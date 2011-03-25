@@ -44,6 +44,7 @@ import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.sigar.SigarException;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -109,37 +110,38 @@ public class HQServerTest {
         serverConfigurator.configure();
         EasyMock.expect(embeddedDatabaseController.shouldUse()).andReturn(true);
         EasyMock.expect(embeddedDatabaseController.startBuiltInDB()).andReturn(true);
-        EasyMock.expect(
-            processManager.executeProcess(EasyMock
-                .aryEq(new String[] { System.getProperty("java.home") + "/bin/java",
-                                     "-cp",
-                                     serverHome + "/lib/ant-launcher-1.7.1.jar",
-                                     "-Dserver.home=" + serverHome,
-                                     "-Dant.home=" + serverHome,
-                                     "-Dtomcat.home=" + engineHome + "/hq-server",
-                                     "-Dlog4j.configuration=" +
-                                         new File(serverHome + "/conf/log4j.xml").toURI().toURL()
-                                             .toString(),
-                                     "org.apache.tools.ant.launch.Launcher",
-                                     "-q",
-                                     "-lib",
-                                     serverHome + "/lib",
-                                     "-listener",
-                                     "org.apache.tools.ant.listener.Log4jListener",
-                                     "-buildfile",
-                                     serverHome + "/data/db-upgrade.xml",
-                                     "upgrade" }), EasyMock.eq(serverHome), EasyMock.eq(true),
-                EasyMock.eq(HQServer.DB_UPGRADE_PROCESS_TIMEOUT))).andReturn(0);
-        EasyMock.expect(dataSource.getConnection()).andReturn(connection);
-        EasyMock.expect(connection.createStatement()).andReturn(statement);
-        EasyMock.expect(
-            statement.executeQuery("select propvalue from EAM_CONFIG_PROPS " + "WHERE propkey = '" +
-                                   HQConstants.SchemaVersion + "'")).andReturn(resultSet);
-        EasyMock.expect(resultSet.next()).andReturn(true);
-        EasyMock.expect(resultSet.getString("propvalue")).andReturn("3.1.88");
-        connection.close();
-        resultSet.close();
-        statement.close();
+        //TODO re-enable if we add dbupgrade back to bootstrap?
+//        EasyMock.expect(
+//            processManager.executeProcess(EasyMock
+//                .aryEq(new String[] { System.getProperty("java.home") + "/bin/java",
+//                                     "-cp",
+//                                     serverHome + "/lib/ant-launcher-1.7.1.jar",
+//                                     "-Dserver.home=" + serverHome,
+//                                     "-Dant.home=" + serverHome,
+//                                     "-Dtomcat.home=" + engineHome + "/hq-server",
+//                                     "-Dlog4j.configuration=" +
+//                                         new File(serverHome + "/conf/log4j.xml").toURI().toURL()
+//                                             .toString(),
+//                                     "org.apache.tools.ant.launch.Launcher",
+//                                     "-q",
+//                                     "-lib",
+//                                     serverHome + "/lib",
+//                                     "-listener",
+//                                     "org.apache.tools.ant.listener.Log4jListener",
+//                                     "-buildfile",
+//                                     serverHome + "/data/db-upgrade.xml",
+//                                     "upgrade" }), EasyMock.eq(serverHome), EasyMock.eq(true),
+//                EasyMock.eq(HQServer.DB_UPGRADE_PROCESS_TIMEOUT))).andReturn(0);
+//        EasyMock.expect(dataSource.getConnection()).andReturn(connection);
+//        EasyMock.expect(connection.createStatement()).andReturn(statement);
+//        EasyMock.expect(
+//            statement.executeQuery("select propvalue from EAM_CONFIG_PROPS " + "WHERE propkey = '" +
+//                                   HQConstants.SchemaVersion + "'")).andReturn(resultSet);
+//        EasyMock.expect(resultSet.next()).andReturn(true);
+//        EasyMock.expect(resultSet.getString("propvalue")).andReturn("3.1.88");
+//        connection.close();
+//        resultSet.close();
+//        statement.close();
         Properties testProps = new Properties();
         testProps.put("server.java.opts",
             "-XX:MaxPermSize=192m -Xmx512m -Xms512m -XX:+HeapDumpOnOutOfMemoryError");
@@ -180,37 +182,38 @@ public class HQServerTest {
         serverConfigurator.configure();
         EasyMock.expectLastCall().andThrow(new NullPointerException());
         EasyMock.expect(embeddedDatabaseController.shouldUse()).andReturn(false);
-        EasyMock.expect(
-            processManager.executeProcess(EasyMock
-                .aryEq(new String[] { System.getProperty("java.home") + "/bin/java",
-                                     "-cp",
-                                     serverHome + "/lib/ant-launcher-1.7.1.jar",
-                                     "-Dserver.home=" + serverHome,
-                                     "-Dant.home=" + serverHome,
-                                     "-Dtomcat.home=" + engineHome + "/hq-server",
-                                     "-Dlog4j.configuration=" +
-                                         new File(serverHome + "/conf/log4j.xml").toURI().toURL()
-                                             .toString(),
-                                     "org.apache.tools.ant.launch.Launcher",
-                                     "-q",
-                                     "-lib",
-                                     serverHome + "/lib",
-                                     "-listener",
-                                     "org.apache.tools.ant.listener.Log4jListener",
-                                     "-buildfile",
-                                     serverHome + "/data/db-upgrade.xml",
-                                     "upgrade" }), EasyMock.eq(serverHome), EasyMock.eq(true),
-                EasyMock.eq(HQServer.DB_UPGRADE_PROCESS_TIMEOUT))).andReturn(0);
-        EasyMock.expect(dataSource.getConnection()).andReturn(connection);
-        EasyMock.expect(connection.createStatement()).andReturn(statement);
-        EasyMock.expect(
-            statement.executeQuery("select propvalue from EAM_CONFIG_PROPS " + "WHERE propkey = '" +
-                                   HQConstants.SchemaVersion + "'")).andReturn(resultSet);
-        EasyMock.expect(resultSet.next()).andReturn(true);
-        EasyMock.expect(resultSet.getString("propvalue")).andReturn("3.1.88");
-        connection.close();
-        resultSet.close();
-        statement.close();
+        //TODO re-enable if we add dbupgrade back to bootstrap?
+//        EasyMock.expect(
+//            processManager.executeProcess(EasyMock
+//                .aryEq(new String[] { System.getProperty("java.home") + "/bin/java",
+//                                     "-cp",
+//                                     serverHome + "/lib/ant-launcher-1.7.1.jar",
+//                                     "-Dserver.home=" + serverHome,
+//                                     "-Dant.home=" + serverHome,
+//                                     "-Dtomcat.home=" + engineHome + "/hq-server",
+//                                     "-Dlog4j.configuration=" +
+//                                         new File(serverHome + "/conf/log4j.xml").toURI().toURL()
+//                                             .toString(),
+//                                     "org.apache.tools.ant.launch.Launcher",
+//                                     "-q",
+//                                     "-lib",
+//                                     serverHome + "/lib",
+//                                     "-listener",
+//                                     "org.apache.tools.ant.listener.Log4jListener",
+//                                     "-buildfile",
+//                                     serverHome + "/data/db-upgrade.xml",
+//                                     "upgrade" }), EasyMock.eq(serverHome), EasyMock.eq(true),
+//                EasyMock.eq(HQServer.DB_UPGRADE_PROCESS_TIMEOUT))).andReturn(0);
+//        EasyMock.expect(dataSource.getConnection()).andReturn(connection);
+//        EasyMock.expect(connection.createStatement()).andReturn(statement);
+//        EasyMock.expect(
+//            statement.executeQuery("select propvalue from EAM_CONFIG_PROPS " + "WHERE propkey = '" +
+//                                   HQConstants.SchemaVersion + "'")).andReturn(resultSet);
+//        EasyMock.expect(resultSet.next()).andReturn(true);
+//        EasyMock.expect(resultSet.getString("propvalue")).andReturn("3.1.88");
+//        connection.close();
+//        resultSet.close();
+//        statement.close();
         Properties testProps = new Properties();
         testProps.put("server.java.opts",
             "-XX:MaxPermSize=192m -Xmx512m -Xms512m -XX:+HeapDumpOnOutOfMemoryError");
@@ -229,6 +232,7 @@ public class HQServerTest {
         verify();
     }
 
+    @Ignore("Re-enable if we add dbupgrade back to bootstrap?")
     @Test
     public void testStartErrorVerifyingSchema() throws Exception {
         EasyMock.expect(engineController.isEngineRunning()).andReturn(false);
@@ -276,6 +280,7 @@ public class HQServerTest {
     }
 
     @Test
+    @Ignore("Re-enable if we add dbupgrade back to bootstrap?")
     public void testStartInvalidDBSchema() throws Exception {
         EasyMock.expect(engineController.isEngineRunning()).andReturn(false);
         serverConfigurator.configure();
@@ -318,6 +323,7 @@ public class HQServerTest {
         verify();
     }
 
+    @Ignore("Re-enable if we add dbupgrade back to bootstrap?")
     @Test
     public void testStartNoDBResultsWithSchemaCheck() throws Exception {
         EasyMock.expect(engineController.isEngineRunning()).andReturn(false);

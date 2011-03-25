@@ -105,7 +105,7 @@ public class ServiceManagerTest
         List<Server> servers = new ArrayList<Server>(2);
 
         for (Platform platform : platforms) {
-            servers.add(createServer(platform, serverType, "server"));
+            servers.add(createServer(platform, serverType, platform.getName() + ".server"));
         }
         return servers;
     }
@@ -311,7 +311,7 @@ public class ServiceManagerTest
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
         for (int i = 1; i <= 5; i++) {
             sinfo.setDescription("Test ServiceType Desc");
-            sinfo.setName("Test ServiceType Name");
+            sinfo.setName("Test ServiceType Name" + i);
             pgList.add(serviceManager.createServiceType(sinfo, "test", serverResType)
                 .getServiceTypeValue());
         }
@@ -356,7 +356,7 @@ public class ServiceManagerTest
         for (int i = 1; i <= 5; i++) {
             sinfo.setDescription("Test ServiceType Desc");
 
-            sinfo.setName("Test ServiceType Name");
+            sinfo.setName("Test ServiceType Name" + i);
             pgList.add(serviceManager.createServiceType(sinfo, "test", serverResType)
                 .getServiceTypeValue());
         }
@@ -373,7 +373,7 @@ public class ServiceManagerTest
         for (int i = 1; i <= 5; i++) {
             sinfo.setDescription("Test ServiceType Desc");
 
-            sinfo.setName("Test ServiceType Name");
+            sinfo.setName("Test ServiceType Name" + i);
             pgList.add(serviceManager.createServiceType(sinfo, "test", serverResType)
                 .getServiceTypeValue());
         }

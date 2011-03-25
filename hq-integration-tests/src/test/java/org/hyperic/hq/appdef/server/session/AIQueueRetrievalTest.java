@@ -56,7 +56,7 @@ public class AIQueueRetrievalTest extends BaseInfrastructureTest {
             Platform platform = createPlatform(platformType, "Platform" + i, "Platform" + i,
                 IP_ADDRESS, agentManager.getAgent("agentToken" + i));
             for (int j = 1; j <= NUM_SERVERS_PER_AGENT; j++) {
-                createServer(platform, serverType, "Server" + j);
+                createServer(platform, serverType, platform.getName() + "." + "Server" + j);
             }
         }
     }

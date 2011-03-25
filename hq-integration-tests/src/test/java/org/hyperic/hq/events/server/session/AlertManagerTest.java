@@ -39,8 +39,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.persistence.EntityNotFoundException;
-
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.alert.data.AlertRepository;
 import org.hyperic.hq.appdef.server.session.Platform;
@@ -55,6 +53,7 @@ import org.hyperic.hq.auth.domain.Role;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupCreateInfo;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.EntityNotFoundException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.events.AlertDefinitionCreateException;
@@ -488,7 +487,7 @@ public class AlertManagerTest
         alertManager.createAlert(this.testPlatformAlertDef, ctime);
         alertManager.createAlert(this.testPlatformAlertDef, ctime + 999l);
         alertManager.createAlert(this.testPlatformAlertDef, ctime + 2999l);
-        assertEquals("Wrong alert count", 3, alertManager.getAlertCount());
+        assertEquals("Wrong alert count", 3l, alertManager.getAlertCount());
     }
 
     @Test
@@ -716,6 +715,7 @@ public class AlertManagerTest
         AlertCondition cond = new AlertCondition();
         cond.setName("Availability");
         cond.setType(EventConstants.TYPE_THRESHOLD);
+        entityManager.persist(cond);
         testPlatformAlert.createConditionLog("threshold exceeded", cond);
         // Short reason text is:
         // "<AlertDefName> <AppDefEntityName> <conditionName> (<conditionValue>) "
@@ -731,6 +731,7 @@ public class AlertManagerTest
         AlertCondition cond = new AlertCondition();
         cond.setName("Baseline");
         cond.setType(EventConstants.TYPE_BASELINE);
+        entityManager.persist(cond);
         testPlatformAlert.createConditionLog("baseline threshold", cond);
         // Short reason text is:
         // "<AlertDefName> <AppDefEntityName> <conditionName> (<conditionValue>) "
@@ -746,6 +747,7 @@ public class AlertManagerTest
         AlertCondition cond = new AlertCondition();
         cond.setName("Control");
         cond.setType(EventConstants.TYPE_CONTROL);
+        entityManager.persist(cond);
         testPlatformAlert.createConditionLog("controlValue", cond);
         // Short reason text is:
         // "<AlertDefName> <AppDefEntityName> <conditionName>"
@@ -760,6 +762,7 @@ public class AlertManagerTest
         AlertCondition cond = new AlertCondition();
         cond.setName("Change");
         cond.setType(EventConstants.TYPE_CHANGE);
+        entityManager.persist(cond);
         testPlatformAlert.createConditionLog("changeValue", cond);
         // Short reason text is:
         // "<AlertDefName> <AppDefEntityName> <conditionName> (<conditionValue>) "
@@ -774,6 +777,7 @@ public class AlertManagerTest
         AlertCondition cond = new AlertCondition();
         cond.setName("CustomProperty");
         cond.setType(EventConstants.TYPE_CUST_PROP);
+        entityManager.persist(cond);
         testPlatformAlert.createConditionLog("customPropertyValue", cond);
         // Short reason text is:
         // "<AlertDefName> <AppDefEntityName> <conditionName> (<conditionValue>) "
@@ -789,6 +793,7 @@ public class AlertManagerTest
         AlertCondition cond = new AlertCondition();
         cond.setName("JustName");
         cond.setType(EventConstants.TYPE_LOG);
+        entityManager.persist(cond);
         testPlatformAlert.createConditionLog("logValue", cond);
         // Short reason text is:
         // "<AlertDefName> <AppDefEntityName> Log (<conditionValue>) "
@@ -803,6 +808,7 @@ public class AlertManagerTest
         AlertCondition cond = new AlertCondition();
         cond.setName("ChangeOfConfig");
         cond.setType(EventConstants.TYPE_CFG_CHG);
+        entityManager.persist(cond);
         testPlatformAlert.createConditionLog("configValue", cond);
         // Short reason text is:
         // "<AlertDefName> <AppDefEntityName> Config changed (<conditionValue>) "

@@ -82,6 +82,7 @@ public class AppdefBossTest
             createPlatform(agentToken, "Linux", "Platform" + 1, "Platform" + i, 2);
         }
         PageControl pc = new PageControl(0, 7);
+        pc.setSortorder(PageControl.SORT_ASC);
         PageList<AppdefResourceValue> appdefs = appdefBoss.search(sessionId,
             AppdefEntityConstants.APPDEF_TYPE_PLATFORM, null, null, null, null, false, false,
             false, pc);
@@ -100,6 +101,7 @@ public class AppdefBossTest
             createServer(testPlatform, testServerType, "Server" + i);
         }
         PageControl pc = new PageControl(0, 7);
+        pc.setSortorder(PageControl.SORT_ASC);
         PageList<AppdefResourceValue> appdefs = appdefBoss.search(sessionId,
             AppdefEntityConstants.APPDEF_TYPE_SERVER, null, null, null, null, false, false, false,
             pc);
@@ -119,6 +121,7 @@ public class AppdefBossTest
                 "my computer");
         }
         PageControl pc = new PageControl(0, 7);
+        pc.setSortorder(PageControl.SORT_ASC);
         PageList<AppdefResourceValue> appdefs = appdefBoss.search(sessionId,
             AppdefEntityConstants.APPDEF_TYPE_SERVICE, null, null, null, null, false, false, false,
             pc);
@@ -137,6 +140,7 @@ public class AppdefBossTest
             createApplication("App" + i, "App" + i, new ArrayList<AppdefEntityID>(0));
         }
         PageControl pc = new PageControl(0, 7);
+        pc.setSortorder(PageControl.SORT_ASC);
         PageList<AppdefResourceValue> appdefs = appdefBoss.search(sessionId,
             AppdefEntityConstants.APPDEF_TYPE_APPLICATION, null, null, null, null, false, false,
             false, pc);
@@ -156,6 +160,7 @@ public class AppdefBossTest
             createPlatform(agentToken, "Linux", "Platform" + 1, "Platform" + i, 2);
         }
         PageControl pc = new PageControl(0, 7);
+        pc.setSortorder(PageControl.SORT_ASC);
         PageList<AppdefResourceValue> appdefs = appdefBoss.search(sessionId,
             AppdefEntityConstants.APPDEF_TYPE_PLATFORM, null, new AppdefEntityTypeID(1,
                 testPlatformType.getId()), null, null, false, false, false, pc);
@@ -176,6 +181,7 @@ public class AppdefBossTest
             createServer(testPlatform, testServerType, "Server" + i);
         }
         PageControl pc = new PageControl(0, 7);
+        pc.setSortorder(PageControl.SORT_ASC);
         PageList<AppdefResourceValue> appdefs = appdefBoss.search(sessionId,
             AppdefEntityConstants.APPDEF_TYPE_SERVER, null, new AppdefEntityTypeID(2,
                 testServerType.getId()), null, null, false, false, false, pc);
@@ -197,6 +203,7 @@ public class AppdefBossTest
                 "my computer");
         }
         PageControl pc = new PageControl(0, 7);
+        pc.setSortorder(PageControl.SORT_ASC);
         PageList<AppdefResourceValue> appdefs = appdefBoss.search(sessionId,
             AppdefEntityConstants.APPDEF_TYPE_SERVICE, null, new AppdefEntityTypeID(3,
                 platServiceType.getId()), null, null, false, false, false, pc);
@@ -214,6 +221,7 @@ public class AppdefBossTest
         testPlatforms.add(testPlatform);
         createPlatformResourceGroup(testPlatforms, "AllPlatformGroup");
         PageControl pc = new PageControl(0, 7);
+        pc.setSortorder(PageControl.SORT_ASC);
         PageList<AppdefResourceValue> appdefs = appdefBoss.search(sessionId,
             AppdefEntityConstants.APPDEF_TYPE_GROUP, null, null, null,new int[] {14,15},false, false, false, pc);
         assertEquals(1, appdefs.size());
@@ -231,6 +239,7 @@ public class AppdefBossTest
         testPlatforms.add(testPlatform);
         createPlatformResourceGroup(testPlatforms, "AllPlatformGroup");
         PageControl pc = new PageControl(0, 7);
+        pc.setSortorder(PageControl.SORT_ASC);
         PageList<AppdefResourceValue> appdefs = appdefBoss.search(sessionId,
             AppdefEntityConstants.APPDEF_TYPE_GROUP, null, null, null,new int[] {13,12,11},false, false, false, pc);
         assertEquals(3, appdefs.size());
@@ -248,6 +257,7 @@ public class AppdefBossTest
         testPlatforms.add(testPlatform);
         createPlatformResourceGroup(testPlatforms, "AllPlatformGroup");
         PageControl pc = new PageControl(0, 7);
+        pc.setSortorder(PageControl.SORT_ASC);
         PageList<AppdefResourceValue> appdefs = appdefBoss.search(sessionId,
             AppdefEntityConstants.APPDEF_TYPE_GROUP, null, null, null,new int[] {12},false, false, false, pc);
         assertEquals(1, appdefs.size());
@@ -268,6 +278,7 @@ public class AppdefBossTest
         testPlatforms2.add(test2);
         createPlatformResourceGroup(testPlatforms2, "AnotherPlatformGroup");
         PageControl pc = new PageControl(0, 7);
+        pc.setSortorder(PageControl.SORT_ASC);
         PageList<AppdefResourceValue> appdefs = appdefBoss.search(sessionId,
             AppdefEntityConstants.APPDEF_TYPE_GROUP, null, new AppdefEntityTypeID(1,testPlatformType.getId()), null,new int[] {14,15},false, false, false, pc);
         assertEquals(1, appdefs.size());
