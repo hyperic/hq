@@ -46,6 +46,8 @@ import org.springframework.stereotype.Component;
 @Aspect
 @Component
 public class MonitorArchitecture {
+    
+    ///CLOVER:OFF
 	@Pointcut("inServiceLayer() && execution(* *.hyperic.hq..*.*(..))")
 	public void serviceLayerOperationDuration() {
 	}
@@ -63,4 +65,5 @@ public class MonitorArchitecture {
 	@Pointcut("execution(* (@org.springframework.stereotype.Service *).*(..))")
 	public void serviceOperation() {
 	}
+	///CLOVER:ON
 }
