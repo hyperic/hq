@@ -33,6 +33,7 @@ import org.hyperic.hq.pdk.domain.Agent;
 import org.hyperic.hq.pdk.domain.Resource;
 import org.hyperic.hq.pdk.domain.ResourceType;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -79,6 +80,7 @@ public class VMAndHostVCenterPlatformDetectorTest {
     }
 
     @Test
+    @Ignore("Not a unit test.  RestApi is trying to make a connection")
     public void testDiscoverPlatforms() throws Exception {
     	RestApi api = new RestApi(properties);
     	VMAndHostVCenterPlatformDetector detector = new VMAndHostVCenterPlatformDetector();
