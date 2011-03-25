@@ -785,7 +785,6 @@
 					<module>hq-hqu</module>
 					<module>hq-measurement</module>
 					<module>hq-plugin-mgmt</module>
-					<module>hq-update</module>
 					<module>hq-integration-tests</module>
 			</modules>
 		</profile>
