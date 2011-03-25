@@ -262,7 +262,7 @@
 		width:12px;
 	}
 </style>
-<div id="pluginManagerPanel" class="container top">
+<section id="pluginManagerPanel" class="container top">
 	<h1><fmt:message key="admin.managers.plugin.title" /></h1>
 	<p id="instruction"><fmt:message key="${instruction}" /></p>
 	
@@ -329,7 +329,7 @@
 			<input id="showUploadFormButton" type="button" value="<fmt:message key="admin.managers.plugin.button.add.plugin" />" />
 		</div>	
 	</c:if>
-</div>
+</section>
 
 
 <c:if test="${mechanismOn}" >
@@ -420,6 +420,7 @@
 			var xhrArgs = {
 					url: "/app/admin/managers/plugin/status/"+pluginId+"?searchWord="+searchWord,
 					load: function(response) {
+						hqDojo.empty("agentList");
 						hqDojo.style(hqDojo.byId("loadingIcon"),"visibility","hidden");
 						hqDojo.forEach(response, function(agentStatus) {
 							var statusLi = hqDojo.create("li",{
