@@ -32,7 +32,7 @@ public class ResourceRelationship {
      * @return The relationship name
      */
     public String getName() {
-        return getUnderlyingState().getType().name();
+        return getPersistentState().getType().name();
     }
 
     /**
@@ -57,7 +57,7 @@ public class ResourceRelationship {
      */
     public Map<String, Object> getProperties() {
         Map<String, Object> properties = new HashMap<String, Object>();
-        for (String key : getUnderlyingState().getPropertyKeys()) {
+        for (String key : getPersistentState().getPropertyKeys()) {
             // Filter out properties that are class fields
             if (!("from".equals(key)) && !("to".equals(key))) {
                 properties.put(key, getProperty(key));
@@ -73,7 +73,7 @@ public class ResourceRelationship {
      */
     public Object getProperty(String key) {
         // TODO model default values? See above
-        return getUnderlyingState().getProperty(key);
+        return getPersistentState().getProperty(key);
     }
 
     /**
@@ -87,15 +87,15 @@ public class ResourceRelationship {
         // TODO give a way to model properties on a type relation to validate
         // creation of properties on the relation? What about pre-defined types?
         if (value == null) {
-            return getUnderlyingState().removeProperty(key);
+            return getPersistentState().removeProperty(key);
         }
         Object oldValue = null;
         try {
-            oldValue = getUnderlyingState().getProperty(key);
+            oldValue = getPersistentState().getProperty(key);
         } catch (NotFoundException e) {
             // could be first time
         }
-        getUnderlyingState().setProperty(key, value);
+        getPersistentState().setProperty(key, value);
         return oldValue;
     }
 

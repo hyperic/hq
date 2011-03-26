@@ -419,7 +419,7 @@ public class ResourceIntegrationTest {
         Config measurement = new Config();
         ConfigType measType = new ConfigType("Measurement");
         entityManager.persist(measType);
-        measType.attach();
+        measType.persist();
         measurement.setType(measType);
         traderJoes.addConfig(measurement);
     }

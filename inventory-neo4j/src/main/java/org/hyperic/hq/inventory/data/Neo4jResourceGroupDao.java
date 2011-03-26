@@ -37,7 +37,7 @@ public class Neo4jResourceGroupDao implements ResourceGroupDao {
             .createQuery("select o from ResourceGroup o", ResourceGroup.class)
             .setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
         for (ResourceGroup resourceGroup : result) {
-            resourceGroup.attach();
+            resourceGroup.persist();
         }
         return result;
     }
@@ -47,7 +47,7 @@ public class Neo4jResourceGroupDao implements ResourceGroupDao {
         List<ResourceGroup> result = entityManager.createQuery("select o from ResourceGroup o",
             ResourceGroup.class).getResultList();
         for (ResourceGroup resourceGroup : result) {
-            resourceGroup.attach();
+            resourceGroup.persist();
         }
         return result;
     }
@@ -59,7 +59,7 @@ public class Neo4jResourceGroupDao implements ResourceGroupDao {
         }
         ResourceGroup result = entityManager.find(ResourceGroup.class, id);
         if (result != null) {
-            result.attach();
+            result.persist();
         }
         return result;
     }
@@ -67,10 +67,10 @@ public class Neo4jResourceGroupDao implements ResourceGroupDao {
     @Transactional(readOnly = true)
     public ResourceGroup findByName(String name) {
         ResourceGroup group = finderFactory.createNodeEntityFinder(ResourceGroup.class)
-            .findByPropertyValue(null, "name", name);
+            .findByPropertyValue( GraphDatabaseContext.DEFAULT_NODE_INDEX_NAME, "name", name);
 
         if (group != null) {
-            group.attach();
+            group.persist();
         }
 
         return group;
@@ -80,22 +80,28 @@ public class Neo4jResourceGroupDao implements ResourceGroupDao {
     public ResourceGroup merge(ResourceGroup resourceGroup) {
         ResourceGroup merged = entityManager.merge(resourceGroup);
         entityManager.flush();
-        merged.attach();
+        merged.persist();
         return merged;
     }
 
     @Transactional
     public void persist(ResourceGroup resourceGroup) {
-        if(findByName(resourceGroup.getName()) != null) {
-            throw new NotUniqueException("Group with name " + resourceGroup.getName() + " already exists");
+        if (findByName(resourceGroup.getName()) != null) {
+            throw new NotUniqueException("Group with name " + resourceGroup.getName() +
+                                         " already exists");
         }
         entityManager.persist(resourceGroup);
-        //flush to get the JSR-303 validation done sooner
+        // flush to get the JSR-303 validation done sooner
         entityManager.flush();
-        resourceGroup.attach();
+        resourceGroup.persist();
         // Set the type index here b/c ResourceGroup needs an ID before we can
         // access the underlying node
-        graphDatabaseContext.getNodeIndex(GraphDatabaseContext.DEFAULT_NODE_INDEX_NAME).add(resourceGroup.getUnderlyingState(), "type",
-            resourceGroup.getType().getId());
+        graphDatabaseContext.getIndex(ResourceGroup.class,
+            GraphDatabaseContext.DEFAULT_NODE_INDEX_NAME, false).add(
+            resourceGroup.getPersistentState(), "type", resourceGroup.getType().getId());
+        //TODO should inherit the @Indexed on Resource name but bug starting with M4 seems to have broken that
+        graphDatabaseContext.getIndex(ResourceGroup.class,
+            GraphDatabaseContext.DEFAULT_NODE_INDEX_NAME, false).add(
+            resourceGroup.getPersistentState(), "name", resourceGroup.getName());
     }
 }

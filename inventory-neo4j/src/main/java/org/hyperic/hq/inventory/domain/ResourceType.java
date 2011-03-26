@@ -110,7 +110,7 @@ public class ResourceType {
         // TODO can't do this in a detached env b/c relationship doesn't take
         // unless both items are node-backed
         entityManager.persist(configType);
-        configType.attach();
+        configType.persist();
         configTypes.add(configType);
     }
 
@@ -122,7 +122,7 @@ public class ResourceType {
         // TODO can't do this in a detached env b/c relationship doesn't take
         // unless both items are node-backed
         entityManager.persist(operationType);
-        operationType.attach();
+        operationType.persist();
         operationTypes.add(operationType);
     }
 
@@ -134,7 +134,7 @@ public class ResourceType {
         // TODO can't do this in a detached env b/c relationship doesn't take
         // unless both items are node-backed
         entityManager.persist(propertyType);
-        propertyType.attach();
+        propertyType.persist();
         propertyTypes.add(propertyType);
     }
 
@@ -144,10 +144,10 @@ public class ResourceType {
         for (org.neo4j.graphdb.Relationship relationship : relationships) {
             // Don't include Neo4J relationship b/w Node and its Java type
             if (!relationship.isType(SubReferenceNodeTypeStrategy.INSTANCE_OF_RELATIONSHIP_TYPE)) {
-                Node node = relationship.getOtherNode(getUnderlyingState());
+                Node node = relationship.getOtherNode(getPersistentState());
                 Class<?> otherEndType = graphDatabaseContext.getJavaType(node);
                 if (ResourceType.class.isAssignableFrom(otherEndType)) {
-                    if (entity == null || node.equals(entity.getUnderlyingState())) {
+                    if (entity == null || node.equals(entity.getPersistentState())) {
                         relations.add(graphDatabaseContext.createEntityFromState(relationship,
                             ResourceTypeRelationship.class));
                     }
@@ -268,7 +268,7 @@ public class ResourceType {
     private Set<ResourceType> getRelatedResourceTypes(String relationName,
                                                       org.neo4j.graphdb.Direction direction) {
         Set<ResourceType> resourceTypes = new HashSet<ResourceType>();
-        Traverser relationTraverser = getUnderlyingState().traverse(Traverser.Order.BREADTH_FIRST,
+        Traverser relationTraverser = getPersistentState().traverse(Traverser.Order.BREADTH_FIRST,
             new StopEvaluator() {
                 public boolean isStopNode(TraversalPosition currentPos) {
                     return currentPos.depth() >= 1;
@@ -289,7 +289,7 @@ public class ResourceType {
      * @return All relationships this ResourceType is involved in
      */
     public Set<ResourceTypeRelationship> getRelationships() {
-        return convertRelationships(null, getUnderlyingState().getRelationships());
+        return convertRelationships(null, getPersistentState().getRelationships());
     }
 
     /**
@@ -304,7 +304,7 @@ public class ResourceType {
                                                           Direction direction) {
         return convertRelationships(
             entity,
-            getUnderlyingState().getRelationships(DynamicRelationshipType.withName(name),
+            getPersistentState().getRelationships(DynamicRelationshipType.withName(name),
                 direction.toNeo4jDir()));
     }
 
@@ -371,7 +371,7 @@ public class ResourceType {
      *         ResourceType by Outgoing relationship
      */
     public boolean isRelatedTo(ResourceType entity, String name) {
-        Traverser relationTraverser = getUnderlyingState().traverse(Traverser.Order.BREADTH_FIRST,
+        Traverser relationTraverser = getPersistentState().traverse(Traverser.Order.BREADTH_FIRST,
             new StopEvaluator() {
                 public boolean isStopNode(TraversalPosition currentPos) {
                     return currentPos.depth() >= 1;
@@ -379,7 +379,7 @@ public class ResourceType {
             }, ReturnableEvaluator.ALL_BUT_START_NODE, DynamicRelationshipType.withName(name),
             org.neo4j.graphdb.Direction.OUTGOING);
         for (Node related : relationTraverser) {
-            if (related.equals(entity.getUnderlyingState())) {
+            if (related.equals(entity.getPersistentState())) {
                 return true;
             }
         }
@@ -412,8 +412,8 @@ public class ResourceType {
         if (this.entityManager.contains(this)) {
             this.entityManager.remove(this);
         } else {
-            ResourceType attached = this.entityManager.find(this.getClass(), this.id);
-            this.entityManager.remove(attached);
+            ResourceType persisted = this.entityManager.find(this.getClass(), this.id);
+            this.entityManager.remove(persisted);
         }
     }
 
@@ -440,7 +440,7 @@ public class ResourceType {
      */
     @Transactional
     public void removeRelationships() {
-        for (org.neo4j.graphdb.Relationship relationship : getUnderlyingState().getRelationships()) {
+        for (org.neo4j.graphdb.Relationship relationship : getPersistentState().getRelationships()) {
             relationship.delete();
         }
     }
@@ -464,7 +464,7 @@ public class ResourceType {
     @Transactional
     public void removeRelationships(ResourceType entity, String name, Direction direction) {
         for (ResourceTypeRelationship relation : getRelationships(entity, name, direction)) {
-            relation.getUnderlyingState().delete();
+            relation.getPersistentState().delete();
         }
     }
 
@@ -474,7 +474,7 @@ public class ResourceType {
      */
     @Transactional
     public void removeRelationships(String relationName) {
-        for (org.neo4j.graphdb.Relationship relationship : getUnderlyingState().getRelationships(
+        for (org.neo4j.graphdb.Relationship relationship : getPersistentState().getRelationships(
             DynamicRelationshipType.withName(relationName), Direction.BOTH.toNeo4jDir())) {
             relationship.delete();
         }

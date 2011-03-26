@@ -36,7 +36,7 @@ public class ResourceTypeRelationship {
      * @return The relationship name
      */
     public String getName() {
-        return getUnderlyingState().getType().name();
+        return getPersistentState().getType().name();
     }
 
     /**

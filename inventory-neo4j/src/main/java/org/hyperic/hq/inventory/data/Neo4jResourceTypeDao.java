@@ -35,7 +35,7 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
         
    
         for (ResourceType resourceType : result) {
-            resourceType.attach();
+            resourceType.persist();
         }
         
         return result;
@@ -48,7 +48,7 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
         
         
         for (ResourceType resourceType : result) {
-            resourceType.attach();
+            resourceType.persist();
         }
         
         return result;
@@ -61,7 +61,7 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
         ResourceType result = entityManager.find(ResourceType.class, id);
        
         if(result != null) {
-            result.attach();
+            result.persist();
         }
         
         return result;
@@ -74,7 +74,7 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
             .findByPropertyValue(null, "name",name);
 
         if (type != null) {
-            type.attach();
+            type.persist();
         }
 
         return type;
@@ -89,7 +89,7 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
     public ResourceType merge(ResourceType resourceType) {
         ResourceType merged = entityManager.merge(resourceType);
         entityManager.flush();
-        merged.attach();
+        merged.persist();
         return merged;
     }
     
@@ -99,7 +99,7 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
             throw new NotUniqueException("Resource Type with name " + resourceType.getName() + " already exists");
         }
         entityManager.persist(resourceType);
-        resourceType.attach();
+        resourceType.persist();
         //flush to get the JSR-303 validation done sooner
         entityManager.flush();
     }  

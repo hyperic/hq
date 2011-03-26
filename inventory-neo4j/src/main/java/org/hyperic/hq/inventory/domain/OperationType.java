@@ -79,7 +79,7 @@ public class OperationType {
     public void addOperationArgType(OperationArgType argType) {
         //TODO can't do this in a detached env b/c relationship doesn't take unless both items are node-backed
         entityManager.persist(argType);
-        argType.attach();
+        argType.persist();
         operationArgTypes.add(argType);
     }
 

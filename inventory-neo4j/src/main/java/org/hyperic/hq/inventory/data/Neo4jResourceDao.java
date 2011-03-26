@@ -49,7 +49,7 @@ public class Neo4jResourceDao implements ResourceDao {
             .createQuery("select o from Resource o", Resource.class).setFirstResult(firstResult)
             .setMaxResults(maxResults).getResultList();
         for (Resource resource : result) {
-            resource.attach();
+            resource.persist();
         }
         return result;
     }
@@ -61,7 +61,7 @@ public class Neo4jResourceDao implements ResourceDao {
         List<Resource> result = entityManager.createQuery("select o from Resource o",
             Resource.class).getResultList();
         for (Resource resource : result) {
-            resource.attach();
+            resource.persist();
         }
         return result;
     }
@@ -72,7 +72,7 @@ public class Neo4jResourceDao implements ResourceDao {
             return null;
         Resource result = entityManager.find(Resource.class, id);
         if (result != null) {
-            result.attach();
+            result.persist();
         }
         return result;
     }
@@ -87,7 +87,7 @@ public class Neo4jResourceDao implements ResourceDao {
                 getSortFieldType(sortAttributeType), order.getDirection().equals(
                     org.springframework.data.domain.Sort.Direction.DESC))));
         }
-        IndexHits<Node> indexHits = graphDatabaseContext.getNodeIndex(
+        IndexHits<Node> indexHits = graphDatabaseContext.getIndex(Resource.class,
             GraphDatabaseContext.DEFAULT_NODE_INDEX_NAME).query(propertyName, queryContext);
         if (indexHits == null) {
             return new PageImpl<Resource>(new ArrayList<Resource>(0),pageInfo,0);
@@ -117,7 +117,7 @@ public class Neo4jResourceDao implements ResourceDao {
         Resource resource = finderFactory.createNodeEntityFinder(Resource.class)
             .findByPropertyValue(null, "name", name);
         if (resource != null) {
-            resource.attach();
+            resource.persist();
         }
 
         return resource;
@@ -164,11 +164,11 @@ public class Neo4jResourceDao implements ResourceDao {
                                          " already exists");
         }
         entityManager.persist(resource);
-        resource.attach();
+        resource.persist();
         // Set the type index here b/c Resource needs an ID before we can access
         // the underlying node
-        graphDatabaseContext.getNodeIndex(GraphDatabaseContext.DEFAULT_NODE_INDEX_NAME).add(
-            resource.getUnderlyingState(), "type", resource.getType().getId());
+        graphDatabaseContext.getIndex(Resource.class,GraphDatabaseContext.DEFAULT_NODE_INDEX_NAME).add(
+            resource.getPersistentState(), "type", resource.getType().getId());
         // flush to get the JSR-303 validation done sooner
         entityManager.flush();
     }

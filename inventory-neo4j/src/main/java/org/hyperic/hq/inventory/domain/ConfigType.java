@@ -77,7 +77,7 @@ public class ConfigType {
     public void addConfigOptionType(ConfigOptionType configOptionType) {
         //TODO can't do this in a detached env b/c relationship doesn't take unless both items are node-backed
         entityManager.persist(configOptionType);
-        configOptionType.attach();
+        configOptionType.persist();
         configOptionTypes.add(configOptionType);
     }
 
@@ -146,8 +146,8 @@ public class ConfigType {
         if (this.entityManager.contains(this)) {
             this.entityManager.remove(this);
         } else {
-            ConfigType attached = this.entityManager.find(this.getClass(), this.id);
-            this.entityManager.remove(attached);
+            ConfigType persisted = this.entityManager.find(this.getClass(), this.id);
+            this.entityManager.remove(persisted);
         }
     }
 

@@ -81,7 +81,7 @@ public class Config {
                                                type.getName());
         }
         try {
-            return getUnderlyingState().getProperty(key);
+            return getPersistentState().getProperty(key);
         } catch (NotFoundException e) {
             return optionType.getDefaultValue();
         }
@@ -93,7 +93,7 @@ public class Config {
      */
     public Map<String, Object> getValues() {
         Map<String, Object> properties = new HashMap<String, Object>();
-        for (String key : getUnderlyingState().getPropertyKeys()) {
+        for (String key : getPersistentState().getPropertyKeys()) {
             try {
                 properties.put(key, getValue(key));
             } catch (IllegalArgumentException e) {
@@ -113,8 +113,8 @@ public class Config {
         if (this.entityManager.contains(this)) {
             this.entityManager.remove(this);
         } else {
-            Config attached = this.entityManager.find(this.getClass(), this.id);
-            this.entityManager.remove(attached);
+            Config persisted = this.entityManager.find(this.getClass(), this.id);
+            this.entityManager.remove(persisted);
         }
     }
 
@@ -128,9 +128,9 @@ public class Config {
 
     public void setType(ConfigType configType) {
         //TODO can't do this in a detached env b/c relationship doesn't take unless both items are node-backed
-        if(getUnderlyingState() == null) {
+        if(getPersistentState() == null) {
             entityManager.persist(this);
-            attach();
+            persist();
         }
        this.type = configType;
     }
@@ -156,11 +156,11 @@ public class Config {
         //TODO validation
         Object oldValue = null;
         try {
-            oldValue = getUnderlyingState().getProperty(key);
+            oldValue = getPersistentState().getProperty(key);
         } catch (NotFoundException e) {
             // could be first time
         }
-        getUnderlyingState().setProperty(key, value);
+        getPersistentState().setProperty(key, value);
         return oldValue;
     }
 

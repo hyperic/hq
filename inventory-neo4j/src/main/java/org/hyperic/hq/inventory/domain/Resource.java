@@ -130,10 +130,10 @@ public class Resource {
         for (org.neo4j.graphdb.Relationship relationship : relationships) {
             // Don't include Neo4J relationship b/w Node and its Java type
             if (!relationship.isType(SubReferenceNodeTypeStrategy.INSTANCE_OF_RELATIONSHIP_TYPE)) {
-                Node node = relationship.getOtherNode(getUnderlyingState());
+                Node node = relationship.getOtherNode(getPersistentState());
                 Class<?> otherEndType = graphDatabaseContext.getJavaType(node);
                 if (Resource.class.isAssignableFrom(otherEndType)) {
-                    if (entity == null || node.equals(entity.getUnderlyingState())) {
+                    if (entity == null || node.equals(entity.getPersistentState())) {
                         relations.add(graphDatabaseContext.createEntityFromState(relationship,
                             ResourceRelationship.class));
                     }
@@ -161,7 +161,7 @@ public class Resource {
                 }
             };
         }
-        Traverser relationTraverser = getUnderlyingState().traverse(Traverser.Order.BREADTH_FIRST,
+        Traverser relationTraverser = getPersistentState().traverse(Traverser.Order.BREADTH_FIRST,
             stopEvaluator, ReturnableEvaluator.ALL_BUT_START_NODE,
             DynamicRelationshipType.withName(RelationshipTypes.CONTAINS),
             Direction.OUTGOING.toNeo4jDir());
@@ -189,7 +189,7 @@ public class Resource {
                 }
             };
         }
-        Traverser relationTraverser = getUnderlyingState().traverse(Traverser.Order.BREADTH_FIRST,
+        Traverser relationTraverser = getPersistentState().traverse(Traverser.Order.BREADTH_FIRST,
             stopEvaluator, ReturnableEvaluator.ALL_BUT_START_NODE,
             DynamicRelationshipType.withName(RelationshipTypes.CONTAINS),
             Direction.OUTGOING.toNeo4jDir());
@@ -276,7 +276,7 @@ public class Resource {
      */
     public Map<String, Object> getProperties(boolean includeHidden) {
         Map<String, Object> properties = new HashMap<String, Object>();
-        for (String key : getUnderlyingState().getPropertyKeys()) {
+        for (String key : getPersistentState().getPropertyKeys()) {
             if (!(includeHidden)) {
                 PropertyType propType = type.getPropertyType(key);
                 if (propType != null && propType.isHidden()) {
@@ -308,7 +308,7 @@ public class Resource {
                                                type.getName());
         }
         try {
-            return getUnderlyingState().getProperty(key);
+            return getPersistentState().getProperty(key);
         } catch (NotFoundException e) {
             return propertyType.getDefaultValue();
         }
@@ -316,7 +316,7 @@ public class Resource {
 
     private Set<Resource> getRelatedResources(String relationName, Direction direction) {
         Set<Resource> resources = new HashSet<Resource>();
-        Traverser relationTraverser = getUnderlyingState().traverse(Traverser.Order.BREADTH_FIRST,
+        Traverser relationTraverser = getPersistentState().traverse(Traverser.Order.BREADTH_FIRST,
             new StopEvaluator() {
                 public boolean isStopNode(TraversalPosition currentPos) {
                     return currentPos.depth() >= 1;
@@ -337,7 +337,7 @@ public class Resource {
      *         and Outgoing)
      */
     public Set<ResourceRelationship> getRelationships() {
-        return convertRelationships(null, getUnderlyingState().getRelationships());
+        return convertRelationships(null, getPersistentState().getRelationships());
     }
 
     /**
@@ -352,7 +352,7 @@ public class Resource {
                                                       Direction direction) {
         return convertRelationships(
             entity,
-            getUnderlyingState().getRelationships(DynamicRelationshipType.withName(name),
+            getPersistentState().getRelationships(DynamicRelationshipType.withName(name),
                 direction.toNeo4jDir()));
     }
 
@@ -365,7 +365,7 @@ public class Resource {
     public Set<ResourceRelationship> getRelationshipsFrom(String relationName) {
         return convertRelationships(
             null,
-            getUnderlyingState().getRelationships(DynamicRelationshipType.withName(relationName),
+            getPersistentState().getRelationships(DynamicRelationshipType.withName(relationName),
                 Direction.OUTGOING.toNeo4jDir()));
     }
 
@@ -378,7 +378,7 @@ public class Resource {
     public Set<ResourceRelationship> getRelationshipsTo(String relationName) {
         return convertRelationships(
             null,
-            getUnderlyingState().getRelationships(DynamicRelationshipType.withName(relationName),
+            getPersistentState().getRelationships(DynamicRelationshipType.withName(relationName),
                 Direction.INCOMING.toNeo4jDir()));
     }
 
@@ -390,7 +390,7 @@ public class Resource {
      * @throw {@link NotUniqueException} If more than one relationship exists
      */
     public ResourceRelationship getRelationshipTo(Resource resource, String relationName) {
-        Set<ResourceRelationship> relations = convertRelationships(resource, getUnderlyingState()
+        Set<ResourceRelationship> relations = convertRelationships(resource, getPersistentState()
             .getRelationships(DynamicRelationshipType.withName(relationName)));
         if (relations.isEmpty()) {
             return null;
@@ -484,7 +484,7 @@ public class Resource {
      *         Resource by Outgoing relationship
      */
     public boolean isRelatedTo(Resource resource, String relationName) {
-        Traverser relationTraverser = getUnderlyingState().traverse(Traverser.Order.BREADTH_FIRST,
+        Traverser relationTraverser = getPersistentState().traverse(Traverser.Order.BREADTH_FIRST,
             new StopEvaluator() {
                 public boolean isStopNode(TraversalPosition currentPos) {
                     return currentPos.depth() >= 1;
@@ -492,7 +492,7 @@ public class Resource {
             }, ReturnableEvaluator.ALL_BUT_START_NODE,
             DynamicRelationshipType.withName(relationName), Direction.OUTGOING.toNeo4jDir());
         for (Node related : relationTraverser) {
-            if (related.equals(resource.getUnderlyingState())) {
+            if (related.equals(resource.getPersistentState())) {
                 return true;
             }
         }
@@ -532,12 +532,12 @@ public class Resource {
     }
 
     private void removeConfig() {
-        Iterable<org.neo4j.graphdb.Relationship> relationships = this.getUnderlyingState()
+        Iterable<org.neo4j.graphdb.Relationship> relationships = this.getPersistentState()
             .getRelationships(DynamicRelationshipType.withName(RelationshipTypes.HAS_CONFIG),
                 Direction.OUTGOING.toNeo4jDir());
         for (org.neo4j.graphdb.Relationship relationship : relationships) {
             graphDatabaseContext.createEntityFromState(
-                relationship.getOtherNode(getUnderlyingState()), Config.class).remove();
+                relationship.getOtherNode(getPersistentState()), Config.class).remove();
         }
     }
 
@@ -546,8 +546,8 @@ public class Resource {
      */
     @Transactional
     public void removeProperties() {
-        for (String key : getUnderlyingState().getPropertyKeys()) {
-            getUnderlyingState().removeProperty(key);
+        for (String key : getPersistentState().getPropertyKeys()) {
+            getPersistentState().removeProperty(key);
         }
     }
 
@@ -556,7 +556,7 @@ public class Resource {
      */
     @Transactional
     public void removeRelationships() {
-        for (org.neo4j.graphdb.Relationship relationship : getUnderlyingState().getRelationships()) {
+        for (org.neo4j.graphdb.Relationship relationship : getPersistentState().getRelationships()) {
             relationship.delete();
         }
     }
@@ -580,7 +580,7 @@ public class Resource {
     @Transactional
     public void removeRelationships(Resource entity, String name, Direction direction) {
         for (ResourceRelationship relation : getRelationships(entity, name, direction)) {
-            relation.getUnderlyingState().delete();
+            relation.getPersistentState().delete();
         }
     }
 
@@ -590,7 +590,7 @@ public class Resource {
      */
     @Transactional
     public void removeRelationships(String relationName) {
-        for (org.neo4j.graphdb.Relationship relationship : getUnderlyingState().getRelationships(
+        for (org.neo4j.graphdb.Relationship relationship : getPersistentState().getRelationships(
             DynamicRelationshipType.withName(relationName), Direction.BOTH.toNeo4jDir())) {
             relationship.delete();
         }
@@ -664,14 +664,15 @@ public class Resource {
         }
         Object oldValue = null;
         try {
-            oldValue = getUnderlyingState().getProperty(key);
+            oldValue = getPersistentState().getProperty(key);
         } catch (NotFoundException e) {
             // could be first time
         }
-        getUnderlyingState().setProperty(key, value);
+        getPersistentState().setProperty(key, value);
         if (propertyType.isIndexed()) {
-            graphDatabaseContext.getNodeIndex(GraphDatabaseContext.DEFAULT_NODE_INDEX_NAME).add(
-                getUnderlyingState(), key, value);
+           
+            graphDatabaseContext.getIndex(Resource.class,GraphDatabaseContext.DEFAULT_NODE_INDEX_NAME,false).add(
+                getPersistentState(), key, value);
         }
         CPropChangeEvent event = new CPropChangeEvent(getId(), key, oldValue, value);
         messagePublisher.publishMessage(MessagePublisher.EVENTS_TOPIC, event);
