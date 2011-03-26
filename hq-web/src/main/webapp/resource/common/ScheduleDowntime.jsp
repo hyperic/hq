@@ -32,6 +32,8 @@
 
 <tiles:importAttribute name="resource" ignore="true" />
 
+<c:if test="${not empty resource}">
+
 <div id="maintenance<c:out value='${resource.id}'/>">
     <div id="maintenance_status_<c:out value='${resource.id}'/>" style="display: none"></div>
     <div id="existing_downtime_<c:out value='${resource.id}'/>"></div>
@@ -92,6 +94,32 @@ hyperic.data.maintenance_schedule.error = {
 };
 
 var maintenance_<c:out value="${resource.id}"/> = null;
+
+// create Tools menu item after "Add to Group"
+var eeAddToGroupMenuElement = document.getElementById("AddToGroupMenuLink");
+
+if (eeAddToGroupMenuElement) {
+	var downtimeLinkBreak = document.createElement("br");
+	var downtimeLinkImg = document.createElement("img");
+	downtimeLinkImg.border = '0';
+	downtimeLinkImg.width = '11';
+	downtimeLinkImg.height = '9';
+	downtimeLinkImg.src = '/images/title_arrow.gif';
+	
+	var downtimeLink = document.createElement("a");
+	var downtimeLinkText = document.createTextNode('<fmt:message key="resource.group.MaintenanceWindow.Title"/>');
+	downtimeLink.setAttribute('href', '#');
+	downtimeLink.onclick = function() {
+		maintenance_<c:out value='${resource.id}'/>.getSchedule();
+	};
+	downtimeLink.appendChild(downtimeLinkText);
+	downtimeLink.appendChild(downtimeLinkImg);
+	
+	var eeToolsMenuElement = eeAddToGroupMenuElement.parentNode;
+	eeToolsMenuElement.insertBefore(downtimeLinkBreak, eeAddToGroupMenuElement.nextSibling);
+	eeToolsMenuElement.insertBefore(downtimeLink, downtimeLinkBreak.nextSibling);
+}
+
 hqDojo.ready(function(){
     maintenance_<c:out value="${resource.id}"/> = new hyperic.maintenance_schedule({
         "title": "<fmt:message key="resource.group.MaintenanceWindow.Title"/>", 
@@ -103,3 +131,5 @@ hqDojo.ready(function(){
 });
 //]]>
 </script>
+
+</c:if>

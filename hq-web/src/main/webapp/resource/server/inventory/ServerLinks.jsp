@@ -33,8 +33,6 @@
 
 
 <tiles:importAttribute name="resource" ignore="true" />
-<tiles:importAttribute name="autoInventory" ignore="true"/>
-
 
 <c:if test="${not empty resource}">
     <c:set var="newServiceUrl"    
