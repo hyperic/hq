@@ -125,7 +125,7 @@ public class ResourceGroupController extends BaseController {
 		group.setLocation(form.getLocation());
 		
 		// TODO Owner and modifiedby can be set based on the authenticated user, for hardcoding to HQAdmin...
-		AuthzSubject subject = authzSubjectDao.findById(1);
+		AuthzSubject subject = authzSubjectDao.findOne(1);
 		if(subject == null) {
             throw new EntityNotFoundException("Subject with ID: 1 was not found");
         }

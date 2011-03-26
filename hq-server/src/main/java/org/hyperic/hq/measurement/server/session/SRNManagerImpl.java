@@ -142,7 +142,7 @@ public class SRNManagerImpl implements SRNManager {
     public void removeSrn(AppdefEntityID aid) {
         SrnId id = new SrnId(aid.getID());
         if (srnCache.remove(id)) {
-            ScheduleRevNum srn = scheduleRevNumRepository.findById(id);
+            ScheduleRevNum srn = scheduleRevNumRepository.findOne(id);
             if(srn != null) {
                 scheduleRevNumRepository.delete(srn);
             }
@@ -158,7 +158,7 @@ public class SRNManagerImpl implements SRNManager {
      */
     public int incrementSrn(AppdefEntityID aid, long newMin) {        
         SrnId id = new SrnId(aid.getID());
-        ScheduleRevNum srn = scheduleRevNumRepository.findById(id);
+        ScheduleRevNum srn = scheduleRevNumRepository.findOne(id);
         final boolean debug = log.isDebugEnabled();
 
         // Create the SRN if it does not already exist.

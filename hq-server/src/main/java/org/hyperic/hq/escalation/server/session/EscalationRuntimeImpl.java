@@ -465,9 +465,9 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
 		// HHQ-3499, need to make sure that the alertId that is pointed to by
 		// the escalation still exists
 		if (alertType instanceof GalertEscalationAlertType) {
-			alert = galertLogRepository.findById(new Integer(s.getAlertId()));
+			alert = galertLogRepository.findOne(new Integer(s.getAlertId()));
 		} else if (alertType instanceof ClassicEscalationAlertType) {
-			alert = alertRepository.findById(new Integer(s.getAlertId()));
+			alert = alertRepository.findOne(new Integer(s.getAlertId()));
 		}
 		if (alert == null) {
 			if (debug)
@@ -530,7 +530,7 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
 	public void endEscalation(EscalationState escalationState) {
 		if (escalationState != null) {
 			// make sure we have the updated state to avoid StaleStateExceptions
-			escalationState = escalationStateRepository.findById(escalationState.getId());
+			escalationState = escalationStateRepository.findOne(escalationState.getId());
 			if (escalationState == null) {
 				return;
 			}
@@ -546,7 +546,7 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
 		// in a separate session when ending an escalation).
 		// The get() will return null if the escalation state
 		// does not exist.
-		EscalationState escalationState = escalationStateRepository.findById(stateId);
+		EscalationState escalationState = escalationStateRepository.findOne(stateId);
 
 		if (hasEscalationStateOrEscalatingEntityBeenDeleted(escalationState)) {
 			// just to be safe

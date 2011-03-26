@@ -279,7 +279,7 @@ public class Alert implements AlertInterface, Serializable {
     protected void setAlertValue(AlertValue val) {
         ResourceAlertDefinitionRepository aDao = Bootstrap
             .getBean(ResourceAlertDefinitionRepository.class);
-        ResourceAlertDefinition def = aDao.findById(val.getAlertDefId());
+        ResourceAlertDefinition def = aDao.findOne(val.getAlertDefId());
         if (def == null) {
             throw new EntityNotFoundException("Resource Alert Definition with ID: " +
                                               val.getAlertDefId() + " was not found");
@@ -295,7 +295,7 @@ public class Alert implements AlertInterface, Serializable {
         for (Iterator<AlertConditionLogValue> i = val.getAddedConditionLogs().iterator(); i
             .hasNext();) {
             AlertConditionLogValue lv = i.next();
-            AlertConditionLog log = aclDao.findById(lv.getId());
+            AlertConditionLog log = aclDao.findOne(lv.getId());
             if (log == null) {
                 throw new EntityNotFoundException("Alert Condition Log with ID: " + lv.getId() +
                                                   " was not found");
@@ -306,7 +306,7 @@ public class Alert implements AlertInterface, Serializable {
         for (Iterator<AlertConditionLogValue> i = val.getRemovedConditionLogs().iterator(); i
             .hasNext();) {
             AlertConditionLogValue lv = i.next();
-            AlertConditionLog log = aclDao.findById(lv.getId());
+            AlertConditionLog log = aclDao.findOne(lv.getId());
             if (log == null) {
                 throw new EntityNotFoundException("Alert Condition Log with ID: " + lv.getId() +
                                                   " was not found");
@@ -316,7 +316,7 @@ public class Alert implements AlertInterface, Serializable {
 
         for (Iterator<AlertActionLog> i = val.getAddedActionLogs().iterator(); i.hasNext();) {
             AlertActionLog lv = i.next();
-            AlertActionLog existing = alDao.findById(lv.getId());
+            AlertActionLog existing = alDao.findOne(lv.getId());
             if (existing == null) {
                 throw new EntityNotFoundException("AlertActionLog with ID: " + lv.getId() +
                                                   " was not found");
@@ -326,7 +326,7 @@ public class Alert implements AlertInterface, Serializable {
 
         for (Iterator<AlertActionLog> i = val.getRemovedActionLogs().iterator(); i.hasNext();) {
             AlertActionLog lv = i.next();
-            AlertActionLog existing = alDao.findById(lv.getId());
+            AlertActionLog existing = alDao.findOne(lv.getId());
             if (existing == null) {
                 throw new EntityNotFoundException("AlertActionLog with ID: " + lv.getId() +
                                                   " was not found");

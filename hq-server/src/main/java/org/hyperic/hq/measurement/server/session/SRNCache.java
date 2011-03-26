@@ -89,7 +89,7 @@ public class SRNCache {
             return (ScheduleRevNum) el.getObjectValue();
         }
 
-        ScheduleRevNum srn = scheduleRevNumRepository.findById(id);
+        ScheduleRevNum srn = scheduleRevNumRepository.findOne(id);
         if (srn != null) {
             this.put(srn);
         }

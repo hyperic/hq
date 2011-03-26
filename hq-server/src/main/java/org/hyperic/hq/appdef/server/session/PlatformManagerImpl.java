@@ -494,7 +494,7 @@ public class PlatformManagerImpl implements PlatformManager {
         Agent agent = null;
 
             if (agentPK != null) {
-                agent = agentDAO.findById(agentPK);
+                agent = agentDAO.findOne(agentPK);
                 if(agent == null) {
                     throw new EntityNotFoundException("Agent with ID: " + 
                         agentPK + " was not found");

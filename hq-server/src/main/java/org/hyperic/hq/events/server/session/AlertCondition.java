@@ -267,7 +267,7 @@ public class AlertCondition implements Serializable {
         setComparator(val.getComparator());
         setThreshold(val.getThreshold());
         setOptionStatus(val.getOption());
-        RegisteredTrigger trigger = tDAO.findById(val.getTriggerId());
+        RegisteredTrigger trigger = tDAO.findOne(val.getTriggerId());
         if(trigger == null) {
             throw new EntityNotFoundException("Registered Trigger with ID: " + 
                 val.getTriggerId() + " was not found");

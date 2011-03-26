@@ -147,7 +147,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
     }
 
     private Role lookupRole(Integer id) {
-        Role role = roleDAO.findById(id);
+        Role role = roleDAO.findOne(id);
         if(role == null) {
             throw new EntityNotFoundException("Role with ID: " + id + 
                 " was not found");
@@ -170,7 +170,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
     @Transactional(readOnly=true)
     private Role getRootRoleIfMember(AuthzSubject subject) {
         // Look up the root role
-        Role rootRole = roleDAO.findById(AuthzConstants.rootRoleId);
+        Role rootRole = roleDAO.findOne(AuthzConstants.rootRoleId);
         if(rootRole == null) {
             throw new EntityNotFoundException("Role with ID: " + AuthzConstants.rootRoleId + 
                 " was not found");
@@ -271,7 +271,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
         if (subjectIds != null) {
             HashSet<AuthzSubject> sLocals = new HashSet<AuthzSubject>(subjectIds.length);
             for (int si = 0; si < subjectIds.length; si++) {
-                AuthzSubject subject = authzSubjectDAO.findById(subjectIds[si]);
+                AuthzSubject subject = authzSubjectDAO.findOne(subjectIds[si]);
                 if(subject == null) {
                     throw new EntityNotFoundException("Subject with ID: " + subjectIds[si] + 
                         " was not found");
@@ -308,7 +308,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
             throw new ApplicationException("Superuser role cannot be removed");
         }
 
-        Role role = roleDAO.findById(rolePk);
+        Role role = roleDAO.findOne(rolePk);
         if(role == null) {
             throw new EntityNotFoundException("Role with ID: " + rolePk + 
                 " was not found");
@@ -440,7 +440,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
      * 
      */
     public void addResourceGroups(AuthzSubject whoami, Integer rid, Integer[] gids) throws PermissionException {
-        Role roleLocal = roleDAO.findById(rid);
+        Role roleLocal = roleDAO.findOne(rid);
         if(roleLocal == null) {
             throw new EntityNotFoundException("Role with ID: " + rid + 
                 " was not found");
@@ -568,7 +568,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
      */
     @Transactional(readOnly=true)
     public Role getRoleById(int id) {
-        return roleDAO.findById(new Integer(id));
+        return roleDAO.findOne(new Integer(id));
     }
 
     /**
@@ -628,7 +628,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
      */
     public OwnedRoleValue findOwnedRoleById(AuthzSubject whoami, Integer id) throws PermissionException {
 
-        Role local = roleDAO.findById(id);
+        Role local = roleDAO.findOne(id);
         if(local == null) {
             throw new EntityNotFoundException("Role with ID: " + id + 
                 " was not found");
@@ -662,7 +662,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
         throws PermissionException {
       
         // find the role by id
-        Role role = roleDAO.findById(roleId);
+        Role role = roleDAO.findOne(roleId);
         if(role == null) {
             throw new EntityNotFoundException("Role with ID: " + roleId + 
                 " was not found");
@@ -937,7 +937,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
         if (isRootRoleMember(intendedSubjectValue)) {
             ArrayList<Role> roleList = new ArrayList<Role>(roles.size() + 1);
 
-            Role rootRole = roleDAO.findById(AuthzConstants.rootRoleId);
+            Role rootRole = roleDAO.findOne(AuthzConstants.rootRoleId);
             if(rootRole == null) {
                 throw new EntityNotFoundException("Role with ID: " + AuthzConstants.rootRoleId + 
                     " was not found");
@@ -1152,7 +1152,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
                                                                            boolean system, PageControl pc)
         throws PermissionException, NotFoundException {
         // first find the role by its id
-        Role role = roleDAO.findById(roleId);
+        Role role = roleDAO.findOne(roleId);
         if(role == null) {
             throw new EntityNotFoundException("Role with ID: " + roleId + 
                 " was not found");
@@ -1274,7 +1274,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
                                                                    Integer[] groupIds, PageControl pc)
         throws PermissionException, NotFoundException {
 
-        Role role = roleDAO.findById(roleId);
+        Role role = roleDAO.findOne(roleId);
         if(role == null) {
             throw new EntityNotFoundException("Role with ID: " + roleId + 
                 " was not found");
@@ -1351,7 +1351,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
     @Transactional(readOnly=true)
     public PageList<AuthzSubject> getSubjects(AuthzSubject whoami, Integer roleId, PageControl pc)
         throws PermissionException, NotFoundException {
-        Role roleLocal = roleDAO.findById(roleId);
+        Role roleLocal = roleDAO.findOne(roleId);
 
         if (roleLocal == null) {
             return new PageList<AuthzSubject>();
@@ -1462,7 +1462,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
     public void addSubjects(AuthzSubject whoami, Integer id, Integer[] sids) throws PermissionException {
         Role role = lookupRole(id);
         for (int i = 0; i < sids.length; i++) {
-            AuthzSubject subject = authzSubjectDAO.findById(sids[i]);
+            AuthzSubject subject = authzSubjectDAO.findOne(sids[i]);
             if(subject == null) {
                 throw new EntityNotFoundException("Subject with ID: " + sids[i] + 
                     " was not found");
@@ -1485,7 +1485,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
     public void removeSubjects(AuthzSubject whoami, Integer id, Integer[] ids) throws PermissionException {
         Role roleLocal = lookupRole(id);
         for (int i = 0; i < ids.length; i++) {
-            AuthzSubject subj = authzSubjectDAO.findById(ids[i]);
+            AuthzSubject subj = authzSubjectDAO.findOne(ids[i]);
             if(subj == null) {
                 throw new EntityNotFoundException("Subject with ID: " + ids[i] + 
                     " was not found");
@@ -1505,7 +1505,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
             } else if (vals[i] instanceof ResourceValue) {
                 ret.add(lookupResource((ResourceValue) vals[i]));
             } else if (vals[i] instanceof Role) {
-                Role role = roleDAO.findById(((Role) vals[i]).getId());
+                Role role = roleDAO.findOne(((Role) vals[i]).getId());
                 if(role == null) {
                     throw new EntityNotFoundException("Role with ID: " + ((Role) vals[i]).getId() + 
                         " was not found");

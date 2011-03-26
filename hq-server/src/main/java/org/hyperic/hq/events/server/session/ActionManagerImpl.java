@@ -67,7 +67,7 @@ public class ActionManagerImpl implements ActionManager {
      */
     @Transactional(readOnly=true)
     public List<ActionValue> getActionsForAlert(int alertId) {
-        Alert alert = alertRepository.findById(new Integer(alertId));
+        Alert alert = alertRepository.findOne(new Integer(alertId));
         if(alert == null) {
             throw new EntityNotFoundException("Alert with ID: " + 
                 alertId + " was not found");
@@ -103,7 +103,7 @@ public class ActionManagerImpl implements ActionManager {
      */
     public Action updateAction(ActionValue val) {
         // First update the primary action
-        Action action = actionRepository.findById(val.getId());
+        Action action = actionRepository.findOne(val.getId());
         if(action == null) {
             throw new EntityNotFoundException("Action with ID: " + 
                 val.getId() + " not found");
@@ -207,7 +207,7 @@ public class ActionManagerImpl implements ActionManager {
         if (parent == null) {
             action.setParent(null);
         } else {
-            Action parentAction = actionRepository.findById(parent);
+            Action parentAction = actionRepository.findOne(parent);
             if(parentAction == null) {
                 throw new EntityNotFoundException("Action with ID: " + 
                     parent + " not found");

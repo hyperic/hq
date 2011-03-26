@@ -244,7 +244,7 @@ public class EscalationManagerImpl implements EscalationManager {
 
     @Transactional(readOnly = true)
     public Escalation findById(Integer id) {
-        Escalation escalation = escalationRepository.findById(id);
+        Escalation escalation = escalationRepository.findOne(id);
         if(escalation == null) {
             throw new EntityNotFoundException("Escalation with ID: " + id + 
                 " was not found");
@@ -254,7 +254,7 @@ public class EscalationManagerImpl implements EscalationManager {
 
     @Transactional(readOnly = true)
     public Escalation findById(AuthzSubject subject, Integer id) throws PermissionException {
-        Escalation escalation = escalationRepository.findById(id);
+        Escalation escalation = escalationRepository.findOne(id);
         if(escalation == null) {
             throw new EntityNotFoundException("Escalation with ID: " + id + 
                 " was not found");

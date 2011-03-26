@@ -49,7 +49,7 @@ public class ActionRepositoryIntegrationTest {
         actionRepository.deleteByAlertDefinition(alertdef2);
         entityManager.flush();
         entityManager.clear();
-        assertTrue(actionRepository.findById(action.getId()).isDeleted());
+        assertTrue(actionRepository.findOne(action.getId()).isDeleted());
     }
     
     @Test

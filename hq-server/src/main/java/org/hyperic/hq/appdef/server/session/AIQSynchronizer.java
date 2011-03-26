@@ -144,7 +144,7 @@ public class AIQSynchronizer {
     private void updateQueueState(AIPlatform aip, AIPlatformValue aiplatform, boolean updateServers,
                                  boolean isApproval, boolean isReport, AIPlatformRepository aiPlatformDao) {
         // reassociate platform
-        aip = aiPlatformDao.findById(aip.getId());
+        aip = aiPlatformDao.findOne(aip.getId());
 
         long nowTime = System.currentTimeMillis();
         aip.setFqdn(aiplatform.getFqdn());

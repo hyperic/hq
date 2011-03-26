@@ -449,7 +449,7 @@ public class ControlScheduleManagerImpl
         // END SpringSource
 
         for (int i = 0; i < ids.length; i++) {
-            ControlHistory historyLocal = controlHistoryRepository.findById(ids[i]);
+            ControlHistory historyLocal = controlHistoryRepository.findOne(ids[i]);
             if(historyLocal == null) {
                 throw new ApplicationException("ControlHistory with id: " + ids[i] + " was not found");
             }
@@ -485,7 +485,7 @@ public class ControlScheduleManagerImpl
      */
     @Transactional(readOnly=true)
     public ControlHistory getJobByJobId(AuthzSubject subject, Integer id) throws ApplicationException {
-        ControlHistory controlHistory = controlHistoryRepository.findById(id);
+        ControlHistory controlHistory = controlHistoryRepository.findOne(id);
         if(controlHistory == null) {
             throw new ApplicationException("Control History with id: " + id + " not found");
         }
@@ -522,7 +522,7 @@ public class ControlScheduleManagerImpl
     public ControlSchedule getControlJob(AuthzSubject subject, Integer id) throws PluginException {
 
         try {
-            ControlSchedule controlSchedule = controlScheduleRepository.findById(id);
+            ControlSchedule controlSchedule = controlScheduleRepository.findOne(id);
             if(controlSchedule == null) {
                 throw new PluginException("Control Schedule with id: " + id + " not found");
             }
@@ -546,7 +546,7 @@ public class ControlScheduleManagerImpl
 
         for (int i = 0; i < ids.length; i++) {
             try {
-                ControlSchedule cScheduleLocal = controlScheduleRepository.findById(ids[i]);
+                ControlSchedule cScheduleLocal = controlScheduleRepository.findOne(ids[i]);
                 if(cScheduleLocal == null) {
                     throw new PluginException("Unable to remove job.  Control Schedule with id:  " + ids[i] + 
                         " not found");
@@ -716,7 +716,7 @@ public class ControlScheduleManagerImpl
      */
     @Transactional
     public void updateHistory(Integer jobId, long endTime, String status, String message) throws ApplicationException {
-        ControlHistory local = controlHistoryRepository.findById(jobId);
+        ControlHistory local = controlHistoryRepository.findOne(jobId);
         if(local == null) {
             throw new ApplicationException("Control History with id: " + jobId + " was not found");
         } 
@@ -734,7 +734,7 @@ public class ControlScheduleManagerImpl
      */
     @Transactional(readOnly=true)
     public ControlHistory getJobHistoryValue(Integer jobId) throws ApplicationException {
-        ControlHistory controlHistory = controlHistoryRepository.findById(jobId);
+        ControlHistory controlHistory = controlHistoryRepository.findOne(jobId);
         if(controlHistory == null) {
             throw new ApplicationException("Control History with id: " + jobId + " not found");
         }
@@ -749,7 +749,7 @@ public class ControlScheduleManagerImpl
      */
     @Transactional
     public void removeHistory(Integer id) throws ApplicationException {
-        ControlHistory local = controlHistoryRepository.findById(id);
+        ControlHistory local = controlHistoryRepository.findOne(id);
         if(local == null) {
             throw new ApplicationException("ControlHistory with id: " + id + " was not found");
         }

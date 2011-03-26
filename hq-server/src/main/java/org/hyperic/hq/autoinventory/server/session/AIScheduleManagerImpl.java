@@ -320,7 +320,7 @@ public class AIScheduleManagerImpl
      */
     @Transactional(readOnly=true)
     public AISchedule findScheduleByID(AuthzSubject subject, Integer id) {
-        AISchedule aiSchedule = aiScheduleRepository.findById(id);
+        AISchedule aiSchedule = aiScheduleRepository.findOne(id);
         if(aiSchedule == null) {
             throw new EntityNotFoundException("AISchedule with id: " + id + " was not found");
         }
@@ -377,7 +377,7 @@ public class AIScheduleManagerImpl
     public void deleteAIJob(AuthzSubject subject, Integer ids[]) throws AutoinventoryException {
         for (int i = 0; i < ids.length; i++) {
             try {
-                AISchedule aiScheduleLocal = aiScheduleRepository.findById(ids[i]);
+                AISchedule aiScheduleLocal = aiScheduleRepository.findOne(ids[i]);
                 if(aiScheduleLocal == null) {
                     throw new AutoinventoryException("Unable to remove job.  Job with id: " + ids[i] + " not found"); 
                 }

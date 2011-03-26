@@ -415,7 +415,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
             Action parent = null;
 
             if (action.getParentId() != null) {
-                parent = actionRepository.findById(action.getParentId());
+                parent = actionRepository.findOne(action.getParentId());
                 if(parent == null) {
                     throw new EntityNotFoundException("Action with ID: " + 
                         action.getParentId() + " was not found");
@@ -454,7 +454,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
         final boolean debug = log.isDebugEnabled();
         StopWatch watch = new StopWatch();
         
-        AlertDefinition def = resAlertDefRepository.findById(id);
+        AlertDefinition def = resAlertDefRepository.findOne(id);
         if(def == null) {
             throw new EntityNotFoundException("Alert Definition with ID: " +id + 
                 " was not found");
@@ -573,7 +573,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
     public AlertDefinitionValue updateAlertDefinition(AlertDefinitionValue adval) throws AlertConditionCreateException,
         ActionCreateException {
 
-        ResourceAlertDefinition aldef = resAlertDefRepository.findById(adval.getId());
+        ResourceAlertDefinition aldef = resAlertDefRepository.findOne(adval.getId());
         if(aldef == null) {
             throw new EntityNotFoundException("Alert Definition with ID: " + adval.getId() + 
                 " was not found");
@@ -630,7 +630,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
                 Action parent = null;
 
                 if (action.getParentId() != null) {
-                    parent = actionRepository.findById(action.getParentId());
+                    parent = actionRepository.findOne(action.getParentId());
                     if(parent == null) {
                         throw new EntityNotFoundException("Action with ID: " + 
                             action.getParentId() + " was not found");
@@ -696,7 +696,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
         }
 
         for (AlertConditionValue cVal : val.getAddedConditions()) {
-            AlertCondition cond = alertConditionRepository.findById(cVal.getId());
+            AlertCondition cond = alertConditionRepository.findOne(cVal.getId());
             if(cond == null) {
                 throw new EntityNotFoundException("Alert Condition with ID: " + cVal.getId() + 
                     " was not found");
@@ -705,7 +705,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
         }
 
         for (AlertConditionValue cVal : val.getRemovedConditions()) {
-            AlertCondition cond = alertConditionRepository.findById(cVal.getId());
+            AlertCondition cond = alertConditionRepository.findOne(cVal.getId());
             if(cond == null) {
                 throw new EntityNotFoundException("Alert Condition with ID: " + cVal.getId() + 
                     " was not found");
@@ -714,7 +714,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
         }
 
         for (ActionValue aVal : val.getAddedActions()) {
-            Action action = actionRepository.findById(aVal.getId());
+            Action action = actionRepository.findOne(aVal.getId());
             if(action == null) {
                 throw new EntityNotFoundException("Action with ID: " + 
                     aVal.getId() + " was not found");
@@ -723,7 +723,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
         }
 
         for (ActionValue aVal : val.getRemovedActions()) {
-            Action action = actionRepository.findById(aVal.getId());
+            Action action = actionRepository.findOne(aVal.getId());
             if(action == null) {
                 throw new EntityNotFoundException("Action with ID: " + 
                     aVal.getId() + " was not found");
@@ -762,7 +762,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
         List<AlertDefinition> alertdefs = new ArrayList<AlertDefinition>();
 
         for (int i = 0; i < ids.length; i++) {
-            ResourceAlertDefinition alertdef = resAlertDefRepository.findById(ids[i]);
+            ResourceAlertDefinition alertdef = resAlertDefRepository.findOne(ids[i]);
             if(alertdef == null) {
                 throw new EntityNotFoundException("Alert Definition with ID: " + ids[i] + 
                     " was not found"); 
@@ -862,7 +862,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
             List<Integer> triggerDefIds = new ArrayList<Integer>(ids.size());
             
             for (Integer alertDefId : ids ) {
-                AlertDefinition def = resAlertDefRepository.findById(alertDefId);
+                AlertDefinition def = resAlertDefRepository.findOne(alertDefId);
                 
                 if (def != null && def.isEnabled() != enable) {
                     // ...check that user has modify permission on alert definition's resource...
@@ -888,7 +888,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
      * 
      */
     public void setEscalation(AuthzSubject subj, Integer defId, Integer escId) throws PermissionException {
-        AlertDefinition def = resAlertDefRepository.findById(defId);
+        AlertDefinition def = resAlertDefRepository.findOne(defId);
         if(def == null) {
             throw new EntityNotFoundException("Alert Definition with ID: " + defId + 
                 " was not found"); 
@@ -930,7 +930,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
     public void deleteAlertDefinitions(AuthzSubject subj, Integer[] ids) throws PermissionException {
         //TODO separate deletion of Resource and ResourceType alertdefs
         for (int i = 0; i < ids.length; i++) {
-            ResourceAlertDefinition alertdef = resAlertDefRepository.findById(ids[i]);
+            ResourceAlertDefinition alertdef = resAlertDefRepository.findOne(ids[i]);
 
             // TODO Don't delete child alert definitions
             //if (alertdef.getParent() != null && !EventConstants.TYPE_ALERT_DEF_ID.equals(alertdef.getParent().getId())) {
@@ -1162,7 +1162,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
             final List<ResourceAlertDefinition> alertDefs = new ArrayList<ResourceAlertDefinition>(alertDefIds.size());
             for (Integer alertdefId : alertDefIds) {
                 if (debug) watch.markTimeBegin("findById");
-                final ResourceAlertDefinition alertdef = resAlertDefRepository.findById(alertdefId);
+                final ResourceAlertDefinition alertdef = resAlertDefRepository.findOne(alertdefId);
                 if(alertdef == null) {
                     throw new EntityNotFoundException("Alert Definition with ID: " + alertdefId + 
                         " was not found");
@@ -1230,7 +1230,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
      */
     @Transactional(readOnly=true)
     public AlertDefinition getByIdAndCheck(AuthzSubject subj, Integer id) throws PermissionException {
-        AlertDefinition ad = resAlertDefRepository.findById(id);
+        AlertDefinition ad = resAlertDefRepository.findOne(id);
         if (ad != null) {
             if (ad.isDeleted()) {
                 ad = null;
@@ -1259,7 +1259,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
      */
     @Transactional(readOnly=true)
     public AlertDefinition getByIdNoCheck(Integer id) {
-        return resAlertDefRepository.findById(id);
+        return resAlertDefRepository.findOne(id);
     }
     
     
@@ -1473,7 +1473,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
      */
     @Transactional(readOnly=true)
     public PageList<AlertDefinitionValue> findAlertDefinitionChildren(Integer id) {
-        ResourceAlertDefinition def = resAlertDefRepository.findById(id);
+        ResourceAlertDefinition def = resAlertDefRepository.findOne(id);
         if(def == null) {
             throw new EntityNotFoundException("Alert Definition with ID: " + id + 
                 " was not found");

@@ -122,7 +122,7 @@ public class EscalationStateRepositoryIntegrationTest {
         escalationStateRepository.removeAcknowledgedBy(bob);
         entityManager.flush();
         entityManager.clear();
-        assertNull(escalationStateRepository.findById(state.getId()).getAcknowledgedBy());
+        assertNull(escalationStateRepository.findOne(state.getId()).getAcknowledgedBy());
     }
 
     private void verifyQueryCaching(String cacheName) {

@@ -158,7 +158,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
         if (revisedAIplatform == null) {
             // log.info("AIQmgr.queue (post appdef-diff): aiplatform=NULL");
             AIPlatform aiplatformLocal;
-            aiplatformLocal = aiPlatformRepository.findById(aiplatform.getId());
+            aiplatformLocal = aiPlatformRepository.findOne(aiplatform.getId());
             if(aiplatformLocal == null) {
                 throw new EntityNotFoundException("AIPlatform with ID: " + aiplatform.getId() + " not found");
             }
@@ -325,7 +325,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
     @Transactional
     public AIPlatformValue findAIPlatformById(AuthzSubject subject, int aiplatformID) {
 
-        AIPlatform aiplatform = aiPlatformRepository.findById(new Integer(aiplatformID));
+        AIPlatform aiplatform = aiPlatformRepository.findOne(new Integer(aiplatformID));
 
         if (aiplatform == null) {
             return null;
@@ -361,7 +361,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
      */
     @Transactional(readOnly = true)
     public AIServerValue findAIServerById(AuthzSubject subject, int serverID) {
-        AIServer aiserver = aiServerRepository.findById(new Integer(serverID));
+        AIServer aiserver = aiServerRepository.findOne(new Integer(serverID));
 
         if (aiserver == null) {
             return null;
@@ -409,7 +409,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
      */
     @Transactional(readOnly = true)
     public AIIpValue findAIIpById(AuthzSubject subject, int ipID) {
-        AIIp aiip = aiIpRepository.findById(new Integer(ipID));
+        AIIp aiip = aiIpRepository.findOne(new Integer(ipID));
         if (aiip == null) {
             return null;
         }
@@ -501,7 +501,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
                     continue;
                 }
 
-                aiplatform = aiPlatformRepository.findById(id);
+                aiplatform = aiPlatformRepository.findOne(id);
 
                 if (aiplatform == null) {
                     if (isPurgeAction) {
@@ -555,7 +555,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
                     continue;
                 }
 
-                final AIIp aiip = aiIpRepository.findById(id);
+                final AIIp aiip = aiIpRepository.findOne(id);
 
                 if (aiip == null) {
                     if (isPurgeAction)
@@ -579,7 +579,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
                     continue;
                 }
                 
-                final AIServer aiserver = aiServerRepository.findById(id);
+                final AIServer aiserver = aiServerRepository.findOne(id);
                 if (aiserver == null) {
                     if (isPurgeAction) {
                         continue;
@@ -607,7 +607,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
 
             for (Integer id : aiplatformsToResync.keySet()) {
 
-                aiplatform = aiPlatformRepository.findById(id);
+                aiplatform = aiPlatformRepository.findOne(id);
                 if(aiplatform == null) {
                     throw new SystemException("AIPlatform with ID: " + id + " not found");
                 }
@@ -641,7 +641,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
         }
 
         for (Integer id : ipList) {
-            final AIIp aiip = aiIpRepository.findById(id);
+            final AIIp aiip = aiIpRepository.findOne(id);
             if(aiip == null) {
                 throw new EntityNotFoundException("AIIp with ID: " + id + " not found");
             }
@@ -675,7 +675,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
         AIPlatform aiplatform;
 
         // XXX Do authz check
-        aiplatform = aiPlatformRepository.findById(new Integer(aiPlatformID));
+        aiplatform = aiPlatformRepository.findOne(new Integer(aiPlatformID));
         if(aiplatform == null) {
             throw new EntityNotFoundException("AIPlatform with ID: " + aiPlatformID + " not found");
         }

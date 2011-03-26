@@ -262,7 +262,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
         ArrayList<Measurement> dmList = new ArrayList<Measurement>();
         for (int i = 0; i < templates.length; i++) {
-            MeasurementTemplate t = measurementTemplateRepository.findById(templates[i]);
+            MeasurementTemplate t = measurementTemplateRepository.findOne(templates[i]);
             if (t == null) {
                 continue;
             }
@@ -314,7 +314,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         throws PermissionException, MeasurementCreateException, TemplateNotFoundException {
         long[] intervals = new long[templates.length];
         for (int i = 0; i < templates.length; i++) {
-            MeasurementTemplate tmpl = measurementTemplateRepository.findById(templates[i]);
+            MeasurementTemplate tmpl = measurementTemplateRepository.findOne(templates[i]);
             if(tmpl == null) {
                 throw new EntityNotFoundException("MeasurementTemplate with ID " + templates[i] + " not found");
             }
@@ -328,7 +328,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
      */
     @Transactional(readOnly = true)
     public Measurement findMeasurementById(Integer mid) {
-        return measurementRepository.findById(mid);
+        return measurementRepository.findOne(mid);
     }
 
     /**
@@ -444,7 +444,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         // need to remove one at a time to avoid EhCache clearing the
         // measurement cache which would lead to thrashing
         for (Integer id : ids) {
-            Measurement meas = measurementRepository.findById(id);
+            Measurement meas = measurementRepository.findOne(id);
             if (meas == null) {
                 continue;
             }
@@ -459,7 +459,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
      */
     @Transactional(readOnly = true)
     public Measurement getMeasurement(Integer mid) {
-        return measurementRepository.findById(mid);
+        return measurementRepository.findOne(mid);
     }
 
     /**
@@ -990,7 +990,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         }
 
         for (Integer mid : mids) {
-            final Measurement m = measurementRepository.findById(mid);
+            final Measurement m = measurementRepository.findOne(mid);
             if(m == null) {
                 throw new EntityNotFoundException("Measurement with ID: " + mid + " was not found");
             } 
@@ -1018,7 +1018,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
         watch.markTimeBegin("setEnabled");
         for (Integer mid : midsList) {
-            Measurement meas = measurementRepository.findById(mid);
+            Measurement meas = measurementRepository.findOne(mid);
 
             if (!meas.isEnabled()) {
                 resource = meas.getResource();
@@ -1048,7 +1048,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     public void enableMeasurement(AuthzSubject subject, Integer mId, long interval)
         throws PermissionException {
         final List<Integer> mids = Collections.singletonList(mId);
-        Measurement meas = measurementRepository.findById(mId);
+        Measurement meas = measurementRepository.findOne(mId);
         if (meas.isEnabled()) {
             return;
         }
@@ -1057,7 +1057,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         permissionManager.checkModifyPermission(subject.getId(), appId);
       
         for (Integer mid : mids) {
-            final Measurement m = measurementRepository.findById(mid);
+            final Measurement m = measurementRepository.findOne(mid);
             if(m == null) {
                 throw new EntityNotFoundException("Measurement with ID: " + mid + " was not found");
             }
@@ -1075,7 +1075,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
      */
     public void updateMeasurementInterval(AuthzSubject subject, Integer mId, long interval)
         throws PermissionException {
-        Measurement meas = measurementRepository.findById(mId);
+        Measurement meas = measurementRepository.findOne(mId);
         meas.setEnabled((interval != 0));
         meas.setInterval(interval);
         Resource resource = meas.getResource();
@@ -1481,7 +1481,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         Measurement dm = null;
 
         try {
-            dm = measurementRepository.findById(event.getInstanceId());
+            dm = measurementRepository.findOne(event.getInstanceId());
             event.setResource(dm.getResource().getId());
             event.setUnits(dm.getTemplate().getUnits());
         } catch (Exception e) {

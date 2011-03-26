@@ -129,7 +129,7 @@ public class CalendarManagerImpl implements CalendarManager {
 	 */
     @Transactional(readOnly=true)
 	public Calendar findCalendarById(int id) {
-		Calendar calendar = calendarDAO.findById(new Integer(id));
+		Calendar calendar = calendarDAO.findOne(new Integer(id));
 		if(calendar == null) {
 		    throw new EntityNotFoundException("Calendar with id: " + id + 
 		        " was not found");
@@ -142,6 +142,6 @@ public class CalendarManagerImpl implements CalendarManager {
      */
     @Transactional(readOnly=true)
 	public CalendarEntry findEntryById(int id) {
-		return calendarEntryDAO.findById(new Integer(id));
+		return calendarEntryDAO.findOne(new Integer(id));
 	}
 }

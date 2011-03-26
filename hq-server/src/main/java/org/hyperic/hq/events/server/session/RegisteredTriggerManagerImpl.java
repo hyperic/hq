@@ -251,7 +251,7 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
            
             
             try {
-                AlertDefinition def = resAlertDefRepository.findById(alertDefId);
+                AlertDefinition def = resAlertDefRepository.findOne(alertDefId);
                 if(def == null) {
                     throw new EntityNotFoundException("Alert definition with ID: " + 
                         alertDefId + " was not found");
@@ -593,7 +593,7 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
      */
     @Transactional(readOnly=true)
     public RegisteredTrigger findById(Integer id) {
-        RegisteredTrigger trigger = triggerRepository.findById(id);
+        RegisteredTrigger trigger = triggerRepository.findOne(id);
         if(trigger == null) {
             throw new EntityNotFoundException("Registered Trigger with ID: " + 
                 id + " was not found");
@@ -827,7 +827,7 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
      * 
      */
     public void deleteTriggers(Integer adId) {
-        AlertDefinition def = resAlertDefRepository.findById(adId);  
+        AlertDefinition def = resAlertDefRepository.findOne(adId);  
         if(def == null) {
             throw new EntityNotFoundException("Alert definition with ID: " + 
                 adId + " was not found");

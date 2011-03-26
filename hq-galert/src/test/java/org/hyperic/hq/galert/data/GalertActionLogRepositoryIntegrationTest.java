@@ -54,6 +54,6 @@ public class GalertActionLogRepositoryIntegrationTest {
         galertActionLogRepository.removeSubject(bob);
         galertActionLogRepository.flush();
         entityManager.clear();
-        assertNull(galertActionLogRepository.findById(actionLog.getId()).getSubject());
+        assertNull(galertActionLogRepository.findOne(actionLog.getId()).getSubject());
     }
 }

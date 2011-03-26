@@ -104,6 +104,6 @@ public class GalertAuxLogRepositoryIntegrationTest {
         entityManager.flush();
         entityManager.clear();
         assertEquals(GalertAuxLogProvider.INSTANCE.getCode(),
-            galertAuxLogRepository.findById(auxLog.getId()).getAuxType());
+            galertAuxLogRepository.findOne(auxLog.getId()).getAuxType());
     }
 }

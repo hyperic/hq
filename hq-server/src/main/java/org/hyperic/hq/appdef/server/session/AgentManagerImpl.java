@@ -471,7 +471,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      */
     @Transactional(readOnly = true)
     public Agent findAgent(Integer id) {
-        Agent agent = agentDao.findById(id);
+        Agent agent = agentDao.findOne(id);
         if(agent == null) {
             throw new EntityNotFoundException("Agent with ID: " + id + " was not found");
         }
@@ -483,7 +483,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      */
     @Transactional(readOnly = true)
     public Agent getAgent(Integer id) {
-        return agentDao.findById(id);
+        return agentDao.findOne(id);
     }
 
     /**

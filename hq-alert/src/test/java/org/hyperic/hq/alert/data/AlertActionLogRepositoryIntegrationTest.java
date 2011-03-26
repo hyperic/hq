@@ -74,7 +74,7 @@ public class AlertActionLogRepositoryIntegrationTest {
     @Test
     public void testRemoveSubject() {
         alertActionLogRepository.removeSubject(bob);
-        assertNull(alertActionLogRepository.findById(actionLog.getId()).getSubject());
-        assertNull(alertActionLogRepository.findById(actionLog2.getId()).getSubject());
+        assertNull(alertActionLogRepository.findOne(actionLog.getId()).getSubject());
+        assertNull(alertActionLogRepository.findOne(actionLog2.getId()).getSubject());
     }
 }

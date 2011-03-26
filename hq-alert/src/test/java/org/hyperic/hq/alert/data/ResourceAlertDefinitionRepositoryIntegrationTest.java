@@ -158,8 +158,8 @@ public class ResourceAlertDefinitionRepositoryIntegrationTest {
         resourceAlertDefinitionRepository.setChildrenActive(parentdef, true);
         entityManager.flush();
         entityManager.clear();
-        assertTrue(resourceAlertDefinitionRepository.findById(alertdef.getId()).isEnabled());
-        assertTrue(resourceAlertDefinitionRepository.findById(alertdef2.getId()).isEnabled());
+        assertTrue(resourceAlertDefinitionRepository.findOne(alertdef.getId()).isEnabled());
+        assertTrue(resourceAlertDefinitionRepository.findOne(alertdef2.getId()).isEnabled());
     }
 
     @Test
@@ -182,9 +182,9 @@ public class ResourceAlertDefinitionRepositoryIntegrationTest {
         resourceAlertDefinitionRepository.setChildrenEscalation(parentdef, escalation);
         entityManager.flush();
         entityManager.clear();
-        assertEquals(escalation, resourceAlertDefinitionRepository.findById(alertdef.getId())
+        assertEquals(escalation, resourceAlertDefinitionRepository.findOne(alertdef.getId())
             .getEscalation());
-        assertEquals(escalation, resourceAlertDefinitionRepository.findById(alertdef2.getId())
+        assertEquals(escalation, resourceAlertDefinitionRepository.findOne(alertdef2.getId())
             .getEscalation());
     }
 }

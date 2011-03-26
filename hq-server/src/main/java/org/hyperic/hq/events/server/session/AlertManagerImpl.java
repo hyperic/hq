@@ -212,7 +212,7 @@ public class AlertManagerImpl implements AlertManager,
 
     public void addConditionLogs(Alert alert, AlertConditionLogValue[] logs) {
         for (int i = 0; i < logs.length; i++) {
-            AlertCondition cond = alertConditionRepository.findById(logs[i].getCondition().getId());
+            AlertCondition cond = alertConditionRepository.findOne(logs[i].getCondition().getId());
             if(cond == null) {
                 throw new EntityNotFoundException("Alert Condition with ID: " +logs[i].getCondition().getId() + 
                     " was not found");
@@ -252,7 +252,7 @@ public class AlertManagerImpl implements AlertManager,
     
     @Transactional(readOnly = true)
     public Alert getAlertById(Integer id) {
-        return alertRepository.findById(id);
+        return alertRepository.findOne(id);
     }
 
     /**
@@ -260,7 +260,7 @@ public class AlertManagerImpl implements AlertManager,
      */
     @Transactional(readOnly = true)
     public Alert findAlertById(Integer id) {
-        Alert alert = alertRepository.findById(id);
+        Alert alert = alertRepository.findOne(id);
         if(alert == null) {
             throw new EntityNotFoundException("Alert with ID: " + id + " was not found");
         }
@@ -276,7 +276,7 @@ public class AlertManagerImpl implements AlertManager,
     @Transactional(readOnly = true)
     public Alert findLastUnfixedByDefinition(AuthzSubject subj, Integer id) {
         try {
-            AlertDefinition def = resAlertDefRepository.findById(id);
+            AlertDefinition def = resAlertDefRepository.findOne(id);
             if(def == null) {
                 return null;
             }
@@ -675,7 +675,7 @@ public class AlertManagerImpl implements AlertManager,
             switch (cond.getType()) {
                 case EventConstants.TYPE_THRESHOLD:
                 case EventConstants.TYPE_BASELINE:
-                    dm = measurementRepository.findById(new Integer(cond.getMeasurementId()));
+                    dm = measurementRepository.findOne(new Integer(cond.getMeasurementId()));
                     if(dm == null) {
                         throw new EntityNotFoundException("Measurement with ID: " + cond.getMeasurementId() + 
                             " not found");

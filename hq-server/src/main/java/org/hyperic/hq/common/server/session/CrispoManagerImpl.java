@@ -80,7 +80,7 @@ public class CrispoManagerImpl implements CrispoManager {
      */
     @Transactional(readOnly=true)
     public Crispo findById(Integer id) {
-        return crispoRepository.findById(id);
+        return crispoRepository.findOne(id);
     }
 
     /**

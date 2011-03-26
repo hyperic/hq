@@ -132,7 +132,7 @@ public class UIPluginManagerImpl implements UIPluginManager {
 
     @Transactional(readOnly = true)
     public View findViewById(Integer id) {
-        View view = viewRepository.findById(id);
+        View view = viewRepository.findOne(id);
         if(view == null) {
             throw new EntityNotFoundException("View with ID: " + id + " was not found");
         }
@@ -141,7 +141,7 @@ public class UIPluginManagerImpl implements UIPluginManager {
 
     @Transactional(readOnly = true)
     public Attachment findAttachmentById(Integer id) {
-        Attachment attachment = attachmentRepository.findById(id);
+        Attachment attachment = attachmentRepository.findOne(id);
         if (attachment == null) {
             throw new EntityNotFoundException("Attachment with ID: " + id + " was not found");
         }

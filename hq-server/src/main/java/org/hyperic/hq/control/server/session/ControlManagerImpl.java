@@ -510,7 +510,7 @@ public class ControlManagerImpl implements ControlManager {
         }
 
         Integer pk = new Integer(id);
-        ControlHistory cLocal = controlHistoryRepository.findById(pk);
+        ControlHistory cLocal = controlHistoryRepository.findOne(pk);
         if (cLocal == null) {
             // We know the ID, this should not happen
             throw new SystemException(

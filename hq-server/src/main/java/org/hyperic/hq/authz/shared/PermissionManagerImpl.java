@@ -210,7 +210,7 @@ public class PermissionManagerImpl
                 if (roleDao == null) {
                     roleDao = getRoleDAO();
                 }
-                ret.add(roleDao.findById(((Role) vals[i]).getId()));
+                ret.add(roleDao.findOne(((Role) vals[i]).getId()));
             } else if (vals[i] instanceof ResourceGroupValue) {
                 
                 ret.add(resourceGroupDao.findById(((ResourceGroupValue) vals[i]).getId()));
@@ -362,7 +362,7 @@ public class PermissionManagerImpl
     }
 
     public List getAllOperations(AuthzSubject subject, PageControl pc) throws PermissionException {
-        Role rootRole = getRoleDAO().findById(AuthzConstants.rootRoleId);
+        Role rootRole = getRoleDAO().findOne(AuthzConstants.rootRoleId);
         Set ops = new HashSet();
         //TODO impl?
         //ops.addAll(rootRole.getOperations());

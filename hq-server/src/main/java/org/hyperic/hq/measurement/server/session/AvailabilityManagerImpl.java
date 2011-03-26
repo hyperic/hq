@@ -753,7 +753,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             AvailabilityDataRLE rle = (AvailabilityDataRLE) entry.getValue();
             // if we call remove() on an object which is already in the session
             // hibernate will throw NonUniqueObjectExceptions
-            AvailabilityDataRLE tmp = availabilityDataRepository.findById(rle.getAvailabilityDataId());
+            AvailabilityDataRLE tmp = availabilityDataRepository.findOne(rle.getAvailabilityDataId());
             if (tmp != null) {
                 availabilityDataRepository.delete(tmp);
             } else {

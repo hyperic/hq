@@ -238,7 +238,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
      */
     @Transactional(readOnly = true)
     public GalertDef findById(Integer id) {
-        GalertDef def = galertDefRepository.findById(id);
+        GalertDef def = galertDefRepository.findOne(id);
         if(def == null) {
             throw new EntityNotFoundException("GalertDef with ID: " + id + 
                 " was not found");
@@ -251,7 +251,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
      */
     @Transactional(readOnly = true)
     public GalertAuxLog findAuxLogById(Integer id) {
-        GalertAuxLog log = auxLogRepository.findById(id);
+        GalertAuxLog log = auxLogRepository.findOne(id);
         if(log == null) {
             throw new EntityNotFoundException("GalertAuxLog with ID: " + id + 
                 " was not found");
@@ -379,7 +379,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
      */
     @Transactional(readOnly = true)
     public Escalatable findEscalatableAlert(Integer id) {
-        GalertLog alert = gAlertLogRepository.findById(id);
+        GalertLog alert = gAlertLogRepository.findOne(id);
         if(alert == null) {
             throw new EntityNotFoundException("GalertLog with ID: " + id + " was not found");
         }
@@ -391,7 +391,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
      */
     @Transactional(readOnly = true)
     public GalertLog findAlertLog(Integer id) {
-        GalertLog log = gAlertLogRepository.findById(id);
+        GalertLog log = gAlertLogRepository.findOne(id);
         if(log == null) {
             throw new EntityNotFoundException("GalertLog with ID: " + id + " was not found");
         }

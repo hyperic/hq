@@ -245,7 +245,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
             throw new PermissionException("Root user can not be deleted");
         }
 
-        AuthzSubject toDelete = authzSubjectDAO.findById(subject);
+        AuthzSubject toDelete = authzSubjectDAO.findOne(subject);
         if(toDelete == null) {
             throw new EntityNotFoundException("AuthzSubject with ID: " + 
                 subject + " was not found");
@@ -292,7 +292,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
 
     @Transactional(readOnly = true)
     public AuthzSubject findSubjectById(Integer id) {
-        AuthzSubject subj = authzSubjectDAO.findById(id);
+        AuthzSubject subj = authzSubjectDAO.findOne(id);
         if(subj == null) {
             throw new EntityNotFoundException("AuthzSubject with ID: " + 
                 id + " was not found");
@@ -310,7 +310,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
      */
     @Transactional(readOnly = true)
     public AuthzSubject getSubjectById(Integer id) {
-        return authzSubjectDAO.findById(id);
+        return authzSubjectDAO.findOne(id);
     }
 
     /** 
@@ -354,7 +354,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
 
         // if a user does not have permission to view subjects,
         // all they can see is their own entry.
-        AuthzSubject who = authzSubjectDAO.findById(whoami.getId());
+        AuthzSubject who = authzSubjectDAO.findOne(whoami.getId());
         if(who == null) {
             throw new EntityNotFoundException("AuthzSubject with ID: " + 
                 whoami.getId() + " was not found");
@@ -456,7 +456,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
      */
     @Transactional(readOnly = true)
     public String getEmailById(Integer id) {
-        AuthzSubject subject = authzSubjectDAO.findById(id);
+        AuthzSubject subject = authzSubjectDAO.findOne(id);
         if(subject == null) {
             throw new EntityNotFoundException("AuthzSubject with ID: " + 
                 id + " was not found");
@@ -490,7 +490,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
               //  AuthzConstants.rootResourceId, AuthzConstants.subjectOpViewSubject);
         }
 
-        AuthzSubject targ = authzSubjectDAO.findById(subjId);
+        AuthzSubject targ = authzSubjectDAO.findOne(subjId);
         if(targ == null) {
             throw new EntityNotFoundException("AuthzSubject with ID: " + 
                 subjId + " was not found");
@@ -515,7 +515,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
               //  AuthzConstants.rootResourceId, AuthzConstants.subjectOpModifySubject);
         }
 
-        AuthzSubject targ = authzSubjectDAO.findById(subjId);
+        AuthzSubject targ = authzSubjectDAO.findOne(subjId);
         if(targ == null) {
             throw new EntityNotFoundException("AuthzSubject with ID: " + 
                 subjId + " was not found");
@@ -542,7 +542,7 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
      */
     @Transactional(readOnly = true)
     public AuthzSubject getOverlordPojo() {
-        AuthzSubject overlord = authzSubjectDAO.findById(AuthzConstants.overlordId);
+        AuthzSubject overlord = authzSubjectDAO.findOne(AuthzConstants.overlordId);
         if(overlord == null) {
             throw new EntityNotFoundException("AuthzSubject with ID: " + 
                 AuthzConstants.overlordId + " was not found");

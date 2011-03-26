@@ -97,7 +97,7 @@ public class TemplateManagerImpl implements TemplateManager {
      */
     @Transactional(readOnly = true)
     public MeasurementTemplate getTemplate(Integer id) {
-        return measurementTemplateRepository.findById(id);
+        return measurementTemplateRepository.findOne(id);
     }
 
     /**
@@ -311,7 +311,7 @@ public class TemplateManagerImpl implements TemplateManager {
                                               long interval) {
         HashSet<AppdefEntityID> toReschedule = new HashSet<AppdefEntityID>();
         for (int i = 0; i < templIds.length; i++) {
-            MeasurementTemplate template = measurementTemplateRepository.findById(templIds[i]);
+            MeasurementTemplate template = measurementTemplateRepository.findOne(templIds[i]);
             if(template == null) {
                 throw new EntityNotFoundException("MeasurementTemplate with id: " + templIds[i] + " not found");
             }
@@ -361,7 +361,7 @@ public class TemplateManagerImpl implements TemplateManager {
 
         Map<AppdefEntityID, Long> aeids = new HashMap<AppdefEntityID, Long>();
         for (Integer templateId : templIds) {
-            MeasurementTemplate template = measurementTemplateRepository.findById(templateId);
+            MeasurementTemplate template = measurementTemplateRepository.findOne(templateId);
             if(template == null) {
                 throw new EntityNotFoundException("MeasurementTemplate with id: " + templateId + " not found");
             }
