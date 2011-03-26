@@ -311,7 +311,7 @@ public class ProductManagerImpl implements ProductManager {
 	        	log.info(pluginName + " is self registering...");
 
 	        	pluginDefinition = ((FlexibleProductPlugin) pplugin).generateResourceTypeHierarchy();
-	        	
+	        	updatePlugin(pInfo);
 	           	processPluginDefinition(pluginDefinition);
 	        }
 
