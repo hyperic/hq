@@ -57,7 +57,7 @@ public class DataPurgeJob implements Runnable {
     private ConcurrentStatsCollector concurrentStatsCollector;
     private long _lastAnalyze = 0l;
     private static final long ANALYZE_INTERVAL = Integer.parseInt(System.getProperty(
-        "data.purge.analyzeInterval", "6")) * MeasurementConstants.HOUR;
+        "data.purge.analyze.interval", "6")) * MeasurementConstants.HOUR;
     private static final boolean RUN_ANALYZE_METRIC_TABLES = Boolean.parseBoolean((System.getProperty(
         "data.purge.analyze.metricTables", "true")));
     private static final boolean RUN_ANALYZE_NON_METRIC_TABLES = Boolean.parseBoolean((System.getProperty(
