@@ -109,7 +109,7 @@
 	<classpathentry kind="var" path="M2_REPO/org/springframework/spring-core/3.0.5.RELEASE/spring-core-3.0.5.RELEASE.jar" sourcepath="M2_REPO/org/springframework/spring-core/3.0.5.RELEASE/spring-core-3.0.5.RELEASE-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/data/spring-data-commons-core/1.0.0.M4/spring-data-commons-core-1.0.0.M4.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/data/spring-data-graph-core/1.0.0.M4/spring-data-graph-core-1.0.0.M4.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/springframework/data/spring-data-neo4j/1.0.0.M4/spring-data-neo4j-1.0.0.M4.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/springframework/data/spring-data-neo4j/1.0.0.M4/spring-data-neo4j-1.0.0.M4.jar" sourcepath="/M2_REPO/org/springframework/data/spring-data-neo4j/1.0.0.M4/spring-data-neo4j-1.0.0.M4-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/spring-expression/3.0.5.RELEASE/spring-expression-3.0.5.RELEASE.jar" sourcepath="M2_REPO/org/springframework/spring-expression/3.0.5.RELEASE/spring-expression-3.0.5.RELEASE-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/spring-jdbc/3.0.5.RELEASE/spring-jdbc-3.0.5.RELEASE.jar" sourcepath="M2_REPO/org/springframework/spring-jdbc/3.0.5.RELEASE/spring-jdbc-3.0.5.RELEASE-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/spring-jms/3.0.5.RELEASE/spring-jms-3.0.5.RELEASE.jar" sourcepath="M2_REPO/org/springframework/spring-jms/3.0.5.RELEASE/spring-jms-3.0.5.RELEASE-sources.jar"/>
