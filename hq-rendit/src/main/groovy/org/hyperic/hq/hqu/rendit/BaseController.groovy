@@ -153,7 +153,7 @@ abstract class BaseController {
         def res
         eachUpload() { upload ->
             if (upload.fieldName == argName)
-                res = upload.openStream().getText()
+                res = upload.openStream().getText("utf-8")
         }
         res
     }
@@ -323,7 +323,9 @@ abstract class BaseController {
         invokeArgs.response.setContentType(opts.contentType)
         StreamingMarkupBuilder b = new StreamingMarkupBuilder()
         b.encoding = opts.encoding
-        b.bind(c).writeTo(invokeArgs.response.writer)
+        b.bind { mkp.xmlDeclaration()
+                 out << c
+        }.writeTo(invokeArgs.response.writer)
 	}
 	
     protected void render(opts) {

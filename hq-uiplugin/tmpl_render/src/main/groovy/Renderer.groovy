@@ -52,7 +52,7 @@ class Renderer {
             
             if (!tmplMap || tmplMap.mtime != mtime) {
                 _log.info("Creating template for [${gspFile.absolutePath}]")
-                gspFile.withReader { reader ->
+                gspFile.withReader("UTF-8") { reader ->
                     def eng = new SimpleTemplateEngine(Thread.currentThread().contextClassLoader)
                     Template t = eng.createTemplate(reader)
                     _templates[gspFile] = [mtime: mtime, template : t]
