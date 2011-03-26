@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.product.server.session;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -261,7 +262,7 @@ public class ProductManagerImpl implements ProductManager {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void deploymentNotify(String pluginName)
+    public void deploymentNotify(String pluginName, File dir)
     throws PluginNotFoundException, VetoException, NotFoundException {
         ProductPlugin pplugin = (ProductPlugin) getProductPluginManager().getPlugin(pluginName);
         boolean created = false;
@@ -272,7 +273,7 @@ public class ProductManagerImpl implements ProductManager {
 
         if (pluginVal != null && pInfo.name.equals(pluginVal.getName()) &&
                 pInfo.md5.equals(pluginVal.getMD5())) {
-            log.info(pluginName + " plugin up to date");
+            log.info(pluginName + " plugin up to date (" + dir + ")");
             if (forceUpdate(pluginName)) {
                 log.info(pluginName + " configured to force update");
             } else {

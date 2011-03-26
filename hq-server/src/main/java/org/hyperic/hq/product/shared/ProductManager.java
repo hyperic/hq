@@ -25,12 +25,12 @@
  */
 package org.hyperic.hq.product.shared;
 
+import java.io.File;
 import java.util.Map;
 import java.util.Set;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
@@ -58,7 +58,8 @@ public interface ProductManager {
                                         ConfigResponse baseResponse) throws PluginException,
         AppdefEntityNotFoundException, PermissionException;
 
-    public void deploymentNotify(String pluginName) throws PluginNotFoundException, VetoException, NotFoundException;
+    public void deploymentNotify(String pluginName, File dir)
+    throws PluginNotFoundException, VetoException, NotFoundException;
 
     public void updateDynamicServiceTypePlugin(String pluginName, Set<ServiceType> serviceTypes)
         throws PluginNotFoundException, VetoException, NotFoundException;

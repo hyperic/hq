@@ -743,47 +743,47 @@ public class ProductPluginManager
     }
 
     public Collection<PluginInfo> registerPlugins(String path) {
-
         Collection<PluginInfo> rtn = new ArrayList<PluginInfo>();
         List<String> dirs = StringUtil.explode(path, File.pathSeparator);
-
         for (int i = 0; i < dirs.size(); i++) {
             File dir = new File(dirs.get(i));
             if (!dir.exists()) {
-                log.debug("register plugins: " + dir + " does not exist");
+                log.warn("register plugins: " + dir + " does not exist");
                 continue;
             }
             if (!dir.isDirectory()) {
-                log.debug("register plugins: " + dir + " not a directory");
+                log.warn("register plugins: " + dir + " not a directory");
                 continue;
             }
-
             File[] plugins = listPlugins(dir);
-            for (int j = 0; j < plugins.length; j++) {
-                String name = plugins[j].getName();
-                
-                if (!isLoadablePluginName(name)) {
-                    continue;
+            Collection<PluginInfo> pluginInfo = register(Arrays.asList(plugins));
+            rtn.addAll(pluginInfo);
+        }
+        return rtn;
+    }
+
+    private Collection<PluginInfo> register(Collection<File> plugins) {
+        Collection<PluginInfo> rtn = new ArrayList<PluginInfo>();
+        for (File plugin : plugins) {
+            String name = plugin.getName();
+            if (!isLoadablePluginName(name)) {
+                continue;
+            }
+            log.info("Loading plugin: " + name + " (" + plugin.getParent() + ")");
+            try {
+                PluginInfo info = null;
+                if ((info = registerPluginJar(plugin.getAbsolutePath())) != null) {
+                	rtn.add(info);
                 }
-                
-                log.info("Loading plugin: " + name);
-                
-                try {
-                    PluginInfo info = null;
-                    if ((info = registerPluginJar(plugins[j].getAbsolutePath())) != null) {
-                    	rtn.add(info);
-                    }
-                } catch (UnsupportedClassVersionError e) {
-                    log.info("Cannot load " + name + ": " + unsupportedClassVersionMessage(e.getMessage()));
-                } catch (PluginExistsException e) {
-                    log.debug("Plugin " + name + " already exists.");
-                } catch (PluginException e) {
-                	// ...we're unable to register this particular plugin, log it and press on...
-                	log.error("A problem occured while registering plugin [" + name + "]", e);
-                }
+            } catch (UnsupportedClassVersionError e) {
+                log.info("Cannot load " + name + ": " + unsupportedClassVersionMessage(e.getMessage()));
+            } catch (PluginExistsException e) {
+                log.debug("Plugin " + name + " already exists.");
+            } catch (PluginException e) {
+            	// ...we're unable to register this particular plugin, log it and press on...
+            	log.error("A problem occured while registering plugin [" + name + "]", e);
             }
         }
-
         return rtn;
     }
 
@@ -962,14 +962,7 @@ public class ProductPluginManager
 
             setPluginInfo(pluginName, info);
 
-            // Skip duplicate plugins
-            try {
-                registerPlugin(plugin, null);
-            } catch (PluginExistsException e) {
-                log.error("Unable to deploy plugin '" + jarName + "'", e);
-                throw e;
-            }
-
+            registerPlugin(plugin, null);
             TypeInfo[] types = plugin.getTypes();
 
             if (types == null) {

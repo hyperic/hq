@@ -30,7 +30,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -64,9 +63,6 @@ implements AgentPluginUpdater, ApplicationListener<ContextRefreshedEvent>, Appli
     private AgentSynchronizer agentSynchronizer;
     private PluginManager pluginManager;
     private ApplicationContext ctx;
-    // used AtomicBoolean so that a groovy script may disable the mechanism live, no restarts
-    private final AtomicBoolean isDisabled =
-        new AtomicBoolean(new Boolean(System.getProperty("hq.saps.disable", "false")));
     private AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle;
     
     @Autowired
@@ -229,12 +225,8 @@ implements AgentPluginUpdater, ApplicationListener<ContextRefreshedEvent>, Appli
         thread.start();
     }
 
-    public void setDisabled(boolean disabled) {
-        isDisabled.set(disabled);
-    }
-
-    public boolean isDisabled() {
-        return isDisabled.get();
+    private boolean isDisabled() {
+        return pluginManager.isPluginDeploymentOff();
     }
 
 }
