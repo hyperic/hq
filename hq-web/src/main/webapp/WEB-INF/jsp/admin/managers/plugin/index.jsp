@@ -644,7 +644,7 @@
 						if (response=="success") {
 							hqDojo.publish("refreshDataGrid");
 							hqDojo.attr("progressMessage", "class", "information");
-							hqDojo.byId("progressMessage").innerHTML = "remove success";
+							hqDojo.byId("progressMessage").innerHTML = '<fmt:message key="admin.managers.plugin.message.remove.success" />';
 							var anim = [hqDojo.fadeIn({
 										node: "progressMessage",
 										duration: 500
