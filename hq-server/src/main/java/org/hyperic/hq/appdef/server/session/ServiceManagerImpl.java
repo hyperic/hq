@@ -51,6 +51,7 @@ import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.ValidationException;
+import org.hyperic.hq.auth.data.AuthzSubjectRepository;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -104,6 +105,7 @@ public class ServiceManagerImpl implements ServiceManager {
     private ResourceDao resourceDao;
     private ResourceTypeDao resourceTypeDao;
     private AgentRepository agentRepository;
+    private AuthzSubjectRepository authzSubjectRepository;
 
     @Autowired
     public ServiceManagerImpl(PermissionManager permissionManager,
@@ -111,7 +113,8 @@ public class ServiceManagerImpl implements ServiceManager {
                               AuthzSubjectManager authzSubjectManager, PluginRepository pluginRepository,
                               ServiceFactory serviceFactory,
                               ResourceGroupManager resourceGroupManager, ZeventEnqueuer zeventEnqueuer,
-                              ResourceDao resourceDao, ResourceTypeDao resourceTypeDao, AgentRepository agentRepository) {
+                              ResourceDao resourceDao, ResourceTypeDao resourceTypeDao, AgentRepository agentRepository,
+                              AuthzSubjectRepository authzSubjectRepository) {
         this.permissionManager = permissionManager;
         this.resourceManager = resourceManager;
         this.authzSubjectManager = authzSubjectManager;
@@ -122,6 +125,7 @@ public class ServiceManagerImpl implements ServiceManager {
         this.resourceDao = resourceDao;
         this.resourceTypeDao = resourceTypeDao;
         this.agentRepository = agentRepository;
+        this.authzSubjectRepository = authzSubjectRepository;
     }
     
     private Resource create(AuthzSubject subject,ResourceType type, Resource parent, String name, String desc,
@@ -144,6 +148,8 @@ public class ServiceManagerImpl implements ServiceManager {
         s.setProperty(AppdefResource.SORT_NAME, name.toUpperCase());
         s.setProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_SERVICE);
         subject.addOwnedResource(s);
+        //AuthzSubject is likely detached b/c it's stored as session state.  Reattach it for persistent change
+        authzSubjectRepository.save(subject);
         agentRepository.findByManagedResource(parent).addManagedResource(s);
         parent.relateTo(s, RelationshipTypes.SERVICE);
         parent.relateTo(s, RelationshipTypes.CONTAINS);

@@ -91,13 +91,14 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     private ApplicationContext applicationContext;
     private ResourceDao resourceDao;
     private ResourceTypeDao resourceTypeDao;
+    private AuthzSubjectRepository authzSubjectRepository;
 
     @Autowired
     public ResourceManagerImpl(AuthzSubjectManager authzSubjectManager,
                                
                                ZeventEnqueuer zeventManager, PermissionManager permissionManager,
                                ResourceAuditFactory resourceAuditFactory, ResourceDao resourceDao,
-                               ResourceTypeDao resourceTypeDao) {
+                               ResourceTypeDao resourceTypeDao, AuthzSubjectRepository authzSubjectRepository) {
         this.authzSubjectManager = authzSubjectManager;
         this.zeventManager = zeventManager;
         this.permissionManager = permissionManager;
@@ -105,6 +106,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         this.resourceAuditFactory = resourceAuditFactory;
         this.resourceDao = resourceDao;
         this.resourceTypeDao = resourceTypeDao;
+        this.authzSubjectRepository = authzSubjectRepository;
     }
     
    
@@ -174,6 +176,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         if (pm.hasAdminPermission(whoami.getId()) || whoami.getOwnedResources().contains(resource)) {
             newOwner.addOwnedResource(resource);
             whoami.removeOwnedResource(resource);
+            authzSubjectRepository.save(whoami);
             resource.setModifiedBy(whoami.getName());
             resourceDao.merge(resource);
         } else {

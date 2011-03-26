@@ -71,6 +71,7 @@ import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
+import org.hyperic.hq.auth.data.AuthzSubjectRepository;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
@@ -158,6 +159,8 @@ public class PlatformManagerImpl implements PlatformManager {
     
     private ResourceTypeDao resourceTypeDao;
     
+    private AuthzSubjectRepository authzSubjectRepository;
+    
 
     @Autowired
     public PlatformManagerImpl(
@@ -169,7 +172,8 @@ public class PlatformManagerImpl implements PlatformManager {
                                ResourceAuditFactory resourceAuditFactory, PluginRepository pluginRepository,
                                ServerManager serverManager, PlatformFactory platformFactory,
                                ServiceManager serviceManager, ServerFactory serverFactory,
-                               ResourceDao resourceDao, ResourceTypeDao resourceTypeDao) {
+                               ResourceDao resourceDao, ResourceTypeDao resourceTypeDao,
+                               AuthzSubjectRepository authzSubjectRepository) {
         this.permissionManager = permissionManager;
         this.agentDAO = agentDAO;
         this.resourceManager = resourceManager;
@@ -185,6 +189,7 @@ public class PlatformManagerImpl implements PlatformManager {
         this.serverFactory = serverFactory;
         this.resourceDao = resourceDao;
         this.resourceTypeDao  = resourceTypeDao;
+        this.authzSubjectRepository = authzSubjectRepository;
     }
     
     private Platform toPlatform(Resource resource) {
@@ -425,6 +430,8 @@ public class PlatformManagerImpl implements PlatformManager {
         p.setModifiedBy(initialOwner);
         agent.addManagedResource(p);
         subject.addOwnedResource(p);
+        //AuthzSubject is likely detached b/c it's stored as session state.  Reattach it for persistent change
+        authzSubjectRepository.save(subject);
         resourceManager.findRootResource().relateTo(p, RelationshipTypes.PLATFORM);
         resourceManager.findRootResource().relateTo(p, RelationshipTypes.CONTAINS);
         return p;
@@ -448,6 +455,8 @@ public class PlatformManagerImpl implements PlatformManager {
         p.setProperty(AppdefResource.SORT_NAME, pv.getName().toUpperCase());
         agent.addManagedResource(p);
         owner.addOwnedResource(p);
+        //AuthzSubject is likely detached b/c it's stored as session state.  Reattach it for persistent change
+        authzSubjectRepository.save(owner);
         for (IpValue ipv : pv.getAddedIpValues()) {
             addIp(toPlatform(p), ipv.getAddress(), ipv.getNetmask(), ipv.getMACAddress());
         }

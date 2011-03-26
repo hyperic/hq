@@ -190,6 +190,8 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
           //  res.addRole(role);
         //}
         whoami.addOwnedResource(res);
+        //AuthzSubject is likely detached b/c it's stored as session state.  Reattach it for persistent change
+        authzSubjectRepository.save(whoami);
         if(cInfo.getGroupTypeId() == AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS || 
             cInfo.getGroupTypeId() == AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC) {
             res.setProperty(MIXED,false);

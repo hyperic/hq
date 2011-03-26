@@ -96,7 +96,8 @@ public class AuthzSubject implements Serializable {
     @Index(name = "PREF_CRISPO_ID_IDX")
     private Crispo prefs;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany(fetch=FetchType.EAGER)
+    @OptimisticLock(excluded = true)
     @JoinTable(name = "OWNED_RESOURCES", joinColumns = { @JoinColumn(name = "SUBJECT_ID") }, inverseJoinColumns = { @JoinColumn(name = "RESOURCE_ID") })
     private Set<Resource> ownedResources = new HashSet<Resource>();
 

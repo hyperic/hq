@@ -264,6 +264,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
         ResourceGroup app =  new ResourceGroup(appV.getName(),resourceManager.findResourceTypeByName(AppdefEntityConstants.APPDEF_NAME_APPLICATION));
         resourceGroupDao.persist(app);
         owner.addOwnedResource(app);
+        //AuthzSubject is likely detached b/c it's stored as session state.  Reattach it for persistent change
+        authzSubjectRepository.save(owner);
         updateApplication(app, appV);
         return app;
     }
