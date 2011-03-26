@@ -56,7 +56,12 @@ public class DataPurgeJob implements Runnable {
     private AlertManager alertManager;
     private ConcurrentStatsCollector concurrentStatsCollector;
     private long _lastAnalyze = 0l;
-    private static final long ANALYZE_INTERVAL = 6 * MeasurementConstants.HOUR;
+    private static final long ANALYZE_INTERVAL = Integer.parseInt(System.getProperty(
+        "data.purge.analyzeInterval", "6")) * MeasurementConstants.HOUR;
+    private static final boolean RUN_ANALYZE_METRIC_TABLES = Boolean.parseBoolean((System.getProperty(
+        "data.purge.analyze.metricTables", "true")));
+    private static final boolean RUN_ANALYZE_NON_METRIC_TABLES = Boolean.parseBoolean((System.getProperty(
+        "data.purge.analyze.nonMetricTables", "true")));
     private final Object analyzeRunningLock = new Object();
     private boolean analyzeRunning = false;
     private final Object compressRunningLock = new Object();
@@ -260,13 +265,19 @@ public class DataPurgeJob implements Runnable {
     }
 
     private void runDBAnalyze() {
+        if (log.isDebugEnabled()) {
+            log.debug("Run analyze metric tables: " + RUN_ANALYZE_METRIC_TABLES);
+            log.debug("Run analyze non metric tables: " + RUN_ANALYZE_NON_METRIC_TABLES);
+            log.debug("Analyze interval: " + ANALYZE_INTERVAL + " ms");
+        }
         // First check if we are already running
         long analyzeStart = System.currentTimeMillis();
         synchronized (analyzeRunningLock) {
             if (analyzeRunning) {
                 log.info("Not starting db analyze. (Already running)");
                 return;
-            } else if ((_lastAnalyze + ANALYZE_INTERVAL) > analyzeStart) {
+            } else if (RUN_ANALYZE_METRIC_TABLES &&
+                       (_lastAnalyze + ANALYZE_INTERVAL) > analyzeStart) {
                 serverConfigManager.analyzeHqMetricTables(false);
                 log.info("Only running analyze on current metric data table " +
                          "since last full run was at " + TimeUtil.toString(_lastAnalyze));
@@ -276,11 +287,16 @@ public class DataPurgeJob implements Runnable {
             }
         }
         try {
-            log.info("Performing database analyze");
-            // Analyze the current and previous hq_metric_data table
-            serverConfigManager.analyzeHqMetricTables(true);
-            // Analyze all non-metric tables
-            serverConfigManager.analyzeNonMetricTables();
+            if (RUN_ANALYZE_METRIC_TABLES) {
+                log.info("Performing database analyze on metric tables.");
+                // Analyze the current and previous hq_metric_data table
+                serverConfigManager.analyzeHqMetricTables(true);
+            }
+            if (RUN_ANALYZE_NON_METRIC_TABLES) {
+                log.info("Performing database analyze on non metric tables.");
+                // Analyze all non-metric tables
+                serverConfigManager.analyzeNonMetricTables();
+            }
             long secs = (System.currentTimeMillis() - analyzeStart) / 1000;
             log.info("Completed database analyze " + secs + " secs");
         } finally {
@@ -292,7 +308,7 @@ public class DataPurgeJob implements Runnable {
     }
 
     private void runDBMaintenance() {
-        // Once compression finishes, we check to see if databae maintaince
+        // Once compression finishes, we check to see if database maintenance
         // should be performed. This is defaulted to 1 hour, so it should
         // always run unless changed by the user.
 
