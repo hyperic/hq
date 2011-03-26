@@ -6,6 +6,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import org.hyperic.hq.inventory.NotUniqueException;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.graph.neo4j.finder.FinderFactory;
@@ -66,8 +67,8 @@ public class Neo4jResourceGroupDao implements ResourceGroupDao {
 
     @Transactional(readOnly = true)
     public ResourceGroup findByName(String name) {
-        ResourceGroup group = finderFactory.createNodeEntityFinder(ResourceGroup.class)
-            .findByPropertyValue( GraphDatabaseContext.DEFAULT_NODE_INDEX_NAME, "name", name);
+        ResourceGroup group = (ResourceGroup) finderFactory.createNodeEntityFinder(Resource.class)
+            .findByPropertyValue( null, "name", name);
 
         if (group != null) {
             group.persist();
@@ -99,9 +100,5 @@ public class Neo4jResourceGroupDao implements ResourceGroupDao {
         graphDatabaseContext.getIndex(ResourceGroup.class,
             GraphDatabaseContext.DEFAULT_NODE_INDEX_NAME, false).add(
             resourceGroup.getPersistentState(), "type", resourceGroup.getType().getId());
-        //TODO should inherit the @Indexed on Resource name but bug starting with M4 seems to have broken that
-        graphDatabaseContext.getIndex(ResourceGroup.class,
-            GraphDatabaseContext.DEFAULT_NODE_INDEX_NAME, false).add(
-            resourceGroup.getPersistentState(), "name", resourceGroup.getName());
     }
 }
