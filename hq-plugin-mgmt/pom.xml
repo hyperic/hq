@@ -10,7 +10,7 @@
 		<version>5.0.0.BUILD-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>hq-plugin-mgmnt</artifactId>
+	<artifactId>hq-plugin-mgmt</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ - Plugin Management</name>
 
