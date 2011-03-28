@@ -321,8 +321,10 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
       function setAvailRefresh() {
         setTimeout( "refreshAvail()", 60*1000 );
       }
-
-      onloads.push( setAvailRefresh );
+      
+      hqDojo.ready(function() {
+    	  setAvailRefresh();
+      });
     </script>
     <c:choose>
     <c:when test="${empty Indicators || empty AllResources}">

@@ -85,7 +85,6 @@
 	}
 	
 	function refreshPortlets() {
-	
 	    var problemPortlet = hqDojo.byId('problemResourcesTable');
 	    var favoritePortlet = hqDojo.byId('favoriteTable');
 	
@@ -136,7 +135,9 @@
 	    }
 	}
 	
-	onloads.push(refreshPortlets);
+	hqDojo.ready(function() {
+		refreshPortlets();
+	});
 </script>
 <html:link page="/Resource.do?eid=" linkName="viewResUrl" styleId="viewResUrl" style="display:none;"></html:link>
 
@@ -287,7 +288,6 @@
 						        // This should be rewritten using dojo 1.1 dnd.move package
 						        // http://docs.google.com/View?docid=d764479_11fcs7s397
 						        // writing a new Sortable version using dojo 1.1 which will hopefully play better with IE
-						        // Anton Stroganov <anton@hyperic.com>
 						        // -----------
 					            Sortable.create("<c:out value="narrowList_${narrow}"/>", {
 						            dropOnEmpty: true,

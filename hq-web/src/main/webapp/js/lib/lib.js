@@ -3096,7 +3096,7 @@ hyperic.indicator_charts_manager = function(props, charts) {
 	}
 	
 	that.drawChart = function(chartArgs) {
-		var rootObj = $("root");
+		var rootObj = hqDojo.byId("root");
 		var liNode = document.createElement("li");
 		liNode.id = chartArgs.metricId;
 
@@ -3221,7 +3221,7 @@ hyperic.indicator_charts_manager = function(props, charts) {
             error: function(data){
               console.debug("could not remove metric:");
               console.debug(data);
-              new Effect.Pulsate($(metric));
+              new Effect.Pulsate(metric);
             }
           });
 	}
@@ -3245,13 +3245,13 @@ hyperic.indicator_charts_manager = function(props, charts) {
               console.log(data);
               console.log('moved metric up');
               var root = hqDojo.byId('root');
-              var elem = $(metric);
+              var elem = hqDojo.byId(metric);
               moveElementUp(elem, root);
             },
             error: function(data){
               console.debug("could not move metric up:");
               console.debug(data);
-              new Effect.Pulsate($(metric));
+              new Effect.Pulsate(metric);
             }
           });
 	}
@@ -3275,13 +3275,13 @@ hyperic.indicator_charts_manager = function(props, charts) {
               console.log(data);
               console.log('moved metric down');
               var root = hqDojo.byId('root');
-              var elem = $(metric);
+              var elem = hqDojo.byId(metric);
               moveElementDown(elem, root);
             },
             error: function(data){
               console.debug("could not move metric down:");
               console.debug(data);
-              new Effect.Pulsate($(metric));
+              new Effect.Pulsate(metric);
             }
           });
 	}

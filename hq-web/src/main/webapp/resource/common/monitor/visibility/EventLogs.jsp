@@ -63,7 +63,9 @@ function timeLineOnLoad() {
   setTimeout("fillEventLogs()", 5000);
  }
 
-  onloads.push( timeLineOnLoad );
+	hqDojo.ready(function() {
+		timeLineOnLoad();
+	});
 
   function fillEventLogs() {
   <c:forEach var="timeTick" items="${timeIntervals}" varStatus="status">

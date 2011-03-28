@@ -34,59 +34,65 @@
 <c:set var="rssUrl" value="/rss/ViewResourceHealth.rss"/>
 
 <div class="effectsPortlet">
-<tiles:insert definition=".header.tab">
-  <tiles:put name="tabKey" value="dash.home.ResourceHealth"/>
-  <tiles:put name="adminUrl" beanName="adminUrl" />
-  <tiles:put name="portletName" beanName="portletName" />
-  <tiles:put name="rssBase" beanName="rssUrl" />
-</tiles:insert>
+	<tiles:insert definition=".header.tab">
+	  	<tiles:put name="tabKey" value="dash.home.ResourceHealth"/>
+	  	<tiles:put name="adminUrl" beanName="adminUrl" />
+	  	<tiles:put name="portletName" beanName="portletName" />
+	  	<tiles:put name="rssBase" beanName="rssUrl" />
+	</tiles:insert>
 
-  <!-- JSON available at /dashboard/ViewResourceHealth.do -->
-<script type="text/javascript">
-function requestFavoriteResources() {
-    var preventCacheStr = "?hq=" + new Date().getTime();
-	var faveUrl = "<html:rewrite page="/dashboard/ViewResourceHealth.do"/>" + preventCacheStr;
-	new Ajax.Request(faveUrl, {method: 'get', onSuccess:showFavoriteResponse, onFailure :reportError});
-}
-onloads.push(requestFavoriteResources);
-</script>
+  	<!-- JSON available at /dashboard/ViewResourceHealth.do -->
+	<script type="text/javascript">
+		function requestFavoriteResources() {
+			hqDojo.xhrGet({
+				url: "<html:rewrite action="/dashboard/ViewResourceHealth"/>",
+				content: {
+					hq: (new Date()).getTime()
+				},
+				load: showFavoriteResponse,
+				error: reportError
+			});
+		}
+		
+		hqDojo.ready(function() {
+			requestFavoriteResources();
+		});
+	</script>
 
- <table width="100%" border="0" cellspacing="0" cellpadding="0" id="favoriteTable" class="portletLRBorder">
- 	<tbody>
-	<tr class="tableRowHeader">
-		<th class="tableRowInactive">
-			<fmt:message key="dash.home.TableHeader.ResourceName"/>
-		</th>
-		<th width="80px" class="tableRowInactive">
-			<fmt:message key="dash.home.TableHeader.Type"/>
-		</th>
-		<th width="60px" align="center" class="tableRowInactive">
-			<fmt:message key="resource.common.monitor.visibility.AvailabilityTH"/>
-		</th>
-		<th width="40px" align="center" class="tableRowInactive">
-			<fmt:message key="dash.home.TableHeader.Alerts"/>
-		</th>
-	</tr>
-	 <!-- table rows are inserted here dynamically -->
+ 	<table width="100%" border="0" cellspacing="0" cellpadding="0" id="favoriteTable" class="portletLRBorder">
+ 		<tbody>
+			<tr class="tableRowHeader">
+				<th class="tableRowInactive">
+					<fmt:message key="dash.home.TableHeader.ResourceName"/>
+				</th>
+				<th width="80px" class="tableRowInactive">
+					<fmt:message key="dash.home.TableHeader.Type"/>
+				</th>
+				<th width="60px" align="center" class="tableRowInactive">
+					<fmt:message key="resource.common.monitor.visibility.AvailabilityTH"/>
+				</th>
+				<th width="40px" align="center" class="tableRowInactive">
+					<fmt:message key="dash.home.TableHeader.Alerts"/>
+				</th>
+			</tr>
+	 	<!-- table rows are inserted here dynamically -->
 		</tbody>
 	</table>
 	<table width="100%" cellpadding="0" cellspacing="0" border="0" id="noFaveResources" style="display:none;" class="portletLRBorder">
         <tbody>
-        <tr class="ListRow">
-            <td class="ListCell">
-                <c:url var="path" value="/"/>
-                <fmt:message key="dash.home.add.resources.to.display">
-                  <fmt:param value="${path}"/>
-                </fmt:message>
-            </td>
-        </tr>
+	        <tr class="ListRow">
+	            <td class="ListCell">
+	                <c:url var="path" value="/"/>
+	                <fmt:message key="dash.home.add.resources.to.display">
+	                  	<fmt:param value="${path}"/>
+	                </fmt:message>
+	            </td>
+	        </tr>
         </tbody>
-  </table>
+  	</table>
     <table width="100%" border="0" cellspacing="0" cellpadding="0">
-
-          <tr>
-              <td id="modifiedFavoriteTime" class="modifiedDate">Updated: </td>
-          </tr>
-
+	    <tr>
+    		<td id="modifiedFavoriteTime" class="modifiedDate">Updated: </td>
+        </tr>
     </table>
 </div>
