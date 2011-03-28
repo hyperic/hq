@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.product.shared;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -56,10 +57,12 @@ public interface PluginManager {
     Map<Integer, Map<AgentPluginStatusEnum, Integer>> getPluginRollupStatus();
 
 // XXX javadoc!
-    Collection<AgentPluginStatus> getErrorStatusesByPluginId(int pluginId);
+    Collection<AgentPluginStatus> getStatusesByPluginId(int pluginId,
+                                                        AgentPluginStatusEnum ... statuses);
 
 // XXX javadoc!
     boolean isPluginDeploymentOff();
+    void setDisabledForPluginDeploymentMechanism(boolean disabled);
 
     Plugin getPluginById(Integer id);
 
@@ -94,4 +97,21 @@ public interface PluginManager {
 
  // XXX javadoc!
     void markDisabled(Collection<Integer> pluginIds);
+
+ // XXX javadoc!
+    void markDisabled(String pluginFileName);
+
+ // XXX javadoc!
+    void markEnabled(String pluginFileName);
+
+    /**
+     * @return WEB-INF/hq-plugins/
+     */
+    File getServerPluginDir();
+
+    /**
+     * @return parent dir of user.dir/hq-plugins/ basically, /cwd/../hq-plugins/
+     */
+    File getCustomPluginDir();
+
 }

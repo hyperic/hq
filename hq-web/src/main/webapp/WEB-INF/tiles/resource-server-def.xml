@@ -45,15 +45,15 @@
   <definition name=".page.title.resource.server.full"
               extends=".page.title.resource.server">
     <put name="linkUrl"
-         value="/resource/server/inventory/ServerLinks.jsp"/>
+         value=".resource.server.inventory.serverLinks"/>
   </definition>
   
   <definition name=".page.title.resource.inventory.full"
               extends=".page.title.resource.server">
     <put name="linkUrl"
-         value="/resource/server/inventory/ServerLinks.jsp"/>
+         value=".resource.server.inventory.serverLinks"/>
   </definition>
-  
+    
   <definition name=".tabs.resource.server.inventory"
               extends=".tabs.resource.server">                            
    <put name="selectedIndex"  value="1" />
@@ -118,6 +118,9 @@
               extends=".resource.common.inventory.generalProperties">
     <put name="showLocation" value="true"/>
   </definition>
+
+  <definition name=".resource.server.inventory.serverLinks"
+              path="/resource/server/inventory/ServerLinks.jsp"/>
 
   <definition name=".tabs.resource.server" extends=".tabs.resource"> 
     <put name="selectedIndex" value="0" />

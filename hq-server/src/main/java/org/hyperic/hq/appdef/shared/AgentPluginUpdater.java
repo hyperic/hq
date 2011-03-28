@@ -50,14 +50,4 @@ public interface AgentPluginUpdater {
      */
     public void queuePluginRemoval(Integer agentId, Collection<String> pluginFileNames);
 
-    /**
-     * returns true is the Agent Plugin Sync Mechanism is disabled
-     */
-    public boolean isDisabled();
-
-    /**
-     * disable the Agent Plugin Sync Mechanism
-     */
-    public void setDisabled(boolean disabled);
-
 }

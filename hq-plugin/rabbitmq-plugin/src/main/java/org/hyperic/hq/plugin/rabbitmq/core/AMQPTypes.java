@@ -53,6 +53,6 @@ public class AMQPTypes {
      * as other repurcussions in the plugin as well - around
      * transient resource handling.
      */
-    public static final String DEFAULT_EXCHANGE_NAME = "_";
+    public static final String DEFAULT_EXCHANGE_NAME = "amq.default";
 
 }

@@ -39,50 +39,30 @@ import org.hyperic.util.config.ConfigResponse;
  * ConnectionCollector
  * @author Helena Edelson
  */
-public class ConnectionCollector extends RabbitMQListCollector {
+public class ConnectionCollector extends RabbitMQDefaultCollector {
 
     private static final Log logger = LogFactory.getLog(ConnectionCollector.class);
 
     public void collect(HypericRabbitAdmin rabbitAdmin) {
         Properties props = getProperties();
-        if (logger.isDebugEnabled()) {
-            String node = (String) props.get(MetricConstants.NODE);
-            logger.debug("[collect] node=" + node);
+        String cName = props.getProperty(MetricConstants.CONNECTION);
+        logger.debug("[collect] ConnectionName=" + cName);
+
+        try {
+            logger.debug("[collect] RabbitConnection=" + cName);
+            RabbitConnection conn = rabbitAdmin.getConnection(cName);
+            setValue("Availability", Metric.AVAIL_UP);
+            setValue("packetsReceived", conn.getRecvCnt());
+            setValue("packetsSent", conn.getSendCnt());
+            setValue("channelCount", conn.getChannels());
+            setValue("octetsReceived", conn.getRecvOct());
+            setValue("octetsSent", conn.getSendOct());
+            setValue("pendingSends", conn.getSendPend());
+        } catch (Exception ex) {
+            setAvailability(false);
+            logger.debug(ex.getMessage(), ex);
         }
 
-        List<RabbitConnection> connections = rabbitAdmin.getConnections();
-        if (connections != null) {
-            for (RabbitConnection conn : connections) {
-                logger.debug("[collect] RabbitConnection="+conn.getPid());
-                setValue(conn.getPid() + ".Availability", Metric.AVAIL_UP);
-                setValue(conn.getPid() + ".packetsReceived", conn.getReceiveCount());
-                setValue(conn.getPid() + ".packetsSent", conn.getSendCount());
-                setValue(conn.getPid() + ".channelCount", conn.getChannels());
-                setValue(conn.getPid() + ".octetsReceived", conn.getOctetsReceived());
-                setValue(conn.getPid() + ".octetsSent", conn.getOctetsSent());
-                setValue(conn.getPid() + ".pendingSends", conn.getPendingSends());
-            }
-        }
-    }
-
-    /**
-     * Assemble custom key/value data for each object to set
-     * as custom properties in the ServiceResource to display
-     * in the UI.
-     * @param conn
-     * @return
-     */
-    public static ConfigResponse getAttributes(RabbitConnection conn) {
-        ConfigResponse res = new ConfigResponse();
-        res.setValue("username", conn.getUsername());
-        res.setValue("vHost", conn.getVhost());
-        res.setValue("pid", conn.getPid());
-        res.setValue("frameMax", conn.getFrameMax());
-        res.setValue("selfNode", conn.getAddress().getHost() + ":" + conn.getAddress().getPort());
-        res.setValue("peerNode", conn.getPeerAddress().getHost() + ":" + conn.getPeerAddress().getPort());
-        res.setValue("state", conn.getState());
-
-        return res;
     }
 
     @Override

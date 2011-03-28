@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2010], VMware, Inc.
+ * Copyright (C) [2004-2011], VMware, Inc.
  * This file is part of Hyperic.
  *
  * Hyperic is free software; you can redistribute it and/or modify
@@ -291,8 +291,16 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
                 .getMaintenanceEventManager().getRunningMaintenanceEvents();
 
             for (MaintenanceEvent event : events) {
-                ResourceGroup group = groupManager.findResourceGroupById(event.getGroupId());
-                Collection<Resource> resources = groupManager.getMembers(group);
+            	AppdefEntityID entityId = event.getAppdefEntityID();
+            	Collection<Resource> resources = null;
+            	
+            	if (entityId.isGroup()) {
+            		ResourceGroup group = groupManager.findResourceGroupById(entityId.getId());
+            		resources = groupManager.getMembers(group);
+            	} else {
+            		Resource resource = resourceManager.findResource(entityId);
+            		resources = Collections.singletonList(resource);
+            	}
 
                 for (Resource resource : resources) {
                     List<Measurement> measurements = getAvailMeasurementChildren(

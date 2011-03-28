@@ -80,7 +80,7 @@ class ConsoleController extends BaseController {
         def tmplCode = ""
         
         if (templates.contains(template)) {
-            new File(templateDir, "${template}.groovy").withReader { r ->
+            new File(templateDir, "${template}.groovy").withReader("UTF-8") { r ->
 				tmplCode = r.text
             }
         }
@@ -97,7 +97,7 @@ class ConsoleController extends BaseController {
         log.info "Requested to execute code\n${code}\n"
 		File tmp = File.createTempFile('gcon', null)
         log.info "Writing tmp file: ${tmp.absolutePath}"
-		tmp.withWriter { writer -> 
+		tmp.withWriter("UTF-8") { writer -> 
 			writer.write(code)
 		}
 		

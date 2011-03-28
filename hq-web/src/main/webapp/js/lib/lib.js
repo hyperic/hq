@@ -3767,6 +3767,7 @@ hyperic.maintenance_schedule = function(args, title_name, group_id, group_name) 
     var baseUrl = args.url;
     
     that.existing_schedule = {};
+    that.entity_id = args.entityId;
     that.group_id = args.resourceId;
     that.group_name = unescape(args.resourceName);
     that.title_name = args.title + " - " + that.group_name;
@@ -3909,7 +3910,7 @@ hyperic.maintenance_schedule = function(args, title_name, group_id, group_name) 
                 },
                 error: function(data){
                 	that.displayError(hyperic.data.maintenance_schedule.error.serverError);
-                	console.info("An error occurred setting maintenance schedule for group " + that.group_id, data);
+                	console.info("An error occurred setting maintenance schedule for resource " + that.entity_id, data);
                 },
                 timeout: 5000
             });
@@ -3918,7 +3919,7 @@ hyperic.maintenance_schedule = function(args, title_name, group_id, group_name) 
     
     that.clear_schedule_action = function() {
         return hqDojo.xhrPost( {
-            url: baseUrl + "/schedule/" + that.group_id,
+            url: baseUrl + "/schedule/" + that.entity_id,
             content: {
         		"_method" : "DELETE" // need to work around issue using PUT directly
         	},
@@ -3939,7 +3940,7 @@ hyperic.maintenance_schedule = function(args, title_name, group_id, group_name) 
             },
             error: function(data){
             	that.displayError(hyperic.data.maintenance_schedule.error.serverError);
-            	console.info("An error occurred clearing maintenance schedule for group " + that.group_id, data);
+            	console.info("An error occurred clearing maintenance schedule for resource " + that.entity_id, data);
             },
             timeout: 5000
         });
@@ -3947,7 +3948,7 @@ hyperic.maintenance_schedule = function(args, title_name, group_id, group_name) 
     
     that.getSchedule = function() {
         return hqDojo.xhrGet( {
-            url: baseUrl + "/schedule/" + that.group_id,
+            url: baseUrl + "/schedule/" + that.entity_id,
             headers: { "Content-Type": "application/json"},
             handleAs: 'json',
             preventCache: true,
@@ -3989,7 +3990,7 @@ hyperic.maintenance_schedule = function(args, title_name, group_id, group_name) 
                 that.resetSchedule();
             	that.redraw(true, "&nbsp;");
             	that.displayError(hyperic.data.maintenance_schedule.error.serverError);
-            	console.info("An error occurred fetching maintenance schedule for group " + that.group_id, data);
+            	console.info("An error occurred fetching maintenance schedule for resource " + that.entity_id, data);
             },
             timeout: 5000
         });

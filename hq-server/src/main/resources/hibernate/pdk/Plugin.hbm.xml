@@ -70,7 +70,7 @@
     </property>
 
     <property name="disabled" type="boolean">
-      <column name="DISABLED" not-null="true" default="false"/>
+      <column name="DISABLED" not-null="true" default="'0'"/>
     </property>
 
   </class>

@@ -25,12 +25,11 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.collect;
 
+import java.util.Date;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.core.*;
-import org.hyperic.util.config.ConfigResponse;
 
-import java.util.List;
 import java.util.Properties;
 import org.hyperic.hq.product.Metric;
 
@@ -38,46 +37,28 @@ import org.hyperic.hq.product.Metric;
  * ChannelCollector
  * @author Helena Edelson
  */
-public class ChannelCollector extends RabbitMQListCollector {
+public class ChannelCollector extends RabbitStatsCollector {
 
     private static final Log logger = LogFactory.getLog(ChannelCollector.class);
 
-    public void collect(HypericRabbitAdmin rabbitAdmin) {
+    public RabbitStatsObject collectStats(HypericRabbitAdmin rabbitAdmin) {
         Properties props = getProperties();
-        if (logger.isDebugEnabled()) {
-            String node = (String) props.get(MetricConstants.NODE);
-            logger.debug("[collect] node=" + node);
+        String chName = props.getProperty(MetricConstants.CHANNEL);
+        logger.debug("[collect] RabbitChannel=" + chName);
+        RabbitStatsObject res = null;
+        try {
+            RabbitChannel c = rabbitAdmin.getChannel(chName);
+            setAvailability(c.getIdleSince() == null ? Metric.AVAIL_UP : Metric.AVAIL_PAUSED);
+            setValue("idleTime", c.getIdleSince() == null ? 0 : new Date().getTime() - c.getIdleSince().getTime());
+            setValue("consumerCount", c.getConsumerCount());
+            setValue("prefetchCount", c.getPrefetchCount());
+            setValue("acksUncommitted", c.getAcksUncommitted());
+            setValue("messagesUnacknowledged", c.getMessagesUnacknowledged());
+            res = c;
+        } catch (Exception ex) {
+            setAvailability(false);
+            logger.debug(ex.getMessage(), ex);
         }
-
-        List<RabbitChannel> channels = rabbitAdmin.getChannels();
-        if (channels != null) {
-            for (RabbitChannel c : channels) {
-                logger.debug("[collect] RabbitChannel=" + c.getPid());
-                setValue(c.getPid() + ".Availability", Metric.AVAIL_UP);
-                setValue(c.getPid() + ".consumerCount", c.getConsumerCount());
-                setValue(c.getPid() + ".prefetchCount", c.getPrefetchCount());
-                setValue(c.getPid() + ".acksUncommitted", c.getAcksUncommitted());
-                setValue(c.getPid() + ".messagesUnacknowledged", c.getMessagesUnacknowledged());
-            }
-        }
-    }
-
-    /**
-     * Assemble custom key/value data for each object to set
-     * as custom properties in the ServiceResource to display
-     * in the UI.
-     * @param channel
-     * @return
-     */
-    public static ConfigResponse getAttributes(RabbitChannel channel) {
-        ConfigResponse res = new ConfigResponse();
-        res.setValue("pid", channel.getPid());
-        res.setValue("connection", channel.getConnection().getPid());
-        res.setValue("number", channel.getNumber());
-        res.setValue("user", channel.getUser());
-        res.setValue("transactional", channel.getTransactional());
-
-
         return res;
     }
 

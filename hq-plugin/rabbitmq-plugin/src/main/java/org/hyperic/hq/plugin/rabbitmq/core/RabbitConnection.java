@@ -25,181 +25,244 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.core;
 
-import com.rabbitmq.client.Address;
-
-import java.util.Map;
+import org.hyperic.hq.plugin.rabbitmq.collect.MetricConstants;
+import org.hyperic.util.config.ConfigResponse;
 
 /**
  * ErlangConnection is a simple POJO reflecting the response <connectioninfoitem>
  * @author Helena Edelson
  */
-public class RabbitConnection {
- 
-    private String pid;
-   
-    private Address address;
+public class RabbitConnection implements RabbitObject {
 
-    private Address peerAddress;
-
-    private long octetsReceived;
-
-    private long receiveCount;
-
-    private long octetsSent;
-
-    private long sendCount;
-
-    private long pendingSends;
-
+    private String name;
+    private long recvOct;
+    private long recvCnt;
+    private long sendOct;
+    private long sendCnt;
+    private long sendPend;
     private String state; // running
-
     private long channels;
-
-    private String username;
-
-    private String vhost;
-
-    private long timeout;
-
-    private long frameMax;
-
-    private Map clientProperties;
-
-    @Override
-    public String toString() {
-        return new StringBuilder("Connection[pid=").append(pid).append(" address=").append(address).append(" peerAddress=").append(peerAddress)
-               .append(" octetsReceived=").append(octetsReceived).append(" receiveCount=").append(receiveCount).append(" octetsSent=").append(octetsSent)
-                 .append(" sendCount=").append(sendCount).append(" pendingSends=").append(pendingSends).append(" state=").append(state)
-                    .append(" channels=").append(channels).append(" username=").append(username).append(" vhost=").append(vhost).append(" timeout=")
-                       .append(timeout).append(" frameMax=").append(frameMax).toString(); //.append(" clientProperties=").append(clientProperties)
-
-    }
+    private String authMechanism;
+    private String protocol;
+    private String user;
+    private int timeout;
+    private boolean ssl;
 
     public RabbitConnection() {
-
-    }
-    
-    public RabbitConnection(String pid) {
-        this.pid = pid;
     }
 
-    public String getPid() {
-        return pid;
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
     }
 
-    public void setPid(String pid) {
-        this.pid = pid;
+    /**
+     * @param pid the name to set
+     */
+    public void setName(String pid) {
+        this.name = pid;
     }
 
-    public Address getAddress() {
-        return address;
+    /**
+     * @return the recvOct
+     */
+    public long getRecvOct() {
+        return recvOct;
     }
 
-    public void setAddress(String host, int port) {
-        this.address = new Address(host, port);
+    /**
+     * @param recvOct the recvOct to set
+     */
+    public void setRecvOct(long recvOct) {
+        this.recvOct = recvOct;
     }
 
-    public Address getPeerAddress() {
-        return peerAddress;
+    /**
+     * @return the recvCnt
+     */
+    public long getRecvCnt() {
+        return recvCnt;
     }
 
-    public void setPeerAddress(String host, int port) {
-        this.peerAddress = new Address(host, port);
+    /**
+     * @param recvCnt the recvCnt to set
+     */
+    public void setRecvCnt(long recvCnt) {
+        this.recvCnt = recvCnt;
     }
 
-    public long getOctetsReceived() {
-        return octetsReceived;
+    /**
+     * @return the sendOct
+     */
+    public long getSendOct() {
+        return sendOct;
     }
 
-    public void setOctetsReceived(long octetsReceived) {
-        this.octetsReceived = octetsReceived;
+    /**
+     * @param sendOct the sendOct to set
+     */
+    public void setSendOct(long sendOct) {
+        this.sendOct = sendOct;
     }
 
-    public long getReceiveCount() {
-        return receiveCount;
+    /**
+     * @return the sendCnt
+     */
+    public long getSendCnt() {
+        return sendCnt;
     }
 
-    public void setReceiveCount(long receiveCount) {
-        this.receiveCount = receiveCount;
+    /**
+     * @param sendCnt the sendCnt to set
+     */
+    public void setSendCnt(long sendCnt) {
+        this.sendCnt = sendCnt;
     }
 
-    public long getOctetsSent() {
-        return octetsSent;
+    /**
+     * @return the sendPend
+     */
+    public long getSendPend() {
+        return sendPend;
     }
 
-    public void setOctetsSent(long octetsSent) {
-        this.octetsSent = octetsSent;
+    /**
+     * @param sendPend the sendPend to set
+     */
+    public void setSendPend(long sendPend) {
+        this.sendPend = sendPend;
     }
 
-    public long getSendCount() {
-        return sendCount;
-    }
-
-    public void setSendCount(long sendCount) {
-        this.sendCount = sendCount;
-    }
-
-    public long getPendingSends() {
-        return pendingSends;
-    }
-
-    public void setPendingSends(long pendingSends) {
-        this.pendingSends = pendingSends;
-    }
-
+    /**
+     * @return the state
+     */
     public String getState() {
         return state;
     }
 
+    /**
+     * @param state the state to set
+     */
     public void setState(String state) {
         this.state = state;
     }
 
+    /**
+     * @return the channels
+     */
     public long getChannels() {
         return channels;
     }
 
+    /**
+     * @param channels the channels to set
+     */
     public void setChannels(long channels) {
         this.channels = channels;
     }
 
-    public String getUsername() {
-        return username;
+    /**
+     * @return the authMechanism
+     */
+    public String getAuthMechanism() {
+        return authMechanism;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    /**
+     * @param authMechanism the authMechanism to set
+     */
+    public void setAuthMechanism(String authMechanism) {
+        this.authMechanism = authMechanism;
     }
 
-    public String getVhost() {
-        return vhost;
+    /**
+     * @return the protocol
+     */
+    public String getProtocol() {
+        return protocol;
     }
 
-    public void setVhost(String vhost) {
-        this.vhost = vhost;
+    /**
+     * @param protocol the protocol to set
+     */
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
     }
 
-    public long getTimeout() {
+    /**
+     * @return the user
+     */
+    public String getUser() {
+        return user;
+    }
+
+    /**
+     * @param user the user to set
+     */
+    public void setUser(String user) {
+        this.user = user;
+    }
+
+    /**
+     * @return the timeout
+     */
+    public int getTimeout() {
         return timeout;
     }
 
-    public void setTimeout(long timeout) {
+    /**
+     * @param timeout the timeout to set
+     */
+    public void setTimeout(int timeout) {
         this.timeout = timeout;
     }
 
-    public long getFrameMax() {
-        return frameMax;
+    /**
+     * @return the ssl
+     */
+    public boolean isSsl() {
+        return ssl;
     }
 
-    public void setFrameMax(long frameMax) {
-        this.frameMax = frameMax;
+    /**
+     * @param ssl the ssl to set
+     */
+    public void setSsl(boolean ssl) {
+        this.ssl = ssl;
     }
 
-    public Map getClientProperties() {
-        return clientProperties;
+    @Override
+    public String toString() {
+        return "RabbitConnection{name=" + name + ", recvOct=" + recvOct + " ,recvCnt=" + recvCnt + " ,sendOct=" + sendOct + " ,sendCnt=" + sendCnt + ", sendPend=" + sendPend + ", state=" + state + ", channels=" + channels + ", authMechanism=" + authMechanism + ", protocol=" + protocol + ", user=" + user + ", timeout=" + timeout + ", ssl=" + ssl + '}';
     }
 
-    public void setClientProperties(Map clientProperties) {
-        this.clientProperties = clientProperties;
+    public String getServiceType() {
+        return AMQPTypes.CONNECTION;
+    }
+
+    public String getServiceName() {
+        return getServiceType() + " " + getName();
+    }
+
+    public ConfigResponse getProductConfig() {
+        ConfigResponse c = new ConfigResponse();
+        c.setValue(MetricConstants.CONNECTION, getName());
+        return c;
+    }
+
+    public ConfigResponse getCustomProperties() {
+        ConfigResponse c = new ConfigResponse();
+        c.setValue("authMechanism", getAuthMechanism());
+        c.setValue("protocol", getProtocol());
+        c.setValue("user", getUser());
+        c.setValue("timeout", getTimeout());
+        c.setValue("ssl", isSsl());
+        return c;
+    }
+
+    public boolean isDurable() {
+        return false;
     }
 }

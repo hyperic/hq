@@ -93,7 +93,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.core.io.Resource;
 import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -106,7 +105,6 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     // XXX: These should go elsewhere.
     private static final String CAM_AGENT_TYPE = "covalent-eam";
     private static final String HQ_AGENT_REMOTING_TYPE = "hyperic-hq-remoting";
-    private static final String HQ_PLUGINS_DIR = "/hq-plugins";
     private static final String PLUGINS_EXTENSION = "-plugin";
 
     private static final String AGENT_BUNDLE_HOME_PROP = "${" + AgentConfig.AGENT_BUNDLE_HOME + "}";
@@ -125,6 +123,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     private PluginDAO pluginDAO;
     private ConcurrentStatsCollector concurrentStatsCollector;
     private AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle;
+    private PluginManager pluginManager;
 
     @Autowired
     public AgentManagerImpl(AgentTypeDAO agentTypeDao,
@@ -135,7 +134,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                             AgentPluginStatusDAO agentPluginStatusDAO,
                             AgentPluginUpdater agentPluginUpdater, PluginDAO pluginDAO,
                             ConcurrentStatsCollector concurrentStatsCollector,
-                            AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle) {
+                            AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle,
+                            PluginManager pluginManager) {
         this.agentPluginUpdater = agentPluginUpdater;
         this.pluginDAO = pluginDAO;
         this.agentTypeDao = agentTypeDao;
@@ -149,6 +149,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         this.agentPluginStatusDAO = agentPluginStatusDAO;
         this.concurrentStatsCollector = concurrentStatsCollector;
         this.agentPluginSyncRestartThrottle = agentPluginSyncRestartThrottle;
+        this.pluginManager = pluginManager;
     }
     
     @PostConstruct
@@ -156,7 +157,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         ZeventManager.getInstance().addBufferedListener(PluginStatusZevent.class,
             new ZeventListener<PluginStatusZevent>() {
             public void processEvents(List<PluginStatusZevent> events) {
-                if (agentPluginUpdater.isDisabled()) {
+                if (pluginManager.isPluginDeploymentOff()) {
                     return;
                 }
                 AgentManager am = applicationContext.getBean(AgentManager.class);
@@ -191,7 +192,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         ZeventManager.getInstance().addBufferedListener(PluginDeployedZevent.class,
             new ZeventListener<PluginDeployedZevent>() {
             public void processEvents(List<PluginDeployedZevent> events) {
-                if (agentPluginUpdater.isDisabled()) {
+                if (pluginManager.isPluginDeploymentOff()) {
                     return;
                 }
                 AgentManager am = applicationContext.getBean(AgentManager.class);
@@ -886,7 +887,6 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         return results[0];
     }
 
-    @SuppressWarnings("unchecked")
     @Transactional(readOnly = true)
     public FileDataResult[] transferAgentPlugins(AuthzSubject subject, Integer agentId,
                                                  Collection<String> filenames)
@@ -906,12 +906,19 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         int i=0;
         for (final String filename : filenames) {
             log.info("Transferring server plugin  " + filename + " to agent " + agent);
-            File src = new File(
-                applicationContext.getResource("WEB-INF" + HQ_PLUGINS_DIR).getFile(), filename);
-            if (!src.exists()) {
-                log.warn("Plugin " + filename + " could not be found");
-                rtn.add(new FileDataResult(filename, 0, 0));
-                continue;
+            File customPlugin = new File(pluginManager.getCustomPluginDir(), filename);
+            File src;
+            if (!customPlugin.exists()) {
+                File serverPlugin = new File(pluginManager.getServerPluginDir(), filename);
+                if (!serverPlugin.exists()) {
+                    log.warn("Plugin " + filename + " could not be found");
+                    rtn.add(new FileDataResult(filename, 0, 0));
+                    continue;
+                } else {
+                    src = serverPlugin;
+                }
+            } else {
+                src = customPlugin;
             }
             files[i][0] = src.getPath();
             if (filename.indexOf(PLUGINS_EXTENSION) < 0) {
@@ -962,12 +969,13 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
 
         // perform some basic error checking before enqueueing.
 
-        Resource pluginFile = applicationContext.getResource("WEB-INF" + HQ_PLUGINS_DIR + "/" +
-                                                             plugin);
+        File pluginFile = new File(pluginManager.getCustomPluginDir(), plugin);
         if (!pluginFile.exists()) {
-            throw new FileNotFoundException("Plugin " + plugin + " could not be found");
+            pluginFile = new File(pluginManager.getServerPluginDir(), plugin);
+            if (!pluginFile.exists()) {
+                throw new FileNotFoundException("Plugin " + plugin + " could not be found");
+            }
         }
-
         log.info("Enqueuing Zevent to transfer server plugin " + plugin + " to agent " +
                  aid.getID());
 
@@ -1456,7 +1464,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     @Transactional(readOnly=true)
     public void syncAllAgentPlugins() {
         final boolean debug = log.isDebugEnabled();
-        if (agentPluginUpdater.isDisabled()) {
+        if (pluginManager.isPluginDeploymentOff()) {
             if (debug) log.debug("Plugin update mechanism is disabled, will not sync all agent plugins");
             return;
         }

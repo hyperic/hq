@@ -39,6 +39,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -46,6 +47,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
@@ -63,8 +65,11 @@ import org.hyperic.hq.appdef.shared.AgentPluginUpdater;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.measurement.server.session.MonitorableType;
+import org.hyperic.hq.measurement.server.session.MonitorableTypeDAO;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.product.shared.PluginDeployException;
 import org.hyperic.hq.product.shared.PluginManager;
@@ -78,34 +83,42 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import edu.emory.mathcs.backport.java.util.Collections;
-
 @Service
 @Transactional(readOnly=true)
 public class PluginManagerImpl implements PluginManager, ApplicationContextAware {
     private static final Log log = LogFactory.getLog(PluginManagerImpl.class);
-    
-    private PluginDAO pluginDAO;
-    private AgentPluginStatusDAO agentPluginStatusDAO;
 
     private static final String TMP_DIR = System.getProperty("java.io.tmpdir");
+    private static final String PLUGIN_DIR = "hq-plugins";
 
-    private ApplicationContext ctx;
-
+    // used AtomicBoolean so that a groovy script may disable the mechanism live, no restarts
+    private final AtomicBoolean isDisabled =
+        new AtomicBoolean(new Boolean(System.getProperty("server.pluginsync.enabled", "false")));
+    
     private PermissionManager permissionManager;
     private AgentSynchronizer agentSynchronizer;
     private AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle;
+    private PluginDAO pluginDAO;
+    private AgentPluginStatusDAO agentPluginStatusDAO;
+    private MonitorableTypeDAO monitorableTypeDAO;
+    private ResourceManager resourceManager;
+
+    private ApplicationContext ctx;
 
     @Autowired
     public PluginManagerImpl(PluginDAO pluginDAO, AgentPluginStatusDAO agentPluginStatusDAO,
+                             MonitorableTypeDAO monitorableTypeDAO,
                              PermissionManager permissionManager,
+                             ResourceManager resourceManager,
                              AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle,
                              AgentSynchronizer agentSynchronizer) {
         this.pluginDAO = pluginDAO;
         this.agentPluginStatusDAO = agentPluginStatusDAO;
+        this.monitorableTypeDAO = monitorableTypeDAO;
         this.permissionManager = permissionManager;
         this.agentPluginSyncRestartThrottle = agentPluginSyncRestartThrottle;
         this.agentSynchronizer = agentSynchronizer;
+        this.resourceManager = resourceManager;
     }
     
     public Plugin getByJarName(String jarName) {
@@ -117,17 +130,77 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
     throws PermissionException {
         permissionManager.checkIsSuperUser(subj);
         final Collection<Agent> agents = agentPluginStatusDAO.getAutoUpdatingAgents();
-        final File pluginDir = getPluginDir();
+        final File serverPluginDir = getServerPluginDir();
+        final File customPluginDir = getCustomPluginDir();
+        deletePluginFiles(serverPluginDir, customPluginDir, pluginFileNames);
         for (final String filename : pluginFileNames) {
-            final File plugin = new File(pluginDir.getAbsolutePath() + "/" + filename);
-            if (!plugin.delete()) {
-                log.warn("Could not remove plugin " + filename);
-            }
+            removePluginAndAssociatedResources(subj, pluginDAO.getByFilename(filename));
         }
         final AgentPluginUpdater agentPluginUpdater = Bootstrap.getBean(AgentPluginUpdater.class);
         for (final Agent agent : agents) {
             agentPluginUpdater.queuePluginRemoval(agent.getId(), pluginFileNames);
         }
+    }
+    
+    public File getCustomPluginDir() {
+        File wdParent = new File(System.getProperty("user.dir")).getParentFile();
+        return new File(wdParent, PLUGIN_DIR);
+    }
+
+    public File getServerPluginDir() {
+        try {
+            return ctx.getResource("WEB-INF/" + PLUGIN_DIR).getFile();
+        } catch (IOException e) {
+            throw new SystemException(e);
+        }
+    }
+    
+    private void deletePluginFiles(File serverPluginDir, File customPluginDir,
+                                   Collection<String> pluginFileNames)
+    throws PermissionException {
+        // Want this to be all or nothing, so first check if we can delete all the files
+        for (final String filename : pluginFileNames) {
+            final File customPlugin = new File(customPluginDir.getAbsolutePath() + "/" + filename);
+            final File serverPlugin = new File(serverPluginDir.getAbsolutePath() + "/" + filename);
+            if (!customPlugin.exists() && !serverPlugin.exists()) {
+                String msg = "Could not remove plugin " + filename +
+                             " from " + customPlugin.getAbsoluteFile() +
+                             " or " + serverPlugin.getAbsoluteFile() + " file does not exist." +
+                             " Will ignore and continue with plugin removal";
+                log.warn(msg);
+            } else if (!canDelete(customPlugin) && !canDelete(serverPlugin)) {
+                String msg = "Could not remove plugin " + filename +
+                             " from " + customPlugin.getAbsoluteFile() +
+                             " or " + serverPlugin.getAbsoluteFile() +
+                             " user may not have write priviledge on the file, dir or the files" +
+                             " may not exist";
+                log.warn(msg);
+                throw new PermissionException(msg);
+            }
+        }
+        for (final String filename : pluginFileNames) {
+            final File customPlugin = new File(customPluginDir.getAbsolutePath() + "/" + filename);
+            final File serverPlugin = new File(serverPluginDir.getAbsolutePath() + "/" + filename);
+            customPlugin.delete();
+            serverPlugin.delete();
+        }
+    }
+    
+    private boolean canDelete(File file) {
+        if (!file.exists()) {
+            return false;
+        }
+        // if a user does not have write perms to the dir or the file then they can't delete it
+        if (!file.getParentFile().canWrite() && !file.canWrite()) {
+            return false;
+        }
+        return true;
+    }
+
+    private void removePluginAndAssociatedResources(AuthzSubject subj, Plugin plugin) {
+        pluginDAO.remove(plugin);
+        final Map<String, MonitorableType> map = monitorableTypeDAO.findByPluginName(plugin.getName());
+        resourceManager.removeResourcesAndTypes(subj, map.values());
     }
     
     public Set<Integer> getAgentIdsInQueue() {
@@ -192,20 +265,12 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
             close(writer);
         }
     }
-    
-// XXX probably want to get this from the ProductPluginDeployer
-    private File getPluginDir() {
-        try {
-            return ctx.getResource("WEB-INF/hq-plugins").getFile();
-        } catch (IOException e) {
-            throw new SystemException(e);
-        }
-    }
 
     private void deployPlugins(Collection<File> files) {
-        File pluginDir = getPluginDir();
-        if (!pluginDir.exists()) {
-            throw new SystemException(pluginDir.getAbsolutePath() + " does not exist");
+        final File pluginDir = getCustomPluginDir();
+        if (!pluginDir.exists() && !pluginDir.isDirectory() && !pluginDir.mkdir()) {
+            throw new SystemException(pluginDir.getAbsolutePath() +
+                " does not exist or is not a directory");
         }
         for (final File file : files) {
             final File dest = new File(pluginDir.getAbsolutePath() + "/" + file.getName());
@@ -343,53 +408,54 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         return rtn;
     }
 
-    @SuppressWarnings("unchecked")
-    public Collection<AgentPluginStatus> getErrorStatusesByPluginId(int pluginId) {
+    public Collection<AgentPluginStatus> getStatusesByPluginId(int pluginId, AgentPluginStatusEnum ... keys) {
+        if (keys.length == 0) {
+            return Collections.emptyList();
+        }
         final Plugin plugin = pluginDAO.get(pluginId);
         if (plugin == null) {
             return Collections.emptyList();
         }
-        return agentPluginStatusDAO.getErrorPluginStatusByFileName(plugin.getPath());
+        return agentPluginStatusDAO.getPluginStatusByFileName(plugin.getPath(), Arrays.asList(keys));
     }
     
     public boolean isPluginDeploymentOff() {
-// XXX need to implement
-        return false;
+        return isDisabled.get();
+    }
+    
+    public void setDisabledForPluginDeploymentMechanism(boolean disabled) {
+        isDisabled.set(disabled);
     }
 
-     public Map<Plugin, Collection<AgentPluginStatus>> getOutOfSyncAgentsByPlugin() {
-         return agentPluginStatusDAO.getOutOfSyncAgentsByPlugin();
-     }
+    public Map<Plugin, Collection<AgentPluginStatus>> getOutOfSyncAgentsByPlugin() {
+        return agentPluginStatusDAO.getOutOfSyncAgentsByPlugin();
+    }
 
-     public List<Plugin> getAllPlugins() {
-         return pluginDAO.findAll();
-     }
+    public List<Plugin> getAllPlugins() {
+        return pluginDAO.findAll();
+    }
 
-     public Collection<String> getOutOfSyncPluginNamesByAgentId(Integer agentId) {
-         return agentPluginStatusDAO.getOutOfSyncPluginNamesByAgentId(agentId);
-     }
+    public Collection<String> getOutOfSyncPluginNamesByAgentId(Integer agentId) {
+        return agentPluginStatusDAO.getOutOfSyncPluginNamesByAgentId(agentId);
+    }
      
-     @Transactional(propagation=Propagation.REQUIRES_NEW, readOnly=false)
-     public void updateAgentPluginSyncStatusInNewTran(AgentPluginStatusEnum s, Integer agentId,
-                                                      Collection<Plugin> plugins) {
-         if (plugins == null || plugins.isEmpty()) {
-             return;
-         }
-         final Map<String, AgentPluginStatus> statusMap =
-             agentPluginStatusDAO.getStatusByAgentId(agentId);
-         final long now = System.currentTimeMillis();
-         for (final Plugin plugin : plugins) {
-             AgentPluginStatus status = statusMap.get(plugin.getName());
-             if (status == null) {
-                 continue;
-             }
-             status.setLastSyncStatus(s.toString());
-             status.setLastSyncAttempt(now);
-         }
-     }
-
-    public void setApplicationContext(ApplicationContext ctx) throws BeansException {
-        this.ctx = ctx;
+    @Transactional(propagation=Propagation.REQUIRES_NEW, readOnly=false)
+    public void updateAgentPluginSyncStatusInNewTran(AgentPluginStatusEnum s, Integer agentId,
+                                                     Collection<Plugin> plugins) {
+        if (plugins == null || plugins.isEmpty()) {
+            return;
+        }
+        final Map<String, AgentPluginStatus> statusMap =
+            agentPluginStatusDAO.getStatusByAgentId(agentId);
+        final long now = System.currentTimeMillis();
+        for (final Plugin plugin : plugins) {
+            final AgentPluginStatus status = statusMap.get(plugin.getName());
+            if (status == null) {
+                continue;
+            }
+            status.setLastSyncStatus(s.toString());
+            status.setLastSyncAttempt(now);
+        }
     }
 
     private void close(OutputStream os) {
@@ -428,6 +494,28 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
     @Transactional(readOnly=false)
     public void removeAgentPluginStatuses(Integer agentId, Collection<String> pluginFileNames) {
         agentPluginStatusDAO.removeAgentPluginStatuses(agentId, pluginFileNames);
+    }
+
+    @Transactional(readOnly=false)
+    public void markDisabled(String pluginFileName) {
+        final Plugin plugin = pluginDAO.getByFilename(pluginFileName);
+        if (plugin == null) {
+            return;
+        }
+        plugin.setDisabled(true);
+    }
+
+    public void setApplicationContext(ApplicationContext ctx) throws BeansException {
+        this.ctx = ctx;
+    }
+
+    @Transactional(readOnly=false)
+    public void markEnabled(String pluginFileName) {
+        final Plugin plugin = pluginDAO.getByFilename(pluginFileName);
+        if (plugin == null) {
+            return;
+        }
+        plugin.setDisabled(false);
     }
 
 }

@@ -3,18 +3,13 @@ package org.hyperic.hq.web.admin.managers;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatus;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatusEnum;
@@ -38,12 +33,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -57,7 +51,7 @@ public class PluginManagerController extends BaseController implements Applicati
     private PluginManager pluginManager;
     private AgentManager agentManager;
     private AuthzBoss authzBoss;
-    
+    SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy hh:mm aa zzz");
 
     
     @Autowired
@@ -65,7 +59,6 @@ public class PluginManagerController extends BaseController implements Applicati
             ProductManager productManager, PluginManager pluginManager,
             AgentManager agentManager) {
         super(appdefBoss, authzBoss);
-        this.productManager = productManager;
         this.pluginManager = pluginManager;
         this.agentManager = agentManager;
     }
@@ -73,9 +66,9 @@ public class PluginManagerController extends BaseController implements Applicati
     @RequestMapping(method = RequestMethod.GET)
     public String index(Model model) {
         model.addAttribute("pluginSummaries", getPluginSummaries());
-        model.addAttribute("allAgentCount",agentManager.getAgentCount());
-        model.addAttribute("mechanismOn", pluginManager.isPluginDeploymentOff());
-        if (pluginManager.isPluginDeploymentOff()){
+        model.addAttribute("allAgentCount",agentManager.getNumAutoUpdatingAgents());
+        model.addAttribute("mechanismOn", !pluginManager.isPluginDeploymentOff());
+        if (!pluginManager.isPluginDeploymentOff()){
             model.addAttribute("instruction", "admin.managers.plugin.instructions");
         }else{
             model.addAttribute("instruction", "admin.managers.plugin.mechanism.off");
@@ -87,7 +80,7 @@ public class PluginManagerController extends BaseController implements Applicati
     public @ResponseBody List<Map<String, Object>> getPluginSummaries() {
         List<Map<String, Object>> pluginSummaries = new ArrayList<Map<String,Object>>();
         List<Plugin> plugins =  pluginManager.getAllPlugins();
-        SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy hh:mm aa zzz");
+        
         
         Comparator<Plugin> sortByPluginName = new Comparator<Plugin>() {
             public int compare(Plugin o1, Plugin o2) {
@@ -133,22 +126,7 @@ public class PluginManagerController extends BaseController implements Applicati
             pluginSummary.put("inProgress",isInProgress);
             pluginSummary.put("updatedDate", formatter.format(plugin.getModifiedTime()));
             pluginSummary.put("version", plugin.getVersion());   
-            
-            //TODO add disabled
-            pluginSummary.put("disabled", false);
-            
-            //errorAgents
-            List<Map<String,Object>> errorAgents = new ArrayList<Map<String,Object>>();
-            Collection<AgentPluginStatus> errorAgentStatusList = pluginManager.getErrorStatusesByPluginId(pluginId);
-            
-            for(AgentPluginStatus errorAgentStatus: errorAgentStatusList){
-                Map<String,Object> errorAgent = new HashMap<String,Object>();
-                errorAgent.put("agentName", getAgentName(errorAgentStatus.getAgent())); 
-                errorAgent.put("syncDate", formatter.format(errorAgentStatus.getLastSyncAttempt()));
-                errorAgents.add(errorAgent);
-            }
-            pluginSummary.put("errorAgents", errorAgents);
-            
+            pluginSummary.put("disabled", plugin.isDisabled());
             pluginSummaries.add(pluginSummary);
         }
 
@@ -158,17 +136,50 @@ public class PluginManagerController extends BaseController implements Applicati
     @RequestMapping(method = RequestMethod.GET, value="/info", headers="Accept=application/json")
     public @ResponseBody Map<String, Object> getAgentInfo() {
         Map<String, Object> info = new HashMap<String,Object>();
-        info.put("allAgentCount", agentManager.getAgentCount());
+        info.put("allAgentCount", agentManager.getNumAutoUpdatingAgents());
         return info;
     }
+
+    @RequestMapping(method = RequestMethod.GET, value="/status/{pluginId}", headers="Accept=application/json")
+    public @ResponseBody List<Map<String, Object>> getAgentStatus(@PathVariable int pluginId, @RequestParam("searchWord") String searchWord) {
+        Collection<AgentPluginStatus> errorAgentStatusList = 
+            pluginManager.getStatusesByPluginId(pluginId, AgentPluginStatusEnum.SYNC_FAILURE);
+
+        
+        List<Map<String,Object>> resultAgents = new ArrayList<Map<String,Object>>();
+        for(AgentPluginStatus errorAgentStatus: errorAgentStatusList){
+            String agentName = getAgentName(errorAgentStatus.getAgent());
+            if("".equals(searchWord) || agentName.contains(searchWord)){
+                Map<String,Object> errorAgent = new HashMap<String,Object>();
+                errorAgent.put("agentName", agentName); 
+                errorAgent.put("syncDate", formatter.format(errorAgentStatus.getLastSyncAttempt()));
+                errorAgent.put("status", "error");
+                resultAgents.add(errorAgent);
+            }
+        }
+        
+        Collection<AgentPluginStatus> inProgressAgentStatusList = 
+            pluginManager.getStatusesByPluginId(pluginId, AgentPluginStatusEnum.SYNC_IN_PROGRESS);
+        for(AgentPluginStatus inProgressAgentStatus: inProgressAgentStatusList){
+            String agentName = getAgentName(inProgressAgentStatus.getAgent());
+            if("".equals(searchWord) || agentName.contains(searchWord)){
+                Map<String,Object> inProgressAgent = new HashMap<String,Object>();
+                inProgressAgent.put("agentName", agentName); 
+                inProgressAgent.put("syncDate", formatter.format(inProgressAgentStatus.getLastSyncAttempt()));
+                inProgressAgent.put("status", "inProgress");
+                resultAgents.add(inProgressAgent);
+            }
+        }     
+
+        return resultAgents;
+    }
+    
     
     /**
      * @param agent
      * @return the address of Agent
      */
     private String getAgentName(Agent agent){
-        //Our intent is to return the FQDN of the platform the agent is running on. 
-        // However, we haven't figure out a good way to distinguish "fake" platform now.
         Collection <Platform> platforms = agent.getPlatforms();
         for (Platform platform: platforms){
             if(PlatformDetector.isSupportedPlatform(platform.getPlatformType().getName())){
@@ -195,17 +206,13 @@ public class PluginManagerController extends BaseController implements Applicati
             return "success";
 
         } catch (SessionNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error(e,e);
         } catch (SessionTimeoutException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error(e,e);
         } catch (PermissionException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error(e,e);
         }
         
-
         return "error";
     }
        
@@ -221,12 +228,7 @@ public class PluginManagerController extends BaseController implements Applicati
             for (int i= 0 ; i<plugins.length;i++){
                 MultipartFile plugin = plugins[i];
                 String name = "";
-                name = plugin.getName();
-                if ("application/java-archive".equals(plugin.getContentType().toString())){
-                    name+=".jar";
-                }else if ("text/xml".equals(plugin.getContentType().toString())){
-                    name+=".xml";
-                }
+                name = plugin.getOriginalFilename();
                 filename.add(name);
                 pluginInfo.put(name, plugin.getBytes());
             }
@@ -261,7 +263,6 @@ public class PluginManagerController extends BaseController implements Applicati
 
         model.addAttribute("success", success);
         model.addAttribute("messageKey", messageKey);
-        model.addAttribute("filename", filename);
         
         return "admin/managers/plugin/upload/status";
     }
