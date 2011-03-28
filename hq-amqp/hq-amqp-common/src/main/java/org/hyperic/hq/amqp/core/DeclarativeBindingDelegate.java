@@ -52,8 +52,8 @@ public class DeclarativeBindingDelegate implements BindingDelegate {
      * @param exchangeType can be null, which will create a TopicExchange
      * @throws ChannelException
      */
-    public String bindExchangeToAnonymousQueue(final String exchangeName, final String routingKey, final String exchangeType) throws ChannelException {
-        return declareAndBind(exchangeName, routingKey, exchangeType != null ? exchangeType : MessageConstants.DEFAULT_EXCHANGE_TYPE, null);
+    public String bindExchangeToAnonymousQueue(String exchangeName, String exchangeType, String routingKey, boolean durable) throws ChannelException {
+        return declareAndBind(exchangeName, getExchangeType(exchangeType), routingKey, durable, null);
     }
 
      /**
@@ -66,8 +66,8 @@ public class DeclarativeBindingDelegate implements BindingDelegate {
      * @param exchangeType
      * @throws ChannelException
      */
-    public void bindExchangeToNamedQueue(final String exchangeName, final String routingKey, final String exchangeType, final String queueName) throws ChannelException {
-        declareAndBind(exchangeName, routingKey, exchangeType, queueName);
+    public void bindExchangeToNamedQueue(String exchangeName, String exchangeType, String routingKey, boolean durable, String queueName) throws ChannelException {
+        declareAndBind(exchangeName, routingKey, getExchangeType(exchangeType), durable, queueName);
     }
 
     /**
@@ -79,30 +79,37 @@ public class DeclarativeBindingDelegate implements BindingDelegate {
      * @return
      * @throws ChannelException
      */
-    private String declareAndBind(final String exchangeName, final String routingKey, final String exchangeType, final String queueName) throws ChannelException {
+    private String declareAndBind(final String exchangeName, final String exchangeType, final String routingKey, final boolean durable, final String queueName) throws ChannelException {
         return this.template.execute(new ChannelCallback<String>() {
 
             public String doInChannel(Channel channel) throws ChannelException {
                 String name = queueName;
-                try { 
-                    /** durable */
-                    channel.exchangeDeclare(exchangeName, exchangeType, true);
+                try {
+                    channel.exchangeDeclare(exchangeName, exchangeType, durable);
                     if (name == null) {
                        name = channel.queueDeclare().getQueue();
                     }
                     else {
-                        /** durable, exclusive, auto-delete, args */
-                       channel.queueDeclare(name, true, false, false, null);
+                       channel.queueDeclare(name, durable, false, durable, null);
                     }
 
-                    channel.queueBind(name, exchangeName, (routingKey != null ? routingKey : name));
+                    channel.queueBind(name, exchangeName, routingKey);
                     return name;
                 }
                 catch (IOException e) {
-                    throw new ChannelException("Could not bind queue to exchange", e);
+                    throw new ChannelException("Could not bind queue " + name + " to exchange", e);
                 }
             }
         });
+    }
+
+    /**
+     * If the exchangeType is null, returns the default, "topic"
+     * @param exchangeType direct, fanout, topic, header. Can be null.xxx
+     * @return String exchange type
+     */
+    private String getExchangeType(String exchangeType) {
+        return exchangeType != null ? exchangeType : MessageConstants.DEFAULT_EXCHANGE_TYPE;
     }
 
 

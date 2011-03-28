@@ -42,14 +42,15 @@ import java.util.Map;
  * Created by the client factory on the server and AgentClient on the Agent.
  * Temporary to handle legacy command strategy.
  * TODO error strategy
- * TODO route to agent.ip, agents.authToken
+ * TODO route to agents.authToken.operation
  * @author Helena Edelson
  */
 public class AmqpCommandOperationService implements AgentCommandsClient {
 
     protected final Log logger = LogFactory.getLog(this.getClass());
 
-    protected SimplePingTemplate template;
+    /** temporary for migration */
+    protected AgentAmqpOperationService agentOperationService;
 
     protected boolean unidirectional;
 
@@ -81,11 +82,11 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
         this.operationService = operationService;
         this.unidirectional = agentUnidirectional;
         this.legacyClient = legacyClient;
-        this.template = new SimplePingTemplate();
+        this.agentOperationService = new AgentAmqpOperationService();
     }
 
-    public SimplePingTemplate getTemplate() {
-        return template;
+    public AgentAmqpOperationService getTemplate() {
+        return agentOperationService;
     }
 
     /**
@@ -99,7 +100,7 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
         if (unidirectional) return 0;
 
         try {
-            template.agentPing();
+            agentOperationService.agentPing();
             //return (legacyClient instanceof LegacyAgentCommandsClientImpl) ? template.agentPing() : template.ping();
         }
         catch (Exception e) {
@@ -109,7 +110,7 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
     }
 
     public void timedPing(int append) throws IOException, InterruptedException {
-        template.timedPing(append);
+        agentOperationService.timedPing(append);
     }
 
 

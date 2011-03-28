@@ -6,7 +6,6 @@ import org.hyperic.hq.bizapp.agent.ProviderInfo;
 import org.hyperic.hq.bizapp.client.*;
 import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertNotNull;
@@ -15,11 +14,11 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Helena Edelson
  */
-@Ignore
+//@Ignore
 public class LatherReplacementIntegrationTests extends BaseInfrastructureTest {
 
     /** Must configure */
-    private final static String AGENT_HOME = "path/to/agent";
+    private final static String AGENT_HOME = "/Users/hedelson/tools/hyperic/agent-4.6.0.BUILD-SNAPSHOT";
 
     private BizappCallbackClient bizappClient;
 

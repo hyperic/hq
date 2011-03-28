@@ -1,34 +1,24 @@
 package org.hyperic.hq.amqp;
 
-import org.apache.log4j.Logger;
-
 /**
- * Prototype only.
  * @author Helena Edelson
  */
-public class SimpleAsyncResponseHandler implements AsyncQueueConsumer {
-
-    protected final Logger logger = Logger.getLogger(this.getClass());
+public class SimpleAsyncResponseHandler extends SimpleAsyncMessageReceiver implements AsyncQueueingConsumer {
 
     protected OperationService operationService;
 
     public SimpleAsyncResponseHandler() {
-       //this.operationService = new AgentAmqpOperationService();
+       this(new AgentAmqpOperationService());
     }
     
     public SimpleAsyncResponseHandler(OperationService operationService) {
         this.operationService = operationService;
     }
 
+    @Override
     public void handleMessage(String message) {
-            String status = "Received [" + message + "]";
+            String status = this + " received=" + message;
             logger.info("********"+status);
-
-            //operationService.send(status);
+            operationService.send(status);
     }
-
-    public void handleMessage(byte[] message) {
-        handleMessage(new String(message));
-    }
-
 }

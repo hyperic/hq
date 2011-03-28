@@ -16,7 +16,7 @@ public class AgentManualAmqpConfigurer {
     
     private SimpleMessageListenerContainer listener;
  
-    public AgentManualAmqpConfigurer(AsyncQueueConsumer asyncConsumer, String queueName) {
+    public AgentManualAmqpConfigurer(AsyncQueueingConsumer asyncConsumer, String queueName) {
         this.listener = new SimpleMessageListenerContainer(new SingleConnectionFactory());
         listener.setMessageListener(new MessageListenerAdapter(asyncConsumer));
         listener.setQueueName(queueName);

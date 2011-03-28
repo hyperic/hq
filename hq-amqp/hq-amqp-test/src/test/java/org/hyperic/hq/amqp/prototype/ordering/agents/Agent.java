@@ -26,7 +26,7 @@
 package org.hyperic.hq.amqp.prototype.ordering.agents;
 
 import org.apache.log4j.Logger;
-import org.hyperic.hq.amqp.AsyncQueueConsumer;
+import org.hyperic.hq.amqp.AsyncQueueingConsumer;
 import org.springframework.amqp.core.AmqpTemplate;
 
 import java.util.concurrent.atomic.AtomicLong;
@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * @author Helena Edelson
  */
-public class Agent implements AsyncQueueConsumer {
+public class Agent implements AsyncQueueingConsumer {
 
     private Logger logger = Logger.getLogger(this.getClass().getName());
 

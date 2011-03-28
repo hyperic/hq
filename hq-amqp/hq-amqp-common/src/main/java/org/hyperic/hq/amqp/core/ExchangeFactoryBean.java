@@ -34,49 +34,27 @@ import java.io.IOException;
 /**
  * @author Helena Edelson
  */
-public class ExchangeFactoryBean implements FactoryBean<String> {
-
-    private static final String TYPE = "topic";
-
-    private static final boolean DURABLE = true;
-
-    private final ChannelTemplate channelTemplate;
-
-    private final String exchangeName;
+public class ExchangeFactoryBean extends AmqpComponentBean implements FactoryBean<String> {
 
     /**
      * Creates a new {@link com.rabbitmq.client.AMQP.Exchange}
-     *
      * @param connectionFactory Used to get a connection to create the queue with
-     * @param exchangeName The name of the exchange
+     * @param exchangeName      The name of the exchange
      */
-    public ExchangeFactoryBean(ConnectionFactory connectionFactory, String exchangeName) {
-        this.channelTemplate = new ChannelTemplate(connectionFactory);
-        this.exchangeName = exchangeName;
+    public ExchangeFactoryBean(ConnectionFactory connectionFactory, String exchangeName, String exchangeType, boolean durable) {
+        super(connectionFactory, exchangeName, exchangeType, null, durable);
     }
 
-    public Class<?> getObjectType() {
-        return String.class;
-    }
-
-    public boolean isSingleton() {
-        return true;
-    }
-
-    //@Override
     public String getObject() throws ChannelException {
-        return this.channelTemplate.execute(new ChannelCallback<String>() {
-
-            //@Override
+        return channelTemplate.execute(new ChannelCallback<String>() {
             public String doInChannel(Channel channel) throws ChannelException {
                 try {
-                    channel.exchangeDeclare(ExchangeFactoryBean.this.exchangeName, TYPE, DURABLE);
+                    channel.exchangeDeclare(ExchangeFactoryBean.this.exchangeName, ExchangeFactoryBean.this.exchangeType, ExchangeFactoryBean.this.durable);
                 } catch (IOException e) {
                     throw new ChannelException("Unable to declare exchange", e);
                 }
                 return ExchangeFactoryBean.this.exchangeName;
             }
         });
-    }
-
+    } 
 }

@@ -13,7 +13,7 @@ import java.io.IOException;
  * Prototype only.
  * @author Helena Edelson
  */
-public class SimplePingTemplate {
+public class  SimplePingTemplate {
 
     private final Log logger = LogFactory.getLog(SimplePingTemplate.class);
 

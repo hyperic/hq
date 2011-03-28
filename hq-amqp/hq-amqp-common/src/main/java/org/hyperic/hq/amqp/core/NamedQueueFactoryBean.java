@@ -24,13 +24,14 @@
  */
 
 package org.hyperic.hq.amqp.core;
- 
+
 import com.rabbitmq.client.ConnectionFactory;
+import org.springframework.beans.factory.FactoryBean;
 
 /**
  * @author Helena Edelson
  */
-public class NamedQueueFactoryBean extends AnonymousQueueFactoryBean {
+public class NamedQueueFactoryBean extends AnonymousQueueFactoryBean implements FactoryBean<String> {
 
     private final String queueName;
 
@@ -40,22 +41,20 @@ public class NamedQueueFactoryBean extends AnonymousQueueFactoryBean {
      * @param exchangeName      Exchange name to bind the Queue
      * @param queueName         Name of the queue
      */
-    public NamedQueueFactoryBean(ConnectionFactory connectionFactory, String exchangeName, String queueName) {
-        super(connectionFactory, exchangeName);
+    public NamedQueueFactoryBean(ConnectionFactory connectionFactory, String exchangeName, String exchangeType, String routingKey, boolean durable, String queueName) {
+        super(connectionFactory, exchangeName, exchangeType, routingKey, durable);
         this.queueName = queueName;
     }
 
     /**
-     * Creates a new exclusive, autodelete, non-durable named {@link com.rabbitmq.client.AMQP.Queue}
-     * then binds the queue to an exchange by name.
-     * TODO handle exchange type assignment: decide the use case.
+     * Creates a new named {@link com.rabbitmq.client.AMQP.Queue}
+     * then binds the queue to an exchange by name. 
      * @return
      * @throws ChannelException
      */
-    @Override
     public String getObject() throws ChannelException {
-        declarativeBindingDelegate.bindExchangeToNamedQueue(NamedQueueFactoryBean.this.exchangeName, null, "direct", NamedQueueFactoryBean.this.queueName);
+        declarativeBindingDelegate.bindExchangeToNamedQueue(NamedQueueFactoryBean.this.exchangeName, NamedQueueFactoryBean.this.exchangeType,
+                NamedQueueFactoryBean.this.routingKey, NamedQueueFactoryBean.this.durable, NamedQueueFactoryBean.this.queueName);
         return NamedQueueFactoryBean.this.queueName;
     }
-
 }

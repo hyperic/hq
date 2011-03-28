@@ -4,15 +4,16 @@ import org.apache.log4j.Logger;
 import org.hyperic.hq.amqp.util.Operations;
 
 /**
+ * Agent pojo listener - handles messages from the server.
  * @author Helena Edelson
  */
-public class AmqpServerCommandHandler implements AsyncQueueConsumer {
+public class AmqpServerListenerHandler implements AsyncQueueingConsumer {
 
     protected Logger logger = Logger.getLogger(this.getClass());
 
     private OperationService operationService;
 
-    public AmqpServerCommandHandler() {
+    public AmqpServerListenerHandler() {
         this.operationService = new AgentAmqpOperationService();
     }
 

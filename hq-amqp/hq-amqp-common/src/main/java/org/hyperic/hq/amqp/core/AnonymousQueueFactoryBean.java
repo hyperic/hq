@@ -31,40 +31,25 @@ import org.springframework.beans.factory.FactoryBean;
 /**
  * @author Helena Edelson
  */
-public class AnonymousQueueFactoryBean implements FactoryBean<String> {
-
-    protected final DeclarativeBindingDelegate declarativeBindingDelegate;
-
-    protected final String exchangeName;
+public class AnonymousQueueFactoryBean extends AmqpComponentBean implements FactoryBean<String> {
 
     /**
      * Creates a new anonymous {@link com.rabbitmq.client.AMQP.Queue}
      * @param connectionFactory Used to get a connection to create the queue with
      * @param exchangeName The name of the exchange to link the queue with
      */
-    public AnonymousQueueFactoryBean(ConnectionFactory connectionFactory, String exchangeName) {
-        this.declarativeBindingDelegate = new DeclarativeBindingDelegate(connectionFactory);
-        this.exchangeName = exchangeName;
+    public AnonymousQueueFactoryBean(ConnectionFactory connectionFactory, String exchangeName, String exchangeType, String routingKey, boolean durable) {
+        super(connectionFactory, exchangeName, exchangeType, routingKey, durable);
     }
 
     /**
-     * TODO handle exchange type assignment: decide the use case.
+     * Creates a new {@link com.rabbitmq.client.AMQP.Queue} with an
+     * auto-generated name.
      * @return
      * @throws ChannelException
      */
-    @Override
     public String getObject() throws ChannelException {
-        return declarativeBindingDelegate.bindExchangeToAnonymousQueue(AnonymousQueueFactoryBean.this.exchangeName, null, "direct");
-    }
-
-    @Override
-    public Class<?> getObjectType() {
-        return String.class;
-    }
-    @Override
-    public boolean isSingleton() {
-        return true;
-    }
-
-
+        return declarativeBindingDelegate.bindExchangeToAnonymousQueue(AnonymousQueueFactoryBean.this.exchangeName,
+                AnonymousQueueFactoryBean.this.exchangeType, AnonymousQueueFactoryBean.this.routingKey, AnonymousQueueFactoryBean.this.durable);
+    } 
 }

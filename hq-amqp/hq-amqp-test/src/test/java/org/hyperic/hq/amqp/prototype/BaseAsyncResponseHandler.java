@@ -23,9 +23,10 @@
  * USA.
  */
 
-package org.hyperic.hq.amqp;
+package org.hyperic.hq.amqp.prototype;
 
 import org.apache.log4j.Logger;
+import org.hyperic.hq.amqp.AsyncQueueingConsumer;
 import org.springframework.amqp.core.AmqpTemplate;
 
 import java.util.concurrent.atomic.AtomicLong;
@@ -34,7 +35,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * Prototype only.
  * @author Helena Edelson
  */
-public class BaseAsyncResponseHandler implements AsyncQueueConsumer {
+public class BaseAsyncResponseHandler implements AsyncQueueingConsumer {
 
     private Logger logger = Logger.getLogger(this.getClass().getName());
 

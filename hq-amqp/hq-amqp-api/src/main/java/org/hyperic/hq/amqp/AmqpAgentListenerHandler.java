@@ -5,15 +5,16 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.amqp.util.Operations;
 
 /**
+ * Server pojo listener - handles messages from agents.
  * @author Helena Edelson
  */
-public class AmqpAgentCommandHandler implements AsyncQueueConsumer {
+public class AmqpAgentListenerHandler implements AsyncQueueingConsumer {
 
     protected final Log logger = LogFactory.getLog(this.getClass());
 
     private OperationService operationService;
 
-    public AmqpAgentCommandHandler(OperationService operationService) {
+    public AmqpAgentListenerHandler(OperationService operationService) {
         this.operationService = operationService;
     }
 
@@ -35,7 +36,7 @@ public class AmqpAgentCommandHandler implements AsyncQueueConsumer {
         //logger.info("***server received=" + message);
         try {
             String resp = Operations.AGENT_PING_RESPONSE + (message.substring(message.length()-1));
-            //logger.info("***server sending=" + Operations.AGENT_PING_RESPONSE);
+            logger.info("***server sending=" + Operations.AGENT_PING_RESPONSE);
             operationService.send(resp);
 
         } catch (Exception e) {

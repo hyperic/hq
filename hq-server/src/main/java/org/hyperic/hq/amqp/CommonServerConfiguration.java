@@ -59,8 +59,8 @@ public class CommonServerConfiguration extends CommonAmqpConfiguration {
     }
 
     @Bean
-    public AmqpAgentCommandHandler amqpAgentCommandHandler() {
-        return new AmqpAgentCommandHandler(operationService());
+    public AmqpAgentListenerHandler amqpAgentCommandHandler() {
+        return new AmqpAgentListenerHandler(operationService());
     }
 
     @Bean

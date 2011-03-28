@@ -29,7 +29,7 @@ package org.hyperic.hq.amqp;
  * Simple async message handler.
  * @author Helena Edelson
  */
-public interface AsyncQueueConsumer {
+public interface AsyncQueueingConsumer {
  
     /**
      * The message converter to a String.
