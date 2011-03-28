@@ -252,12 +252,12 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
         }
     }
 
-    private void deployPlugin(String plugin, File dir) {
+    private void deployPlugin(String pluginName, File dir) {
         try {
-            productManager.deploymentNotify(plugin, dir);
-            pluginManager.markEnabled(plugin);
+            productManager.deploymentNotify(pluginName, dir);
+            pluginManager.markEnabled(pluginName);
         } catch (Exception e) {
-            log.error("Unable to deploy plugin '" + plugin + "'", e);
+            log.error("Unable to deploy plugin '" + pluginName + "'", e);
         }
     }
 

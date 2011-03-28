@@ -157,10 +157,10 @@ public interface PluginManager {
     void markDisabled(String pluginFileName);
 
     /**
-     * Sets the disabled flag to false of the {@link Plugin} object represented by pluginFileName
+     * Sets the disabled flag to false of the {@link Plugin} object represented by pluginName
      * @param pluginFileName - pluginNames associated with a {@link Plugin}
      */
-    void markEnabled(String pluginFileName);
+    void markEnabled(String pluginName);
 
     /**
      * @return /path/to/WEB-INF/hq-plugins/

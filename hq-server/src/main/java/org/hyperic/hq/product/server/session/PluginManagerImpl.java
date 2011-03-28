@@ -510,8 +510,8 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
     }
 
     @Transactional(readOnly=false)
-    public void markEnabled(String pluginFileName) {
-        final Plugin plugin = pluginDAO.getByFilename(pluginFileName);
+    public void markEnabled(String pluginName) {
+        final Plugin plugin = pluginDAO.findByName(pluginName);
         if (plugin == null) {
             return;
         }

@@ -281,7 +281,7 @@ public class ProductManagerImpl implements ProductManager {
                 return;
             }
         } else {
-            log.info(pluginName + " unknown -- registering");
+            log.info(pluginName + " unknown -- registering (" + dir + ")");
             created = (pluginVal == null);
         }
 
