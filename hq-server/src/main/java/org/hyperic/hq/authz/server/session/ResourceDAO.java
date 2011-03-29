@@ -43,8 +43,6 @@ import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.server.session.Server;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -395,6 +393,16 @@ public class ResourceDAO
         return ((Number) getSession().createQuery(sql).setInteger("platProto",
             AuthzConstants.authzPlatform.intValue()).setString("vspherevm",
             AuthzConstants.platformPrototypeVmwareVsphereVm).uniqueResult()).intValue();
+    }
+
+    @SuppressWarnings("unchecked")
+	public List<Resource> getPlatformsMinusVsphereVmPlatforms() {
+        String sql = "select r from Resource r " + "where r.resourceType.id = :platProto "
+                     + "and r.prototype.name != :vspherevm";
+        return getSession().createQuery(sql)
+        	.setInteger("platProto", AuthzConstants.authzPlatform.intValue())
+        	.setString("vspherevm", AuthzConstants.platformPrototypeVmwareVsphereVm)
+        	.list();
     }
 
     @SuppressWarnings("unchecked")
