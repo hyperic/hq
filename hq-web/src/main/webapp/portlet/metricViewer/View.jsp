@@ -39,7 +39,7 @@
 			url: "<html:rewrite action="/dashboard/ViewMetricViewer" />",
 			content: {
 				token: "${portlet.token}",
-				hq: (new Date().getTime()
+				hq: (new Date()).getTime()
 			},
 			handleAs: "json",
 			load: showMetricsResponse
