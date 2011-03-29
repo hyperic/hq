@@ -38,13 +38,6 @@
             <useTransitiveDependencies>false</useTransitiveDependencies>
             <includes>
                 <include>org.hyperic.hq.amqp:hq-amqp-api</include>
-                <include>com.rabbitmq:amqp-client</include>
-                <include>commons-io:commons-io</include>
-                <include>org.springframework.amqp:spring-amqp</include>
-                <include>org.springframework.amqp:spring-rabbit</include>
-                <include>org.springframework:spring-beans</include>
-                <include>org.springframework:spring-content</include>
-                <include>org.springframework:spring-core</include>
             </includes>
             <outputDirectory>/lib</outputDirectory>
             <fileMode>0644</fileMode>
