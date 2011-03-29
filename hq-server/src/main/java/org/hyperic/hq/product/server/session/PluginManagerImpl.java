@@ -130,18 +130,27 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
     throws PermissionException {
         permissionManager.checkIsSuperUser(subj);
         final Collection<Agent> agents = agentPluginStatusDAO.getAutoUpdatingAgents();
-        final File serverPluginDir = getServerPluginDir();
-        final File customPluginDir = getCustomPluginDir();
-        deletePluginFiles(serverPluginDir, customPluginDir, pluginFileNames);
-        for (final String filename : pluginFileNames) {
-            removePluginAndAssociatedResources(subj, pluginDAO.getByFilename(filename));
-        }
+        deletePluginFiles(pluginFileNames);
+        removePluginsAndAssociatedResources(subj, pluginFileNames);
         final AgentPluginUpdater agentPluginUpdater = Bootstrap.getBean(AgentPluginUpdater.class);
         for (final Agent agent : agents) {
             agentPluginUpdater.queuePluginRemoval(agent.getId(), pluginFileNames);
         }
     }
     
+    private void removePluginsAndAssociatedResources(AuthzSubject subj,
+                                                     Collection<String> pluginFileNames) {
+        for (final String filename : pluginFileNames) {
+            final Plugin plugin = pluginDAO.getByFilename(filename);
+            if (plugin != null) {
+                final Map<String, MonitorableType> map =
+                    monitorableTypeDAO.findByPluginName(plugin.getName());
+                resourceManager.removeResourcesAndTypes(subj, map.values());
+                pluginDAO.remove(plugin);
+            }
+        }
+    }
+
     public File getCustomPluginDir() {
         File wdParent = new File(System.getProperty("user.dir")).getParentFile();
         return new File(wdParent, PLUGIN_DIR);
@@ -155,9 +164,10 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         }
     }
     
-    private void deletePluginFiles(File serverPluginDir, File customPluginDir,
-                                   Collection<String> pluginFileNames)
+    private void deletePluginFiles(Collection<String> pluginFileNames)
     throws PermissionException {
+        final File serverPluginDir = getServerPluginDir();
+        final File customPluginDir = getCustomPluginDir();
         // Want this to be all or nothing, so first check if we can delete all the files
         for (final String filename : pluginFileNames) {
             final File customPlugin = new File(customPluginDir.getAbsolutePath() + "/" + filename);
@@ -197,12 +207,6 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         return true;
     }
 
-    private void removePluginAndAssociatedResources(AuthzSubject subj, Plugin plugin) {
-        pluginDAO.remove(plugin);
-        final Map<String, MonitorableType> map = monitorableTypeDAO.findByPluginName(plugin.getName());
-        resourceManager.removeResourcesAndTypes(subj, map.values());
-    }
-    
     public Set<Integer> getAgentIdsInQueue() {
         final Set<Integer> rtn = new HashSet<Integer>();
         rtn.addAll(agentSynchronizer.getJobListByDescription(
@@ -449,12 +453,25 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
             agentPluginStatusDAO.getStatusByAgentId(agentId);
         final long now = System.currentTimeMillis();
         for (final Plugin plugin : plugins) {
+            if (plugin == null || plugin.isDisabled()) {
+                continue;
+            }
             final AgentPluginStatus status = statusMap.get(plugin.getName());
             if (status == null) {
                 continue;
             }
             status.setLastSyncStatus(s.toString());
             status.setLastSyncAttempt(now);
+        }
+    }
+
+    @Transactional(propagation=Propagation.REQUIRES_NEW, readOnly=false)
+    public void updateAgentPluginStatusByFileNameInNewTran(AgentPluginStatusEnum s, Integer agentId,
+                                                           Collection<String> pluginFileNames) {
+        final Collection<AgentPluginStatus> statuses =
+            agentPluginStatusDAO.getStatusByAgentAndFileNames(agentId, pluginFileNames);
+        for (final AgentPluginStatus status: statuses) {
+            status.setLastSyncStatus(s.toString());
         }
     }
 

@@ -104,12 +104,22 @@ public interface PluginManager {
     /**
      * Updates all the {@link AgentPluginStatus} objects associated with the agentId to the
      * specified status
-     * @param status
+     * @param status - {@link AgentPluginStatusEnum}
      * @param agentId - id associated with the {@link Agent} object
-     * @param plugins {@link Collection} of {@link Plugin}
+     * @param plugins - {@link Collection} of {@link Plugin}
      */
     void updateAgentPluginSyncStatusInNewTran(AgentPluginStatusEnum status, Integer agentId,
                                               Collection<Plugin> plugins);
+
+    /**
+     * Updates all the {@link AgentPluginStatus} objects associated with the agentId to the
+     * specified status
+     * @param status - {@link AgentPluginStatusEnum}
+     * @param agentId - id associated with the {@link Agent} object
+     * @param pluginFileNames - {@link Collection} of {@link String} = pluginFileName
+     */
+    void updateAgentPluginStatusByFileNameInNewTran(AgentPluginStatusEnum status, Integer agentId,
+                                                    Collection<String> pluginFileNames);
 
     /**
      * Removes all plugins specified by the pluginFilenames collection
