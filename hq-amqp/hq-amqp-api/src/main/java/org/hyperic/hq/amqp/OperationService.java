@@ -1,6 +1,6 @@
 package org.hyperic.hq.amqp;
 
-import org.hyperic.hq.amqp.core.OperationFailedException;
+import java.util.Map;
 
 /**
  * @author Helena Edelson
@@ -9,31 +9,34 @@ public interface OperationService {
 
     /**
      * Perform an asynchronous operation
-     * @param operationName           The name of the operation that should be performed
-     * @param nodeId                  The id of the node this operation should be performed on
-     * @param context                 The context for the operation being performed
-     * @param operationStatusCallback A callback for notification of selected events in the lifecycle of the operation
-     * @throws org.hyperic.hq.amqp.core.OperationFailedException if there is any problem sending the operation abroad
+     * @param operationName The name of the operation that should be performed. Based on the operation name,
+     * the framework knows where to route it.
+     * @param data The data to route
+     * @param properties Any properties to apply, can be null
+     * @throws OperationFailedException
      */
-    <T> void perform(String operationName, long nodeId, Object context, Object operationStatusCallback) throws OperationFailedException;
+    <T> void perform(String operationName, Object data, Map<String,?> properties) throws OperationFailedException;
 
     /**
-     * Sends a message with pre-configured routing.
+     * Perform an asynchronous operation
+     * @param operationName The name of the operation that should be performed
+     * @param exchangeName
+     * @param routingKey The routing key to send to
+     * @param data The data to route
+     * @param properties Any properties to apply, can be null
+     * @throws OperationFailedException
      */
-    void send(String message);
+    <T> void perform(String operationName, String exchangeName, String routingKey, Object data, Map<String,?> properties) throws OperationFailedException;
 
     /**
-     * Sends a message with configurable routing.
+     * Perform an asynchronous operation
+     * @param operationName The name of the operation that should be performed
+     * @param exchangeName
+     * @param routingKey The routing key to send to
+     * @param data The data to route
+     * @param properties Any properties to apply, can be null
+     * @throws OperationFailedException
      */
-    void send(String exchange, String routingKey, String message);
-
-    /**
-     * For initial synchronous pings between agent and server.
-     * @param exchange
-     * @param routingKey
-     * @param message
-     * @return
-     */
-    Object sendAndReceive(String exchange, String routingKey, String message);
-
+    <T> void performAndReceive(String operationName, String exchangeName, String routingKey, Object data, Map<String,?> properties) throws OperationFailedException;
+   
 }
