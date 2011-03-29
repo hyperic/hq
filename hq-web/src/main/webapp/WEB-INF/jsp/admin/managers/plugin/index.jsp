@@ -261,13 +261,16 @@
 	.infoIcon{
 		width:12px;
 	}
+	.span-status{
+		width:120px;
+	}
 </style>
 <section id="pluginManagerPanel" class="container top">
 	<h1><fmt:message key="admin.managers.plugin.title" /></h1>
 	<p id="instruction"><fmt:message key="${instruction}" /></p>
 	
 	<div id="agentInfo">
-		<fmt:message key="admin.managers.Plugin.information.agent.count"/><img src="/images/icon_info_small.gif" class="infoIcon"/>:&nbsp;<span id="agentInfoAllCount">${allAgentCount}</span> <br/>
+		<fmt:message key="admin.managers.Plugin.information.agent.count"/>:&nbsp;<span id="agentInfoAllCount">${allAgentCount}</span><img src="/images/icon_info_small.gif" class="infoIcon"/> <br/>
 	</div>
 	
 	<div class="gridheader clear">
@@ -277,7 +280,7 @@
 		<span class="column span-4"><fmt:message key="admin.managers.plugin.column.header.jar.name" /></span>
 		<span class="column span-4" id="addedTimeHeader"><fmt:message key="admin.managers.plugin.column.header.initial.deploy.date" /><img src="/images/icon_info_small.gif" class="infoIcon"></span>
 		<span class="column span-4" id="updatedTimeHeader"><fmt:message key="admin.managers.plugin.column.header.last.sync.date" /><img src="/images/icon_info_small.gif" class="infoIcon"></span>
-		<span class="last column span-3"><fmt:message key="admin.managers.plugin.column.header.status" /></span>
+		<span class="column span-status"><fmt:message key="admin.managers.plugin.column.header.status" /></span>
 	</div>
 	
 	<form:form id="deleteForm" name="deleteForm" onsubmit="return false;" method="delete">
@@ -290,13 +293,13 @@
                     	<input type="checkbox" name="deleteId" value="${pluginSummary.id}" class="checkbox" />&nbsp; 
 					</c:if>
 				</span>
-				<span class="column span-3">${pluginSummary.name}
+				<span class="column span-3">${pluginSummary.name}</span>
+				<span class="column span-3">${pluginSummary.version}&nbsp;</span>
+				<span class="column span-4">${pluginSummary.jarName}&nbsp;
 					<c:if test="${pluginSummary.disabled}">
 						<br/><span class="notFound"><fmt:message key="admin.managers.Plugin.column.plugin.disabled"/></span>
 					</c:if>
 				</span>
-				<span class="column span-3">${pluginSummary.version}&nbsp;</span>
-				<span class="column span-4">${pluginSummary.jarName}&nbsp;</span>
 				<span class="column span-4">${pluginSummary.initialDeployDate}&nbsp;</span>
 				<span class="column span-4">${pluginSummary.updatedDate}&nbsp;</span>		
 				<span class="last column span-3" >
@@ -384,6 +387,8 @@
 	</div>
 	
 </div>
+<div id="checkboxSelection" style="visibility:hidden;">
+</div>
 
 <script  djConfig="parseOnLoad: true">
 	hqDojo.require("dojo.fx");
@@ -395,8 +400,16 @@
 	hqDojo.require("dojox.form.FileUploader");
 	hqDojo.require("dijit.ProgressBar");
 	hqDojo.require("dojo.behavior");
+	hqDojo.require("dojo.hash");
+	hqDojo.require("dojox.timing._base");
+
 	
-	function refreshPage(){
+
+	
+	hqDojo.ready(function() {
+
+		
+		function refreshPage(){
 			var infoXhrArgs={
 				url:"<spring:url value='/app/admin/managers/plugin/info'/>",
 				handleAs:"json",
@@ -408,11 +421,30 @@
 					hqDojo.byId("agentInfoAllCount").innerHTML=response.allAgentCount;
 				}
 			}
+				
+		    var deleteIdsString = "";
+			hqDojo.query(".checkbox").forEach(function(entry){
+				if(entry.checked){
+					deleteIdsString+=entry.value+",";
+				}
+			});
+			if(deleteIdsString.length>1){
+				deleteIdsString = deleteIdsString.substr(0,deleteIdsString.length-1);
+			}else{
+				deleteIdsString="";
+			}
+			
+			var hashObj = {
+				deleteIds: deleteIdsString
+			}
+			hqDojo.hash(hqDojo.objectToQuery(hashObj));
+			
+			
 			hqDojo.xhrGet(infoXhrArgs);
 			hqDojo.publish("refreshDataGrid");
-	}
+		}
 	
-	hqDojo.ready(function() {
+	
 		function seeStatusDetail(pluginId,keyword){
 			hqDijit.byId("showStatusPanelDialog").show();
 			var agentListUl = hqDojo.byId("agentList");
@@ -701,6 +733,8 @@
                 	"Accept": "application/json"
                 },
                 load: function(response, args) {
+                	
+                	
                 	hqDojo.empty("pluginList");
                 	
                 	var index = 1;
@@ -720,9 +754,18 @@
                 				"name":"deleteId"
                 			}, span);
                 		}
-                		spanName = hqDojo.create("span", {
+                		span = hqDojo.create("span", {
                 			"class": "column span-3",
                 			"innerHTML": summary.name
+                		}, li);
+
+                		span = hqDojo.create("span", {
+                			"class": "column span-3",
+                			"innerHTML": summary.version
+                		}, li);
+                		spanName = hqDojo.create("span", {
+                			"class": "column span-4",
+                			"innerHTML": summary.jarName
                 		}, li);
                 		if(summary.disabled){
                 			span = hqDojo.create("span",{
@@ -730,14 +773,6 @@
                 				"innerHTML":"<br/><fmt:message key='admin.managers.Plugin.column.plugin.disabled'/>"
                 			},spanName);
                 		}
-                		span = hqDojo.create("span", {
-                			"class": "column span-3",
-                			"innerHTML": summary.version
-                		}, li);
-                		span = hqDojo.create("span", {
-                			"class": "column span-4",
-                			"innerHTML": summary.jarName
-                		}, li);
                 		span = hqDojo.create("span", {
                 			"class": "column span-4",
                 			"innerHTML": summary.initialDeployDate
@@ -785,7 +820,16 @@
                 		}
                 		index++;
                 	});
-
+					var hashObj = hqDojo.queryToObject(hqDojo.hash());
+					if(hashObj.deleteIds!=""){
+						hqDojo.forEach(hashObj.deleteIds.split(","),function(pluginId){
+							var checkbox = hqDojo.query(".checkbox[value$="+pluginId+"]");
+							if(checkbox[0]!=null){
+								checkbox[0].checked="true";
+							}
+						});
+					}
+					
 					hqDojo.behavior.apply();
 					hqDojo.query(".notFound").forEach(function(e){
 						new hqDijit.Tooltip({
@@ -799,8 +843,15 @@
                 	
                 }
 			});
+			//setInterval("refreshPage()",1000);
+			
+
 		});
-	setInterval("refreshPage()",10000);
+		var timer = new hqDojox.timing.Timer();
+		timer.setInterval(10000);
+		timer.onTick = refreshPage;
+		timer.start();
+	
 	});
 
 </script>
