@@ -2,60 +2,32 @@ package org.hyperic.hq.amqp.unit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.amqp.util.Routings;
 import org.hyperic.util.security.SecurityUtil;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
-import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
-/**
- * Example possible bindings:
- * hq.#, hq.agents.#, hq.servers.#
- * hq.agents.*.operations.* , hq.agent.*.operations.#, hq.agent.*.operations.metrics.#
- *
+/** 
  * @author Helena Edelson
  */
 public class RoutingKeyTests {
 
     protected final Log logger = LogFactory.getLog(this.getClass().getName());
 
+    protected Routings routings = new Routings();
+
     protected final int agents = 1000;
-
-
-    protected final String agentRoutingKeyPrefix = "hq.agents.agent-";
-
-    protected String serverRoutingKeyPrefix = "hq.servers.server-";
-
-    protected final String[] agentOperations = {
-            "metrics.report.request", "metrics.availability.request", "metrics.schedule.response", "metrics.unschedule.response", "metrics.config.response",
-            "scans.runtime.request", "scans.default.request", "scans.autodiscovery.start.response", "scans.autodiscovery.stop.response", "scans.autodiscovery.config.response",
-            "ping.request", "user.authentication.request", "config.authentication.request", "config.registration.request",
-            "config.upgrade.response", "config.bundle.request", "config.restart.response", "config.update.request",
-            "events.track.log.request", "events.track.config.request",
-            "controlActions.results.request", "controlActions.config.response", "controlActions.execute.response",
-            "plugin.metadata.request", "plugin.liveData.request",
-            "plugin.control.add.response", "plugin.track.add.response", "plugin.track.remove.response"
-    };
-
-    protected final String[] serverOperations = {
-            "metrics.report.response", "metrics.availability.response", "metrics.schedule.request", "metrics.unschedule.request", "metrics.config.request",
-            "scans.runtime.response", "scans.default.response", "scans.autodiscovery.start.request", "scans.autodiscovery.stop.request", "scans.autodiscovery.config.request",
-            "ping.response", "user.authentication.response", "config.authentication.response", "config.registration.response",
-            "config.upgrade.request", "config.bundle.response", "config.restart.request", "config.update.response",
-            "events.track.log.response", "events.track.config.response",
-            "controlActions.results.response", "controlActions.config.request", "controlActions.execute.request",
-            "plugin.metadata.response", "plugin.liveData.response", "plugin.control.add.request",
-            "plugin.track.add.request", "plugin.track.remove.request"
-    };
-
+ 
     @Before
     public void prepare() throws UnknownHostException {
-        logger.debug("Created routing keys for " + agentOperations.length + " agent and " + serverOperations.length + " server operations"); 
-        this.serverRoutingKeyPrefix += InetAddress.getLocalHost().getHostAddress();
+        logger.debug("Created routing keys for " + routings.getAgentOperations().length
+                + " agent and " + routings.getServerOperations().length + " server operations");
     }
 
     /**
@@ -66,24 +38,22 @@ public class RoutingKeyTests {
      * @throws UnsupportedEncodingException
      */
     @Test
-    public void agentRoutingKeyLength() throws UnsupportedEncodingException {
+    public void agentRoutingKeys() throws UnsupportedEncodingException {
         for (int count = 0; count < agents; count++) {
             String agentToken = SecurityUtil.generateRandomToken();
 
-            for (String operation : agentOperations) {
-                String routingKey = new StringBuilder(agentRoutingKeyPrefix).append(agentToken).append(".operations.").append(operation).toString();
-                //System.out.println(routingKey);
-                testKey(routingKey);
+            List<String> keys = routings.createAgentOperationRoutingKeys(agentToken);
+
+            for (String key : keys) { 
+                testKey(key);
             }
         }
     }
 
     @Test
-    public void serverRoutingKeyLength() {
-        for (String operation : serverOperations) {
-            String routingKey = new StringBuilder(serverRoutingKeyPrefix).append(".operations.").append(operation).toString();
-            //System.out.println(routingKey);
-            testKey(routingKey);
+    public void serverRoutingKeys() {
+        for (String key : routings.createServerOperationRoutingKeys()) {
+            testKey(key);
         }
     }
 
