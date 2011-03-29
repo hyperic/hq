@@ -252,12 +252,12 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
         }
     }
 
-    private void deployPlugin(String plugin, File dir) {
+    private void deployPlugin(String pluginName, File dir) {
         try {
-            productManager.deploymentNotify(plugin, dir);
-            pluginManager.markEnabled(plugin);
+            productManager.deploymentNotify(pluginName, dir);
+            pluginManager.markEnabled(pluginName);
         } catch (Exception e) {
-            log.error("Unable to deploy plugin '" + plugin + "'", e);
+            log.error("Unable to deploy plugin '" + pluginName + "'", e);
         }
     }
 
@@ -455,10 +455,7 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
                         agentManager.syncPluginToAgentsAfterCommit(pluginFile.getName());
                     }
                 } else if (FileOperation.DELETED.equals(fileEvent.getOperation())) {
-                    boolean undeployed = undeployPlugin(pluginFile);
-                    if (undeployed) {
-                        agentManager.removePluginFromAgentsInBackground(pluginFile.getName());
-                    }
+                    undeployPlugin(pluginFile);
                 } else if (FileOperation.UPDATED.equals(fileEvent.getOperation()) &&
                            !(pluginDirs.contains(fileEvent.getFileDetails().getFile()))) {
                     boolean undeployed = undeployPlugin(pluginFile);

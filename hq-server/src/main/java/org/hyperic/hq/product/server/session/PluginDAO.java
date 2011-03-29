@@ -26,6 +26,8 @@
 
 package org.hyperic.hq.product.server.session;
 
+import java.util.Collection;
+
 import org.hibernate.SessionFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.product.Plugin;
