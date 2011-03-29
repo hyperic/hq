@@ -6,6 +6,7 @@ import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.client.AgentCommandsClientFactory;
 import org.hyperic.hq.agent.client.LegacyAgentCommandsClientImpl;
 import org.hyperic.hq.amqp.admin.RabbitAdminTemplate;
+import org.hyperic.hq.amqp.core.AmqpCommandOperationService;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.bizapp.agent.client.SecureAgentConnection;
 import org.hyperic.hq.test.BaseInfrastructureTest;

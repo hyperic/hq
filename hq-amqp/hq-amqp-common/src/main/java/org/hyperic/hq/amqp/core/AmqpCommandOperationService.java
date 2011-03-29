@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.hq.amqp;
+package org.hyperic.hq.amqp.core;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

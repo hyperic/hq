@@ -36,7 +36,7 @@ import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.client.LegacyAgentCommandsClientImpl;
 import org.hyperic.hq.agent.server.AgentDaemon;
 import org.hyperic.hq.agent.server.LoggingOutputStream;
-import org.hyperic.hq.amqp.AmqpCommandOperationService;
+import org.hyperic.hq.amqp.core.AmqpCommandOperationService;
 import org.hyperic.hq.bizapp.agent.ProviderInfo;
 import org.hyperic.hq.bizapp.agent.commands.CreateToken_args;
 import org.hyperic.hq.bizapp.agent.commands.CreateToken_result;
@@ -108,7 +108,7 @@ public class AgentClient {
     private boolean             redirectedOutputs = false;
 
     public AgentClient(AgentConfig config, SecureAgentConnection conn){
-        this.agtCommands = new AmqpCommandOperationService(new LegacyAgentCommandsClientImpl(conn)); 
+        this.agtCommands = new AmqpCommandOperationService(new LegacyAgentCommandsClientImpl(conn));
         //this.agtCommands = new LegacyAgentCommandsClientImpl(conn);
         this.camCommands = new CommandsClient(conn);
         this.config      = config;

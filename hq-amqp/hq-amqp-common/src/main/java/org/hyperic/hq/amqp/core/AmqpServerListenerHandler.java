@@ -1,4 +1,4 @@
-package org.hyperic.hq.amqp;
+package org.hyperic.hq.amqp.core;
 
 import org.apache.log4j.Logger;
 import org.hyperic.hq.amqp.util.Operations;

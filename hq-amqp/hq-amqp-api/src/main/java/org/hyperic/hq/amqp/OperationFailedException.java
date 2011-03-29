@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.hq.amqp.core;
+package org.hyperic.hq.amqp;
 
 /**
  * @author Helena Edelson

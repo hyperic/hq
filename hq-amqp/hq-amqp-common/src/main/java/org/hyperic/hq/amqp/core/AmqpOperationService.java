@@ -1,4 +1,4 @@
-package org.hyperic.hq.amqp;
+package org.hyperic.hq.amqp.core;
 
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;

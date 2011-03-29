@@ -1,4 +1,4 @@
-package org.hyperic.hq.amqp;
+package org.hyperic.hq.amqp.core;
 
 /**
  * @author Helena Edelson

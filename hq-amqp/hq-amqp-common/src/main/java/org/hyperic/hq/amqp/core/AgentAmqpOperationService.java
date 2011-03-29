@@ -1,8 +1,7 @@
-package org.hyperic.hq.amqp;
+package org.hyperic.hq.amqp.core;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.QueueingConsumer;
-import org.hyperic.hq.amqp.core.SingleConnectionFactory;
 import org.hyperic.hq.amqp.util.Operations;
 
 import java.io.IOException;
