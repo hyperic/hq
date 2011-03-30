@@ -54,9 +54,9 @@
     </fieldset>
 	</div>
 	<div>
-    	<span id="cancel_btn"></span>
     	<span id="clear_schedule_btn"></span>
     	<span id="schedule_btn"></span>
+    	<span id="cancel_btn"></span>
 	</div>
 </div>
 
