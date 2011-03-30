@@ -46,6 +46,7 @@
 		function requestFavoriteResources() {
 			hqDojo.xhrGet({
 				url: "<html:rewrite action="/dashboard/ViewResourceHealth"/>",
+				handleAs: "json",
 				content: {
 					hq: (new Date()).getTime()
 				},

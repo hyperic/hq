@@ -198,8 +198,11 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
     }
 
     Long getNumAutoUpdatingAgents() {
-        final String hql = "select count(distinct agent) from AgentPluginStatus";
-        return (Long) getSession().createQuery(hql).uniqueResult();
+        final String sql = new StringBuilder(150)
+            .append("select count(distinct agent_id) from EAM_AGENT_PLUGIN_STATUS s ")
+            .append("where exists (select 1 from EAM_PLATFORM p where p.agent_id = s.agent_id)")
+            .toString();
+        return ((Number) getSession().createSQLQuery(sql).uniqueResult()).longValue();
     }
 
     @SuppressWarnings("unchecked")
@@ -260,9 +263,22 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
         return rtn;
     }
 
-    public Map<Agent, AgentPluginStatus> getPluginStatus(String pluginName) {
-        final String hql = "select id from AgentPluginStatus where pluginName = :name";
-        final List<Integer> list = getSession().createQuery(hql).setParameter("name", pluginName).list();
+    @SuppressWarnings("unchecked")
+    public Collection<AgentPluginStatus> getStatusByAgentAndFileNames(Integer agentId,
+                                                                      Collection<String> fileNames) {
+        final String hql =
+            "from AgentPluginStatus where agent.id = :agentId AND fileName in (:fileNames)";
+        return getSession().createQuery(hql)
+                           .setParameterList("fileNames", fileNames)
+                           .setInteger("agentId", agentId)
+                           .list();
+    }
+
+    public Map<Agent, AgentPluginStatus> getPluginStatusByFileName(String fileName) {
+        final String hql = "select id from AgentPluginStatus where fileName = :fileName";
+        @SuppressWarnings("unchecked")
+        final List<Integer> list =
+            getSession().createQuery(hql).setParameter("fileName", fileName).list();
         final Map<Agent, AgentPluginStatus> rtn = new HashMap<Agent, AgentPluginStatus>(list.size());
         for (final Integer sapsId : list) {
             final AgentPluginStatus status = get(sapsId);

@@ -182,8 +182,11 @@ implements AgentPluginUpdater, ApplicationListener<ContextRefreshedEvent>, Appli
             }
             public void execute() {
                 final AgentManager agentManager = Bootstrap.getBean(AgentManager.class);
+                // NOTE: AgentPluginStatus objects are removed when the agent restarts and
+                // doesn't check in a Plugin
+                pluginManager.updateAgentPluginStatusByFileNameInNewTran(
+                    AgentPluginStatusEnum.SYNC_IN_PROGRESS, agentId, pluginFileNames);
                 try {
-                    pluginManager.removeAgentPluginStatuses(agentId, pluginFileNames);
                     final Map<String, Boolean> result =
                         agentManager.agentRemovePlugins(overlord, agentId, pluginFileNames);
                     // only reboot the agent if we actually removed a plugin

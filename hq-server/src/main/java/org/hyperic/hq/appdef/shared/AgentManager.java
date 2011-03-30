@@ -479,9 +479,6 @@ public interface AgentManager {
     public void syncPluginToAgentsAfterCommit(String pluginFileName);
 
 // XXX javadoc!
-    public void removePluginFromAgentsInBackground(String pluginFileName);
-
-// XXX javadoc!
     public long getNumAutoUpdatingAgents();
 
 }
