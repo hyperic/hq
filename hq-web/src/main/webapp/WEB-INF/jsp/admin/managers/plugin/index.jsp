@@ -291,7 +291,7 @@
 			<li class="gridrow clear<c:if test="${index.count % 2 == 0}"> even</c:if>">
 				<span class="first column span-1">
 					<c:if test="${mechanismOn}">
-                    	<input type="checkbox" name="deleteId" value="${pluginSummary.id}" class="checkbox" />&nbsp; 
+                    	<input type="checkbox" value="${pluginSummary.id}" name="deleteId"/>&nbsp; 
 					</c:if>
 				</span>
 				<span class="column span-3">${pluginSummary.name}</span>
@@ -417,10 +417,8 @@
 			}
 				
 		    var deleteIdsString = "";
-			hqDojo.query(".checkbox").forEach(function(entry){
-				if(entry.checked){
+			hqDojo.query("input[type=checkbox]:checked").forEach(function(entry){
 					deleteIdsString+=entry.value+",";
-				}
 			});
 			if(deleteIdsString.length>1){
 				deleteIdsString = deleteIdsString.substr(0,deleteIdsString.length-1);
@@ -432,7 +430,6 @@
 				deleteIds: deleteIdsString
 			}
 			hqDojo.hash(hqDojo.objectToQuery(hashObj));
-			
 			
 			hqDojo.xhrGet(infoXhrArgs);
 			hqDojo.publish("refreshDataGrid");
@@ -617,7 +614,7 @@
 			
 			hqDojo.connect(hqDojo.byId("uploadButton"), "onclick", function(e){
 				var fileTypeCorrect=true;
-				var pluginList = hqDojo.query("input[type='file']", hqDojo.byId("hqDijit_FileUploaderForm_0"));
+				var pluginList = hqDojo.query("input[type=file]", hqDojo.byId("hqDijit_FileUploaderForm_0"));
 				var newPluginList = pluginList.slice(0,pluginList.length-1);
 					
 				newPluginList.forEach(function(input) {
@@ -656,7 +653,7 @@
 			}
 			
 			hqDojo.connect(hqDojo.byId("showRemoveConfirmationButton"), "onclick", function(e) {
-				var checkedPlugins = hqDojo.filter(hqDojo.query(".checkbox"), function(e){ return e.checked; });
+				var checkedPlugins = hqDojo.filter(hqDojo.query("input[type=checkbox]"), function(e){ return e.checked; });
 				if(checkedPlugins.length>0){
 					hqDijit.byId("removePanelDialog").show();
 				}else{
@@ -745,9 +742,8 @@
                 		if(${mechanismOn}){
 	                		var input = hqDojo.create("input", {
     	            			"type": "checkbox",
-        	        			"value": summary.id,
-            	    			"class": "checkbox",
-                				"name":"deleteId"
+    	            			"name": "deleteId",
+        	        			"value": summary.id
                 			}, span);
                 		}
                 		span = hqDojo.create("span", {
@@ -819,7 +815,7 @@
 					var hashObj = hqDojo.queryToObject(hqDojo.hash());
 					if(hashObj.deleteIds!=""){
 						hqDojo.forEach(hashObj.deleteIds.split(","),function(pluginId){
-							var checkbox = hqDojo.query(".checkbox[value$="+pluginId+"]");
+							var checkbox = hqDojo.query("input[value='"+pluginId+"']");
 							if(checkbox[0]!=null){
 								checkbox[0].checked="true";
 							}
