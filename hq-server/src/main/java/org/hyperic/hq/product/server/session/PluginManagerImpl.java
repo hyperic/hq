@@ -350,6 +350,9 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         final Map<Integer, Map<AgentPluginStatusEnum, Integer>> rtn =
             new HashMap<Integer, Map<AgentPluginStatusEnum, Integer>>();
         for (final AgentPluginStatus status : statuses) {
+            if (status.getAgent().getPlatforms().isEmpty()) {
+                continue;
+            }
             final String name = status.getPluginName();
             final Plugin plugin = pluginsByName.get(name);
             if (plugin == null) {
