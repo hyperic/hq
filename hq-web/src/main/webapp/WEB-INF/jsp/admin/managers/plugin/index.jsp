@@ -121,10 +121,12 @@
 	
 	#uploadPanel {
 		width: 400px;
+		text-align: left;
 	}
 
 	#removeErrorPanel, #confirmationPanel {
 		width: 400px;
+		text-align: left;
 	}
 	#removeErrorPanel div{
 		text-align: right;
@@ -201,7 +203,8 @@
 	}
 	#showStatusPanelDialog{
 		width: 505px;
-		height: 400px;
+		height: 410px;
+		text-align: left;
 	}
 	
 	#statusButtonBar {
@@ -241,7 +244,10 @@
 	#selectedFileList{
 		width:400px;
 	}
+	.uploaderInsideNode{
+	}
 	#selectFileBtn{
+		
 		width:90px;
 		float:right;
 	}
@@ -351,7 +357,7 @@
 				<div id="selectedFileList"></div>
 				<p id="afterSelectFileInstruction"><fmt:message key="admin.managers.plugin.upload.dialog.instruction.after" /></p>
 			</p>
-			<p id="validationMessage" class="error" style="opacity:0;">&nbsp;</p>
+			<p id="validationMessage" class="error" style="opacity:0; filter:alpha(opacity=0);zoom: 1;">&nbsp;</p>
 			<div id="uploadButtonBar">
 				<input id="uploadButton" type="button" value="<fmt:message key='admin.managers.plugin.button.upload' />" /> &nbsp;
 				<a href="#" class="cancelLink"><fmt:message key="admin.managers.plugin.button.cancel" /></a>
@@ -405,6 +411,7 @@
 		
 		function refreshPage(){
 			var infoXhrArgs={
+				preventCache:true,
 				url:"<spring:url value='/app/admin/managers/plugin/info'/>",
 				handleAs:"json",
 				headers: { 
@@ -462,6 +469,7 @@
 			var agentListUl = hqDojo.byId("agentList");
 			var searchWord = hqDojo.byId("searchText").value;
 			var xhrArgs = {
+					preventCache:true,
 					url: "/app/admin/managers/plugin/status/"+pluginId+"?searchWord="+searchWord,
 					load: function(response) {
 						hqDojo.empty("agentList");
@@ -664,6 +672,7 @@
 
 			hqDojo.connect(hqDojo.byId("removeButton"), "onclick", function(e) {
 				var xhrArgs = {
+					preventCache:true,
 					form: hqDojo.byId("deleteForm"),
 					url: "<spring:url value='/app/admin/managers/plugin/delete' />",
 					load: function(response) {
@@ -719,7 +728,8 @@
 		
 		hqDojo.subscribe("refreshDataGrid", function() {
 			hqDojo.xhrGet({
-				url: "<spring:url value="/app/admin/managers/plugin/list" />",
+				preventCache:true,
+				url: "<spring:url value='/app/admin/managers/plugin/list' />",
 				handleAs: "json",
 				headers: { 
                 	"Content-Type": "application/json",
