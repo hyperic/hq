@@ -151,6 +151,9 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
                     .list();
     }
     
+    /**
+     * @return {@link Collection} of {@link Object[]} where [0] = agentId and [1] = pluginName
+     */
     @SuppressWarnings("unchecked")
     Collection<Object[]> getPluginsNotOnAllAgents() {
         final String sql = new StringBuilder(256)
@@ -164,7 +167,7 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
 			.toString();
         return getSession().createSQLQuery(sql)
                            .addScalar("id", Hibernate.INTEGER)
-                           .addScalar("name", Hibernate.INTEGER)
+                           .addScalar("name", Hibernate.STRING)
                            .list();
     }
 

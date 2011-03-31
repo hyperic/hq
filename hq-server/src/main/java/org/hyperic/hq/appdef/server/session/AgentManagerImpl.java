@@ -1201,6 +1201,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         final int size = pluginFileNames.size();
         final Map<String, String> pathToFileName = new HashMap<String, String>(size);
         final Collection<String> filenames = new ArrayList<String>(size);
+        final boolean debug = log.isDebugEnabled();
         for (final String fileName : pluginFileNames) {
             if (fileName == null) {
                 continue;
@@ -1208,6 +1209,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
             final String path= AGENT_BUNDLE_HOME_PROP + "/pdk/plugins/" + fileName;
             filenames.add(path);
             pathToFileName.put(path, fileName);
+            if (debug) log.debug("removing " + path + " from agent=" + agent);
         }
         final Map<String, Boolean> result = agentRemoveFiles(subject, agent, filenames);
         final Map<String, Boolean> rtn = new HashMap<String, Boolean>(size);
@@ -1476,13 +1478,13 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         final Collection<Object[]> objs = agentPluginStatusDAO.getPluginsNotOnAllAgents();
         for (final Object[] obj : objs) {
             final Integer agentId = (Integer) obj[0];
-            final Integer pluginId = (Integer) obj[1];
+            final String pluginName = (String) obj[1];
             Collection<Plugin> tmp;
             if (null == (tmp = updateMap.get(agentId))) {
                 tmp = new HashSet<Plugin>();
                 updateMap.put(agentId, tmp);
             }
-            tmp.add(pluginDAO.findById(pluginId));
+            tmp.add(pluginDAO.findByName(pluginName));
         }
     }
 
