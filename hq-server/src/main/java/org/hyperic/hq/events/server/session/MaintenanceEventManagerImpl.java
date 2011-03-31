@@ -64,9 +64,9 @@ public class MaintenanceEventManagerImpl implements MaintenanceEventManager {
     }
 
     /**
-     * Get currently running maintenance events
+     * Get current maintenance events
      */
-    public List<MaintenanceEvent> getRunningMaintenanceEvents()
+    public List<MaintenanceEvent> getMaintenanceEvents(AuthzSubject subject, String state)
         throws SchedulerException {
         return Collections.EMPTY_LIST;
     }

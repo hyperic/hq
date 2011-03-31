@@ -51,9 +51,11 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
@@ -111,6 +113,8 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
 
     private static final long MAX_DATA_BACKLOG_TIME = 7 * MeasurementConstants.DAY;
 
+    private AuthzSubjectManager authzSubjectManager;
+
     private MeasurementManager measurementManager;
 
     private ResourceGroupManager groupManager;
@@ -128,11 +132,13 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     private ConcurrentStatsCollector concurrentStatsCollector;
     
     @Autowired
-    public AvailabilityManagerImpl(ResourceManager resourceManager, ResourceGroupManager groupManager, MessagePublisher messenger,
+    public AvailabilityManagerImpl(AuthzSubjectManager authzSubjectManager, ResourceManager resourceManager, 
+    							   ResourceGroupManager groupManager, MessagePublisher messenger,
                                    AvailabilityDataDAO availabilityDataDAO, MeasurementDAO measurementDAO,
                                    MessagePublisher messagePublisher, RegisteredTriggers registeredTriggers, AvailabilityCache availabilityCache,
                                    ConcurrentStatsCollector concurrentStatsCollector) {
-        this.resourceManager = resourceManager;
+    	this.authzSubjectManager = authzSubjectManager;
+    	this.resourceManager = resourceManager;
         this.groupManager = groupManager;
         this.messenger = messenger;
         this.availabilityDataDAO = availabilityDataDAO;
@@ -286,9 +292,12 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         Map<Integer, Measurement> measMap = new HashMap<Integer, Measurement>();
         
         try {
+    		AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
+
             // TODO: Resolve circular dependency and autowire MaintenanceEventManager
             List<MaintenanceEvent> events = PermissionManagerFactory.getInstance()
-                .getMaintenanceEventManager().getRunningMaintenanceEvents();
+                .getMaintenanceEventManager().getMaintenanceEvents(overlord, 
+                		MaintenanceEvent.STATE_RUNNING);
 
             for (MaintenanceEvent event : events) {
             	AppdefEntityID entityId = event.getAppdefEntityID();
