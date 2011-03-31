@@ -150,6 +150,26 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
         return query.addScalar("id", Hibernate.INTEGER)
                     .list();
     }
+    
+    /**
+     * @return {@link Collection} of {@link Object[]} where [0] = agentId and [1] = pluginName
+     */
+    @SuppressWarnings("unchecked")
+    Collection<Object[]> getPluginsNotOnAllAgents() {
+        final String sql = new StringBuilder(256)
+            .append("SELECT distinct a.id,p.name from EAM_PLUGIN p ")
+            .append("JOIN EAM_AGENT a ")
+			.append("JOIN EAM_PLATFORM pl on pl.agent_id = a.id ")
+			.append("WHERE not exists ( ")
+			.append("    SELECT 1 FROM EAM_AGENT_PLUGIN_STATUS s ")
+			.append("    WHERE a.id = s.agent_id and s.plugin_name = p.name ")
+			.append(")")
+			.toString();
+        return getSession().createSQLQuery(sql)
+                           .addScalar("id", Hibernate.INTEGER)
+                           .addScalar("name", Hibernate.STRING)
+                           .list();
+    }
 
     @SuppressWarnings("unchecked")
     Collection<Integer> getPluginsNotOnAgent(int agentId) {
@@ -207,8 +227,18 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
 
     @SuppressWarnings("unchecked")
     public Collection<Agent> getAutoUpdatingAgents() {
-        final String hql = "select distinct agent from AgentPluginStatus";
-        return getSession().createQuery(hql).list();
+        final String hql = new StringBuilder(150)
+            .append("select distinct agent_id from EAM_AGENT_PLUGIN_STATUS s ")
+            .append("where exists (select 1 from EAM_PLATFORM p where p.agent_id = s.agent_id)")
+            .toString();
+        final List<Integer> ids = getSession().createSQLQuery(hql)
+                                              .addScalar("agent_id", Hibernate.INTEGER)
+                                              .list();
+        final List<Agent> rtn = new ArrayList<Agent>(ids.size());
+        for (final Integer agentId : ids) {
+            rtn.add(agentDAO.findById(agentId));
+        }
+        return rtn;
     }
 
     public void removeAgentPluginStatuses(Integer agentId, Collection<String> pluginFileNames) {
