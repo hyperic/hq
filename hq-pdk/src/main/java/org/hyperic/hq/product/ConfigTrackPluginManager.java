@@ -25,19 +25,56 @@
 
 package org.hyperic.hq.product;
 
+import java.io.File;
 import java.util.Properties;
+
+import org.hyperic.hq.agent.AgentConfig;
+
+import com.vmware.frantic.fsmonitor.FileMonitor;
+import com.vmware.frantic.fsmonitor.IFileMonitor;
+import com.vmware.frantic.fsmonitor.MonitorStatus;
 
 public class ConfigTrackPluginManager extends TrackEventPluginManager {
 
+    private static IFileMonitor _fileMonitor = FileMonitor.getInstance();
+
      public ConfigTrackPluginManager() {
-        super();
+        super();        
+        initMonitor();
     }
 
-    public ConfigTrackPluginManager(Properties props) {
-        super(props);
+     public ConfigTrackPluginManager(Properties props) {
+         super(props);
+         initMonitor();
+     }
+
+    private void initMonitor() {
+        // determine the data dir for tracking local data
+        final String dataDir = getProperty(AgentConfig.PROP_DATADIR[0],
+            AgentConfig.PROP_DATADIR[1]);
+        final File f = new File(dataDir);
+
+        // get property for max diff size
+        _fileMonitor.setAppDataDir(f.getAbsolutePath());
+        final String maxDiffSize = getProperty("hq.plugins.configmon.maxdiff", "5012");
+        long size = -1;
+        try{
+            size = Long.valueOf(maxDiffSize).longValue();
+        } catch (NumberFormatException e) {
+            log.error(e.getMessage(), e);
+        }
+        _fileMonitor.setMaxDiffSize(size);
+
+        // start the monitor, no events will be tracked until tracked folders are defined.
+        if (!(MonitorStatus.STARTED.equals(_fileMonitor.getStatus())))
+            _fileMonitor.start();
     }
 
     public String getName() {
         return ProductPlugin.TYPE_CONFIG_TRACK;
+    }
+    
+    public IFileMonitor getFileMonitor(){
+        return _fileMonitor;
     }
 }
