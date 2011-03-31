@@ -27,6 +27,7 @@ package org.hyperic.hq.measurement.agent.client;
 
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
+import org.hyperic.hq.agent.server.ConfigStorage.Key;
 import org.hyperic.hq.measurement.agent.commands.DeleteProperties_args;
 import org.hyperic.hq.measurement.agent.commands.GetMeasurements_args;
 import org.hyperic.hq.measurement.agent.commands.GetMeasurements_result;
@@ -93,7 +94,7 @@ public interface MeasurementCommandsClient {
     void removeTrackPlugin(String id, String pluginType)
             throws AgentRemoteException, AgentConnectionException;
     
-    void activateTrackPlugin(String pluginType, String installPath, ConfigResponse configResponse)
+    void activateTrackPlugin(String pluginType, String installPath, ConfigResponse configResponse, Key key)
             throws AgentRemoteException, AgentConnectionException;
 
 }

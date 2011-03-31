@@ -45,11 +45,14 @@ public class TrackEvent implements java.io.Serializable {
     //see AgentDListProvider.RECSIZE
     public static final int MESSAGE_MAXLEN = 3500;
     public static final int SOURCE_MAXLEN  = 100;
+    public static final int TYPE_MAXLEN  = 10;
 
     private AppdefEntityID id;  // The appdef id.
     private long time;          // Timestamp of when the event was recorded.
     private int level;          // Log level. (see LogConstants.java)
+    private String type;
     private String source;      // The source (file, class, etc)
+    private String newSource;      // Additional source (file, class, etc) - for cases like rename
     private String message;     // Message to report
 
     public TrackEvent(AppdefEntityID id, long time, int level,
@@ -59,6 +62,19 @@ public class TrackEvent implements java.io.Serializable {
         this.level = level;
         this.source = source;
         this.message = message;
+    }
+    public TrackEvent(AppdefEntityID id, long time, int level, String type,
+                      String source, String newSource, String message) {
+        this(id, time, level, source, message);
+        this.type = type;
+        this.newSource = newSource;
+    }
+    
+    public TrackEvent(String id, long time, int level, String type,
+                      String source, String newSource, String message) {
+        this(id, time, level, source, message);
+        this.type = type;
+        this.newSource = newSource;
     }
 
     public TrackEvent(String id, long time, int level,
@@ -72,6 +88,14 @@ public class TrackEvent implements java.io.Serializable {
     
     public String getSource() {
         return source;
+    }
+
+    public String getNewSource() {
+        return newSource;
+    }
+
+    public String getType() {
+        return type;
     }
 
     public String getMessage() {
@@ -111,7 +135,9 @@ public class TrackEvent implements java.io.Serializable {
         dOs.writeInt(this.id.getType());
         dOs.writeLong(time);
         dOs.writeInt(level);
+        dOs.writeUTF(truncate(type, TYPE_MAXLEN));
         dOs.writeUTF(truncate(source, SOURCE_MAXLEN));
+        dOs.writeUTF(truncate(newSource, SOURCE_MAXLEN));
         dOs.writeUTF(truncate(message, MESSAGE_MAXLEN));
 
         return Base64.encode(bOs.toByteArray());
@@ -122,28 +148,30 @@ public class TrackEvent implements java.io.Serializable {
     {
         ByteArrayInputStream bIs;
         DataInputStream dIs;
-        String source, message;
-        int id, type, level;
+        String source, newSource,  message, eventType;
+        int id, entityIdType, level;
         long time;
 
         bIs = new ByteArrayInputStream(Base64.decode(data));
         dIs = new DataInputStream(bIs);
 
         id = dIs.readInt();
-        type = dIs.readInt();
+        entityIdType = dIs.readInt();
         time = dIs.readLong();
         level = dIs.readInt();
+        eventType = dIs.readUTF();
         source = dIs.readUTF();
+        newSource = dIs.readUTF();
         message = dIs.readUTF();
 
-        return new TrackEvent(new AppdefEntityID(type, id),
-                              time, level, source, message);
+        return new TrackEvent(new AppdefEntityID(entityIdType, id),
+                              time, level, eventType, source, newSource, message);
     }
 
     // XXX: for debuging purposes
     public String toString() {
-        return id + ": msg=" + message + " file=" +
-            source;
+        return id  + ": msg=" + message + " type="+ type + " file=" +
+            source + " newFile=" + newSource;
     }
 }
 

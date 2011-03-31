@@ -29,21 +29,20 @@ import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentRemoteValue;
 import org.hyperic.hq.agent.client.AgentConnection;
+import org.hyperic.hq.agent.server.ConfigStorage.Key;
 import org.hyperic.hq.measurement.agent.MeasurementCommandsAPI;
 import org.hyperic.hq.measurement.agent.commands.DeleteProperties_args;
 import org.hyperic.hq.measurement.agent.commands.DeleteProperties_result;
 import org.hyperic.hq.measurement.agent.commands.GetMeasurements_args;
 import org.hyperic.hq.measurement.agent.commands.GetMeasurements_result;
-import org.hyperic.hq.measurement.agent.commands.TrackPluginActivate_args;
-import org.hyperic.hq.measurement.agent.commands.TrackPluginAdd_args;
-import org.hyperic.hq.measurement.agent.commands.TrackPluginRemove_args;
 import org.hyperic.hq.measurement.agent.commands.ScheduleMeasurements_args;
 import org.hyperic.hq.measurement.agent.commands.ScheduleMeasurements_result;
 import org.hyperic.hq.measurement.agent.commands.SetProperties_args;
 import org.hyperic.hq.measurement.agent.commands.SetProperties_result;
+import org.hyperic.hq.measurement.agent.commands.TrackPluginAdd_args;
+import org.hyperic.hq.measurement.agent.commands.TrackPluginRemove_args;
 import org.hyperic.hq.measurement.agent.commands.UnscheduleMeasurements_args;
 import org.hyperic.hq.measurement.agent.commands.UnscheduleMeasurements_result;
-
 import org.hyperic.util.config.ConfigResponse;
 
 /**
@@ -173,13 +172,11 @@ public class LegacyMeasurementCommandsClientImpl implements MeasurementCommandsC
     }
 
     public void activateTrackPlugin(String pluginType, String installPath,
-                                    ConfigResponse configResponse) throws AgentRemoteException,
+                                    ConfigResponse configResponse, Key key) throws AgentRemoteException,
         AgentConnectionException {
-        TrackPluginActivate_args args = new TrackPluginActivate_args();
-        args.setConfig(pluginType, installPath, configResponse);
 
-        AgentRemoteValue val = this.agentConn.sendCommand(
+/*        AgentRemoteValue val = this.agentConn.sendCommand(
             this.verAPI.command_pushRuntimeDiscoveryConfig,
             this.verAPI.getVersion(), args);
-    }
+*/    }
 }

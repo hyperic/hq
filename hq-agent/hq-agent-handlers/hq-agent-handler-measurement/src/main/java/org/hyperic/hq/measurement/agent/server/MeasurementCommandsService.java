@@ -31,9 +31,12 @@ import java.util.Vector;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentRemoteException;
+import org.hyperic.hq.agent.AgentRemoteValue;
 import org.hyperic.hq.agent.PropertyPair;
 import org.hyperic.hq.agent.server.AgentStorageException;
 import org.hyperic.hq.agent.server.AgentStorageProvider;
+import org.hyperic.hq.agent.server.ConfigStorage;
+import org.hyperic.hq.agent.server.ConfigStorage.Key;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.measurement.agent.ScheduledMeasurement;
 import org.hyperic.hq.measurement.agent.client.MeasurementCommandsClient;
@@ -43,7 +46,6 @@ import org.hyperic.hq.measurement.agent.commands.GetMeasurements_result;
 import org.hyperic.hq.measurement.agent.commands.ScheduleMeasurements_args;
 import org.hyperic.hq.measurement.agent.commands.ScheduleMeasurements_metric;
 import org.hyperic.hq.measurement.agent.commands.SetProperties_args;
-import org.hyperic.hq.measurement.agent.commands.TrackPluginActivate_args;
 import org.hyperic.hq.measurement.agent.commands.TrackPluginAdd_args;
 import org.hyperic.hq.measurement.agent.commands.TrackPluginRemove_args;
 import org.hyperic.hq.measurement.agent.commands.UnscheduleMeasurements_args;
@@ -76,6 +78,7 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
     private final AgentStorageProvider _storage;
     private final Map _validProps;
     private final MeasurementSchedule _schedStorage;
+    private final ConfigStorage _folderMonitorStorage;
     private final MeasurementPluginManager _pluginManager;
     private final LogTrackPluginManager _ltPluginManager;
     private final ConfigTrackPluginManager _ctPluginManager;
@@ -85,6 +88,7 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
     public MeasurementCommandsService(AgentStorageProvider storage, 
                                       Map validProps, 
                                       MeasurementSchedule schedStorage, 
+                                      ConfigStorage folderMonitorStorage,
                                       MeasurementPluginManager pluginManager, 
                                       LogTrackPluginManager ltPluginManager, 
                                       ConfigTrackPluginManager ctPluginManager, 
@@ -92,6 +96,7 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
         _storage = storage;
         _validProps = validProps;
         _schedStorage = schedStorage;
+        _folderMonitorStorage = folderMonitorStorage;
         _pluginManager = pluginManager;
         _ltPluginManager = ltPluginManager;
         _ctPluginManager = ctPluginManager;
@@ -398,30 +403,45 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
         _scheduleObject.unscheduleMeasurements(id);
     }
 
-    public void activateTrackPlugin(final TrackPluginActivate_args ta)
+    private static final String PROP_TYPE_NAME = "entity.typeName";
+    private static final String INSTALL_PATH = "config.installpath";
+
+    public void activateTrackPlugin(final AgentRemoteValue rv)
         throws AgentRemoteException{
-        final String pluginType = ta.getType();
-        final String installPath = ta.getInstallPath();
-        final ConfigResponse configResponse = ta.getConfigResponse();
-        activateTrackPlugin(pluginType, installPath, configResponse);
+        final Key key = _folderMonitorStorage.getKey(rv);
+        ConfigResponse cr = new ConfigResponse();
+        ConfigStorage.copy(ConfigStorage.NO_PREFIX, rv, ConfigStorage.NO_PREFIX, cr);
+
+        activateTrackPlugin(key, cr);
     }
-    
-    public void activateTrackPlugin(String pluginType, String installPath, ConfigResponse configResponse)
+
+    public void activateTrackPlugin(Key key, ConfigResponse configResponse) throws AgentRemoteException{
+        final String pluginType =  configResponse.getValue(PROP_TYPE_NAME);
+        final String installPath =  configResponse.getValue(INSTALL_PATH);       
+        activateTrackPlugin(pluginType, installPath, configResponse, key);
+    }
+
+    public void activateTrackPlugin(String pluginType, String installPath, ConfigResponse configResponse, Key key)
             throws AgentRemoteException {
-        GenericPlugin plugin;
+        GenericPlugin plugin = null;
         try {
             plugin = _ctPluginManager.getPlugin(pluginType);
         } catch (PluginNotFoundException e) {
-            plugin = null;
+            _log.info(e.getMessage(), e);
         }   
         if (plugin == null)
-            // log error
             return;
         
         if (!(plugin instanceof FileChangeTrackPlugin))
-            // log error
+            // TODO: log?
             return;
-        
+                
+        try{
+            _folderMonitorStorage.put(key, configResponse);
+        } catch (AgentStorageException e) {
+            _log.error(e.getMessage(), e);
+        }
+
         try{
             _ctPluginManager.updatePlugin(plugin, configResponse);
         } catch (PluginNotFoundException e) {
@@ -432,5 +452,6 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
             _log.error(e.getMessage(), e);
             throw new AgentRemoteException(e.getMessage());
         }
-}
+    }
+
 }

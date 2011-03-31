@@ -181,6 +181,15 @@
     <plugin type="log_track"
             class="org.hyperic.hq.product.Log4JLogTrackPlugin"/>
 
+    <plugin type="config_track"
+            class="org.hyperic.hq.product.FileChangeTrackPlugin">
+            <template>
+            	<!--folder recursive='true' path='/conf' filter='wrapper.conf'/-->
+            	<folder path="wtpwebapps" recursive="true" filter=".*.txt"/>
+            	<!-- folder recursive='true' path='/webapps' /-->
+            </template>
+    </plugin>
+
     <property name="DEFAULT_PROGRAM"
               value="bin/catalina.sh"/>
 

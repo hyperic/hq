@@ -43,6 +43,8 @@ public class ConfigChangedEvent extends AbstractEvent
     private AppdefEntityID resource;
     private String message;
     private String source;
+    private String newSource;
+    private String type;
     
     public ConfigChangedEvent(TrackEvent te) {
         super.setTimestamp(te.getTime());
@@ -50,6 +52,8 @@ public class ConfigChangedEvent extends AbstractEvent
         setResource(te.getAppdefId());
         setMessage(te.getMessage());
         setSource(te.getSource());
+        setNewSource(te.getNewSource());
+        setType(te.getType());
     }
 
     public AppdefEntityID getResource() {
@@ -72,6 +76,22 @@ public class ConfigChangedEvent extends AbstractEvent
         return source;
     }
     
+    public String getNewSource() {
+        return newSource;
+    }
+
+    public void setNewSource(String newSource) {
+        this.newSource = newSource;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
     public void setSource(String src) {
         this.source = src;
     }
