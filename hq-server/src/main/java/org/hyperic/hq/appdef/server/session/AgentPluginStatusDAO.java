@@ -157,8 +157,7 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
     @SuppressWarnings("unchecked")
     Collection<Object[]> getPluginsNotOnAllAgents() {
         final String sql = new StringBuilder(256)
-            .append("SELECT distinct a.id,p.name from EAM_PLUGIN p ")
-            .append("JOIN EAM_AGENT a ")
+            .append("SELECT distinct a.id,p.name from EAM_PLUGIN p, EAM_AGENT a ")
 			.append("JOIN EAM_PLATFORM pl on pl.agent_id = a.id ")
 			.append("WHERE not exists ( ")
 			.append("    SELECT 1 FROM EAM_AGENT_PLUGIN_STATUS s ")
