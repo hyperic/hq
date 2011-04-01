@@ -53,10 +53,12 @@
         <input type="text" name="to_time" id="to_time" />
     </fieldset>
 	</div>
-	<div>
+	<div style="text-align:right;">
     	<span id="clear_schedule_btn"></span>
     	<span id="schedule_btn"></span>
-    	<span id="cancel_btn"></span>
+		<span style="vertical-align:middle;padding-left:5px" class="maintenanceLink">
+			<a href="#" id="maintenance_cancel_link_<c:out value='${resource.id}'/>"><fmt:message key="resource.group.MaintenanceWindow.Cancel"/></a>
+		</span>
 	</div>
 </div>
 
@@ -123,8 +125,7 @@ if (eeAddToGroupMenuElement) {
 hqDojo.ready(function(){
     maintenance_<c:out value="${resource.id}"/> = new hyperic.maintenance_schedule({
         "title": "<fmt:message key="resource.group.MaintenanceWindow.Title"/>", 
-        "resourceId": <c:out value="${resource.id}"/>, 
-        "entityId": "<c:out value="${resource.entityId}"/>", 
+        "appdefentityId": "<c:out value="${resource.entityId}"/>", 
         "resourceName": "<c:out value="${resource.name}"/>",
         "url": "/app/resource/<c:out value='${resource.entityId}' />/downtime"
     });
