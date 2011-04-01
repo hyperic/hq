@@ -8,9 +8,9 @@
     		handleAs: "json-comment-filtered",
     		load: function(response, args) {
       			hqDojo.byId('userCPU').innerHTML       = response.sysUserCpu;
-			    hqDojo.style('userCPUBar', 'width')    = response.sysUserCpu;
+			    hqDojo.style('userCPUBar', 'width', response.sysUserCpu) ;
 			    hqDojo.byId('sysCPU').innerHTML        = response.sysSysCpu;
-			    hqDojo.style('sysCPUBar', 'width')     = response.sysSysCpu;
+			    hqDojo.style('sysCPUBar', 'width', response.sysSysCpu);
 			    hqDojo.byId('niceCPU').innerHTML       = response.sysNiceCpu;
 			    hqDojo.byId('idleCPU').innerHTML       = response.sysIdleCpu;
 			    hqDojo.byId('waitCPU').innerHTML       = response.sysWaitCpu;
@@ -19,11 +19,11 @@
 			    hqDojo.byId('loadAvg15').innerHTML     = response.loadAvg15;
 			    hqDojo.byId('totalMem').innerHTML      = response.totalMem;
 			    hqDojo.byId('usedMem').innerHTML       = response.usedMem;
-			    hqDojo.style('usedMemBar', 'width')    = response.percMem;
+			    hqDojo.style('usedMemBar', 'width',response.percMem);
 			    hqDojo.byId('freeMem').innerHTML       = response.freeMem;
 			    hqDojo.byId('totalSwap').innerHTML     = response.totalSwap;
 			    hqDojo.byId('usedSwap').innerHTML      = response.usedSwap;
-			    hqDojo.style('usedSwapBar', 'width')   = response.percSwap;
+			    hqDojo.style('usedSwapBar', 'width', response.percSwap);
 			    hqDojo.byId('freeSwap').innerHTML      = response.freeSwap;
 			    hqDojo.byId('pid').innerHTML           = response.pid;
 			    hqDojo.byId('procStartTime').innerHTML = response.procStartTime;
@@ -32,13 +32,13 @@
 			    hqDojo.byId('procMemRes').innerHTML    = response.procMemRes;
 			    hqDojo.byId('procMemShare').innerHTML  = response.procMemShare;
 			    hqDojo.byId('procCpu').innerHTML       = response.procCpu;
-			    hqDojo.style('procCpuBar', 'width')    = response.procCpu;
+			    hqDojo.style('procCpuBar', 'width', response.procCpu);
 			    hqDojo.byId('sysPercCpu').innerHTML    = response.sysPercCpu;
-			    hqDojo.style('sysPercCpuBar', 'width') = response.sysPercCpu;
+			    hqDojo.style('sysPercCpuBar', 'width', response.sysPercCpu);
 			    hqDojo.byId('percMem').innerHTML       = response.percMem;
-			    hqDojo.style('percMemBar', 'width')    = response.percMem;
+			    hqDojo.style('percMemBar', 'width', response.percMem);
 			    hqDojo.byId('percSwap').innerHTML      = response.percSwap;
-			    hqDojo.style('percSwapBar', 'width')   = response.percSwap;
+			    hqDojo.style('percSwapBar', 'width', response.percSwap);
 			    hqDojo.byId('jvmTotalMem').innerHTML   = response.jvmTotalMem
 			    hqDojo.byId('jvmFreeMem').innerHTML    = response.jvmFreeMem
 			    hqDojo.byId('jvmMaxMem').innerHTML     = response.jvmMaxMem
