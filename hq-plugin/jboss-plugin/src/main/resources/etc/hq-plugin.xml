@@ -1566,7 +1566,7 @@
             <plugin type="control"
               class="JBossStateServiceControlPlugin"/>
 
-            <actions include="stop,start,removeAllMessages"/>
+            <actions include="stop,start"/>
 
             <metric name="Availability"
             template="${OBJECT_NAME}:${alias}"
@@ -1654,6 +1654,10 @@
             <metric name="Durable Message Count" alias="DurableMessageCount" category="THROUGHPUT" indicator="true"/>
             <metric name="NonDurableMessageCount" alias="NonDurableMessageCount" category="THROUGHPUT"/>
         </service>
-
+       <service name="WebApp" internal="true">
+            <property name="CONTROL_OBJECT_NAME"
+                value="jboss.web:j2eeType=WebModule,name=//localhost%path%,J2EEApplication=none,J2EEServer=none"/>
+            <plugin type="control" class="JBoss6StateServiceControlPlugin"/>
+        </service>
     </server>
 </plugin>
