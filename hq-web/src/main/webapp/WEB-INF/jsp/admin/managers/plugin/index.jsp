@@ -42,8 +42,13 @@
 	#uploadButtonBar{
 		text-align: right;
 	}
+
+	
+	
 	#pluginManagerPanel {
 		padding: 0.5em 1.5em;
+		width:90%;
+		min-width:400px;
 	}
 	
 	#pluginManagerPanel span a {
@@ -59,7 +64,6 @@
 	}
 	
 	#pluginManagerPanel .actionbar {
-		padding: 0.25em 1em;
 		background: url("/images/4.0/backgrounds/table_header_large.png") repeat-x 0 0 transparent;
 		overflow: hidden;
 		border: 1px solid gray;
@@ -73,6 +77,10 @@
 		margin-right: 0.5em;
 	}
 	
+	#pluginManagerPanel .actionbar input[type="button"]{
+		margin: 0.25em 1em;
+	}
+	
 	#pluginManagerPanel ul {
 		margin: 0;
 		padding: 0;
@@ -82,9 +90,11 @@
 		border-top: 0;
 		border-bottom: 0;
 		overflow-y: scroll;
+		overflow-x: hidden;
 		height: 400px;
+		
 	}
-	
+
 	#pluginManagerPanel .gridheader {
 		background: url("/images/4.0/backgrounds/table_header_large.png") repeat-x 0 0 transparent;
 		overflow: hidden;
@@ -267,10 +277,22 @@
 	.infoIcon{
 		width:12px;
 	}
-	.span-status{
-		width:120px;
-	}
 
+    #pluginManagerPanel .gridheader, #pluginManagerPanel .gridrow, 
+    	#pluginManagerPanel .actionbar, #pluginManagerPanel ul{
+    	min-width:980px;
+	}
+	.span-small{
+		width:10%;
+	}
+	.span-med{
+		width:15%;
+	}
+	.span-status{
+		min-width: 120px;
+		width:10%;
+	}
+deleteForm
 </style>
 <section id="pluginManagerPanel" class="container top">
 	<h1><fmt:message key="admin.managers.plugin.title" /></h1>
@@ -282,11 +304,11 @@
 	
 	<div class="gridheader clear">
 		<span class="first column span-1">&nbsp;</span>
-		<span class="column span-3"><fmt:message key="admin.managers.plugin.column.header.product.plugin" /></span>
-		<span class="column span-3"><fmt:message key="admin.managers.plugin.column.header.version" /></span>
-		<span class="column span-4"><fmt:message key="admin.managers.plugin.column.header.jar.name" /></span>
-		<span class="column span-4" id="addedTimeHeader"><fmt:message key="admin.managers.plugin.column.header.initial.deploy.date" /><img src="/images/icon_info_small.gif" class="infoIcon"></span>
-		<span class="column span-4" id="updatedTimeHeader"><fmt:message key="admin.managers.plugin.column.header.last.sync.date" /><img src="/images/icon_info_small.gif" class="infoIcon"></span>
+		<span class="column span-small"><fmt:message key="admin.managers.plugin.column.header.product.plugin" /></span>
+		<span class="column span-med"><fmt:message key="admin.managers.plugin.column.header.version" /></span>
+		<span class="column span-med"><fmt:message key="admin.managers.plugin.column.header.jar.name" /></span>
+		<span class="column span-med" id="addedTimeHeader"><fmt:message key="admin.managers.plugin.column.header.initial.deploy.date" /><img src="/images/icon_info_small.gif" class="infoIcon"></span>
+		<span class="column span-med" id="updatedTimeHeader"><fmt:message key="admin.managers.plugin.column.header.last.sync.date" /><img src="/images/icon_info_small.gif" class="infoIcon"></span>
 		<span class="column span-status"><fmt:message key="admin.managers.plugin.column.header.status" /></span>
 	</div>
 	
@@ -300,16 +322,16 @@
                     	<input type="checkbox" value="${pluginSummary.id}" name="deleteId"/>&nbsp; 
 					</c:if>
 				</span>
-				<span class="column span-3">${pluginSummary.name}</span>
-				<span class="column span-3">${pluginSummary.version}&nbsp;</span>
-				<span class="column span-4">${pluginSummary.jarName}&nbsp;
+				<span class="column span-small">${pluginSummary.name}</span>
+				<span class="column span-med">${pluginSummary.version}&nbsp;</span>
+				<span class="column span-med">${pluginSummary.jarName}&nbsp;
 					<c:if test="${pluginSummary.disabled}">
 						<br/><span class="notFound"><fmt:message key="admin.managers.Plugin.column.plugin.disabled"/></span>
 					</c:if>
 				</span>
-				<span class="column span-4">${pluginSummary.initialDeployDate}&nbsp;</span>
-				<span class="column span-4">${pluginSummary.updatedDate}&nbsp;</span>		
-				<span class="last column span-3" >
+				<span class="column span-med">${pluginSummary.initialDeployDate}&nbsp;</span>
+				<span class="column span-med">${pluginSummary.updatedDate}&nbsp;</span>		
+				<span class="last column span-status" >
 					<c:if test="${pluginSummary.allAgentCount>0}">
 					    <c:if test="${pluginSummary.successAgentCount>0}">
 					    	${pluginSummary.successAgentCount}&nbsp;<img src="/images/icon_available_green.gif"/>&nbsp;&nbsp;
@@ -757,16 +779,16 @@
                 			}, span);
                 		}
                 		span = hqDojo.create("span", {
-                			"class": "column span-3",
+                			"class": "column span-small",
                 			"innerHTML": summary.name
                 		}, li);
 
                 		span = hqDojo.create("span", {
-                			"class": "column span-3",
+                			"class": "column span-med",
                 			"innerHTML": summary.version
                 		}, li);
                 		spanName = hqDojo.create("span", {
-                			"class": "column span-4",
+                			"class": "column span-med",
                 			"innerHTML": summary.jarName
                 		}, li);
                 		if(summary.disabled){
@@ -776,16 +798,16 @@
                 			},spanName);
                 		}
                 		span = hqDojo.create("span", {
-                			"class": "column span-4",
+                			"class": "column span-med",
                 			"innerHTML": summary.initialDeployDate
                 		}, li);
                 		span = hqDojo.create("span", {
-                			"class": "column span-4",
+                			"class": "column span-med",
                 			"innerHTML": summary.updatedDate
                 		}, li);
 
                 		var statusSpan = hqDojo.create("span", {
-                			"class": "last column span-3"
+                			"class": "last column span-status"
                 		}, li);
                 		
                 		if (summary.allAgentCount>0){      
