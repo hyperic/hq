@@ -364,8 +364,8 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
         return rtn;
     }
 
-    private boolean undeployPlugin(File pluginFile) throws Exception {
-        if (!isDeployable(pluginFile)) {
+    private boolean undeployPlugin(File pluginFile, boolean force) throws Exception {
+        if (!force && !isDeployable(pluginFile)) {
             log.info("cannot undeploy " + pluginFile + " since it is over-written in " +
                      getCustomPluginDir() + " (this is ok)");
             return false;
@@ -420,6 +420,10 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
         return file.getAbsoluteFile().getParent().startsWith(getCustomPluginDir().getAbsolutePath());
     }
 
+    private File getServerPluginDir() {
+        return pluginManager.getServerPluginDir();
+    }
+
     private File getCustomPluginDir() {
         return pluginManager.getCustomPluginDir();
     }
@@ -430,7 +434,7 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
         } catch (IOException e) {
             log.info("HQU directory not found");
         }
-        pluginDirs.add(pluginManager.getServerPluginDir());
+        pluginDirs.add(getServerPluginDir());
         //Add custom hq-plugins dir at same level as server home
         File workingDirParent = new File(System.getProperty("user.dir")).getParentFile();
         if( workingDirParent != null && new File(workingDirParent,"hq-plugins").exists()) {
@@ -450,15 +454,27 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
             try {
                 final File pluginFile = fileEvent.getFileDetails().getFile();
                 if (FileOperation.CREATED.equals(fileEvent.getOperation())) {
+                    File serverPlugin = new File(getServerPluginDir(), pluginFile.getName());
+                    if (!serverPlugin.equals(pluginFile)) {
+                        // plugin was deployed in the custom dir but already exists in the
+                        // server dir.  redeploy it!
+                        undeployPlugin(serverPlugin, true);
+                    }
                     boolean deployed = loadAndDeployPlugin(pluginFile);
                     if (deployed) {
                         agentManager.syncPluginToAgentsAfterCommit(pluginFile.getName());
                     }
                 } else if (FileOperation.DELETED.equals(fileEvent.getOperation())) {
-                    undeployPlugin(pluginFile);
+                    File customPlugin = new File(getCustomPluginDir(), pluginFile.getName());
+                    if (customPlugin.exists()) {
+                        // do nothing, the file existed in both custom dir and server
+                        // then the server file was deleted
+                    } else {
+                        undeployPlugin(pluginFile, false);
+                    }
                 } else if (FileOperation.UPDATED.equals(fileEvent.getOperation()) &&
                            !(pluginDirs.contains(fileEvent.getFileDetails().getFile()))) {
-                    boolean undeployed = undeployPlugin(pluginFile);
+                    boolean undeployed = undeployPlugin(pluginFile, false);
                     if (undeployed) {
                         boolean deployed = loadAndDeployPlugin(pluginFile);
                         if (deployed) {
