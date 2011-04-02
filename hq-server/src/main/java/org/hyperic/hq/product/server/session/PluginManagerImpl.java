@@ -82,6 +82,9 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 @Service
 @Transactional(readOnly=true)
@@ -90,6 +93,7 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
 
     private static final String TMP_DIR = System.getProperty("java.io.tmpdir");
     private static final String PLUGIN_DIR = "hq-plugins";
+    private static final String AGENT_PLUGIN_DIR = "[/\\\\]pdk[/\\\\]plugins[/\\\\]";
 
     // used AtomicBoolean so that a groovy script may disable the mechanism live, no restarts
     private final AtomicBoolean isDisabled =
@@ -318,7 +322,23 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
                     }
                     currXml = entry.getName();
                     is = jarFile.getInputStream(entry);
-                    new SAXBuilder().build(is);
+                    SAXBuilder builder = new SAXBuilder();
+                    builder.setEntityResolver(new EntityResolver() {
+                        // systemId = file:///pdk/plugins/process-metrics.xml
+                        public InputSource resolveEntity(String publicId, String systemId)
+                        throws SAXException, IOException {
+                            final File entity = new File(systemId);
+                            final String filename = entity.getName().replaceAll(AGENT_PLUGIN_DIR, "");
+                            File file = new File(getCustomPluginDir(), filename);
+                            if (!file.exists()) {
+                                file = new File(getServerPluginDir(), filename);
+                            }
+                            return (file.exists()) ?
+                                new InputSource("file://" + file.getAbsolutePath()) :
+                                new InputSource(systemId);
+                        }
+                    });
+                    builder.build(is);
                     currXml = null;
                 } finally {
                     close(is);
