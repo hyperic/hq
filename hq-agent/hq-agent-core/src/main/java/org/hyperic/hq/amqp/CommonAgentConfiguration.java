@@ -1,6 +1,6 @@
 package org.hyperic.hq.amqp;
  
-import org.hyperic.hq.amqp.configuration.CommonAmqpConfiguration;
+import org.hyperic.hq.operation.rabbit.configuration.CommonAmqpConfiguration;
 
 /**
  * @author Helena Edelson

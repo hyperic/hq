@@ -22,13 +22,18 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.hyperic.hq.amqp</groupId>
-            <artifactId>hq-amqp-api</artifactId>
+            <groupId>org.hyperic.hq</groupId>
+            <artifactId>hq-operations</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.hyperic.hq.amqp</groupId>
-            <artifactId>hq-amqp-common</artifactId>
+            <groupId>org.hyperic.hq</groupId>
+            <artifactId>hq-operation-service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hyperic.hq.operation.rabbit</groupId>
+            <artifactId>hq-operation-service-rabbit-shared</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
