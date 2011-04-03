@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ NOTE: This copyright does *not* cover user programs that use HQ
+  ~ program services by normal system calls through the application
+  ~ program interfaces provided as part of the Hyperic Plug-in Development
+  ~ Kit or the Hyperic Client Development Kit - this is merely considered
+  ~ normal use of the program, and does *not* fall under the heading of
+  ~ "derived work".
+  ~
+  ~ Copyright (C) [2009-2010], VMware, Inc.
+  ~ This file is part of HQ.
+  ~
+  ~ HQ is free software; you can redistribute it and/or modify
+  ~ it under the terms version 2 of the GNU General Public License as
+  ~ published by the Free Software Foundation. This program is distributed
+  ~ in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  ~ even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  ~ PARTICULAR PURPOSE. See the GNU General Public License for more
+  ~ details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program; if not, write to the Free Software
+  ~ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  ~ USA.
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.hyperic.hq</groupId>
+        <artifactId>hq-parent</artifactId>
+        <version>4.6.0.BUILD-SNAPSHOT</version>
+    </parent>
+
+    <groupId>org.hyperic.hq.operation.rabbit</groupId>
+    <artifactId>hq-operation-service-rabbit</artifactId> 
+    <packaging>pom</packaging>
+    <name>Hyperic Operation Service Rabbit - Modules</name>
+
+    <modules>
+        <module>hq-operation-service-rabbit-shared</module>
+        <module>hq-operation-service-rabbit-common</module> 
+        <module>hq-operation-service-rabbit-admin</module>
+        <module>hq-operation-service-rabbit-installer</module>
+        <module>hq-operation-service-rabbit-test</module>
+    </modules>
+  
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.atlassian.maven.plugins</groupId>
+                <artifactId>maven-clover2-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.5</version>
+                <configuration>
+                    <includes>
+                        <include>**/*Test*.java</include>
+                    </includes>
+                    <excludes>
+                        <exclude>**/*Integration*Test*.java</exclude>
+                        <exclude>**/Abstract*Test*.java</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+ 
+
+</project>
