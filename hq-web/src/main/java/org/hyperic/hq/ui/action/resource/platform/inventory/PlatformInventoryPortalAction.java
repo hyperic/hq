@@ -88,7 +88,7 @@ public class PlatformInventoryPortalAction
 
     public ActionForward viewPlatform(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                       HttpServletResponse response) throws Exception {
-        setResource(request);
+        setResource(request, response);
 
         Portal portal = Portal.createPortal("resource.platform.inventory.ViewPlatformTitle",
             ".resource.platform.inventory.ViewPlatform");
@@ -101,7 +101,7 @@ public class PlatformInventoryPortalAction
                                                        HttpServletRequest request, HttpServletResponse response)
         throws Exception {
 
-        setResource(request);
+        setResource(request, response);
 
         Portal portal = Portal.createPortal("resource.platform.inventory.EditPlatformGeneralPropertiesTitle",
             ".resource.platform.inventory.EditPlatformGeneralProperties");
@@ -115,7 +115,7 @@ public class PlatformInventoryPortalAction
                                                            HttpServletRequest request, HttpServletResponse response)
         throws Exception {
 
-        setResource(request);
+        setResource(request, response);
 
         Portal portal = Portal.createPortal("resource.platform.inventory.EditPlatformTypeNetworkPropertiesTitle",
             ".resource.platform.inventory.EditPlatformTypeNetworkProperties");
@@ -128,7 +128,7 @@ public class PlatformInventoryPortalAction
     public ActionForward changePlatformOwner(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                              HttpServletResponse response) throws Exception {
 
-        setResource(request);
+        setResource(request, response);
 
         Portal portal = Portal.createPortal(Constants.CHANGE_OWNER_TITLE,
             ".resource.platform.inventory.changePlatformOwner");
@@ -141,7 +141,7 @@ public class PlatformInventoryPortalAction
     public ActionForward addPlatformGroups(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                            HttpServletResponse response) throws Exception {
 
-        setResource(request);
+        setResource(request, response);
 
         // clean out the return path
         SessionUtils.resetReturnPath(request.getSession());
@@ -167,7 +167,7 @@ public class PlatformInventoryPortalAction
         Portal portal = Portal.createPortal("resource.platform.inventory.ConfigurationPropertiesTitle",
             ".resource.platform.inventory.EditConfigProperties");
 
-        super.editConfig(request, portal);
+        super.editConfig(request, response, portal);
 
         return null;
     }

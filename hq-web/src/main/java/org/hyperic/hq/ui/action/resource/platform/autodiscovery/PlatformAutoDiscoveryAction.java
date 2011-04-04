@@ -110,7 +110,7 @@ public class PlatformAutoDiscoveryAction
 
             request.setAttribute(Constants.TITLE_PARAM_ATTR, aiPlatform.getName());
         } catch (ParameterNotFoundException e) {
-            findAndSetResource(request);
+            findAndSetResource(request, response);
 
             PlatformValue pVal = (PlatformValue) RequestUtils.getResource(request);
             try {
@@ -134,7 +134,7 @@ public class PlatformAutoDiscoveryAction
     public ActionForward editAutoDiscovery(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                            HttpServletResponse response) throws Exception {
 
-        findAndSetResource(request);
+        findAndSetResource(request, response);
         findAndSetAISchedule(request);
 
         Portal portal = Portal.createPortal(TITLE_PATH + "EditPlatformAutodiscoveryTitle",
@@ -148,7 +148,7 @@ public class PlatformAutoDiscoveryAction
     public ActionForward viewResource(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                       HttpServletResponse response) throws Exception {
 
-        findAndSetResource(request);
+        findAndSetResource(request, response);
 
         Portal portal = Portal.createPortal("resource.platform.inventory.ViewPlatformTitle",
             ".resource.platform.inventory.ViewPlatform");
@@ -160,7 +160,7 @@ public class PlatformAutoDiscoveryAction
     public ActionForward viewResults(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                      HttpServletResponse response) throws Exception {
 
-        findAndSetResource(request);
+        findAndSetResource(request, response);
 
         Portal portal = Portal.createPortal(TITLE_PATH + "ViewAutodiscoveryResultsTitle",
             ".resource.platform.autodiscovery.ViewResults");
@@ -197,9 +197,9 @@ public class PlatformAutoDiscoveryAction
         request.setAttribute(Constants.AISCHEDULE_ATTR, sValue);
     }
 
-    private void findAndSetResource(HttpServletRequest request) throws Exception {
+    private void findAndSetResource(HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-        setResource(request);
+        setResource(request, response);
 
         PlatformValue pVal = (PlatformValue) RequestUtils.getResource(request);
         if (pVal != null)

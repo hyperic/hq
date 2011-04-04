@@ -95,7 +95,7 @@ public class GroupControllerAction
         portal.setDialog(true);
 
         request.setAttribute(Constants.PORTAL_KEY, portal);
-        setResource(request);
+        setResource(request, response);
 
         checkGroupHasMembers(mapping, form, request, response);
 

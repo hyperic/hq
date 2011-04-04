@@ -72,7 +72,7 @@ public class ConfigPortalAction
     public ActionForward configMetrics(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                        HttpServletResponse response) throws Exception {
 
-        setResource(request);
+        setResource(request, response);
 
         super.configMetrics(mapping, form, request, response);
 

@@ -90,7 +90,7 @@ public class ApplicationInventoryPortalAction
 
     public ActionForward viewResource(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                       HttpServletResponse response) throws Exception {
-        setResource(request);
+        setResource(request, response);
 
         Portal portal = Portal.createPortal("resource.application.inventory.ViewApplicationTitle",
             ".resource.application.inventory.ViewApplication");
@@ -101,7 +101,7 @@ public class ApplicationInventoryPortalAction
 
     public ActionForward editGeneralProperties(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                                HttpServletResponse response) throws Exception {
-        setResource(request);
+        setResource(request, response);
         Portal portal = Portal.createPortal("resource.application.inventory.EditGeneralPropertiesTitle",
             ".resource.application.inventory.EditGeneralProperties");
         portal.setDialog(true);
@@ -111,7 +111,7 @@ public class ApplicationInventoryPortalAction
 
     public ActionForward editApplicationProperties(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                                    HttpServletResponse response) throws Exception {
-        setResource(request);
+        setResource(request, response);
         Portal portal = Portal.createPortal("resource.application.inventory.EditApplicationPropertiesTitle",
             ".resource.application.inventory.EditApplicationProperties");
         portal.setDialog(true);
@@ -121,7 +121,7 @@ public class ApplicationInventoryPortalAction
 
     public ActionForward changeOwner(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                      HttpServletResponse response) throws Exception {
-        setResource(request);
+        setResource(request, response);
         Portal portal = Portal
             .createPortal(Constants.CHANGE_OWNER_TITLE, ".resource.application.inventory.changeOwner");
         portal.setDialog(true);
@@ -132,7 +132,7 @@ public class ApplicationInventoryPortalAction
 
     public ActionForward addApplicationGroups(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                               HttpServletResponse response) throws Exception {
-        setResource(request);
+        setResource(request, response);
 
         Portal portal = Portal.createPortal("resource.application.inventory.AddToGroupsTitle",
             ".resource.application.inventory.addApplicationGroups");
@@ -144,7 +144,7 @@ public class ApplicationInventoryPortalAction
 
     public ActionForward addApplicationServices(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                                 HttpServletResponse response) throws Exception {
-        setResource(request);
+        setResource(request, response);
         Portal portal = Portal.createPortal("common.title.Edit",
             ".resource.application.inventory.addApplicationServices");
         portal.setDialog(true);
@@ -155,7 +155,7 @@ public class ApplicationInventoryPortalAction
 
     public ActionForward listServiceDependencies(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                                  HttpServletResponse response) throws Exception {
-        setResource(request);
+        setResource(request, response);
         // XXX put the right title in or refactor to use a common title...
         Portal portal = Portal.createPortal("resource.application.inventory.AddDependenciesTitle",
             ".resource.application.inventory.listServiceDependencies");
@@ -167,7 +167,7 @@ public class ApplicationInventoryPortalAction
 
     public ActionForward addDependencies(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                          HttpServletResponse response) throws Exception {
-        setResource(request);
+        setResource(request, response);
         // XXX put the right title in or refactor to use a common title...
         Portal portal = Portal.createPortal("resource.application.inventory.AddDependenciesPageTitle",
             ".resource.application.inventory.addServiceDependencies");
