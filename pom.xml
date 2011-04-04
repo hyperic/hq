@@ -713,7 +713,10 @@
                 <module>hq-common</module>
                 <module>hq-lather</module>
                 <module>hq-pdk</module>
-                <module>hq-amqp</module>
+                <module>hq-operations</module>
+                <module>hq-operation-service</module>
+                <module>hq-operation-service-rabbit-shared</module>
+                <module>hq-operation-service-rabbit-common</module>
                 <module>hq-agent</module>
                 <module>hq-server</module>
                 <module>hq-rendit</module>
@@ -735,7 +738,10 @@
                 <module>hq-common</module>
                 <module>hq-lather</module>
                 <module>hq-pdk</module>
-                <module>hq-amqp</module>
+                <module>hq-operations</module>
+                <module>hq-operation-service</module>
+                <module>hq-operation-service-rabbit-shared</module>
+                <module>hq-operation-service-rabbit-common</module>
                 <module>hq-agent</module>
                 <module>hq-server</module>
                 <module>hq-rendit</module>
@@ -753,8 +759,10 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <modules>
-                <module>hq-amqp</module>
                 <module>hq-agent</module>
+                <module>hq-operations</module>
+                <module>hq-operation-service</module>
+                <module>hq-operation-service-rabbit-shared</module> 
                 <module>dist</module>
             </modules>
         </profile>
@@ -765,6 +773,10 @@
                 <module>hq-common</module>
                 <module>hq-lather</module>
                 <module>hq-pdk</module>
+                <module>hq-operations</module>
+                <module>hq-operation-service</module>
+                <module>hq-operation-service-rabbit-shared</module>
+                <module>hq-operation-service-rabbit-common</module>
                 <module>hq-agent</module>
                 <module>hq-server</module>
                 <module>hq-rendit</module>
@@ -794,7 +806,10 @@
                 <module>hq-common</module>
                 <module>hq-lather</module>
                 <module>hq-pdk</module>
-                <module>hq-amqp</module>
+                <module>hq-operations</module>
+                <module>hq-operation-service</module>
+                <module>hq-operation-service-rabbit-shared</module>
+                <module>hq-operation-service-rabbit-common</module>
                 <module>hq-agent</module>
                 <module>hq-server</module>
                 <module>hq-rendit</module>
