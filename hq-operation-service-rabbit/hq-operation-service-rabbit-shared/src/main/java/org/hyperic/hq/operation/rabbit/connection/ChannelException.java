@@ -30,6 +30,15 @@ package org.hyperic.hq.operation.rabbit.connection;
  * @author Helena Edelson
  */
 public class ChannelException extends Exception {
+    private static final long serialVersionUID = -4901175883619184424L;
+
+    /**
+     * Creates an chaining-aware instance
+     * @param cause The java.lang.Throwable cause
+     */
+    public ChannelException(Throwable cause) {
+        super(cause);
+    }
 
     /**
      * Creates an instance with a message
