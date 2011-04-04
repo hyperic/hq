@@ -36,14 +36,19 @@
 	    font-size: 0.9em;
 	    font-weight: bold;
 	    padding: 3px 15px;
-	    width: 60px;
+	    width: 90px;
 	    float:right;
 	}
 	#uploadButtonBar{
 		text-align: right;
 	}
+
+	
+	
 	#pluginManagerPanel {
 		padding: 0.5em 1.5em;
+		width:90%;
+		min-width:400px;
 	}
 	
 	#pluginManagerPanel span a {
@@ -59,7 +64,6 @@
 	}
 	
 	#pluginManagerPanel .actionbar {
-		padding: 0.25em 1em;
 		background: url("/images/4.0/backgrounds/table_header_large.png") repeat-x 0 0 transparent;
 		overflow: hidden;
 		border: 1px solid gray;
@@ -73,6 +77,10 @@
 		margin-right: 0.5em;
 	}
 	
+	#pluginManagerPanel .actionbar input[type="button"]{
+		margin: 0.25em 1em;
+	}
+	
 	#pluginManagerPanel ul {
 		margin: 0;
 		padding: 0;
@@ -82,9 +90,11 @@
 		border-top: 0;
 		border-bottom: 0;
 		overflow-y: scroll;
+		overflow-x: hidden;
 		height: 400px;
+		
 	}
-	
+
 	#pluginManagerPanel .gridheader {
 		background: url("/images/4.0/backgrounds/table_header_large.png") repeat-x 0 0 transparent;
 		overflow: hidden;
@@ -121,10 +131,12 @@
 	
 	#uploadPanel {
 		width: 400px;
+		text-align: left;
 	}
 
 	#removeErrorPanel, #confirmationPanel {
 		width: 400px;
+		text-align: left;
 	}
 	#removeErrorPanel div{
 		text-align: right;
@@ -201,7 +213,8 @@
 	}
 	#showStatusPanelDialog{
 		width: 505px;
-		height: 400px;
+		height: 410px;
+		text-align: left;
 	}
 	
 	#statusButtonBar {
@@ -241,7 +254,10 @@
 	#selectedFileList{
 		width:400px;
 	}
+	.uploaderInsideNode{
+	}
 	#selectFileBtn{
+		
 		width:90px;
 		float:right;
 	}
@@ -261,23 +277,39 @@
 	.infoIcon{
 		width:12px;
 	}
+
+    #pluginManagerPanel .gridheader, #pluginManagerPanel .gridrow, 
+    	#pluginManagerPanel .actionbar, #pluginManagerPanel ul{
+    	min-width:980px;
+	}
+	.span-small{
+		width:10%;
+	}
+	.span-med{
+		width:15%;
+	}
+	.span-status{
+		min-width: 120px;
+		width:10%;
+	}
+deleteForm
 </style>
 <section id="pluginManagerPanel" class="container top">
 	<h1><fmt:message key="admin.managers.plugin.title" /></h1>
 	<p id="instruction"><fmt:message key="${instruction}" /></p>
 	
 	<div id="agentInfo">
-		<fmt:message key="admin.managers.Plugin.information.agent.count"/><img src="/images/icon_info_small.gif" class="infoIcon"/>:&nbsp;<span id="agentInfoAllCount">${allAgentCount}</span> <br/>
+		<fmt:message key="admin.managers.Plugin.information.agent.count"/>:&nbsp;<span id="agentInfoAllCount">${allAgentCount}</span><img src="/images/icon_info_small.gif" class="infoIcon"/> <br/>
 	</div>
 	
 	<div class="gridheader clear">
 		<span class="first column span-1">&nbsp;</span>
-		<span class="column span-3"><fmt:message key="admin.managers.plugin.column.header.product.plugin" /></span>
-		<span class="column span-3"><fmt:message key="admin.managers.plugin.column.header.version" /></span>
-		<span class="column span-4"><fmt:message key="admin.managers.plugin.column.header.jar.name" /></span>
-		<span class="column span-4" id="addedTimeHeader"><fmt:message key="admin.managers.plugin.column.header.initial.deploy.date" /><img src="/images/icon_info_small.gif" class="infoIcon"></span>
-		<span class="column span-4" id="updatedTimeHeader"><fmt:message key="admin.managers.plugin.column.header.last.sync.date" /><img src="/images/icon_info_small.gif" class="infoIcon"></span>
-		<span class="last column span-3"><fmt:message key="admin.managers.plugin.column.header.status" /></span>
+		<span class="column span-small"><fmt:message key="admin.managers.plugin.column.header.product.plugin" /></span>
+		<span class="column span-med"><fmt:message key="admin.managers.plugin.column.header.version" /></span>
+		<span class="column span-med"><fmt:message key="admin.managers.plugin.column.header.jar.name" /></span>
+		<span class="column span-med" id="addedTimeHeader"><fmt:message key="admin.managers.plugin.column.header.initial.deploy.date" /><img src="/images/icon_info_small.gif" class="infoIcon"></span>
+		<span class="column span-med" id="updatedTimeHeader"><fmt:message key="admin.managers.plugin.column.header.last.sync.date" /><img src="/images/icon_info_small.gif" class="infoIcon"></span>
+		<span class="column span-status"><fmt:message key="admin.managers.plugin.column.header.status" /></span>
 	</div>
 	
 	<form:form id="deleteForm" name="deleteForm" onsubmit="return false;" method="delete">
@@ -287,19 +319,19 @@
 			<li class="gridrow clear<c:if test="${index.count % 2 == 0}"> even</c:if>">
 				<span class="first column span-1">
 					<c:if test="${mechanismOn}">
-                    	<input type="checkbox" name="deleteId" value="${pluginSummary.id}" class="checkbox" />&nbsp; 
+                    	<input type="checkbox" value="${pluginSummary.id}" name="deleteId"/>&nbsp; 
 					</c:if>
 				</span>
-				<span class="column span-3">${pluginSummary.name}
+				<span class="column span-small">${pluginSummary.name}</span>
+				<span class="column span-med">${pluginSummary.version}&nbsp;</span>
+				<span class="column span-med">${pluginSummary.jarName}&nbsp;
 					<c:if test="${pluginSummary.disabled}">
 						<br/><span class="notFound"><fmt:message key="admin.managers.Plugin.column.plugin.disabled"/></span>
 					</c:if>
 				</span>
-				<span class="column span-3">${pluginSummary.version}&nbsp;</span>
-				<span class="column span-4">${pluginSummary.jarName}&nbsp;</span>
-				<span class="column span-4">${pluginSummary.initialDeployDate}&nbsp;</span>
-				<span class="column span-4">${pluginSummary.updatedDate}&nbsp;</span>		
-				<span class="last column span-3" >
+				<span class="column span-med">${pluginSummary.initialDeployDate}&nbsp;</span>
+				<span class="column span-med">${pluginSummary.updatedDate}&nbsp;</span>		
+				<span class="last column span-status" >
 					<c:if test="${pluginSummary.allAgentCount>0}">
 					    <c:if test="${pluginSummary.successAgentCount>0}">
 					    	${pluginSummary.successAgentCount}&nbsp;<img src="/images/icon_available_green.gif"/>&nbsp;&nbsp;
@@ -339,8 +371,7 @@
 			</p>
 			<p>
 				<div class="selectInstruction"><fmt:message key="admin.managers.plugin.upload.dialog.instruction" />&nbsp;</div>
-				
-				<div id="selectFileButton" class="selectFileBtn">Select File</div>
+				<div id="selectFileButton" class="selectFileBtn"><fmt:message key="admin.managers.plugin.button.select.files" /></div>
 			</p>
 			<br/>
 			<p>
@@ -348,7 +379,7 @@
 				<div id="selectedFileList"></div>
 				<p id="afterSelectFileInstruction"><fmt:message key="admin.managers.plugin.upload.dialog.instruction.after" /></p>
 			</p>
-			<p id="validationMessage" class="error" style="opacity:0;">&nbsp;</p>
+			<p id="validationMessage" class="error" style="opacity:0; filter:alpha(opacity=0);zoom: 1;">&nbsp;</p>
 			<div id="uploadButtonBar">
 				<input id="uploadButton" type="button" value="<fmt:message key='admin.managers.plugin.button.upload' />" /> &nbsp;
 				<a href="#" class="cancelLink"><fmt:message key="admin.managers.plugin.button.cancel" /></a>
@@ -395,9 +426,14 @@
 	hqDojo.require("dojox.form.FileUploader");
 	hqDojo.require("dijit.ProgressBar");
 	hqDojo.require("dojo.behavior");
-	
-	function refreshPage(){
+	hqDojo.require("dojo.hash");
+	hqDojo.require("dojox.timing._base");
+
+	hqDojo.ready(function() {
+		
+		function refreshPage(){
 			var infoXhrArgs={
+				preventCache:true,
 				url:"<spring:url value='/app/admin/managers/plugin/info'/>",
 				handleAs:"json",
 				headers: { 
@@ -408,16 +444,54 @@
 					hqDojo.byId("agentInfoAllCount").innerHTML=response.allAgentCount;
 				}
 			}
+				
+		    var deleteIdsString = "";
+			hqDojo.query("input[type=checkbox]:checked").forEach(function(entry){
+					deleteIdsString+=entry.value+",";
+			});
+			if(deleteIdsString.length>1){
+				deleteIdsString = deleteIdsString.substr(0,deleteIdsString.length-1);
+			}else{
+				deleteIdsString="";
+			}
+			
+			var hashObj = {
+				deleteIds: deleteIdsString
+			}
+			hqDojo.hash(hqDojo.objectToQuery(hashObj));
+			
 			hqDojo.xhrGet(infoXhrArgs);
 			hqDojo.publish("refreshDataGrid");
-	}
+		}
+
+		new hqDijit.Tooltip({
+			connectId:["addedTimeHeader"],
+			label: "<fmt:message key='admin.managers.plugin.column.header.initial.deploy.date.tip' />"
+		});
+		
+		new hqDijit.Tooltip({
+			connectId:["updatedTimeHeader"],
+			label: "<fmt:message key='admin.managers.plugin.column.header.last.sync.date.tip' />"
+		});
+		
+		new hqDijit.Tooltip({
+			connectId:["agentInfo"],
+			label: "<fmt:message key='admin.managers.Plugin.information.agent.count.tip' />"
+		});
+
+		hqDojo.query(".notFound").forEach(function(e){
+			new hqDijit.Tooltip({
+				connectId: [e],
+				label: "<fmt:message key='admin.managers.Plugin.column.plugin.disabled.tip' />"
+			});		
+		});	
 	
-	hqDojo.ready(function() {
 		function seeStatusDetail(pluginId,keyword){
 			hqDijit.byId("showStatusPanelDialog").show();
 			var agentListUl = hqDojo.byId("agentList");
 			var searchWord = hqDojo.byId("searchText").value;
 			var xhrArgs = {
+					preventCache:true,
 					url: "/app/admin/managers/plugin/status/"+pluginId+"?searchWord="+searchWord,
 					load: function(response) {
 						hqDojo.empty("agentList");
@@ -482,50 +556,95 @@
 			seeStatusDetail(pluginId,hqDojo.byId("searchText").value);			
 		});
 		
-		new hqDijit.Tooltip({
-			connectId:["addedTimeHeader"],
-			label: "<fmt:message key='admin.managers.plugin.column.header.initial.deploy.date.tip' />"
-		});
-		
-		new hqDijit.Tooltip({
-			connectId:["updatedTimeHeader"],
-			label: "<fmt:message key='admin.managers.plugin.column.header.last.sync.date.tip' />"
-		});
-		
-		new hqDijit.Tooltip({
-			connectId:["agentInfo"],
-			label: "<fmt:message key='admin.managers.Plugin.information.agent.count.tip' />"
-		});
-
-		hqDojo.query(".notFound").forEach(function(e){
-			new hqDijit.Tooltip({
-				connectId: [e],
-				label: "<fmt:message key='admin.managers.Plugin.column.plugin.disabled.tip' />"
-			});		
-		});
-		
 		if(${!mechanismOn}){
 			hqDojo.attr("deleteForm","class","mechanismOff");
 			hqDojo.addClass(hqDojo.byId("instruction"),"mechanismOffInstruction");
 		}
 	
 		if (${mechanismOn}){
+			var uploader;
 		
-			var uploader = new hqDojox.form.FileUploader({
-				selectMultipleFiles:true,
-				fileListId:"selectedFileList",
-				isDebug:false,
-				uploadUrl:"<spring:url value='/app/admin/managers/plugin/upload'/>",
-				force:"html",
-				fileMask:[
-					["jar File", "*.jar"],
-					["xml File", "*.xml"]
-				]
-			}, "selectFileButton");
-	
+			var uploadDialog = new hqDijit.Dialog({
+				id: "uploadPanelDialog",
+				title: "<fmt:message key="admin.managers.plugin.upload.dialog.title" />"
+			});
+		
+			var removeDialog = new hqDijit.Dialog({
+				id: "removePanelDialog",
+				title: "<fmt:message key="admin.managers.plugin.remove.dialog.title" />"
+			});
+			var removeErrorPanelDialog = new hqDijit.Dialog({
+				id: "removeErrorPanelDialog",
+				title: "<fmt:message key="admin.managers.Plugin.remove.error.dialog.title" />"
+			});
+			
+			var uploadPanel = hqDojo.byId("uploadPanel");
+			var confirmationPanel = hqDojo.byId("confirmationPanel");
+			var removeErrorPanel = hqDojo.byId("removeErrorPanel");
+		
+			hqDojo.style(uploadDialog.closeButtonNode, "visibility", "hidden");
+			hqDojo.style(removeDialog.closeButtonNode, "visibility", "hidden");
+			hqDojo.style(removeErrorPanelDialog.closeButtonNode,"visibility", "hidden" );
+			uploadDialog.setContent(uploadPanel);
+			removeDialog.setContent(confirmationPanel);
+			removeErrorPanelDialog.setContent(removeErrorPanel);
+		
+			hqDojo.style(uploadPanel, "visibility", "visible");
+			hqDojo.style(confirmationPanel, "visibility", "visible");
+			hqDojo.style(removeErrorPanel, "visibility", "visible");
+
+			hqDojo.query("#uploadPanelDialog .cancelLink").onclick(function(e) {
+				hqDijit.byId("uploadPanelDialog").hide();
+				hqDijit.registry.remove("selectFileButton");
+			});
+
+			hqDojo.query("#removePanelDialog .cancelLink").onclick(function(e) {
+				hqDijit.byId("removePanelDialog").hide();
+			});
+			hqDojo.query("#removeErrorPanelDialog .cancelLink").onclick(function(e) {
+				hqDijit.byId("removeErrorPanelDialog").hide();
+			});
+
+		
+			hqDojo.connect(hqDojo.byId("showUploadFormButton"), "onclick", function(e) {
+				hqDojo.byId("selectFileButton").innerHTML = "<fmt:message key='admin.managers.plugin.button.select.files' />"
+				hqDojo.byId("selectedFileList").innerHTML = "";
+				uploader = new hqDojox.form.FileUploader({
+					selectMultipleFiles:true,
+					fileListId:"selectedFileList",
+					isDebug:false,
+					uploadUrl:"<spring:url value='/app/admin/managers/plugin/upload'/>",
+					force:"html",
+					fileMask:[
+						["jar File", "*.jar"],
+						["xml File", "*.xml"]
+					]
+				}, "selectFileButton");
+			
+				hqDojo.connect(uploader, "onComplete", function(dataArray){
+					if (dataArray[0].success){
+						hqDojo.attr("progressMessage", "class", "information");
+					} else {
+						hqDojo.attr("progressMessage", "class", "error");
+					}	
+					hqDojo.byId("progressMessage").innerHTML=dataArray[0].message;
+					var anim = [hqDojo.fadeIn({
+									node: "progressMessage",
+									duration: 500
+								}),
+								hqDojo.fadeOut({
+									node: "progressMessage",
+									delay: 5000,
+									duration: 500
+								})];
+					hqDojo.fx.chain(anim).play();						
+				});
+				hqDijit.byId("uploadPanelDialog").show();
+			});
+			
 			hqDojo.connect(hqDojo.byId("uploadButton"), "onclick", function(e){
 				var fileTypeCorrect=true;
-				var pluginList = hqDojo.query("input[type='file']", hqDojo.byId("hqDijit_FileUploaderForm_0"));
+				var pluginList = hqDojo.query("input[type=file]", hqDojo.byId("hqDijit_FileUploaderForm_0"));
 				var newPluginList = pluginList.slice(0,pluginList.length-1);
 					
 				newPluginList.forEach(function(input) {
@@ -538,34 +657,14 @@
     	   			hqDojo.attr(input, "name", "plugins");
 				});
 				if(fileTypeCorrect){
-					uploader.upload();
 					hqDijit.byId("uploadPanelDialog").hide();
+					uploader.upload();
+					hqDijit.registry.remove("selectFileButton");
 				}
 			});
-		
-			hqDojo.connect(uploader, "onComplete", function(dataArray){
-				if (dataArray[0].success){
-					hqDojo.attr("progressMessage", "class", "information");
-				} else {
-					hqDojo.attr("progressMessage", "class", "error");
-				}
-					
-				hqDojo.byId("progressMessage").innerHTML=dataArray[0].message;
-				var anim = [hqDojo.fadeIn({
-								node: "progressMessage",
-								duration: 500
-							}),
-							hqDojo.fadeOut({
-								node: "progressMessage",
-								delay: 5000,
-								duration: 500
-							})];
-				hqDojo.fx.chain(anim).play();						
-			});
-				
+						
 			function checkFileType(filePath){
-				var ext = filePath.substr(filePath.length - 4);
-			
+				var ext = filePath.substr(filePath.length - 4);			
 				if (ext != ".jar" && ext != ".xml") {
 					hqDojo.byId("validationMessage").innerHTML = "<fmt:message key='admin.managers.plugin.message.invalid.file.extension' />";
 					var anim = [hqDojo.fadeIn({
@@ -582,42 +681,9 @@
 				}
 				return true;
 			}
-		
-			var uploadDialog = new hqDijit.Dialog({
-				id: "uploadPanelDialog",
-				title: "<fmt:message key="admin.managers.plugin.upload.dialog.title" />"
-			});
-		
-			var removeDialog = new hqDijit.Dialog({
-				id: "removePanelDialog",
-				title: "<fmt:message key="admin.managers.plugin.remove.dialog.title" />"
-			});
-			var removeErrorPanelDialog = new hqDijit.Dialog({
-				id: "removeErrorPanelDialog",
-				title: "<fmt:message key="admin.managers.Plugin.remove.error.dialog.title" />"
-			});
-
 			
-			var uploadPanel = hqDojo.byId("uploadPanel");
-			var confirmationPanel = hqDojo.byId("confirmationPanel");
-			var removeErrorPanel = hqDojo.byId("removeErrorPanel");
-		
-			hqDojo.style(uploadDialog.closeButtonNode, "visibility", "hidden");
-			hqDojo.style(removeDialog.closeButtonNode, "visibility", "hidden");
-			hqDojo.style(removeErrorPanelDialog.closeButtonNode,"visibility", "hidden" );
-			uploadDialog.setContent(uploadPanel);
-			removeDialog.setContent(confirmationPanel);
-			removeErrorPanelDialog.setContent(removeErrorPanel);
-		
-			hqDojo.style(uploadPanel, "visibility", "visible");
-			hqDojo.style(confirmationPanel, "visibility", "visible");
-			hqDojo.style(removeErrorPanel, "visibility", "visible");
-		
-			hqDojo.connect(hqDojo.byId("showUploadFormButton"), "onclick", function(e) {
-				hqDijit.byId("uploadPanelDialog").show();
-			});
 			hqDojo.connect(hqDojo.byId("showRemoveConfirmationButton"), "onclick", function(e) {
-				var checkedPlugins = hqDojo.filter(hqDojo.query(".checkbox"), function(e){ return e.checked; });
+				var checkedPlugins = hqDojo.filter(hqDojo.query("input[type=checkbox]"), function(e){ return e.checked; });
 				if(checkedPlugins.length>0){
 					hqDijit.byId("removePanelDialog").show();
 				}else{
@@ -625,19 +691,10 @@
 					hqDijit.byId("removeErrorPanelDialog").show();
 				}
 			});
-			hqDojo.query("#uploadPanelDialog .cancelLink").onclick(function(e) {
-				hqDijit.byId("uploadPanelDialog").hide();
-			});
 
-			hqDojo.query("#removePanelDialog .cancelLink").onclick(function(e) {
-				hqDijit.byId("removePanelDialog").hide();
-			});
-			hqDojo.query("#removeErrorPanelDialog .cancelLink").onclick(function(e) {
-				hqDijit.byId("removeErrorPanelDialog").hide();
-			});
-		
 			hqDojo.connect(hqDojo.byId("removeButton"), "onclick", function(e) {
 				var xhrArgs = {
+					preventCache:true,
 					form: hqDojo.byId("deleteForm"),
 					url: "<spring:url value='/app/admin/managers/plugin/delete' />",
 					load: function(response) {
@@ -691,16 +748,18 @@
 			});
 		}
 		
-		
 		hqDojo.subscribe("refreshDataGrid", function() {
 			hqDojo.xhrGet({
-				url: "<spring:url value="/app/admin/managers/plugin/list" />",
+				preventCache:true,
+				url: "<spring:url value='/app/admin/managers/plugin/list' />",
 				handleAs: "json",
 				headers: { 
                 	"Content-Type": "application/json",
                 	"Accept": "application/json"
                 },
                 load: function(response, args) {
+                	
+                	
                 	hqDojo.empty("pluginList");
                 	
                 	var index = 1;
@@ -715,14 +774,22 @@
                 		if(${mechanismOn}){
 	                		var input = hqDojo.create("input", {
     	            			"type": "checkbox",
-        	        			"value": summary.id,
-            	    			"class": "checkbox",
-                				"name":"deleteId"
+    	            			"name": "deleteId",
+        	        			"value": summary.id
                 			}, span);
                 		}
-                		spanName = hqDojo.create("span", {
-                			"class": "column span-3",
+                		span = hqDojo.create("span", {
+                			"class": "column span-small",
                 			"innerHTML": summary.name
+                		}, li);
+
+                		span = hqDojo.create("span", {
+                			"class": "column span-med",
+                			"innerHTML": summary.version
+                		}, li);
+                		spanName = hqDojo.create("span", {
+                			"class": "column span-med",
+                			"innerHTML": summary.jarName
                 		}, li);
                 		if(summary.disabled){
                 			span = hqDojo.create("span",{
@@ -731,24 +798,16 @@
                 			},spanName);
                 		}
                 		span = hqDojo.create("span", {
-                			"class": "column span-3",
-                			"innerHTML": summary.version
-                		}, li);
-                		span = hqDojo.create("span", {
-                			"class": "column span-4",
-                			"innerHTML": summary.jarName
-                		}, li);
-                		span = hqDojo.create("span", {
-                			"class": "column span-4",
+                			"class": "column span-med",
                 			"innerHTML": summary.initialDeployDate
                 		}, li);
                 		span = hqDojo.create("span", {
-                			"class": "column span-4",
+                			"class": "column span-med",
                 			"innerHTML": summary.updatedDate
                 		}, li);
 
                 		var statusSpan = hqDojo.create("span", {
-                			"class": "last column span-3"
+                			"class": "last column span-status"
                 		}, li);
                 		
                 		if (summary.allAgentCount>0){      
@@ -785,7 +844,16 @@
                 		}
                 		index++;
                 	});
-
+					var hashObj = hqDojo.queryToObject(hqDojo.hash());
+					if(hashObj.deleteIds!=""){
+						hqDojo.forEach(hashObj.deleteIds.split(","),function(pluginId){
+							var checkbox = hqDojo.query("input[value='"+pluginId+"']");
+							if(checkbox[0]!=null){
+								checkbox[0].checked="true";
+							}
+						});
+					}
+					
 					hqDojo.behavior.apply();
 					hqDojo.query(".notFound").forEach(function(e){
 						new hqDijit.Tooltip({
@@ -800,7 +868,10 @@
                 }
 			});
 		});
-	setInterval("refreshPage()",10000);
+		var timer = new hqDojox.timing.Timer();
+		timer.setInterval(10000);
+		timer.onTick = refreshPage;
+		timer.start();
 	});
 
 </script>

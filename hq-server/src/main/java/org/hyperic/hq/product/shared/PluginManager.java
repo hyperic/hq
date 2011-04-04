@@ -53,59 +53,127 @@ public interface PluginManager {
     void deployPluginIfValid(AuthzSubject subj, Map<String, byte[]> pluginInfo)
     throws PluginDeployException;
 
-// XXX javadoc!
+    /**
+     * @return {@link Map} of {@link Integer} = pluginId to {@link Map} of
+     * {@link AgentPluginStatusEnum} to {@link Integer} = count of number of agents that
+     * match the status
+     */
     Map<Integer, Map<AgentPluginStatusEnum, Integer>> getPluginRollupStatus();
 
-// XXX javadoc!
+    /**
+     * @param pluginId - id associated with the {@link Plugin} object
+     * @param {@link AgentPluginStatusEnum} array of status enums to match
+     * @return {@link Collection} of {@link AgentPluginStatus} objects which match the pluginId and 
+     * statuses params
+     */
     Collection<AgentPluginStatus> getStatusesByPluginId(int pluginId,
                                                         AgentPluginStatusEnum ... statuses);
 
-// XXX javadoc!
+    /**
+     * @return true if the server.pluginsync.enabled property is set to false or
+     * setDisabledForPluginDeploymentMechanism(true) was called
+     * @see #setDisabledForPluginDeploymentMechanism(boolean)
+     */
     boolean isPluginDeploymentOff();
+
+    /**
+     * turns the Server -> Agent Plugin Sync mechanism on or off represented by the disabled flag
+     */
     void setDisabledForPluginDeploymentMechanism(boolean disabled);
 
     Plugin getPluginById(Integer id);
 
-// XXX javadoc!
+    /**
+     * @return {@link Map} of {@link Plugin} to {@link Collection} of {@link AgentPluginStatus}
+     * where the plugin md5 checksum does not match the plugin's md5 checksum in the
+     * EAM_AGENT_PLUGIN_STATUS table
+     */
     Map<Plugin, Collection<AgentPluginStatus>> getOutOfSyncAgentsByPlugin();
 
-// XXX javadoc!
+    /**
+     * @return {@link List} of {@link Plugin}s
+     */
     List<Plugin> getAllPlugins();
 
-// XXX javadoc!
+    /**
+     * @param agentId - id associated with the {@link Agent} object
+     * @return {@link Collection} of {@link String} representing the pluginName from {@link Plugin}
+     */
     Collection<String> getOutOfSyncPluginNamesByAgentId(Integer agentId);
     
- // XXX javadoc!
-     void updateAgentPluginSyncStatusInNewTran(AgentPluginStatusEnum s, Integer agentId,
-                                               Collection<Plugin> plugins);
-
- // XXX javadoc!
-    void removePlugins(AuthzSubject subj, Collection<String> pluginFilenames)
-    throws PermissionException;
-
- // XXX javadoc!
-    void removeAgentPluginStatuses(Integer agentId, Collection<String> pluginFileNames);
-
- // XXX javadoc!
-    Set<Integer> getAgentIdsInQueue();
-
- // XXX javadoc!
-    Map<Integer, Long> getAgentIdsInRestartState();
-
- // XXX javadoc!
-    Map<String, Integer> getAllPluginIdsByName();
-
- // XXX javadoc!
-    void markDisabled(Collection<Integer> pluginIds);
-
- // XXX javadoc!
-    void markDisabled(String pluginFileName);
-
- // XXX javadoc!
-    void markEnabled(String pluginFileName);
+    /**
+     * Updates all the {@link AgentPluginStatus} objects associated with the agentId to the
+     * specified status
+     * @param status - {@link AgentPluginStatusEnum}
+     * @param agentId - id associated with the {@link Agent} object
+     * @param plugins - {@link Collection} of {@link Plugin}
+     */
+    void updateAgentPluginSyncStatusInNewTran(AgentPluginStatusEnum status, Integer agentId,
+                                              Collection<Plugin> plugins);
 
     /**
-     * @return WEB-INF/hq-plugins/
+     * Updates all the {@link AgentPluginStatus} objects associated with the agentId to the
+     * specified status
+     * @param status - {@link AgentPluginStatusEnum}
+     * @param agentId - id associated with the {@link Agent} object
+     * @param pluginFileNames - {@link Collection} of {@link String} = pluginFileName
+     */
+    void updateAgentPluginStatusByFileNameInNewTran(AgentPluginStatusEnum status, Integer agentId,
+                                                    Collection<String> pluginFileNames);
+
+    /**
+     * Removes all plugins specified by the pluginFilenames collection
+     * @param subj
+     * @param pluginFileNames
+     * @throws PermissionException
+     */
+    void removePlugins(AuthzSubject subj, Collection<String> pluginFileNames)
+    throws PermissionException;
+
+    /**
+     * Removes all {@link AgentPluginStatus} objects associated with the agentId and pluginFileNames
+     * @param agentId - id associated with the {@link Agent} object
+     * @param pluginFileNames
+     */
+    void removeAgentPluginStatuses(Integer agentId, Collection<String> pluginFileNames);
+
+    /**
+     * @return {@link Set} of {@link Integer} which represents an agentId
+     */
+    Set<Integer> getAgentIdsInQueue();
+
+    /**
+     * Gets the agentIds being restarted by the SAPS mechanism
+     * @return {@link Map} of {@link Integer} = agentId to {@link Long} = timestamp ms which
+     * represents the time the agent restart command was issued
+     */
+    Map<Integer, Long> getAgentIdsInRestartState();
+
+    /**
+     * @return {@link Map} of {@link String} = pluginName to {@link Integer} = pluginId
+     */
+    Map<String, Integer> getAllPluginIdsByName();
+
+    /**
+     * Sets the disabled flag to true of the {@link Plugin}s represented by pluginIds
+     * @param pluginIds - ids associated with {@link Plugin} objects
+     */
+    void markDisabled(Collection<Integer> pluginIds);
+
+    /**
+     * Sets the disabled flag to true of the {@link Plugin} object represented by pluginFileName
+     * @param pluginFileName - pluginNames associated with a {@link Plugin}
+     */
+    void markDisabled(String pluginFileName);
+
+    /**
+     * Sets the disabled flag to false of the {@link Plugin} object represented by pluginName
+     * @param pluginFileName - pluginNames associated with a {@link Plugin}
+     */
+    void markEnabled(String pluginName);
+
+    /**
+     * @return /path/to/WEB-INF/hq-plugins/
      */
     File getServerPluginDir();
 

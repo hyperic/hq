@@ -156,7 +156,6 @@ function clickRemove(formName, index) {
 	newInput.setAttribute("name", "remove.x");
 	newInput.setAttribute("value", index);
 	document.forms[formName].appendChild(newInput);
-   // $('remove.x').value=index;
 }
 
 function clickAIPlatformImport(formName) {

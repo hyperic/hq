@@ -51,9 +51,9 @@ public interface MaintenanceEventManager {
         throws PermissionException, SchedulerException;
     
     /**
-     * Get currently running maintenance events
+     * Get current maintenance events
      */
-    public List<MaintenanceEvent> getRunningMaintenanceEvents()
+    public List<MaintenanceEvent> getMaintenanceEvents(AuthzSubject subject, String state)
         throws SchedulerException;
 
     /**

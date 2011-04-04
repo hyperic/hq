@@ -82,6 +82,9 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 @Service
 @Transactional(readOnly=true)
@@ -90,6 +93,7 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
 
     private static final String TMP_DIR = System.getProperty("java.io.tmpdir");
     private static final String PLUGIN_DIR = "hq-plugins";
+    private static final String AGENT_PLUGIN_DIR = "[/\\\\]pdk[/\\\\]plugins[/\\\\]";
 
     // used AtomicBoolean so that a groovy script may disable the mechanism live, no restarts
     private final AtomicBoolean isDisabled =
@@ -130,18 +134,27 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
     throws PermissionException {
         permissionManager.checkIsSuperUser(subj);
         final Collection<Agent> agents = agentPluginStatusDAO.getAutoUpdatingAgents();
-        final File serverPluginDir = getServerPluginDir();
-        final File customPluginDir = getCustomPluginDir();
-        deletePluginFiles(serverPluginDir, customPluginDir, pluginFileNames);
-        for (final String filename : pluginFileNames) {
-            removePluginAndAssociatedResources(subj, pluginDAO.getByFilename(filename));
-        }
+        deletePluginFiles(pluginFileNames);
+        removePluginsAndAssociatedResources(subj, pluginFileNames);
         final AgentPluginUpdater agentPluginUpdater = Bootstrap.getBean(AgentPluginUpdater.class);
         for (final Agent agent : agents) {
             agentPluginUpdater.queuePluginRemoval(agent.getId(), pluginFileNames);
         }
     }
     
+    private void removePluginsAndAssociatedResources(AuthzSubject subj,
+                                                     Collection<String> pluginFileNames) {
+        for (final String filename : pluginFileNames) {
+            final Plugin plugin = pluginDAO.getByFilename(filename);
+            if (plugin != null) {
+                final Map<String, MonitorableType> map =
+                    monitorableTypeDAO.findByPluginName(plugin.getName());
+                resourceManager.removeResourcesAndTypes(subj, map.values());
+                pluginDAO.remove(plugin);
+            }
+        }
+    }
+
     public File getCustomPluginDir() {
         File wdParent = new File(System.getProperty("user.dir")).getParentFile();
         return new File(wdParent, PLUGIN_DIR);
@@ -155,9 +168,10 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         }
     }
     
-    private void deletePluginFiles(File serverPluginDir, File customPluginDir,
-                                   Collection<String> pluginFileNames)
+    private void deletePluginFiles(Collection<String> pluginFileNames)
     throws PermissionException {
+        final File serverPluginDir = getServerPluginDir();
+        final File customPluginDir = getCustomPluginDir();
         // Want this to be all or nothing, so first check if we can delete all the files
         for (final String filename : pluginFileNames) {
             final File customPlugin = new File(customPluginDir.getAbsolutePath() + "/" + filename);
@@ -197,12 +211,6 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         return true;
     }
 
-    private void removePluginAndAssociatedResources(AuthzSubject subj, Plugin plugin) {
-        pluginDAO.remove(plugin);
-        final Map<String, MonitorableType> map = monitorableTypeDAO.findByPluginName(plugin.getName());
-        resourceManager.removeResourcesAndTypes(subj, map.values());
-    }
-    
     public Set<Integer> getAgentIdsInQueue() {
         final Set<Integer> rtn = new HashSet<Integer>();
         rtn.addAll(agentSynchronizer.getJobListByDescription(
@@ -314,7 +322,23 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
                     }
                     currXml = entry.getName();
                     is = jarFile.getInputStream(entry);
-                    new SAXBuilder().build(is);
+                    SAXBuilder builder = new SAXBuilder();
+                    builder.setEntityResolver(new EntityResolver() {
+                        // systemId = file:///pdk/plugins/process-metrics.xml
+                        public InputSource resolveEntity(String publicId, String systemId)
+                        throws SAXException, IOException {
+                            final File entity = new File(systemId);
+                            final String filename = entity.getName().replaceAll(AGENT_PLUGIN_DIR, "");
+                            File file = new File(getCustomPluginDir(), filename);
+                            if (!file.exists()) {
+                                file = new File(getServerPluginDir(), filename);
+                            }
+                            return (file.exists()) ?
+                                new InputSource("file://" + file.getAbsolutePath()) :
+                                new InputSource(systemId);
+                        }
+                    });
+                    builder.build(is);
                     currXml = null;
                 } finally {
                     close(is);
@@ -346,6 +370,9 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         final Map<Integer, Map<AgentPluginStatusEnum, Integer>> rtn =
             new HashMap<Integer, Map<AgentPluginStatusEnum, Integer>>();
         for (final AgentPluginStatus status : statuses) {
+            if (status.getAgent().getPlatforms().isEmpty()) {
+                continue;
+            }
             final String name = status.getPluginName();
             final Plugin plugin = pluginsByName.get(name);
             if (plugin == null) {
@@ -449,12 +476,25 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
             agentPluginStatusDAO.getStatusByAgentId(agentId);
         final long now = System.currentTimeMillis();
         for (final Plugin plugin : plugins) {
+            if (plugin == null || plugin.isDisabled()) {
+                continue;
+            }
             final AgentPluginStatus status = statusMap.get(plugin.getName());
             if (status == null) {
                 continue;
             }
             status.setLastSyncStatus(s.toString());
             status.setLastSyncAttempt(now);
+        }
+    }
+
+    @Transactional(propagation=Propagation.REQUIRES_NEW, readOnly=false)
+    public void updateAgentPluginStatusByFileNameInNewTran(AgentPluginStatusEnum s, Integer agentId,
+                                                           Collection<String> pluginFileNames) {
+        final Collection<AgentPluginStatus> statuses =
+            agentPluginStatusDAO.getStatusByAgentAndFileNames(agentId, pluginFileNames);
+        for (final AgentPluginStatus status: statuses) {
+            status.setLastSyncStatus(s.toString());
         }
     }
 
@@ -510,8 +550,8 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
     }
 
     @Transactional(readOnly=false)
-    public void markEnabled(String pluginFileName) {
-        final Plugin plugin = pluginDAO.getByFilename(pluginFileName);
+    public void markEnabled(String pluginName) {
+        final Plugin plugin = pluginDAO.findByName(pluginName);
         if (plugin == null) {
             return;
         }

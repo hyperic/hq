@@ -34,69 +34,39 @@
 <%--<c:set var="rssUrl" value="/rss/ViewResourceHealth.rss"/>--%>
 
 <div class="effectsPortlet">
-<tiles:insert definition=".header.tab">
-  <tiles:put name="tabKey" value="dash.home.EscalationSummary"/>
-  <tiles:put name="adminUrl" beanName="adminUrl" />
-  <tiles:put name="portletName" beanName="portletName" />
-  <tiles:put name="rssBase" beanName="rssUrl" />
-</tiles:insert>
-
-
-
-<script type="text/javascript">
-/*
-function requestEscalationSummary() {
-    var url = '<html:rewrite page="/escalation/ListActiveEscalations.do"/>';
-
-	new Ajax.Request(url, {method: 'get', onSuccess:showEscalationResponse, onFailure :reportError});
-}
-onloads.push(requestEscalationSummary);
-*/
-</script>
-
-<table width="100%" border="0" cellspacing="0" cellpadding="0" id="escalationTable" class="portletLRBorder">
- 	<tbody>
-        <tr class="tableRowHeader">
-            <th width="40%" class="tableRowInactive">
-                Problem Resource
-            </th>
-            <th width="30%"  class="tableRowInactive" noWrap>
-                Alert Name
-            </th>
-            <th width="10%" class="tableRowInactive" align="center">
-
-                Time Elapsed
-            </th>
-            <th width="10%" align="center" class="tableRowInactive" noWrap>
-                Next Action Starts
-            </th>
-            <th width="10%" align="center" class="tableRowInactive" noWrap>
-                Ack'd
-            </th>
-
-        </tr>
-        
-        <!-- table rows are inserted here dynamically -->
-    </tbody>
+	<tiles:insert definition=".header.tab">
+  		<tiles:put name="tabKey" value="dash.home.EscalationSummary"/>
+  		<tiles:put name="adminUrl" beanName="adminUrl" />
+  		<tiles:put name="portletName" beanName="portletName" />
+  		<tiles:put name="rssBase" beanName="rssUrl" />
+	</tiles:insert>
+	<table width="100%" border="0" cellspacing="0" cellpadding="0" id="escalationTable" class="portletLRBorder">
+ 		<tbody>
+        	<tr class="tableRowHeader">
+            	<th width="40%" class="tableRowInactive">Problem Resource</th>
+            	<th width="30%"  class="tableRowInactive" noWrap>Alert Name</th>
+            	<th width="10%" class="tableRowInactive" align="center">Time Elapsed</th>
+            	<th width="10%" align="center" class="tableRowInactive" noWrap>Next Action Starts</th>
+            	<th width="10%" align="center" class="tableRowInactive" noWrap>Ack'd</th>
+        	</tr>
+        	<!-- table rows are inserted here dynamically -->
+    	</tbody>
 	</table>
 	<table width="100%" cellpadding="0" cellspacing="0" border="0" id="noEscResources" style="display:none;" class="portletLRBorder">
         <tbody>
-        <tr class="ListRow">
-            <td class="ListCell">
-                <fmt:message key="dash.home.alerts.no.resource.to.display"/>
-            </td>
-        </tr>
+        	<tr class="ListRow">
+	            <td class="ListCell">
+	                <fmt:message key="dash.home.alerts.no.resource.to.display"/>
+	            </td>
+	        </tr>
         </tbody>
-  </table>
+  	</table>
     <table width="100%" border="0" cellspacing="0" cellpadding="0">
-
-          <tr>
-              <td colspan="4" id="modifiedEscalationTime" class="modifiedDate">Updated: </td>
-          </tr>
-
+    	<tr>
+        	<td colspan="4" id="modifiedEscalationTime" class="modifiedDate">Updated: </td>
+        </tr>
     </table>
-
-     <div id="logInfo"></div>
+   	<div id="logInfo"></div>
     <div style="display:none;">
         <span id="noWaitText"><fmt:message key="alert.config.escalation.end"/></span>
         <span id="fiveText"><fmt:message key="alert.config.escalation.wait"><fmt:param value="5"/></fmt:message></span>

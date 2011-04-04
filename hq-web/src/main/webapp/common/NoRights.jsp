@@ -70,7 +70,7 @@
         <p>
         <fmt:message key="securityAlert.CannotBeDisplayed"/> 
         <fmt:message key="securityAlert.PleaseContact"/> 
-        <!--html:link href="mailto:CAMAdmin@petstore.com"!--><fmt:message key="securityAlert.CAMAdminstrator"/><!--/html:link-->
+        <fmt:message key="securityAlert.CAMAdminstrator"/>
         <fmt:message key="securityAlert.toAdd"/>
         </p>
         

@@ -42,6 +42,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.product.shared.PluginManager;
 import org.springframework.beans.BeansException;
@@ -182,8 +183,11 @@ implements AgentPluginUpdater, ApplicationListener<ContextRefreshedEvent>, Appli
             }
             public void execute() {
                 final AgentManager agentManager = Bootstrap.getBean(AgentManager.class);
+                // NOTE: AgentPluginStatus objects are removed when the agent restarts and
+                // doesn't check in a Plugin
+                pluginManager.updateAgentPluginStatusByFileNameInNewTran(
+                    AgentPluginStatusEnum.SYNC_IN_PROGRESS, agentId, pluginFileNames);
                 try {
-                    pluginManager.removeAgentPluginStatuses(agentId, pluginFileNames);
                     final Map<String, Boolean> result =
                         agentManager.agentRemovePlugins(overlord, agentId, pluginFileNames);
                     // only reboot the agent if we actually removed a plugin
@@ -212,6 +216,13 @@ implements AgentPluginUpdater, ApplicationListener<ContextRefreshedEvent>, Appli
         // don't want the main thread to hang the startup so put it in a new thread
         final Thread thread = new Thread("AgentPluginStartupSync") {
             public void run() {
+                try {
+                    // want all agents to be able to check in their PluginInfo before this runs
+                    log.info("will start agent plugin sync in 5 minutes");
+                    Thread.sleep(5*MeasurementConstants.MINUTE);
+                } catch (InterruptedException e) {
+                    log.debug(e,e);
+                }
                 try {
                     log.info("starting agent plugin sync");
                     final AgentManager agentManager = Bootstrap.getBean(AgentManager.class);

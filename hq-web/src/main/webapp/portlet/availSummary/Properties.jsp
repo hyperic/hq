@@ -48,7 +48,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 var help = '<hq:help/>';
 
 /***********************************************/
-/* Disable "Enter" key in Form script- By Nurul Fadilah(nurul@REMOVETHISvolmedia.com)
+/* Disable "Enter" key in Form script- By Nurul Fadilah
 /* This notice must stay intact for use
 /* Visit http://www.dynamicdrive.com/ for full source code
 /***********************************************/

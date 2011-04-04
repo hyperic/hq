@@ -36,54 +36,61 @@
 <html:link page="/ResourceHub.do?ff=" linkName="browseUrl" styleId="browseUrl" style="visibility:hidden;"></html:link>
 
 <script type="text/javascript">
-function requestAvailSummary<c:out value="${portlet.token}"/>() {
-    var dummyStr = '&hq=' + new Date().getTime();
-    var availResourcesUrl = "<html:rewrite page="/dashboard/ViewAvailSummary.do?token=${portlet.token}"/>" + dummyStr;
-	new Ajax.Request(availResourcesUrl, {method: 'get', onSuccess:showAvailSummary, onFailure :reportError});
-}
-onloads.push(requestAvailSummary<c:out value="${portlet.token}"/>);
+	function requestAvailSummary${portlet.token}() {
+		hqDojo.xhrGet({
+			url: "<html:rewrite action="/dashboard/ViewAvailSummary" />",
+			content: {
+				token: "${portlet.token}",
+				hq: (new Date()).getTime()
+			},
+			handleAs: "json",
+			load: showAvailSummary,
+			error: reportError
+		});
+	}
+	
+	hqDojo.ready(function() {
+		requestAvailSummary${portlet.token}();
+	});
 </script>
 
 <div class="effectsPortlet">
-<tiles:insert definition=".header.tab">
-  <tiles:put name="tabKey" value="dash.home.AvailSummary"/>
-  <tiles:put name="subTitle" beanName="portlet" beanProperty="description"/>
-  <tiles:put name="adminUrl" beanName="adminUrl" />
-  <tiles:put name="portletName" beanName="portletName" />
-
-  <c:if test="${not empty portlet.token}">
-    <tiles:put name="adminToken" beanName="portlet" beanProperty="token"/>
-    <c:set var="tableName" value="availTable${portlet.token}"/>
-    <c:set var="noTableName" value="noAvailTable${portlet.token}"/>
-  </c:if>
-  <c:if test="${empty portlet.token}">
-    <c:set var="tableName" value="availTable"/>
-    <c:set var="noTableName" value="noAvailTable"/>
-  </c:if>
-  <tiles:put name="portletName"><c:out value="${portlet.fullUrl}"/></tiles:put>
-
-</tiles:insert>
-   <!-- Content Block  -->
-    <table width="100%" border="0" cellspacing="0" cellpadding="0" id="<c:out value="${tableName}"/>" class="portletLRBorder">
-      <tbody>
-        <tr class="tableRowHeader">
-          <th width="72%" class="tableRowInactive"><fmt:message key="dash.home.TableHeader.Type"/></th>
-          <th align="center" colspan="2" class="tableRowInactive"><fmt:message key="resource.common.monitor.visibility.AvailabilityTH"/></th>
-        </tr>
-        <!-- table rows are inserted here dynamically -->
-      </tbody>
+	<tiles:insert definition=".header.tab">
+  		<tiles:put name="tabKey" value="dash.home.AvailSummary" />
+  		<tiles:put name="subTitle" beanName="portlet" beanProperty="description" />
+  		<tiles:put name="adminUrl" beanName="adminUrl" />
+  		<tiles:put name="portletName" beanName="portletName" />
+  		<c:if test="${not empty portlet.token}">
+    		<tiles:put name="adminToken" beanName="portlet" beanProperty="token" />
+    		<c:set var="tableName" value="availTable${portlet.token}" />
+    		<c:set var="noTableName" value="noAvailTable${portlet.token}" />
+  		</c:if>
+  		<c:if test="${empty portlet.token}">
+    		<c:set var="tableName" value="availTable"/>
+    		<c:set var="noTableName" value="noAvailTable"/>
+  		</c:if>
+  		<tiles:put name="portletName">${portlet.fullUrl}</tiles:put>
+	</tiles:insert>
+   	<!-- Content Block  -->
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" id="${tableName}" class="portletLRBorder">
+    	<tbody>
+        	<tr class="tableRowHeader">
+          		<th width="72%" class="tableRowInactive"><fmt:message key="dash.home.TableHeader.Type"/></th>
+          		<th align="center" colspan="2" class="tableRowInactive"><fmt:message key="resource.common.monitor.visibility.AvailabilityTH"/></th>
+        	</tr>
+        	<!-- table rows are inserted here dynamically -->
+      	</tbody>
     </table>
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" id="<c:out value="${noTableName}"/>" style="display:none;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" id="${noTableName}" style="display:none;">
         <tbody>
-        <tr class="ListRow">
-        <td class="ListCell">
-                <c:url var="path" value="/"/>
-                <fmt:message key="dash.home.add.resources.to.display">
-                  <fmt:param value="${path}"/>
-                </fmt:message>
-        </td>
-      </tr>
-      </tbody>
+        	<tr class="ListRow">
+        		<td class="ListCell">
+                	<c:url var="path" value="/" />
+                	<fmt:message key="dash.home.add.resources.to.display">
+                  		<fmt:param value="${path}"/>
+                	</fmt:message>
+        		</td>
+      		</tr>
+      	</tbody>
     </table>
-  </div>
-
+</div>
