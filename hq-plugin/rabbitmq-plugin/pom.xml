@@ -34,6 +34,14 @@
             <version>1.4</version>
             <type>jar</type>
         </dependency>
+        <!-- During a clover build, we end up using an instrumented hq-pdk jar.  
+        Since we are skipping instrumentation, we end up with a ClassNotFoundException for clover on exec-->
+        <dependency>
+            <groupId>com.cenqua.clover</groupId>
+            <artifactId>clover</artifactId>
+            <version>2.6.3</version>
+            <scope>test</scope>
+       </dependency>
     </dependencies>
 
     <build>
