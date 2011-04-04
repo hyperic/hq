@@ -452,7 +452,7 @@ public class AlertRepositoryIntegrationTest {
     public void testGetOldestUnfixedAlertTimeNoAlerts() {
         alertRepository.delete(alert);
         alertRepository.delete(alert2);
-        alertRepository.getOldestUnfixedAlertTime();
+        assertEquals(0l,alertRepository.getOldestUnfixedAlertTime());
     }
 
     @Test

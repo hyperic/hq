@@ -307,6 +307,11 @@ public class EventLogRepositoryIntegrationTest {
         eventLogRepository.save(log5);
         assertEquals(Long.valueOf(timestamp - 2000), eventLogRepository.getMinimumTimeStamp());
     }
+    
+    @Test
+    public void testGetMinimumTimeStampNoLogs() {
+        assertEquals(Long.valueOf(-1l), eventLogRepository.getMinimumTimeStamp());
+    }
 
     @Test
     public void testInsertLogs() {

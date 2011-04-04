@@ -186,13 +186,12 @@ public class AlertRepositoryImpl implements AlertRepositoryCustom {
     }
 
     public long getOldestUnfixedAlertTime() {
-        long alertCount = entityManager.createQuery("select count(a) from Alert a", Long.class)
-            .getSingleResult();
-        if (alertCount == 0) {
+        Long minTime = entityManager.createQuery("select min(a.ctime) from Alert a where a.fixed = false",
+            Long.class).getSingleResult();
+        if (minTime == null) {
             return 0;
         }
-        return entityManager.createQuery("select min(a.ctime) from Alert a where a.fixed = false",
-            Long.class).getSingleResult();
+        return minTime;
     }
 
     @SuppressWarnings("unchecked")

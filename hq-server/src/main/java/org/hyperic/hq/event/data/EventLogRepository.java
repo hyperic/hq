@@ -58,8 +58,4 @@ public interface EventLogRepository extends JpaRepository<EventLog, Integer>,
     List<EventLog> findByTimestampGreaterThanOrEqualToAndType(@Param("timestamp") long timestamp,
                                                               @Param("type") String type);
 
-    @Transactional(readOnly = true)
-    @Query("select min(l.timestamp) from EventLog l")
-    Long getMinimumTimeStamp();
-
 }

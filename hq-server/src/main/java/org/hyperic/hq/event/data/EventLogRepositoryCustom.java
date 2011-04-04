@@ -2,6 +2,7 @@ package org.hyperic.hq.event.data;
 
 import org.hyperic.hq.events.server.session.EventLog;
 import org.hyperic.hq.inventory.domain.Resource;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface EventLogRepositoryCustom {
 
@@ -12,7 +13,11 @@ public interface EventLogRepositoryCustom {
      * @param to The timestamp to delete to
      * @return The number of event logs deleted.
      */
+    @Transactional
     int deleteLogsInTimeRange(long from, long to);
+    
+    @Transactional(readOnly = true)
+    Long getMinimumTimeStamp();
 
     /**
      * Insert the event logs in batch, with batch size specified by the
@@ -20,6 +25,7 @@ public interface EventLogRepositoryCustom {
      * 
      * @param eventLogs The event logs to insert.
      */
+    @Transactional
     void insertLogs(EventLog[] eventLogs);
 
     /**
@@ -32,5 +38,6 @@ public interface EventLogRepositoryCustom {
      *         will be true if logs exists for the specified Resource in that
      *         interval
      */
+    @Transactional(readOnly = true)
     boolean[] logsExistPerInterval(Resource resource, long begin, long end, int intervals);
 }

@@ -76,6 +76,15 @@ public class EventLogRepositoryImpl implements EventLogRepositoryCustom {
         return sql.toString();
     }
 
+    public Long getMinimumTimeStamp() {
+        Long timestamp = entityManager.createQuery("select min(l.timestamp) from EventLog l",
+            Long.class).getSingleResult();
+        if (timestamp == null) {
+            return -1l;
+        }
+        return timestamp;
+    }
+
     public void insertLogs(EventLog[] eventLogs) {
         FlushModeType flushMode = entityManager.getFlushMode();
         try {
