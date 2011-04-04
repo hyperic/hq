@@ -298,8 +298,15 @@ deleteForm
 	<h1><fmt:message key="admin.managers.plugin.title" /></h1>
 	<p id="instruction"><fmt:message key="${instruction}" /></p>
 	
-	<div id="agentInfo">
-		<fmt:message key="admin.managers.Plugin.information.agent.count"/>:&nbsp;<span id="agentInfoAllCount">${allAgentCount}</span><img src="/images/icon_info_small.gif" class="infoIcon"/> <br/>
+	
+	<div>
+		
+		<span id="agentInfo">&nbsp;&nbsp;&nbsp;&nbsp;
+			<fmt:message key="admin.managers.Plugin.information.agent.count"/>:&nbsp;
+		    <span id="agentInfoAllCount">${allAgentCount}</span>
+		    <img src="/images/icon_info_small.gif" class="infoIcon"/> <br/>
+		</span>
+		<img id="refreshIcon" style="float:right;" src="/images/arrow_refresh.png" />
 	</div>
 	
 	<div class="gridheader clear">
@@ -430,6 +437,16 @@ deleteForm
 	hqDojo.require("dojox.timing._base");
 
 	hqDojo.ready(function() {
+		uncheckCheckboxes();
+		function uncheckCheckboxes(){
+			hqDojo.forEach( hqDojo.query("input[type=checkbox]"), function(e){
+					e.checked=false;
+			});	    
+		}
+		
+		hqDojo.connect(hqDojo.byId("refreshIcon"),"onclick",function(e){
+			refreshPage();
+		});
 		
 		function refreshPage(){
 			var infoXhrArgs={
@@ -444,7 +461,7 @@ deleteForm
 					hqDojo.byId("agentInfoAllCount").innerHTML=response.allAgentCount;
 				}
 			}
-				
+			/*	
 		    var deleteIdsString = "";
 			hqDojo.query("input[type=checkbox]:checked").forEach(function(entry){
 					deleteIdsString+=entry.value+",";
@@ -459,7 +476,7 @@ deleteForm
 				deleteIds: deleteIdsString
 			}
 			hqDojo.hash(hqDojo.objectToQuery(hashObj));
-			
+			*/
 			hqDojo.xhrGet(infoXhrArgs);
 			hqDojo.publish("refreshDataGrid");
 		}
@@ -546,6 +563,7 @@ deleteForm
 		hqDojo.style(showStatusPanel, "visibility", "visible");
 			
 		hqDojo.query("#showStatusPanelDialog .cancelLink").onclick(function(e) {
+			uncheckCheckboxes();
 			hqDijit.byId("showStatusPanelDialog").hide();
 			hqDojo.empty("agentList");
 			hqDojo.byId("searchText").value="";
@@ -594,11 +612,13 @@ deleteForm
 			hqDojo.style(removeErrorPanel, "visibility", "visible");
 
 			hqDojo.query("#uploadPanelDialog .cancelLink").onclick(function(e) {
+				uncheckCheckboxes();
 				hqDijit.byId("uploadPanelDialog").hide();
-				hqDijit.registry.remove("selectFileButton");
+
 			});
 
 			hqDojo.query("#removePanelDialog .cancelLink").onclick(function(e) {
+				uncheckCheckboxes();
 				hqDijit.byId("removePanelDialog").hide();
 			});
 			hqDojo.query("#removeErrorPanelDialog .cancelLink").onclick(function(e) {
@@ -607,6 +627,14 @@ deleteForm
 
 		
 			hqDojo.connect(hqDojo.byId("showUploadFormButton"), "onclick", function(e) {
+								if(hqDijit.registry.map(function(e){
+					return e.id=="selectFileButton";
+				 						}))
+				{ 
+					hqDijit.registry.remove("selectFileButton");
+				};
+				
+			
 				hqDojo.byId("selectFileButton").innerHTML = "<fmt:message key='admin.managers.plugin.button.select.files' />"
 				hqDojo.byId("selectedFileList").innerHTML = "";
 				uploader = new hqDojox.form.FileUploader({
@@ -844,6 +872,7 @@ deleteForm
                 		}
                 		index++;
                 	});
+                	/*
 					var hashObj = hqDojo.queryToObject(hqDojo.hash());
 					if(hashObj.deleteIds!=""){
 						hqDojo.forEach(hashObj.deleteIds.split(","),function(pluginId){
@@ -852,7 +881,9 @@ deleteForm
 								checkbox[0].checked="true";
 							}
 						});
-					}
+					}*/
+
+					
 					
 					hqDojo.behavior.apply();
 					hqDojo.query(".notFound").forEach(function(e){
@@ -871,7 +902,7 @@ deleteForm
 		var timer = new hqDojox.timing.Timer();
 		timer.setInterval(10000);
 		timer.onTick = refreshPage;
-		timer.start();
+		//timer.start();
 	});
 
 </script>
