@@ -200,7 +200,7 @@
 	.inProgressAgentList li{
 		list-style-image: url("/images/arrow_refresh.png");
 	}
-	#agentInfo{
+	#agentInfo, #currentTimeInfo{
 		font-weight: bold;
 		float: right;
 		height: 20px;
@@ -297,16 +297,18 @@ deleteForm
 <section id="pluginManagerPanel" class="container top">
 	<h1><fmt:message key="admin.managers.plugin.title" /></h1>
 	<p id="instruction"><fmt:message key="${instruction}" /></p>
-	
-	
-	<div>
-		
-		<span id="agentInfo">&nbsp;&nbsp;&nbsp;&nbsp;
+
+	<div style="float:left;" id="agentInfo">
+		<span>
 			<fmt:message key="admin.managers.Plugin.information.agent.count"/>:&nbsp;
 		    <span id="agentInfoAllCount">${allAgentCount}</span>
 		    <img src="/images/icon_info_small.gif" class="infoIcon"/> <br/>
 		</span>
+	</div>
+	
+	<div style="float:right;" id="currentTimeInfo">
 		<img id="refreshIcon" style="float:right;" src="/images/arrow_refresh.png" />
+		<fmt:message key="admin.managers.Plugin.information.refresh.time"/> <span id="timeNow"></span>&nbsp;&nbsp;&nbsp;
 	</div>
 	
 	<div class="gridheader clear">
@@ -435,9 +437,11 @@ deleteForm
 	hqDojo.require("dojo.behavior");
 	hqDojo.require("dojo.hash");
 	hqDojo.require("dojox.timing._base");
+	hqDojo.require("dojo.date.locale");
 
 	hqDojo.ready(function() {
 		uncheckCheckboxes();
+		updateTime();
 		function uncheckCheckboxes(){
 			hqDojo.forEach( hqDojo.query("input[type=checkbox]"), function(e){
 					e.checked=false;
@@ -448,6 +452,17 @@ deleteForm
 			refreshPage();
 		});
 		
+		function dateFormat(date){
+			return hqDojo.date.locale.format(date,{
+				selector: "date",
+				datePattern: "MM/dd/yy hh:mm:ss aa"
+			});
+		};
+		
+		function updateTime(){
+			var now = new Date();
+			hqDojo.byId("timeNow").innerHTML=dateFormat(now);
+		}		
 		function refreshPage(){
 			var infoXhrArgs={
 				preventCache:true,
@@ -479,8 +494,13 @@ deleteForm
 			*/
 			hqDojo.xhrGet(infoXhrArgs);
 			hqDojo.publish("refreshDataGrid");
-		}
+			
 
+		}
+		new hqDijit.Tooltip({
+			connectId:["refreshIcon"],
+			label: "<fmt:message key='admin.managers.Plugin.information.refresh.time.tip'/>"
+		});
 		new hqDijit.Tooltip({
 			connectId:["addedTimeHeader"],
 			label: "<fmt:message key='admin.managers.plugin.column.header.initial.deploy.date.tip' />"
@@ -786,7 +806,8 @@ deleteForm
                 	"Accept": "application/json"
                 },
                 load: function(response, args) {
-                	
+                	updateTime();
+
                 	
                 	hqDojo.empty("pluginList");
                 	
