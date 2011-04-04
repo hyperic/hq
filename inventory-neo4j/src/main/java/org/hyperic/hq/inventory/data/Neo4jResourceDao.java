@@ -88,7 +88,7 @@ public class Neo4jResourceDao implements ResourceDao {
                     org.springframework.data.domain.Sort.Direction.DESC))));
         }
         IndexHits<Node> indexHits = graphDatabaseContext.getIndex(Resource.class,
-            GraphDatabaseContext.DEFAULT_NODE_INDEX_NAME).query(propertyName, queryContext);
+            null).query(propertyName, queryContext);
         if (indexHits == null) {
             return new PageImpl<Resource>(new ArrayList<Resource>(0),pageInfo,0);
         }
@@ -167,7 +167,7 @@ public class Neo4jResourceDao implements ResourceDao {
         resource.persist();
         // Set the type index here b/c Resource needs an ID before we can access
         // the underlying node
-        graphDatabaseContext.getIndex(Resource.class,GraphDatabaseContext.DEFAULT_NODE_INDEX_NAME).add(
+        graphDatabaseContext.getIndex(Resource.class,null).add(
             resource.getPersistentState(), "type", resource.getType().getId());
         // flush to get the JSR-303 validation done sooner
         entityManager.flush();

@@ -671,7 +671,7 @@ public class Resource {
         getPersistentState().setProperty(key, value);
         if (propertyType.isIndexed()) {
            
-            graphDatabaseContext.getIndex(Resource.class,GraphDatabaseContext.DEFAULT_NODE_INDEX_NAME,false).add(
+            graphDatabaseContext.getIndex(Resource.class,null).add(
                 getPersistentState(), key, value);
         }
         CPropChangeEvent event = new CPropChangeEvent(getId(), key, oldValue, value);

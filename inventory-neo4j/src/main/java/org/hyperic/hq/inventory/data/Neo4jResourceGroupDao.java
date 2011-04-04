@@ -68,7 +68,7 @@ public class Neo4jResourceGroupDao implements ResourceGroupDao {
     @Transactional(readOnly = true)
     public ResourceGroup findByName(String name) {
         ResourceGroup group = (ResourceGroup) finderFactory.createNodeEntityFinder(Resource.class)
-            .findByPropertyValue( null, "name", name);
+            .findByPropertyValue(null, "name", name);
 
         if (group != null) {
             group.persist();
@@ -97,8 +97,7 @@ public class Neo4jResourceGroupDao implements ResourceGroupDao {
         resourceGroup.persist();
         // Set the type index here b/c ResourceGroup needs an ID before we can
         // access the underlying node
-        graphDatabaseContext.getIndex(ResourceGroup.class,
-            GraphDatabaseContext.DEFAULT_NODE_INDEX_NAME, false).add(
+        graphDatabaseContext.getIndex(Resource.class, null).add(
             resourceGroup.getPersistentState(), "type", resourceGroup.getType().getId());
     }
 }
