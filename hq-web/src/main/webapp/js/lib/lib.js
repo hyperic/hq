@@ -3762,15 +3762,15 @@ hyperic.alert_center = function(title_name) {
 	that.initDialog();
 }
 
-hyperic.maintenance_schedule = function(args, title_name, group_id, group_name) {
+hyperic.maintenance_schedule = function(args) {
     var that = this;
     var baseUrl = args.url;
     
     that.existing_schedule = {};
-    that.entity_id = args.entityId;
-    that.group_id = args.resourceId;
-    that.group_name = unescape(args.resourceName);
-    that.title_name = args.title + " - " + that.group_name;
+    that.appdefentity_id = args.appdefentityId;
+    that.entity_id = that.appdefentity_id.split(":")[1];
+    that.resource_name = unescape(args.resourceName);
+    that.title_name = args.title + " - " + that.resource_name;
     that.dialog = null;
 	that.buttons = {};
 	that.inputs = {};
@@ -3779,8 +3779,8 @@ hyperic.maintenance_schedule = function(args, title_name, group_id, group_name) 
     that.server_time = new Date(); // default
         
     that.message_area = {
-    	request_status : hqDojo.byId('maintenance_status_' + that.group_id),
-    	schedule_status : hqDojo.byId('existing_downtime_' + that.group_id)
+    	request_status : hqDojo.byId('maintenance_status_' + that.entity_id),
+    	schedule_status : hqDojo.byId('existing_downtime_' + that.entity_id)
     };
 
     that.init = function() {
@@ -3788,10 +3788,10 @@ hyperic.maintenance_schedule = function(args, title_name, group_id, group_name) 
 			if(that.title_name.length > 42) {
 				that.title_name = that.title_name.substring(0,42) + "...";
 			}
-	    	var pane = hqDojo.byId('maintenance' + that.group_id);
+	    	var pane = hqDojo.byId('maintenance' + that.entity_id);
 			pane.style.width = "450px";
 			that.dialog = new hqDijit.Dialog({
-				id: "maintenance_schedule_dialog_" + that.group_id,
+				id: "maintenance_schedule_dialog_" + that.entity_id,
 				refocus: true,
 				autofocus: false,
 				title: that.title_name
@@ -3846,17 +3846,8 @@ hyperic.maintenance_schedule = function(args, title_name, group_id, group_name) 
 			id: "schedule_btn",
 			type: 'button'
 		}, "schedule_btn");
-
         hqDojo.connect(that.buttons.schedule_btn, 'onClick', that.schedule_action);
-
-		that.buttons.cancel_btn = new hqDijit.form.Button({
-			label: hyperic.data.maintenance_schedule.label.cancel,
-			name: "cancel_btn",
-			id: "cancel_btn",
-			type: 'cancel'
-		}, "cancel_btn");
-		hqDojo.connect(that.buttons.cancel_btn, 'onClick', that.dialog.onCancel);
-
+        
 		that.buttons.clear_schedule_btn = new hqDijit.form.Button({
 			label: hyperic.data.maintenance_schedule.label.clear,
 			name: "clear_schedule_btn",
@@ -3864,7 +3855,10 @@ hyperic.maintenance_schedule = function(args, title_name, group_id, group_name) 
 			type: 'button'
 		}, "clear_schedule_btn");
         hqDojo.connect(that.buttons.clear_schedule_btn, 'onClick', that.clear_schedule_action);
-
+        
+		hqDojo.byId("maintenance_cancel_link_" + that.entity_id).onclick = function(e) {
+			hqDijit.byId("maintenance_schedule_dialog_" + that.entity_id).onCancel();
+		};
     };
 
     that.schedule_action = function() {
@@ -3910,7 +3904,7 @@ hyperic.maintenance_schedule = function(args, title_name, group_id, group_name) 
                 },
                 error: function(data){
                 	that.displayError(hyperic.data.maintenance_schedule.error.serverError);
-                	console.info("An error occurred setting maintenance schedule for resource " + that.entity_id, data);
+                	console.info("An error occurred setting maintenance schedule for resource " + that.appdefentity_id, data);
                 },
                 timeout: 5000
             });
@@ -3919,7 +3913,7 @@ hyperic.maintenance_schedule = function(args, title_name, group_id, group_name) 
     
     that.clear_schedule_action = function() {
         return hqDojo.xhrPost( {
-            url: baseUrl + "/schedule/" + that.entity_id,
+            url: baseUrl + "/schedule/" + that.appdefentity_id,
             content: {
         		"_method" : "DELETE" // need to work around issue using PUT directly
         	},
@@ -3940,7 +3934,7 @@ hyperic.maintenance_schedule = function(args, title_name, group_id, group_name) 
             },
             error: function(data){
             	that.displayError(hyperic.data.maintenance_schedule.error.serverError);
-            	console.info("An error occurred clearing maintenance schedule for resource " + that.entity_id, data);
+            	console.info("An error occurred clearing maintenance schedule for resource " + that.appdefentity_id, data);
             },
             timeout: 5000
         });
@@ -3948,7 +3942,7 @@ hyperic.maintenance_schedule = function(args, title_name, group_id, group_name) 
     
     that.getSchedule = function() {
         return hqDojo.xhrGet( {
-            url: baseUrl + "/schedule/" + that.entity_id,
+            url: baseUrl + "/schedule/" + that.appdefentity_id,
             headers: { "Content-Type": "application/json"},
             handleAs: 'json',
             preventCache: true,
@@ -3990,7 +3984,7 @@ hyperic.maintenance_schedule = function(args, title_name, group_id, group_name) 
                 that.resetSchedule();
             	that.redraw(true, "&nbsp;");
             	that.displayError(hyperic.data.maintenance_schedule.error.serverError);
-            	console.info("An error occurred fetching maintenance schedule for resource " + that.entity_id, data);
+            	console.info("An error occurred fetching maintenance schedule for resource " + that.appdefentity_id, data);
             },
             timeout: 5000
         });
@@ -4159,7 +4153,7 @@ hyperic.maintenance_schedule = function(args, title_name, group_id, group_name) 
         }
         else
         {
-        	setTimeout('maintenance_' + that.group_id + '.dialog.hide()', 2000);
+        	setTimeout('maintenance_' + that.entity_id + '.dialog.hide()', 2000);
         }
     };
     

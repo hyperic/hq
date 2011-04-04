@@ -2575,3 +2575,15 @@ span.returnToLink {
 .dijitArrowButtonInner {
 	border: 0;
 }
+
+.maintenanceLink a {
+	color:#0066CC;
+	font-weight:normal;
+	text-decoration:underline;
+}
+
+.maintenanceLink a:hover {
+	color:#0099FF;
+	font-weight:normal;
+	text-decoration:underline;
+}
