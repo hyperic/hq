@@ -2,11 +2,14 @@ package org.hyperic.hq.operation;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
 
+import java.io.Serializable;
 import java.util.*;
 
 
-public abstract class AbstractOperation {
+public abstract class AbstractOperation implements Serializable {
 
+    private static final long serialVersionUID = 6991306796752066389L;
+     
     private Map stringVals;
 
     private Map intVals;

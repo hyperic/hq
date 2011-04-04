@@ -38,6 +38,8 @@ import java.io.IOException;
  */
 public class DeclarativeBindingHandler implements BindingHandler {
 
+    private final Routings routings = new Routings();
+
     private final ChannelTemplate template;
 
     public DeclarativeBindingHandler(ConnectionFactory connectionFactory) {
@@ -111,8 +113,6 @@ public class DeclarativeBindingHandler implements BindingHandler {
      * @return String exchange type
      */
     private String getExchangeType(String exchangeType) {
-        return exchangeType != null ? exchangeType : Routings.SHARED_EXCHANGE_TYPE;
+        return exchangeType != null ? exchangeType : routings.getSharedExchangeType();
     }
-
-
 }

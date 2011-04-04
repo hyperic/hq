@@ -18,7 +18,7 @@
  *  details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
+ *  along with this program; if not, fromObject to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  *  USA.
  *
@@ -76,16 +76,64 @@ public final class MessageConstants {
     /**
      * The standard message properties
      */
-    public static final AMQP.BasicProperties MESSAGE_PROPERTIES;
+    public static final AMQP.BasicProperties DEFAULT_MESSAGE_PROPERTIES;
  
     static {
-        MESSAGE_PROPERTIES = new AMQP.BasicProperties();
-        MESSAGE_PROPERTIES.setContentType(TEXT_CONTENT_TYPE); // plain for early dev work
-        MESSAGE_PROPERTIES.setContentEncoding(ENCODING); 
-        MESSAGE_PROPERTIES.setDeliveryMode(DELIVERY_MODE_NON_PERSISTENT);
-        MESSAGE_PROPERTIES.setPriority(PRIORITY);
+        DEFAULT_MESSAGE_PROPERTIES = new AMQP.BasicProperties();
+        DEFAULT_MESSAGE_PROPERTIES.setContentType(JSON_CONTENT_TYPE); // plain for early dev work
+        DEFAULT_MESSAGE_PROPERTIES.setContentEncoding(ENCODING);
+        DEFAULT_MESSAGE_PROPERTIES.setDeliveryMode(DELIVERY_MODE_NON_PERSISTENT);
+        DEFAULT_MESSAGE_PROPERTIES.setPriority(PRIORITY);
     }
 
     private MessageConstants() {
     }
+
+    /**
+     * The exchange type for shared agent-server exchanges
+     */
+    public static final String SHARED_EXCHANGE_TYPE = "topic";
+
+    public static final String OPERATION_REQUEST = ".request";
+
+    public static final String OPERATION_RESPONSE = ".response";
+
+    public static final String OPERATION_PREFIX = ".operations.";
+
+    public static final String TO_SERVER_UNAUTHENTICATED_EXCHANGE = "toServerUnauthenticatedExchange";
+
+    public static final String TO_SERVER_EXCHANGE = "toServerExchange";
+
+    public static final String TO_AGENT__UNAUTHENTICATED_EXCHANGE = "toAgentUnauthenticatedExchange";
+
+    public static final String TO_AGENT_EXCHANGE = "toAgentExchange";
+
+    public static final String AGENT_ROUTING_KEY_PREFIX = "hq.agents.agent-";
+
+    public static final String SERVER_ROUTING_KEY_PREFIX = "hq.servers.server-";
+
+    /* Temporary - just finishing the api for automatic registration of operations */
+    public static final String[] AGENT_OPERATIONS = {
+            "metrics.report.request", "metrics.availability.request", "metrics.schedule.response", "metrics.unschedule.response", "metrics.config.response",
+            "scans.runtime.request", "scans.default.request", "scans.autodiscovery.start.response", "scans.autodiscovery.stop.response", "scans.autodiscovery.config.response",
+            "ping.request", "user.authentication.request", "config.authentication.request", "config.registration.request",
+            "config.upgrade.response", "config.bundle.request", "config.restart.response", "config.update.request",
+            "events.track.log.request", "events.track.config.request",
+            "controlActions.results.request", "controlActions.config.response", "controlActions.execute.response",
+            "plugin.metadata.request", "plugin.liveData.request",
+            "plugin.control.add.response", "plugin.track.add.response", "plugin.track.remove.response"
+    };
+
+
+    /* Temporary - just finishing the api for automatic registration of operations */
+    public static final String[] SERVER_OPERATIONS = {
+            "metrics.report.response", "metrics.availability.response", "metrics.schedule.request", "metrics.unschedule.request", "metrics.config.request",
+            "scans.runtime.response", "scans.default.response", "scans.autodiscovery.start.request", "scans.autodiscovery.stop.request", "scans.autodiscovery.config.request",
+            "ping.response", "user.authentication.response", "config.authentication.response", "config.registration.response",
+            "config.upgrade.request", "config.bundle.response", "config.restart.request", "config.update.response",
+            "events.track.log.response", "events.track.config.response",
+            "controlActions.results.response", "controlActions.config.request", "controlActions.execute.request",
+            "plugin.metadata.response", "plugin.liveData.response", "plugin.control.add.request",
+            "plugin.track.add.request", "plugin.track.remove.request"
+    };
 }

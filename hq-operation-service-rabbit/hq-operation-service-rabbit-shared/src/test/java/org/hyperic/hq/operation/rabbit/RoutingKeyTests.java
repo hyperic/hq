@@ -2,7 +2,6 @@ package org.hyperic.hq.operation.rabbit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.operation.rabbit.mapping.RoutingKeys;
 import org.hyperic.hq.operation.rabbit.mapping.Routings;
 import org.hyperic.util.security.SecurityUtil;
 import org.junit.Before;
@@ -24,14 +23,12 @@ public class RoutingKeyTests {
 
     protected Routings routings = new Routings();
 
-    protected RoutingKeys routingKeys = new RoutingKeys();
-    
     protected final int agents = 1000;
  
     @Before
     public void prepare() throws UnknownHostException {
-        logger.debug("Created routing keys for " + routingKeys.getAgentOperations().length
-                + " agent and " + routingKeys.getServerOperations().length + " server operations");
+        logger.debug("Created routing keys for " + routings.getAgentOperations().length
+                + " agent and " + routings.getServerOperations().length + " server operations");
     }
 
     /**
