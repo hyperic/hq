@@ -35,7 +35,7 @@ public interface Converter<T, U> {
      * @param source The input to convert
      * @return The converted output
      */
-    U write(T source);
+    U fromObject(T source);
 
     /**
      * Read and convert from type U to type T
@@ -43,6 +43,6 @@ public interface Converter<T, U> {
      * @param type The type to convert to
      * @return The converted output
      */
-    T read(U source, Class<?> type);
+    T toObject(U source, Class<?> type);
 
 }

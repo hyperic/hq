@@ -5,11 +5,11 @@ package org.hyperic.hq.operation.rabbit.convert;
  */
 public class SimpleConverter implements Converter<String, byte[]> {
 
-    public byte[] write(String source) {
+    public byte[] fromObject(String source) {
         return source.getBytes();
     }
 
-    public String read(byte[] source, Class<?> type) {
+    public String toObject(byte[] source, Class<?> type) {
         return new String(source);
     }
 }

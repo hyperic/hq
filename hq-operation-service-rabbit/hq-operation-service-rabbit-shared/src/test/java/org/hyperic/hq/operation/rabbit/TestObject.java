@@ -4,12 +4,16 @@ import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.junit.Ignore;
 
+import java.io.Serializable;
+
 /**
  * @author Helena Edelson
  */
 @Ignore
-public class TestObject {
+public class TestObject implements Serializable {
 
+    private static final long serialVersionUID = 6991306796752066389L;
+    
     private volatile String content;
 
     @JsonCreator

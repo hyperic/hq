@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.operation.rabbit.convert;
 
-import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.hyperic.hq.operation.rabbit.util.MessageConstants;
@@ -47,10 +46,9 @@ public class JsonMappingConverter implements Converter<Object, String> {
     public JsonMappingConverter() {
         this.objectMapper = new ObjectMapper();
         this.objectMapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS, false);
-        this.objectMapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false); 
     }
 
-    public String write(Object source) throws ConversionException {
+    public String fromObject(Object source) throws ConversionException {
         try {
             return this.objectMapper.writeValueAsString(source);
         } catch (IOException e) {
@@ -58,11 +56,11 @@ public class JsonMappingConverter implements Converter<Object, String> {
         }
     }
 
-    public Object read(String source, Class<?> type) {
+    public Object toObject(String source, Class<?> type) {
         try {
             return this.objectMapper.readValue(source, type);
         } catch (IOException e) {
             throw new ConversionException(e);
         }
-    }
+    } 
 }
