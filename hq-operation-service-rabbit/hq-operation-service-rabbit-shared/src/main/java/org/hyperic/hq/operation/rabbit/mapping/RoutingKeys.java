@@ -1,23 +1,42 @@
 package org.hyperic.hq.operation.rabbit.mapping;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.UUID;
 
 /**
  * @author Helena Edelson
  */
-public class RoutingKeys { 
+public final class RoutingKeys { 
+
+    private static final Log logger = LogFactory.getLog(RoutingKeys.class);
 
     private final String agentPrefix = "hq.agents.agent-";
 
     private String serverPrefix = "hq.servers.server-";
 
-    /** Temporary */
     public RoutingKeys() {
+        this(getDefaultServerId());
+    }
+
+    public RoutingKeys(String serverId) {
+        this.serverPrefix += serverId;
+    }
+
+    /**
+     * Returns the IP address as a String. If an error occurs getting
+     * the host IP, a random UUID as String is used.
+     * @return the IP address string in textual presentation
+     */
+    private static String getDefaultServerId() {
         try {
-            this.serverPrefix += InetAddress.getLocalHost().getHostAddress();
+            return InetAddress.getLocalHost().getHostAddress();
         } catch (UnknownHostException e) {
-            // todo logger.error("", e);
+            logger.error("Unable to get the host IP address for use as Server Id.", e);
+            return UUID.randomUUID().toString();
         }
     }
 
