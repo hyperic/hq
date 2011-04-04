@@ -25,10 +25,10 @@
 
 package org.hyperic.hq.amqp;
 
-import org.hyperic.hq.amqp.admin.RabbitAdminTemplate;
-import org.hyperic.hq.amqp.configuration.CommonAmqpConfiguration;
-import org.hyperic.hq.amqp.core.AmqpAgentListenerHandler;
-import org.hyperic.hq.amqp.core.AmqpOperationService;
+import org.hyperic.hq.operation.rabbit.admin.RabbitAdminTemplate;
+import org.hyperic.hq.operation.rabbit.configuration.CommonAmqpConfiguration;
+import org.hyperic.hq.operation.rabbit.handler.AmqpAgentListenerHandler;
+import org.hyperic.hq.operation.rabbit.core.RabbitOperationService;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
@@ -52,7 +52,7 @@ public class CommonServerConfiguration extends CommonAmqpConfiguration {
     
     @Bean
     public OperationService operationService() {
-        return new AmqpOperationService(serverRabbitTemplate());
+        return new RabbitOperationService(serverRabbitTemplate());
     }
 
     @Bean
