@@ -1,4 +1,4 @@
-package org.hyperic.hq.amqp;
+package org.hyperic.hq.rabbit;
 
 import org.hyperic.hq.agent.AgentConfigException;
 import org.hyperic.hq.test.BaseInfrastructureTest;

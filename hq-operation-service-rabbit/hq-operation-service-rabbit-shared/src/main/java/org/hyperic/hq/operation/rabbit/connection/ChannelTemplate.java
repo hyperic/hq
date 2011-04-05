@@ -75,30 +75,44 @@ public final class ChannelTemplate implements ChannelOperations {
         }
     }
 
+    /**
+     * Creates a com.rabbitmq.client.Channel
+     * @return com.rabbitmq.client.Channel
+     * @throws ChannelException if an error occur
+     */
     public Channel createChannel() throws ChannelException {
         try {
-            return this.connectionFactory.newConnection().createChannel();
+            return createConnection().createChannel();
         } catch (IOException e) {
-            logger.error(e);
             throw new ChannelException("Unable to create channel", e);
         }
     }
 
-    public boolean validateCredentials() {
-        Channel channel = null;
+    /**
+     * Creates a com.rabbitmq.client.Connection
+     * @return com.rabbitmq.client.Connection
+     * @throws ConnectionException if an error occurs during creation of the connection
+     */
+    public Connection createConnection() throws ConnectionException {
         try {
-            channel = createChannel();
-            return channel != null;
+            return this.connectionFactory.newConnection();
+        }
+        catch (IOException e) {
+            throw translateConnectionException(e);
+        }
+    }
+
+    public boolean validateConnection() {
+        Connection conn = null;
+        try {
+            conn = createConnection();
+            return conn != null;
         }
         catch (Exception e) {
-            logger.error("Unable to connect with username=" + this.connectionFactory.getUsername()
-                    + " password=" + this.connectionFactory.getPassword()
-                    + " host=" + this.connectionFactory.getHost()
-                    + " port=" + this.connectionFactory.getPort(), e);
-            return false;
+            throw translateConnectionException(e);
         }
         finally {
-            releaseResources(channel);
+            closeConnection(conn);
         }
     }
 
@@ -111,22 +125,34 @@ public final class ChannelTemplate implements ChannelOperations {
 
         try {
             channel.close();
-            closeConnection(channel.getConnection()); 
+            closeConnection(channel.getConnection());
         }
-        catch (Exception e) {
+        catch (IOException e) {
             logger.debug("Connection is already closed.", e);
         }
     }
 
-    private void closeConnection(Connection conn) {
+    public void closeConnection(Connection conn) {
         if (conn == null) return;
 
         try {
             conn.close();
         }
         catch (IOException e) {
-            logger.error(e);
+            logger.debug("Connection is already closed.", e);
         }
+    }
+
+    public ChannelException translateChannelException(String context, Channel channel, Throwable t) throws ConnectionException {
+        return new ChannelException(context + ": " + channel, t);
+    }
+
+
+    public ConnectionException translateConnectionException(Throwable t) throws ConnectionException {
+        return new ConnectionException("Unable to connect with username=" + this.connectionFactory.getUsername()
+                + " password=" + this.connectionFactory.getPassword()
+                + " host=" + this.connectionFactory.getHost()
+                + " port=" + this.connectionFactory.getPort(), t);
     }
 
 }

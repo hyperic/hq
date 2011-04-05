@@ -41,6 +41,7 @@ public interface ChannelCallback<T> {
      * @param channel The channel to work with
      * @return Any value that needs to be returned to the original caller
      * @throws ChannelException
+     * @throws java.io.IOException
      */
     T doInChannel(Channel channel) throws ChannelException, IOException;
 }

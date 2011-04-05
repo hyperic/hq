@@ -26,7 +26,7 @@
 package org.hyperic.hq.operation.rabbit.demo.distribution.agents;
 
 import org.apache.log4j.Logger;
-import org.hyperic.hq.amqp.AsyncQueueingConsumer;
+import org.hyperic.hq.rabbit.AsyncQueueingConsumer;
 import org.springframework.amqp.core.AmqpTemplate;
 
 import java.util.ArrayList;

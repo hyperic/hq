@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.hq.amqp;
+package org.hyperic.hq.rabbit;
 
 import org.hyperic.hq.operation.rabbit.admin.RabbitAdminTemplate;
 import org.hyperic.hq.operation.rabbit.configuration.CommonAmqpConfiguration;

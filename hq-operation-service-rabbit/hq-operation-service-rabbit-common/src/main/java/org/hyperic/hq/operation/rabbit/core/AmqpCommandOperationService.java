@@ -102,7 +102,7 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
         boolean valid = false;
 
         try {
-            valid = simpleRabbitTemplate.verifyConnection();
+            valid = simpleRabbitTemplate.hasValidConfigurations();
         }
         catch (Exception e) {
             handleException(e, Operations.PING);

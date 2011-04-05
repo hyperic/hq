@@ -1,8 +1,8 @@
-package org.hyperic.hq.amqp;
+package org.hyperic.hq.rabbit;
 
 import org.hyperic.hq.agent.*;
 import org.hyperic.hq.agent.client.LegacyAgentCommandsClientImpl;
-import org.hyperic.hq.amqp.core.AmqpCommandOperationService;
+import org.hyperic.hq.rabbit.core.AmqpCommandOperationService;
 import org.hyperic.hq.bizapp.agent.ProviderInfo;
 import org.hyperic.hq.bizapp.agent.client.SecureAgentConnection;
 import org.hyperic.hq.bizapp.client.AgentCallbackClient;

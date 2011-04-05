@@ -1,5 +1,7 @@
 package org.hyperic.hq.operation.rabbit.core;
 
+import org.hyperic.hq.operation.rabbit.connection.ChannelException;
+
 import java.io.IOException;
 
 /**
@@ -7,8 +9,24 @@ import java.io.IOException;
  */
 public interface RabbitTemplate {
 
-    void send(String exchangeName, String routingKey, Object message) throws IOException;
+    /**
+     * Sends a message
+     * @param exchangeName the exchange name to use
+     * @param routingKey The routing key to use
+     * @param data The data to send
+     * @throws org.hyperic.hq.operation.rabbit.connection.ChannelException
+     * if an error occurs during the send process. 
+     */
+    void send(String exchangeName, String routingKey, Object data) throws ChannelException, IOException;
 
-    Object sendAndReceive(String exchangeName, String routingKey, String data) throws IOException, InterruptedException;
+    /**
+     * Sends a message and synchronously receives the response
+     * @param exchangeName the exchange name to use
+     * @param routingKey The routing key to use
+     * @param data The data to send
+     * @throws org.hyperic.hq.operation.rabbit.connection.ChannelException
+     * if an error occurs during the send process.
+     */
+    Object sendAndReceive(String exchangeName, String routingKey, Object data) throws ChannelException, IOException;
     
 }

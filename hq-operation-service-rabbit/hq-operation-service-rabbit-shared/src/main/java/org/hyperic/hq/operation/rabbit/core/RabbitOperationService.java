@@ -70,7 +70,8 @@ public class RabbitOperationService implements OperationService {
      * @param exchangeName the exchange name to use
      * @param routingKey the routing key
      * @param data the payload
-     * @throws org.hyperic.hq.operation.OperationFailedException
+     * @throws org.hyperic.hq.operation.OperationFailedException if an
+     * error occurs during the synchronous send and receive
      */
     public Object performAndReceive(String operationName, String exchangeName, String routingKey, Object data) throws OperationFailedException { 
         try {
@@ -80,12 +81,15 @@ public class RabbitOperationService implements OperationService {
         }
         catch (IOException e) {
             throw new OperationFailedException(e.getMessage());
-        }
-        catch (InterruptedException e) {
-            throw new OperationFailedException(e.getMessage());
-        }
+        } 
     }
 
+    /**
+     *
+     * @param exchangeName
+     * @param routingKey
+     * @param data
+     */
     private void handleStringMessage(String exchangeName, String routingKey, Object data) {
         try {
            rabbitTemplate.send(exchangeName, routingKey, data.toString());

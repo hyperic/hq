@@ -29,11 +29,11 @@ package org.hyperic.hq.operation.rabbit.connection;
  * Indicates Channel failure.
  * @author Helena Edelson
  */
-public class ChannelException extends Exception {
+public class ChannelException extends RuntimeException {
     private static final long serialVersionUID = -4901175883619184424L;
 
     /**
-     * Creates an chaining-aware instance
+     * Creates a chaining-aware instance
      * @param cause The java.lang.Throwable cause
      */
     public ChannelException(Throwable cause) {
@@ -42,10 +42,10 @@ public class ChannelException extends Exception {
 
     /**
      * Creates an instance with a message
-     * @param message The exception message
+     * @param context The exception message
      */
-    public ChannelException(String message) {
-        super(message);
+    public ChannelException(String context) {
+        super(context);
     }
 
     /**

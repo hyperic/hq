@@ -28,7 +28,6 @@ package org.hyperic.hq.operation.rabbit.connection;
 import com.rabbitmq.client.Address;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import com.rabbitmq.client.impl.FrameHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -102,10 +101,6 @@ abstract class AbstractRabbitConnectionFactory extends ConnectionFactory {
             }
             return connection;
         }
-    }
-
-    public FrameHandler createFrameHandler(Address address) {
-        return createFrameHandler(new Address(getHost(), getPort()));
     }
 
     protected final Connection doNewConnection(Address[] addrs) throws IOException {

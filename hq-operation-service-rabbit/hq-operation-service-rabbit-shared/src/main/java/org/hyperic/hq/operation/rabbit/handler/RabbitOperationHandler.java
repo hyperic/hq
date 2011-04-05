@@ -2,8 +2,9 @@ package org.hyperic.hq.operation.rabbit.handler;
 
 import org.hyperic.hq.operation.*;
 import org.hyperic.hq.operation.rabbit.convert.Converter;
-import org.hyperic.hq.operation.rabbit.convert.SimpleConverter;
+import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
 import org.hyperic.hq.operation.rabbit.core.RabbitTemplate;
+import org.hyperic.hq.operation.rabbit.mapping.Routings;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -19,23 +20,26 @@ public class RabbitOperationHandler implements OperationHandlerRegistry, Operati
 
     private final RabbitTemplate rabbitTemplate;
 
+    private final Routings routings;
+
     /**
-     * temporary: explicit for no spring. Next ticket: new JsonMappingConverter()
+     * temporary: explicit for no spring.
      */
-    private final Converter converter;
+    private final Converter<Object,String> converter;
 
     private final Map<String, MethodInvoker> operationHandlers = new ConcurrentHashMap<String, MethodInvoker>();
 
     public RabbitOperationHandler(RabbitTemplate rabbitTemplate) {
-        this(rabbitTemplate, new SimpleConverter());
+        this(rabbitTemplate, new JsonMappingConverter());
     }
 
     /**
      * @param rabbitTemplate Used to listen for messages
      */
-    public RabbitOperationHandler(RabbitTemplate rabbitTemplate, Converter converter) {
+    public RabbitOperationHandler(RabbitTemplate rabbitTemplate, Converter<Object,String> converter) {
         this.rabbitTemplate = rabbitTemplate;
         this.converter = converter;
+        this.routings = new Routings();
     }
 
     public void registerOperationHandler(String operationName, Method handlerMethod, Object instance) {
@@ -47,11 +51,11 @@ public class RabbitOperationHandler implements OperationHandlerRegistry, Operati
 
         try {
             Object response = methodInvoker.invoke(envelope.getContext());
-            //JIRA Object data = this.converter.write(response);
+            String data = this.converter.fromObject(response);
 
-            byte[] data = ((String) response).getBytes();
-           // Envelope responseMessage = new Message(envelope.getOperationId(), Routings.OPERATION_RESPONSE, "test.context", data, null);
-            //this.rabbitTemplate.send(envelope.getReplyTo(), responseMessage);
+            //routings.getOperationResponse()
+           // Envelope responseMessage = new Message(envelope.getOperationId(), "", data, null);
+           // this.rabbitTemplate.send(envelope.getReplyTo(), responseMessage);
 
         }
         catch (IllegalAccessException e) {
@@ -84,7 +88,7 @@ public class RabbitOperationHandler implements OperationHandlerRegistry, Operati
         }
 
         Object invoke(String context) throws IllegalAccessException, InvocationTargetException {
-            Object data = this.converter.read(context, this.handlerMethod.getParameterTypes()[0]);
+            Object data = this.converter.toObject(context, this.handlerMethod.getParameterTypes()[0]);
             return this.handlerMethod.invoke(this.instance, data);
         }
 

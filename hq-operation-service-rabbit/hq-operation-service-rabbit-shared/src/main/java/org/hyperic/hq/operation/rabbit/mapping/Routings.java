@@ -29,15 +29,26 @@ public final class Routings {
 
     public final String agentRoutingKeyPrefix;
 
+    public final String defaultToAgentBindingKey;
+
+    public final String defaultToServerBindingKey;
+
     public Routings() {
         this(getDefaultServerId());
     }
 
+    /**
+     * Much of this is temporary. There is a ticket to
+     * automate registration of these.
+     * @param serverId
+     */
     public Routings(String serverId) {
         this.agentOperations = AGENT_OPERATIONS;
         this.serverOperations = SERVER_OPERATIONS;
         this.agentRoutingKeyPrefix = AGENT_ROUTING_KEY_PREFIX;
         this.serverPrefix = SERVER_ROUTING_KEY_PREFIX + serverId;
+        this.defaultToAgentBindingKey = agentRoutingKeyPrefix + "";
+        this.defaultToServerBindingKey = agentRoutingKeyPrefix + "";
     }
 
     public List<String> createAgentOperationRoutingKeys(final String agentToken) {
