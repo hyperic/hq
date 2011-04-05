@@ -46,6 +46,9 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
+import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.appdef.server.session.AgentDAO;
+import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
@@ -74,6 +77,7 @@ import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.product.AvailabilityMetricValue;
 import org.hyperic.hq.product.MetricValue;
+import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.pager.PageControl;
@@ -81,7 +85,6 @@ import org.hyperic.util.pager.PageList;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -130,12 +133,14 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     private RegisteredTriggers registeredTriggers;
     private AvailabilityCache availabilityCache;
     private ConcurrentStatsCollector concurrentStatsCollector;
+    private AgentDAO agentDAO;
     
     @Autowired
     public AvailabilityManagerImpl(AuthzSubjectManager authzSubjectManager, ResourceManager resourceManager, 
     							   ResourceGroupManager groupManager, MessagePublisher messenger,
                                    AvailabilityDataDAO availabilityDataDAO, MeasurementDAO measurementDAO,
-                                   MessagePublisher messagePublisher, RegisteredTriggers registeredTriggers, AvailabilityCache availabilityCache,
+                                   MessagePublisher messagePublisher, RegisteredTriggers registeredTriggers,
+                                   AvailabilityCache availabilityCache, AgentDAO agentDAO,
                                    ConcurrentStatsCollector concurrentStatsCollector) {
     	this.authzSubjectManager = authzSubjectManager;
     	this.resourceManager = resourceManager;
@@ -147,6 +152,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         this.registeredTriggers = registeredTriggers;
         this.availabilityCache = availabilityCache;
         this.concurrentStatsCollector = concurrentStatsCollector;
+        this.agentDAO = agentDAO;
     }
 
     @PostConstruct
@@ -1554,4 +1560,36 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         }
         return true;
     }
+    
+    @Transactional(readOnly=true)
+    public boolean platformIsAvailable(int agentId) {
+        final Agent agent = agentDAO.get(agentId);
+        if (agent == null) {
+            return false;
+        }
+        Resource resource = null;
+        Collection<Platform> platforms = agent.getPlatforms();
+        for (final Platform p : platforms) {
+            if (PlatformDetector.isSupportedPlatform(p.getResource().getPrototype().getName())) {
+                resource = p.getResource();
+                if (resource == null || resource.isInAsyncDeleteState()) {
+                    return false;
+                }
+                break;
+            }
+        }
+        final Measurement m = measurementManager.getAvailabilityMeasurement(resource);
+        if (m == null) {
+            return false;
+        }
+        final MetricValue last = getLastAvail(m);
+        if (last == null) {
+            return false;
+        }
+        if (last.getValue() == MeasurementConstants.AVAIL_UP) {
+            return true;
+        }
+        return false;
+    }
+
 }

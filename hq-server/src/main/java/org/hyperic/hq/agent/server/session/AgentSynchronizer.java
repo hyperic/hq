@@ -53,6 +53,7 @@ import org.hyperic.hq.common.DiagnosticsLogger;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -196,6 +197,19 @@ public class AgentSynchronizer implements DiagnosticObject {
             public void run() {
                 if (agentIsAlive(job)) {
                     job.execute();
+                    return;
+                }
+                AvailabilityManager availabilityManager = Bootstrap.getBean(AvailabilityManager.class);
+                if (availabilityManager.platformIsAvailable(job.getAgentId())) {
+                    // agent is busy but up and running, add job back to the queue
+                    if (log.isDebugEnabled()) {
+                        log.debug("cannot ping agentId=" + job.getAgentId() +
+                                  " but availabilityManager shows that it is available, " +
+                                  "rescheduling job=" + getJobInfo(job));
+                    }
+                    synchronized (agentJobs) {
+                        agentJobs.add(job);
+                    }
                 }
             }
         };
@@ -209,7 +223,7 @@ public class AgentSynchronizer implements DiagnosticObject {
             thread.interrupt();
         }
     }
-    
+
     private boolean agentIsAlive(AgentDataTransferJob job) {
         try {
             // XXX need to set this in the constructor
