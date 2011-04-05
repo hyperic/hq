@@ -9,6 +9,8 @@ import org.codehaus.jackson.annotate.JsonProperty;
  */
 public class RegisterAgent extends AbstractAgentOperation {
 
+    private static final long serialVersionUID = 1876820746657883192L;
+    
     private String authToken;
 
     private String version;
@@ -40,44 +42,19 @@ public class RegisterAgent extends AbstractAgentOperation {
         return cpuCount;
     }
 
-    @JsonIgnore
-    public boolean isValid() {
-        return this.authToken != null && this.version != null && this.cpuCount > 0;
-    }
-
     @Override
     public String toString() {
-        return super.toString() + this.authToken + this.version + this.cpuCount + this.getAgentIp() + this.getAgentPort() + this.getUsername() + this.getPassword();
+        return new StringBuilder(this.authToken).append(this.version).append(this.cpuCount).append(super.toString()).toString();
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + (this.toString() == null ? 0 : this.toString().hashCode());
-        return result;
+    /**
+     * TODO better port test
+     * @throws IllegalStateException
+     */
+    @JsonIgnore
+    public void validate() throws IllegalStateException {
+        if (this.authToken != null && this.version != null && this.cpuCount > 0) {
+            throw new IllegalStateException(this + " is not properly initialized: " + this.toString());
+        }
     }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        RegisterAgent other = (RegisterAgent) obj;
-        if (this.toString() == null) {
-            if (other.toString() != null) {
-                return false;
-            }
-        } else if (!this.toString().equals(other.toString())) {
-            return false;
-        }
-        return true;
-    }
-
 }

@@ -34,10 +34,12 @@ public class ConverterTests {
     @Test
     public void write() {
         String json = this.converter.fromObject(new RegisterAgent("testAuth", "5.0", 1, this.agentIp, this.agentPort, "hqadmin", "hqadmin"));
-        assertEquals("{\"authToken\":\"testAuth\",\"version\":\"5.0\",\"cpuCount\":1,\"agentIp\":\"localhost\",\"agentPort\":7071,\"username\":\"hqadmin\",\"password\":\"hqadmin\"," +
-                "\"agentToken\":null,\"unidirectional\":false,\"newTransportAgent\":false,\"operationName\":\"RegisterAgent\"," +
-                "\"stringVals\":{},\"intVals\":{},\"doubleVals\":{},\"longVals\":{},\"byteAVals\":{},\"objectVals\":{},\"stringLists\":{},\"intLists\":{},\"doubleLists\":{}," +
-                "\"byteALists\":{},\"objectLists\":{}}", json);
+
+        assertEquals("{\"authToken\":\"testAuth\",\"version\":\"5.0\",\"cpuCount\":1,\"agentIp\":\"localhost\",\"agentPort\":7071," +
+                "\"username\":\"hqadmin\",\"password\":\"hqadmin\",\"agentToken\":null,\"unidirectional\":false," +
+                "\"newTransportAgent\":false,\"operationName\":\"RegisterAgent\",\"ensureOrder\":true,\"byteaLists\":{}," +
+                "\"byteaVals\":{},\"stringVals\":{},\"intVals\":{},\"doubleVals\":{},\"longVals\":{},\"byteAVals\":{}," +
+                "\"objectVals\":{},\"stringLists\":{},\"intLists\":{},\"doubleLists\":{},\"byteALists\":{},\"objectLists\":{}}", json);
     }
 
     @Test
@@ -50,10 +52,12 @@ public class ConverterTests {
     public void read() {
         RegisterAgent request = new RegisterAgent("authTokenValue", "5.0", 1, this.agentIp, this.agentPort, "hqadmin", "hqadmin");
 
-        Object response = this.converter.toObject("{\"authToken\":\"authTokenValue\",\"version\":\"5.0\",\"cpuCount\":1,\"agentIp\":\"localhost\",\"agentPort\":7071,\"username\":\"hqadmin\",\"password\":\"hqadmin\"," +
-                "\"agentToken\":null,\"unidirectional\":false,\"newTransportAgent\":false,\"operationName\":\"RegisterAgent\"," +
-                "\"stringVals\":{},\"intVals\":{},\"doubleVals\":{},\"longVals\":{},\"byteAVals\":{},\"objectVals\":{},\"stringLists\":{},\"intLists\":{},\"doubleLists\":{}," +
-                "\"byteALists\":{},\"objectLists\":{}}", RegisterAgent.class);
+        Object response = this.converter.toObject("{\"authToken\":\"authTokenValue\",\"version\":\"5.0\",\"cpuCount\":1,\"agentIp\":\"localhost\",\"agentPort\":7071," +
+                "\"username\":\"hqadmin\",\"password\":\"hqadmin\",\"agentToken\":null,\"unidirectional\":false," +
+                "\"newTransportAgent\":false,\"operationName\":\"RegisterAgent\",\"ensureOrder\":false,\"byteaLists\":{}," +
+                "\"byteaVals\":{},\"stringVals\":{},\"intVals\":{},\"doubleVals\":{},\"longVals\":{},\"byteAVals\":{}," +
+                "\"objectVals\":{},\"stringLists\":{},\"intLists\":{},\"doubleLists\":{},\"byteALists\":{}," +
+                "\"objectLists\":{}}", RegisterAgent.class);
  
         assertEquals(request,response); 
     }

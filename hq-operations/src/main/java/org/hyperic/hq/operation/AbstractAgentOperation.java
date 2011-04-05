@@ -7,6 +7,8 @@ import org.codehaus.jackson.annotate.JsonProperty;
 
 public class AbstractAgentOperation extends AbstractOperation {
 
+    private static final long serialVersionUID = -7404476740286545689L;
+
     @JsonIgnore
     private String agentToken;
      
@@ -29,6 +31,7 @@ public class AbstractAgentOperation extends AbstractOperation {
                          @JsonProperty("password") String password, @JsonProperty("agentIp") String agentIp,
                          @JsonProperty("agentPort") int agentPort) {
 
+        super(true);
         this.username = username;
         this.password = password;
         this.agentIp = agentIp;
@@ -40,8 +43,9 @@ public class AbstractAgentOperation extends AbstractOperation {
                          @JsonProperty("password") String password, @JsonProperty("agentIp") String agentIp,
                          @JsonProperty("agentPort") int agentPort, @JsonProperty("unidirectional") boolean unidirectional,
                          @JsonProperty("newTransportAgent") boolean newTransportAgent) {
-
-        if (agentToken == null) throw new IllegalStateException("'agentToken' must not be null.");
+        super(true);
+        if (agentToken == null) throw new IllegalArgumentException("'agentToken' must not be null.");
+        
         this.agentToken = agentToken;
         this.username = username;
         this.password = password;
@@ -81,40 +85,16 @@ public class AbstractAgentOperation extends AbstractOperation {
 
     @Override
     public String toString() {
-        return this.agentToken + this.username + this.password + this.agentIp + this.agentPort;
+        StringBuilder sb = new StringBuilder(this.username).append(this.password)
+                .append(this.agentIp).append(this.agentPort).append(super.toString());
+         
+        return agentToken != null ? new StringBuilder(this.agentToken).append(sb).toString() : sb.toString();
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + (this.toString() == null ? 0 : this.toString().hashCode());
-        return result;
-    }
+    /* Everything from here down is legacy and should be re-evaluated */
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        AbstractAgentOperation other = (AbstractAgentOperation) obj;
-        if (this.toString() == null) {
-            if (other.toString() != null) {
-                return false;
-            }
-        } else if (!this.toString().equals(other.toString())) {
-            return false;
-        }
-        return true;
-    }
-
-    /*    public void setNewTransportAgent(boolean unidirectional) {
+ 
+   /*public void setNewTransportAgent(boolean unidirectional) {
         this.setStringValue(PROP_NEWTRANSPORTTYPE, Boolean.TRUE.toString());
         this.setStringValue(PROP_UNIDIRECTIONAL, String.valueOf(unidirectional));
     }
@@ -183,14 +163,14 @@ public class AbstractAgentOperation extends AbstractOperation {
         return this.getStringValue(PROP_AGENTTOKEN);
     }*/
 
-    public void validate() throws Exception {
-        try {
-            this.getUsername();
-            this.getPassword();
-            this.getAgentIp();
-            this.getAgentPort();
-        } catch (Exception exc) {
-           // throw new LatherRemoteException("All values not set");
+    /**
+     * TODO better port test
+     * @throws IllegalStateException
+     */
+    @JsonIgnore
+    public void validate() throws IllegalStateException {
+        if (username == null || password == null || agentIp == null || agentPort < 1) {
+            throw new IllegalStateException(this + " is not properly initialized: " + this.toString());
         }
     }
 }
