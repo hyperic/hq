@@ -23,20 +23,29 @@ function refreshDefTables() {
 
 function selectDefType(t) {
   if (t == '1') {
-    hyperic.html.show('defsTable')
-    hyperic.html.show('excludeTypeBasedInput')
-    <% if (superUser) { %> hyperic.html.hide('typeDefsTable') <% } %>
-    hyperic.html.hide('galertDefsTable')
+    hyperic.html.show('defsTable');
+    hyperic.html.show('excludeTypeBasedInput');
+    Defs_refreshTable();
+    <% if (superUser) { %> 
+    	hyperic.html.hide('typeDefsTable');
+    <% } %>
+    hyperic.html.hide('galertDefsTable');
   } else if (t == '2') {
-    hyperic.html.hide('defsTable')
-    hyperic.html.hide('excludeTypeBasedInput')
-    <% if (superUser) { %> hyperic.html.show('typeDefsTable') <% } %>
-    hyperic.html.hide('galertDefsTable')
+    hyperic.html.hide('defsTable');
+    hyperic.html.hide('excludeTypeBasedInput');
+    <% if (superUser) { %> 
+    	hyperic.html.show('typeDefsTable');
+    	TypeDefs_refreshTable();
+    <% } %>
+    hyperic.html.hide('galertDefsTable');
   } else if (t == '3') {
-    hyperic.html.hide('defsTable')
-    hyperic.html.hide('excludeTypeBasedInput')
-    <% if (superUser) { %> hyperic.html.hide('typeDefsTable') <% } %>
-    hyperic.html.show('galertDefsTable')
+    hyperic.html.hide('defsTable');
+    hyperic.html.hide('excludeTypeBasedInput');
+    <% if (superUser) { %> 
+    	hyperic.html.hide('typeDefsTable');
+    <% } %>
+    hyperic.html.show('galertDefsTable');
+    GalertDefs_refreshTable();
   }
 }
  
