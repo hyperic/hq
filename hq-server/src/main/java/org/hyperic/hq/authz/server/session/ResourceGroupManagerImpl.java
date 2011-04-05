@@ -189,9 +189,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         //for(Role role: roles) {
           //  res.addRole(role);
         //}
-        whoami.addOwnedResource(res);
-        //AuthzSubject is likely detached b/c it's stored as session state.  Reattach it for persistent change
-        authzSubjectRepository.save(whoami);
+        authzSubjectRepository.setOwner(whoami, res);
         if(cInfo.getGroupTypeId() == AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS || 
             cInfo.getGroupTypeId() == AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC) {
             res.setProperty(MIXED,false);
@@ -473,7 +471,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         //retVal.setMTime(new Long(g.getMtime()));
         //retVal.setCTime(new Long(g.getCtime()));
         retVal.setModifiedBy(g.getModifiedBy());
-        retVal.setOwner(authzSubjectRepository.findByOwnedResource(g).getName());
+        retVal.setOwner(authzSubjectRepository.findOwner(g).getName());
 
         // Add the group members
         for (Resource r : members) {
@@ -659,11 +657,11 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     public void changeGroupOwner(AuthzSubject subject, ResourceGroup group, AuthzSubject newOwner)
         throws PermissionException {
         //TODO this used to call ResourceManager. Perm check?
-        AuthzSubject oldOwner = authzSubjectRepository.findByOwnedResource(group);
+        AuthzSubject oldOwner = authzSubjectRepository.findOwner(group);
         if(oldOwner != null) {
-            oldOwner.removeOwnedResource(group);
+            authzSubjectRepository.removeOwner(oldOwner, group);
         }
-        newOwner.addOwnedResource(group);
+        authzSubjectRepository.setOwner(newOwner, group);
         group.setModifiedBy(newOwner.getName());
     }
         

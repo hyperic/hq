@@ -254,9 +254,7 @@ public class ServerManagerImpl implements ServerManager {
         s.setProperty(ServerFactory.CREATION_TIME, System.currentTimeMillis());
         s.setProperty(ServerFactory.MODIFIED_TIME,System.currentTimeMillis());
         s.setProperty(AppdefResource.SORT_NAME, sv.getName().toUpperCase());
-        owner.addOwnedResource(s);
-        //AuthzSubject is likely detached b/c it's stored as session state.  Reattach it for persistent change
-        authzSubjectRepository.save(owner);
+        authzSubjectRepository.setOwner(owner, s);
         agentRepository.findByManagedResource(p).addManagedResource(s);
         return s;
    }

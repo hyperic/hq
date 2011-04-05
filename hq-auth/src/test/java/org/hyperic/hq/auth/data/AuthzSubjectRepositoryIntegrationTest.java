@@ -1,5 +1,11 @@
 package org.hyperic.hq.auth.data;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
@@ -15,8 +21,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 @DirtiesContext
 @Transactional
@@ -70,26 +74,62 @@ public class AuthzSubjectRepositoryIntegrationTest {
     }
 
     @Test
-    public void testFindByOwnedResource() {
+    public void testFindOwner() {
         Resource resource1 = new Resource();
         resource1.setName("Resource 1");
         entityManager.persist(resource1);
         AuthzSubject bob = new AuthzSubject(true, "bob", "dev", "bob@bob.com", true, "Bob",
             "Bobbins", "Bob", "123123123", "123123123", false);
         authzSubjectRepository.save(bob);
-        bob.addOwnedResource(resource1);
-        assertEquals(bob, authzSubjectRepository.findByOwnedResource(resource1));
+        authzSubjectRepository.setOwner(bob, resource1);
+        assertEquals(bob, authzSubjectRepository.findOwner(resource1));
     }
 
     @Test
-    public void testFindByOwnedResourceNoOwner() {
+    public void testFindByOwnerNoOwner() {
         Resource resource1 = new Resource();
         resource1.setName("Resource 1");
         entityManager.persist(resource1);
         AuthzSubject bob = new AuthzSubject(true, "bob", "dev", "bob@bob.com", true, "Bob",
             "Bobbins", "Bob", "123123123", "123123123", false);
         authzSubjectRepository.save(bob);
-        assertNull(authzSubjectRepository.findByOwnedResource(resource1));
+        assertNull(authzSubjectRepository.findOwner(resource1));
+    }
+    
+    @Test
+    public void testRemoveOwner() {
+        Resource resource1 = new Resource();
+        resource1.setName("Resource 1");
+        entityManager.persist(resource1);
+        AuthzSubject bob = new AuthzSubject(true, "bob", "dev", "bob@bob.com", true, "Bob",
+            "Bobbins", "Bob", "123123123", "123123123", false);
+        authzSubjectRepository.save(bob);
+        authzSubjectRepository.setOwner(bob, resource1);
+        entityManager.flush();
+        entityManager.clear();
+        authzSubjectRepository.removeOwner(bob, resource1);
+        entityManager.flush();
+        entityManager.clear();
+        assertNull(authzSubjectRepository.findOwner(resource1));
+    }
+    
+    @Test
+    public void testGetOwnedResources() {
+        Resource resource1 = new Resource();
+        resource1.setName("Resource 1");
+        entityManager.persist(resource1);
+        Resource resource2 = new Resource();
+        resource2.setName("Resource 2");
+        entityManager.persist(resource2);
+        AuthzSubject bob = new AuthzSubject(true, "bob", "dev", "bob@bob.com", true, "Bob",
+            "Bobbins", "Bob", "123123123", "123123123", false);
+        authzSubjectRepository.save(bob);
+        authzSubjectRepository.setOwner(bob, resource1);
+        authzSubjectRepository.setOwner(bob, resource2);
+        Set<Resource> expected = new HashSet<Resource>();
+        expected.add(resource1);
+        expected.add(resource2);
+        assertEquals(expected,authzSubjectRepository.getOwnedResources(bob));
     }
 
     private void verifyQueryCaching(String cacheName) {

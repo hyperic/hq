@@ -34,7 +34,9 @@
 		<property name="entityManagerFactory" ref="entityManagerFactory" />
 	</bean>
 
-	<jdbc:embedded-database id="dataSource" type="HSQL" />
+	<jdbc:embedded-database id="dataSource" type="HSQL">
+		<jdbc:script location="classpath:test-schema.sql"/>
+	</jdbc:embedded-database>
 
 	<jpa:repositories base-package="org.hyperic.hq.auth.data" />
 

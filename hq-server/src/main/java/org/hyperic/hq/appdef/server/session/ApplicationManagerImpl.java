@@ -251,7 +251,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         application.setBusinessContact((String)resourceGroup.getProperty(BUSINESS_CONTACT));
         application.setEngContact((String)resourceGroup.getProperty(ENG_CONTACT));
         application.setOpsContact((String)resourceGroup.getProperty(OPS_CONTACT));
-        application.setOwnerName(authzSubjectRepository.findByOwnedResource(resourceGroup).getName());
+        application.setOwnerName(authzSubjectRepository.findOwner(resourceGroup).getName());
         //TODO get rid of ApplicationType.  For now just hard-coding them all to Generic type
         application.setApplicationType(APPLICATION_TYPES.get(0));
         for(Resource member: resourceGroup.getMembers()) {
@@ -263,9 +263,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     private ResourceGroup create(AuthzSubject owner, ApplicationValue appV) {
         ResourceGroup app =  new ResourceGroup(appV.getName(),resourceManager.findResourceTypeByName(AppdefEntityConstants.APPDEF_NAME_APPLICATION));
         resourceGroupDao.persist(app);
-        owner.addOwnedResource(app);
-        //AuthzSubject is likely detached b/c it's stored as session state.  Reattach it for persistent change
-        authzSubjectRepository.save(owner);
+        authzSubjectRepository.setOwner(owner, app);
         updateApplication(app, appV);
         return app;
     }

@@ -173,10 +173,9 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     public void setResourceOwner(AuthzSubject whoami, Resource resource, AuthzSubject newOwner)
         throws PermissionException {
         PermissionManager pm = PermissionManagerFactory.getInstance();
-        if (pm.hasAdminPermission(whoami.getId()) || whoami.getOwnedResources().contains(resource)) {
-            newOwner.addOwnedResource(resource);
-            whoami.removeOwnedResource(resource);
-            authzSubjectRepository.save(whoami);
+        if (pm.hasAdminPermission(whoami.getId()) || authzSubjectRepository.getOwnedResources(whoami).contains(resource)) {
+            authzSubjectRepository.removeOwner(whoami, resource);
+            authzSubjectRepository.setOwner(newOwner, resource);
             resource.setModifiedBy(whoami.getName());
             resourceDao.merge(resource);
         } else {
@@ -277,7 +276,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
      */
     @Transactional(readOnly = true)
     public Collection<Resource> findResourceByOwner(AuthzSubject owner) {
-        return owner.getOwnedResources();
+        return authzSubjectRepository.getOwnedResources(owner);
     }
 
     @Transactional(readOnly = true)

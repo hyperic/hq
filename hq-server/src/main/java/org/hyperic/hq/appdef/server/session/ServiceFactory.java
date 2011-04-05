@@ -54,7 +54,7 @@ public class ServiceFactory {
         service.setModifiedBy(resource.getModifiedBy());
         service.setModifiedTime((Long) resource.getProperty(MODIFIED_TIME));
         service.setName(resource.getName());
-        service.setOwnerName(authzSubjectRepository.findByOwnedResource(resource).getName());
+        service.setOwnerName(authzSubjectRepository.findOwner(resource).getName());
         service.setResource(resource);
         Resource parent = resource.getResourceTo(RelationshipTypes.SERVICE);
         if(parent.getProperty(AppdefResourceType.APPDEF_TYPE_ID).equals(AppdefEntityConstants.APPDEF_TYPE_SERVER)) {

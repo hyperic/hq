@@ -429,9 +429,7 @@ public class PlatformManagerImpl implements PlatformManager {
         p.setProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_PLATFORM);
         p.setModifiedBy(initialOwner);
         agent.addManagedResource(p);
-        subject.addOwnedResource(p);
-        //AuthzSubject is likely detached b/c it's stored as session state.  Reattach it for persistent change
-        authzSubjectRepository.save(subject);
+        authzSubjectRepository.setOwner(subject, p);
         resourceManager.findRootResource().relateTo(p, RelationshipTypes.PLATFORM);
         resourceManager.findRootResource().relateTo(p, RelationshipTypes.CONTAINS);
         return p;
@@ -454,9 +452,7 @@ public class PlatformManagerImpl implements PlatformManager {
         p.setProperty(PlatformFactory.MODIFIED_TIME,System.currentTimeMillis());
         p.setProperty(AppdefResource.SORT_NAME, pv.getName().toUpperCase());
         agent.addManagedResource(p);
-        owner.addOwnedResource(p);
-        //AuthzSubject is likely detached b/c it's stored as session state.  Reattach it for persistent change
-        authzSubjectRepository.save(owner);
+        authzSubjectRepository.setOwner(owner, p);
         for (IpValue ipv : pv.getAddedIpValues()) {
             addIp(toPlatform(p), ipv.getAddress(), ipv.getNetmask(), ipv.getMACAddress());
         }

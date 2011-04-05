@@ -27,7 +27,6 @@ package org.hyperic.hq.auth.domain;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -39,7 +38,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
@@ -51,7 +49,6 @@ import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OptimisticLock;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.config.domain.Crispo;
-import org.hyperic.hq.inventory.domain.Resource;
 
 @Entity
 @Table(name = "EAM_SUBJECT", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME", "DSN" }) })
@@ -96,11 +93,6 @@ public class AuthzSubject implements Serializable {
     @Index(name = "PREF_CRISPO_ID_IDX")
     private Crispo prefs;
 
-    @OneToMany(fetch=FetchType.EAGER)
-    @OptimisticLock(excluded = true)
-    @JoinTable(name = "OWNED_RESOURCES", joinColumns = { @JoinColumn(name = "SUBJECT_ID") }, inverseJoinColumns = { @JoinColumn(name = "RESOURCE_ID") })
-    private Set<Resource> ownedResources = new HashSet<Resource>();
-
     @ManyToMany(fetch = FetchType.LAZY)
     @OptimisticLock(excluded = true)
     @JoinTable(name = "EAM_SUBJECT_ROLE_MAP", joinColumns = { @JoinColumn(name = "SUBJECT_ID") }, inverseJoinColumns = { @JoinColumn(name = "ROLE_ID") })
@@ -140,10 +132,6 @@ public class AuthzSubject implements Serializable {
 
     public AuthzSubject(Integer id) {
         this.id = id;
-    }
-
-    public void addOwnedResource(Resource resource) {
-        ownedResources.add(resource);
     }
 
     public void addRole(Role role) {
@@ -225,10 +213,6 @@ public class AuthzSubject implements Serializable {
         return prefs;
     }
 
-    public Set<Resource> getOwnedResources() {
-        return ownedResources;
-    }
-
     public Collection<Role> getRoles() {
         return roles;
     }
@@ -277,10 +261,6 @@ public class AuthzSubject implements Serializable {
 
     public void removeAllRoles() {
         roles.clear();
-    }
-
-    public void removeOwnedResource(Resource resource) {
-        ownedResources.remove(resource);
     }
 
     public void removeRole(Role role) {

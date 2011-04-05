@@ -114,7 +114,7 @@ public class EditGeneralAction
 
             if (isPrivate) {
                 // Make sure the username appears in the name
-                final String owner = authzSubjectRepository.findByOwnedResource(group).getName();
+                final String owner = authzSubjectRepository.findOwner(group).getName();
                 if (rForm.getName().indexOf(owner) < 0) {
                     final String privateName = RequestUtils.message(request, "resource.group.name.private",
                         new Object[] { owner });

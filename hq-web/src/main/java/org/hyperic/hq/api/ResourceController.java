@@ -125,7 +125,7 @@ public class ResourceController extends BaseController {
 		    throw new EntityNotFoundException("Subject with ID: 1 was not found");
 		}
 		
-		subject.addOwnedResource(resource);
+		authzSubjectDao.setOwner(subject, resource);
 		resource.setModifiedBy(subject.getName());
 
 		return resource;

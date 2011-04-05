@@ -147,9 +147,7 @@ public class ServiceManagerImpl implements ServiceManager {
         s.setProperty(ServiceFactory.MODIFIED_TIME,System.currentTimeMillis());
         s.setProperty(AppdefResource.SORT_NAME, name.toUpperCase());
         s.setProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_SERVICE);
-        subject.addOwnedResource(s);
-        //AuthzSubject is likely detached b/c it's stored as session state.  Reattach it for persistent change
-        authzSubjectRepository.save(subject);
+        authzSubjectRepository.setOwner(subject, s);
         agentRepository.findByManagedResource(parent).addManagedResource(s);
         parent.relateTo(s, RelationshipTypes.SERVICE);
         parent.relateTo(s, RelationshipTypes.CONTAINS);

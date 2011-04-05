@@ -59,7 +59,7 @@ public class PlatformFactory {
         platform.setResource(resource);
         platform.setPlatformType(createPlatformType(resource.getType()));
         platform.setSortName((String) resource.getProperty(AppdefResource.SORT_NAME));
-        platform.setOwnerName(authzSubjectRepository.findByOwnedResource(resource).getName());
+        platform.setOwnerName(authzSubjectRepository.findOwner(resource).getName());
         Set<Resource> ips = resource.getResourcesFrom(RelationshipTypes.IP);
         for (Resource ip : ips) {
             platform.addIp(createIp(ip));
