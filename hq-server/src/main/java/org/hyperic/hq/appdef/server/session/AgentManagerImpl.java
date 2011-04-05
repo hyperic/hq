@@ -157,7 +157,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         ZeventManager.getInstance().addBufferedListener(PluginStatusZevent.class,
             new ZeventListener<PluginStatusZevent>() {
             public void processEvents(List<PluginStatusZevent> events) {
-                if (pluginManager.isPluginDeploymentOff()) {
+                if (!pluginManager.isPluginSyncEnabled()) {
                     return;
                 }
                 AgentManager am = applicationContext.getBean(AgentManager.class);
@@ -192,7 +192,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         ZeventManager.getInstance().addBufferedListener(PluginDeployedZevent.class,
             new ZeventListener<PluginDeployedZevent>() {
             public void processEvents(List<PluginDeployedZevent> events) {
-                if (pluginManager.isPluginDeploymentOff()) {
+                if (!pluginManager.isPluginSyncEnabled()) {
                     return;
                 }
                 AgentManager am = applicationContext.getBean(AgentManager.class);
@@ -1459,7 +1459,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     @Transactional(readOnly=true)
     public void syncAllAgentPlugins() {
         final boolean debug = log.isDebugEnabled();
-        if (pluginManager.isPluginDeploymentOff()) {
+        if (!pluginManager.isPluginSyncEnabled()) {
             if (debug) log.debug("Plugin update mechanism is disabled, will not sync all agent plugins");
             return;
         }

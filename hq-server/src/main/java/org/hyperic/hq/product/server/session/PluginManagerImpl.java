@@ -77,6 +77,7 @@ import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
@@ -96,8 +97,7 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
     private static final String AGENT_PLUGIN_DIR = "[/\\\\]pdk[/\\\\]plugins[/\\\\]";
 
     // used AtomicBoolean so that a groovy script may disable the mechanism live, no restarts
-    private final AtomicBoolean isDisabled =
-        new AtomicBoolean(new Boolean(System.getProperty("server.pluginsync.enabled", "false")));
+    private final AtomicBoolean isEnabled = new AtomicBoolean(true);
     
     private PermissionManager permissionManager;
     private AgentSynchronizer agentSynchronizer;
@@ -446,12 +446,13 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         return agentPluginStatusDAO.getPluginStatusByFileName(plugin.getPath(), Arrays.asList(keys));
     }
     
-    public boolean isPluginDeploymentOff() {
-        return isDisabled.get();
+    public boolean isPluginSyncEnabled() {
+        return isEnabled.get();
     }
     
-    public void setDisabledForPluginDeploymentMechanism(boolean disabled) {
-        isDisabled.set(disabled);
+    @Value(value="${server.pluginsync.enabled}")
+    public void setPluginSyncEnabled(boolean enabled) {
+        isEnabled.set(enabled);
     }
 
     public Map<Plugin, Collection<AgentPluginStatus>> getOutOfSyncAgentsByPlugin() {
@@ -469,7 +470,10 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
     @Transactional(propagation=Propagation.REQUIRES_NEW, readOnly=false)
     public void updateAgentPluginSyncStatusInNewTran(AgentPluginStatusEnum s, Integer agentId,
                                                      Collection<Plugin> plugins) {
-        if (plugins == null || plugins.isEmpty()) {
+        if (plugins == null) {
+            plugins = pluginDAO.findAll();
+        }
+        if (plugins.isEmpty()) {
             return;
         }
         final Map<String, AgentPluginStatus> statusMap =
@@ -483,8 +487,12 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
             if (status == null) {
                 continue;
             }
+            // only setLastSyncAttempt if it changes from !"in progress" to "in progress"
+            if (!status.getLastSyncStatus().equals(AgentPluginStatusEnum.SYNC_IN_PROGRESS.toString())
+                    && s == AgentPluginStatusEnum.SYNC_IN_PROGRESS) {
+                status.setLastSyncAttempt(now);
+            }
             status.setLastSyncStatus(s.toString());
-            status.setLastSyncAttempt(now);
         }
     }
 

@@ -43,6 +43,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.hq.product.shared.PluginManager;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -150,14 +151,23 @@ public class AgentPluginSyncRestartThrottle {
         final long now = System.currentTimeMillis();
         int rtn = 0;
         final Iterator<Entry<Integer, Long>> it=agentRestartTimstampMap.entrySet().iterator();
+        final Set<Integer> restartFailures = new HashSet<Integer>();
         while (it.hasNext()) {
             final Entry<Integer, Long> entry = it.next();
             final Long timestamp = entry.getValue();
             if ((now - timestamp) >= RECORD_TIMEOUT) {
+                restartFailures.add(entry.getKey());
                 it.remove();
                 continue;
             }
             rtn++;
+        }
+        if (!restartFailures.isEmpty()) {
+            final PluginManager pm = Bootstrap.getBean(PluginManager.class);
+            for (final Integer agentId : restartFailures) {
+                pm.updateAgentPluginSyncStatusInNewTran(
+                    AgentPluginStatusEnum.SYNC_FAILURE, agentId, null);
+            }
         }
         return rtn;
     }

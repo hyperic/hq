@@ -67,8 +67,8 @@ public class PluginManagerController extends BaseController implements Applicati
     public String index(Model model) {
         model.addAttribute("pluginSummaries", getPluginSummaries());
         model.addAttribute("allAgentCount",agentManager.getNumAutoUpdatingAgents());
-        model.addAttribute("mechanismOn", !pluginManager.isPluginDeploymentOff());
-        if (!pluginManager.isPluginDeploymentOff()){
+        model.addAttribute("mechanismOn", pluginManager.isPluginSyncEnabled());
+        if (pluginManager.isPluginSyncEnabled()){
             model.addAttribute("instruction", "admin.managers.plugin.instructions");
         }else{
             model.addAttribute("instruction", "admin.managers.plugin.mechanism.off");

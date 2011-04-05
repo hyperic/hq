@@ -70,16 +70,16 @@ public interface PluginManager {
                                                         AgentPluginStatusEnum ... statuses);
 
     /**
-     * @return true if the server.pluginsync.enabled property is set to false or
-     * setDisabledForPluginDeploymentMechanism(true) was called
-     * @see #setDisabledForPluginDeploymentMechanism(boolean)
+     * @return true if the server.pluginsync.enabled property is set to true or
+     * setPluginSyncEnabled(true) was called
+     * @see #setPluginSyncEnabled(boolean)
      */
-    boolean isPluginDeploymentOff();
+    boolean isPluginSyncEnabled();
 
     /**
-     * turns the Server -> Agent Plugin Sync mechanism on or off represented by the disabled flag
+     * turns the Server Agent Plugin Sync mechanism on or off represented by the enabled flag
      */
-    void setDisabledForPluginDeploymentMechanism(boolean disabled);
+    void setPluginSyncEnabled(boolean enabled);
 
     Plugin getPluginById(Integer id);
 
@@ -103,10 +103,12 @@ public interface PluginManager {
     
     /**
      * Updates all the {@link AgentPluginStatus} objects associated with the agentId to the
-     * specified status
+     * specified status.  If plugins is null then all {@link AgentPluginStatus} objs
+     * are updated which are associated with agentId
      * @param status - {@link AgentPluginStatusEnum}
      * @param agentId - id associated with the {@link Agent} object
-     * @param plugins - {@link Collection} of {@link Plugin}
+     * @param plugins - {@link Collection} of {@link Plugin} if plugins is null then all
+     * {@link AgentPluginStatus} objs are updated which are associated with agentId
      */
     void updateAgentPluginSyncStatusInNewTran(AgentPluginStatusEnum status, Integer agentId,
                                               Collection<Plugin> plugins);

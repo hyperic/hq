@@ -237,7 +237,7 @@ implements AgentPluginUpdater, ApplicationListener<ContextRefreshedEvent>, Appli
     }
 
     private boolean isDisabled() {
-        return pluginManager.isPluginDeploymentOff();
+        return !pluginManager.isPluginSyncEnabled();
     }
 
 }
