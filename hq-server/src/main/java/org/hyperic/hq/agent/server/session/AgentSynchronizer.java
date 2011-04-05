@@ -208,6 +208,16 @@ public class AgentSynchronizer implements DiagnosticObject {
                                   "rescheduling job=" + getJobInfo(job));
                     }
                     synchronized (agentJobs) {
+                        // if the job queue isn't very full then we don't want to keep spinning
+                        // as a result of re-adding this job.  Instead lets just sleep for a few
+                        // secs and then re-issue the job.
+                        if (agentJobs.size() < NUM_WORKERS) {
+                            try {
+                                agentJobs.wait(5000);
+                            } catch (InterruptedException e) {
+                                log.debug(e,e);
+                            }
+                        }
                         agentJobs.add(job);
                     }
                 }
