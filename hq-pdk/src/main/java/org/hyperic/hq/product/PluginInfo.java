@@ -55,6 +55,15 @@ public class PluginInfo implements java.io.Serializable {
         this.jar  = "";
         this.md5  = "";
     }
+
+    /** Used for plugins that are excluded on the agent */
+    PluginInfo(File file, String version) {
+        this.name = file.getName().replace("-plugin", "").replace(".xml", "").replace(".jar", "");
+        this.version = version;
+        this.product = name;
+        this.jar  = file.getName();
+        this.md5 = MD5.getMD5Checksum(file);
+    }
     
     public PluginInfo(ProductPlugin plugin, String jar) {
         try {
