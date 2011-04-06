@@ -39,8 +39,6 @@ import java.io.IOException;
 public class JsonMappingConverter implements Converter<Object, String> {
 
     private final ObjectMapper objectMapper;
-     
-	private volatile String defaultCharset = MessageConstants.ENCODING;
 
     /**
      * Creates a new instance of the converter
@@ -50,7 +48,11 @@ public class JsonMappingConverter implements Converter<Object, String> {
         this.objectMapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS, false);
     }
 
-    public String fromObject(Object source) throws ConversionException {
+    public byte[] writeBytes(Object source) throws ConversionException {
+        return this.write(source).getBytes(MessageConstants.CHARSET);
+    }
+
+    public String write(Object source) throws ConversionException {
         try {
             return this.objectMapper.writeValueAsString(source);
         } catch (IOException e) {
@@ -58,7 +60,7 @@ public class JsonMappingConverter implements Converter<Object, String> {
         }
     }
 
-    public Object toObject(String source, Class<?> type) {
+    public Object read(String source, Class<?> type) {
         try {
             return this.objectMapper.readValue(source, type);
         } catch (IOException e) {

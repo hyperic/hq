@@ -23,8 +23,8 @@ public class ConverterTests {
     public void convertString() {
         Converter<String, byte[]> converter = new SimpleConverter();
         String msg = "test message";
-        byte[] bytes = converter.fromObject(msg);
-        String result = converter.toObject(bytes, Byte.class);
+        byte[] bytes = converter.write(msg);
+        String result = converter.read(bytes, Byte.class);
         assertEquals(msg, new String(bytes));
         assertEquals(result, msg);
         assertEquals(msg.getBytes().length, result.getBytes().length);
@@ -33,7 +33,7 @@ public class ConverterTests {
 
     @Test
     public void write() {
-        String json = this.converter.fromObject(new RegisterAgent("testAuth", "5.0", 1, this.agentIp, this.agentPort, "hqadmin", "hqadmin"));
+        String json = this.converter.write(new RegisterAgent("testAuth", "5.0", 1, this.agentIp, this.agentPort, "hqadmin", "hqadmin"));
 
         assertEquals("{\"authToken\":\"testAuth\",\"version\":\"5.0\",\"cpuCount\":1,\"agentIp\":\"localhost\",\"agentPort\":7071," +
                 "\"username\":\"hqadmin\",\"password\":\"hqadmin\",\"agentToken\":null,\"unidirectional\":false," +
@@ -44,7 +44,7 @@ public class ConverterTests {
 
     @Test
     public void writeSimple() {
-        String json = this.converter.fromObject(new TestObject("test-content"));
+        String json = this.converter.write(new TestObject("test-content"));
         assertEquals("{\"content\":\"test-content\"}", json);        
     }
 
@@ -52,7 +52,7 @@ public class ConverterTests {
     public void read() {
         RegisterAgent request = new RegisterAgent("authTokenValue", "5.0", 1, this.agentIp, this.agentPort, "hqadmin", "hqadmin");
 
-        Object response = this.converter.toObject("{\"authToken\":\"authTokenValue\",\"version\":\"5.0\",\"cpuCount\":1,\"agentIp\":\"localhost\",\"agentPort\":7071," +
+        Object response = this.converter.read("{\"authToken\":\"authTokenValue\",\"version\":\"5.0\",\"cpuCount\":1,\"agentIp\":\"localhost\",\"agentPort\":7071," +
                 "\"username\":\"hqadmin\",\"password\":\"hqadmin\",\"agentToken\":null,\"unidirectional\":false," +
                 "\"newTransportAgent\":false,\"operationName\":\"RegisterAgent\",\"ensureOrder\":false,\"byteaLists\":{}," +
                 "\"byteaVals\":{},\"stringVals\":{},\"intVals\":{},\"doubleVals\":{},\"longVals\":{},\"byteAVals\":{}," +
@@ -65,7 +65,7 @@ public class ConverterTests {
     @Test
     public void readSimple() {
         TestObject simpleRequest = new TestObject("test-content");
-        Object simpleResponse = this.converter.toObject("{\"content\":\"test-content\"}", TestObject.class);
+        Object simpleResponse = this.converter.read("{\"content\":\"test-content\"}", TestObject.class);
         assertEquals(simpleRequest, simpleResponse);
     }
 }

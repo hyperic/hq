@@ -30,7 +30,7 @@ package org.hyperic.hq.operation;
  */
 public class ConversionException extends RuntimeException {
  
-    ConversionException(Throwable cause) {
+    public ConversionException(Throwable cause) {
         super(cause);
     }
 }

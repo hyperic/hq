@@ -5,7 +5,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.operation.rabbit.mapping.Routings;
 import org.hyperic.util.security.SecurityUtil;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
@@ -23,7 +22,7 @@ public class RoutingKeyTests {
 
     protected Routings routings = new Routings();
 
-    protected final int agents = 1000;
+    protected final int agents = 50;
  
     @Before
     public void prepare() throws UnknownHostException {
@@ -32,13 +31,14 @@ public class RoutingKeyTests {
     }
 
     /**
+     * I test this with agents = 1000 but for CI builds have lowered it.
      * Each agent will generate a  unique set of routing keys in order to bind
      * it's exchange to the existing agent exchanges which will route to their respective queues
      * and eventually route messages to the server and to bind its queue to the existing
      * server exchanges
      * @throws UnsupportedEncodingException
      */
-    @Test  @Ignore("Long-running test not suitable for CI of entire HQ build")
+    @Test
     public void agentRoutingKeys() throws UnsupportedEncodingException {
         for (int count = 0; count < agents; count++) {
             String agentToken = SecurityUtil.generateRandomToken();
