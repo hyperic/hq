@@ -177,6 +177,12 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                             }
                             log.debug(e, e);
                         }
+                        try {
+                            // sleep for one second on stale state exception
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            log.debug(e,e);
+                        }
                     }
                     if (ex != null) {
                         log.error(ex,ex);
