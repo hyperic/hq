@@ -1475,9 +1475,17 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     }
 
     private void setPluginsNotOnAgents(Map<Integer, Collection<Plugin>> updateMap) {
+        final Collection<Agent> agents = agentPluginStatusDAO.getAutoUpdatingAgents();
+        final Set<Integer> agentIds = new HashSet<Integer>(agents.size());
+        for (final Agent agent : agents) {
+            agentIds.add(agent.getId());
+        }
         final Collection<Object[]> objs = agentPluginStatusDAO.getPluginsNotOnAllAgents();
         for (final Object[] obj : objs) {
             final Integer agentId = (Integer) obj[0];
+            if (!agentIds.contains(agentId)) {
+                continue;
+            }
             final String pluginName = (String) obj[1];
             Collection<Plugin> tmp;
             if (null == (tmp = updateMap.get(agentId))) {
