@@ -22,6 +22,11 @@
 	<bean id="graphDatabaseService" class="org.neo4j.kernel.EmbeddedGraphDatabase"
 		destroy-method="shutdown" scope="singleton">
 		<constructor-arg index="0" value="${neo4j.location}" />
+		<constructor-arg>
+            <map>
+               <entry key="tx_manager_impl" value="spring-jta"/>
+            </map>
+        </constructor-arg>
 	</bean>
 	<bean id="nodeTypeStrategy"
 		class="org.springframework.data.graph.neo4j.support.SubReferenceNodeTypeStrategy">
@@ -88,23 +93,12 @@
 	<bean id="neo4jUserTransactionService" class="org.neo4j.kernel.impl.transaction.UserTransactionImpl">
 		<constructor-arg index="0" ref="graphDatabaseService" />
 	</bean>
-
-	<bean id="transactionManager"
-		class="org.springframework.data.graph.neo4j.transaction.ChainedTransactionManager">
-		<constructor-arg>
-			<list>
-				<bean class="org.springframework.orm.jpa.JpaTransactionManager"
-					id="jpaTransactionManager">
-					<property name="entityManagerFactory" ref="entityManagerFactory" />
-				</bean>
-
-				<bean class="org.springframework.transaction.jta.JtaTransactionManager">
-					<property name="transactionManager" ref="neo4jTransactionManagerService" />
-					<property name="userTransaction" ref="neo4jUserTransactionService" />
-				</bean>
-			</list>
-		</constructor-arg>
-	</bean>
+	
+	<bean id="transactionManager" class="org.springframework.transaction.jta.JtaTransactionManager">
+        <property name="transactionManager">
+                <bean class="org.springframework.data.graph.neo4j.transaction.JotmFactoryBean"/>
+        </property>
+    </bean>
 
 	<bean
 		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
