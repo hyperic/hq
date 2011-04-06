@@ -51,7 +51,7 @@ public class RabbitOperationHandler implements OperationHandlerRegistry, Operati
 
         try {
             Object response = methodInvoker.invoke(envelope.getContext());
-            String data = this.converter.fromObject(response);
+            String data = this.converter.write(response);
 
             //routings.getOperationResponse()
            // Envelope responseMessage = new Message(envelope.getOperationId(), "", data, null);
@@ -93,7 +93,7 @@ public class RabbitOperationHandler implements OperationHandlerRegistry, Operati
         }
 
         Object invoke(String context) throws IllegalAccessException, InvocationTargetException {
-            Object data = this.converter.toObject(context, this.handlerMethod.getParameterTypes()[0]);
+            Object data = this.converter.read(context, this.handlerMethod.getParameterTypes()[0]);
             return this.handlerMethod.invoke(this.instance, data);
         }
 

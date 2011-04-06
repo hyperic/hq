@@ -42,7 +42,7 @@ public class SerializationVsJsonBenchmarkTests {
             this.serialDurationTotal += duration1;
 
             long startTime2 = System.nanoTime();
-            Object jsonResult = this.converter.fromObject(this.converter.toObject(json, RegisterAgent.class));
+            Object jsonResult = this.converter.write(this.converter.read(json, RegisterAgent.class));
             long duration2 = System.nanoTime() - startTime2;
             this.jsonDurationTotal += duration2;
             System.out.println("serial=" + duration1 + " json=" + duration2);

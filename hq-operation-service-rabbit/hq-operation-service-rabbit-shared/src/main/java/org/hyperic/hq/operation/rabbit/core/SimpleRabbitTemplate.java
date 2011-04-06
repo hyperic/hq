@@ -101,7 +101,7 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
     }
 
     private void publish(String exchangeName, String routingKey, Object data) throws IOException {
-        byte[] bytes = this.converter.fromObject(data).getBytes(MessageConstants.CHARSET);
+        byte[] bytes = this.converter.write(data).getBytes(MessageConstants.CHARSET);
 
         synchronized (this.monitor) {
             this.channel.basicPublish(exchangeName, routingKey, MessageConstants.DEFAULT_MESSAGE_PROPERTIES, bytes);
@@ -128,7 +128,7 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
                 GetResponse response = channel.basicGet(agentQueue, false);
                 if (response != null && response.getProps().getCorrelationId().equals(correlationId)) {
                     this.logger.debug("received=" + response);
-                    Object received = this.converter.toObject(new String(response.getBody()), Object.class);
+                    Object received = this.converter.read(new String(response.getBody()), Object.class);
                     this.channel.basicAck(response.getEnvelope().getDeliveryTag(), false);
                     return received;
                 }
@@ -166,7 +166,7 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
 
     public void timedTest(int append) throws IOException, InterruptedException {
         String msg = "test-" + append;
-        byte[] bytes = this.converter.fromObject(msg).getBytes(MessageConstants.CHARSET);
+        byte[] bytes = this.converter.write(msg).getBytes(MessageConstants.CHARSET);
         AMQP.BasicProperties bp = getBasicProperties(msg);
         String correlationId = bp.getCorrelationId();
 
