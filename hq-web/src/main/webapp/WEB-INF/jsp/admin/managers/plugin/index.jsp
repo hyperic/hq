@@ -37,6 +37,7 @@
 	    font-weight: bold;
 	    padding: 3px 15px;
 	    width: 90px;
+	    height: 16px;
 	    float:right;
 	}
 	#uploadButtonBar{
@@ -337,7 +338,7 @@
 	
 	<ul id="pluginList">
 		<c:forEach var="pluginSummary" items="${pluginSummaries}" varStatus="index">
-			<li class="gridrow clear<c:if test="${index.index % 2 != 0}"> even</c:if>">
+			<li class="gridrow clear<c:if test="${index.count % 2 == 0}"> even</c:if>">
 				<span class="first column span-1">
 					<c:if test="${mechanismOn}">
                     	<input type="checkbox" value="${pluginSummary.id}_${pluginSummary.jarName} (${pluginSummary.name})" name="deleteId"/>&nbsp; 
@@ -553,7 +554,7 @@
 		
 		new hqDijit.Tooltip({
 			connectId:["agentInfo"],
-			label: "<fmt:message key='admin.managers.Plugin.information.agent.count.tip' />",
+			label: "<fmt:message key='admin.managers.Plugin.information.agent.count.tip' />"
 		});
 
 		hqDojo.query(".notFound").forEach(function(e){
@@ -657,7 +658,6 @@
 		}
 	
 		if (${mechanismOn}){
-			var uploader;
 		
 			var uploadDialog = new hqDijit.Dialog({
 				id: "uploadPanelDialog",
@@ -704,14 +704,16 @@
 
 		
 			hqDojo.connect(hqDojo.byId("showUploadFormButton"), "onclick", function(e) {
-								if(hqDijit.registry.map(function(e){
-					return e.id=="selectFileButton";
-				 						}))
-				{ 
-					hqDijit.registry.remove("selectFileButton");
-				};
 				
-			
+				hqDijit.registry.filter(function(e){return e.id=="selectFileButton";}).forEach(function(entry){
+						hqDijit.registry.remove("selectFileButton");
+				});				
+				hqDojo.query("div > #selectFileButton").forEach(function(e){
+					hqDojo.removeAttr(e,"class");
+					hqDojo.attr(e,"class","selectFileBtn");
+					hqDojo.removeAttr(e,"wigetid");
+					hqDojo.removeAttr(e,"style");
+				});
 				hqDojo.byId("selectFileButton").innerHTML = "<fmt:message key='admin.managers.plugin.button.select.files' />"
 				hqDojo.byId("selectedFileList").innerHTML = "";
 				uploader = new hqDojox.form.FileUploader({
@@ -720,6 +722,7 @@
 					isDebug:false,
 					uploadUrl:"<spring:url value='/app/admin/managers/plugin/upload'/>",
 					force:"html",
+					closable: true,
 					fileMask:[
 						["jar File", "*.jar"],
 						["xml File", "*.xml"]
