@@ -50,7 +50,7 @@ public class QzPausedTriggerGrp  implements Serializable {
     }
     
     public void setTriggerGroup(String triggerGroup) {
-        triggerGroup = triggerGroup;
+        this.triggerGroup = triggerGroup;
     }
 
     @Override
