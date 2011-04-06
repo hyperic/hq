@@ -1,7 +1,8 @@
 package org.hyperic.hq.operation.rabbit.mapping;
 
-import org.hyperic.hq.operation.Operation;
+import org.hyperic.hq.operation.OperationData;
 import org.hyperic.hq.operation.OperationSupported;
+import org.hyperic.hq.operation.rabbit.util.RoutingType;
 
 /**
  * @author Helena Edelson
@@ -13,6 +14,6 @@ public interface OperationRoutingSupported extends OperationSupported {
      * @param operation The operation name
      * @return Returns true if the operation name is a key in the handler's mapping, false if not
      */
-    boolean supports(Operation operation, RoutingType type);
+    boolean supports(OperationData operation, RoutingType type);
 
 }

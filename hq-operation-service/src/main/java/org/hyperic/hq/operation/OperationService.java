@@ -9,7 +9,7 @@ public interface OperationService {
      * the framework knows where to route it
      * @throws OperationFailedException
      */
-    void perform(Operation operation) throws OperationFailedException;
+    void perform(OperationData operation) throws OperationFailedException;
 
     /**
      * Perform an asynchronous operation
@@ -18,7 +18,7 @@ public interface OperationService {
      * @param routingKey The routing key to use
      * @throws OperationFailedException
      */
-    void perform(Operation operation, String exchangeName, String routingKey) throws OperationFailedException;
+    void perform(OperationData operation, String exchangeName, String routingKey) throws OperationFailedException;
 
     /**
      * Perform an asynchronous operation
@@ -27,6 +27,6 @@ public interface OperationService {
      * @param routingKey The routing key to use
      * @throws OperationFailedException
      */
-    Object performAndReceive(Operation operation, String exchangeName, String routingKey) throws OperationFailedException;
+    Object performAndReceive(OperationData operation, String exchangeName, String routingKey) throws OperationFailedException;
    
 }

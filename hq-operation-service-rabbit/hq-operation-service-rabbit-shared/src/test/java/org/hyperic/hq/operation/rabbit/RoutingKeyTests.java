@@ -2,7 +2,7 @@ package org.hyperic.hq.operation.rabbit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.operation.rabbit.mapping.Routings;
+import org.hyperic.hq.operation.rabbit.util.Routings;
 import org.hyperic.util.security.SecurityUtil;
 import org.junit.Before;
 import org.junit.Test;

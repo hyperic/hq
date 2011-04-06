@@ -3,7 +3,7 @@ package org.hyperic.hq.operation;
 /**
  * @author Helena Edelson
  */
-public interface Operation {
+public interface OperationData {
 
     /**
      * Returns the name of the operation

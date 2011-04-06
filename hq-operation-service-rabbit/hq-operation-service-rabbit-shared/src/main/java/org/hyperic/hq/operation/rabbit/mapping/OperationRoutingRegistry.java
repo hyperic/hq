@@ -1,5 +1,7 @@
 package org.hyperic.hq.operation.rabbit.mapping;
 
+import org.hyperic.hq.operation.rabbit.util.RoutingType;
+
 import java.util.Map;
 
 /**

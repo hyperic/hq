@@ -10,6 +10,6 @@ public interface OperationSupported {
      * @param operation The operation name
      * @return Returns true if the operation name is a key in the handler's mapping, false if not
      */
-    boolean supports(Operation operation);
+    boolean supports(OperationData operation);
     
 }

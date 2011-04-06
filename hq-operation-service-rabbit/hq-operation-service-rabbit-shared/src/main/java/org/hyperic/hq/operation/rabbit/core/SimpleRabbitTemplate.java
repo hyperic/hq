@@ -9,7 +9,7 @@ import org.hyperic.hq.operation.rabbit.connection.ChannelTemplate;
 import org.hyperic.hq.operation.rabbit.connection.ConnectionException;
 import org.hyperic.hq.operation.rabbit.connection.SingleConnectionFactory;
 import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
-import org.hyperic.hq.operation.rabbit.mapping.Routings;
+import org.hyperic.hq.operation.rabbit.util.Routings;
 import org.hyperic.hq.operation.rabbit.util.MessageConstants;
 
 import java.io.IOException;
@@ -75,7 +75,7 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
      * @param serverId     If a serverId exists it is used to initialize org.hyperic.hq.operation.rabbit.mapping.Routings
      *                     and if not, a default server id is generated to initialize org.hyperic.hq.operation.rabbit.mapping.Routings.
      * @param exchangeName The exchange name to use. if null, uses the AMQP default
-     * @see org.hyperic.hq.operation.rabbit.mapping.Routings
+     * @see org.hyperic.hq.operation.rabbit.util.Routings
      */
     public SimpleRabbitTemplate(ConnectionFactory cf, String exchangeName, String serverId) {
         this.channelTemplate = new ChannelTemplate(cf);

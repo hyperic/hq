@@ -3,7 +3,7 @@ package org.hyperic.hq.operation;
 /**
  * @author Helena Edelson
  */
-public interface Envelope extends Operation {
+public interface Envelope extends OperationData {
 
     /**
      * Returns the id of the operation

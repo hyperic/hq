@@ -4,7 +4,7 @@ import org.hyperic.hq.operation.*;
 import org.hyperic.hq.operation.Converter;
 import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
 import org.hyperic.hq.operation.rabbit.core.RabbitTemplate;
-import org.hyperic.hq.operation.rabbit.mapping.Routings;
+import org.hyperic.hq.operation.rabbit.util.Routings;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -74,7 +74,7 @@ public class RabbitOperationHandler implements OperationHandlerRegistry, Operati
      * @param operation The operation name
      * @return Returns true if the operation name is a key in the handler's mapping, false if not
      */
-    public boolean supports(Operation operation) {
+    public boolean supports(OperationData operation) {
        return this.operationHandlers.containsKey(operation.getOperationName());
     }
 

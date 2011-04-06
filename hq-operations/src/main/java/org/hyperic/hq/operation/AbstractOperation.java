@@ -7,7 +7,7 @@ import java.io.Serializable;
 import java.util.*;
 
 
-public abstract class AbstractOperation implements Operation, Serializable {
+public abstract class AbstractOperation implements OperationData, Serializable {
 
     private static final long serialVersionUID = 6991306796752066389L;
 

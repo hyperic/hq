@@ -1,9 +1,7 @@
-package org.hyperic.hq.operation.rabbit.mapping;
+package org.hyperic.hq.operation.rabbit.util;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.operation.rabbit.util.OperationConstants;
-import org.hyperic.hq.operation.rabbit.util.RoutingConstants;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;

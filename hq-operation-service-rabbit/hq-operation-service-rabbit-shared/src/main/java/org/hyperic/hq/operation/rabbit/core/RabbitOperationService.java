@@ -1,7 +1,7 @@
 package org.hyperic.hq.operation.rabbit.core;
 
 import org.apache.log4j.Logger;
-import org.hyperic.hq.operation.Operation;
+import org.hyperic.hq.operation.OperationData;
 import org.hyperic.hq.operation.OperationFailedException;
 import org.hyperic.hq.operation.OperationService;
 import org.hyperic.hq.operation.rabbit.connection.SingleConnectionFactory;
@@ -45,7 +45,7 @@ public class RabbitOperationService implements OperationService {
      * the framework knows where to route it
      * @throws OperationFailedException
      */
-    public void perform(Operation operation) throws OperationFailedException {
+    public void perform(OperationData operation) throws OperationFailedException {
         //send(exchangeName, routingKey, operation);
     }
 
@@ -55,7 +55,7 @@ public class RabbitOperationService implements OperationService {
      * @param routingKey The routing key to use
      * @throws OperationFailedException
      */
-    public void perform(Operation operation, String exchangeName, String routingKey) throws OperationFailedException {
+    public void perform(OperationData operation, String exchangeName, String routingKey) throws OperationFailedException {
         try {
             rabbitTemplate.send(exchangeName, routingKey, operation);
         } catch (Exception e) {
@@ -71,7 +71,7 @@ public class RabbitOperationService implements OperationService {
      * @return
      * @throws OperationFailedException
      */
-    public Object performAndReceive(Operation operation, String exchangeName, String routingKey) throws OperationFailedException {
+    public Object performAndReceive(OperationData operation, String exchangeName, String routingKey) throws OperationFailedException {
         try {
             return rabbitTemplate.sendAndReceive(exchangeName, routingKey, operation);
         }

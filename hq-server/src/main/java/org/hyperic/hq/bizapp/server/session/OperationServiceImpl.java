@@ -16,7 +16,7 @@ import org.hyperic.hq.control.shared.ControlManager;
 import org.hyperic.hq.ha.HAService;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.ReportProcessor;
-import org.hyperic.hq.operation.Operation;
+import org.hyperic.hq.operation.OperationData;
 import org.hyperic.hq.operation.OperationFailedException;
 import org.hyperic.hq.operation.OperationService;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
@@ -93,15 +93,15 @@ public class OperationServiceImpl implements OperationService {
     }
 
 
-    public void perform(Operation operation) throws OperationFailedException {
+    public void perform(OperationData operation) throws OperationFailedException {
 
     }
 
-    public void perform(Operation operation, String exchangeName, String routingKey) throws OperationFailedException {
+    public void perform(OperationData operation, String exchangeName, String routingKey) throws OperationFailedException {
 
     }
 
-    public Object performAndReceive(Operation operation, String exchangeName, String routingKey) throws OperationFailedException {
+    public Object performAndReceive(OperationData operation, String exchangeName, String routingKey) throws OperationFailedException {
         return null;
     }
 }

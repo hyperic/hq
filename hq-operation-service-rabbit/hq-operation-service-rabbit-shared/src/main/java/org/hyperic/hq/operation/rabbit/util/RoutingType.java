@@ -23,7 +23,7 @@
  *  USA.
  *
  */
-package org.hyperic.hq.operation.rabbit.mapping;
+package org.hyperic.hq.operation.rabbit.util;
 
 /**
  * @author Helena Edelson
