@@ -435,14 +435,18 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
             log.info("HQU directory not found");
         }
         pluginDirs.add(getServerPluginDir());
-        //Add custom hq-plugins dir at same level as server home
-        File workingDirParent = new File(System.getProperty("user.dir")).getParentFile();
-        if( workingDirParent != null && new File(workingDirParent,"hq-plugins").exists()) {
-            pluginDirs.add(new File(workingDirParent,"hq-plugins"));
+        // Add custom hq-plugins dir at same level as server home
+        final File customPluginDir = getCustomPluginDir();
+        if (!customPluginDir.exists()) {
+            customPluginDir.mkdirs();
+        }
+        if( customPluginDir != null && customPluginDir.exists() && customPluginDir.isDirectory()) {
+            pluginDirs.add(customPluginDir);
         } else {
-            log.warn("custom plugin directory " + workingDirParent.getAbsolutePath() +
-                File.pathSeparator + "hq-plugins does not exist.  Without this directory users " +
-                "will not be able to deploy plugins from the HQ Plugin Manager");
+            log.error("custom plugin directory " + customPluginDir.getAbsolutePath() +
+                      " does not exist.  Without this directory users " +
+                      "will not be able to deploy plugins from the HQ Plugin Manager",
+                      new Throwable());
         }
     }
 

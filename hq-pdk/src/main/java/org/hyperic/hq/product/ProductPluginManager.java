@@ -408,7 +408,7 @@ public class ProductPluginManager
             if (!dir.exists()) {
                 continue;
             }
-            registerPlugins(dir.getPath());
+            registerPlugins(dir.getPath(), null);
         }
     }
 
@@ -661,16 +661,26 @@ public class ProductPluginManager
                 return false;
             }
         }
+        if (isExcluded(name)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean isExcluded(String name) {
+        if (name.endsWith("-plugin.jar") || name.endsWith("-plugin.xml")) {
+            name = name.substring(0, name.length() - 11);
+        }
         if (this.excludePlugins != null) {
             if (this.excludePlugins.get(name) != null) {
                 if (DEBUG_LIFECYCLE) {
                     log.debug("Skipping " + name + " (in plugins.exclude)");
                 }
-                return false;
+                return true;
             }
         }
-
-        return true;
+        return false;
     }
 
     /**
@@ -705,7 +715,7 @@ public class ProductPluginManager
         }
     }
 
-    public Collection<PluginInfo> registerCustomPlugins(String startDir) {
+    public Collection<PluginInfo> registerCustomPlugins(String startDir, Collection<PluginInfo> excludes) {
         // check startDir and higher for hq-plugins
         File dir = new File(startDir).getAbsoluteFile();
         
@@ -713,7 +723,7 @@ public class ProductPluginManager
             File customPluginDir = new File(dir, "hq-plugins");
             
             if (customPluginDir.exists()) {
-                return registerPlugins(customPluginDir.toString());
+                return registerPlugins(customPluginDir.toString(), excludes);
             }
             
             dir = dir.getParentFile();
@@ -742,7 +752,7 @@ public class ProductPluginManager
         }
     }
 
-    public Collection<PluginInfo> registerPlugins(String path) {
+    public Collection<PluginInfo> registerPlugins(String path, Collection<PluginInfo> excludes) {
         Collection<PluginInfo> rtn = new ArrayList<PluginInfo>();
         List<String> dirs = StringUtil.explode(path, File.pathSeparator);
         for (int i = 0; i < dirs.size(); i++) {
@@ -756,17 +766,21 @@ public class ProductPluginManager
                 continue;
             }
             File[] plugins = listPlugins(dir);
-            Collection<PluginInfo> pluginInfo = register(Arrays.asList(plugins));
+            Collection<PluginInfo> pluginInfo = register(Arrays.asList(plugins), excludes);
             rtn.addAll(pluginInfo);
         }
         return rtn;
     }
 
-    private Collection<PluginInfo> register(Collection<File> plugins) {
+    private Collection<PluginInfo> register(Collection<File> plugins, Collection<PluginInfo> excludes) {
         Collection<PluginInfo> rtn = new ArrayList<PluginInfo>();
         for (File plugin : plugins) {
             String name = plugin.getName();
             if (!isLoadablePluginName(name)) {
+                if (isExcluded(name) && excludes != null && plugin.exists() && !plugin.isDirectory()) {
+                    PluginInfo info = new PluginInfo(plugin, "EXCLUDED");
+                    excludes.add(info);
+                }
                 continue;
             }
             log.info("Loading plugin: " + name + " (" + plugin.getParent() + ")");

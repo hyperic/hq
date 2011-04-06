@@ -695,10 +695,12 @@ public class AgentDaemon
             pluginDir = 
                 bootProps.getProperty(AgentConfig.PROP_PDK_PLUGIN_DIR[0]);
 
+            Collection<PluginInfo> excludes = new ArrayList<PluginInfo>();
             Collection<PluginInfo> plugins = new ArrayList<PluginInfo>();
-            plugins.addAll(this.ppm.registerPlugins(pluginDir));
+            plugins.addAll(this.ppm.registerPlugins(pluginDir, excludes));
             //check .. and higher for hq-plugins
-            plugins.addAll(this.ppm.registerCustomPlugins(".."));
+            plugins.addAll(this.ppm.registerCustomPlugins("..", excludes));
+            plugins.addAll(excludes);
             sendPluginStatusToServer(plugins);
             
             logger.info("Product Plugin Manager initalized");
@@ -743,6 +745,7 @@ public class AgentDaemon
                 }
             }
         };
+        thread.setDaemon(true);
         thread.start();
     }
 
