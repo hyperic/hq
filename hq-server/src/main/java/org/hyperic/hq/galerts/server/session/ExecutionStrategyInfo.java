@@ -71,11 +71,8 @@ public class ExecutionStrategyInfo implements Serializable {
     @Column(name = "ID")
     private Integer id;
 
-    private transient GalertDefPartition partition;
-
-    @SuppressWarnings("unused")
     @Column(name = "PARTITION", nullable = false)
-    private int partitionEnum;
+    private int partition;
 
     @OneToMany(mappedBy = "strategy", cascade = CascadeType.ALL, orphanRemoval = true)
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
@@ -99,7 +96,7 @@ public class ExecutionStrategyInfo implements Serializable {
         this.alertDef = alertDef;
         this.type = type;
         this.config = config;
-        this.partition = partition;
+        this.partition = partition.getCode();
     }
 
     GtriggerInfo addTrigger(GtriggerTypeInfo typeInfo, Crispo config, ResourceGroup group,
@@ -158,11 +155,7 @@ public class ExecutionStrategyInfo implements Serializable {
     }
 
     public GalertDefPartition getPartition() {
-        return partition;
-    }
-
-    protected int getPartitionEnum() {
-        return partition.getCode();
+        return GalertDefPartition.findByCode(partition);
     }
 
     public ExecutionStrategy getStrategy() {
@@ -206,8 +199,8 @@ public class ExecutionStrategyInfo implements Serializable {
         this.id = id;
     }
 
-    protected void setPartitionEnum(int partition) {
-        this.partition = GalertDefPartition.findByCode(partition);
+    protected void setPartition(int partition) {
+        this.partition = partition;
     }
 
     protected void setTriggerList(List<GtriggerInfo> triggers) {

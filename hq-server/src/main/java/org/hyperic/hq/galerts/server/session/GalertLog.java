@@ -93,11 +93,8 @@ public class GalertLog implements AlertInterface, Serializable {
     @Column(name = "LONG_REASON", nullable = false, length = 2048)
     private String longReason;
 
-    private transient GalertDefPartition partition;
-
-    @SuppressWarnings("unused")
     @Column(name = "PARTITION", nullable = false)
-    private int partitionEnum;
+    private int partition;
 
     @Column(name = "SHORT_REASON", nullable = false, length = 256)
     private String shortReason;
@@ -123,7 +120,7 @@ public class GalertLog implements AlertInterface, Serializable {
         this.timestamp = timestamp;
         shortReason = reason.getShortReason();
         longReason = reason.getLongReason();
-        partition = reason.getPartition();
+        partition = reason.getPartition().getCode();
     }
 
     GalertAuxLog addAuxLog(AlertAuxLog auxLog, GalertAuxLog parent) {
@@ -191,8 +188,8 @@ public class GalertLog implements AlertInterface, Serializable {
         return longReason;
     }
 
-    protected int getPartitionEnum() {
-        return partition.getCode();
+    protected int getPartition() {
+        return partition;
     }
 
     public String getShortReason() {
@@ -243,8 +240,8 @@ public class GalertLog implements AlertInterface, Serializable {
         longReason = txt;
     }
 
-    protected void setPartitionEnum(int code) {
-        partition = GalertDefPartition.findByCode(code);
+    protected void setPartition(int code) {
+        partition = code;
     }
 
     protected void setShortReason(String txt) {

@@ -61,7 +61,7 @@ public class AlertActionLog  implements Serializable
     
     @SuppressWarnings("unused")
     @Column(name="ALERT_TYPE",nullable=false)
-    private int alertTypeEnum;
+    private int alertType;
     
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="ACTION_ID")
@@ -139,12 +139,8 @@ public class AlertActionLog  implements Serializable
     protected void setSubject(AuthzSubject subject) {
         this.subject = subject;
     }
-    
-    protected int getAlertTypeEnum() {
-        return ClassicEscalationAlertType.CLASSIC.getCode();
-    }
-    
-    protected void setAlertTypeEnum(int v) {
+      
+    protected void setAlertType(int v) {
         // Do nothing
     }
     
