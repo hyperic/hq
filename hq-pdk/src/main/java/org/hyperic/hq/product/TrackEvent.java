@@ -30,6 +30,7 @@ import org.hyperic.util.encoding.Base64;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -135,10 +136,10 @@ public class TrackEvent implements java.io.Serializable {
         dOs.writeInt(this.id.getType());
         dOs.writeLong(time);
         dOs.writeInt(level);
-        dOs.writeUTF(truncate(type, TYPE_MAXLEN));
         dOs.writeUTF(truncate(source, SOURCE_MAXLEN));
-        dOs.writeUTF(truncate(newSource, SOURCE_MAXLEN));
         dOs.writeUTF(truncate(message, MESSAGE_MAXLEN));
+        dOs.writeUTF(truncate(type, TYPE_MAXLEN));
+        dOs.writeUTF(truncate(newSource, SOURCE_MAXLEN));
 
         return Base64.encode(bOs.toByteArray());
     }
@@ -159,13 +160,19 @@ public class TrackEvent implements java.io.Serializable {
         entityIdType = dIs.readInt();
         time = dIs.readLong();
         level = dIs.readInt();
-        eventType = dIs.readUTF();
         source = dIs.readUTF();
-        newSource = dIs.readUTF();
         message = dIs.readUTF();
-
-        return new TrackEvent(new AppdefEntityID(entityIdType, id),
-                              time, level, eventType, source, newSource, message);
+        
+        try{
+            eventType = dIs.readUTF();
+            newSource = dIs.readUTF();
+            return new TrackEvent(new AppdefEntityID(entityIdType, id),
+                time, level, eventType, source, newSource, message);
+        } catch (EOFException e){
+            // maintain backwards compatibility
+            return new TrackEvent(new AppdefEntityID(entityIdType, id),
+                time, level, source, message);
+        }
     }
 
     // XXX: for debuging purposes

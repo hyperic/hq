@@ -432,10 +432,11 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
         if (plugin == null)
             return;
         
-        if (!(plugin instanceof FileChangeTrackPlugin))
-            // TODO: log?
+        if (!(plugin instanceof FileChangeTrackPlugin)){
+            if (_log.isDebugEnabled())
+                _log.debug(plugin.getName()+" not of class FileChangeTrackPlugin, and will be skipped.");
             return;
-                
+        }
         try{
             _folderMonitorStorage.put(key, configResponse);
         } catch (AgentStorageException e) {

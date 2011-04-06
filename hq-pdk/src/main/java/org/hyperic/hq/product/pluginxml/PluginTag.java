@@ -122,7 +122,7 @@ class PluginTag
     
     public XmlTagInfo[] getSubTags() {
         return new XmlTagInfo[] {
-            new XmlTagInfo(new TemplateTag(this),
+            new XmlTagInfo(new MonitoredTag(this),
                            XmlTagInfo.ZERO_OR_MORE),
         };
     }

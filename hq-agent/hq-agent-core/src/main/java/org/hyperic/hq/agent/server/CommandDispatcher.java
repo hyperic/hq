@@ -28,18 +28,16 @@ package org.hyperic.hq.agent.server;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentAPIInfo;
 import org.hyperic.hq.agent.AgentCommand;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentRemoteValue;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * The object which manages all libraries wanting to have their
@@ -73,8 +71,9 @@ public class CommandDispatcher {
         
         for(final String cmd: cmds){
             List<AgentServerHandler> handlerList = commands.get(cmd);
-            if (handlerList == null)
+            if (handlerList == null){
                 handlerList = new LinkedList<AgentServerHandler>();
+            }
             handlerList.add(handler);
             this.commands.put(cmd, handlerList);
         }

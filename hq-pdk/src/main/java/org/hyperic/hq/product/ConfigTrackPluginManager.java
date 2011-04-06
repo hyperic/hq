@@ -36,7 +36,7 @@ import com.vmware.frantic.fsmonitor.MonitorStatus;
 
 public class ConfigTrackPluginManager extends TrackEventPluginManager {
 
-    private static IFileMonitor _fileMonitor = FileMonitor.getInstance();
+    private static IFileMonitor fileMonitor = FileMonitor.getInstance();
 
      public ConfigTrackPluginManager() {
         super();        
@@ -55,7 +55,7 @@ public class ConfigTrackPluginManager extends TrackEventPluginManager {
         final File f = new File(dataDir);
 
         // get property for max diff size
-        _fileMonitor.setAppDataDir(f.getAbsolutePath());
+        fileMonitor.setAppDataDir(f.getAbsolutePath());
         final String maxDiffSize = getProperty("hq.plugins.configmon.maxdiff", "5012");
         long size = -1;
         try{
@@ -63,11 +63,11 @@ public class ConfigTrackPluginManager extends TrackEventPluginManager {
         } catch (NumberFormatException e) {
             log.error(e.getMessage(), e);
         }
-        _fileMonitor.setMaxDiffSize(size);
+        fileMonitor.setMaxDiffSize(size);
 
         // start the monitor, no events will be tracked until tracked folders are defined.
-        if (!(MonitorStatus.STARTED.equals(_fileMonitor.getStatus())))
-            _fileMonitor.start();
+        if (!(MonitorStatus.STARTED.equals(fileMonitor.getStatus())))
+            fileMonitor.start();
     }
 
     public String getName() {
@@ -75,6 +75,15 @@ public class ConfigTrackPluginManager extends TrackEventPluginManager {
     }
     
     public IFileMonitor getFileMonitor(){
-        return _fileMonitor;
+        return fileMonitor;
     }
+
+    @Override
+    public void shutdown() throws PluginException {
+        fileMonitor.stop();
+        fileMonitor = null;
+        super.shutdown();
+    }
+    
+    
 }

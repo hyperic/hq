@@ -75,6 +75,7 @@
 		<xbean.version>3.6</xbean.version>
 		<xstream.version>1.3.1</xstream.version>
 		<filemonitor.version>1.0.0</filemonitor.version>
+		<asm.version>3.1</asm.version>
 
 		<maven.build.timestamp.format>MMM dd, yyyy</maven.build.timestamp.format>
 		<build.timestamp>${maven.build.timestamp}</build.timestamp>
@@ -577,7 +578,11 @@
 				<artifactId>cm-file-monitor</artifactId>
 				<version>${filemonitor.version}</version>
 			</dependency>
-
+			<dependency>
+				<groupId>asm</groupId>
+				<artifactId>asm</artifactId>
+				<version>${asm.version}</version>
+			</dependency>				
 		</dependencies>
 	</dependencyManagement>
 

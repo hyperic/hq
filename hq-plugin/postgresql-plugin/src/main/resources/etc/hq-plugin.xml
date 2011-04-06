@@ -256,6 +256,15 @@
     <plugin type="control"
             class="PostgreSQLControlPlugin"/>
 
+    <plugin type="config_track"
+            class="org.hyperic.hq.product.FileChangeTrackPlugin">
+            <monitored>
+            	<!--folder recursive='true' path='/conf' filter='wrapper.conf'/-->
+            	<folder path="data" recursive="true" filter=".*.txt"/>
+            	<!-- folder recursive='true' path='/webapps' /-->
+            </monitored>
+    </plugin>
+
     <actions include="Analyze,ResetStatistics,Vacuum,VacuumAnalyze"/>
 
     <metrics include="pg-server"/>
