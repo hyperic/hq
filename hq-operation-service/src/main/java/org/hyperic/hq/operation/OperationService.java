@@ -5,31 +5,28 @@ public interface OperationService {
 
     /**
      * Perform an asynchronous operation
-     * @param operationName The name of the operation that should be performed. Based on the operation name,
-     * the framework knows where to route it.
-     * @param data The data to route
+     * @param operation The operation that should be performed. Based on the operation name,
+     * the framework knows where to route it
      * @throws OperationFailedException
      */
-    void perform(String operationName, Object data) throws OperationFailedException;
+    void perform(Operation operation) throws OperationFailedException;
 
     /**
      * Perform an asynchronous operation
-     * @param operationName The name of the operation that should be performed
-     * @param exchangeName
-     * @param routingKey The routing key to send to
-     * @param data The data to route
+     * @param operation The operation that should be performed
+     * @param exchangeName The exchange name to use
+     * @param routingKey The routing key to use
      * @throws OperationFailedException
      */
-    void perform(String operationName, String exchangeName, String routingKey, Object data) throws OperationFailedException;
+    void perform(Operation operation, String exchangeName, String routingKey) throws OperationFailedException;
 
     /**
      * Perform an asynchronous operation
-     * @param operationName The name of the operation that should be performed
-     * @param exchangeName
-     * @param routingKey The routing key to send to
-     * @param data The data to route
+     * @param operation The name of the operation that should be performed
+     * @param exchangeName The exchange name to use
+     * @param routingKey The routing key to use
      * @throws OperationFailedException
      */
-    Object performAndReceive(String operationName, String exchangeName, String routingKey, Object data) throws OperationFailedException;
+    Object performAndReceive(Operation operation, String exchangeName, String routingKey) throws OperationFailedException;
    
 }

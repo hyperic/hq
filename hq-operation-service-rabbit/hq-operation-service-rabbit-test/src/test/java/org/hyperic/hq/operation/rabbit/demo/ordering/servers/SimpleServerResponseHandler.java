@@ -26,7 +26,6 @@
 package org.hyperic.hq.operation.rabbit.demo.ordering.servers;
 
 import org.hyperic.hq.operation.rabbit.handler.SimpleAsyncResponseHandler;
-import org.hyperic.hq.operation.rabbit.mapping.Operations;
 
 /**
  * Asynchronously Receives messages.
@@ -40,15 +39,6 @@ public class SimpleServerResponseHandler extends SimpleAsyncResponseHandler {
      * @param message the message converted from byte[]
      */
     public void handleMessage(String message) {
-        if (message.equalsIgnoreCase(Operations.PING)) {
-            handlePing();
-        }
-    }
 
-    /**
-     * Go do something useful
-     */
-    private void handlePing() {
-         logger.info("*********Server received Agent ping"); 
     }
 }

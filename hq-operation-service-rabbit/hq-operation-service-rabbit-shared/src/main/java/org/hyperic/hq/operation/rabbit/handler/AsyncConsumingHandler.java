@@ -29,7 +29,6 @@ import org.apache.log4j.Logger;
 import org.hyperic.hq.operation.AsyncQueuedConsumer;
 import org.hyperic.hq.operation.rabbit.core.RabbitTemplate;
 import org.hyperic.hq.operation.rabbit.core.SimpleRabbitTemplate;
-import org.hyperic.hq.operation.rabbit.mapping.Operations;
 
 /**
  * @author Helena Edelson
@@ -49,14 +48,7 @@ public class AsyncConsumingHandler implements AsyncQueuedConsumer {
      * @param message the message converted from byte[]
      */
     public void handleMessage(String message) {
-        if (message.equalsIgnoreCase(Operations.AGENT_PING_RESPONSE)) {
-            handleServerPing(message);
-        }
-    }
 
-    private long handleServerPing(String message) {
-        logger.info("************received response " + message);
-        return 0;
     }
 
     public void handleMessage(byte[] message) {

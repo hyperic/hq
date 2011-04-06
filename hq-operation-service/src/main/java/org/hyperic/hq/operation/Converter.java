@@ -23,33 +23,26 @@
  * USA.
  */
 
-package org.hyperic.hq.operation.rabbit.mapping;
+package org.hyperic.hq.operation;
 
 /**
- * Temporary
  * @author Helena Edelson
  */
-public class Operations {
+public interface Converter<T, U> {
 
-    public static final String AGENT_PING_REQUEST = "agent:ping-request";
+    /**
+     * Write and convert from type T to type U
+     * @param source The input to convert
+     * @return The converted output
+     */
+    U fromObject(T source);
 
-    public static final String AGENT_PING_RESPONSE = "agent:ping-response";
+    /**
+     * Read and convert from type U to type T
+     * @param source The input to convert
+     * @param type The type to convert to
+     * @return The converted output
+     */
+    T toObject(U source, Class<?> type);
 
-    public static final String PING = "ping";
-
-    public static final String START = "start";
-
-    public static final String RESTART = "restart";
-
-    public static final String DIE = "die";
-
-    public static final String UPGRADE = "upgrade";
-
-    public static final String GET_AGENT_BUNDLE = "getCurrentAgentBundle";
-
-    public static final String SEND_FILE = "agentSendFileData";
-
-    public static final String REMOVE_FILE = "agentRemoveFile";
-
- 
 }

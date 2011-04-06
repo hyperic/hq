@@ -2,7 +2,8 @@ package org.hyperic.hq.operation.rabbit.mapping;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.operation.rabbit.util.MessageConstants;
+import org.hyperic.hq.operation.rabbit.util.OperationConstants;
+import org.hyperic.hq.operation.rabbit.util.RoutingConstants;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -28,10 +29,10 @@ public final class RoutingKeys {
     }
 
     public RoutingKeys(String serverId) {
-        this.agentOperations = MessageConstants.AGENT_OPERATIONS;
-        this.serverOperations = MessageConstants.SERVER_OPERATIONS;
-        this.agentRoutingKeyPrefix = MessageConstants.AGENT_ROUTING_KEY_PREFIX;
-        this.serverPrefix = MessageConstants.SERVER_ROUTING_KEY_PREFIX + serverId;
+        this.agentOperations = OperationConstants.AGENT_OPERATIONS;
+        this.serverOperations = OperationConstants.SERVER_OPERATIONS;
+        this.agentRoutingKeyPrefix = RoutingConstants.AGENT_ROUTING_KEY_PREFIX;
+        this.serverPrefix = RoutingConstants.SERVER_ROUTING_KEY_PREFIX + serverId;
     }
 
     /**

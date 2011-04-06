@@ -1,7 +1,7 @@
 package org.hyperic.hq.operation.rabbit.handler;
 
 import org.hyperic.hq.operation.*;
-import org.hyperic.hq.operation.rabbit.convert.Converter;
+import org.hyperic.hq.operation.Converter;
 import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
 import org.hyperic.hq.operation.rabbit.core.RabbitTemplate;
 import org.hyperic.hq.operation.rabbit.mapping.Routings;
@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author Helena Edelson
  */
-public class RabbitOperationHandler implements OperationHandlerRegistry, OperationHandler {
+public class RabbitOperationHandler implements OperationHandlerRegistry, OperationHandler, OperationSupported {
 
     private static final long STARTUP_TIMEOUT = 5000;
 
@@ -68,9 +68,14 @@ public class RabbitOperationHandler implements OperationHandlerRegistry, Operati
             throw new EnvelopeHandlingException("Exception sending response to operation", e);
         }*/
     }
-
-    private boolean supports(Message message) throws Exception {
-        return this.operationHandlers.containsKey(message.getOperationName());
+ 
+    /**
+     * Tests whether the operation has been registered with this handler
+     * @param operation The operation name
+     * @return Returns true if the operation name is a key in the handler's mapping, false if not
+     */
+    public boolean supports(Operation operation) {
+       return this.operationHandlers.containsKey(operation.getOperationName());
     }
 
     private static final class MethodInvoker {

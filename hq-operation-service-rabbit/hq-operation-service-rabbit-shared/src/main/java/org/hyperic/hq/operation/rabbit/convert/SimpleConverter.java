@@ -1,5 +1,7 @@
 package org.hyperic.hq.operation.rabbit.convert;
 
+import org.hyperic.hq.operation.Converter;
+
 /**
  * @author Helena Edelson
  */

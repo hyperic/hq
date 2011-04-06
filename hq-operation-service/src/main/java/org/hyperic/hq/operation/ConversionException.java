@@ -28,13 +28,9 @@ package org.hyperic.hq.operation;
 /**
  * @author Helena Edelson
  */
-public interface OperationToRoutingMapper {
-
-     /**
-     * Map an operation to its Rabbit routing 
-     * @param id The operation's id
-     * @return The operation's rabbit routing
-     */
-    String map(String id);
-
+public class ConversionException extends RuntimeException {
+ 
+    ConversionException(Throwable cause) {
+        super(cause);
+    }
 }

@@ -2,6 +2,8 @@ package org.hyperic.hq.operation.rabbit.mapping;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.operation.rabbit.util.OperationConstants;
+import org.hyperic.hq.operation.rabbit.util.RoutingConstants;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -9,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static org.hyperic.hq.operation.rabbit.util.MessageConstants.*;
+import static org.hyperic.hq.operation.rabbit.util.BindingPatternConstants.OPERATION_PREFIX;
 
 
 /**
@@ -43,10 +45,10 @@ public final class Routings {
      * @param serverId
      */
     public Routings(String serverId) {
-        this.agentOperations = AGENT_OPERATIONS;
-        this.serverOperations = SERVER_OPERATIONS;
-        this.agentRoutingKeyPrefix = AGENT_ROUTING_KEY_PREFIX;
-        this.serverPrefix = SERVER_ROUTING_KEY_PREFIX + serverId;
+        this.agentOperations = OperationConstants.AGENT_OPERATIONS;
+        this.serverOperations = OperationConstants.SERVER_OPERATIONS;
+        this.agentRoutingKeyPrefix = RoutingConstants.AGENT_ROUTING_KEY_PREFIX;
+        this.serverPrefix = RoutingConstants.SERVER_ROUTING_KEY_PREFIX + serverId;
         this.defaultToAgentBindingKey = agentRoutingKeyPrefix + "";
         this.defaultToServerBindingKey = agentRoutingKeyPrefix + "";
     }
@@ -100,15 +102,15 @@ public final class Routings {
     }
 
     public String getSharedExchangeType() {
-        return SHARED_EXCHANGE_TYPE;
+        return RoutingConstants.SHARED_EXCHANGE_TYPE;
     }
 
     public String getOperationRequest() {
-        return OPERATION_REQUEST;
+        return RoutingConstants.OPERATION_REQUEST;
     }
 
     public String getOperationResponse() {
-        return OPERATION_RESPONSE;
+        return RoutingConstants.OPERATION_RESPONSE;
     }
 
     public String getOperationPrefix() {
@@ -116,18 +118,18 @@ public final class Routings {
     }
 
     public String getToServerUnauthenticatedExchange() {
-        return TO_SERVER_UNAUTHENTICATED_EXCHANGE;
+        return RoutingConstants.TO_SERVER_EXCHANGE;
     }
 
     public String getToServerExchange() {
-        return TO_SERVER_EXCHANGE;
+        return RoutingConstants.TO_SERVER_AUTHENTICATED_EXCHANGE;
     }
 
     public String getToAgentUnauthenticatedExchange() {
-        return TO_AGENT__UNAUTHENTICATED_EXCHANGE;
+        return RoutingConstants.TO_AGENT_EXCHANGE;
     }
 
     public String getToAgentExchange() {
-        return TO_AGENT_EXCHANGE;
+        return RoutingConstants.TO_AGENT_AUTHENTICATED_EXCHANGE;
     } 
 }

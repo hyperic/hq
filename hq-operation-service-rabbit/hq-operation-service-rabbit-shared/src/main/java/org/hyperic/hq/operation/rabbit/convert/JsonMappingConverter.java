@@ -27,6 +27,8 @@ package org.hyperic.hq.operation.rabbit.convert;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
+import org.hyperic.hq.operation.ConversionException;
+import org.hyperic.hq.operation.Converter;
 import org.hyperic.hq.operation.rabbit.util.MessageConstants;
 
 import java.io.IOException;

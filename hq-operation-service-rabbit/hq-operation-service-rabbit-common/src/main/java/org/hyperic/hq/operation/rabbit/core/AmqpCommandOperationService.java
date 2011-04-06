@@ -31,7 +31,7 @@ import org.hyperic.hq.agent.FileData;
 import org.hyperic.hq.agent.FileDataResult;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.operation.OperationService;
-import org.hyperic.hq.operation.rabbit.mapping.Operations;
+import org.hyperic.hq.operation.rabbit.util.OperationConstants;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -105,7 +105,7 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
             valid = simpleRabbitTemplate.hasValidConfigurations();
         }
         catch (Exception e) {
-            handleException(e, Operations.PING);
+            handleException(e, "ping");
         }
         return valid ? 1 : 0;
     }
@@ -119,7 +119,7 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
         try {
             client.restart();
         } catch (Exception e) {
-            handleException(e, Operations.RESTART);
+            handleException(e, OperationConstants.RESTART);
         }
     }
 
@@ -127,7 +127,7 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
         try {
             client.die();
         } catch (Exception e) {
-            handleException(e, Operations.DIE);
+            handleException(e, OperationConstants.DIE);
         }
     }
 
@@ -135,7 +135,7 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
         try {
             return client.getCurrentAgentBundle();
         } catch (Exception e) {
-            handleException(e, Operations.GET_AGENT_BUNDLE);
+            handleException(e, OperationConstants.GET_AGENT_BUNDLE);
             return null;
         }
     }
@@ -144,7 +144,7 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
         try {
             return client.upgrade(tarFile, destination);
         } catch (Exception e) {
-            handleException(e, Operations.UPGRADE);
+            handleException(e, OperationConstants.UPGRADE);
             return null;
         }
     }
@@ -153,7 +153,7 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
         try {
             return client.agentSendFileData(destFiles, streams);
         } catch (Exception e) {
-            handleException(e, Operations.SEND_FILE);
+            handleException(e, OperationConstants.SEND_FILE);
             return null;
         }
     }
@@ -162,7 +162,7 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
         try {
             return client.agentRemoveFile(files);
         } catch (Exception e) {
-            handleException(e, Operations.REMOVE_FILE);
+            handleException(e, OperationConstants.REMOVE_FILE);
             return null;
         }
     }

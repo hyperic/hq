@@ -3,19 +3,13 @@ package org.hyperic.hq.operation;
 /**
  * @author Helena Edelson
  */
-public interface Envelope {
+public interface Envelope extends Operation {
 
     /**
      * Returns the id of the operation
      * @return operation id
      */
     long getOperationId();
-
-    /**
-     * Returns the name of the operation
-     * @return the operation name
-     */
-    String getOperationName();
 
     /**
      * Returns the context of the operation

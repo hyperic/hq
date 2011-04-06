@@ -1,29 +1,30 @@
 package org.hyperic.hq.operation.rabbit.core;
 
 import org.apache.log4j.Logger;
+import org.hyperic.hq.operation.Operation;
 import org.hyperic.hq.operation.OperationFailedException;
 import org.hyperic.hq.operation.OperationService;
 import org.hyperic.hq.operation.rabbit.connection.SingleConnectionFactory;
+import org.hyperic.hq.operation.rabbit.mapping.OperationMappingRegistry;
 
 import java.io.IOException;
 
 /**
- * TODO add converter
  * @author Helena Edelson
  */
 public class RabbitOperationService implements OperationService {
 
-    protected Logger logger = Logger.getLogger(this.getClass());
+    protected final Logger logger = Logger.getLogger(this.getClass());
 
-    private static final long DEFAULT_REPLY_TIMEOUT = 5000;
-
+    private OperationMappingRegistry operationMappingRegistry;
+ 
     /**
      * Injection of template with pre-configured exchange and routing key
      */
     private RabbitTemplate rabbitTemplate;
 
     /**
-     * Used by the Agent which does not use Spring (yet)
+     * Used by non-Spring clients and guest credentials
      */
     public RabbitOperationService() {
         this(new SimpleRabbitTemplate(new SingleConnectionFactory()));
@@ -37,65 +38,45 @@ public class RabbitOperationService implements OperationService {
         this.rabbitTemplate = rabbitTemplate;
     }
 
-    /**
-     * Temporary until conversion complete
-     * @param operationName The name of the operation that should be performed. Based on the operation name,
-     * the framework knows where to route it.
-     * @param data The data to route
+    //TODO add constructor w/credentials
+
+    /** 
+     * @param operation The operation that should be performed. Based on the operation name,
+     * the framework knows where to route it
      * @throws OperationFailedException
      */
-    public void perform(String operationName, Object data) throws OperationFailedException {
-        if (data instanceof String) {
-            handleStringMessage(null, null, data);
-        }
+    public void perform(Operation operation) throws OperationFailedException {
+        //send(exchangeName, routingKey, operation);
     }
 
     /**
-     * Temporary until conversion complete
-     * @param operationName The name of the operation that should be performed
-     * @param exchangeName
-     * @param routingKey The routing key to send to
-     * @param data The data to route
+     * @param operation The operation that should be performed
+     * @param exchangeName The exchange name to use
+     * @param routingKey The routing key to use
      * @throws OperationFailedException
      */
-    public void perform(String operationName, String exchangeName, String routingKey, Object data) throws OperationFailedException {
-        if (data instanceof String) {
-            handleStringMessage(exchangeName, routingKey, data);
-        }
-    }
-
-    /**
-     * Handle legacy synchronous operations
-     * @param operationName the operation name
-     * @param exchangeName the exchange name to use
-     * @param routingKey the routing key
-     * @param data the payload
-     * @throws org.hyperic.hq.operation.OperationFailedException if an
-     * error occurs during the synchronous send and receive
-     */
-    public Object performAndReceive(String operationName, String exchangeName, String routingKey, Object data) throws OperationFailedException { 
+    public void perform(Operation operation, String exchangeName, String routingKey) throws OperationFailedException {
         try {
-            Object response = rabbitTemplate.sendAndReceive(exchangeName, routingKey, data.toString());
-            logger.info("sent=" + data + ", received=" + response);
-            return response;
-        }
-        catch (IOException e) {
-            throw new OperationFailedException(e.getMessage());
-        } 
-    }
-
-    /**
-     *
-     * @param exchangeName
-     * @param routingKey
-     * @param data
-     */
-    private void handleStringMessage(String exchangeName, String routingKey, Object data) {
-        try {
-           rabbitTemplate.send(exchangeName, routingKey, data.toString());
+            rabbitTemplate.send(exchangeName, routingKey, operation);
         } catch (Exception e) {
             throw new OperationFailedException(e.getMessage());
         }
     }
 
+    /**
+     * Handle legacy synchronous operations
+     * @param operation The name of the operation that should be performed
+     * @param exchangeName The exchange name to use
+     * @param routingKey The routing key to use
+     * @return
+     * @throws OperationFailedException
+     */
+    public Object performAndReceive(Operation operation, String exchangeName, String routingKey) throws OperationFailedException {
+        try {
+            return rabbitTemplate.sendAndReceive(exchangeName, routingKey, operation);
+        }
+        catch (IOException e) {
+            throw new OperationFailedException(e.getMessage(), e);
+        }
+    }
 }

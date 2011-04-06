@@ -1,7 +1,7 @@
 package org.hyperic.hq.operation.rabbit;
 
+import org.hyperic.hq.operation.Converter;
 import org.hyperic.hq.operation.RegisterAgent;
-import org.hyperic.hq.operation.rabbit.convert.Converter;
 import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
 import org.hyperic.hq.operation.rabbit.convert.SimpleConverter;
 import org.junit.Test;
