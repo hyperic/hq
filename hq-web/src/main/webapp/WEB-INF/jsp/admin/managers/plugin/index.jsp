@@ -303,9 +303,10 @@
 
 	
 	<div id="currentTimeInfo">
-		<span style="float:right;" id="refreshTimeInfo">&nbsp;&nbsp; <fmt:message key="admin.managers.Plugin.information.refresh.time"/> <span id="timeNow"></span>
+		<span style="float:right;" id="refreshTimeInfo"><fmt:message key="admin.managers.Plugin.information.refresh.time"/> <span id="timeNow"></span>
 		</span>
-		<img style="float:right;" id="refreshIcon" style="float:right;" src="/images/arrow_refresh.png" />
+		<span style="float:right;">&nbsp;&nbsp;</span>
+		<img style="float:right;" id="refreshIcon" style="float:right;" src="/images/arrow_refresh.png" alt="refresh" /> 
 	</div>
 
 	<div class="topInfo">
@@ -336,10 +337,10 @@
 	
 	<ul id="pluginList">
 		<c:forEach var="pluginSummary" items="${pluginSummaries}" varStatus="index">
-			<li class="gridrow clear<c:if test="${index.count % 2 == 0}"> even</c:if>">
+			<li class="gridrow clear<c:if test="${index.index % 2 != 0}"> even</c:if>">
 				<span class="first column span-1">
 					<c:if test="${mechanismOn}">
-                    	<input type="checkbox" value="${pluginSummary.id}" name="deleteId"/>&nbsp; 
+                    	<input type="checkbox" value="${pluginSummary.id}_${pluginSummary.jarName} (${pluginSummary.name})" name="deleteId"/>&nbsp; 
 					</c:if>
 				</span>
 				<span class="column span-small">${pluginSummary.name}</span>
@@ -409,6 +410,9 @@
 			</div>
 	</div>
 	<div id="confirmationPanel" style="visibility:hidden;">
+		<p><fmt:message key="admin.managers.plugin.confirmation.title" /></p>
+		<ul id="removeList">
+		</ul>
 		<p><fmt:message key="admin.managers.plugin.confirmation.message" /></p>
 		<div>
 			<input id="removeButton" type="button" name="remove" value="<fmt:message key="admin.managers.plugin.button.remove" />" />
@@ -416,7 +420,7 @@
 		</div>
 	</div>
 	<div id="removeErrorPanel" style="visibility:hidden;">
-		<p id="removeErrorMsg"></p>
+		<p id="removeErrorMsg"><fmt:message key="admin.managers.Plugin.remove.error.dialog.empty" /></p>
 		<div>
 			<a href="#" class="cancelLink"><fmt:message key="admin.managers.plugin.button.cancel" /></a>
 		</div>
@@ -459,7 +463,7 @@
 
 	hqDojo.ready(function() {
 		var timer = new hqDojox.timing.Timer();
-		timer.setInterval(30000);
+		timer.setInterval(120000);
 		timer.onTick = refreshPage;
 		
 		
@@ -783,24 +787,42 @@
 				return true;
 			}
 			
+			function pluginMapping(id,content){
+				this.id=id;
+				this.content=content;
+			}
+			
 			hqDojo.connect(hqDojo.byId("showRemoveConfirmationButton"), "onclick", function(e) {
 				var checkedPlugins = hqDojo.filter(hqDojo.query("input[type=checkbox]"), function(e){ return e.checked; });
+				hqDojo.empty("removeList");
+				
 				if(checkedPlugins.length>0){
+					hqDojo.forEach(checkedPlugins,function(checkedPlugin){
+						var pluginName = checkedPlugin.value.split("_")[1];
+
+						if (pluginName!=undefined){
+							hqDojo.create("li", {
+                				"innerHTML":pluginName
+                			}, "removeList");
+						}
+					});
 					hqDijit.byId("removePanelDialog").show();
 				}else{
-					hqDojo.byId("removeErrorMsg").innerHTML = '<fmt:message key="admin.managers.Plugin.remove.error.dialog.empty" />';
 					hqDijit.byId("removeErrorPanelDialog").show();
 				}
 			});
 
 			hqDojo.connect(hqDojo.byId("removeButton"), "onclick", function(e) {
+				var checkedPlugins = hqDojo.filter(hqDojo.query("input[type=checkbox]"), function(e){ return e.checked; });
+       			hqDojo.forEach(checkedPlugins,function(checkedPlugin){
+       				checkedPlugin.value=checkedPlugin.value.split("_")[0];
+       			});
 				var xhrArgs = {
 					preventCache:true,
 					form: hqDojo.byId("deleteForm"),
 					url: "<spring:url value='/app/admin/managers/plugin/delete' />",
 					load: function(response) {
 						if (response=="success") {
-							hqDojo.publish("refreshDataGrid");
 							hqDojo.attr("progressMessage", "class", "information");
 							hqDojo.byId("progressMessage").innerHTML = '<fmt:message key="admin.managers.plugin.message.remove.success" />';
 							var anim = [hqDojo.fadeIn({
@@ -826,6 +848,7 @@
 									})];
 						}
 						hqDojo.fx.chain(anim).play();	
+						refreshPage();
 					},
 					error: function(response,arg){
 						hqDojo.attr("progressMessage", "class", "error");
@@ -840,16 +863,15 @@
 										duration: 500
 									})];
 						hqDojo.fx.chain(anim).play();
-						
+						refreshPage();
 					}
 				};
 				hqDojo.xhrPost(xhrArgs);
-				refreshPage();
 				hqDijit.byId("removePanelDialog").hide(); 
 			});
 		}
 		
-		hqDojo.subscribe("refreshDataGrid", function() {
+		hqDojo.subscribe("refreshDataGrid", function() {			
 			hqDojo.xhrGet({
 				preventCache:true,
 				url: "<spring:url value='/app/admin/managers/plugin/list' />",
@@ -876,7 +898,7 @@
 	                		var input = hqDojo.create("input", {
     	            			"type": "checkbox",
     	            			"name": "deleteId",
-        	        			"value": summary.id
+        	        			"value": summary.id+"_"+summary.jarName+" ("+summary.name+")"
                 			}, span);
                 		}
                 		span = hqDojo.create("span", {
