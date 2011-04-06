@@ -65,11 +65,8 @@ public class RoleCalendar {
     @Index(name = "ROLE_CAL_ID_IDX")
     private Calendar calendar;
 
-    private transient RoleCalendarType type;
-    
-    @SuppressWarnings("unused")
     @Column(name = "CALTYPE", nullable = false)
-    private Integer typeEnum;
+    private Integer type;
 
     protected RoleCalendar() {
     }
@@ -77,7 +74,7 @@ public class RoleCalendar {
     public RoleCalendar(Role role, Calendar calendar, RoleCalendarType type) {
         this.role = role;
         this.calendar = calendar;
-        this.type = type;
+        this.type = type.getCode();
     }
 
     public Integer getId() {
@@ -113,15 +110,11 @@ public class RoleCalendar {
     }
 
     public RoleCalendarType getType() {
-        return type;
+        return RoleCalendarType.findByCode(type);
     }
     
-    protected int getTypeEnum() {
-        return type.getCode();
-    }
-
-    protected void setTypeEnum(int typeCode) {
-        type = RoleCalendarType.findByCode(typeCode);
+    protected void setType(int typeCode) {
+        type = typeCode;
     }
 
     public String toString() {

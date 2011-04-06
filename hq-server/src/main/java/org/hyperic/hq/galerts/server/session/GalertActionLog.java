@@ -55,7 +55,7 @@ public class GalertActionLog implements Serializable {
 
     @SuppressWarnings("unused")
     @Column(name = "ALERT_TYPE", nullable = false)
-    private int alertTypeEnum;
+    private int alertType;
 
     @Column(name = "DETAIL", nullable = false, length = 1024)
     private String detail;
@@ -110,10 +110,6 @@ public class GalertActionLog implements Serializable {
         return GalertEscalationAlertType.GALERT;
     }
 
-    protected int getAlertTypeEnum() {
-        return GalertEscalationAlertType.GALERT.getCode();
-    }
-
     public String getDetail() {
         return detail;
     }
@@ -144,7 +140,7 @@ public class GalertActionLog implements Serializable {
         this.action = action;
     }
 
-    protected void setAlertTypeEnum(int v) {
+    protected void setAlertType(int v) {
         // Do nothing
     }
 

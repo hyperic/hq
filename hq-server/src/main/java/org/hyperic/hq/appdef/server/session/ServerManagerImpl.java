@@ -54,7 +54,6 @@ import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
-import org.hyperic.hq.auth.data.AuthzSubjectRepository;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -115,7 +114,6 @@ public class ServerManagerImpl implements ServerManager {
     private ServiceFactory serviceFactory;
     private ResourceDao resourceDao;
     private ResourceTypeDao resourceTypeDao;
-    private AuthzSubjectRepository authzSubjectRepository;
 
     @Autowired
     public ServerManagerImpl(PermissionManager permissionManager,  ResourceManager resourceManager,
@@ -124,8 +122,7 @@ public class ServerManagerImpl implements ServerManager {
                              ZeventEnqueuer zeventManager, ResourceAuditFactory resourceAuditFactory,
                              PluginRepository pluginRepository, ServerFactory serverFactory,
                              ServiceManager serviceManager, ServiceFactory serviceFactory, ResourceDao resourceDao,
-                             ResourceTypeDao resourceTypeDao, AgentRepository agentRepository,
-                             AuthzSubjectRepository authzSubjectRepository) {
+                             ResourceTypeDao resourceTypeDao, AgentRepository agentRepository) {
         this.permissionManager = permissionManager;
         this.resourceManager = resourceManager;
         this.auditManager = auditManager;
@@ -140,7 +137,6 @@ public class ServerManagerImpl implements ServerManager {
         this.resourceDao =resourceDao;
         this.resourceTypeDao = resourceTypeDao;
         this.agentRepository = agentRepository;
-        this.authzSubjectRepository = authzSubjectRepository;
     }
     
     private Server toServer(Resource resource) {
@@ -254,7 +250,7 @@ public class ServerManagerImpl implements ServerManager {
         s.setProperty(ServerFactory.CREATION_TIME, System.currentTimeMillis());
         s.setProperty(ServerFactory.MODIFIED_TIME,System.currentTimeMillis());
         s.setProperty(AppdefResource.SORT_NAME, sv.getName().toUpperCase());
-        authzSubjectRepository.setOwner(owner, s);
+        s.setOwner(owner.getName());
         agentRepository.findByManagedResource(p).addManagedResource(s);
         return s;
    }

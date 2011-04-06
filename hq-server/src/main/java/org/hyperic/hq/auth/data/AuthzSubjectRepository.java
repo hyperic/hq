@@ -9,8 +9,7 @@ import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
-public interface AuthzSubjectRepository extends JpaRepository<AuthzSubject, Integer>,
-    AuthzSubjectRepositoryCustom {
+public interface AuthzSubjectRepository extends JpaRepository<AuthzSubject, Integer> {
 
     @Transactional(readOnly = true)
     @Query("select s from AuthzSubject s where s.name=:name")

@@ -1,6 +1,5 @@
 package org.hyperic.hq.appdef.server.session;
 
-import org.hyperic.hq.auth.data.AuthzSubjectRepository;
 import org.hyperic.hq.inventory.domain.RelationshipTypes;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
@@ -31,14 +30,11 @@ public class ServerFactory {
     
     private PluginRepository pluginRepository;
     
-    private AuthzSubjectRepository authzSubjectRepository;
     
     @Autowired
-    public ServerFactory(PlatformFactory platformFactory, PluginRepository pluginRepository,
-                         AuthzSubjectRepository authzSubjectRepository) {
+    public ServerFactory(PlatformFactory platformFactory, PluginRepository pluginRepository) {
         this.platformFactory = platformFactory;
         this.pluginRepository = pluginRepository;
-        this.authzSubjectRepository = authzSubjectRepository;
     }
   
     public Server createServer(Resource serverResource) {
@@ -58,7 +54,7 @@ public class ServerFactory {
         server.setWasAutodiscovered((Boolean)serverResource.getProperty(WAS_AUTODISCOVERED));
         server.setAutodiscoveryZombie((Boolean)serverResource.getProperty(AUTODISCOVERY_ZOMBIE));
         server.setSortName((String) serverResource.getProperty(AppdefResource.SORT_NAME));
-        server.setOwnerName(authzSubjectRepository.findOwner(serverResource).getName());
+        server.setOwnerName(serverResource.getOwner());
         Resource platform = serverResource.getResourceTo(RelationshipTypes.SERVER);
         if(platform != null) {
             server.setPlatform(platformFactory.createPlatform(platform));

@@ -1,5 +1,7 @@
 package org.hyperic.hq.inventory.data;
 
+import java.util.Set;
+
 import org.hyperic.hq.inventory.domain.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +28,13 @@ public interface ResourceDao extends GenericDao<Resource> {
      */
     Page<Resource> findByIndexedProperty(String propertyName, Object propertyValue,
                                          Pageable pageInfo, Class<?> sortAttributeType);
+
+    /**
+     * 
+     * @param owner The name of the Resource owner
+     * @return All Resources owned by the specified owner
+     */
+    Set<Resource> findByOwner(String owner);
 
     /**
      * 
