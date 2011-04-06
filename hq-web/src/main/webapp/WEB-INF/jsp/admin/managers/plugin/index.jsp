@@ -271,7 +271,7 @@
 	<p id="instruction"><fmt:message key="${instruction}" /></p>
 	
 	<div id="agentInfo">
-		<fmt:message key="admin.managers.Plugin.information.agent.count"/>:&nbsp;<span id="agentInfoAllCount">${allAgentCount}</span><img src="/images/icon_info_small.gif" class="infoIcon"/> <br/>
+		<fmt:message key="admin.managers.Plugin.information.agent.count"/>:&nbsp;<span id="agentInfoAllCount">${allAgentCount}</span><img src="<spring:url value="images/icon_info_small.gif" />" class="infoIcon"/> <br/>
 	</div>
 	
 	<div class="gridheader clear">
@@ -279,8 +279,8 @@
 		<span class="column span-3"><fmt:message key="admin.managers.plugin.column.header.product.plugin" /></span>
 		<span class="column span-3"><fmt:message key="admin.managers.plugin.column.header.version" /></span>
 		<span class="column span-4"><fmt:message key="admin.managers.plugin.column.header.jar.name" /></span>
-		<span class="column span-4" id="addedTimeHeader"><fmt:message key="admin.managers.plugin.column.header.initial.deploy.date" /><img src="/images/icon_info_small.gif" class="infoIcon"></span>
-		<span class="column span-4" id="updatedTimeHeader"><fmt:message key="admin.managers.plugin.column.header.last.sync.date" /><img src="/images/icon_info_small.gif" class="infoIcon"></span>
+		<span class="column span-4" id="addedTimeHeader"><fmt:message key="admin.managers.plugin.column.header.initial.deploy.date" /><img src="<spring:url value="images/icon_info_small.gif" />" class="infoIcon"></span>
+		<span class="column span-4" id="updatedTimeHeader"><fmt:message key="admin.managers.plugin.column.header.last.sync.date" /><img src="<spring:url value="images/icon_info_small.gif" />" class="infoIcon"></span>
 		<span class="column span-status"><fmt:message key="admin.managers.plugin.column.header.status" /></span>
 	</div>
 	
@@ -306,7 +306,7 @@
 				<span class="last column span-3" >
 					<c:if test="${pluginSummary.allAgentCount>0}">
 					    <c:if test="${pluginSummary.successAgentCount>0}">
-					    	${pluginSummary.successAgentCount}&nbsp;<img src="/images/icon_available_green.gif"/>&nbsp;&nbsp;
+					    	${pluginSummary.successAgentCount}&nbsp;<img src="<spring:url value="/images/icon_available_green.gif" />"/>&nbsp;&nbsp;
 					    </c:if>
 					    
 					    <c:if test="${pluginSummary.inProgressAgentCount>0 ||pluginSummary.errorAgentCount>0 }">

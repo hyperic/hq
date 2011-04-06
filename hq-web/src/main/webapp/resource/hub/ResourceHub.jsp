@@ -96,7 +96,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   </c:when>
 </c:choose>
 
-<html:form action="/resource/hub/RemoveResource.do">
+<html:form action="/resource/hub/RemoveResource">
 
 <tiles:insert definition=".page.title.resource.hub">
   <tiles:put name="titleName"><span id="browseFilters"><c:out value="${navHierarchy}" escapeXml="false" /></span></tiles:put>

@@ -2573,5 +2573,5 @@ span.returnToLink {
 }
 
 .dijitArrowButtonInner {
-	border: 0;
+	border: 0 !important;
 }

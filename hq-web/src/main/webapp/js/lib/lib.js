@@ -285,15 +285,18 @@ hyperic.widget.search = function(dojo, /*Object*/ urls, /*number*/ minStrLenth, 
         if(this.searchBox.value.length >= this.minStrLen){
             this.searchStarted();
             hqDojo.xhrGet({
-                url: this.searchURL+'?q='+string, 
+                url: this.searchURL,
+                content: {
+                	q: string
+                },
                 handleAs: "json",
                 headers: { 
                 	"Content-Type": "application/json" 
                 },
                 timeout: 5000, 
                 load: function(response, args) {
-                	var resURL = resourceURL + "?eid=";
-    	            var usrURL = userURL + "?mode=view&u=";
+                	var resURL = resourceURL + ((resourceURL.indexOf("?") == -1) ? "?" : "&") + "eid=";
+    	            var usrURL = userURL + ((userURL.indexOf("?") == -1) ? "?" : "&") + "mode=view&u=";
     	            var template = "<li class='type'><a href='link' title='fullname'>text<\/a><\/li>";
     	            var count = 0;
     	            var res = "";
@@ -366,8 +369,8 @@ hyperic.widget.search = function(dojo, /*Object*/ urls, /*number*/ minStrLenth, 
 };
 
 function loadSearchData(response, evt) {
-	var resURL = resourceURL+"?eid=";
-    var usrURL = userURL +"?mode=view&u=";
+	var resURL = resourceURL + ((resourceURL.indexOf("?") == -1) ? "?" : "&") + "eid=";
+    var usrURL = userURL + ((userURL.indexOf("?") == -1) ? "?" : "&") + "mode=view&u=";
     var template = "<li class='type'><a href='link' title='fullname'>text<\/a><\/li>";
     var count = 0;
     var res = "";

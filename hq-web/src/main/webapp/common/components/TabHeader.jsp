@@ -121,10 +121,10 @@
     <td class="BlockTitle" align="right">
       <c:choose>
         <c:when test="${not empty adminToken}">
-          <html:link page="${adminUrl}" paramId="token" paramName="adminToken"><html:img page="/images/4.0/icons/properties.gif" width="16" height="16" border="0"/></html:link></t
+          <html:link page="${adminUrl}" paramId="token" paramName="adminToken"><img src="<html:rewrite page="/images/4.0/icons/properties.gif" /> width="16" height="16" border="0"/></html:link>
         </c:when>
         <c:otherwise>
-          <html:link page="${adminUrl}"><html:img page="/images/4.0/icons/properties.gif" width="16" height="16" border="0"/></html:link>
+          <html:link page="${adminUrl}"><img src="<html:rewrite page="/images/4.0/icons/properties.gif" /> width="16" height="16" border="0"/></html:link>
         </c:otherwise>
       </c:choose>
     </td>

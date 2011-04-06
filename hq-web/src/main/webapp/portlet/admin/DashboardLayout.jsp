@@ -42,7 +42,7 @@
   var noDelete = false;      
   var help = "<hq:help/>";
 </script>
-<script src="<html:rewrite page="/js/"/>pageLayout.js" type="text/javascript"></script>
+<script src="<html:rewrite page="/js/pageLayout.js" />" type="text/javascript"></script>
 
 <script type="text/javascript">
   var imagePath = "<html:rewrite page="/images/"/>";

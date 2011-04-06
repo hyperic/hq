@@ -83,7 +83,7 @@
         <tbody>
 	        <tr class="ListRow">
 	            <td class="ListCell">
-	                <c:url var="path" value="/"/>
+	                <c:url var="path" value="/images/4.0/icons/properties.gif"/>
 	                <fmt:message key="dash.home.add.resources.to.display">
 	                  	<fmt:param value="${path}"/>
 	                </fmt:message>

@@ -120,7 +120,7 @@ var pageData = new Array();
     <td valign="top">
       <c:choose>
         <c:when test="${isCurrentHealth}">
-          <html:form action="/resource/common/monitor/visibility/SelectResources.do">
+          <html:form action="/resource/common/monitor/visibility/SelectResources">
             <html:hidden property="mode"/>
             <input type="hidden" name="eid" value="<c:out value="${eid}"/>">
             <input type="hidden" name="ctype" value="<c:out value="${ctype}"/>"/>
