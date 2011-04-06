@@ -91,14 +91,13 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     private ApplicationContext applicationContext;
     private ResourceDao resourceDao;
     private ResourceTypeDao resourceTypeDao;
-    private AuthzSubjectRepository authzSubjectRepository;
 
     @Autowired
     public ResourceManagerImpl(AuthzSubjectManager authzSubjectManager,
                                
                                ZeventEnqueuer zeventManager, PermissionManager permissionManager,
                                ResourceAuditFactory resourceAuditFactory, ResourceDao resourceDao,
-                               ResourceTypeDao resourceTypeDao, AuthzSubjectRepository authzSubjectRepository) {
+                               ResourceTypeDao resourceTypeDao) {
         this.authzSubjectManager = authzSubjectManager;
         this.zeventManager = zeventManager;
         this.permissionManager = permissionManager;
@@ -106,7 +105,6 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         this.resourceAuditFactory = resourceAuditFactory;
         this.resourceDao = resourceDao;
         this.resourceTypeDao = resourceTypeDao;
-        this.authzSubjectRepository = authzSubjectRepository;
     }
     
    
@@ -173,9 +171,8 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     public void setResourceOwner(AuthzSubject whoami, Resource resource, AuthzSubject newOwner)
         throws PermissionException {
         PermissionManager pm = PermissionManagerFactory.getInstance();
-        if (pm.hasAdminPermission(whoami.getId()) || authzSubjectRepository.getOwnedResources(whoami).contains(resource)) {
-            authzSubjectRepository.removeOwner(whoami, resource);
-            authzSubjectRepository.setOwner(newOwner, resource);
+        if (pm.hasAdminPermission(whoami.getId()) || resourceDao.findByOwner(whoami.getName()).contains(resource)) {
+            resource.setOwner(newOwner.getName());
             resource.setModifiedBy(whoami.getName());
             resourceDao.merge(resource);
         } else {
@@ -276,7 +273,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
      */
     @Transactional(readOnly = true)
     public Collection<Resource> findResourceByOwner(AuthzSubject owner) {
-        return authzSubjectRepository.getOwnedResources(owner);
+        return resourceDao.findByOwner(owner.getName());
     }
 
     @Transactional(readOnly = true)

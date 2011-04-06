@@ -129,7 +129,7 @@ public class ResourceGroupController extends BaseController {
 		if(subject == null) {
             throw new EntityNotFoundException("Subject with ID: 1 was not found");
         }
-		authzSubjectDao.setOwner(subject, group);
+		group.setOwner(subject.getName());
 		group.setModifiedBy(subject.getName());
 
 		return group;

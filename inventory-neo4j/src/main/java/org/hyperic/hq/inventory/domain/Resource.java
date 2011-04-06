@@ -66,9 +66,6 @@ public class Resource {
     @Autowired
     private transient GraphDatabaseContext graphDatabaseContext;
 
-    @Autowired
-    private transient MessagePublisher messagePublisher;
-
     @Id
     @GenericGenerator(name = "mygen1", strategy = "increment")
     @GeneratedValue(generator = "mygen1")
@@ -79,15 +76,23 @@ public class Resource {
     @Transient
     private String location;
 
+    @Autowired
+    private transient MessagePublisher messagePublisher;
+
     @GraphProperty
     @Transient
     private String modifiedBy;
-
+    
     @NotNull
     @Indexed
     @GraphProperty
     @Transient
     private String name;
+
+    @GraphProperty
+    @Transient
+    @Indexed
+    private String owner;
 
     @Transient
     @RelatedTo(type = RelationshipTypes.IS_A, direction = Direction.OUTGOING, elementClass = ResourceType.class)
@@ -257,6 +262,14 @@ public class Resource {
      */
     public String getName() {
         return name;
+    }
+
+    /**
+     * 
+     * @return The owner of the Resource
+     */
+    public String getOwner() {
+        return owner;
     }
 
     /**
@@ -634,6 +647,15 @@ public class Resource {
      */
     public void setName(String name) {
         this.name = name;
+    }
+    
+    
+    /**
+     * 
+     * @param owner The owner of the Resource
+     */
+    public void setOwner(String owner) {
+        this.owner = owner;
     }
 
     /**

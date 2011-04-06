@@ -54,7 +54,6 @@ import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.DependencyTree;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
-import org.hyperic.hq.auth.data.AuthzSubjectRepository;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -105,8 +104,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
     
     private ResourceGroupDao resourceGroupDao;
     
-    private AuthzSubjectRepository authzSubjectRepository;
-
     private PermissionManager permissionManager;
 
     private ZeventEnqueuer zeventManager;
@@ -152,7 +149,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                                   ZeventEnqueuer zeventManager,
                                   ResourceGroupManager resourceGroupManager, ServiceFactory serviceFactory,
                                   ResourceGroupDao resourceGroupDao, ResourceDao resourceDao,
-                                  ResourceTypeDao resourceTypeDao, AuthzSubjectRepository authzSubjectRepository) {
+                                  ResourceTypeDao resourceTypeDao) {
         this.resourceManager = resourceManager;
         this.permissionManager = permissionManager;
         this.zeventManager = zeventManager;
@@ -161,7 +158,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
         this.resourceGroupDao = resourceGroupDao;
         this.resourceDao = resourceDao;
         this.resourceTypeDao = resourceTypeDao;
-        this.authzSubjectRepository= authzSubjectRepository;
     }
 
     /**
@@ -251,7 +247,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         application.setBusinessContact((String)resourceGroup.getProperty(BUSINESS_CONTACT));
         application.setEngContact((String)resourceGroup.getProperty(ENG_CONTACT));
         application.setOpsContact((String)resourceGroup.getProperty(OPS_CONTACT));
-        application.setOwnerName(authzSubjectRepository.findOwner(resourceGroup).getName());
+        application.setOwnerName(resourceGroup.getOwner());
         //TODO get rid of ApplicationType.  For now just hard-coding them all to Generic type
         application.setApplicationType(APPLICATION_TYPES.get(0));
         for(Resource member: resourceGroup.getMembers()) {
@@ -263,7 +259,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     private ResourceGroup create(AuthzSubject owner, ApplicationValue appV) {
         ResourceGroup app =  new ResourceGroup(appV.getName(),resourceManager.findResourceTypeByName(AppdefEntityConstants.APPDEF_NAME_APPLICATION));
         resourceGroupDao.persist(app);
-        authzSubjectRepository.setOwner(owner, app);
+        app.setOwner(owner.getName());
         updateApplication(app, appV);
         return app;
     }

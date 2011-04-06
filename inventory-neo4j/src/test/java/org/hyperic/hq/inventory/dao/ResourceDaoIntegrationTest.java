@@ -70,8 +70,10 @@ public class ResourceDaoIntegrationTest {
         Resource resource3 = new Resource("Not a service", type);
         resourceDao.persist(resource3);
         PageRequest pageInfo = new PageRequest(0, 15, new Sort("name"));
-        Page<Resource> actual = resourceDao.findByIndexedProperty(SKU, SKU1, pageInfo,String.class);
-        Page<Resource> expected = new PageImpl<Resource>(Arrays.asList(new Resource[] { resource2, resource1 }),pageInfo,2);
+        Page<Resource> actual = resourceDao
+            .findByIndexedProperty(SKU, SKU1, pageInfo, String.class);
+        Page<Resource> expected = new PageImpl<Resource>(
+            Arrays.asList(new Resource[] { resource2, resource1 }), pageInfo, 2);
         assertEquals(expected, actual);
     }
 
@@ -86,8 +88,10 @@ public class ResourceDaoIntegrationTest {
         Resource resource3 = new Resource("Not a service", type);
         resourceDao.persist(resource3);
         PageRequest pageInfo = new PageRequest(0, 15, new Sort(Direction.DESC, "name"));
-        Page<Resource> actual = resourceDao.findByIndexedProperty(SKU, SKU1, pageInfo,String.class);
-        Page<Resource> expected = new PageImpl<Resource>(Arrays.asList(new Resource[] { resource1, resource2 }),pageInfo,2);
+        Page<Resource> actual = resourceDao
+            .findByIndexedProperty(SKU, SKU1, pageInfo, String.class);
+        Page<Resource> expected = new PageImpl<Resource>(
+            Arrays.asList(new Resource[] { resource1, resource2 }), pageInfo, 2);
         assertEquals(expected, actual);
     }
 
@@ -103,8 +107,10 @@ public class ResourceDaoIntegrationTest {
         resourceDao.persist(resource3);
         resource3.setProperty(SKU, SKU1);
         PageRequest pageInfo = new PageRequest(0, 2, new Sort("name"));
-        Page<Resource> actual = resourceDao.findByIndexedProperty(SKU, SKU1, pageInfo,String.class);
-        Page<Resource> expected = new PageImpl<Resource>(Arrays.asList(new Resource[] { resource2, resource1 }),pageInfo,3);
+        Page<Resource> actual = resourceDao
+            .findByIndexedProperty(SKU, SKU1, pageInfo, String.class);
+        Page<Resource> expected = new PageImpl<Resource>(
+            Arrays.asList(new Resource[] { resource2, resource1 }), pageInfo, 3);
         assertEquals(expected, actual);
     }
 
@@ -126,14 +132,16 @@ public class ResourceDaoIntegrationTest {
             }
         }
         PageRequest pageInfo = new PageRequest(1, 5, new Sort("name"));
-        Page<Resource> actual = resourceDao.findByIndexedProperty(SKU, SKU1, pageInfo,String.class);
-        assertEquals(new PageImpl<Resource>(expected,pageInfo,11), actual);
+        Page<Resource> actual = resourceDao
+            .findByIndexedProperty(SKU, SKU1, pageInfo, String.class);
+        assertEquals(new PageImpl<Resource>(expected, pageInfo, 11), actual);
     }
 
     @Test
     public void testFindByIndexedPropertyInvalidPropertyName() {
         PageRequest pageInfo = new PageRequest(1, 5, new Sort("name"));
-        Page<Resource> actual = resourceDao.findByIndexedProperty("foo", "bar", pageInfo,String.class);
+        Page<Resource> actual = resourceDao.findByIndexedProperty("foo", "bar", pageInfo,
+            String.class);
         assertTrue(actual.getContent().isEmpty());
         assertEquals(0, actual.getTotalElements());
     }
@@ -152,7 +160,7 @@ public class ResourceDaoIntegrationTest {
             resource.setProperty(SKU, SKU1);
         }
         PageRequest pageInfo = new PageRequest(2, 5);
-        Page<Resource> actual = resourceDao.findByIndexedProperty(SKU, SKU1, pageInfo,null);
+        Page<Resource> actual = resourceDao.findByIndexedProperty(SKU, SKU1, pageInfo, null);
         assertEquals(1, actual.getNumberOfElements());
         assertEquals(11, actual.getTotalElements());
     }
@@ -160,7 +168,7 @@ public class ResourceDaoIntegrationTest {
     @Test(expected = IllegalArgumentException.class)
     public void testFindByIndexedPropertyInvalidSortType() {
         PageRequest pageInfo = new PageRequest(2, 5, new Sort("name"));
-        resourceDao.findByIndexedProperty(SKU, SKU1, pageInfo,String[].class);
+        resourceDao.findByIndexedProperty(SKU, SKU1, pageInfo, String[].class);
     }
 
     @Test
@@ -279,6 +287,25 @@ public class ResourceDaoIntegrationTest {
         Resource resource1 = new Resource("Some Resource", type);
         resourceDao.persist(resource1);
         assertNull(resourceDao.findByName("Another Resource"));
+    }
+
+    @Test
+    public void testFindByOwner() {
+        Resource resource1 = new Resource("Some Resource", type);
+        resource1.setOwner("bob");
+        resourceDao.persist(resource1);
+        Resource resource2 = new Resource("Some Resource 2", type);
+        resourceDao.persist(resource2);
+        Resource resource3 = new Resource("Some Resource 3", type);
+        resource3.setOwner("bob");
+        resourceDao.persist(resource3);
+        Resource resource4 = new Resource("Some Resource 4", type);
+        resource4.setOwner("mary");
+        resourceDao.persist(resource4);
+        Set<Resource> expected = new HashSet<Resource>();
+        expected.add(resource1);
+        expected.add(resource3);
+        assertEquals(expected, resourceDao.findByOwner("bob"));
     }
 
 }

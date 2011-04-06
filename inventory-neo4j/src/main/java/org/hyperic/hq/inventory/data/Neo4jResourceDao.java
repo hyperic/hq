@@ -1,7 +1,9 @@
 package org.hyperic.hq.inventory.data;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -79,7 +81,7 @@ public class Neo4jResourceDao implements ResourceDao {
 
     @Transactional(readOnly = true)
     public Page<Resource> findByIndexedProperty(String propertyName, Object propertyValue,
-                                                    Pageable pageInfo, Class<?> sortAttributeType) {
+                                                Pageable pageInfo, Class<?> sortAttributeType) {
         QueryContext queryContext = new QueryContext(propertyValue);
         if (pageInfo.getSort() != null) {
             Order order = pageInfo.getSort().iterator().next();
@@ -87,10 +89,10 @@ public class Neo4jResourceDao implements ResourceDao {
                 getSortFieldType(sortAttributeType), order.getDirection().equals(
                     org.springframework.data.domain.Sort.Direction.DESC))));
         }
-        IndexHits<Node> indexHits = graphDatabaseContext.getIndex(Resource.class,
-            null).query(propertyName, queryContext);
+        IndexHits<Node> indexHits = graphDatabaseContext.getIndex(Resource.class, null).query(
+            propertyName, queryContext);
         if (indexHits == null) {
-            return new PageImpl<Resource>(new ArrayList<Resource>(0),pageInfo,0);
+            return new PageImpl<Resource>(new ArrayList<Resource>(0), pageInfo, 0);
         }
 
         List<Resource> resources = new ArrayList<Resource>(pageInfo.getPageSize());
@@ -106,7 +108,7 @@ public class Neo4jResourceDao implements ResourceDao {
             }
             currentPosition++;
         }
-        return new PageImpl<Resource>(resources, pageInfo,indexHits.size());
+        return new PageImpl<Resource>(resources, pageInfo, indexHits.size());
     }
 
     // TODO Assumes name is unique...I think we want to change that behavior in
@@ -121,6 +123,18 @@ public class Neo4jResourceDao implements ResourceDao {
         }
 
         return resource;
+    }
+
+    @Transactional(readOnly = true)
+    public Set<Resource> findByOwner(String owner) {
+        Set<Resource> ownedResources = new HashSet<Resource>();
+        Iterable<Resource> resourceIterator = finderFactory.createNodeEntityFinder(Resource.class)
+            .findAllByPropertyValue(null, "owner", owner);
+        // Walk the lazy iterator to return all results
+        for (Resource resource : resourceIterator) {
+            ownedResources.add(resource);
+        }
+        return ownedResources;
     }
 
     @Transactional(readOnly = true)
@@ -167,8 +181,8 @@ public class Neo4jResourceDao implements ResourceDao {
         resource.persist();
         // Set the type index here b/c Resource needs an ID before we can access
         // the underlying node
-        graphDatabaseContext.getIndex(Resource.class,null).add(
-            resource.getPersistentState(), "type", resource.getType().getId());
+        graphDatabaseContext.getIndex(Resource.class, null).add(resource.getPersistentState(),
+            "type", resource.getType().getId());
         // flush to get the JSR-303 validation done sooner
         entityManager.flush();
     }

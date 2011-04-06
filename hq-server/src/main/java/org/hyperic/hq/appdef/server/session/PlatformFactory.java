@@ -4,7 +4,6 @@ import java.util.Set;
 
 import org.hyperic.hq.agent.mgmt.data.AgentRepository;
 import org.hyperic.hq.appdef.Ip;
-import org.hyperic.hq.auth.data.AuthzSubjectRepository;
 import org.hyperic.hq.inventory.domain.RelationshipTypes;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
@@ -37,9 +36,6 @@ public class PlatformFactory {
     private PluginRepository pluginRepository;
     
     @Autowired
-    private AuthzSubjectRepository authzSubjectRepository;
-    
-    @Autowired
     private AgentRepository agentRepository;
 
     public Platform createPlatform(Resource resource) {
@@ -59,7 +55,7 @@ public class PlatformFactory {
         platform.setResource(resource);
         platform.setPlatformType(createPlatformType(resource.getType()));
         platform.setSortName((String) resource.getProperty(AppdefResource.SORT_NAME));
-        platform.setOwnerName(authzSubjectRepository.findOwner(resource).getName());
+        platform.setOwnerName(resource.getOwner());
         Set<Resource> ips = resource.getResourcesFrom(RelationshipTypes.IP);
         for (Resource ip : ips) {
             platform.addIp(createIp(ip));

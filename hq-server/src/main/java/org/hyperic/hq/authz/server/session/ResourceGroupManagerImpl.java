@@ -50,11 +50,9 @@ import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.GroupTypeValue;
-import org.hyperic.hq.auth.data.AuthzSubjectRepository;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.auth.domain.Role;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.GroupCreationException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
@@ -108,7 +106,6 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     private final String BUNDLE = "org.hyperic.hq.authz.Resources";
    
    
-    private AuthzSubjectRepository authzSubjectRepository;
     private EventLogManager eventLogManager;
     private final Log log = LogFactory.getLog(ResourceGroupManagerImpl.class);
     private ApplicationContext applicationContext;
@@ -118,10 +115,8 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     private Pager defaultPager;
 
     @Autowired
-    public ResourceGroupManagerImpl(AuthzSubjectRepository authzSubjectRepository,
-                                    EventLogManager eventLogManager, ResourceGroupDao resourceGroupDao,
+    public ResourceGroupManagerImpl(EventLogManager eventLogManager, ResourceGroupDao resourceGroupDao,
                                     ResourceDao resourceDao, ResourceTypeDao resourceTypeDao) {
-        this.authzSubjectRepository = authzSubjectRepository;
         this.eventLogManager = eventLogManager;
         this.resourceGroupDao = resourceGroupDao;
         this.resourceDao = resourceDao;
@@ -189,7 +184,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         //for(Role role: roles) {
           //  res.addRole(role);
         //}
-        authzSubjectRepository.setOwner(whoami, res);
+        res.setOwner(whoami.getName());
         if(cInfo.getGroupTypeId() == AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS || 
             cInfo.getGroupTypeId() == AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC) {
             res.setProperty(MIXED,false);
@@ -471,7 +466,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         //retVal.setMTime(new Long(g.getMtime()));
         //retVal.setCTime(new Long(g.getCtime()));
         retVal.setModifiedBy(g.getModifiedBy());
-        retVal.setOwner(authzSubjectRepository.findOwner(g).getName());
+        retVal.setOwner(g.getOwner());
 
         // Add the group members
         for (Resource r : members) {
@@ -657,11 +652,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     public void changeGroupOwner(AuthzSubject subject, ResourceGroup group, AuthzSubject newOwner)
         throws PermissionException {
         //TODO this used to call ResourceManager. Perm check?
-        AuthzSubject oldOwner = authzSubjectRepository.findOwner(group);
-        if(oldOwner != null) {
-            authzSubjectRepository.removeOwner(oldOwner, group);
-        }
-        authzSubjectRepository.setOwner(newOwner, group);
+        group.setOwner(newOwner.getName());
         group.setModifiedBy(newOwner.getName());
     }
         

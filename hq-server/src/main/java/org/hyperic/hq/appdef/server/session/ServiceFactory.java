@@ -1,7 +1,6 @@
 package org.hyperic.hq.appdef.server.session;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
-import org.hyperic.hq.auth.data.AuthzSubjectRepository;
 import org.hyperic.hq.inventory.domain.RelationshipTypes;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
@@ -30,15 +29,13 @@ public class ServiceFactory {
     
     private PluginRepository pluginRepository;
     
-    private AuthzSubjectRepository authzSubjectRepository;
 
     @Autowired
     public ServiceFactory(ServerFactory serverFactory, PlatformFactory platformFactory, 
-                          PluginRepository pluginRepository, AuthzSubjectRepository authzSubjectRepository) {
+                          PluginRepository pluginRepository) {
         this.serverFactory = serverFactory;
         this.platformFactory = platformFactory;
         this.pluginRepository = pluginRepository;
-        this.authzSubjectRepository = authzSubjectRepository;
     }
 
     public Service createService(Resource resource) {
@@ -54,7 +51,7 @@ public class ServiceFactory {
         service.setModifiedBy(resource.getModifiedBy());
         service.setModifiedTime((Long) resource.getProperty(MODIFIED_TIME));
         service.setName(resource.getName());
-        service.setOwnerName(authzSubjectRepository.findOwner(resource).getName());
+        service.setOwnerName(resource.getOwner());
         service.setResource(resource);
         Resource parent = resource.getResourceTo(RelationshipTypes.SERVICE);
         if(parent.getProperty(AppdefResourceType.APPDEF_TYPE_ID).equals(AppdefEntityConstants.APPDEF_TYPE_SERVER)) {
