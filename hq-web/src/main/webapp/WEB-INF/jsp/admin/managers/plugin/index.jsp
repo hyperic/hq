@@ -32,7 +32,7 @@
 	    background: url("/images/4.0/backgrounds/button-green-background.jpg") repeat-x scroll center bottom #2DBF3D;
     	border: 1px solid #84B96D;
 	    color: #FFFFFF;
-	    cursor: pointer;
+	    /*cursor: pointer;*/
 	    font-size: 0.9em;
 	    font-weight: bold;
 	    padding: 3px 15px;
@@ -68,7 +68,6 @@
 		overflow: hidden;
 		border: 1px solid gray;
 		border-top: 0;
-		text-align: right;
 	}
 	
 	#pluginManagerPanel .actionbar input[type="button"],
@@ -171,7 +170,9 @@
 	#progressMessage.error{
 	    color: #bb0000;
 	}
-	
+	#showUploadFormButton {
+		float:right;
+	}	
 	#showRemoveConfirmationButton{
 		float:left;
 	}
@@ -194,15 +195,9 @@
 		font-weight: bold;
 		height:8px;
 	}
-	.errorAgentList li{
-		list-style-image: url("/images/icon_available_red.gif");
-	}
-	.inProgressAgentList li{
-		list-style-image: url("/images/arrow_refresh.png");
-	}
-	#agentInfo, #currentTimeInfo{
+	.topInfo, #currentTimeInfo{
 		font-weight: bold;
-		float: right;
+		/* float: right;*/
 		height: 20px;
 		color: #777777;
 	}
@@ -232,10 +227,10 @@
 	}
 	
 	.errorAgent{
-		list-style-image: url("/images/dark-red-circle.png");
+		list-style-image: url("/images/icon_available_red.gif");
 	}
 	.inProgressAgent{
-		list-style-image: url("/images/dark-blue-circle.png");
+		list-style-image: url("/images/4.0/icons/alert.png");
 	}
 	#searchText{
 		background: url("/images/4.0/icons/search.png") no-repeat scroll 3px center #FFFFFF;
@@ -294,25 +289,37 @@
 	#selectFileButton{
 		width:60px;
 	}
+	#progressMessage{
+		float:left; 
+		margin:0px 100px; 
+		padding:5px 0px;
+	}
 
 </style>
 <section id="pluginManagerPanel" class="container top">
 	<h1><fmt:message key="admin.managers.plugin.title" /></h1>
 	<p id="instruction"><fmt:message key="${instruction}" /></p>
 
-	<div style="float:left;" id="agentInfo">
-		<span>
+
+	
+	<div id="currentTimeInfo">
+		<span style="float:right;" id="refreshTimeInfo">&nbsp;&nbsp; <fmt:message key="admin.managers.Plugin.information.refresh.time"/> <span id="timeNow"></span>
+		</span>
+		<img style="float:right;" id="refreshIcon" style="float:right;" src="/images/arrow_refresh.png" />
+	</div>
+
+	<div class="topInfo">
+		<span id="agentInfo" style="float:right">
 			<fmt:message key="admin.managers.Plugin.information.agent.count"/>:&nbsp;
 		    <span id="agentInfoAllCount">${allAgentCount}</span>
 		    <img src="/images/icon_info_small.gif" class="infoIcon"/> <br/>
 		</span>
-	</div>
-	
-	<div  id="currentTimeInfo">
-		
-		<span style="float:right;">&nbsp;&nbsp;&nbsp; <fmt:message key="admin.managers.Plugin.information.refresh.time"/> <span id="timeNow"></span>
-		</span>
-		<img style="float:right;" id="refreshIcon" style="float:right;" src="/images/arrow_refresh.png" />
+	    <span style="float:left">
+	        <fmt:message key="admin.managers.Plugin.information.legend"/>
+	    	<img src="/images/icon_available_green.gif"/> <fmt:message key="admin.managers.Plugin.tip.icon.success"/>
+	    	&nbsp; <img src="/images/4.0/icons/alert.png"/> <fmt:message key="admin.managers.Plugin.tip.icon.in.progress"/>
+	   		&nbsp;<img src="/images/icon_available_red.gif"/> <fmt:message key="admin.managers.Plugin.tip.icon.error"/>
+	    </span>		
 	</div>
 	
 	<div class="gridheader clear">
@@ -347,16 +354,16 @@
 				<span class="last column span-status" >
 					<c:if test="${pluginSummary.allAgentCount>0}">
 					    <c:if test="${pluginSummary.successAgentCount>0}">
-					    	${pluginSummary.successAgentCount}&nbsp;<img class="successIcon" src="/images/dark-green-circle.png"/>&nbsp;&nbsp;
+					    	${pluginSummary.successAgentCount}&nbsp;<img class="successIcon" src="/images/icon_available_green.gif"/>&nbsp;&nbsp;
 					    </c:if>
 					    
 					    <c:if test="${pluginSummary.inProgressAgentCount>0 ||pluginSummary.errorAgentCount>0 }">
 					    	<span id="${pluginSummary.name}_${pluginSummary.id}" class="agentStatusSpan">				    	
 							<c:if test="${pluginSummary.inProgressAgentCount>0}">
-						        ${pluginSummary.inProgressAgentCount}&nbsp;<img id="${pluginSummary.name}_${pluginSummary.id}" class="inProgressIcon" src="/images/dark-blue-circle.png"/>&nbsp;&nbsp;
+						        ${pluginSummary.inProgressAgentCount}&nbsp;<img id="${pluginSummary.name}_${pluginSummary.id}" class="inProgressIcon" src="/images/4.0/icons/alert.png"/>&nbsp;&nbsp;
 						   	</c:if>	
 						   	<c:if test="${pluginSummary.errorAgentCount>0}">	   		
-					   			${pluginSummary.errorAgentCount}&nbsp;<img id="${pluginSummary.name}_${pluginSummary.id}" class="errorIcon" src="/images/dark-red-circle.png"/>
+					   			${pluginSummary.errorAgentCount}&nbsp;<img id="${pluginSummary.name}_${pluginSummary.id}" class="errorIcon" src="/images/icon_available_red.gif"/>
 							</c:if>
 							</span>
 						</c:if>
@@ -365,16 +372,19 @@
 			</li>
 		</c:forEach>
 	</ul>
+	
 	</form:form>
 	
 	<c:if test="${mechanismOn}" >
 		<div class="actionbar">		
 			<input id="showRemoveConfirmationButton" type="button" value="<fmt:message key="admin.managers.plugin.button.remove.plugin" />" />
-			<span id="progressMessage"></span>
+			<span id="progressMessage">&nbsp;</span>
 			<input id="showUploadFormButton" type="button" value="<fmt:message key="admin.managers.plugin.button.add.plugin" />" />
 		</div>	
 	</c:if>
+
 </section>
+
 
 
 <c:if test="${mechanismOn}" >
@@ -424,8 +434,8 @@
 	<ul id="agentList"></ul>
 	
 	<div id="statusButtonBar">
-	    <span style="float:left">&nbsp;&nbsp; <img src="/images/dark-blue-circle.png"/> <fmt:message key="admin.managers.Plugin.tip.icon.in.progress"/>
-	   							  &nbsp;<img src="/images/dark-red-circle.png"/> <fmt:message key="admin.managers.Plugin.tip.icon.error"/>
+	    <span style="float:left">&nbsp;&nbsp; <img src="/images/4.0/icons/alert.png"/> <fmt:message key="admin.managers.Plugin.tip.icon.in.progress"/>
+	   							  &nbsp;<img src="/images/icon_available_red.gif"/> <fmt:message key="admin.managers.Plugin.tip.icon.error"/>
 	    </span>
 		<a href="#" class="cancelLink"><fmt:message key="admin.managers.plugin.button.close" /></a>
 	</div>
@@ -446,7 +456,13 @@
 	hqDojo.require("dojox.timing._base");
 	hqDojo.require("dojo.date.locale");
 
+
 	hqDojo.ready(function() {
+		var timer = new hqDojox.timing.Timer();
+		timer.setInterval(30000);
+		timer.onTick = refreshPage;
+		
+		
 		uncheckCheckboxes();
 		updateTime();
 		function uncheckCheckboxes(){
@@ -462,15 +478,31 @@
 		function dateFormat(date){
 			return hqDojo.date.locale.format(date,{
 				selector: "date",
-				datePattern: "MM/dd/yy hh:mm:ss aa"
+				datePattern: "hh:mm:ss aa"
 			});
 		};
 		
 		function updateTime(){
 			var now = new Date();
 			hqDojo.byId("timeNow").innerHTML=dateFormat(now);
+			var anim = [
+				hqDojo.animateProperty({
+					node:"refreshTimeInfo",
+					properties:{
+						backgroundColor:"yellow"},
+					duration:600
+				}),
+				hqDojo.animateProperty({
+					node:"refreshTimeInfo",
+					properties:{
+						backgroundColor:"#EEEEEE"},
+					duration:600
+				})
+			];
+			hqDojo.fx.chain(anim).play();					
 		}		
 		function refreshPage(){
+			hqDojo.style(hqDojo.byId("pluginList"), "color","#AAAAAA");
 			var infoXhrArgs={
 				preventCache:true,
 				url:"<spring:url value='/app/admin/managers/plugin/info'/>",
@@ -483,7 +515,7 @@
 					hqDojo.byId("agentInfoAllCount").innerHTML=response.allAgentCount;
 				}
 			}
-			/*	
+				
 		    var deleteIdsString = "";
 			hqDojo.query("input[type=checkbox]:checked").forEach(function(entry){
 					deleteIdsString+=entry.value+",";
@@ -498,16 +530,13 @@
 				deleteIds: deleteIdsString
 			}
 			hqDojo.hash(hqDojo.objectToQuery(hashObj));
-			*/
+			
 			hqDojo.xhrGet(infoXhrArgs);
 			hqDojo.publish("refreshDataGrid");
 			
 
 		}
-		new hqDijit.Tooltip({
-			connectId:["refreshIcon"],
-			label: "<fmt:message key='admin.managers.Plugin.information.refresh.time.tip'/>"
-		});
+
 		new hqDijit.Tooltip({
 			connectId:["addedTimeHeader"],
 			label: "<fmt:message key='admin.managers.plugin.column.header.initial.deploy.date.tip' />"
@@ -520,7 +549,7 @@
 		
 		new hqDijit.Tooltip({
 			connectId:["agentInfo"],
-			label: "<fmt:message key='admin.managers.Plugin.information.agent.count.tip' />"
+			label: "<fmt:message key='admin.managers.Plugin.information.agent.count.tip' />",
 		});
 
 		hqDojo.query(".notFound").forEach(function(e){
@@ -810,8 +839,8 @@
 										delay: 10000,
 										duration: 500
 									})];
-					
 						hqDojo.fx.chain(anim).play();
+						
 					}
 				};
 				hqDojo.xhrPost(xhrArgs);
@@ -830,7 +859,10 @@
                 	"Accept": "application/json"
                 },
                 load: function(response, args) {
+                	hqDojo.style(hqDojo.byId("pluginList"), "color","#000000");
                 	updateTime();
+                	timer.stop();
+                	timer.start();
                 	hqDojo.empty("pluginList");
                 	var index = 1;
                 	hqDojo.forEach(response, function(summary) {
@@ -851,10 +883,14 @@
                 			"class": "column span-small",
                 			"innerHTML": summary.name
                 		}, li);
-
+						if(summary.version==null){
+							var version = "";
+						}else{
+							var version = summary.version;
+						}
                 		span = hqDojo.create("span", {
                 			"class": "column span-med",
-                			"innerHTML": summary.version
+                			"innerHTML": version
                 		}, li);
                 		spanName = hqDojo.create("span", {
                 			"class": "column span-med",
@@ -883,7 +919,7 @@
                 			if(summary.successAgentCount>0){
                 				statusSpan.innerHTML+=summary.successAgentCount+"&nbsp;";
    	            				hqDojo.create("img",{
-       	        					"src": "/images/dark-green-circle.png",
+       	        					"src": "/images/icon_available_green.gif",
        	        					"class": "successIcon"
            	    				}, statusSpan); 
            	    				statusSpan.innerHTML+="&nbsp;&nbsp;&nbsp;";
@@ -896,7 +932,7 @@
 	                		if (summary.inProgressAgentCount>0) {
 	                		    errorAgentSpan.innerHTML+=summary.inProgressAgentCount+"&nbsp;";
     	           				hqDojo.create("img",{
-        	       					"src": "/images/dark-blue-circle.png",
+        	       					"src": "/images/4.0/icons/alert.png",
         	       					"class": "inProgressIcon",
         	       					"id":summary.name+"_"+summary.id
 	        	       			}, errorAgentSpan);
@@ -905,7 +941,7 @@
 	                		if (summary.errorAgentCount > 0) {
                 				errorAgentSpan.innerHTML+= summary.errorAgentCount+"&nbsp;";
                 				hqDojo.create("img",{
-                					"src": "/images/dark-red-circle.png",
+                					"src": "/images/icon_available_red.gif",
                 					"class": "errorIcon",
                 					"id":summary.name+"_"+summary.id
                 				}, errorAgentSpan);
@@ -916,7 +952,7 @@
                 		}
                 		index++;
                 	});
-                	/*
+                	
 					var hashObj = hqDojo.queryToObject(hqDojo.hash());
 					if(hashObj.deleteIds!=""){
 						hqDojo.forEach(hashObj.deleteIds.split(","),function(pluginId){
@@ -925,7 +961,7 @@
 								checkbox[0].checked="true";
 							}
 						});
-					}*/
+					}
 
 					hqDojo.behavior.apply();
 					hqDojo.query(".notFound").forEach(function(e){
@@ -959,10 +995,8 @@
                 }
 			});
 		});
-		var timer = new hqDojox.timing.Timer();
-		timer.setInterval(10000);
-		timer.onTick = refreshPage;
-		//timer.start();
+
+		timer.start();
 	});
 
 </script>
