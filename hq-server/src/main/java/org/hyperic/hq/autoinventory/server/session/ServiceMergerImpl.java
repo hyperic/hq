@@ -98,13 +98,12 @@ public class ServiceMergerImpl implements ServiceMerger {
         ApplicationException {
         final Set<Resource> updatedResources = new HashSet<Resource>();
         final Set<AppdefEntityID> toSchedule = new HashSet<AppdefEntityID>();
-        AuthzSubject subj = authzSubjectManager.getOverlordPojo();
+        AuthzSubject creator = null;
         for (ServiceMergeInfo sInfo : mergeInfos) {
             // this is hacky, but mergeInfos will never be called with multiple
             // subjects
             // and hence the method probably shouldn't be written the way it is
             // anyway.
-            subj = sInfo.subject;
             AIServiceValue aiservice = sInfo.aiservice;
             Server server = serverManager.getServerById(sInfo.serverId);
 			if (server == null 
@@ -112,6 +111,10 @@ public class ServiceMergerImpl implements ServiceMerger {
 					|| server.getResource().isInAsyncDeleteState()) {
 				continue;
 			}
+
+        	// HHQ-4646: The owner of the service should be the same
+			// as the owner of the server
+			creator = authzSubjectManager.findSubjectByName(server.getModifiedBy());
 
             log.info("Checking for existing service: " + aiservice.getName());
 
@@ -135,10 +138,10 @@ public class ServiceMergerImpl implements ServiceMerger {
             if (service == null) {
                 // CREATE SERVICE
                 log.info("Creating new service: " + aiservice.getName());
-
+                
                 String typeName = aiservice.getServiceTypeName();
                 ServiceType serviceType = serviceManager.findServiceTypeByName(typeName);
-                service = serviceManager.createService(sInfo.subject, server, serviceType,
+                service = serviceManager.createService(creator, server, serviceType,
                     aiservice.getName(), aiservice.getDescription(), "", null);
 
                 log.debug("New service created: " + service);
@@ -161,7 +164,7 @@ public class ServiceMergerImpl implements ServiceMerger {
             }
 
             // CONFIGURE SERVICE
-            final boolean wasUpdated = configManager.configureResponse(sInfo.subject, service
+            final boolean wasUpdated = configManager.configureResponse(creator, service
                 .getConfigResponse(), service.getEntityId(), aiservice.getProductConfig(),
                 aiservice.getMeasurementConfig(), aiservice.getControlConfig(), aiservice
                     .getResponseTimeConfig(), null, false);
@@ -181,7 +184,7 @@ public class ServiceMergerImpl implements ServiceMerger {
             }
         }
         if (!toSchedule.isEmpty()) {
-            resourceManager.resourceHierarchyUpdated(subj, updatedResources);
+            resourceManager.resourceHierarchyUpdated(creator, updatedResources);
             zEventManager.enqueueEventAfterCommit(new AgentScheduleSyncZevent(toSchedule));
         }
     }
