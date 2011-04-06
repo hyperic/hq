@@ -53,15 +53,18 @@
         <mx4j.version>3.0.1</mx4j.version>
         <mysql.connector.version>5.1.10</mysql.connector.version>
         <oro.version>2.0.8</oro.version>
+        <otp.version>1.5.3</otp.version>
         <poi.version>3.0.1-FINAL</poi.version>
         <postgresql.agent.driver.version>7.4.3</postgresql.agent.driver.version>
         <postgresql.server.driver.version>8.2-511-A.jdbc3</postgresql.server.driver.version>
         <quartz.version>1.7.2</quartz.version>
+        <rabbitmq.version>2.3.1</rabbitmq.version>
         <roo.version>1.0.2.RELEASE</roo.version>
         <servlet-api.version>2.4</servlet-api.version>
         <sigar.version>1.6.4</sigar.version>
         <slf4j.version>1.6.1</slf4j.version>
         <snmp.version>1.11</snmp.version>
+        <spring.amqp.version>1.0.0.M2</spring.amqp.version>
         <spring-framework.version>3.0.5.RELEASE</spring-framework.version>
         <spring-security.version>3.0.5.RELEASE</spring-security.version>
         <struts.version>1.3.10</struts.version>
@@ -715,8 +718,7 @@
                 <module>hq-pdk</module>
                 <module>hq-operations</module>
                 <module>hq-operation-service</module>
-                <module>hq-operation-service-rabbit-shared</module>
-                <module>hq-operation-service-rabbit-common</module>
+                <module>hq-operation-service-rabbit</module>
                 <module>hq-agent</module>
                 <module>hq-server</module>
                 <module>hq-rendit</module>
@@ -740,8 +742,7 @@
                 <module>hq-pdk</module>
                 <module>hq-operations</module>
                 <module>hq-operation-service</module>
-                <module>hq-operation-service-rabbit-shared</module>
-                <module>hq-operation-service-rabbit-common</module>
+                <module>hq-operation-service-rabbit</module>
                 <module>hq-agent</module>
                 <module>hq-server</module>
                 <module>hq-rendit</module>
@@ -762,7 +763,7 @@
                 <module>hq-agent</module>
                 <module>hq-operations</module>
                 <module>hq-operation-service</module>
-                <module>hq-operation-service-rabbit-shared</module> 
+                <module>hq-operation-service-rabbit</module>
                 <module>dist</module>
             </modules>
         </profile>
@@ -775,8 +776,7 @@
                 <module>hq-pdk</module>
                 <module>hq-operations</module>
                 <module>hq-operation-service</module>
-                <module>hq-operation-service-rabbit-shared</module>
-                <module>hq-operation-service-rabbit-common</module>
+                <module>hq-operation-service-rabbit</module>
                 <module>hq-agent</module>
                 <module>hq-server</module>
                 <module>hq-rendit</module>
@@ -808,8 +808,7 @@
                 <module>hq-pdk</module>
                 <module>hq-operations</module>
                 <module>hq-operation-service</module>
-                <module>hq-operation-service-rabbit-shared</module>
-                <module>hq-operation-service-rabbit-common</module>
+                <module>hq-operation-service-rabbit</module>
                 <module>hq-agent</module>
                 <module>hq-server</module>
                 <module>hq-rendit</module>

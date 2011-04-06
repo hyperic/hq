@@ -36,13 +36,7 @@
     <artifactId>hq-operation-service-rabbit-common</artifactId>
     <packaging>jar</packaging>
     <name>Hyperic Rabbit Operation Service Common Implementation</name>
-
-    <properties>
-        <spring.amqp.version>1.0.0.M2</spring.amqp.version>
-        <rabbitmq.version>2.3.1</rabbitmq.version>
-        <otp.version>1.5.3</otp.version>
-    </properties>
-
+ 
     <dependencies>
         <dependency>
             <groupId>org.hyperic.hq</groupId>
