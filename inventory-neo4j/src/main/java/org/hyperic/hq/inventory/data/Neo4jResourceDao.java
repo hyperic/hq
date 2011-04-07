@@ -5,8 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import javax.annotation.PostConstruct;
 
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
@@ -21,6 +20,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.graph.neo4j.finder.FinderFactory;
+import org.springframework.data.graph.neo4j.finder.NodeFinder;
 import org.springframework.data.graph.neo4j.support.GraphDatabaseContext;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,55 +28,65 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 public class Neo4jResourceDao implements ResourceDao {
 
-    @PersistenceContext
-    protected EntityManager entityManager;
-
     @Autowired
     private FinderFactory finderFactory;
 
     @Autowired
     private GraphDatabaseContext graphDatabaseContext;
 
+    private NodeFinder<Resource> resourceFinder;
+
+    @PostConstruct
+    public void initFinder() {
+        resourceFinder = finderFactory.createNodeEntityFinder(Resource.class);
+    }
+
     @Transactional(readOnly = true)
     public Long count() {
-        return (Long) entityManager.createQuery("select count(o) from Resource o")
-            .getSingleResult();
+        return resourceFinder.count();
     }
 
     @Transactional(readOnly = true)
     public List<Resource> find(Integer firstResult, Integer maxResults) {
         // TODO the root resource is not filtered out from DAO. Find a way to do
         // so?
-        List<Resource> result = entityManager
-            .createQuery("select o from Resource o", Resource.class).setFirstResult(firstResult)
-            .setMaxResults(maxResults).getResultList();
-        for (Resource resource : result) {
-            resource.persist();
+        List<Resource> resources = new ArrayList<Resource>();
+        Iterable<Resource> result = resourceFinder.findAll();
+        int currentPosition = 0;
+        int endIndex = firstResult + maxResults;
+        for (Resource resource: result) {
+            if (currentPosition > endIndex) {
+                break;
+            }
+            if (currentPosition >= firstResult) {
+                resource.persist();
+                resources.add(resource);
+            }
+            currentPosition++;
         }
-        return result;
+        return resources;
     }
 
     @Transactional(readOnly = true)
     public List<Resource> findAll() {
         // TODO the root resource is not filtered out from DAO. Find a way to do
         // so?
-        List<Resource> result = entityManager.createQuery("select o from Resource o",
-            Resource.class).getResultList();
+        List<Resource> resources = new ArrayList<Resource>();
+        Iterable<Resource> result = resourceFinder.findAll();
         for (Resource resource : result) {
             resource.persist();
+            resources.add(resource);
         }
-        return result;
+        return resources;
     }
 
     @Transactional(readOnly = true)
     public Resource findById(Integer id) {
-        if (id == null)
-            return null;
-        Resource result = entityManager.find(Resource.class, id);
-        if (result != null) {
-            result.persist();
+        Resource resource = resourceFinder.findByPropertyValue(null, "id", id);
+        if (resource != null) {
+            resource.persist();
         }
-        return result;
+        return resource;
     }
 
     @Transactional(readOnly = true)
@@ -115,9 +125,7 @@ public class Neo4jResourceDao implements ResourceDao {
     // the product
     @Transactional(readOnly = true)
     public Resource findByName(String name) {
-        // Can't do JPA-style queries on property values that are only in graph
-        Resource resource = finderFactory.createNodeEntityFinder(Resource.class)
-            .findByPropertyValue(null, "name", name);
+        Resource resource = resourceFinder.findByPropertyValue(null, "name", name);
         if (resource != null) {
             resource.persist();
         }
@@ -128,8 +136,8 @@ public class Neo4jResourceDao implements ResourceDao {
     @Transactional(readOnly = true)
     public Set<Resource> findByOwner(String owner) {
         Set<Resource> ownedResources = new HashSet<Resource>();
-        Iterable<Resource> resourceIterator = finderFactory.createNodeEntityFinder(Resource.class)
-            .findAllByPropertyValue(null, "owner", owner);
+        Iterable<Resource> resourceIterator = resourceFinder.findAllByPropertyValue(null, "owner",
+            owner);
         // Walk the lazy iterator to return all results
         for (Resource resource : resourceIterator) {
             ownedResources.add(resource);
@@ -165,25 +173,17 @@ public class Neo4jResourceDao implements ResourceDao {
     }
 
     @Transactional
-    public Resource merge(Resource resource) {
-        Resource merged = entityManager.merge(resource);
-        entityManager.flush();
-        return merged;
-    }
-
-    @Transactional
     public void persist(Resource resource) {
         if (findByName(resource.getName()) != null) {
             throw new NotUniqueException("Resource with name " + resource.getName() +
                                          " already exists");
         }
-        entityManager.persist(resource);
         resource.persist();
+        //TODO meaningful id
+        resource.setId(resource.getNodeId().intValue());
         // Set the type index here b/c Resource needs an ID before we can access
         // the underlying node
         graphDatabaseContext.getIndex(Resource.class, null).add(resource.getPersistentState(),
             "type", resource.getType().getId());
-        // flush to get the JSR-303 validation done sooner
-        entityManager.flush();
     }
 }

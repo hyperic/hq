@@ -3,11 +3,6 @@ package org.hyperic.hq.inventory.domain;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.Entity;
-import javax.persistence.Transient;
-
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.springframework.data.graph.annotation.GraphProperty;
 import org.springframework.data.graph.annotation.NodeEntity;
 import org.springframework.data.graph.annotation.RelatedTo;
@@ -21,18 +16,15 @@ import org.springframework.transaction.annotation.Transactional;
  * @author dcrutchfield
  * 
  */
-@Entity
-@NodeEntity(partial = true)
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+
+@NodeEntity
 public class ResourceGroup
     extends Resource {
 
     @RelatedTo(type = RelationshipTypes.HAS_MEMBER, direction = Direction.OUTGOING, elementClass = Resource.class)
-    @Transient
     private Set<Resource> members;
 
     @GraphProperty
-    @Transient
     private boolean privateGroup;
 
     public ResourceGroup() {

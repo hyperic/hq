@@ -1,17 +1,7 @@
 package org.hyperic.hq.inventory.domain;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.GenericGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.graph.annotation.GraphProperty;
 import org.springframework.data.graph.annotation.NodeEntity;
@@ -26,48 +16,31 @@ import org.springframework.validation.Validator;
  * @author dcrutchfield
  * 
  */
-@NodeEntity(partial = true)
-@Entity
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@NodeEntity
 public class PropertyType {
 
-    @Transient
     @GraphProperty
     private Object defaultValue;
 
     @NotNull
-    @Transient
     @GraphProperty
     private String description;
 
-    @Transient
     @GraphProperty
     private boolean hidden;
 
-    @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")
-    @GeneratedValue(generator = "mygen1")
-    @Column(name = "id")
-    private Integer id;
-
-    @Transient
     @GraphProperty
     private boolean indexed;
 
-    @Transient
     @GraphProperty
     @NotNull
     private String name;
 
-    @Transient
     @GraphProperty
     private boolean secret;
 
     @Autowired
     private transient GraphDatabaseContext graphDatabaseContext;
-
-    @PersistenceContext
-    private transient EntityManager entityManager;
 
     private transient Validator propertyValidator;
 
@@ -103,14 +76,6 @@ public class PropertyType {
      */
     public String getDescription() {
         return this.description;
-    }
-
-    /**
-     * 
-     * @return The ID
-     */
-    public Integer getId() {
-        return this.id;
     }
 
     /**
@@ -152,12 +117,6 @@ public class PropertyType {
     public void remove() {
         // TODO remove property instances?
         graphDatabaseContext.removeNodeEntity(this);
-        if (this.entityManager.contains(this)) {
-            this.entityManager.remove(this);
-        } else {
-            PropertyType attached = this.entityManager.find(this.getClass(), this.id);
-            this.entityManager.remove(attached);
-        }
     }
 
     /**
@@ -182,14 +141,6 @@ public class PropertyType {
      */
     public void setHidden(boolean hidden) {
         this.hidden = hidden;
-    }
-
-    /**
-     * 
-     * @param id The ID
-     */
-    public void setId(Integer id) {
-        this.id = id;
     }
 
     /**
@@ -220,7 +171,6 @@ public class PropertyType {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("PropertyType[");
-        sb.append("Id: ").append(getId()).append(", ");
         sb.append("Name: ").append(getName()).append(", ");
         sb.append("Description: ").append(getDescription()).append(", ");
         sb.append("Secret: ").append(isSecret()).append(", ");

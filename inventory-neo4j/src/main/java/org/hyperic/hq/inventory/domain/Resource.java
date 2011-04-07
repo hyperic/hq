@@ -5,20 +5,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.GenericGenerator;
 import org.hyperic.hq.inventory.InvalidRelationshipException;
 import org.hyperic.hq.inventory.NotUniqueException;
 import org.hyperic.hq.inventory.events.CPropChangeEvent;
@@ -46,55 +34,42 @@ import org.springframework.transaction.annotation.Transactional;
  * @author dcrutchfield
  * 
  */
-@Entity
-@NodeEntity(partial = true)
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+
+@NodeEntity
 public class Resource {
 
     @RelatedTo(type = RelationshipTypes.HAS_CONFIG, direction = Direction.OUTGOING, elementClass = Config.class)
-    @Transient
     private Set<Config> configs;
 
     @GraphProperty
-    @Transient
     private String description;
-
-    @PersistenceContext
-    private transient EntityManager entityManager;
 
     @Autowired
     private transient GraphDatabaseContext graphDatabaseContext;
 
-    @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")
-    @GeneratedValue(generator = "mygen1")
-    @Column(name = "id")
+ // TODO unique ID string instead of number
+    @GraphProperty
+    @Indexed
     private Integer id;
 
     @GraphProperty
-    @Transient
     private String location;
 
     @Autowired
     private transient MessagePublisher messagePublisher;
 
     @GraphProperty
-    @Transient
     private String modifiedBy;
-    
+
     @NotNull
     @Indexed
     @GraphProperty
-    @Transient
     private String name;
 
     @GraphProperty
-    @Transient
     @Indexed
     private String owner;
 
-    @Transient
     @RelatedTo(type = RelationshipTypes.IS_A, direction = Direction.OUTGOING, elementClass = ResourceType.class)
     private ResourceType type;
 
@@ -199,7 +174,7 @@ public class Resource {
             DynamicRelationshipType.withName(RelationshipTypes.CONTAINS),
             Direction.OUTGOING.toNeo4jDir());
         for (Node related : relationTraverser) {
-            children.add((Integer) related.getProperty("foreignId"));
+            children.add((Integer) related.getProperty("id"));
         }
         return children;
     }
@@ -232,12 +207,8 @@ public class Resource {
         return description;
     }
 
-    /**
-     * 
-     * @return The Resource Id
-     */
     public Integer getId() {
-        return this.id;
+        return id;
     }
 
     /**
@@ -338,7 +309,7 @@ public class Resource {
             DynamicRelationshipType.withName(relationName), direction.toNeo4jDir());
         for (Node related : relationTraverser) {
             Resource resource = graphDatabaseContext.createEntityFromState(related, Resource.class);
-            resource.getId();
+            resource.persist();
             resources.add(resource);
         }
         return resources;
@@ -536,12 +507,6 @@ public class Resource {
     public void remove() {
         removeConfig();
         graphDatabaseContext.removeNodeEntity(this);
-        if (this.entityManager.contains(this)) {
-            this.entityManager.remove(this);
-        } else {
-            Resource attached = this.entityManager.find(this.getClass(), this.id);
-            this.entityManager.remove(attached);
-        }
     }
 
     private void removeConfig() {
@@ -617,10 +582,6 @@ public class Resource {
         this.description = description;
     }
 
-    /**
-     * 
-     * @param id The ID of the Resource
-     */
     public void setId(Integer id) {
         this.id = id;
     }
@@ -648,8 +609,7 @@ public class Resource {
     public void setName(String name) {
         this.name = name;
     }
-    
-    
+
     /**
      * 
      * @param owner The owner of the Resource
@@ -692,10 +652,11 @@ public class Resource {
         }
         getPersistentState().setProperty(key, value);
         if (propertyType.isIndexed()) {
-           
-            graphDatabaseContext.getIndex(Resource.class,null).add(
-                getPersistentState(), key, value);
+
+            graphDatabaseContext.getIndex(Resource.class, null).add(getPersistentState(), key,
+                value);
         }
+        
         CPropChangeEvent event = new CPropChangeEvent(getId(), key, oldValue, value);
         messagePublisher.publishMessage(MessagePublisher.EVENTS_TOPIC, event);
         return oldValue;

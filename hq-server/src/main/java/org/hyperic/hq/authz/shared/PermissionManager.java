@@ -411,12 +411,7 @@ public abstract class PermissionManager {
      */
     private Integer getOpIdByResourceType(ResourceType rtV, String opName)
         throws PermissionException {
-        Collection<OperationType> ops = rtV.getOperationTypes();
-        for (OperationType op : ops) {
-            if (op.getName().equals(opName)) {
-                return op.getId();
-            }
-        }
+        //TODO
         throw new PermissionException("Operation: " + opName + " not valid for ResourceType: " +
                                       rtV.getName());
     }

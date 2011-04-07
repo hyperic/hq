@@ -54,11 +54,6 @@ public class ResourceTypeDaoIntegrationTest {
     }
 
     @Test
-    public void testFindByIdNullId() {
-        assertNull(resourceTypeDao.findById(null));
-    }
-
-    @Test
     public void testFindAll() {
         Set<ResourceType> expected = new HashSet<ResourceType>();
         expected.add(type1);

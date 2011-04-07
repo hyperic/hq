@@ -657,33 +657,5 @@
          memoryStoreEvictionPolicy="LRU"/>
   	<cache name="org.hyperic.hq.plugin.mgmt.domain.Plugin" maxElementsInMemory="200" eternal="true" timeToIdleSeconds="0"
 		timeToLiveSeconds="0" memoryStoreEvictionPolicy="LRU" />
-		
-	<cache name="org.hyperic.hq.inventory.domain.ResourceGroup"
-		maxElementsInMemory="100" eternal="true" timeToIdleSeconds="0"
-		timeToLiveSeconds="0" memoryStoreEvictionPolicy="LRU" />
-	
-	<!-- TODO There are 12000+ resources in multi-agent env.  Re-adjust numbers based on old cache size? -->	
-	<cache name="org.hyperic.hq.inventory.domain.Resource"
-		maxElementsInMemory="15000" eternal="true" timeToIdleSeconds="0"
-		timeToLiveSeconds="0" memoryStoreEvictionPolicy="LRU" />
-	<cache name="org.hyperic.hq.inventory.domain.Config"
-        maxElementsInMemory="30000" eternal="true" timeToIdleSeconds="0"
-        timeToLiveSeconds="0" memoryStoreEvictionPolicy="LRU" />
-	<cache name="org.hyperic.hq.inventory.domain.ResourceType"
-		maxElementsInMemory="1000" eternal="true" timeToIdleSeconds="0"
-		timeToLiveSeconds="0" memoryStoreEvictionPolicy="LRU" />
-   <cache name="org.hyperic.hq.inventory.domain.OperationType"
-       maxElementsInMemory="1200" eternal="true" timeToIdleSeconds="0"
-       timeToLiveSeconds="0" memoryStoreEvictionPolicy="LRU" />
-   <!--  TODO Don't need OperationArgType at the moment, plugins can't specify them -->
-   <cache name="org.hyperic.hq.inventory.domain.PropertyType"
-       maxElementsInMemory="8000" eternal="true" timeToIdleSeconds="0"
-       timeToLiveSeconds="0" memoryStoreEvictionPolicy="LRU" />
-  <cache name="org.hyperic.hq.inventory.domain.ConfigType"
-       maxElementsInMemory="1500" eternal="true" timeToIdleSeconds="0"
-       timeToLiveSeconds="0" memoryStoreEvictionPolicy="LRU" />
-  <cache name="org.hyperic.hq.inventory.domain.ConfigOptionType"
-       maxElementsInMemory="6000" eternal="true" timeToIdleSeconds="0"
-       timeToLiveSeconds="0" memoryStoreEvictionPolicy="LRU" />
 
 </ehcache>

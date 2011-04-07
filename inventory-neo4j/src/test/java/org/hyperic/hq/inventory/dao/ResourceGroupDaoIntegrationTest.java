@@ -59,12 +59,7 @@ public class ResourceGroupDaoIntegrationTest {
     public void testFindByIdNonExistent() {
         assertNull(resourceGroupDao.findById(98765));
     }
-    
-    @Test
-    public void testFindByIdNullId() {
-        assertNull(resourceGroupDao.findById(null));
-    }
-    
+      
     @Test
     public void testFindAll() {
         Set<Resource> expected = new HashSet<Resource>();

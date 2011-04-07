@@ -44,13 +44,6 @@ public interface ResourceDao extends GenericDao<Resource> {
     Resource findRoot();
 
     /**
-     * Saves changes to an existing Resource
-     * @param resource The changed Resource
-     * @return The merged Resource
-     */
-    Resource merge(Resource resource);
-
-    /**
      * Persists a new Resource
      * @param resource The new resource
      */

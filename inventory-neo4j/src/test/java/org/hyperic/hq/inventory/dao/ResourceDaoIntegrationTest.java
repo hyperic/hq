@@ -190,11 +190,6 @@ public class ResourceDaoIntegrationTest {
     }
 
     @Test
-    public void testFindByIdNullId() {
-        assertNull(resourceDao.findById(null));
-    }
-
-    @Test
     public void testFindAll() {
         Resource resource1 = new Resource("Some Resource", type);
         resourceDao.persist(resource1);

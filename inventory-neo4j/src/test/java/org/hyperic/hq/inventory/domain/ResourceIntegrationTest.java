@@ -10,9 +10,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.inventory.InvalidRelationshipException;
@@ -54,9 +51,6 @@ public class ResourceIntegrationTest {
 
     @Autowired
     private MockMessagePublisher messagePublisher;
-
-    @PersistenceContext
-    private EntityManager entityManager;
 
     @Before
     public void initializeTestData() throws ApplicationException, NotFoundException {
@@ -320,7 +314,7 @@ public class ResourceIntegrationTest {
         traderJoes.remove();
         // verify relationship removed
         assertEquals(1, produce.getRelationships().size());
-        assertNull(resourceDao.findById(traderJoes.getId()));
+        assertEquals(Long.valueOf(2),resourceDao.count());
     }
 
     @Test
@@ -418,7 +412,7 @@ public class ResourceIntegrationTest {
     public void testAddConfigInvalidType() {
         Config measurement = new Config();
         ConfigType measType = new ConfigType("Measurement");
-        entityManager.persist(measType);
+       
         measType.persist();
         measurement.setType(measType);
         traderJoes.addConfig(measurement);

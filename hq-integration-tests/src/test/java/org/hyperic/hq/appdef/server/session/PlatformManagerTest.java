@@ -329,16 +329,20 @@ public class PlatformManagerTest
         for (Platform p : testPlatforms) {
             // Set Platforms creation time 20 minutes before the current time.
             p.getResource().setProperty(PlatformFactory.CREATION_TIME,setTime - 20 * 60000l);
-            resourceDao.merge(p.getResource());
+            //TODO how to do a tx update?
+            //resourceDao.merge(p.getResource());
             i++;
         }
         // Change two of the platform's creation time to recent
         testPlatforms.get(0).getResource().setProperty(PlatformFactory.CREATION_TIME,setTime);
-        resourceDao.merge(testPlatforms.get(0).getResource());
+        //TODO how to do a tx update?
+        //resourceDao.merge(testPlatforms.get(0).getResource());
         testPlatforms.get(1).getResource().setProperty(PlatformFactory.CREATION_TIME,setTime - 2 * 60000l);
-        resourceDao.merge(testPlatforms.get(1).getResource());
+        //TODO how to do a tx update?
+        //resourceDao.merge(testPlatforms.get(1).getResource());
         testPlatforms.get(2).getResource().setProperty(PlatformFactory.CREATION_TIME,setTime - 3 * 60000l);
-        resourceDao.merge(testPlatforms.get(2).getResource());
+        //TODO how to do a tx update?
+        //resourceDao.merge(testPlatforms.get(2).getResource());
         PageList<PlatformValue> pValues = platformManager.getRecentPlatforms(authzSubjectManager
             .getOverlordPojo(), 5 * 60000l, 10);
         assertEquals(3, pValues.size());

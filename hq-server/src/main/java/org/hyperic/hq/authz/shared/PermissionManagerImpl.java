@@ -141,19 +141,7 @@ public class PermissionManagerImpl
     public List<Integer> findOperationScopeBySubject(AuthzSubject subj, String opName,
                                                      String resType) throws NotFoundException,
         PermissionException {
-        if (_log.isDebugEnabled()) {
-            _log.debug("Checking Scope for Operation: " + opName + " subject: " + subj);
-        }
-
-        ResourceType resTypeBean = resourceTypeDao.findByName(resType);
-
-        if (resTypeBean != null) {
-            OperationType op = resTypeBean.getOperationType(opName);
-
-            if (op != null) {
-                return findOperationScopeBySubject(subj, op.getId());
-            }
-        }
+        //TODO impl
 
         return new ArrayList<Integer>();
     }

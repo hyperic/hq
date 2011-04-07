@@ -29,14 +29,6 @@
 		transaction-manager="transactionManager" />
 
 	<jdbc:embedded-database id="dataSource" type="HSQL" />
-
-	<bean id="persistenceUnitMgr"
-		class="org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager">
-		<property name="persistenceXmlLocation" value="classpath*:META-INF/test-persistence.xml"/>
-		<property name="defaultDataSource" ref="dataSource"/>
-	</bean>
-
-	<bean id="persistenceProvider" class="org.hibernate.ejb.HibernatePersistence" />
 	
 	<bean id="messagePublisher" class="org.hyperic.hq.messaging.MockMessagePublisher"/>
 

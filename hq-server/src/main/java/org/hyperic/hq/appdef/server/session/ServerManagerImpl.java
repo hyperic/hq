@@ -928,7 +928,8 @@ public class ServerManagerImpl implements ServerManager {
         server.setProperty(ServerFactory.AUTO_INVENTORY_IDENTIFIER, existing.getAutoinventoryIdentifier() );
         server.setProperty(ServerFactory.INSTALL_PATH, existing.getInstallPath() );
         server.setProperty(ServerFactory.SERVICES_AUTO_MANAGED, existing.getServicesAutomanaged() );
-        resourceDao.merge(server);
+        //TODO how to do a tx update?
+        //resourceDao.merge(server);
     }
 
     /**

@@ -85,8 +85,8 @@ public class DefaultAlertPermissionManager implements AlertPermissionManager {
             if (!operations.containsKey(opName)) {
                 operations.put(opName,resType.getOperationType(opName));
             }
-            OperationType operation = (OperationType) operations.get(opName);
-            permMgr.check(subjectId, resType.getId(), instId, operation.getId());
+            //TODO operation Id?
+            //permMgr.check(subjectId, resType.getId(), instId, operation.getId());
             // Permission Check Succesful
         }
     }

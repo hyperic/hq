@@ -770,7 +770,8 @@ public class ServiceManagerImpl implements ServiceManager {
         Resource resource = resourceManager.findResourceById(svc.getId());
         resource.setModifiedBy(subject.getName());
         resource.setProperty(ServiceFactory.AUTO_DISCOVERY_ZOMBIE,zombieStatus);
-        resourceDao.merge(resource);
+        //TODO how to do a tx update?
+        //resourceDao.merge(resource);
     }
     
     private void updateService(ServiceValue valueHolder, Resource service) {
@@ -782,7 +783,8 @@ public class ServiceManagerImpl implements ServiceManager {
         service.setModifiedBy( valueHolder.getModifiedBy() );
         service.setLocation( valueHolder.getLocation() );
         service.setName( valueHolder.getName() );
-        resourceDao.merge(service);
+        //TODO how to do a tx update?
+        //resourceDao.merge(service);
         Resource parent = service.getResourceTo(RelationshipTypes.SERVICE);
         if(valueHolder.getParent() != null && !(parent.getId().equals(valueHolder.getParent().getId()))) {
             service.removeRelationships(parent, RelationshipTypes.SERVICE);
@@ -861,7 +863,8 @@ public class ServiceManagerImpl implements ServiceManager {
                     // Just update it
                     if (!sinfo.getDescription().equals(serviceType.getDescription())) {
                         serviceType.setDescription(sinfo.getDescription());
-                        resourceTypeDao.merge(serviceType);
+                        //TODO how to do a tx update?
+                        //resourceTypeDao.merge(serviceType);
                     }
 
                     //TODO  update platform association

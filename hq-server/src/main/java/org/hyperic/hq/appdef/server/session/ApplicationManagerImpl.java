@@ -285,7 +285,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 app.removeMember(resourceManager.findResourceById(o.getId()));
             }
         }
-        resourceGroupDao.merge(app);
+        //TODO how to do a tx update?
+        //resourceGroupDao.merge(app);
     }
 
     /**
@@ -516,26 +517,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
         throw new PermissionException("Operation: " + opName + " not valid for ResourceType: " +
                                       rtV.getName());
-    }
-
-    /**
-     * Get the scope of viewable apps for a given user
-     * @param whoami
-     * @return list of ApplicationPKs for which the subject has
-     *         AuthzConstants.applicationOpViewApplication
-     */
-    protected List<Integer> getViewableApplications(AuthzSubject whoami)
-        throws PermissionException, NotFoundException {
-
-        OperationType op = getOperationByName(resourceManager
-            .findResourceTypeByName(AuthzConstants.applicationResType),
-            AuthzConstants.appOpViewApplication);
-        List<Integer> idList = permissionManager.findOperationScopeBySubject(whoami, op.getId());
-        List<Integer> keyList = new ArrayList<Integer>(idList.size());
-        for (int i = 0; i < idList.size(); i++) {
-            keyList.add(idList.get(i));
-        }
-        return keyList;
     }
    
     private AppService toAppService(Resource service) {

@@ -2,11 +2,9 @@ package org.hyperic.hq.inventory.domain;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -23,8 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
                                    "classpath:org/hyperic/hq/inventory/InventoryIntegrationTest-context.xml" })
 public class ConfigIntegrationTest {
     
-    @PersistenceContext
-    private EntityManager entityManager;
+   
     
     private Config config;
 
@@ -32,7 +29,6 @@ public class ConfigIntegrationTest {
     public void setUp() {
         config = new Config();
         ConfigType configType =  new ConfigType("Product");
-        entityManager.persist(configType);
         configType.persist();
         configType.addConfigOptionType(new ConfigOptionType("user", "A user"));
         config.setType(configType);

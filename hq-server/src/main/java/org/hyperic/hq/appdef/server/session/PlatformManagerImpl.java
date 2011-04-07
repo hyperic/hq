@@ -1517,7 +1517,8 @@ public class PlatformManagerImpl implements PlatformManager {
             // get the agent token and set the agent to the platform
             existing.getAgent().addManagedResource(platform);
         }
-        resourceDao.merge(platform);
+        //TODO how to do a tx update?
+        //resourceDao.merge(platform);
     }
 
     /**
@@ -1625,7 +1626,8 @@ public class PlatformManagerImpl implements PlatformManager {
          resource.setModifiedBy(owner);
          resource.setProperty(PlatformFactory.CPU_COUNT,aiplatform.getCpuCount());
          resource.setDescription(aiplatform.getDescription());
-         resourceDao.merge(resource);
+         //TODO how to do a tx update?
+         //resourceDao.merge(resource);
     }
 
     /**
@@ -1859,7 +1861,8 @@ public class PlatformManagerImpl implements PlatformManager {
     private void updateIp(Resource ip, String netmask, String macAddress) {
         ip.setProperty(PlatformFactory.NETMASK,netmask);
         ip.setProperty(PlatformFactory.MAC_ADDRESS,macAddress);
-        resourceDao.merge(ip);
+        //TODO how to do a tx update?
+        //resourceDao.merge(ip);
     }
 
     /**

@@ -88,7 +88,8 @@ public class ResourceTypeController extends BaseController {
 	public @ResponseBody SuccessResponse update(@PathVariable Integer id, @RequestBody ResourceTypeRep form) throws Exception {
 		ResourceType type = translateFormToDomain(form);
 
-		resourceTypeDao.merge(type);
+		  //TODO how to do a tx update?
+		//resourceTypeDao.merge(type);
 		
 		return new SuccessResponse(new ResourceTypeRep(type));
 	}

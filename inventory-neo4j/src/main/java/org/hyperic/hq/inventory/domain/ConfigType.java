@@ -4,18 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.GenericGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.graph.annotation.GraphProperty;
 import org.springframework.data.graph.annotation.NodeEntity;
@@ -32,30 +22,17 @@ import org.springframework.transaction.annotation.Transactional;
  * 
  */
 
-@NodeEntity(partial = true)
-@Entity
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@NodeEntity
 public class ConfigType {
-
-    @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")
-    @GeneratedValue(generator = "mygen1")
-    @Column(name = "id")
-    private Integer id;
 
     @Autowired
     private transient GraphDatabaseContext graphDatabaseContext;
 
-    @PersistenceContext
-    private transient EntityManager entityManager;
-
-    @Transient
     @GraphProperty
     @NotNull
     private String name;
 
     @RelatedTo(type = RelationshipTypes.HAS_CONFIG_OPT_TYPE, direction = Direction.OUTGOING, elementClass = ConfigOptionType.class)
-    @Transient
     private Set<ConfigOptionType> configOptionTypes;
 
     public ConfigType() {
@@ -75,8 +52,8 @@ public class ConfigType {
      */
     @Transactional
     public void addConfigOptionType(ConfigOptionType configOptionType) {
-        //TODO can't do this in a detached env b/c relationship doesn't take unless both items are node-backed
-        entityManager.persist(configOptionType);
+        // TODO can't do this in a detached env b/c relationship doesn't take
+        // unless both items are node-backed
         configOptionType.persist();
         configOptionTypes.add(configOptionType);
     }
@@ -120,14 +97,6 @@ public class ConfigType {
 
     /**
      * 
-     * @return The ID
-     */
-    public Integer getId() {
-        return id;
-    }
-
-    /**
-     * 
      * @return The name of the config type
      */
     public String getName() {
@@ -143,12 +112,6 @@ public class ConfigType {
     public void remove() {
         removeOptTypes();
         graphDatabaseContext.removeNodeEntity(this);
-        if (this.entityManager.contains(this)) {
-            this.entityManager.remove(this);
-        } else {
-            ConfigType persisted = this.entityManager.find(this.getClass(), this.id);
-            this.entityManager.remove(persisted);
-        }
     }
 
     private void removeOptTypes() {
@@ -157,18 +120,9 @@ public class ConfigType {
         }
     }
 
-    /**
-     * 
-     * @param id The ID
-     */
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("ConfigType[");
-        sb.append("Id: ").append(getId()).append(", ");
         sb.append("Name: ").append(getName()).append("]");
         return sb.toString();
     }

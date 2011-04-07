@@ -2,18 +2,8 @@ package org.hyperic.hq.inventory.domain;
 
 import java.util.Set;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.GenericGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.graph.annotation.GraphProperty;
 import org.springframework.data.graph.annotation.NodeEntity;
@@ -30,35 +20,21 @@ import org.springframework.transaction.annotation.Transactional;
  * 
  */
 
-@NodeEntity(partial = true)
-@Entity
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@NodeEntity
 public class OperationType {
 
-    @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")
-    @GeneratedValue(generator = "mygen1")
-    @Column(name = "id")
-    private Integer id;
-
-    @Transient
     @GraphProperty
     @NotNull
     private String name;
 
-    @Transient
     @GraphProperty
-    private Class<?> returnType;
+    private String returnType;
 
     @RelatedTo(type = RelationshipTypes.OPERATION_ARG_TYPE, direction = Direction.OUTGOING, elementClass = OperationArgType.class)
-    @Transient
     private Set<OperationArgType> operationArgTypes;
 
     @Autowired
     private transient GraphDatabaseContext graphDatabaseContext;
-
-    @PersistenceContext
-    private transient EntityManager entityManager;
 
     public OperationType() {
     }
@@ -77,18 +53,10 @@ public class OperationType {
      */
     @Transactional
     public void addOperationArgType(OperationArgType argType) {
-        //TODO can't do this in a detached env b/c relationship doesn't take unless both items are node-backed
-        entityManager.persist(argType);
+        // TODO can't do this in a detached env b/c relationship doesn't take
+        // unless both items are node-backed
         argType.persist();
         operationArgTypes.add(argType);
-    }
-
-    /**
-     * 
-     * @return The ID
-     */
-    public Integer getId() {
-        return this.id;
     }
 
     /**
@@ -106,13 +74,13 @@ public class OperationType {
     public Set<OperationArgType> getOperationArgTypes() {
         return operationArgTypes;
     }
-    
+
     /**
      * 
      * @return The return value type or null if operation has no return value
      */
-    public Class<?> getReturnType() {
-        return returnType;
+    public String getReturnType() {
+        return this.returnType;
     }
 
     /**
@@ -122,12 +90,6 @@ public class OperationType {
     public void remove() {
         removeArgTypes();
         graphDatabaseContext.removeNodeEntity(this);
-        if (this.entityManager.contains(this)) {
-            this.entityManager.remove(this);
-        } else {
-            OperationType attached = this.entityManager.find(this.getClass(), this.id);
-            this.entityManager.remove(attached);
-        }
     }
 
     private void removeArgTypes() {
@@ -138,24 +100,15 @@ public class OperationType {
 
     /**
      * 
-     * @param id
-     */
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    /**
-     * 
      * @param returnType The type of the operation return value
      */
-    public void setReturnType(Class<?> returnType) {
+    public void setReturnType(String returnType) {
         this.returnType = returnType;
     }
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("OperationType[");
-        sb.append("Id: ").append(getId()).append(", ");
         sb.append("Name: ").append(getName()).append("]");
         return sb.toString();
     }

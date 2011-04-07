@@ -53,13 +53,13 @@ public class ResourceTypeIntegrationTest {
         store.addOperationType(inventory);
         OperationArgType lettuceCount = new OperationArgType("LettuceCount", Integer.class);
         inventory.addOperationArgType(lettuceCount);
-        inventory.setReturnType(String.class);
+        inventory.setReturnType(String.class.getName());
         Set<OperationType> expected = new HashSet<OperationType>(1);
         expected.add(inventory);
         assertEquals(expected, store.getOperationTypes());
         assertEquals(1,store.getOperationTypes().iterator().next().getOperationArgTypes().size());
         assertEquals(lettuceCount,store.getOperationTypes().iterator().next().getOperationArgTypes().iterator().next());
-        assertEquals(String.class,store.getOperationTypes().iterator().next().getReturnType());
+        assertEquals(String.class.getName(),store.getOperationTypes().iterator().next().getReturnType());
     }
 
     @Test
@@ -259,8 +259,8 @@ public class ResourceTypeIntegrationTest {
         securityConfig.setType(security);
         safeway.addConfig(securityConfig);
         store.remove();
-        assertNull(resourceTypeDao.findById(store.getId()));
-        assertNull(resourceDao.findById(safeway.getId()));
+        assertEquals(Long.valueOf(1),resourceTypeDao.count());
+        assertEquals(Long.valueOf(0),resourceDao.count());
         assertTrue(store.getRelationships().isEmpty());
     }
     

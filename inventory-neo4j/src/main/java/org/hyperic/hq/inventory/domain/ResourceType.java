@@ -3,18 +3,8 @@ package org.hyperic.hq.inventory.domain;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.GenericGenerator;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.ReturnableEvaluator;
@@ -38,47 +28,34 @@ import org.springframework.transaction.annotation.Transactional;
  * @author dcrutchfield
  * 
  */
-@Entity
-@NodeEntity(partial = true)
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@NodeEntity
 public class ResourceType {
 
     @RelatedTo(type = RelationshipTypes.HAS_CONFIG_TYPE, direction = Direction.OUTGOING, elementClass = ConfigType.class)
-    @Transient
     private Set<ConfigType> configTypes;
 
     @GraphProperty
-    @Transient
     private String description;
-
-    @PersistenceContext
-    private transient EntityManager entityManager;
 
     @Autowired
     private transient GraphDatabaseContext graphDatabaseContext;
 
-    @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")
-    @GeneratedValue(generator = "mygen1")
-    @Column(name = "id")
+    @GraphProperty
+    @Indexed
     private Integer id;
 
     @NotNull
     @Indexed
     @GraphProperty
-    @Transient
     private String name;
 
     @RelatedTo(type = RelationshipTypes.HAS_OPERATION_TYPE, direction = Direction.OUTGOING, elementClass = OperationType.class)
-    @Transient
     private Set<OperationType> operationTypes;
 
     @RelatedTo(type = RelationshipTypes.HAS_PROPERTY_TYPE, direction = Direction.OUTGOING, elementClass = PropertyType.class)
-    @Transient
     private Set<PropertyType> propertyTypes;
 
     @RelatedTo(type = RelationshipTypes.IS_A, direction = Direction.INCOMING, elementClass = Resource.class)
-    @Transient
     private Set<Resource> resources;
 
     public ResourceType() {
@@ -109,7 +86,6 @@ public class ResourceType {
     public void addConfigType(ConfigType configType) {
         // TODO can't do this in a detached env b/c relationship doesn't take
         // unless both items are node-backed
-        entityManager.persist(configType);
         configType.persist();
         configTypes.add(configType);
     }
@@ -121,7 +97,6 @@ public class ResourceType {
     public void addOperationType(OperationType operationType) {
         // TODO can't do this in a detached env b/c relationship doesn't take
         // unless both items are node-backed
-        entityManager.persist(operationType);
         operationType.persist();
         operationTypes.add(operationType);
     }
@@ -133,7 +108,6 @@ public class ResourceType {
     public void addPropertyType(PropertyType propertyType) {
         // TODO can't do this in a detached env b/c relationship doesn't take
         // unless both items are node-backed
-        entityManager.persist(propertyType);
         propertyType.persist();
         propertyTypes.add(propertyType);
     }
@@ -409,12 +383,6 @@ public class ResourceType {
         removeOperationTypes();
         removeConfigTypes();
         graphDatabaseContext.removeNodeEntity(this);
-        if (this.entityManager.contains(this)) {
-            this.entityManager.remove(this);
-        } else {
-            ResourceType persisted = this.entityManager.find(this.getClass(), this.id);
-            this.entityManager.remove(persisted);
-        }
     }
 
     private void removeConfigTypes() {
