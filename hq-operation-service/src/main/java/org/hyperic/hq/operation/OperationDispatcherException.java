@@ -3,13 +3,13 @@ package org.hyperic.hq.operation;
 /**
  * @author Helena Edelson
  */
-public class OperationNotSupportedException extends RuntimeException {
+public class OperationDispatcherException extends RuntimeException {
 
     /**
      * Creates a chaining-aware instance
      * @param cause The java.lang.Throwable cause
      */
-    public OperationNotSupportedException(Throwable cause) {
+    public OperationDispatcherException(Throwable cause) {
         super(cause);
     }
 
@@ -17,7 +17,7 @@ public class OperationNotSupportedException extends RuntimeException {
      * Creates an instance with a message
      * @param context The exception message
      */
-    public OperationNotSupportedException(String context) {
+    public OperationDispatcherException(String context) {
         super(context);
     }
 
@@ -26,7 +26,7 @@ public class OperationNotSupportedException extends RuntimeException {
      * @param message The exception message
      * @param cause The parent exception
      */
-    public OperationNotSupportedException(String message, Throwable cause) {
+    public OperationDispatcherException(String message, Throwable cause) {
         super(message, cause);
     }
 }

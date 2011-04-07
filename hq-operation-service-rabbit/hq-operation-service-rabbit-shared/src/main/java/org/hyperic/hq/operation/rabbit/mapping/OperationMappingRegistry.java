@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author Helena Edelson
  */
-public class OperationMappingRegistry implements OperationRoutingRegistry, OperationRoutingSupported {
+public class OperationMappingRegistry implements OperationMapper, OperationMappingRegistry, OperationRoutingSupported {
 
     private final Map<String, OperationRouting> operationToBindingPatternMappings = new ConcurrentHashMap<String, OperationRouting>();
 

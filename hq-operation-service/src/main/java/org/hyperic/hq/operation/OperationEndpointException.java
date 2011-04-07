@@ -3,13 +3,14 @@ package org.hyperic.hq.operation;
 /**
  * @author Helena Edelson
  */
-public class OperationNotSupportedException extends RuntimeException {
+public class OperationEndpointException extends RuntimeException {
+    private static final long serialVersionUID = -4901175883619184424L;
 
     /**
      * Creates a chaining-aware instance
      * @param cause The java.lang.Throwable cause
      */
-    public OperationNotSupportedException(Throwable cause) {
+    public OperationEndpointException(Throwable cause) {
         super(cause);
     }
 
@@ -17,7 +18,7 @@ public class OperationNotSupportedException extends RuntimeException {
      * Creates an instance with a message
      * @param context The exception message
      */
-    public OperationNotSupportedException(String context) {
+    public OperationEndpointException(String context) {
         super(context);
     }
 
@@ -26,7 +27,7 @@ public class OperationNotSupportedException extends RuntimeException {
      * @param message The exception message
      * @param cause The parent exception
      */
-    public OperationNotSupportedException(String message, Throwable cause) {
+    public OperationEndpointException(String message, Throwable cause) {
         super(message, cause);
     }
 }

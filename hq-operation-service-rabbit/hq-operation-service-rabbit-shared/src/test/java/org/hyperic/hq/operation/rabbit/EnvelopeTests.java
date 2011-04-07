@@ -1,7 +1,7 @@
 package org.hyperic.hq.operation.rabbit;
 
 import org.hyperic.hq.operation.Envelope;
-import org.hyperic.hq.operation.Message;
+import org.hyperic.hq.operation.rabbit.core.Message;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

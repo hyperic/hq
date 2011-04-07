@@ -23,19 +23,16 @@
  *  USA.
  *
  */
-package org.hyperic.hq.operation.rabbit.util;
+package org.hyperic.hq.operation.rabbit.annotation;
 
 import java.lang.annotation.*;
 
 /**
- * Marks a method parameter as a candidate message payload
- * <p>
- * Example: void foo(@Payload Object data) 
- *
+ * Stereotype annotation indicating that a class can be delegated to as a Messaging Endpoint
  * @author Helena Edelson
  */
-@Target(ElementType.PARAMETER)
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-public @interface OperationPayload {
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME) 
+@Documented 
+public @interface OperationDispatcher {
 }

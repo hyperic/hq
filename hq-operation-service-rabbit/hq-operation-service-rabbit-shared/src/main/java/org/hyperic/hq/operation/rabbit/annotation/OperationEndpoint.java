@@ -23,17 +23,16 @@
  *  USA.
  *
  */
-package org.hyperic.hq.operation.rabbit.util;
+package org.hyperic.hq.operation.rabbit.annotation;
 
 import java.lang.annotation.*;
 
 /**
- * Tags a <code>Class</code> type as an operation initiator
+ * Stereotype annotation indicating that a class can be delegated to as a Messaging Endpoint
  * @author Helena Edelson
- */
+ */ 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@Documented
-//@Component agent doesn't use spring
-public @interface OperationInitiator {
+@Documented 
+public @interface OperationEndpoint {
 }

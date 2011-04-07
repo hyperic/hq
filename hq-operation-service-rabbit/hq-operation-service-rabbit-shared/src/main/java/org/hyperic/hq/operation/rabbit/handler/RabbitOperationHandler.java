@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author Helena Edelson
  */
-public class RabbitOperationHandler implements OperationHandlerRegistry, OperationHandler, OperationSupported {
+public class RabbitOperationHandler implements OperationEndpointRegistry, OperationHandler, OperationSupported {
 
     private static final long STARTUP_TIMEOUT = 5000;
 
@@ -42,10 +42,15 @@ public class RabbitOperationHandler implements OperationHandlerRegistry, Operati
         this.routings = new Routings();
     }
 
-    public void registerOperationHandler(String operationName, Method handlerMethod, Object instance) {
-        this.operationHandlers.put(operationName, new MethodInvoker(handlerMethod, instance, this.converter));
+    /**
+     * @param operationName The name operation name that this method can handle
+     * @param endpointMethod The method
+     * @param endpointCandidate The instance to invoke the method on
+     */
+    public void registerOperationEndpoint(String operationName, Method endpointMethod, Object endpointCandidate) {
+        this.operationHandlers.put(operationName, new MethodInvoker(endpointMethod, endpointCandidate, this.converter));
     }
-
+ 
     public void handle(Envelope envelope) throws EnvelopeHandlingException {
         MethodInvoker methodInvoker = this.operationHandlers.get(envelope.getOperationName());
 

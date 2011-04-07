@@ -1,7 +1,8 @@
-package org.hyperic.hq.operation;
+package org.hyperic.hq.operation.rabbit.core;
 
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.hyperic.hq.operation.Envelope;
 
 /**
  * @author Helena Edelson

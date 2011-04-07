@@ -23,7 +23,9 @@
  *  USA.
  *
  */
-package org.hyperic.hq.operation.rabbit.util;
+package org.hyperic.hq.operation.rabbit.annotation;
+
+import org.hyperic.hq.operation.rabbit.util.RoutingType;
 
 import java.lang.annotation.*;
 
