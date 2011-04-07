@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatus;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatusEnum;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -127,10 +128,11 @@ public interface PluginManager {
      * Removes all plugins specified by the pluginFilenames collection
      * @param subj
      * @param pluginFileNames
-     * @throws PermissionException
+     * @throws PluginDeployException - if plugins can't be deployed, most likely cause here is
+     * permission issues in the hq filesystem
      */
     void removePlugins(AuthzSubject subj, Collection<String> pluginFileNames)
-    throws PermissionException;
+    throws PluginDeployException;
 
     /**
      * Removes all {@link AgentPluginStatus} objects associated with the agentId and pluginFileNames

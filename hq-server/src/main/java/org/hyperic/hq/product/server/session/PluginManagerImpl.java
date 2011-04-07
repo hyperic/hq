@@ -131,26 +131,32 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
     
     @Transactional(readOnly=false)
     public void removePlugins(AuthzSubject subj, Collection<String> pluginFileNames)
-    throws PermissionException {
-        permissionManager.checkIsSuperUser(subj);
+    throws PluginDeployException {
+        try {
+            permissionManager.checkIsSuperUser(subj);
+        } catch (PermissionException e) {
+            throw new PluginDeployException("plugin.manager.deploy.super.user", e);
+        }
         final Collection<Agent> agents = agentPluginStatusDAO.getAutoUpdatingAgents();
-        deletePluginFiles(pluginFileNames);
-        removePluginsAndAssociatedResources(subj, pluginFileNames);
+        final Collection<Plugin> plugins = pluginDAO.getPluginsByFileNames(pluginFileNames);
+        removePluginsAndAssociatedResources(subj, plugins);
         final AgentPluginUpdater agentPluginUpdater = Bootstrap.getBean(AgentPluginUpdater.class);
         for (final Agent agent : agents) {
             agentPluginUpdater.queuePluginRemoval(agent.getId(), pluginFileNames);
         }
+        deletePluginFiles(pluginFileNames);
     }
-    
+
     private void removePluginsAndAssociatedResources(AuthzSubject subj,
-                                                     Collection<String> pluginFileNames) {
-        for (final String filename : pluginFileNames) {
-            final Plugin plugin = pluginDAO.getByFilename(filename);
+                                                     Collection<Plugin> plugins) {
+        for (final Plugin plugin : plugins) {
             if (plugin != null) {
                 final Map<String, MonitorableType> map =
                     monitorableTypeDAO.findByPluginName(plugin.getName());
                 resourceManager.removeResourcesAndTypes(subj, map.values());
-                pluginDAO.remove(plugin);
+                plugin.setDeleted(true);
+// XXX [HHQ-4708] this is a stop-gap until the task is implemented
+pluginDAO.remove(plugin);
             }
         }
     }
@@ -169,7 +175,7 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
     }
     
     private void deletePluginFiles(Collection<String> pluginFileNames)
-    throws PermissionException {
+    throws PluginDeployException {
         final File serverPluginDir = getServerPluginDir();
         final File customPluginDir = getCustomPluginDir();
         // Want this to be all or nothing, so first check if we can delete all the files
@@ -180,16 +186,12 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
                 String msg = "Could not remove plugin " + filename +
                              " from " + customPlugin.getAbsoluteFile() +
                              " or " + serverPlugin.getAbsoluteFile() + " file does not exist." +
-                             " Will ignore and continue with plugin removal";
+                             "  Will ignore and continue with plugin removal";
                 log.warn(msg);
             } else if (!canDelete(customPlugin) && !canDelete(serverPlugin)) {
-                String msg = "Could not remove plugin " + filename +
-                             " from " + customPlugin.getAbsoluteFile() +
-                             " or " + serverPlugin.getAbsoluteFile() +
-                             " user may not have write priviledge on the file, dir or the files" +
-                             " may not exist";
-                log.warn(msg);
-                throw new PermissionException(msg);
+                final String msg = "plugin.manager.delete.filesystem.perms";
+                throw new PluginDeployException(
+                    msg, filename, customPlugin.getAbsolutePath(), serverPlugin.getAbsolutePath());
             }
         }
         for (final String filename : pluginFileNames) {
@@ -238,8 +240,7 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
             } else if (filename.toLowerCase().endsWith(".xml")) {
                 file = getFileAndValidateXML(filename, bytes);
             } else {
-                throw new PluginDeployException(
-                    "cannot recognize file extension of " + filename + ", will not deploy plugin");
+                throw new PluginDeployException("plugin.manager.bad.file.extension", filename);
             }
             files.add(file);
         }
@@ -262,13 +263,12 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
             if (rtn != null && rtn.exists()) {
                 rtn.delete();
             }
-            throw new PluginDeployException(
-                "could not parse xml doc, " + filename + " is not well-formed: " + e, e);
+            throw new PluginDeployException("plugin.manager.file.xml.wellformed.error", filename);
         } catch (IOException e) {
             if (rtn != null && rtn.exists()) {
                 rtn.delete();
             }
-            throw new PluginDeployException("could not open " + filename + ": " + e, e);
+            throw new PluginDeployException("plugin.manager.file.ioexception", filename);
         } finally {
             close(writer);
         }
@@ -297,9 +297,7 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
             jis = new JarInputStream(bais);
             final Manifest manifest = jis.getManifest();
             if (manifest == null) {
-                throw new PluginDeployException(
-                    "manifest does not exist in " + filename +
-                    ", jar file could be corrupt.  Will not deploy.");
+                throw new PluginDeployException("plugin.manager.jar.manifest.does.not.exist", filename);
             }
             file = TMP_DIR + File.separator + filename;
             fos = new FileOutputStream(file);
@@ -350,14 +348,13 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
             if (toRemove != null && toRemove.exists()) {
                 toRemove.delete();
             }
-            throw new PluginDeployException("could not deploy " + filename + ": " + e, e);
+            throw new PluginDeployException("plugin.manager.file.ioexception", filename);
         } catch (JDOMException e) {
             final File toRemove = new File(file);
             if (toRemove != null && toRemove.exists()) {
                 toRemove.delete();
             }
-            throw new PluginDeployException(
-                "could not deploy " + filename + ", " + currXml + " is not well-formed" + e, e);
+            throw new PluginDeployException("plugin.manager.file.xml.wellformed.error", currXml);
         } finally {
             close(jis);
             close(fos);
@@ -410,7 +407,7 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
     public void markDisabled(Collection<Integer> pluginIds) {
         for (final Integer pluginId : pluginIds) {
             final Plugin plugin = pluginDAO.get(pluginId);
-            if (plugin == null) {
+            if (plugin == null || plugin.isDeleted()) {
                 continue;
             }
             plugin.setDisabled(true);
@@ -571,7 +568,7 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
     @Transactional(readOnly=false)
     public void markDisabled(String pluginFileName) {
         final Plugin plugin = pluginDAO.getByFilename(pluginFileName);
-        if (plugin == null) {
+        if (plugin == null || plugin.isDeleted()) {
             return;
         }
         plugin.setDisabled(true);
@@ -584,7 +581,7 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
     @Transactional(readOnly=false)
     public void markEnabled(String pluginName) {
         final Plugin plugin = pluginDAO.findByName(pluginName);
-        if (plugin == null) {
+        if (plugin == null || plugin.isDeleted()) {
             return;
         }
         plugin.setDisabled(false);
