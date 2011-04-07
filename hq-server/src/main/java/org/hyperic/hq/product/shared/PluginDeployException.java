@@ -57,7 +57,7 @@ public class PluginDeployException extends Exception {
     }
 
     public Map<Integer, String> getParameters() {
-        return params;
+        return Collections.unmodifiableMap(params);
     }
 
 }
