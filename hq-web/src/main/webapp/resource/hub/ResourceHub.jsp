@@ -96,7 +96,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   </c:when>
 </c:choose>
 
-<html:form action="/resource/hub/RemoveResource.do">
+<html:form action="/resource/hub/RemoveResource">
 
 <tiles:insert definition=".page.title.resource.hub">
   <tiles:put name="titleName"><span id="browseFilters"><c:out value="${navHierarchy}" escapeXml="false" /></span></tiles:put>
@@ -286,23 +286,23 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 
 <!--  RESOURCE HUB CONTENTS -->
 <c:url var="sAction" value="/ResourceHub.do">
-  <c:if test="${not empty param.keywords}">
-    <c:param name="keywords" value="${param.keywords}"/>
-  </c:if>
-  <c:if test="${not empty param.ps}">
-    <c:param name="ps" value="${param.ps}"/>
-  </c:if>
-  <c:if test="${not empty param.pn}">
-    <c:param name="pn" value="${param.pn}"/>
-  </c:if>
-  <c:if test="${not empty param.ft}">
-    <c:param name="ft" value="${param.ft}"/>
-  </c:if>
-  <c:if test="${not empty param.g}">
-    <c:param name="g" value="${param.g}"/>
-  </c:if>
-  <c:param name="ff" value="${ResourceHubForm.ff}"/>
-  <c:param name="view" value="${ResourceHubForm.view}"/>
+  	<c:if test="${not empty param.keywords}">
+    	<c:param name="keywords" value="${param.keywords}"/>
+  	</c:if>
+  	<c:if test="${not empty param.ps}">
+    	<c:param name="ps" value="${param.ps}"/>
+  	</c:if>
+  	<c:if test="${not empty param.pn}">
+    	<c:param name="pn" value="${param.pn}"/>
+  	</c:if>
+  	<c:if test="${not empty param.ft}">
+    	<c:param name="ft" value="${param.ft}"/>
+  	</c:if>
+  	<c:if test="${not empty param.g}">
+    	<c:param name="g" value="${param.g}"/>
+  	</c:if>
+  	<c:param name="ff" value="${ResourceHubForm.ff}"/>
+  	<c:param name="view" value="${ResourceHubForm.view}"/>
 </c:url>
 
 <c:choose>
@@ -357,19 +357,25 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
     <th width="1%" class="ListHeaderCheckbox"><input type="checkbox" onclick="ToggleAll(this, widgetProperties)" name="listToggleAll"></th>
     <th width="5%" class="tableRowInactive">&nbsp;</th>
     <th width="30%" class="tableRowSorted">
-    <c:choose>
-    <c:when test="${param.so == 'dec'}">
-    <a href="<c:out value="${sAction}&so=asc"/>"><c:out value="${entityTypeTH}"/><html:img border="0" page="/images/tb_sortdown.gif"/></a>
-    </c:when>
-    <c:otherwise>
-    <a href="<c:out value="${sAction}&so=dec"/>"><c:out value="${entityTypeTH}"/><html:img border="0" page="/images/tb_sortup.gif"/></a>
-    </c:otherwise>
-    </c:choose>
+    	<c:choose>
+    		<c:when test="${param.so == 'dec'}">
+    			<c:url var="sortedAction" value="${sAction}">
+    				<c:param name="so" value="asc" />
+    			</c:url>
+    			<a href="${sortedAction}">${entityTypeTH}<html:img border="0" page="/images/tb_sortdown.gif"/></a>
+    		</c:when>
+    		<c:otherwise>
+    			<c:url var="sortedAction" value="${sAction}">
+    				<c:param name="so" value="dec" />
+    			</c:url>
+    			<a href="${sortedAction}">${entityTypeTH}<html:img border="0" page="/images/tb_sortup.gif"/></a>
+    		</c:otherwise>
+    	</c:choose>
     </th>
-    <c:forEach items="${Indicators}" var="indicator">
-      <th class="ListHeaderCheckbox"><c:out value="${indicator.name}"/></th>
-    </c:forEach>
-      <th class="ListHeaderCheckbox"><fmt:message key="resource.common.monitor.visibility.AvailabilityTH"/></th>
+	    <c:forEach items="${Indicators}" var="indicator">
+	      	<th class="ListHeaderCheckbox">${indicator.name}</th>
+	    </c:forEach>
+	  	<th class="ListHeaderCheckbox"><fmt:message key="resource.common.monitor.visibility.AvailabilityTH"/></th>
     </tr>
     <c:forEach items="${AllResources}" var="resource">
     <tr class="tableRowOdd">

@@ -61,7 +61,7 @@ var help = '<hq:help/>';
   </tr>
   <tr valign="top"> 
     <td colspan="2">
-      <html:form action="/dashboard/ModifyResourceHealth.do" onsubmit="ResourceHealthForm.order.value=Sortable.serialize('resOrd')">
+      <html:form action="/dashboard/ModifyResourceHealth" onsubmit="ResourceHealthForm.order.value=Sortable.serialize('resOrd')">
 <div id="narrowlist_false">
       <tiles:insert definition=".header.tab">
         <tiles:put name="tabKey" value="dash.settings.SelectedResources"/>

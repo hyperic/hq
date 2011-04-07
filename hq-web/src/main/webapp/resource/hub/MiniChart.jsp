@@ -75,10 +75,10 @@
          <td>
            <c:choose>
              <c:when test="${chartLink}">
-               <a href="<c:out value="${healthChartLink}"/>"><img src="<c:out value="${healthChartUrl}"/>" width="200" height="100" border="0"></a>
+               <a href="${healthChartLink}"><img src="${healthChartUrl}" width="200" height="100" border="0"></a>
              </c:when>
              <c:otherwise>
-               <img src="<c:out value="${healthChartUrl}"/>" width="200" height="100">
+               <img src="${healthChartUrl}" width="200" height="100">
              </c:otherwise>
            </c:choose>
          </td>

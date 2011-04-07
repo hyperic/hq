@@ -39,7 +39,7 @@
 <c:url var="scanMethodAction" value="${selfAction}&rid=${param.rid}&type=${param.type}"/>
 <c:set var="formName" value="PlatformAutoDiscoveryForm"/>
 
-<script src="<html:rewrite page="/js/"/>checkAll.js" type="text/javascript"></script>
+<script src="<html:rewrite page="/js/checkAll.js"/>" type="text/javascript"></script>
 
 <!--  GENERAL PROPERTIES TITLE -->
 

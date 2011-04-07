@@ -82,7 +82,7 @@
 	}
 </script>
 
-<html:form action="/resource/common/monitor/visibility/IndicatorCharts.do"
+<html:form action="/resource/common/monitor/visibility/IndicatorCharts"
 	       method="GET" onsubmit="this.view.disabled=false">
 	<input type="hidden" name="eid" value="<c:out value="${eid}"/>">
 	

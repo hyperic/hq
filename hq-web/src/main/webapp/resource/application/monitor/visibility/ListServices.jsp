@@ -98,8 +98,7 @@
       <c:param name="type" value="${service.resource.entityId.type}" />
     </c:url>
     <td class="ListCell" width="20%" align="left" valign="top"><a 
-    href="<c:out value="${inventoryUrl}" />"><c:out 
-    value="${service.resource.name}" /></a></td>
+    href="${inventoryUrl}">${service.resource.name}</a></td>
     <td class="ListCell"><c:out value="${service.parentResource.name}" /></td>
     <td class="ListCell"><c:out value="${service.resource.appdefResourceTypeValue.name}" /></td>
     <td width="4%" class="ListCellCheckboxLeftLine"><html:img 

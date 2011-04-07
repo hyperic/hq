@@ -92,7 +92,6 @@
 		overflow-y: scroll;
 		overflow-x: hidden;
 		height: 400px;
-		
 	}
 
 	#pluginManagerPanel .gridheader {
@@ -300,14 +299,12 @@
 <section id="pluginManagerPanel" class="container top">
 	<h1><fmt:message key="admin.managers.plugin.title" /></h1>
 	<p id="instruction"><fmt:message key="${instruction}" /></p>
-
-
 	
 	<div id="currentTimeInfo">
 		<span style="float:right;" id="refreshTimeInfo"><fmt:message key="admin.managers.Plugin.information.refresh.time"/> <span id="timeNow"></span>
 		</span>
 		<span style="float:right;">&nbsp;&nbsp;</span>
-		<img style="float:right;" id="refreshIcon" style="float:right;" src="/images/arrow_refresh.png" alt="refresh" /> 
+		<img style="float:right;" id="refreshIcon" style="float:right;" src="<spring:url value="images/icon_info_small.gif" />" alt="refresh" /> 
 	</div>
 
 	<div class="topInfo">
@@ -356,13 +353,13 @@
 				<span class="last column span-status" >
 					<c:if test="${pluginSummary.allAgentCount>0}">
 					    <c:if test="${pluginSummary.successAgentCount>0}">
-					    	${pluginSummary.successAgentCount}&nbsp;<img class="successIcon" src="/images/icon_available_green.gif"/>&nbsp;&nbsp;
+					    	${pluginSummary.successAgentCount}&nbsp;<img class="successIcon" src="<spring:url value="/images/icon_available_green.gif" />"/>&nbsp;&nbsp;
 					    </c:if>
 					    
 					    <c:if test="${pluginSummary.inProgressAgentCount>0 ||pluginSummary.errorAgentCount>0 }">
 					    	<span id="${pluginSummary.name}_${pluginSummary.id}" class="agentStatusSpan">				    	
 							<c:if test="${pluginSummary.inProgressAgentCount>0}">
-						        ${pluginSummary.inProgressAgentCount}&nbsp;<img id="${pluginSummary.name}_${pluginSummary.id}" class="inProgressIcon" src="/images/4.0/icons/alert.png"/>&nbsp;&nbsp;
+						        ${pluginSummary.inProgressAgentCount}&nbsp;<img id="${pluginSummary.name}_${pluginSummary.id}" class="inProgressIcon" src="/images/arrow_refresh.png"/>&nbsp;&nbsp;
 						   	</c:if>	
 						   	<c:if test="${pluginSummary.errorAgentCount>0}">	   		
 					   			${pluginSummary.errorAgentCount}&nbsp;<img id="${pluginSummary.name}_${pluginSummary.id}" class="errorIcon" src="/images/icon_available_red.gif"/>
@@ -374,7 +371,6 @@
 			</li>
 		</c:forEach>
 	</ul>
-	
 	</form:form>
 	
 	<c:if test="${mechanismOn}" >
@@ -384,9 +380,7 @@
 			<input id="showUploadFormButton" type="button" value="<fmt:message key="admin.managers.plugin.button.add.plugin" />" />
 		</div>	
 	</c:if>
-
 </section>
-
 
 
 <c:if test="${mechanismOn}" >
@@ -460,7 +454,6 @@
 	hqDojo.require("dojo.hash");
 	hqDojo.require("dojox.timing._base");
 	hqDojo.require("dojo.date.locale");
-
 
 	hqDojo.ready(function() {
 		var timer = new hqDojox.timing.Timer();
@@ -538,8 +531,6 @@
 			
 			hqDojo.xhrGet(infoXhrArgs);
 			hqDojo.publish("refreshDataGrid");
-			
-
 		}
 
 		new hqDijit.Tooltip({

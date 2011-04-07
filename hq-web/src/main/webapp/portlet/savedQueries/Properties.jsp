@@ -64,7 +64,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   </tr>
   <tr valign="top"> 
     <td colspan='2'>
-      <html:form action="/dashboard/ModifySavedQueries.do" onsubmit="SavedQueriesForm.order.value=Sortable.serialize('qryOrd')">
+      <html:form action="/dashboard/ModifySavedQueries" onsubmit="SavedQueriesForm.order.value=Sortable.serialize('qryOrd')">
       <div id="narrowlist_false">
       <tiles:insert definition=".header.tab">
         <tiles:put name="tabKey" value="dash.settings.SelectedCharts"/>
