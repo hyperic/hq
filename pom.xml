@@ -574,7 +574,7 @@
 				<scope>test</scope>
 			</dependency>
 			<dependency>
-				<groupId>com.vmware.cm</groupId>
+				<groupId>org.hyperic.cm</groupId>
 				<artifactId>cm-file-monitor</artifactId>
 				<version>${filemonitor.version}</version>
 			</dependency>

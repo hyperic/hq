@@ -37,15 +37,14 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.cm.filemonitor.IChangeListener;
+import org.hyperic.cm.filemonitor.IFileMonitor;
+import org.hyperic.cm.filemonitor.data.EventActionsEnum;
+import org.hyperic.cm.filemonitor.data.EventMessage;
+import org.hyperic.cm.versioncontrol.dto.FolderDto;
 import org.hyperic.hq.product.pluginxml.PluginData;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
-
-import com.vmware.frantic.dao.versioncontrol.dto.FolderDto;
-import com.vmware.frantic.fsmonitor.IChangeListener;
-import com.vmware.frantic.fsmonitor.IFileMonitor;
-import com.vmware.frantic.fsmonitor.data.EventActionsEnum;
-import com.vmware.frantic.fsmonitor.data.EventMessage;
 
 public class FileChangeTrackPlugin extends ConfigFileTrackPlugin{
     static final String PROP_FILES =

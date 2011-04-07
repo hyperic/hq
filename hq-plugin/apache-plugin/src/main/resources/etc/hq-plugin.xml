@@ -1003,6 +1003,9 @@ ExtendedStatus On
     <scan>
       <include name="/**/${VERSION_FILE}"/>
     </scan>
+    <scan registry="SYSTEM\CurrentControlSet\Services\ERS*">
+      <include name="ImagePath"/>
+    </scan>
   </server>
 
   <server name="Apache-ERS"

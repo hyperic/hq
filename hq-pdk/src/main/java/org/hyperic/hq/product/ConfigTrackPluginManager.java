@@ -28,11 +28,10 @@ package org.hyperic.hq.product;
 import java.io.File;
 import java.util.Properties;
 
+import org.hyperic.cm.filemonitor.FileMonitor;
+import org.hyperic.cm.filemonitor.IFileMonitor;
+import org.hyperic.cm.filemonitor.MonitorStatus;
 import org.hyperic.hq.agent.AgentConfig;
-
-import com.vmware.frantic.fsmonitor.FileMonitor;
-import com.vmware.frantic.fsmonitor.IFileMonitor;
-import com.vmware.frantic.fsmonitor.MonitorStatus;
 
 public class ConfigTrackPluginManager extends TrackEventPluginManager {
 
