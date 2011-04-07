@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.hq.operation.rabbit.handler;
+package org.hyperic.hq.operation.rabbit.core;
 
 import org.apache.log4j.Logger;
 import org.hyperic.hq.operation.AsyncQueuedConsumer;

@@ -1,8 +1,7 @@
 package org.hyperic.hq.operation.rabbit.core;
 
-import org.hyperic.hq.operation.OperationDispatcherDiscoverer;
-import org.hyperic.hq.operation.OperationDispatcherRegistry;
-import org.hyperic.hq.operation.rabbit.mapping.AnnotatedOperationDispatcherMapper;
+import org.hyperic.hq.operation.OperationDiscoverer;
+import org.hyperic.hq.operation.OperationRegistry;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 
@@ -11,23 +10,23 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
  */
 public class OperationDispatcherDiscovererBeanPostProcessor implements BeanPostProcessor {
 
-    private final OperationDispatcherDiscoverer operationDispatcherDiscoverer;
+    private final OperationDiscoverer operationDiscoverer;
 
-    private final OperationDispatcherRegistry operationDispatcherRegistry;
+    private final OperationRegistry operationRegistry;
 
     /**
      * Creates an instance
      *
-     * @param operationDispatcherRegistry The registry
+     * @param operationRegistry The registry
      */
-    public OperationDispatcherDiscovererBeanPostProcessor(OperationDispatcherRegistry operationDispatcherRegistry) {
-        this(new AnnotatedOperationDispatcherMapper(), operationDispatcherRegistry);
+    public OperationDispatcherDiscovererBeanPostProcessor(OperationRegistry operationRegistry) {
+        this(new AnnotatedOperationDispatcherDiscoverer(), operationRegistry);
     }
 
-    OperationDispatcherDiscovererBeanPostProcessor(OperationDispatcherDiscoverer operationDispatcherDiscoverer,
-        OperationDispatcherRegistry operationDispatcherRegistry) {
-        this.operationDispatcherDiscoverer = operationDispatcherDiscoverer;
-        this.operationDispatcherRegistry = operationDispatcherRegistry;
+    OperationDispatcherDiscovererBeanPostProcessor(OperationDiscoverer operationDiscoverer,
+        OperationRegistry operationRegistry) {
+        this.operationDiscoverer = operationDiscoverer;
+        this.operationRegistry = operationRegistry;
     }
 
     @Override
@@ -38,7 +37,7 @@ public class OperationDispatcherDiscovererBeanPostProcessor implements BeanPostP
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) {
         try {
-            this.operationDispatcherDiscoverer.discover(bean, this.operationDispatcherRegistry);
+            this.operationDiscoverer.discover(bean, this.operationRegistry);
         } catch (Exception e) {
             throw new FatalBeanException("Unable to scan bean for annotations", e);
         }

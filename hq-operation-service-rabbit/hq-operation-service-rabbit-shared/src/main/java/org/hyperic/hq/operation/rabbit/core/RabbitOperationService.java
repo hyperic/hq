@@ -4,8 +4,7 @@ import org.apache.log4j.Logger;
 import org.hyperic.hq.operation.OperationData;
 import org.hyperic.hq.operation.OperationFailedException;
 import org.hyperic.hq.operation.OperationService;
-import org.hyperic.hq.operation.rabbit.connection.SingleConnectionFactory;
-import org.hyperic.hq.operation.rabbit.mapping.OperationMappingRegistry;
+import org.hyperic.hq.operation.rabbit.connection.SingleConnectionFactory; 
 
 import java.io.IOException;
 
@@ -16,8 +15,6 @@ public class RabbitOperationService implements OperationService {
 
     protected final Logger logger = Logger.getLogger(this.getClass());
 
-    private OperationMappingRegistry operationMappingRegistry;
- 
     /**
      * Injection of template with pre-configured exchange and routing key
      */

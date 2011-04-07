@@ -6,11 +6,11 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.operation.AbstractOperation;
 import org.hyperic.hq.operation.Converter;
 import org.hyperic.hq.operation.rabbit.connection.ChannelTemplate;
-import org.hyperic.hq.operation.rabbit.connection.ConnectionException;
 import org.hyperic.hq.operation.rabbit.connection.SingleConnectionFactory;
 import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
-import org.hyperic.hq.operation.rabbit.util.Routings;
+import org.hyperic.hq.operation.rabbit.mapping.RabbitBindingsRegistry;
 import org.hyperic.hq.operation.rabbit.util.MessageConstants;
+import org.hyperic.hq.operation.rabbit.util.Routings;
 
 import java.io.IOException;
 import java.util.Random;
@@ -27,6 +27,8 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
     private final ChannelTemplate channelTemplate;
 
     private final Routings routings;
+
+    private final RabbitBindingsRegistry bindingsRegistry;
 
     private final Object monitor = new Object();
 
@@ -83,7 +85,7 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
         this.routings = serverId != null ? new Routings(serverId) : new Routings();
         this.exchangeName = exchangeName != null ? exchangeName : "";
         this.usesNonGuestCredentials = !cf.getUsername().equals(defaultCredential) && !cf.getPassword().equals(defaultCredential);
-        initialize(cf);
+        this.bindingsRegistry = new RabbitBindingsRegistry(cf);
     }
 
     /**
@@ -152,14 +154,6 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
         return bp;
     }
 
-    /**
-     * Tests for valid broker configuration, if the client
-     * can connect to a node, and if the node or server is down.
-     * @return
-     */
-    public boolean hasValidConfigurations() {
-        return channelTemplate.validateConnection();
-    }
 
 
     // TODO remove
@@ -192,37 +186,6 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
             } catch (IOException e) {
                 this.logger.error(e);
             }
-        }
-    }
-
-    /**
-     * TODO routing key
-     * Initializes a temporary test with the 2 exchanges for unauthenticated agents only
-     * @param connectionFactory The connection factory to use
-     */
-    private void initialize(ConnectionFactory connectionFactory) {
-        try {
-            /* assert the state of configuration is correct. If so proceed */
-            if (hasValidConfigurations()) {
-                this.channel = connectionFactory.newConnection().createChannel();
-
-                if (channel != null) {
-                    channel.exchangeDeclare(routings.getToServerUnauthenticatedExchange(), routings.getSharedExchangeType(), true);
-                    this.agentQueue = channel.queueDeclare().getQueue();
-                    channel.queueBind(agentQueue, routings.getToServerExchange(), "test");
-
-                    channel.exchangeDeclare(routings.getToAgentUnauthenticatedExchange(), routings.getSharedExchangeType(), true);
-                    this.serverQueue = channel.queueDeclare().getQueue();
-                    channel.queueBind(serverQueue, routings.getToAgentExchange(), "test");
-
-                    this.queueingConsumer = new QueueingConsumer(channel);
-                }
-            } else {
-                throw new ConnectionException("");
-            }
-
-        } catch (IOException e) {
-            throw new ConnectionException("Error declaring and binding exchanges and queues.", e);
         }
     }
 }

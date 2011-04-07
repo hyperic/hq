@@ -23,25 +23,16 @@
  *  USA.
  *
  */
-package org.hyperic.hq.operation.rabbit.annotation;
-
-import org.hyperic.hq.operation.rabbit.annotation.Operation;
+package org.hyperic.hq.operation.annotation;
 
 import java.lang.annotation.*;
 
-
 /**
- * Tags a <code>Method</code> as an operation
- * This annotation can be used as meta-data for other annotations.
+ * Stereotype annotation indicating that a class can be delegated to as a Messaging Endpoint
  * @author Helena Edelson
- */
-@Target(ElementType.METHOD)
-@Operation
-public @interface SecureOperation {
-
-    String operationName();
-
-    String exchangeName() default "";
-
-	String routingKey() default "";
+ */ 
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented 
+public @interface OperationEndpoint {
 }

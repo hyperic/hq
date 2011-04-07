@@ -1,8 +1,7 @@
 package org.hyperic.hq.operation.rabbit.core;
 
-import org.hyperic.hq.operation.OperationEndpointDiscoverer;
-import org.hyperic.hq.operation.OperationEndpointRegistry;
-import org.hyperic.hq.operation.rabbit.mapping.AnnotatedOperationEndpointMapper;
+import org.hyperic.hq.operation.OperationDiscoverer;
+import org.hyperic.hq.operation.OperationRegistry;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 
@@ -11,21 +10,21 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
  */
 public final class OperationEndpointDiscovererBeanPostProcessor implements BeanPostProcessor {
 
-    private final OperationEndpointDiscoverer operationEndpointDiscoverer;
+    private final OperationDiscoverer operationEndpointDiscoverer;
 
-    private final OperationEndpointRegistry operationEndpointRegistry;
+    private final OperationRegistry operationEndpointRegistry;
 
     /**
      * Creates an instance
      *
      * @param operationEndpointRegistry The registry
      */
-    public OperationEndpointDiscovererBeanPostProcessor(OperationEndpointRegistry operationEndpointRegistry) {
-        this(new AnnotatedOperationEndpointMapper(), operationEndpointRegistry);
+    public OperationEndpointDiscovererBeanPostProcessor(OperationRegistry operationEndpointRegistry) {
+        this(new AnnotatedOperationEndpointDiscoverer(), operationEndpointRegistry);
     }
 
-    OperationEndpointDiscovererBeanPostProcessor(OperationEndpointDiscoverer operationEndpointDiscoverer,
-        OperationEndpointRegistry operationEndpointRegistry) {
+    OperationEndpointDiscovererBeanPostProcessor(OperationDiscoverer operationEndpointDiscoverer,
+        OperationRegistry operationEndpointRegistry) {
         this.operationEndpointDiscoverer = operationEndpointDiscoverer;
         this.operationEndpointRegistry = operationEndpointRegistry;
     }

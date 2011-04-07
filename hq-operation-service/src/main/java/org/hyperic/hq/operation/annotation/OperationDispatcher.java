@@ -23,7 +23,7 @@
  *  USA.
  *
  */
-package org.hyperic.hq.operation.rabbit.annotation;
+package org.hyperic.hq.operation.annotation;
 
 import java.lang.annotation.*;
 

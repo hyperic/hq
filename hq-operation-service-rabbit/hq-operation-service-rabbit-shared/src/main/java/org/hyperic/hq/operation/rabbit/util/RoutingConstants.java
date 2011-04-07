@@ -19,7 +19,7 @@ public class RoutingConstants {
      * The exchange type for shared agent-server exchanges
      */
     public static final String SHARED_EXCHANGE_TYPE = "topic";
-
+  
     /**
      * Exchange name to use to send to the server as guest
      * such as for a registration operation

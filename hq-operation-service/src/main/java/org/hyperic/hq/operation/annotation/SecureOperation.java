@@ -23,36 +23,23 @@
  *  USA.
  *
  */
-package org.hyperic.hq.operation.rabbit.annotation;
-
-import org.hyperic.hq.operation.rabbit.util.RoutingType;
+package org.hyperic.hq.operation.annotation;
 
 import java.lang.annotation.*;
 
+
 /**
- * Tags a <code>Method</code> as an operation.
- * Indicates that a method is capable of resolving to an exchange name with a
- * routing key or just a routing key with the default exchange.
+ * Tags a <code>Method</code> as an operation
  * This annotation can be used as meta-data for other annotations.
- * @see SecureOperation
  * @author Helena Edelson
  */
-@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@Inherited
-@Documented
-public @interface Operation {
+@Target(ElementType.METHOD)
+@Operation
+public @interface SecureOperation {
 
-    String operationName() default "";
+    String operationName();
 
     String exchangeName() default "";
 
-	/**
-     * The value of the binding pattern or routing key, based on
-     * the routingType
-     * @return
-     */
-    String value() default "";
-
-    RoutingType routingType() default RoutingType.ROUTING_KEY;
+	String value() default "";
 }

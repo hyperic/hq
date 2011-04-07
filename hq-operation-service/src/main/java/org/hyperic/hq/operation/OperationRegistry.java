@@ -5,14 +5,14 @@ import java.lang.reflect.Method;
 /**
  * @author Helena Edelson
  */
-public interface OperationDispatcherRegistry {
+public interface OperationRegistry {
 
     /**
-        * Registers a dispatcher
+        * Registers a registry entity
         * @param operationName The name operation name that this method can handle
-        * @param dispatcherMethod The method
+        * @param entityMethod The method
         * @param candidate The instance to invoke the method on
         */
-       void registerOperationDispatcher(String operationName, Method dispatcherMethod, Object candidate);
+       void register(String operationName, Method entityMethod, Object candidate);
 
 }

@@ -2,6 +2,7 @@ package org.hyperic.hq.operation.rabbit.handler;
 
 import org.hyperic.hq.operation.AsyncQueuedConsumer;
 import org.hyperic.hq.operation.rabbit.core.RabbitTemplate;
+import org.hyperic.hq.operation.rabbit.core.SimpleAsyncMessageReceiver;
 import org.hyperic.hq.operation.rabbit.core.SimpleRabbitTemplate;
 
 import java.io.IOException;

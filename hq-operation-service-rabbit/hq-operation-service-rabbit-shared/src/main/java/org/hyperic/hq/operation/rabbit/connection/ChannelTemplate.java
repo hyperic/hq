@@ -50,6 +50,7 @@ public final class ChannelTemplate implements ChannelOperations {
      */
     public ChannelTemplate(com.rabbitmq.client.ConnectionFactory connectionFactory) {
         this.connectionFactory = connectionFactory;
+        validateConnection();
     }
 
     /**

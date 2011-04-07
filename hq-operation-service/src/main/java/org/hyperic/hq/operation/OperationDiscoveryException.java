@@ -3,13 +3,13 @@ package org.hyperic.hq.operation;
 /**
  * @author Helena Edelson
  */
-public class OperationDispatcherException extends RuntimeException {
+public class OperationDiscoveryException extends RuntimeException {
 
     /**
      * Creates a chaining-aware instance
      * @param cause The java.lang.Throwable cause
      */
-    public OperationDispatcherException(Throwable cause) {
+    public OperationDiscoveryException(Throwable cause) {
         super(cause);
     }
 
@@ -17,7 +17,7 @@ public class OperationDispatcherException extends RuntimeException {
      * Creates an instance with a message
      * @param context The exception message
      */
-    public OperationDispatcherException(String context) {
+    public OperationDiscoveryException(String context) {
         super(context);
     }
 
@@ -26,7 +26,7 @@ public class OperationDispatcherException extends RuntimeException {
      * @param message The exception message
      * @param cause The parent exception
      */
-    public OperationDispatcherException(String message, Throwable cause) {
+    public OperationDiscoveryException(String message, Throwable cause) {
         super(message, cause);
     }
 }

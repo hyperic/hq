@@ -6,6 +6,7 @@ import java.math.BigInteger;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author Helena Edelson
@@ -21,8 +22,6 @@ public class SerializationUtilTests {
 
         TestObject data = new TestObject("testData");
         assertEquals(data, SerializationUtil.deserialize(SerializationUtil.serialize(data)));
-
-
 	}
 
 	@Test(expected = IllegalStateException.class)
@@ -44,11 +43,11 @@ public class SerializationUtilTests {
 
 	@Test
 	public void serializeNull() throws Exception {
-		assertNotNull(SerializationUtil.serialize(null));
+		assertNull(SerializationUtil.serialize(null));
 	}
 
 	@Test
 	public void deserializeNull() throws Exception {
-		assertNotNull(SerializationUtil.deserialize(null));
+		assertNull(SerializationUtil.deserialize(null));
 	}
 }

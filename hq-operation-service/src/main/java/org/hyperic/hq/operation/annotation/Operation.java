@@ -23,19 +23,32 @@
  *  USA.
  *
  */
-package org.hyperic.hq.operation.rabbit.annotation;
+package org.hyperic.hq.operation.annotation;
+
 
 import java.lang.annotation.*;
 
 /**
- * Marks a method parameter as a candidate message payload
- * <p>
- * Example: void foo(@Payload Object data) 
- *
+ * Tags a <code>Method</code> as an operation.
+ * Indicates that a method is capable of resolving to an exchange name with a
+ * routing key or just a routing key with the default exchange.
+ * This annotation can be used as meta-data for other annotations.
+ * @see SecureOperation
  * @author Helena Edelson
  */
-@Target(ElementType.PARAMETER)
+@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
+@Inherited
 @Documented
-public @interface OperationPayload {
+public @interface Operation {
+
+    String operationName() default "";
+
+    String exchangeName() default "";
+
+	/**
+     * The value of the binding pattern or routing key, based on  
+     */
+    String value() default "";
+
 }
