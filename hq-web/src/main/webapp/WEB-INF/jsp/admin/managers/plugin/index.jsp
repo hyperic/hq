@@ -29,7 +29,7 @@
         
 	.selectFileBtn{
 		-moz-border-radius: 4px 4px 4px 4px;
-	    background: url("/images/4.0/backgrounds/button-green-background.jpg") repeat-x scroll center bottom #2DBF3D;
+	    background: url("<spring:url value="/images/4.0/backgrounds/button-green-background.jpg"/>") repeat-x scroll center bottom #2DBF3D;
     	border: 1px solid #84B96D;
 	    color: #FFFFFF;
 	    /*cursor: pointer;*/
@@ -65,7 +65,7 @@
 	}
 	
 	#pluginManagerPanel .actionbar {
-		background: url("/images/4.0/backgrounds/table_header_large.png") repeat-x 0 0 transparent;
+		background: url("<spring:url value="/images/4.0/backgrounds/table_header_large.png"/>") repeat-x 0 0 transparent;
 		overflow: hidden;
 		border: 1px solid gray;
 		border-top: 0;
@@ -95,7 +95,7 @@
 	}
 
 	#pluginManagerPanel .gridheader {
-		background: url("/images/4.0/backgrounds/table_header_large.png") repeat-x 0 0 transparent;
+		background: url("<spring:url value="/images/4.0/backgrounds/table_header_large.png"/>") repeat-x 0 0 transparent;
 		overflow: hidden;
 		font-weight: bold;
 		font-size: 1.1em;
@@ -227,13 +227,13 @@
 	}
 	
 	.errorAgent{
-		list-style-image: url("/images/icon_available_red.gif");
+		list-style-image: url("<spring:url value="/images/icon_available_red.gif"/>");
 	}
 	.inProgressAgent{
-		list-style-image: url("/images/4.0/icons/alert.png");
+		list-style-image: url("<spring:url value="/images/4.0/icons/alert.png"/>");
 	}
 	#searchText{
-		background: url("/images/4.0/icons/search.png") no-repeat scroll 3px center #FFFFFF;
+		background: url("<spring:url value="/images/4.0/icons/search.png"/>") no-repeat scroll 3px center #FFFFFF;
 		color: #444444;
 		padding: 0.25em 0.25em 0.25em 20px;
 		width:250px;
@@ -256,7 +256,7 @@
 		float:right;
 	}
 	.fileToUploadClose{
-		background: url("/images/dash_movecontent_del-on.gif") no-repeat scroll 5px center #FFFFFF
+		background: url("<spring:url value="/images/dash_movecontent_del-on.gif"/>") no-repeat scroll 5px center #FFFFFF
 	}
 	#afterSelectFileInstruction{
 		text-align:center;
@@ -311,13 +311,13 @@
 		<span id="agentInfo" style="float:right">
 			<fmt:message key="admin.managers.Plugin.information.agent.count"/>:&nbsp;
 		    <span id="agentInfoAllCount">${allAgentCount}</span>
-		    <img src="/images/icon_info_small.gif" class="infoIcon"/> <br/>
+		    <img src="<spring:url value="/images/icon_info_small.gif"/>" class="infoIcon"/> <br/>
 		</span>
 	    <span style="float:left">
 	        <fmt:message key="admin.managers.Plugin.information.legend"/>
-	    	<img src="/images/icon_available_green.gif"/> <fmt:message key="admin.managers.Plugin.tip.icon.success"/>
-	    	&nbsp; <img src="/images/4.0/icons/alert.png"/> <fmt:message key="admin.managers.Plugin.tip.icon.in.progress"/>
-	   		&nbsp;<img src="/images/icon_available_red.gif"/> <fmt:message key="admin.managers.Plugin.tip.icon.error"/>
+	    	<img src="<spring:url value="/images/icon_available_green.gif"/>"/> <fmt:message key="admin.managers.Plugin.tip.icon.success"/>
+	    	&nbsp; <img src="<spring:url value="/images/4.0/icons/alert.png"/>"/> <fmt:message key="admin.managers.Plugin.tip.icon.in.progress"/>
+	   		&nbsp;<img src="<spring:url value="/images/icon_available_red.gif"/>"/> <fmt:message key="admin.managers.Plugin.tip.icon.error"/>
 	    </span>		
 	</div>
 	
@@ -359,10 +359,10 @@
 					    <c:if test="${pluginSummary.inProgressAgentCount>0 ||pluginSummary.errorAgentCount>0 }">
 					    	<span id="${pluginSummary.name}_${pluginSummary.id}" class="agentStatusSpan">				    	
 							<c:if test="${pluginSummary.inProgressAgentCount>0}">
-						        ${pluginSummary.inProgressAgentCount}&nbsp;<img id="${pluginSummary.name}_${pluginSummary.id}" class="inProgressIcon" src="/images/arrow_refresh.png"/>&nbsp;&nbsp;
+						        ${pluginSummary.inProgressAgentCount}&nbsp;<img id="${pluginSummary.name}_${pluginSummary.id}" class="inProgressIcon" src="<spring:url value="/images/arrow_refresh.png"/>"/>&nbsp;&nbsp;
 						   	</c:if>	
 						   	<c:if test="${pluginSummary.errorAgentCount>0}">	   		
-					   			${pluginSummary.errorAgentCount}&nbsp;<img id="${pluginSummary.name}_${pluginSummary.id}" class="errorIcon" src="/images/icon_available_red.gif"/>
+					   			${pluginSummary.errorAgentCount}&nbsp;<img id="${pluginSummary.name}_${pluginSummary.id}" class="errorIcon" src="<spring:url value="/images/icon_available_red.gif"/>"/>
 							</c:if>
 							</span>
 						</c:if>
@@ -425,7 +425,7 @@
 <div id="showStatusPanel" style="visibility:hidden;">
 	<div style="text-align:center; margin:0px;">
 		<input type="text" id="searchText"/>
-		<img id="loadingIcon" src="/images/4.0/icons/ajax-loader-blue.gif" style=""/>
+		<img id="loadingIcon" src="<spring:url value="/images/4.0/icons/ajax-loader-blue.gif"/>" style=""/>
 	</div>
 	<input type="hidden" id="pluginId"/>
 	<input type ="hidden" id="pluginName"/>
