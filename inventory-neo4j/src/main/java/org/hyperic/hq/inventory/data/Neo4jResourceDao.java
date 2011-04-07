@@ -41,12 +41,12 @@ public class Neo4jResourceDao implements ResourceDao {
         resourceFinder = finderFactory.createNodeEntityFinder(Resource.class);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(value="neoTxManager",readOnly = true)
     public Long count() {
         return resourceFinder.count();
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(value="neoTxManager",readOnly = true)
     public List<Resource> find(Integer firstResult, Integer maxResults) {
         // TODO the root resource is not filtered out from DAO. Find a way to do
         // so?
@@ -67,7 +67,7 @@ public class Neo4jResourceDao implements ResourceDao {
         return resources;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(value="neoTxManager",readOnly = true)
     public List<Resource> findAll() {
         // TODO the root resource is not filtered out from DAO. Find a way to do
         // so?
@@ -80,7 +80,7 @@ public class Neo4jResourceDao implements ResourceDao {
         return resources;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(value="neoTxManager",readOnly = true)
     public Resource findById(Integer id) {
         Resource resource = resourceFinder.findByPropertyValue(null, "id", id);
         if (resource != null) {
@@ -89,7 +89,7 @@ public class Neo4jResourceDao implements ResourceDao {
         return resource;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(value="neoTxManager",readOnly = true)
     public Page<Resource> findByIndexedProperty(String propertyName, Object propertyValue,
                                                 Pageable pageInfo, Class<?> sortAttributeType) {
         QueryContext queryContext = new QueryContext(propertyValue);
@@ -123,7 +123,7 @@ public class Neo4jResourceDao implements ResourceDao {
 
     // TODO Assumes name is unique...I think we want to change that behavior in
     // the product
-    @Transactional(readOnly = true)
+    @Transactional(value="neoTxManager",readOnly = true)
     public Resource findByName(String name) {
         Resource resource = resourceFinder.findByPropertyValue(null, "name", name);
         if (resource != null) {
@@ -133,7 +133,7 @@ public class Neo4jResourceDao implements ResourceDao {
         return resource;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(value="neoTxManager",readOnly = true)
     public Set<Resource> findByOwner(String owner) {
         Set<Resource> ownedResources = new HashSet<Resource>();
         Iterable<Resource> resourceIterator = resourceFinder.findAllByPropertyValue(null, "owner",
@@ -145,7 +145,7 @@ public class Neo4jResourceDao implements ResourceDao {
         return ownedResources;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(value="neoTxManager",readOnly = true)
     public Resource findRoot() {
         return findById(1);
     }
@@ -172,7 +172,7 @@ public class Neo4jResourceDao implements ResourceDao {
         throw new IllegalArgumentException("Sort field type " + type + " is not allowed");
     }
 
-    @Transactional
+    @Transactional("neoTxManager")
     public void persist(Resource resource) {
         if (findByName(resource.getName()) != null) {
             throw new NotUniqueException("Resource with name " + resource.getName() +

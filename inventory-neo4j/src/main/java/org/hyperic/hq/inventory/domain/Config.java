@@ -76,7 +76,7 @@ public class Config {
     /**
      * Removes this Config. Only supported as part of Resource removal
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void remove() {
         graphDatabaseContext.removeNodeEntity(this);
     }
@@ -96,7 +96,7 @@ public class Config {
      * @param value The config value
      * @return The previous value or null if there was none
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public Object setValue(String key, Object value) {
         if (value == null) {
             // You can't set null property values in Neo4j, so we won't know if

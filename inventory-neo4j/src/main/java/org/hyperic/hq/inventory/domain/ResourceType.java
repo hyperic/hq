@@ -366,7 +366,7 @@ public class ResourceType {
      * @param relationName The name of the relationship
      * @return The created relationship
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public ResourceTypeRelationship relateTo(ResourceType entity, String relationName) {
         return (ResourceTypeRelationship) this.relateTo(entity, ResourceTypeRelationship.class,
             relationName);
@@ -376,7 +376,7 @@ public class ResourceType {
      * Removes this ResourceType, including all Resources of this type and all
      * relationships
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void remove() {
         removeResources();
         removePropertyTypes();
@@ -406,7 +406,7 @@ public class ResourceType {
     /**
      * Removes all relationships
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void removeRelationships() {
         for (org.neo4j.graphdb.Relationship relationship : getPersistentState().getRelationships()) {
             relationship.delete();
@@ -418,7 +418,7 @@ public class ResourceType {
      * @param entity The related ResourceType
      * @param relationName The name of the relationship
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void removeRelationships(ResourceType entity, String relationName) {
         removeRelationships(entity, relationName, Direction.BOTH);
     }
@@ -429,7 +429,7 @@ public class ResourceType {
      * @param name The name of the relationship
      * @param direction The Direction of the relationship
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void removeRelationships(ResourceType entity, String name, Direction direction) {
         for (ResourceTypeRelationship relation : getRelationships(entity, name, direction)) {
             relation.getPersistentState().delete();
@@ -440,7 +440,7 @@ public class ResourceType {
      * Removes relationships
      * @param relationName The name of the relationship
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void removeRelationships(String relationName) {
         for (org.neo4j.graphdb.Relationship relationship : getPersistentState().getRelationships(
             DynamicRelationshipType.withName(relationName), Direction.BOTH.toNeo4jDir())) {

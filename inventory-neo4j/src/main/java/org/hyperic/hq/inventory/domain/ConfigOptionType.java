@@ -113,7 +113,7 @@ public class ConfigOptionType {
     /**
      * Removes this ConfigOptionType, only supported on removal of ResourceType
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void remove() {
         graphDatabaseContext.removeNodeEntity(this);
     }

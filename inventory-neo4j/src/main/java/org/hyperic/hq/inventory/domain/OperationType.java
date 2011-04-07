@@ -51,7 +51,7 @@ public class OperationType {
      * Adds metadata about arguments to be passed to the operation
      * @param argType The argument type for the operation
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void addOperationArgType(OperationArgType argType) {
         // TODO can't do this in a detached env b/c relationship doesn't take
         // unless both items are node-backed
@@ -86,7 +86,7 @@ public class OperationType {
     /**
      * Removes the OperationType. Only supported as part of ResourceType removal
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void remove() {
         removeArgTypes();
         graphDatabaseContext.removeNodeEntity(this);

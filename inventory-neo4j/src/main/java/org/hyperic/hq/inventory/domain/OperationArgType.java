@@ -62,7 +62,7 @@ public class OperationArgType {
      * Removes this arg type. Only supported with removal of entire
      * encapsulating ResourceType
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void remove() {
         graphDatabaseContext.removeNodeEntity(this);
     }

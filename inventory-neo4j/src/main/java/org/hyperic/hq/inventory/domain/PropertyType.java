@@ -113,7 +113,7 @@ public class PropertyType {
     /**
      * Removes this PropertyType. Only supported as part of ResourceType removal
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void remove() {
         // TODO remove property instances?
         graphDatabaseContext.removeNodeEntity(this);

@@ -26,12 +26,12 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
         resourceTypeFinder = finderFactory.createNodeEntityFinder(ResourceType.class);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(value="neoTxManager",readOnly = true)
     public Long count() {
         return resourceTypeFinder.count();
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(value="neoTxManager",readOnly = true)
     public List<ResourceType> find(Integer firstResult, Integer maxResults) {
         List<ResourceType> resourceTypes = new ArrayList<ResourceType>();
         Iterable<ResourceType> result = resourceTypeFinder.findAll();
@@ -50,7 +50,7 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
         return resourceTypes;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(value="neoTxManager",readOnly = true)
     public List<ResourceType> findAll() {
         List<ResourceType> resourceTypes = new ArrayList<ResourceType>();
         Iterable<ResourceType> result = resourceTypeFinder.findAll();
@@ -62,7 +62,7 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
         return resourceTypes;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(value="neoTxManager",readOnly = true)
     public ResourceType findById(Integer id) {
         ResourceType type = resourceTypeFinder.findByPropertyValue(null, "id", id);
         if (type != null) {
@@ -71,7 +71,7 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
         return type;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(value="neoTxManager",readOnly = true)
     public ResourceType findByName(String name) {
         ResourceType type = resourceTypeFinder.findByPropertyValue(null, "name", name);
         if (type != null) {
@@ -80,12 +80,12 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
         return type;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(value="neoTxManager",readOnly = true)
     public ResourceType findRoot() {
         return findById(1);
     }
 
-    @Transactional
+    @Transactional("neoTxManager")
     public void persist(ResourceType resourceType) {
         if (findByName(resourceType.getName()) != null) {
             throw new NotUniqueException("Resource Type with name " + resourceType.getName() +

@@ -29,13 +29,15 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
 @DirtiesContext
-@Transactional
+@Transactional("neoTxManager")
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "classpath:META-INF/spring/neo4j-context.xml",
                                    "classpath:org/hyperic/hq/inventory/InventoryIntegrationTest-context.xml" })
+@TransactionConfiguration(transactionManager="neoTxManager")
 public class ResourceDaoIntegrationTest {
 
     @Autowired

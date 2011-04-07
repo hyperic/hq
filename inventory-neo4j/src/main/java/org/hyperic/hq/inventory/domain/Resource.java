@@ -91,7 +91,7 @@ public class Resource {
      * @param config The config, whose ConfigType should be one supported by
      *        this Resource's ResourceType
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void addConfig(Config config) {
         // TODO can't do this in a detached env b/c relationship doesn't take
         // unless both items are node-backed
@@ -489,7 +489,7 @@ public class Resource {
      * @param relationName The name of the relationship
      * @return The created relationship
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public ResourceRelationship relateTo(Resource resource, String relationName) {
         if (!(RelationshipTypes.CONTAINS.equals(relationName)) &&
             !type.isRelatedTo(resource.getType(), relationName)) {
@@ -503,7 +503,7 @@ public class Resource {
      * Remove this resource, including all related Config and properties and
      * relationships
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void remove() {
         removeConfig();
         graphDatabaseContext.removeNodeEntity(this);
@@ -522,7 +522,7 @@ public class Resource {
     /**
      * Remove all properties of this Resource
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void removeProperties() {
         for (String key : getPersistentState().getPropertyKeys()) {
             getPersistentState().removeProperty(key);
@@ -532,7 +532,7 @@ public class Resource {
     /**
      * Remove all relationships this Resource is involved in
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void removeRelationships() {
         for (org.neo4j.graphdb.Relationship relationship : getPersistentState().getRelationships()) {
             relationship.delete();
@@ -544,7 +544,7 @@ public class Resource {
      * @param resource The resource related to
      * @param relationName The name of the relationship
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void removeRelationships(Resource resource, String relationName) {
         removeRelationships(resource, relationName, Direction.BOTH);
     }
@@ -555,7 +555,7 @@ public class Resource {
      * @param name The name of the relationship
      * @param direction The {@link Direction} of the relationship to remove
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void removeRelationships(Resource entity, String name, Direction direction) {
         for (ResourceRelationship relation : getRelationships(entity, name, direction)) {
             relation.getPersistentState().delete();
@@ -566,7 +566,7 @@ public class Resource {
      * Remove specific relationships
      * @param relationName The name of the relationship
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void removeRelationships(String relationName) {
         for (org.neo4j.graphdb.Relationship relationship : getPersistentState().getRelationships(
             DynamicRelationshipType.withName(relationName), Direction.BOTH.toNeo4jDir())) {
@@ -626,7 +626,7 @@ public class Resource {
      * @throws IllegalArgumentException If the property is not defined for the
      *         {@link ResourceType}
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public Object setProperty(String key, Object value) {
         if (value == null) {
             // You can't set null property values in Neo4j, so we won't know if

@@ -50,7 +50,7 @@ public class ConfigType {
      * Adds an allowable ConfigOptionType to this ConfigType
      * @param configOptionType A config option type
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void addConfigOptionType(ConfigOptionType configOptionType) {
         // TODO can't do this in a detached env b/c relationship doesn't take
         // unless both items are node-backed
@@ -108,7 +108,7 @@ public class ConfigType {
      * remove config instances since this should only be called upon removal of
      * a ResourceType
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void remove() {
         removeOptTypes();
         graphDatabaseContext.removeNodeEntity(this);

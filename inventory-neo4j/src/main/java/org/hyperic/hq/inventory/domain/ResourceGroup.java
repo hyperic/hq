@@ -54,7 +54,7 @@ public class ResourceGroup
      * 
      * @param member Add a member to the group
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void addMember(Resource member) {
         if (this.members == null) {
             this.members = new HashSet<Resource>();
@@ -91,7 +91,7 @@ public class ResourceGroup
      * 
      * @param member Remove a group member
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void removeMember(Resource member) {
         members.remove(member);
     }

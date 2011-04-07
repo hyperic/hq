@@ -31,12 +31,12 @@ public class Neo4jResourceGroupDao implements ResourceGroupDao {
         groupFinder = finderFactory.createNodeEntityFinder(ResourceGroup.class);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(value="neoTxManager",readOnly = true)
     public Long count() {
         return groupFinder.count();
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(value="neoTxManager",readOnly = true)
     public List<ResourceGroup> find(Integer firstResult, Integer maxResults) {
         List<ResourceGroup> groups = new ArrayList<ResourceGroup>();
         Iterable<ResourceGroup> result = groupFinder.findAll();
@@ -55,7 +55,7 @@ public class Neo4jResourceGroupDao implements ResourceGroupDao {
         return groups;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(value="neoTxManager",readOnly = true)
     public List<ResourceGroup> findAll() {
         List<ResourceGroup> groups = new ArrayList<ResourceGroup>();
         Iterable<ResourceGroup> result = groupFinder.findAll();
@@ -66,7 +66,7 @@ public class Neo4jResourceGroupDao implements ResourceGroupDao {
         return groups;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(value="neoTxManager",readOnly = true)
     public ResourceGroup findById(Integer id) {
         ResourceGroup group = (ResourceGroup) finderFactory.createNodeEntityFinder(Resource.class)
             .findByPropertyValue(null, "id", id);
@@ -76,7 +76,7 @@ public class Neo4jResourceGroupDao implements ResourceGroupDao {
         return group;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(value="neoTxManager",readOnly = true)
     public ResourceGroup findByName(String name) {
         ResourceGroup group = (ResourceGroup) finderFactory.createNodeEntityFinder(Resource.class)
             .findByPropertyValue(null, "name", name);
@@ -87,7 +87,7 @@ public class Neo4jResourceGroupDao implements ResourceGroupDao {
     }
 
   
-    @Transactional
+    @Transactional("neoTxManager")
     public void persist(ResourceGroup resourceGroup) {
         if (findByName(resourceGroup.getName()) != null) {
             throw new NotUniqueException("Group with name " + resourceGroup.getName() +

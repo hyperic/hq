@@ -24,7 +24,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 @DirtiesContext
-@Transactional
+@Transactional("neoTxManager")
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "classpath:META-INF/spring/neo4j-context.xml",
                                    "classpath:org/hyperic/hq/inventory/InventoryIntegrationTest-context.xml" })
