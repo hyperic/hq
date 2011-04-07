@@ -32,7 +32,6 @@
 	    background: url("/images/4.0/backgrounds/button-green-background.jpg") repeat-x scroll center bottom #2DBF3D;
     	border: 1px solid #84B96D;
 	    color: #FFFFFF;
-	    /*cursor: pointer;*/
 	    font-size: 0.9em;
 	    font-weight: bold;
 	    padding: 3px 15px;
@@ -44,8 +43,6 @@
 		text-align: right;
 	}
 
-	
-	
 	#pluginManagerPanel {
 		padding: 0.5em 1.5em;
 		width:90%;
@@ -92,7 +89,6 @@
 		overflow-y: scroll;
 		overflow-x: hidden;
 		height: 400px;
-		
 	}
 
 	#pluginManagerPanel .gridheader {
@@ -566,7 +562,7 @@
 		hqDojo.query(".inProgressIcon").forEach(function(e){
 			new hqDijit.Tooltip({
 				connectId: [e],
-				label: "<fmt:message key='admin.managers.Plugin.tip.icon.in.progress' />"
+				label: "<fmt:message key='admin.managers.Plugin.tip.icon.in.progress' />. <fmt:message key='admin.managers.Plugin.tip.icon.click' />"
 			});		
 		});
 		hqDojo.query(".successIcon").forEach(function(e){
@@ -578,7 +574,7 @@
 		hqDojo.query(".errorIcon").forEach(function(e){
 			new hqDijit.Tooltip({
 				connectId: [e],
-				label: "<fmt:message key='admin.managers.Plugin.tip.icon.error' />"
+				label: "<fmt:message key='admin.managers.Plugin.tip.icon.error' />. <fmt:message key='admin.managers.Plugin.tip.icon.click' />"
 			});		
 		});
 		function seeStatusDetail(pluginId,keyword){
@@ -722,7 +718,6 @@
 					isDebug:false,
 					uploadUrl:"<spring:url value='/app/admin/managers/plugin/upload'/>",
 					force:"html",
-					closable: true,
 					fileMask:[
 						["jar File", "*.jar"],
 						["xml File", "*.xml"]
@@ -999,7 +994,7 @@
 					hqDojo.query(".inProgressIcon").forEach(function(e){
 						new hqDijit.Tooltip({
 							connectId: [e],
-							label: "<fmt:message key='admin.managers.Plugin.tip.icon.in.progress' />"
+							label: "<fmt:message key='admin.managers.Plugin.tip.icon.in.progress' />. <fmt:message key='admin.managers.Plugin.tip.icon.click' />"
 						});		
 					});
 					hqDojo.query(".successIcon").forEach(function(e){
@@ -1011,7 +1006,7 @@
 					hqDojo.query(".errorIcon").forEach(function(e){
 						new hqDijit.Tooltip({
 							connectId: [e],
-							label: "<fmt:message key='admin.managers.Plugin.tip.icon.error' />"
+							label: "<fmt:message key='admin.managers.Plugin.tip.icon.error' />. <fmt:message key='admin.managers.Plugin.tip.icon.click' />"
 						});		
 					});
                 },
