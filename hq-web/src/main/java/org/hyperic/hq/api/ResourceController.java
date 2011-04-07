@@ -75,7 +75,8 @@ public class ResourceController extends BaseController {
 	public @ResponseBody SuccessResponse update(@PathVariable Integer id, @RequestBody ResourceRep form) throws Exception {
 		Resource resource = translateFormToDomain(form);
 
-		resourceDao.merge(resource);
+		//TODO how to update?
+		//resourceDao.merge(resource);
 		
 		return new SuccessResponse(new ResourceRep(resource));
 	}

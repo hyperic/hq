@@ -29,15 +29,14 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
@@ -79,9 +78,10 @@ public class Agent implements ContainerManagedTimestampTrackable, Serializable {
     @Column(name = "ID")
     private Integer id;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "MANAGED_RESOURCES", joinColumns = { @JoinColumn(name = "AGENT_ID") }, inverseJoinColumns = { @JoinColumn(name = "RESOURCE_ID") })
-    private Set<Resource> managedResources = new HashSet<Resource>();
+    @ElementCollection
+    @CollectionTable(name = "MANAGED_RESOURCES", joinColumns = @JoinColumn(name = "AGENT_ID"))
+    @Column(name = "RESOURCE_ID")
+    private Set<Integer> managedResources = new HashSet<Integer>();
 
     @Column(name = "MTIME")
     private Long modifiedTime;
@@ -110,8 +110,8 @@ public class Agent implements ContainerManagedTimestampTrackable, Serializable {
         this.agentVersion = version;
     }
 
-    public void addManagedResource(Resource resource) {
-        managedResources.add(resource);
+    public void addManagedResource(Integer resourceId) {
+        managedResources.add(resourceId);
     }
 
     public boolean allowContainerManagedCreationTime() {
@@ -176,7 +176,7 @@ public class Agent implements ContainerManagedTimestampTrackable, Serializable {
         return id;
     }
 
-    public Set<Resource> getManagedResources() {
+    public Set<Integer> getManagedResources() {
         return managedResources;
     }
 

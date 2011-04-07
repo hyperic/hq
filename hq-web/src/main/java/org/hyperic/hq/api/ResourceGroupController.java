@@ -71,7 +71,8 @@ public class ResourceGroupController extends BaseController {
 	public @ResponseBody SuccessResponse update(@PathVariable Integer id, @RequestBody ResourceGroupForm form) throws Exception {
 		ResourceGroup group = translateFormToDomain(form);
 		
-		resourceGroupDao.merge(group);
+		//TODO how to update?
+		//resourceGroupDao.merge(group);
 		
 		return new SuccessResponse(new ResourceGroupRep(group));
 	}
@@ -97,7 +98,8 @@ public class ResourceGroupController extends BaseController {
 		Resource member = resourceDao.findById(memberId);
 		
 		entity.addMember(member);
-		resourceGroupDao.merge(entity);
+		//TODO how to update?
+		//resourceGroupDao.merge(entity);
 	}
 	
 	@RequestMapping(method = RequestMethod.DELETE, value = "/{id}/members/{memberId}")
@@ -106,7 +108,8 @@ public class ResourceGroupController extends BaseController {
 		Resource member = resourceDao.findById(memberId);
 		
 		entity.removeMember(member);
-		resourceGroupDao.merge(entity);
+		//TODO how to update?
+		//resourceGroupDao.merge(entity);
 	}
 	
 	private ResourceGroup translateFormToDomain(ResourceGroupForm form) {

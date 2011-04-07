@@ -13,7 +13,6 @@ import net.sf.ehcache.CacheManager;
 
 import org.hyperic.hq.agent.mgmt.domain.Agent;
 import org.hyperic.hq.agent.mgmt.domain.AgentType;
-import org.hyperic.hq.inventory.domain.Resource;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -60,10 +59,7 @@ public class AgentRepositoryIntegrationTest {
 
     @Test
     public void testCountUsed() {
-        Resource resource1 = new Resource();
-        resource1.setName("Resource 1");
-        entityManager.persist(resource1);
-        agent.addManagedResource(resource1);
+        agent.addManagedResource(1234);
         assertEquals(1l, agentRepository.countUsed());
     }
 
@@ -88,19 +84,14 @@ public class AgentRepositoryIntegrationTest {
 
     @Test
     public void testFindByManagedResource() {
-        Resource resource1 = new Resource();
-        resource1.setName("Resource 1");
-        entityManager.persist(resource1);
-        agent.addManagedResource(resource1);
-        assertEquals(agent, agentRepository.findByManagedResource(resource1));
+        int resourceId = 1234;
+        agent.addManagedResource(resourceId);
+        assertEquals(agent, agentRepository.findByManagedResource(resourceId));
     }
 
     @Test
     public void testFindByManagedResourceNone() {
-        Resource resource1 = new Resource();
-        resource1.setName("Resource 1");
-        entityManager.persist(resource1);
-        assertNull(agentRepository.findByManagedResource(resource1));
+        assertNull(agentRepository.findByManagedResource(1234));
     }
 
     @Test

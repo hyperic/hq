@@ -501,7 +501,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     
     @Transactional(readOnly = true)
     public Agent getAgent(Resource resource)  {
-        return agentDao.findByManagedResource(resource);
+        return agentDao.findByManagedResource(resource.getId());
     }
 
     /**

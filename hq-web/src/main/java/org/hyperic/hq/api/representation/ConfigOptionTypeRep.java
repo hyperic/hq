@@ -3,7 +3,7 @@ package org.hyperic.hq.api.representation;
 import org.hyperic.hq.inventory.domain.ConfigOptionType;
 
 public class ConfigOptionTypeRep {
-    private Integer id;
+   
     private String name;
     private String defaultValue;
     private String description;
@@ -13,20 +13,11 @@ public class ConfigOptionTypeRep {
 	public ConfigOptionTypeRep() {}
 	
 	public ConfigOptionTypeRep(ConfigOptionType configType) {
-		id = configType.getId();
 		name = configType.getName();
 		defaultValue = (String)configType.getDefaultValue();
 		description = configType.getDescription();
 		hidden = configType.isHidden();
 		secret = configType.isSecret();
-	}
-
-	public Integer getId() {
-		return id;
-	}
-
-	public void setId(Integer id) {
-		this.id = id;
 	}
 
 	public String getName() {

@@ -423,7 +423,7 @@ public class PlatformManagerImpl implements PlatformManager {
         p.setProperty(PlatformFactory.CPU_COUNT,aip.getCpuCount());
         p.setProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_PLATFORM);
         p.setModifiedBy(initialOwner);
-        agent.addManagedResource(p);
+        agent.addManagedResource(p.getId());
         p.setOwner(subject.getName());
         resourceManager.findRootResource().relateTo(p, RelationshipTypes.PLATFORM);
         resourceManager.findRootResource().relateTo(p, RelationshipTypes.CONTAINS);
@@ -446,7 +446,7 @@ public class PlatformManagerImpl implements PlatformManager {
         p.setProperty(PlatformFactory.CREATION_TIME, System.currentTimeMillis());
         p.setProperty(PlatformFactory.MODIFIED_TIME,System.currentTimeMillis());
         p.setProperty(AppdefResource.SORT_NAME, pv.getName().toUpperCase());
-        agent.addManagedResource(p);
+        agent.addManagedResource(p.getId());
         p.setOwner(owner.getName());
         for (IpValue ipv : pv.getAddedIpValues()) {
             addIp(toPlatform(p), ipv.getAddress(), ipv.getNetmask(), ipv.getMACAddress());
@@ -889,7 +889,7 @@ public class PlatformManagerImpl implements PlatformManager {
             if (porker && // Let agent porker
                 // create new platforms
                 !(p.getProperty(PlatformFactory.FQDN).equals(fqdn) || p.getProperty(PlatformFactory.CERT_DN).equals(certdn) || 
-                    agentDAO.findByManagedResource(p).getAgentToken().equals(agentToken))) {
+                    agentDAO.findByManagedResource(p.getId()).getAgentToken().equals(agentToken))) {
                 p = null;
             }
         }
@@ -910,7 +910,7 @@ public class PlatformManagerImpl implements PlatformManager {
             Agent agent = agentManager.getAgent(agentToken);
             Collection<Resource> platforms = getAllPlatforms();
             for (Resource platform : platforms) {
-                if(agent.equals(agentDAO.findByManagedResource(platform))) {
+                if(agent.equals(agentDAO.findByManagedResource(platform.getId()))) {
                     String platType = platform.getType().getName();
                     // need to check if the platform is not a platform device
                     if (PlatformDetector.isSupportedPlatform(platType)) {
@@ -1005,7 +1005,7 @@ public class PlatformManagerImpl implements PlatformManager {
         Set<Resource> agentPlatforms = new HashSet<Resource>();
         Collection<Resource> platforms = getAllPlatforms();
         for (Resource platform : platforms) {
-            if(agentToken.equals(agentDAO.findByManagedResource(platform).getAgentToken())) {
+            if(agentToken.equals(agentDAO.findByManagedResource(platform.getId()).getAgentToken())) {
                 agentPlatforms.add(platform);
             }
         }
@@ -1411,7 +1411,7 @@ public class PlatformManagerImpl implements PlatformManager {
 
             // See if we need to create an AIPlatform
             if (existing.getAgent() != null) {
-                if (agentDAO.findByManagedResource(plat) == null) {
+                if (agentDAO.findByManagedResource(plat.getId()) == null) {
                     // Create AIPlatform for manually created platform
 
                     AIPlatformValue aiPlatform = new AIPlatformValue();
@@ -1432,7 +1432,7 @@ public class PlatformManagerImpl implements PlatformManager {
                     }
 
                     getAIQueueManager().queue(subject, aiPlatform, false, false, true);
-                } else if (!agentDAO.findByManagedResource(plat).equals(existing.getAgent())) {
+                } else if (!agentDAO.findByManagedResource(plat.getId()).equals(existing.getAgent())) {
                     // Need to enqueue the ResourceUpdatedZevent if the
                     // agent changed to get the metrics scheduled
                     List<ResourceUpdatedZevent> events = new ArrayList<ResourceUpdatedZevent>();
@@ -1515,7 +1515,7 @@ public class PlatformManagerImpl implements PlatformManager {
         // if there is a agent
         if (existing.getAgent() != null) {
             // get the agent token and set the agent to the platform
-            existing.getAgent().addManagedResource(platform);
+            existing.getAgent().addManagedResource(platform.getId());
         }
         //TODO how to do a tx update?
         //resourceDao.merge(platform);
@@ -1683,7 +1683,7 @@ public class PlatformManagerImpl implements PlatformManager {
             // make sure we have the current agent that exists on the platform
             // and associate it
             agent = agentManager.getAgent(aiplatform.getAgentToken());
-            agent.addManagedResource(platform);
+            agent.addManagedResource(platform.getId());
         } catch (AgentNotFoundException e) {
             // the agent should exist at this point even if it is a new agent.
             // something failed at another stage of this process
@@ -1725,7 +1725,7 @@ public class PlatformManagerImpl implements PlatformManager {
                     agentManager.pingAgent(subj, agent);
                     log.info("updating ip for agentId=" + agent.getId() + " and platformid=" +
                              platform.getId() + " from ip=" + origIp + " to ip=" + ip.getAddress());
-                    agent.addManagedResource(platform);
+                    agent.addManagedResource(platform.getId());
                     enableMeasurements(subj, platform);
                     break;
                 } catch (AgentConnectionException e) {
@@ -1737,7 +1737,7 @@ public class PlatformManagerImpl implements PlatformManager {
                 // make sure address does not change if/when last ping fails
                 agent.setAddress(origIp);
             }
-            if (agentDAO.findByManagedResource(platform) == null) {
+            if (agentDAO.findByManagedResource(platform.getId()) == null) {
                 log.warn("Removing agent reference from platformid=" + platform.getId() +
                          ".  Server cannot ping the agent from any IP " +
                          "associated with the platform");
@@ -1953,7 +1953,7 @@ public class PlatformManagerImpl implements PlatformManager {
         Collection<Platform> plats  = new HashSet<Platform>();
         Collection<Resource> resources = getAllPlatforms();
         for(Resource resource: resources) {
-            if(agentDAO.findByManagedResource(resource).equals(agt)) {
+            if(agentDAO.findByManagedResource(resource.getId()).equals(agt)) {
                 plats.add(toPlatform(resource));
             }
         }

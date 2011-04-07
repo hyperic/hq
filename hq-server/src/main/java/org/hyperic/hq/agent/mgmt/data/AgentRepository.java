@@ -5,7 +5,6 @@ import java.util.List;
 import javax.persistence.QueryHint;
 
 import org.hyperic.hq.agent.mgmt.domain.Agent;
-import org.hyperic.hq.inventory.domain.Resource;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;
@@ -15,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 public interface AgentRepository extends JpaRepository<Agent, Integer>, AgentRepositoryCustom {
 
     @Transactional(readOnly = true)
-    @Query("select count(a) from Agent a where a.managedResources is not empty")
+    @Query("select count(a) from Agent a where size(a.managedResources) > 0")
     long countUsed();
 
     List<Agent> findByAddress(String address);
@@ -29,7 +28,7 @@ public interface AgentRepository extends JpaRepository<Agent, Integer>, AgentRep
     Agent findByAgentToken(@Param("agentToken") String token);
 
     @Transactional(readOnly = true)
-    @Query("select a from Agent a join a.managedResources r where r=:resource")
-    Agent findByManagedResource(@Param("resource") Resource resource);
+    @Query("select a from Agent a where :resource in elements(a.managedResources)")
+    Agent findByManagedResource(@Param("resource") Integer resourceId);
 
 }

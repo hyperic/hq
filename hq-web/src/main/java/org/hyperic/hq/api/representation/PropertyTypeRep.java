@@ -3,7 +3,7 @@ package org.hyperic.hq.api.representation;
 import org.hyperic.hq.inventory.domain.PropertyType;
 
 public class PropertyTypeRep {
-    private Integer id;
+    
     private String name;
     private Object defaultValue;
     private String description;
@@ -13,20 +13,11 @@ public class PropertyTypeRep {
     public PropertyTypeRep() {}
 	
 	public PropertyTypeRep(PropertyType propertyType) {
-		id = propertyType.getId();
 		name = propertyType.getName();
 		defaultValue = propertyType.getDefaultValue();
 		description = propertyType.getDescription();
 		hidden = propertyType.isHidden();
 		secret = propertyType.isSecret();
-	}
-
-	public Integer getId() {
-		return id;
-	}
-
-	public void setId(Integer id) {
-		this.id = id;
 	}
 
 	public String getName() {

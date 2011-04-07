@@ -144,7 +144,7 @@ public class ServiceManagerImpl implements ServiceManager {
         s.setProperty(AppdefResource.SORT_NAME, name.toUpperCase());
         s.setProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_SERVICE);
         s.setOwner(subject.getName());
-        agentRepository.findByManagedResource(parent).addManagedResource(s);
+        agentRepository.findByManagedResource(parent.getId()).addManagedResource(s.getId());
         parent.relateTo(s, RelationshipTypes.SERVICE);
         parent.relateTo(s, RelationshipTypes.CONTAINS);
         return s;

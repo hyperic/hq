@@ -40,7 +40,7 @@ public class PlatformFactory {
 
     public Platform createPlatform(Resource resource) {
         Platform platform = new Platform();
-        platform.setAgent(agentRepository.findByManagedResource(resource));
+        platform.setAgent(agentRepository.findByManagedResource(resource.getId()));
         platform.setCertdn((String) resource.getProperty(CERT_DN));
         platform.setCommentText((String) resource.getProperty(COMMENT_TEXT));
         platform.setCpuCount((Integer) resource.getProperty(CPU_COUNT));
