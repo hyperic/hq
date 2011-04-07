@@ -45,6 +45,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
+import org.hyperic.hq.common.shared.TransactionRetry;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.product.shared.PluginManager;
@@ -72,12 +73,15 @@ public class AgentPluginSyncRestartThrottle {
     private final Object LOCK = new Object();
     private AuthzSubject overlord;
     private ConcurrentStatsCollector concurrentStatsCollector;
+    private TransactionRetry transactionRetry;
     
     @Autowired
     public AgentPluginSyncRestartThrottle(AuthzSubjectManager authzSubjectManager,
-                                          ConcurrentStatsCollector concurrentStatsCollector) {
+                                          ConcurrentStatsCollector concurrentStatsCollector,
+                                          TransactionRetry transactionRetry) {
         this.overlord = authzSubjectManager.getOverlordPojo();
         this.concurrentStatsCollector = concurrentStatsCollector;
+        this.transactionRetry = transactionRetry;
     }
     
     @PostConstruct
@@ -97,7 +101,19 @@ public class AgentPluginSyncRestartThrottle {
         });
         final Runnable runner = new Runnable() {
             public void run() {
-                getNumRecords(true);
+                try {
+                    final boolean debug = log.isDebugEnabled();
+                    if (debug) log.debug("starting PluginSyncRestartInvalidator");
+                    final Runnable runner = new Runnable() {
+                        public void run() {
+                            getNumRecords(true);
+                        }
+                    };
+                    transactionRetry.runTransaction(runner, 3, 1000);
+                    if (debug) log.debug("done PluginSyncRestartInvalidator");
+                } catch (Throwable t) {
+                    log.error("ERROR running PluginSyncRestartInvalidator: " + t,t);
+                }
             }
         };
         rtn.scheduleWithFixedDelay(runner, RECORD_TIMEOUT, RECORD_TIMEOUT, TimeUnit.MILLISECONDS);
