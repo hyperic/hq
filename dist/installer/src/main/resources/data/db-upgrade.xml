@@ -11615,6 +11615,21 @@ has already been defined.
 	<schema-insert table="EAM_CONFIG_PROPS"
 	                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE) VALUES ('70', 'LDAP_GROUP_SEARCH_SUBTREE', '', 'false')"/>
  </schemaSpec>
+
+ <schemaSpec version="3.204">
+    <schema-directSQL>
+        <statement targetDB="oracle">
+            alter table EAM_PLUGIN add DELETED number(1) not null default 0
+        </statement>
+        <statement targetDB="postgresql">
+            alter table EAM_PLUGIN add DELETED boolean not null default false
+        </statement>
+        <statement targetDB="mysql">
+            alter table EAM_PLUGIN add DELETED bit not null default 0
+        </statement>
+    </schema-directSQL>
+ </schemaSpec>
+
 </dbupgrade>
 </target>
 </project>
