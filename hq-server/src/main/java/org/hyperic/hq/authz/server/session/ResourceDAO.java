@@ -43,8 +43,6 @@ import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.server.session.Server;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -428,6 +426,17 @@ public class ResourceDAO
             }
         }
         return rtn;
+    }
+    
+    @SuppressWarnings("unchecked")
+    Collection<Resource> getResourcesByProtoTypeName(Collection<String> typeNames) {
+        if (typeNames == null || typeNames.isEmpty()) {
+            return Collections.emptyList();
+        }
+        final String hql = "from Resource where prototype.name in (:typeNames)";
+        return getSession().createQuery(hql)
+                           .setParameterList("typeNames", typeNames)
+                           .list();
     }
 
 }

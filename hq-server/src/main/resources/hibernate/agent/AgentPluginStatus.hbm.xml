@@ -47,8 +47,8 @@
       <column name="AGENT_ID" index="AGENT_ID" not-null="true"/>
     </many-to-one>
 
-    <property name="jarName" type="string">
-      <column name="JAR_NAME" not-null="true" length="128"/>
+    <property name="fileName" type="string">
+      <column name="FILE_NAME" not-null="true" length="128" index="APS_FILE_NAME_IDX"/>
     </property>
 
     <property name="productName" type="string">
@@ -56,11 +56,11 @@
     </property>
 
     <property name="pluginName" type="string">
-      <column name="PLUGIN_NAME" not-null="true" length="200"/>
+      <column name="PLUGIN_NAME" not-null="true" length="200" index="APS_PLUGIN_NAME_IDX"/>
     </property>
 
     <property name="MD5" type="string">
-      <column name="MD5" not-null="true" length="100"/>
+      <column name="MD5" not-null="true" length="100" index="APS_MD5_IDX"/>
     </property>
 
     <property name="lastCheckin" type="long">

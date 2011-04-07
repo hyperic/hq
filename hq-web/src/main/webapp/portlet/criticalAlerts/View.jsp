@@ -38,118 +38,124 @@
 <script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
 
 <script type="text/javascript">
-var pageData = new Array();
-var _hqu_<c:out value="${widgetInstanceName}${portlet.token}"/>_refreshTimeout;
-initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');  
-
-function requestRecentAlerts<c:out value="${portlet.token}"/>() {
-    var dummyStr = '&hq=' + new Date().getTime();
-    var critAlertUrl = "<html:rewrite page="/dashboard/ViewCriticalAlerts.do?token=${portlet.token}"/>" + dummyStr;
-	new Ajax.Request(critAlertUrl, {method: 'get', onSuccess:showRecentAlerts, onFailure :reportError});
-}
-
-function _hqu_<c:out value="${widgetInstanceName}${portlet.token}"/>_autoRefresh() {
-    _hqu_<c:out value="${widgetInstanceName}${portlet.token}"/>_refreshTimeout = setTimeout("_hqu_<c:out value="${widgetInstanceName}${portlet.token}"/>_autoRefresh()", 30000);
-	requestRecentAlerts<c:out value="${portlet.token}"/>();
-}
-
-hqDojo.require("dijit.dijit");
-hqDojo.require("dijit.Dialog");
-hqDojo.require("dijit.ProgressBar");
-
-var MyAlertCenter = null;
-hqDojo.ready(function(){
-	if (MyAlertCenter == null) {
-		MyAlertCenter = new hyperic.alert_center("<fmt:message key="dash.home.CriticalAlerts"/>");
+	var pageData = new Array();
+	var _hqu_<c:out value="${widgetInstanceName}${portlet.token}"/>_refreshTimeout;
+	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');  
+	
+	function requestRecentAlerts<c:out value="${portlet.token}"/>() {
+	    hqDojo.xhrGet({
+			url: "<html:rewrite action="/dashboard/ViewCriticalAlerts" />",
+			content: {
+				token: "${portlet.token}",
+				hq: (new Date()).getTime()
+			},
+			handleAs: "json",
+			load: showRecentAlerts,
+			error: reportError
+		});
 	}
-
-	hqDojo.connect("requestRecentAlerts<c:out value="${portlet.token}"/>", function() { MyAlertCenter.resetAlertTable(hqDojo.byId('<c:out value="${widgetInstanceName}${portlet.token}"/>_FixForm')); });
-
-	_hqu_<c:out value="${widgetInstanceName}${portlet.token}"/>_autoRefresh();
-});
+	
+	function _hqu_<c:out value="${widgetInstanceName}${portlet.token}"/>_autoRefresh() {
+	    _hqu_<c:out value="${widgetInstanceName}${portlet.token}"/>_refreshTimeout = setTimeout("_hqu_<c:out value="${widgetInstanceName}${portlet.token}"/>_autoRefresh()", 30000);
+		requestRecentAlerts<c:out value="${portlet.token}"/>();
+	}
+	
+	hqDojo.require("dijit.dijit");
+	hqDojo.require("dijit.Dialog");
+	hqDojo.require("dijit.ProgressBar");
+	
+	var MyAlertCenter = null;
+	hqDojo.ready(function(){
+		if (MyAlertCenter == null) {
+			MyAlertCenter = new hyperic.alert_center("<fmt:message key="dash.home.CriticalAlerts"/>");
+		}
+	
+		hqDojo.connect("requestRecentAlerts<c:out value="${portlet.token}"/>", function() { MyAlertCenter.resetAlertTable(hqDojo.byId('<c:out value="${widgetInstanceName}${portlet.token}"/>_FixForm')); });
+	
+		_hqu_<c:out value="${widgetInstanceName}${portlet.token}"/>_autoRefresh();
+	});
 </script>
 <c:set var="rssUrl" value="/rss/ViewCriticalAlerts.rss"/>
-
 <div class="effectsPortlet">
-<!-- Content Block  -->
-<tiles:insert definition=".header.tab">
-  <tiles:put name="tabKey" value="dash.home.CriticalAlerts"/>
-  <tiles:put name="subTitle" beanName="portlet" beanProperty="description"/>
-  <tiles:put name="adminUrl" beanName="adminUrl" />
-  <c:if test="${not empty portlet.token}">
-    <tiles:put name="adminToken" beanName="portlet" beanProperty="token"/>
-    <c:set var="tableName" value="recentAlertsTable${portlet.token}"/>
-  </c:if>
-  <c:if test="${empty portlet.token}">
-    <c:set var="tableName" value="recentAlertsTable"/>
-  </c:if>
-  <tiles:put name="portletName"><c:out value="${portlet.fullUrl}"/></tiles:put>
-  <tiles:put name="rssBase" beanName="rssUrl" />
-</tiles:insert>
+	<!-- Content Block  -->
+	<tiles:insert definition=".header.tab">
+  		<tiles:put name="tabKey" value="dash.home.CriticalAlerts"/>
+  		<tiles:put name="subTitle" beanName="portlet" beanProperty="description"/>
+  		<tiles:put name="adminUrl" beanName="adminUrl" />
+  		<c:if test="${not empty portlet.token}">
+    		<tiles:put name="adminToken" beanName="portlet" beanProperty="token"/>
+    		<c:set var="tableName" value="recentAlertsTable${portlet.token}"/>
+  		</c:if>
+  		<c:if test="${empty portlet.token}">
+    		<c:set var="tableName" value="recentAlertsTable"/>
+  		</c:if>
+  		<tiles:put name="portletName"><c:out value="${portlet.fullUrl}"/></tiles:put>
+  		<tiles:put name="rssBase" beanName="rssUrl" />
+	</tiles:insert>
 
-  <!-- JSON available at /dashboard/ViewCriticalAlerts.do -->
-  <html:form styleId="${widgetInstanceName}${portlet.token}_FixForm" method="POST" action="/alerts/RemoveAlerts.do">
-  <html:hidden property="output" value="json" />
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" id="<c:out value="${tableName}"/>" class="portletLRBorder">
-     <thead>
-		<tr class="ListRow">
-			<td width="1%" class="ListHeaderCheckbox">
-				<input type="checkbox" onclick="MyAlertCenter.toggleAll(this)" name="listToggleAll" id="<c:out value="${widgetInstanceName}${portlet.token}"/>_CheckAllBox">
-			</td>
-			<td width="30%" class="ListHeaderInactiveSorted" align="left">
-				Date / Time<html:img page="/images/tb_sortdown.gif" height="9" width="9" border="0" />
-			</td>
-			<td width="30%" class="ListHeaderInactive">
-				<fmt:message key="dash.home.TableHeader.AlertName"/>
-			</td>
-			<td width="30%" class="ListHeaderInactive">
-				<fmt:message key="dash.home.TableHeader.ResourceName"/>
-			</td>
-			<td width="4%" class="ListHeaderInactive" align="center">
-				<fmt:message key="alerts.alert.AlertList.ListHeader.Fixed"/>
-			</td>
-			<td width="5%" class="ListHeaderInactive" align="center">
-				<fmt:message key="alerts.alert.AlertList.ListHeader.Acknowledge"/>
-			</td>
-		</tr>
-     </thead>
-     <tbody>
-		 <!-- table rows are inserted here dynamically -->
- 	 </tbody>
-     <tfoot>
-         <tr class="ListRow" id="<c:out value="noCritAlerts${portlet.token}"/>">
-      		<td class="ListCell" colspan="6"><fmt:message key="dash.home.alerts.no.resource.to.display"/></td>
-    	</tr>
-         <tr class="ListRow" id="<c:out value="ackInstruction${portlet.token}"/>" style="display: none;">
-           <td class="ListCell" colspan="6" align="right" style="font-style: italic;">
-              <c:url var="path" value="/"/>
-              <fmt:message key="dash.settings.criticalAlerts.ack.instruction">
-                <fmt:param value="${path}"/>
-              </fmt:message>
-           </td>
-    	</tr>
-        <tr>
-             <td colspan="5">
-    <tiles:insert definition=".toolbar.list">                
-      <tiles:put name="noButtons" value="true"/>
-      <tiles:put name="alerts" value="true"/>
-      <tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>
-	  <tiles:put name="portletToken"><c:out value="${portlet.token}"/></tiles:put> 
-      <%--none of this is being used--%>
-      <tiles:put name="pageSizeAction" value="" />
-      <tiles:put name="pageNumAction" value=""/>    
-      <tiles:put name="defaultSortColumn" value="1"/>
-    </tiles:insert>
-             </td>
-             <td id="modifiedCritTime<c:out value="${portlet.token}"/>" class="modifiedDate" nowrap="true"></td>
-          </tr>
-      </tfoot>
-  </table>
-  <script type="text/javascript">
-  	if (hqDojo.byId("HQAlertCenterDialog") == null) {
-  		document.write('<div id="HQAlertCenterDialog" style="display:none;"></div>');
-  	}
-  </script>
-  </html:form>
+  	<!-- JSON available at /dashboard/ViewCriticalAlerts.do -->
+  	<html:form styleId="${widgetInstanceName}${portlet.token}_FixForm" method="POST" action="/alerts/RemoveAlerts.do">
+  		<html:hidden property="output" value="json" />
+  		<table width="100%" cellpadding="0" cellspacing="0" border="0" id="<c:out value="${tableName}"/>" class="portletLRBorder">
+     		<thead>
+				<tr class="ListRow">
+					<td width="1%" class="ListHeaderCheckbox">
+						<input type="checkbox" onclick="MyAlertCenter.toggleAll(this)" name="listToggleAll" id="<c:out value="${widgetInstanceName}${portlet.token}"/>_CheckAllBox">
+					</td>
+					<td width="30%" class="ListHeaderInactiveSorted" align="left">
+						Date / Time<html:img page="/images/tb_sortdown.gif" height="9" width="9" border="0" />
+					</td>
+					<td width="30%" class="ListHeaderInactive">
+						<fmt:message key="dash.home.TableHeader.AlertName"/>
+					</td>
+					<td width="30%" class="ListHeaderInactive">
+						<fmt:message key="dash.home.TableHeader.ResourceName"/>
+					</td>
+					<td width="4%" class="ListHeaderInactive" align="center">
+						<fmt:message key="alerts.alert.AlertList.ListHeader.Fixed"/>
+					</td>
+					<td width="5%" class="ListHeaderInactive" align="center">
+						<fmt:message key="alerts.alert.AlertList.ListHeader.Acknowledge"/>
+					</td>
+				</tr>
+     		</thead>
+     		<tbody>
+		 		<!-- table rows are inserted here dynamically -->
+ 	 		</tbody>
+     		<tfoot>
+         		<tr class="ListRow" id="<c:out value="noCritAlerts${portlet.token}"/>">
+      				<td class="ListCell" colspan="6"><fmt:message key="dash.home.alerts.no.resource.to.display"/></td>
+    			</tr>
+         		<tr class="ListRow" id="<c:out value="ackInstruction${portlet.token}"/>" style="display: none;">
+           			<td class="ListCell" colspan="6" align="right" style="font-style: italic;">
+              			<c:url var="path" value="/"/>
+            			<fmt:message key="dash.settings.criticalAlerts.ack.instruction">
+                			<fmt:param value="${path}"/>
+              			</fmt:message>
+           			</td>
+    			</tr>
+        		<tr>
+             		<td colspan="5">
+    					<tiles:insert definition=".toolbar.list">                
+      						<tiles:put name="noButtons" value="true"/>
+      						<tiles:put name="alerts" value="true"/>
+      						<tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>
+	  						<tiles:put name="portletToken"><c:out value="${portlet.token}"/></tiles:put> 
+      						<%--none of this is being used--%>
+      						<tiles:put name="pageSizeAction" value="" />
+      						<tiles:put name="pageNumAction" value=""/>    
+      						<tiles:put name="defaultSortColumn" value="1"/>
+    					</tiles:insert>
+             		</td>
+             		<td id="modifiedCritTime<c:out value="${portlet.token}"/>" class="modifiedDate" nowrap="true"></td>
+          		</tr>
+      		</tfoot>
+  		</table>
+  		<script type="text/javascript">
+  			if (hqDojo.byId("HQAlertCenterDialog") == null) {
+  				document.write('<div id="HQAlertCenterDialog" style="display:none;"></div>');
+  			}
+  		</script>
+  	</html:form>
 </div>

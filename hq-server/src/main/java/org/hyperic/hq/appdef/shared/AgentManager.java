@@ -416,6 +416,14 @@ public interface AgentManager {
 
     /**
      * Pings the specified agent.
+     * @see AgentManagerImpl#pingAgent(AuthzSubject, Agent)
+     */
+    public long pingAgent(AuthzSubject overlord, Integer agentId)
+    throws AgentNotFoundException, PermissionException, AgentConnectionException, IOException,
+           ConfigPropertyException, AgentRemoteException;
+
+    /**
+     * Pings the specified agent.
      * @param subject The subject issuing the request.
      * @param aid The agent id.
      * @return the time it took (in milliseconds) for the round-trip time of the
@@ -471,6 +479,6 @@ public interface AgentManager {
     public void syncPluginToAgentsAfterCommit(String pluginFileName);
 
 // XXX javadoc!
-    public void removePluginFromAgentsInBackground(String pluginFileName);
+    public long getNumAutoUpdatingAgents();
 
 }

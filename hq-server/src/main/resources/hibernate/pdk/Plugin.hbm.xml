@@ -69,6 +69,10 @@
       <column name="MTIME" not-null="true"/>
     </property>
 
+    <property name="disabled" type="boolean">
+      <column name="DISABLED" not-null="true"/>
+    </property>
+
   </class>
 
 </hibernate-mapping>

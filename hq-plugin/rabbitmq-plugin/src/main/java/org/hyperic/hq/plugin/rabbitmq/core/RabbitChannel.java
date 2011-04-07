@@ -25,54 +25,33 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.core;
 
+import java.util.Date;
+import org.hyperic.hq.plugin.rabbitmq.collect.MetricConstants;
+import org.hyperic.util.config.ConfigResponse;
+
 /**
  * AmqpChannel
  * @author Helena Edelson
  */
-public class RabbitChannel {
+public class RabbitChannel extends RabbitDefaultStatsObject implements RabbitObject {
 
-    private String pid;
-
-    private String vHost;
-
-    private RabbitConnection connection;
-
+    private String name;
+    private Date idleSince;
     private long number;
-
+    private long consumerCount;
+    private long messagesUnacknowledged;
+    private long acksUncommitted;
+    private long prefetchCount;
+    private boolean transactional;
+    private boolean confirm;
     private String user;
 
-    private String transactional;
-
-    private long consumerCount;
-
-    private long messagesUnacknowledged;
-
-    private long acksUncommitted;
-
-    private long prefetchCount;
-
-    @Override
-    public String toString() {
-        return new StringBuilder("Channel[pid=").append(pid).append(" connection=").append(connection.getPid()).append(" number=").append(number)
-                .append(" user=").append(user).append(" transactional=").append(transactional).append(" consumerCount=").append(consumerCount)
-                    .append(" messagesUnacknowledged=").append(messagesUnacknowledged).append(" acksUncommitted=").append(acksUncommitted)
-                        .append(" prefetchCount=").append(prefetchCount).append("]").toString();
+    public String getName() {
+        return name;
     }
 
-    public String getPid() {
-        return pid;
-    }
-
-    public void setPid(String pid) {
-        this.pid = pid;
-    }
-
-    public RabbitConnection getConnection() {
-        return connection;
-    }
-
-    public void setConnection(String pid) {
-        this.connection = new RabbitConnection(pid);
+    public void setName(String name) {
+        this.name = name;
     }
 
     public long getNumber() {
@@ -81,30 +60,6 @@ public class RabbitChannel {
 
     public void setNumber(long number) {
         this.number = number;
-    }
-
-    public String getUser() {
-        return user;
-    }
-
-    public void setUser(String user) {
-        this.user = user;
-    }
-
-    public String getvHost() {
-        return vHost;
-    }
-
-    public void setvHost(String vHost) {
-        this.vHost = vHost;
-    }
-
-    public String getTransactional() {
-        return transactional;
-    }
-
-    public void setTransactional(String transactional) {
-        this.transactional = transactional;
     }
 
     public long getConsumerCount() {
@@ -137,5 +92,93 @@ public class RabbitChannel {
 
     public void setPrefetchCount(long prefetchCount) {
         this.prefetchCount = prefetchCount;
+    }
+
+    /**
+     * @return the idleSince
+     */
+    public Date getIdleSince() {
+        return idleSince;
+    }
+
+    /**
+     * @param idleSince the idleSince to set
+     */
+    public void setIdleSince(Date idleSince) {
+        this.idleSince = idleSince;
+    }
+
+    /**
+     * @return the transactional
+     */
+    public boolean isTransactional() {
+        return transactional;
+    }
+
+    /**
+     * @param transactional the transactional to set
+     */
+    public void setTransactional(boolean transactional) {
+        this.transactional = transactional;
+    }
+
+    /**
+     * @return the confirm
+     */
+    public boolean isConfirm() {
+        return confirm;
+    }
+
+    /**
+     * @param confirm the confirm to set
+     */
+    public void setConfirm(boolean confirm) {
+        this.confirm = confirm;
+    }
+
+    /**
+     * @return the user
+     */
+    public String getUser() {
+        return user;
+    }
+
+    /**
+     * @param user the user to set
+     */
+    public void setUser(String user) {
+        this.user = user;
+    }
+
+    @Override
+    public String toString() {
+        return "RabbitChannel{name=" + name + ", idleSince=" + idleSince + ", number=" + number + ", consumerCount=" + consumerCount + ", messagesUnacknowledged=" + messagesUnacknowledged + ", acksUncommitted=" + acksUncommitted + ", prefetchCount=" + prefetchCount + ", transactional=" + transactional + ", confirm=" + confirm + ", user=" + user + '}';
+    }
+
+    public String getServiceType() {
+        return AMQPTypes.CHANNEL;
+    }
+
+    public String getServiceName() {
+        return getServiceType() + " " + getName();
+    }
+
+    public ConfigResponse getProductConfig() {
+        ConfigResponse c = new ConfigResponse();
+        c.setValue(MetricConstants.CHANNEL, getName());
+        return c;
+    }
+
+    public ConfigResponse getCustomProperties() {
+        ConfigResponse c = new ConfigResponse();
+        c.setValue("transactional", isTransactional());
+        c.setValue("confirm", isConfirm());
+        c.setValue("user", getUser());
+        return c;
+    }
+
+    public boolean isDurable() {
+        return false;
+
     }
 }

@@ -74,9 +74,10 @@
 
   function filterEventsDetails(status) {
     for (i = 0; i < statusArr.length; i++) {
-      $(statusArr[i] + "EventsTab").className = "eventsTab"; 
+      hqDojo.attr(statusArr[i] + "EventsTab", "class", "eventsTab"); 
     }
-    $(status + "EventsTab").className = "eventsTabOn"; 
+    
+    hqDojo.attr(status + "EventsTab", "class", "eventsTabOn");
 
     if (status != statusArr[0])
       showEventsDetails(eventsTime, status);
@@ -109,7 +110,7 @@
           </td>
           <td valign="top" style="text-align: right; border-bottom: solid; border-width: 1px; border-color: #000000;">
             <html:img page="/images/dash-icon_delete.gif"
-                      onclick="new Effect.Fade(hqDojo.byId('eventDetailTable'))"/>
+                      onclick="hqDojo.fadeOut({ node: 'eventDetailTable' }).play()"/>
           </td>
         </tr>
         <tr>

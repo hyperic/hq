@@ -70,7 +70,9 @@
     }
   }
 
-  onloads.push( checkAllBoxes );
+  	hqDojo.ready(function() {
+  		checkAllBoxes();
+  	});
 </c:if>
 </script>
 

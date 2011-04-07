@@ -43,6 +43,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.hq.product.shared.PluginManager;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -61,7 +62,7 @@ public class AgentPluginSyncRestartThrottle {
     /** agentIds */
     private final TreeSet<Integer> pendingRestarts = new TreeSet<Integer>();
     @SuppressWarnings("unused")
-    private final Thread executor;
+    private Thread throttler;
     private final AtomicBoolean shutdown = new AtomicBoolean(false);
     private final Object LOCK = new Object();
     private AuthzSubject overlord;
@@ -71,7 +72,6 @@ public class AgentPluginSyncRestartThrottle {
     public AgentPluginSyncRestartThrottle(AuthzSubjectManager authzSubjectManager,
                                           ConcurrentStatsCollector concurrentStatsCollector) {
         this.overlord = authzSubjectManager.getOverlordPojo();
-        this.executor = startExecutorThread();
         this.concurrentStatsCollector = concurrentStatsCollector;
     }
     
@@ -79,6 +79,7 @@ public class AgentPluginSyncRestartThrottle {
     public void initialize() {
         concurrentStatsCollector.register(ConcurrentStatsCollector.AGENT_PLUGIN_SYNC_RESTARTS);
         concurrentStatsCollector.register(ConcurrentStatsCollector.AGENT_PLUGIN_SYNC_PENDING_RESTARTS);
+        throttler = startThrottlerThread();
     }
     
     public Set<Integer> getQueuedAgentIds() {
@@ -93,7 +94,7 @@ public class AgentPluginSyncRestartThrottle {
         }
     }
     
-    private Thread startExecutorThread() {
+    private Thread startThrottlerThread() {
         final Thread rtn = new Thread("AgentPluginSyncRestartThrottle") {
             public void run() {
                 while (!shutdown.get()) {
@@ -114,6 +115,7 @@ public class AgentPluginSyncRestartThrottle {
                 }
             }
         };
+        rtn.setDaemon(true);
         rtn.start();
         return rtn;
     }
@@ -149,14 +151,23 @@ public class AgentPluginSyncRestartThrottle {
         final long now = System.currentTimeMillis();
         int rtn = 0;
         final Iterator<Entry<Integer, Long>> it=agentRestartTimstampMap.entrySet().iterator();
+        final Set<Integer> restartFailures = new HashSet<Integer>();
         while (it.hasNext()) {
             final Entry<Integer, Long> entry = it.next();
             final Long timestamp = entry.getValue();
             if ((now - timestamp) >= RECORD_TIMEOUT) {
+                restartFailures.add(entry.getKey());
                 it.remove();
                 continue;
             }
             rtn++;
+        }
+        if (!restartFailures.isEmpty()) {
+            final PluginManager pm = Bootstrap.getBean(PluginManager.class);
+            for (final Integer agentId : restartFailures) {
+                pm.updateAgentPluginSyncStatusInNewTran(
+                    AgentPluginStatusEnum.SYNC_FAILURE, agentId, null);
+            }
         }
         return rtn;
     }

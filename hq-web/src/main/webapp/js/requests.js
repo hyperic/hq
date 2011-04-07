@@ -1,29 +1,17 @@
 
 {
-    Ajax.Responders.register({
-        onCreate: function() {
-            if ($('loading') && Ajax.activeRequestCount > 0)
-                Effect.Appear('loading', {duration: 0.50, queue: 'end'});
-        },
-        onComplete: function() {
-            if ($('loading') && Ajax.activeRequestCount == 0)
-                Effect.Fade('loading', {duration: 0.2, queue: 'end'});
-        }
-    });
-
     var rtimer = null;
 
 
-    function showProblemResponse(originalRequest) {
-
-        var probResp = eval("(" + originalRequest.responseText + ")");
+    function showProblemResponse(response, args) {
+        var probResp = response;
         var mList = probResp.problems;
         var problemTable = document.getElementById('problemResourcesTable');
         var urlColon = ":"
-        var resUrl = $('viewResUrl').href;
-        var noProblemResources = $('noProblemResources');
+        var resUrl = hqDojo.byId('viewResUrl').href;
+        var noProblemResources = hqDojo.byId('noProblemResources');
         var maxResourceNameSize;
-        $('modifiedProblemTime').innerHTML = 'Updated: ' + refreshTime();
+        hqDojo.byId('modifiedProblemTime').innerHTML = 'Updated: ' + refreshTime();
 
         if (mList && mList.length > 0) {
 
@@ -116,12 +104,12 @@
                 }
             }
         } else {
-            $('noProblemResources').style.display = '';
+            hqDojo.style("noProblemResources", "display", "");
         }
     }
 
-    function showRecentAlerts(originalRequest) {
-        var alertText = eval("(" + originalRequest.responseText + ")");
+    function showRecentAlerts(response, args) {
+        var alertText = response;
         var aList = alertText.criticalAlerts;
         var token = alertText.token;
         var alertTable;
@@ -139,10 +127,10 @@
         var tbody = alertTable.getElementsByTagName('tbody')[0];
 
         var noCritAlerts = alertText.token != null ?
-                           $('noCritAlerts' + token) : $('noCritAlerts');
+                hqDojo.byId('noCritAlerts' + token) : hqDojo.byId('noCritAlerts');
 
         var ackInstruction = alertText.token != null ?
-                           $('ackInstruction' + token) : $('ackInstruction');
+        		hqDojo.byId('ackInstruction' + token) : hqDojo.byId('ackInstruction');
 
         ackInstruction.style.display = 'none';
 
@@ -153,7 +141,7 @@
                 tbody.removeChild(tbody.childNodes[i - 1]);
             }
 
-            var alertUrl = $('viewAlertUrl').href;
+            var alertUrl = hqDojo.byId('viewAlertUrl').href;
 
             for (i = 0; i < aList.length; i++) {
 
@@ -262,15 +250,14 @@
 
         }
 
-        $('modifiedCritTime' + (token != null ? token : '')).innerHTML =
+        hqDojo.byId('modifiedCritTime' + (token != null ? token : '')).innerHTML =
         'Updated: ' + refreshTime();
     }
 
-    function showAvailSummary(originalRequest) {
-
-        var availText = eval("(" + originalRequest.responseText + ")");
+    function showAvailSummary(response, args) {
+        var availText = response;
         var availList = availText.availSummary;
-        var browseUrl = $('browseUrl').href;
+        var browseUrl = hqDojo.byId('browseUrl').href;
         var urlColon = ":";
         var urlParams = "&view=list&ft=";
         var token = availText.token;
@@ -289,7 +276,7 @@
         }
 
         if (availList.length < 1) {
-            $(noAvailTable).style.display = '';
+        	hqDojo.style(noAvailTable, "display", "");
         } else {
             var tbody = availTable.getElementsByTagName('tbody')[0];
             var browser = BrowserDetect.browser;
@@ -361,26 +348,22 @@
 
             if (token != null) {
                 td4.setAttribute('id', 'availTime' + token);
-                $('availTime' + token).innerHTML = 'Updated: ' + refreshTime();
+                hqDojo.byId('availTime' + token).innerHTML = 'Updated: ' + refreshTime();
             } else {
                 td4.setAttribute('id', 'availTime');
-                $('availTime').innerHTML = 'Updated: ' + refreshTime();
+                hqDojo.byId('availTime').innerHTML = 'Updated: ' + refreshTime();
             }
 
         }
-
-        //$('modifiedAvailTime').innerHTML = 'Updated: ' + refreshTime();
-        //rTimer = setTimeout(availFunc, 60000);
     }
 
-    function showMetricsResponse(originalRequest) {
-
-        var metricText = eval("(" + originalRequest.responseText + ")");
+    function showMetricsResponse(response, args) {
+        var metricText = response;
         var metricValues = metricText.metricValues;
         var resourceNameHeader = metricValues.resourceTypeName;
         var resourceLoadTypeHeader = metricValues.metricName;
         var urlColon = ":"
-        var resUrl = $('viewResUrl').href;
+        var resUrl = hqDojo.byId('viewResUrl').href;
         var metricTable;
         var noMetricTable;
         var metricFunc
@@ -462,29 +445,22 @@
             if (token != null) {
 
                 td3.setAttribute('id', 'metricTime' + token);
-                $('metricTime' + token).innerHTML = 'Updated: ' + refreshTime();
+                hqDojo.byId('metricTime' + token).innerHTML = 'Updated: ' + refreshTime();
             } else {
 
                 td3.setAttribute('id', 'metricTime');
-                $('metricTime').innerHTML = 'Updated: ' + refreshTime();
+                hqDojo.byId('metricTime').innerHTML = 'Updated: ' + refreshTime();
             }
-
-            //$('modifiedMetricTime').innerHTML = 'Updated: '+refreshTime();
-
         } else {
-            $(noMetricTable).style.display = '';
+        	hqDojo.style(noMetricTable, "display", "");
         }
-
-        //rTimer = setTimeout(metricFunc, 60000);
-        //Refresh in 60 seconds
     }
 
-    function showFavoriteResponse(originalRequest) {
-       
-        var faveText = eval('(' + originalRequest.responseText + ')');
+    function showFavoriteResponse(response, args) {
+        var faveText = response;
         var fList = faveText.favorites;
         var table = document.getElementById('favoriteTable');
-        $('modifiedFavoriteTime').innerHTML = 'Updated: ' + refreshTime();
+        hqDojo.byId('modifiedFavoriteTime').innerHTML = 'Updated: ' + refreshTime();
         var maxResourceNameSize;
         
         if (table) {
@@ -506,7 +482,7 @@
                     var td5 = document.createElement('td');
                     var td6 = document.createElement('td');
                     var urlColon = ":"
-                    var resUrl = $('viewResUrl').href;
+                    var resUrl = hqDojo.byId('viewResUrl').href;
 
 
                     tbody.appendChild(tr);
@@ -589,11 +565,9 @@
                 }
                 
             } else {
-                $('noFaveResources').style.display = '';
+            	hqDojo.style('noFaveResources', "display", "");
             }
         }
-        //var rTimer = setTimeout(showFavoriteResponse,20000); //Refresh in 60 seconds
-
     }
 
 }
@@ -641,7 +615,7 @@ function refreshDate() {
     return todayDate;
 }
 
-function reportError(originalRequest) {
+function reportError(response, args) {
     //alert('Error ' + originalRequest.status + ' -- ' + originalRequest.statusText);
 }
 
@@ -651,7 +625,7 @@ function unCheck() {
             if(document.FixAlertsForm.elements[i].type=="checkbox") {
             document.FixAlertsForm.elements[i].checked=false;
             }
-            $('listToggleAll').checked=false;
+            hqDojo.byId('listToggleAll').checked=false;
        }
 
 }

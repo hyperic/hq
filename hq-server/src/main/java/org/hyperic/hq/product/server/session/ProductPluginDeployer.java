@@ -31,10 +31,13 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -49,6 +52,7 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginInfo;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ProductPluginManager;
+import org.hyperic.hq.product.shared.PluginManager;
 import org.hyperic.hq.product.shared.ProductManager;
 import org.hyperic.util.file.FileUtil;
 import org.hyperic.util.file.FileWatcher;
@@ -76,7 +80,6 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
 
     private final Log log = LogFactory.getLog(ProductPluginDeployer.class);
 
-    private static final String PLUGIN_DIR = "hq-plugins";
     private static final String HQU = "hqu";
 
     private RenditServer renditServer;
@@ -89,29 +92,35 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
 
     private AgentManager agentManager;
 
+    private PluginManager pluginManager;
+
     @Autowired
     public ProductPluginDeployer(RenditServer renditServer, ProductManager productManager,
-                                 AgentManager agentManager) {
+                                 AgentManager agentManager, PluginManager pluginManager) {
         this.renditServer = renditServer;
         this.productManager = productManager;
         this.agentManager = agentManager;
+        this.pluginManager = pluginManager;
     }
 
-    private void initializePlugins(File pluginDir) {
-        List<String> plugins = new ArrayList<String>();
+    private void initializePlugins(Collection<File> pluginDirs) {
+        Map<String, File> plugins = new HashMap<String, File>(0);
         // On startup, it's necessary to load all plugins first due to
         // inter-plugin class dependencies
         try {
-            plugins = loadPlugins(pluginDir);
+            plugins = loadPlugins(pluginDirs);
         } catch (Exception e) {
             log.error("Error loading product plugins", e);
         }
-
         // Now we can deploy the plugins
-        Collections.sort(plugins, this);
-        for (String pluginName : plugins) {
-            deployPlugin(pluginName);
+        final Map<String, Integer> existing = pluginManager.getAllPluginIdsByName();
+        final List<String> keys = new ArrayList<String>(plugins.keySet());
+        Collections.sort(keys, this);
+        for (final String pluginName : keys) {
+            existing.remove(pluginName);
+            deployPlugin(pluginName, plugins.get(pluginName));
         }
+        pluginManager.markDisabled(existing.values());
     }
 
     /**
@@ -230,12 +239,12 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
         return order1 - order2;
     }
 
-    private String registerPluginJar(String pluginJar) {
+    private PluginInfo registerPluginJar(String pluginJar) {
         if (!productPluginManager.isLoadablePluginName(pluginJar)) {
             return null;
         }
         try {
-            String plugin = productPluginManager.registerPluginJar(pluginJar, null).name;
+            PluginInfo plugin = productPluginManager.registerPluginJar(pluginJar, null);
             return plugin;
         } catch (Exception e) {
             log.error("Unable to deploy plugin '" + pluginJar + "'", e);
@@ -243,11 +252,12 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
         }
     }
 
-    private void deployPlugin(String plugin) {
+    private void deployPlugin(String pluginName, File dir) {
         try {
-            productManager.deploymentNotify(plugin);
+            productManager.deploymentNotify(pluginName, dir);
+            pluginManager.markEnabled(pluginName);
         } catch (Exception e) {
-            log.error("Unable to deploy plugin '" + plugin + "'", e);
+            log.error("Unable to deploy plugin '" + pluginName + "'", e);
         }
     }
 
@@ -268,9 +278,9 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
         FileWatcher fileWatcher = new FileWatcher();
         fileWatcher.addFileEventListener(new ProductPluginFileEventListener());
         for(File pluginDir: this.pluginDirs) {
-            initializePlugins(pluginDir);
             fileWatcher.addDir(pluginDir.toString(), false);
         }
+        initializePlugins(pluginDirs);
         if(!(pluginDirs.isEmpty())) {
             fileWatcher.start();
         }
@@ -322,40 +332,100 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
         } // else Rendit watcher will deploy the new plugin
     }
 
-    private List<String> loadPlugins(File pluginDir) throws Exception {
-        File[] plugins = pluginDir.listFiles();
-        List<String> pluginNames = new ArrayList<String>();
-        for (File pluginFile : plugins) {
-            String plugin = loadPlugin(pluginFile, true);
-            if (plugin != null) {
-                pluginNames.add(plugin);
+    private Map<String, File> loadPlugins(Collection<File> pluginDirs) throws Exception {
+        Map<String, File> map = new HashMap<String, File>();
+        for (File pluginDir : pluginDirs) {
+            File[] files = pluginDir.listFiles();
+            for (File file : files) {
+                String filename = file.getName();
+                if (map.containsKey(filename)) {
+                    if (isInCustomDir(file)) {
+                        log.info("plugin file " + file + " takes precedence over " +
+                                 map.get(filename) + " since it is in the custom plugin " +
+                                 "deployment dir (this is ok)");
+                        map.put(filename, file);
+                    } else {
+                        log.info("plugin file " + file + " will not be deployed since the custom file " +
+                                 map.get(filename) + " takes precedence (this is ok)");
+                    }
+                } else {
+                    map.put(filename, file);
+                }
             }
         }
-        return pluginNames;
+        Collection<File> plugins = map.values();
+        Map<String, File> rtn = new HashMap<String, File>();
+        for (File pluginFile : plugins) {
+            PluginInfo plugin = loadPlugin(pluginFile, true);
+            if (plugin != null) {
+                rtn.put(plugin.name, pluginFile);
+            }
+        }
+        return rtn;
     }
 
-    private void undeployPlugin(File pluginFile) throws Exception {
+    private boolean undeployPlugin(File pluginFile, boolean force) throws Exception {
+        if (!force && !isDeployable(pluginFile)) {
+            log.info("cannot undeploy " + pluginFile + " since it is over-written in " +
+                     getCustomPluginDir() + " (this is ok)");
+            return false;
+        }
         log.info("Undeploying plugin: " + pluginFile);
         productPluginManager.removePluginJar(pluginFile.toString());
-        agentManager.removePluginFromAgentsInBackground(pluginFile.getName());
+        pluginManager.markDisabled(pluginFile.getName());
+        return true;
     }
 
-    private String loadPlugin(File pluginFile, boolean initializing) throws Exception {
-        String plugin = registerPluginJar(pluginFile.toString());
+    private PluginInfo loadPlugin(File pluginFile, boolean initializing) throws Exception {
+        PluginInfo plugin = registerPluginJar(pluginFile.toString());
         if (plugin != null) {
-            deployHqu(plugin, pluginFile, initializing);
+            deployHqu(plugin.name, pluginFile, initializing);
             return plugin;
         }
         return null;
     }
 
-    private void loadAndDeployPlugin(File pluginFile) throws Exception {
-        String pluginName = loadPlugin(pluginFile, false);
-        if (pluginName != null) {
-            log.info("Deploying plugin: " + pluginName);
-            deployPlugin(pluginName);
+    private boolean loadAndDeployPlugin(File pluginFile) throws Exception {
+        if (!isDeployable(pluginFile)) {
+            log.info("cannot deploy " + pluginFile + " since it is over-written in " +
+                     getCustomPluginDir() + " (this is ok)");
+            return false;
         }
-        agentManager.syncPluginToAgentsAfterCommit(pluginFile.getName());
+        PluginInfo pluginInfo = loadPlugin(pluginFile, false);
+        if (pluginInfo != null) {
+            log.info("Deploying plugin: " + pluginFile.getAbsolutePath());
+            deployPlugin(pluginInfo.name, pluginFile.getParentFile());
+        }
+        return true;
+    }
+
+    /**
+     * simply checks if the pluginFile is in the serverPluginDir and if there is a duplicate
+     * filename in the customPluginDir.  If those conditions are met then return false.
+     */
+    private boolean isDeployable(File pluginFile) {
+        if (isInCustomDir(pluginFile)) {
+            return true;
+        }
+        if (new File(getCustomPluginDir().getAbsoluteFile(), pluginFile.getName()).exists()) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * @return true if pluginFile is located in customPluginDir
+     */
+    private boolean isInCustomDir(File file) {
+        return file.getAbsoluteFile().getParent().startsWith(getCustomPluginDir().getAbsolutePath());
+    }
+
+    private File getServerPluginDir() {
+        return pluginManager.getServerPluginDir();
+    }
+
+    private File getCustomPluginDir() {
+        return pluginManager.getCustomPluginDir();
     }
 
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
@@ -364,36 +434,60 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
         } catch (IOException e) {
             log.info("HQU directory not found");
         }
-        try {
-             File pluginDir = applicationContext.getResource("WEB-INF/" + PLUGIN_DIR).getFile();
-             pluginDirs.add(pluginDir);
-        } catch (IOException e) {
-            log.error("Plugins directory not found", e);
+        pluginDirs.add(getServerPluginDir());
+        // Add custom hq-plugins dir at same level as server home
+        final File customPluginDir = getCustomPluginDir();
+        if (!customPluginDir.exists()) {
+            customPluginDir.mkdirs();
         }
-        //Add custom hq-plugins dir at same level as server home
-        File workingDirParent = new File(System.getProperty("user.dir")).getParentFile();
-        if( workingDirParent != null && new File(workingDirParent,"hq-plugins").exists()) {
-            File customPluginDir = new File(workingDirParent,"hq-plugins");
+        if( customPluginDir != null && customPluginDir.exists() && customPluginDir.isDirectory()) {
             pluginDirs.add(customPluginDir);
-         }  
+        } else {
+            log.error("custom plugin directory " + customPluginDir.getAbsolutePath() +
+                      " does not exist.  Without this directory users " +
+                      "will not be able to deploy plugins from the HQ Plugin Manager",
+                      new Throwable());
+        }
     }
 
     private class ProductPluginFileEventListener implements FileEventListener {
-
         public void onFileEvent(FileEvent fileEvent) {
-            log.debug("Received product plugin file event: " + fileEvent);
+            if (log.isDebugEnabled()) {
+                log.debug("Received product plugin file event: " + fileEvent);
+            }
             try {
+                final File pluginFile = fileEvent.getFileDetails().getFile();
                 if (FileOperation.CREATED.equals(fileEvent.getOperation())) {
-                    loadAndDeployPlugin(fileEvent.getFileDetails().getFile());
+                    File serverPlugin = new File(getServerPluginDir(), pluginFile.getName());
+                    if (!serverPlugin.equals(pluginFile)) {
+                        // plugin was deployed in the custom dir but already exists in the
+                        // server dir.  redeploy it!
+                        undeployPlugin(serverPlugin, true);
+                    }
+                    boolean deployed = loadAndDeployPlugin(pluginFile);
+                    if (deployed) {
+                        agentManager.syncPluginToAgentsAfterCommit(pluginFile.getName());
+                    }
                 } else if (FileOperation.DELETED.equals(fileEvent.getOperation())) {
-                    undeployPlugin(fileEvent.getFileDetails().getFile());
+                    File customPlugin = new File(getCustomPluginDir(), pluginFile.getName());
+                    if (customPlugin.exists()) {
+                        // do nothing, the file existed in both custom dir and server
+                        // then the server file was deleted
+                    } else {
+                        undeployPlugin(pluginFile, false);
+                    }
                 } else if (FileOperation.UPDATED.equals(fileEvent.getOperation()) &&
                            !(pluginDirs.contains(fileEvent.getFileDetails().getFile()))) {
-                    undeployPlugin(fileEvent.getFileDetails().getFile());
-                    loadAndDeployPlugin(fileEvent.getFileDetails().getFile());
+                    boolean undeployed = undeployPlugin(pluginFile, false);
+                    if (undeployed) {
+                        boolean deployed = loadAndDeployPlugin(pluginFile);
+                        if (deployed) {
+                    	   agentManager.syncPluginToAgentsAfterCommit(pluginFile.getName());
+                        }
+                    }
                 }
             } catch (Exception e) {
-                log.error("Error responding to plugin file event " + fileEvent + ".  Cause: " + e, e);
+                log.error("Error responding to plugin file event " + fileEvent + ": " + e, e);
             }
         }
     }

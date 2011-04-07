@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2010], VMware, Inc.
+ * Copyright (C) [2004-2011], VMware, Inc.
  * This file is part of Hyperic.
  *
  * Hyperic is free software; you can redistribute it and/or modify
@@ -50,7 +50,14 @@ public class MaintenanceEvent
 
     // Constants for REST Service and Quartz Job
     private static final String OBJECT_NAME = "MaintenanceEvent";
+
+    public static final String ENTITY_ID = "entityId";
+    
+    /**
+     * @deprecated Use ENTITY_ID instead
+     */
     public static final String GROUP_ID = "groupId";
+    
     public static final String STATE = "state";
     public static final String START_TIME = "startTime";
     public static final String END_TIME = "endTime";
@@ -73,8 +80,15 @@ public class MaintenanceEvent
     public long alertCount;
     public long errorCount;
 
+    /**
+     * @deprecated Use AppdefEntityID constructor instead
+     */
     public MaintenanceEvent(Integer groupId) {
-        super(new TrackEvent(AppdefEntityID.newGroupID(groupId),
+    	this(AppdefEntityID.newGroupID(groupId));
+    }
+
+    public MaintenanceEvent(AppdefEntityID entityId) {
+        super(new TrackEvent(entityId,
                              System.currentTimeMillis(),
                              LogTrackPlugin.LOGLEVEL_INFO, "", ""));
 
@@ -84,10 +98,21 @@ public class MaintenanceEvent
         resetStats();
     }
 
+    /**
+     * @deprecated Use AppdefEntityID getter instead
+     */
     public Integer getGroupId() {
-        return getResource().getId();
+    	if (getResource().isGroup()) {
+    		return getResource().getId();
+    	} else {
+    		return null;
+    	}
     }
 
+    public AppdefEntityID getAppdefEntityID() {
+        return getResource();
+    }
+    
     public String getState() {
         return _state;
     }
@@ -148,8 +173,17 @@ public class MaintenanceEvent
      */
     public static MaintenanceEvent build(JobDetail jobDetail) {
         JobDataMap jdMap = jobDetail.getJobDataMap();
-        MaintenanceEvent event = new MaintenanceEvent(
-                                                      jdMap.getIntegerFromString(GROUP_ID));
+        MaintenanceEvent event = null;
+        
+        // for backwards compatibility, need to check group id first
+        if (jdMap.containsKey(GROUP_ID)) {
+        	Integer groupId = jdMap.getIntegerFromString(GROUP_ID);
+        	event = new MaintenanceEvent(groupId);
+        } else {        
+        	String entityId = jdMap.getString(ENTITY_ID);
+        	event = new MaintenanceEvent(new AppdefEntityID(entityId));
+        }
+        
         event.setState(jdMap.getString(STATE));
         event.setStartTime(jdMap.getLongValue(START_TIME));
         event.setEndTime(jdMap.getLongValue(END_TIME));
@@ -173,7 +207,7 @@ public class MaintenanceEvent
             sb.append("]");
         } else {
             sb.append(OBJECT_NAME);
-            sb.append("[" + GROUP_ID + "=" + getGroupId());
+            sb.append("[" + ENTITY_ID + "=" + getAppdefEntityID());
             sb.append("," + STATE + "=" + _state);
             sb.append("," + START_TIME + "=" + new Date(_startTime));
             sb.append("," + END_TIME + "=" + new Date(_endTime));
@@ -187,7 +221,7 @@ public class MaintenanceEvent
     public JSONObject toJSON() {
         JSONObject json = new JSONObject();
         try {
-            json.put(GROUP_ID, getGroupId())
+            json.put(ENTITY_ID, getAppdefEntityID())
                 .put(STATE, getState())
                 .put(START_TIME, getStartTime())
                 .put(END_TIME, getEndTime());

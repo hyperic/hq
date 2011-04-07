@@ -45,10 +45,15 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.shared.AgentManager;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.common.DiagnosticObject;
 import org.hyperic.hq.common.DiagnosticsLogger;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -68,11 +73,14 @@ public class AgentSynchronizer implements DiagnosticObject {
     private final AtomicBoolean shutdown = new AtomicBoolean(false);
     private final AtomicLong executorNum = new AtomicLong(0);
     private ConcurrentStatsCollector concurrentStatsCollector;
+    private AuthzSubject overlord;
 
     @Autowired
     public AgentSynchronizer(ConcurrentStatsCollector concurrentStatsCollector,
-                             DiagnosticsLogger diagnosticsLogger) {
+                             DiagnosticsLogger diagnosticsLogger,
+                             AuthzSubjectManager authzSubjectManager) {
         this.concurrentStatsCollector = concurrentStatsCollector;
+        this.overlord = authzSubjectManager.getOverlordPojo();
         diagnosticsLogger.addDiagnosticObject(this);
     }
     
@@ -187,7 +195,34 @@ public class AgentSynchronizer implements DiagnosticObject {
         final String name = Thread.currentThread().getName() + "-" + executorNum.getAndIncrement();
         final Thread thread = new Thread(name) {
             public void run() {
-                job.execute();
+                if (agentIsAlive(job)) {
+                    job.execute();
+                    return;
+                }
+                AvailabilityManager availabilityManager = Bootstrap.getBean(AvailabilityManager.class);
+                if (availabilityManager.platformIsAvailable(job.getAgentId())) {
+                    // agent is busy but up and running, add job back to the queue
+                    if (log.isDebugEnabled()) {
+                        log.debug("cannot ping agentId=" + job.getAgentId() +
+                                  " but availabilityManager shows that it is available, " +
+                                  "rescheduling job=" + getJobInfo(job));
+                    }
+                    synchronized (agentJobs) {
+                        // if the job queue isn't very full then we don't want to keep spinning
+                        // as a result of re-adding this job.  Instead lets just sleep for a few
+                        // secs and then re-issue the job.
+                        if (agentJobs.size() < NUM_WORKERS) {
+                            try {
+                                agentJobs.wait(5000);
+                            } catch (InterruptedException e) {
+                                log.debug(e,e);
+                            }
+                        }
+                        agentJobs.add(job);
+                    }
+                } else {
+                    log.warn("Could not ping agent in order to run job " + getJobInfo(job));
+                }
             }
         };
         thread.start();
@@ -200,7 +235,19 @@ public class AgentSynchronizer implements DiagnosticObject {
             thread.interrupt();
         }
     }
-    
+
+    private boolean agentIsAlive(AgentDataTransferJob job) {
+        try {
+            // XXX need to set this in the constructor
+            final AgentManager agentManager = Bootstrap.getBean(AgentManager.class);
+            agentManager.pingAgent(overlord, job.getAgentId());
+        } catch (Exception e) {
+            log.debug(e,e);
+            return false;
+        }
+        return true;
+    }
+
     private String getJobInfo(AgentDataTransferJob job) {
         final String desc = job.getJobDescription();
         return new StringBuilder(desc.length() + 32)

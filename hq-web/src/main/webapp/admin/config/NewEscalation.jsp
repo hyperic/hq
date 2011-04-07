@@ -520,8 +520,8 @@ function editEscalation (row) {
     }
 
     function hideDisplay() {
-        $(emailinput).style.display='none';
-        $(sysloginput).style.display='none';
+        hqDojo.style(emailinput, "display", "none");
+        hqDojo.style(sysloginput, "display", "none");
     }
 
     function removeRow(obj) {

@@ -27,7 +27,7 @@ Window.prototype = {
 	// Available parameters : className, title, minWidth, minHeight, maxWidth, maxHeight, width, height, top, left, bottom, right, resizable, zIndex, opacity, 
 	//                        hideEffect, showEffect, showEffectOptions, hideEffectOptions, effectOptions, url, draggable, closable, minimizable, maximizable, parent, onload
 	initialize: function(id) {
-	  if ($(id))
+	  if (hqDojo.byId(id))
 	    alert("Window " + id + " is already register is the DOM!!, be sure to use setDestroyOnClose()")
 	    
 		this.hasEffectLib = String.prototype.parseColor != null;
@@ -73,9 +73,9 @@ Window.prototype = {
     this.eventMouseDownContent = this.toFront.bindAsEventListener(this);
     this.eventResize = this._recenter.bindAsEventListener(this);
  
-		this.topbar = $(this.element.id + "_top");
-		this.bottombar = $(this.element.id + "_bottom");
-    this.content = $(this.element.id + "_content");
+		this.topbar = hqDojo.byId(this.element.id + "_top");
+		this.bottombar = hqDojo.byId(this.element.id + "_bottom");
+    this.content = hqDojo.byId(this.element.id + "_content");
     
 		Event.observe(this.topbar, "mousedown", this.eventMouseDown);
 		Event.observe(this.bottombar, "mousedown", this.eventMouseDown);
@@ -90,7 +90,7 @@ Window.prototype = {
     }		
     
 		if (this.options.resizable) {
-			this.sizer = $(this.element.id + "_sizer");
+			this.sizer = hqDojo.byId(this.element.id + "_sizer");
     	Event.observe(this.sizer, "mousedown", this.eventMouseDown);
     }	
     
@@ -186,15 +186,16 @@ Window.prototype = {
 	setContent: function(id, autoresize, autoposition) {
 		var d = null;
 		var p = null;
-
+		var obj = hqDojo.byId(id);
+		
 		if (autoresize) 
 			d = Element.getDimensions(id);
 		if (autoposition) 
-			p = Position.cumulativeOffset($(id));
+			p = Position.cumulativeOffset(obj);
 
 		var content = this.getContent()
-		content.appendChild($(id));
-		$(id).show();
+		content.appendChild(obj);
+		hqDojo.style(obj, "display", "");
 		if (autoresize) 
 			this.setSize(d.width, d.height);
 		if (autoposition) 
@@ -280,7 +281,7 @@ Window.prototype = {
 		  this.doResize = false;
 
   		// Check if click on close button, 
-  		var closeButton = $(this.getId() + '_close');
+  		var closeButton = hqDojo.byId(this.getId() + '_close');
   		if (closeButton && Position.within(closeButton, this.pointer[0], this.pointer[1])) 
   			return;
 
@@ -417,7 +418,7 @@ Window.prototype = {
     
 		Element.hide(win);
 		this.options.parent.insertBefore(win, this.options.parent.firstChild);
-		Event.observe($(id + "_content"), "load", this.options.onload);
+		Event.observe(hqDojo.byId(id + "_content"), "load", this.options.onload);
 		return win;
 	},
 	
@@ -462,7 +463,7 @@ Window.prototype = {
 		this.element.setStyle({height: height  + this.heightN + this.heightS + "px"})
 
 		// Update content height
-		var content = $(this.element.id + '_content')
+		var content = hqDojo.byId(this.element.id + '_content')
 		content.setStyle({height: height  + 'px'});
 		content.setStyle({width: width  + 'px'});
 	},
@@ -549,9 +550,9 @@ Window.prototype = {
 	  if (this.modal) {
   		var pageSize = WindowUtilities.getPageSize();
   		// set height of Overlay to take up whole page and show
-  		if ($('overlay_modal')) {
-  		  $('overlay_modal').style.height = (pageSize.pageHeight + 'px');
-  		  $('overlay_modal').style.width = (pageSize.pageWidth + 'px');
+  		if (hqDojo.byId('overlay_modal')) {
+  			hqDojo.style('overlay_modal', "height", pageSize.pageHeight + 'px');
+  			hqDojo.style('overlay_modal', "width", pageSize.pageWidth + 'px');
       }		
   		if (this.centered)
   		  this._center(this.centerTop, this.centerLeft);		
@@ -577,7 +578,7 @@ Window.prototype = {
 	},
 
   minimize: function() {
-    var r2 = $(this.getId() + "_row2");
+    var r2 = hqDojo.byId(this.getId() + "_row2");
     var dh = r2.getDimensions().height;
     
     if (r2.visible()) {
@@ -634,7 +635,7 @@ Window.prototype = {
   },
   
   isMinimized: function() {
-    var r2 = $(this.getId() + "_row2");
+    var r2 = hqDojo.byId(this.getId() + "_row2");
     return !r2.visible();
   },
   
@@ -660,7 +661,7 @@ Window.prototype = {
   },
 
 	setStatusBar: function(element) {
-		var statusBar = $(this.getId() + "_bottom");
+		var statusBar = hqDojo.byId(this.getId() + "_bottom");
 
     if (typeof(element) == "object") {
       if (this.bottombar.firstChild)
@@ -675,7 +676,7 @@ Window.prototype = {
 	_checkIEOverlapping: function() {
     if(!this.iefix && (navigator.appVersion.indexOf('MSIE')>0) && (navigator.userAgent.indexOf('Opera')<0) && (this.element.getStyle('position')=='absolute')) {
         new Insertion.After(this.element.id, '<iframe id="' + this.element.id + '_iefix" '+ 'style="display:none;position:absolute;filter:progid:DXImageTransform.Microsoft.Alpha(opacity=0);" ' + 'src="javascript:false;" frameborder="0" scrolling="no"></iframe>');
-        this.iefix = $(this.element.id+'_iefix');
+        this.iefix = hqDojo.byId(this.element.id+'_iefix');
     }
     if(this.iefix) 
 			setTimeout(this._fixIEOverlapping.bind(this), 50);
@@ -819,12 +820,12 @@ var Windows = {
     if (win) {
 	  	if (win.getDelegate() && ! win.getDelegate().canClose(win)) 
 	  		return;
-	      if ($(id + "_close"))
-	        $(id + "_close").onclick = null;
-	      if ($(id + "_minimize"))
-	        $(id + "_minimize").onclick = null;	        
-	      if ($(id + "_maximize"))
-	        $(id + "_maximize").onclick = null;	      
+	      if (hqDojo.byId(id + "_close"))
+	    	  hqDojo.byId(id + "_close").onclick = null;
+	      if (hqDojo.byId(id + "_minimize"))
+	    	  hqDojo.byId(id + "_minimize").onclick = null;	        
+	      if (hqDojo.byId(id + "_maximize"))
+	    	  hqDojo.byId(id + "_maximize").onclick = null;	      
 	      
   			this.notify("onClose", win);
   			win.hide();
@@ -1111,14 +1112,14 @@ var WindowUtilities = {
 		var objBody = document.getElementsByTagName("body").item(0);
 
 		// prep objects
-	 	var objOverlay = $(overlayId);
+	 	var objOverlay = hqDojo.byId(overlayId);
 
 		var pageSize = WindowUtilities.getPageSize();
 
 		// Hide select boxes as they will 'peek' through the image in IE
 		if (contentId && isIE) {
-      $$('select').each(function(element) {element.style.visibility = "hidden"});
-	    $$('#'+contentId+' select').each(function(element) {element.style.visibility = "visible"});
+			hqDojo.query('select').forEach(function(element) {element.style.visibility = "hidden"});
+			hqDojo.query('#' + contentId + ' select').forEach(function(element) {element.style.visibility = "visible"});
 		}	
 	
 		// set height of Overlay to take up whole page and show
@@ -1129,14 +1130,14 @@ var WindowUtilities = {
 
  	enableScreen: function(id) {
  	  id = id || 'overlay_modal'
-	 	var objOverlay =  $(id);
+	 	var objOverlay =  hqDojo.byId(id);
 		if (objOverlay) {
 			// hide lightbox and overlay
 			objOverlay.style.display = 'none';
 
 			// make select boxes visible
 			if (isIE) {
-        $$('select').each(function(element) {element.style.visibility = "visible"});
+				hqDojo.query('select').forEach(function(element) {element.style.visibility = "visible"});
 			}
 			objOverlay.parentNode.removeChild(objOverlay);
 		}
@@ -1149,7 +1150,7 @@ var WindowUtilities = {
 	// container for the overlay pattern and the inline image.
 	initLightbox: function(id, className) {
 		// Already done, just update zIndex
-		if ($(id)) {
+		if (hqDojo.byId(id)) {
 			Element.setStyle(id, {zIndex: Windows.maxZIndex + 10});
 		}
 		// create overlay div and hardcode some functional styles (aesthetic styles are in CSS file)
@@ -1216,13 +1217,11 @@ var WindowUtilities = {
   	
   	var size;
   	if (height)
-  	  size = $(id).getDimensions().width + margin;
+  	  size = hqDojo.position(id).w + margin;
     else
-      size = $(id).getDimensions().height + margin;
+      size = hqDojo.position(id).h + margin;
   	objBody.removeChild(tmpObj);
     
   	return size;
   }	
 }
-
-

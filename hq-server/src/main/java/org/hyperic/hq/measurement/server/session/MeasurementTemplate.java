@@ -26,6 +26,7 @@
 package org.hyperic.hq.measurement.server.session;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
 import org.hyperic.hibernate.PersistedObject;
@@ -49,6 +50,7 @@ public class MeasurementTemplate
     private String  _plugin;
     private long    _ctime;
     private long    _mtime;
+    private Collection measurementBag;
 
     private MonitorableType _monitorableType;
     private Category        _category;
@@ -193,6 +195,14 @@ public class MeasurementTemplate
     
     void setCategory(Category category) {
         _category = category;
+    }
+
+    private Collection getMeasurementBag() {
+        return measurementBag;
+    }
+
+    private void setMeasurementBag(Collection measurementBag) {
+        this.measurementBag = measurementBag;
     }
 
     public boolean isAvailability() {

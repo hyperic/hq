@@ -5,8 +5,50 @@
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
 
 <style>
+
+	.mechanismOff{
+		border-bottom: 1px solid gray;
+	}
+
+	#selectedFileList{
+		border: 1px solid #CCCCCC;
+    	height: 100px;
+    	overflow-x: hidden;
+    	overflow-y: auto;
+    	width: 350px;
+    	text-align: left;
+	}
+	.fileToUploadClose{
+		width:10px;
+	}
+	
+	#selectedFileList table{
+		padding: 0px;
+		margin: 0px;
+	}
+        
+	.selectFileBtn{
+		-moz-border-radius: 4px 4px 4px 4px;
+	    background: url("/images/4.0/backgrounds/button-green-background.jpg") repeat-x scroll center bottom #2DBF3D;
+    	border: 1px solid #84B96D;
+	    color: #FFFFFF;
+	    cursor: pointer;
+	    font-size: 0.9em;
+	    font-weight: bold;
+	    padding: 3px 15px;
+	    width: 90px;
+	    float:right;
+	}
+	#uploadButtonBar{
+		text-align: right;
+	}
+
+	
+	
 	#pluginManagerPanel {
 		padding: 0.5em 1.5em;
+		width:90%;
+		min-width:400px;
 	}
 	
 	#pluginManagerPanel span a {
@@ -22,7 +64,6 @@
 	}
 	
 	#pluginManagerPanel .actionbar {
-		padding: 0.25em 1em;
 		background: url("/images/4.0/backgrounds/table_header_large.png") repeat-x 0 0 transparent;
 		overflow: hidden;
 		border: 1px solid gray;
@@ -36,6 +77,10 @@
 		margin-right: 0.5em;
 	}
 	
+	#pluginManagerPanel .actionbar input[type="button"]{
+		margin: 0.25em 1em;
+	}
+	
 	#pluginManagerPanel ul {
 		margin: 0;
 		padding: 0;
@@ -45,9 +90,11 @@
 		border-top: 0;
 		border-bottom: 0;
 		overflow-y: scroll;
+		overflow-x: hidden;
 		height: 400px;
+		
 	}
-	
+
 	#pluginManagerPanel .gridheader {
 		background: url("/images/4.0/backgrounds/table_header_large.png") repeat-x 0 0 transparent;
 		overflow: hidden;
@@ -84,10 +131,12 @@
 	
 	#uploadPanel {
 		width: 400px;
+		text-align: left;
 	}
-	
-	#removeErrorPanel {
+
+	#removeErrorPanel, #confirmationPanel {
 		width: 400px;
+		text-align: left;
 	}
 	#removeErrorPanel div{
 		text-align: right;
@@ -119,25 +168,27 @@
 	}
 	
 	#validationMessage.error,
-	#progressMessage.error {
+	#progressMessage.error{
 	    color: #bb0000;
 	}
 	
 	#showRemoveConfirmationButton{
 		float:left;
 	}
-	.errorAgentSpan{
+	#pluginList .notFound{
+		color:red;
+	}
+	.agentStatusSpan{
 		color: #0066CC;
 		font-weight: bold;
+		height:50px;
 	}
-	.errorAgentSpan:focus,
-	.errorAgentSpan:hover{
+	.agentStatusSpan:focus,
+	.agentStatusSpan:hover{
 		color: #0066FF;
 	}
 	.errorAgentTip{
 		overflow:auto;
-		height:300px;
-		width:400px;
 	}
 	.errorAgentTitle{
 		font-weight: bold;
@@ -149,7 +200,7 @@
 	.inProgressAgentList li{
 		list-style-image: url("/images/arrow_refresh.png");
 	}
-	#agentInfo{
+	#agentInfo, #currentTimeInfo{
 		font-weight: bold;
 		float: right;
 		height: 20px;
@@ -160,110 +211,269 @@
 		float:right;
 		visibility:hidden;
 	}
+	#showStatusPanelDialog{
+		width: 505px;
+		height: 410px;
+		text-align: left;
+	}
+	
+	#statusButtonBar {
+		text-align: right;
+		vertical-align:bottom;
+	}
+	#agentList{
+		border: solid 1px;
+		border-color: #BBBBBB;
+		height: 290px;
+		overflow: auto;
+		margin: 10px;
+		padding: 0px 30px;
+		width:410px;
+	}
+	
+	.errorAgent{
+		list-style-image: url("/images/dark-red-circle.png");
+	}
+	.inProgressAgent{
+		list-style-image: url("/images/dark-blue-circle.png");
+	}
+	#searchText{
+		background: url("/images/4.0/icons/search.png") no-repeat scroll 3px center #FFFFFF;
+		color: #444444;
+		padding: 0.25em 0.25em 0.25em 20px;
+		width:250px;
+	}
+	input[type="text"]{
+		margin:0.5em 0;
+	}
+	.selectInstruction{
+		font-weight:bold;
+		width:290px;
+		float:left;
+	}
+	#selectedFileList{
+		width:400px;
+	}
+	.uploaderInsideNode{
+	}
+	#selectFileBtn{
+		width:60px;
+		float:right;
+	}
+	.fileToUploadClose{
+		background: url("/images/dash_movecontent_del-on.gif") no-repeat scroll 5px center #FFFFFF
+	}
+	#afterSelectFileInstruction{
+		text-align:center;
+		color:#777777;
+	}
+	.mechanismOffInstruction{
+		background:yellow; 
+	}	
+	#loadingIcon{
+		width:15px;
+	}
+	.infoIcon{
+		width:12px;
+	}
+
+    #pluginManagerPanel .gridheader, #pluginManagerPanel .gridrow, 
+    	#pluginManagerPanel .actionbar, #pluginManagerPanel ul{
+    	min-width:980px;
+	}
+	.span-small{
+		width:10%;
+	}
+	.span-med{
+		width:15%;
+	}
+	.span-status{
+		min-width: 120px;
+		width:10%;
+	}
+	#selectFileButton{
+		width:60px;
+	}
+
 </style>
 <section id="pluginManagerPanel" class="container top">
 	<h1><fmt:message key="admin.managers.plugin.title" /></h1>
-	<p><fmt:message key="admin.managers.plugin.instructions" /></p>
+	<p id="instruction"><fmt:message key="${instruction}" /></p>
+
+	<div style="float:left;" id="agentInfo">
+		<span>
+			<fmt:message key="admin.managers.Plugin.information.agent.count"/>:&nbsp;
+		    <span id="agentInfoAllCount">${allAgentCount}</span>
+		    <img src="/images/icon_info_small.gif" class="infoIcon"/> <br/>
+		</span>
+	</div>
 	
-	<div id="agentInfo">
-		<fmt:message key="admin.managers.Plugin.information.agent.count"/>&nbsp;<span id="agentInfoAllCount"></span> <br/>
+	<div  id="currentTimeInfo">
+		
+		<span style="float:right;">&nbsp;&nbsp;&nbsp; <fmt:message key="admin.managers.Plugin.information.refresh.time"/> <span id="timeNow"></span>
+		</span>
+		<img style="float:right;" id="refreshIcon" style="float:right;" src="/images/arrow_refresh.png" />
 	</div>
 	
 	<div class="gridheader clear">
 		<span class="first column span-1">&nbsp;</span>
-		<span class="column span-3"><fmt:message key="admin.managers.plugin.column.header.product.plugin" /></span>
-		<span class="column span-3"><fmt:message key="admin.managers.plugin.column.header.version" /></span>
-		<span class="column span-4"><fmt:message key="admin.managers.plugin.column.header.jar.name" /></span>
-		<span class="column span-4"><fmt:message key="admin.managers.plugin.column.header.initial.deploy.date" /></span>
-		<span class="column span-4"><fmt:message key="admin.managers.plugin.column.header.last.sync.date" /></span>
-		<span class="last column span-3"><fmt:message key="admin.managers.plugin.column.header.status" /></span>
+		<span class="column span-small"><fmt:message key="admin.managers.plugin.column.header.product.plugin" /></span>
+		<span class="column span-med"><fmt:message key="admin.managers.plugin.column.header.version" /></span>
+		<span class="column span-med"><fmt:message key="admin.managers.plugin.column.header.jar.name" /></span>
+		<span class="column span-med" id="addedTimeHeader"><fmt:message key="admin.managers.plugin.column.header.initial.deploy.date" /><img src="/images/icon_info_small.gif" class="infoIcon"></span>
+		<span class="column span-med" id="updatedTimeHeader"><fmt:message key="admin.managers.plugin.column.header.last.sync.date" /><img src="/images/icon_info_small.gif" class="infoIcon"></span>
+		<span class="column span-status"><fmt:message key="admin.managers.plugin.column.header.status" /></span>
 	</div>
 	
 	<form:form id="deleteForm" name="deleteForm" onsubmit="return false;" method="delete">
+	
 	<ul id="pluginList">
 		<c:forEach var="pluginSummary" items="${pluginSummaries}" varStatus="index">
 			<li class="gridrow clear<c:if test="${index.count % 2 == 0}"> even</c:if>">
 				<span class="first column span-1">
-                    <input type="checkbox" name="deleteId" value="${pluginSummary.id}" class="checkbox" />&nbsp; 
+					<c:if test="${mechanismOn}">
+                    	<input type="checkbox" value="${pluginSummary.id}" name="deleteId"/>&nbsp; 
+					</c:if>
 				</span>
-				<span class="column span-3">${pluginSummary.name}&nbsp;</span>
-				<span class="column span-3">${pluginSummary.version}&nbsp;</span>
-				<span class="column span-4">${pluginSummary.jarName}&nbsp;</span>
-				<span class="column span-4">${pluginSummary.initialDeployDate}&nbsp;</span>
-				<span class="column span-4">${pluginSummary.updatedDate}&nbsp;</span>		
-				<span class="last column span-3" >
+				<span class="column span-small">${pluginSummary.name}</span>
+				<span class="column span-med">${pluginSummary.version}&nbsp;</span>
+				<span class="column span-med">${pluginSummary.jarName}&nbsp;
+					<c:if test="${pluginSummary.disabled}">
+						<br/><span class="notFound"><fmt:message key="admin.managers.Plugin.column.plugin.disabled"/></span>
+					</c:if>
+				</span>
+				<span class="column span-med">${pluginSummary.initialDeployDate}&nbsp;</span>
+				<span class="column span-med">${pluginSummary.updatedDate}&nbsp;</span>		
+				<span class="last column span-status" >
 					<c:if test="${pluginSummary.allAgentCount>0}">
-						<c:if test="${pluginSummary.inProgressAgentCount>0}">
-					        ${pluginSummary.inProgressAgentCount}&nbsp;<img src="/images/arrow_refresh.png"/>&nbsp;&nbsp;
-					   	</c:if>	
 					    <c:if test="${pluginSummary.successAgentCount>0}">
-					    	${pluginSummary.successAgentCount}&nbsp;<img src="/images/icon_available_green.gif"/>&nbsp;&nbsp;
+					    	${pluginSummary.successAgentCount}&nbsp;<img class="successIcon" src="/images/dark-green-circle.png"/>&nbsp;&nbsp;
 					    </c:if>
-				    </c:if>
-				    
-				   	<c:if test="${pluginSummary.errorAgentCount>0}">
-				   		<span id="errorAgent_${index.count}" class="errorAgentSpan">
-				   			${pluginSummary.errorAgentCount}&nbsp;<img src="/images/icon_available_red.gif"/>
-				    	</span>
+					    
+					    <c:if test="${pluginSummary.inProgressAgentCount>0 ||pluginSummary.errorAgentCount>0 }">
+					    	<span id="${pluginSummary.name}_${pluginSummary.id}" class="agentStatusSpan">				    	
+							<c:if test="${pluginSummary.inProgressAgentCount>0}">
+						        ${pluginSummary.inProgressAgentCount}&nbsp;<img id="${pluginSummary.name}_${pluginSummary.id}" class="inProgressIcon" src="/images/dark-blue-circle.png"/>&nbsp;&nbsp;
+						   	</c:if>	
+						   	<c:if test="${pluginSummary.errorAgentCount>0}">	   		
+					   			${pluginSummary.errorAgentCount}&nbsp;<img id="${pluginSummary.name}_${pluginSummary.id}" class="errorIcon" src="/images/dark-red-circle.png"/>
+							</c:if>
+							</span>
+						</c:if>
 					</c:if>
 				</span>
 			</li>
 		</c:forEach>
 	</ul>
 	</form:form>
-	<div class="actionbar">
-		<input id="showRemoveConfirmationButton" type="button" value="<fmt:message key="admin.managers.plugin.button.remove.plugin" />" />
-		<span id="progressMessage"></span>
-		<input id="showUploadFormButton" type="button" value="<fmt:message key="admin.managers.plugin.button.add.plugin" />" />
-	</div>	
+	
+	<c:if test="${mechanismOn}" >
+		<div class="actionbar">		
+			<input id="showRemoveConfirmationButton" type="button" value="<fmt:message key="admin.managers.plugin.button.remove.plugin" />" />
+			<span id="progressMessage"></span>
+			<input id="showUploadFormButton" type="button" value="<fmt:message key="admin.managers.plugin.button.add.plugin" />" />
+		</div>	
+	</c:if>
 </section>
 
 
-
-<div id="uploadPanel" style="visibility:hidden;">
-	<form id="uploadForm" name="uploadForm" onsubmit="return false;" method="POST" enctype="multipart/form-data">
-		<strong><fmt:message key="admin.managers.plugin.upload.dialog.instruction" /></strong>
-		<p>
-			<span><fmt:message key="admin.managers.plugin.upload.dialog.label" /></span>
-		</p>
-		<p>
-			<input type="file" id="plugin" name="plugin" />
-		</p>
-		<p id="validationMessage" class="error" style="opacity:0;">&nbsp;</p>
+<c:if test="${mechanismOn}" >
+	<div id="uploadPanel" style="visibility:hidden;">
+			<p>
+				<span><fmt:message key="admin.managers.plugin.upload.dialog.label" />&nbsp;</span>
+			</p>
+			<p>
+				<div class="selectInstruction"><fmt:message key="admin.managers.plugin.upload.dialog.instruction" />&nbsp;</div>
+				<div id="selectFileButton" class="selectFileBtn"><fmt:message key="admin.managers.plugin.button.select.files" /></div>
+			</p>
+			<br/>
+			<p>
+			    <div><fmt:message key="admin.managers.plugin.upload.dialog.files.title" /></div>
+				<div id="selectedFileList"></div>
+				<p id="afterSelectFileInstruction"><fmt:message key="admin.managers.plugin.upload.dialog.instruction.after" /></p>
+			</p>
+			<p id="validationMessage" class="error" style="opacity:0; filter:alpha(opacity=0);zoom: 1;">&nbsp;</p>
+			<div id="uploadButtonBar">
+				<input id="uploadButton" type="button" value="<fmt:message key='admin.managers.plugin.button.upload' />" /> &nbsp;
+				<a href="#" class="cancelLink"><fmt:message key="admin.managers.plugin.button.cancel" /></a>
+			</div>
+	</div>
+	<div id="confirmationPanel" style="visibility:hidden;">
+		<p><fmt:message key="admin.managers.plugin.confirmation.message" /></p>
 		<div>
-			<input id="uploadButton" type="submit" name="upload" value="<fmt:message key="admin.managers.plugin.button.upload" />" />
+			<input id="removeButton" type="button" name="remove" value="<fmt:message key="admin.managers.plugin.button.remove" />" />
 			<a href="#" class="cancelLink"><fmt:message key="admin.managers.plugin.button.cancel" /></a>
 		</div>
-	</form>
-</div>
-<div id="confirmationPanel" style="visibility:hidden;">
-	<p><fmt:message key="admin.managers.plugin.confirmation.message" /></p>
-	<div>
-		<input id="removeButton" type="button" name="remove" value="<fmt:message key="admin.managers.plugin.button.remove" />" />
-		<a href="#" class="cancelLink"><fmt:message key="admin.managers.plugin.button.cancel" /></a>
 	</div>
-</div>
-
-<div id="removeErrorPanel" style="visibility:hidden;">
-	<p id="removeErrorMsg"></p>
-	<div>
-		<a href="#" class="cancelLink"><fmt:message key="admin.managers.plugin.button.cancel" /></a>
+	<div id="removeErrorPanel" style="visibility:hidden;">
+		<p id="removeErrorMsg"></p>
+		<div>
+			<a href="#" class="cancelLink"><fmt:message key="admin.managers.plugin.button.cancel" /></a>
+		</div>
 	</div>
+</c:if>
+
+<div id="showStatusPanel" style="visibility:hidden;">
+	<div style="text-align:center; margin:0px;">
+		<input type="text" id="searchText"/>
+		<img id="loadingIcon" src="/images/4.0/icons/ajax-loader-blue.gif" style=""/>
+	</div>
+	<input type="hidden" id="pluginId"/>
+	<input type ="hidden" id="pluginName"/>
+	
+	<ul id="agentList"></ul>
+	
+	<div id="statusButtonBar">
+	    <span style="float:left">&nbsp;&nbsp; <img src="/images/dark-blue-circle.png"/> <fmt:message key="admin.managers.Plugin.tip.icon.in.progress"/>
+	   							  &nbsp;<img src="/images/dark-red-circle.png"/> <fmt:message key="admin.managers.Plugin.tip.icon.error"/>
+	    </span>
+		<a href="#" class="cancelLink"><fmt:message key="admin.managers.plugin.button.close" /></a>
+	</div>
+	
 </div>
 
-
-
-<script>
+<script  djConfig="parseOnLoad: true">
 	hqDojo.require("dojo.fx");
 	hqDojo.require("dojo.io.iframe");
 	hqDojo.require("dijit.dijit");
 	hqDojo.require("dijit.Dialog");
 	hqDojo.require("dijit.form.Button");
 	hqDojo.require("dijit.Tooltip");
-	
+	hqDojo.require("dojox.form.FileUploader");
+	hqDojo.require("dijit.ProgressBar");
+	hqDojo.require("dojo.behavior");
+	hqDojo.require("dojo.hash");
+	hqDojo.require("dojox.timing._base");
+	hqDojo.require("dojo.date.locale");
+
+	hqDojo.ready(function() {
+		uncheckCheckboxes();
+		updateTime();
+		function uncheckCheckboxes(){
+			hqDojo.forEach( hqDojo.query("input[type=checkbox]"), function(e){
+					e.checked=false;
+			});	    
+		}
+		
+		hqDojo.connect(hqDojo.byId("refreshIcon"),"onclick",function(e){
+			refreshPage();
+		});
+		
+		function dateFormat(date){
+			return hqDojo.date.locale.format(date,{
+				selector: "date",
+				datePattern: "MM/dd/yy hh:mm:ss aa"
+			});
+		};
+		
+		function updateTime(){
+			var now = new Date();
+			hqDojo.byId("timeNow").innerHTML=dateFormat(now);
+		}		
 		function refreshPage(){
 			var infoXhrArgs={
-				url:"<spring:url value='/app/admin/managers/plugin/agentInfo'/>",
+				preventCache:true,
+				url:"<spring:url value='/app/admin/managers/plugin/info'/>",
 				handleAs:"json",
 				headers: { 
                 	"Content-Type": "application/json",
@@ -273,349 +483,486 @@
 					hqDojo.byId("agentInfoAllCount").innerHTML=response.allAgentCount;
 				}
 			}
+			/*	
+		    var deleteIdsString = "";
+			hqDojo.query("input[type=checkbox]:checked").forEach(function(entry){
+					deleteIdsString+=entry.value+",";
+			});
+			if(deleteIdsString.length>1){
+				deleteIdsString = deleteIdsString.substr(0,deleteIdsString.length-1);
+			}else{
+				deleteIdsString="";
+			}
+			
+			var hashObj = {
+				deleteIds: deleteIdsString
+			}
+			hqDojo.hash(hqDojo.objectToQuery(hashObj));
+			*/
 			hqDojo.xhrGet(infoXhrArgs);
 			hqDojo.publish("refreshDataGrid");
+			
+
+		}
+		new hqDijit.Tooltip({
+			connectId:["refreshIcon"],
+			label: "<fmt:message key='admin.managers.Plugin.information.refresh.time.tip'/>"
+		});
+		new hqDijit.Tooltip({
+			connectId:["addedTimeHeader"],
+			label: "<fmt:message key='admin.managers.plugin.column.header.initial.deploy.date.tip' />"
+		});
+		
+		new hqDijit.Tooltip({
+			connectId:["updatedTimeHeader"],
+			label: "<fmt:message key='admin.managers.plugin.column.header.last.sync.date.tip' />"
+		});
+		
+		new hqDijit.Tooltip({
+			connectId:["agentInfo"],
+			label: "<fmt:message key='admin.managers.Plugin.information.agent.count.tip' />"
+		});
+
+		hqDojo.query(".notFound").forEach(function(e){
+			new hqDijit.Tooltip({
+				connectId: [e],
+				label: "<fmt:message key='admin.managers.Plugin.column.plugin.disabled.tip' />"
+			});		
+		});	
+		hqDojo.query(".inProgressIcon").forEach(function(e){
+			new hqDijit.Tooltip({
+				connectId: [e],
+				label: "<fmt:message key='admin.managers.Plugin.tip.icon.in.progress' />"
+			});		
+		});
+		hqDojo.query(".successIcon").forEach(function(e){
+			new hqDijit.Tooltip({
+				connectId: [e],
+				label: "<fmt:message key='admin.managers.Plugin.tip.icon.success' />"
+			});		
+		});	
+		hqDojo.query(".errorIcon").forEach(function(e){
+			new hqDijit.Tooltip({
+				connectId: [e],
+				label: "<fmt:message key='admin.managers.Plugin.tip.icon.error' />"
+			});		
+		});
+		function seeStatusDetail(pluginId,keyword){
+			hqDijit.byId("showStatusPanelDialog").show();
+			var agentListUl = hqDojo.byId("agentList");
+			var searchWord = hqDojo.byId("searchText").value;
+			var xhrArgs = {
+					preventCache:true,
+					url: "/app/admin/managers/plugin/status/"+pluginId+"?searchWord="+searchWord,
+					load: function(response) {
+						hqDojo.empty("agentList");
+						hqDojo.style(hqDojo.byId("loadingIcon"),"visibility","hidden");
+						hqDojo.forEach(response, function(agentStatus) {
+							var statusLi = hqDojo.create("li",{
+								"innerHTML":agentStatus.agentName
+							});
+							statusLi.innerHTML+=" <fmt:message key="admin.managers.Plugin.tip.status.sync.date" /> "+agentStatus.syncDate;
+							if(agentStatus.status=="error"){
+								hqDojo.addClass(statusLi,"errorAgent");
+							}else{
+								hqDojo.addClass(statusLi,"inProgressAgent");
+							};
+							agentListUl.appendChild(statusLi);
+						});
+					},
+					handleAs: "json",
+					headers: { 
+	 	               	"Content-Type": "application/json",
+    	            	"Accept": "application/json"
+        	        }
+				
+			};
+			hqDojo.xhrGet(xhrArgs);			
+			hqDojo.byId("showStatusPanelDialog_title").innerHTML=hqDojo.byId("pluginName").value + "&nbsp;-&nbsp;"+ "<fmt:message key="admin.managers.Plugin.tip.status.title" />";
+		}
+
+		hqDojo.behavior.add({
+			".agentStatusSpan":{
+				onclick: function(evt){
+					var anchor = evt.target.id.indexOf("_");
+					var pluginId = evt.target.id.substr(anchor+1,evt.target.id.length);
+					var pluginName = evt.target.id.substr(0,anchor);
+					hqDojo.byId("pluginName").value=pluginName;
+					hqDojo.byId("pluginId").value=pluginId;
+					seeStatusDetail(pluginId);
+				},
+				found: function(node){hqDojo.style(node,"cursor","pointer");}
+			}
+		});
+		
+		hqDojo.behavior.apply();
+		
+		var showStatusDialog = new hqDijit.Dialog({
+			id: "showStatusPanelDialog"
+		});
+		
+		var showStatusPanel = hqDojo.byId("showStatusPanel");
+		hqDojo.style(showStatusDialog.closeButtonNode,"visibility", "hidden" );
+		showStatusDialog.setContent(showStatusPanel);
+		hqDojo.style(showStatusPanel, "visibility", "visible");
+			
+		hqDojo.query("#showStatusPanelDialog .cancelLink").onclick(function(e) {
+			uncheckCheckboxes();
+			hqDijit.byId("showStatusPanelDialog").hide();
+			hqDojo.empty("agentList");
+			hqDojo.byId("searchText").value="";
+		});
+		 
+		hqDojo.connect(hqDojo.byId("searchText"),"onkeyup",function(e){
+			var pluginId = hqDojo.byId("pluginId").value;
+			seeStatusDetail(pluginId,hqDojo.byId("searchText").value);			
+		});
+		
+		if(${!mechanismOn}){
+			hqDojo.attr("deleteForm","class","mechanismOff");
+			hqDojo.addClass(hqDojo.byId("instruction"),"mechanismOffInstruction");
 		}
 	
-	hqDojo.ready(function() {
-		refreshPage();
+		if (${mechanismOn}){
+			var uploader;
 		
-	new hqDijit.Tooltip({
-		connectId:["agentInfo"],
-		label: "<fmt:message key='admin.managers.Plugin.information.agent.count.tip' />"
-	});
-	
-		<c:forEach var="pluginSummary" items="${pluginSummaries}" varStatus="index">
-			if(${pluginSummary.errorAgentCount>0}){
-				var errorAgentTip_${index.count} = hqDojo.create("div",{
-					"class":"errorAgentTip"
-				});
-				
-				var errorAgentTipTitleSpan_${index.count} = hqDojo.create("p",{
-					"class":"errorAgentTitle",
-					"innerHTML":"<fmt:message key='admin.managers.Plugin.tip.status.title' /> ${pluginSummary.name}"
-				},errorAgentTip_${index.count});
-				
-				hqDojo.create("input",{
-					"type":"button",
-					"id": "closeErrorAgentTipButton_${index.count}",
-					"class":"closeButton",
-					"value":"x"},
-					errorAgentTipTitleSpan_${index.count}
-				);
-				
-				<c:if test="${pluginSummary.inProgressAgentCount>0}">
-					var errorUl=hqDojo.create("ul",{
-						"class":"inProgressAgentList"
-						},errorAgentTip_${index.count});
-				</c:if>
-				<c:if test="${pluginSummary.errorAgentCount>0}">
-					var errorUl=hqDojo.create("ul",{
-						"class":"errorAgentList"
-						},errorAgentTip_${index.count});
-					<c:forEach var="agent" items="${pluginSummary.errorAgents}">
-						li = hqDojo.create("li",{
-							"innerHTML":"${agent.agentName} <fmt:message key='admin.managers.Plugin.tip.status.sync.fail'/> ${agent.syncDate}"
-						},errorUl);
-					</c:forEach>
-				</c:if>
-				
-				var dialog_${index.count} = new hqDijit.TooltipDialog();
-				dialog_${index.count}.setContent(errorAgentTip_${index.count});
-				
-				hqDojo.connect(hqDojo.byId("errorAgent_${index.count}"),"onmouseenter", function(e){
-					hqDijit.popup.open({
-						popup: dialog_<c:out value="${index.count}"/>, 
-                        around: hqDojo.byId("errorAgent_${index.count}")
-					});
-				});
-				hqDojo.connect(hqDojo.byId("closeErrorAgentTipButton_${index.count}"),"onclick", function(e){
-					hqDijit.popup.close(dialog_${index.count});
-				});				
-			}
-		</c:forEach>
-	
-		var uploadDialog = new hqDijit.Dialog({
-			id: "uploadPanelDialog",
-			title: "<fmt:message key="admin.managers.plugin.upload.dialog.title" />"
-		});
+			var uploadDialog = new hqDijit.Dialog({
+				id: "uploadPanelDialog",
+				title: "<fmt:message key="admin.managers.plugin.upload.dialog.title" />"
+			});
 		
-		var removeDialog = new hqDijit.Dialog({
-			id: "removePanelDialog",
-			title: "<fmt:message key="admin.managers.plugin.remove.dialog.title" />"
-		});
-		var removeErrorPanelDialog = new hqDijit.Dialog({
-			id: "removeErrorPanelDialog",
-			title: "<fmt:message key="admin.managers.Plugin.remove.error.dialog.title" />"
-		});
+			var removeDialog = new hqDijit.Dialog({
+				id: "removePanelDialog",
+				title: "<fmt:message key="admin.managers.plugin.remove.dialog.title" />"
+			});
+			var removeErrorPanelDialog = new hqDijit.Dialog({
+				id: "removeErrorPanelDialog",
+				title: "<fmt:message key="admin.managers.Plugin.remove.error.dialog.title" />"
+			});
+			
+			var uploadPanel = hqDojo.byId("uploadPanel");
+			var confirmationPanel = hqDojo.byId("confirmationPanel");
+			var removeErrorPanel = hqDojo.byId("removeErrorPanel");
 		
-		var uploadPanel = hqDojo.byId("uploadPanel");
-		var confirmationPanel = hqDojo.byId("confirmationPanel");
-		var removeErrorPanel = hqDojo.byId("removeErrorPanel");
+			hqDojo.style(uploadDialog.closeButtonNode, "visibility", "hidden");
+			hqDojo.style(removeDialog.closeButtonNode, "visibility", "hidden");
+			hqDojo.style(removeErrorPanelDialog.closeButtonNode,"visibility", "hidden" );
+			uploadDialog.setContent(uploadPanel);
+			removeDialog.setContent(confirmationPanel);
+			removeErrorPanelDialog.setContent(removeErrorPanel);
 		
-		hqDojo.style(uploadDialog.closeButtonNode, "visibility", "hidden");
-		hqDojo.style(removeDialog.closeButtonNode, "visibility", "hidden");
-		hqDojo.style(removeErrorPanelDialog.closeButtonNode,"visibility", "hidden" );
-		uploadDialog.setContent(uploadPanel);
-		removeDialog.setContent(confirmationPanel);
-		removeErrorPanelDialog.setContent(removeErrorPanel);
-		
-		hqDojo.style(uploadPanel, "visibility", "visible");
-		hqDojo.style(confirmationPanel, "visibility", "visible");
-		hqDojo.style(removeErrorPanel, "visibility", "visible");
-		
-		hqDojo.connect(hqDojo.byId("showUploadFormButton"), "onclick", function(e) {
-			hqDojo.byId("plugin").value = "";
-			hqDijit.byId("uploadPanelDialog").show();
-		});
-		hqDojo.connect(hqDojo.byId("showRemoveConfirmationButton"), "onclick", function(e) {
-			var checkedPlugins = hqDojo.filter(hqDojo.query(".checkbox"), function(e){ return e.checked; });
-			if(checkedPlugins.length>0){
-				hqDojo.byId("plugin").value = "";
-				hqDijit.byId("removePanelDialog").show();
-			}else{
-				hqDojo.byId("removeErrorMsg").innerHTML = '<fmt:message key="admin.managers.Plugin.remove.error.dialog.empty" />';
-				hqDijit.byId("removeErrorPanelDialog").show();
-			}
-		});
-		hqDojo.query("#uploadPanelDialog .cancelLink").onclick(function(e) {
-			hqDijit.byId("uploadPanelDialog").hide();
-		});
-		hqDojo.query("#removePanelDialog .cancelLink").onclick(function(e) {
-			hqDijit.byId("removePanelDialog").hide();
-		});
-		hqDojo.query("#removeErrorPanelDialog .cancelLink").onclick(function(e) {
-			hqDijit.byId("removeErrorPanelDialog").hide();
-		});
-		
+			hqDojo.style(uploadPanel, "visibility", "visible");
+			hqDojo.style(confirmationPanel, "visibility", "visible");
+			hqDojo.style(removeErrorPanel, "visibility", "visible");
+
+			hqDojo.query("#uploadPanelDialog .cancelLink").onclick(function(e) {
+				uncheckCheckboxes();
+				hqDijit.byId("uploadPanelDialog").hide();
+
+			});
+
+			hqDojo.query("#removePanelDialog .cancelLink").onclick(function(e) {
+				uncheckCheckboxes();
+				hqDijit.byId("removePanelDialog").hide();
+			});
+			hqDojo.query("#removeErrorPanelDialog .cancelLink").onclick(function(e) {
+				hqDijit.byId("removeErrorPanelDialog").hide();
+			});
 
 		
+			hqDojo.connect(hqDojo.byId("showUploadFormButton"), "onclick", function(e) {
+								if(hqDijit.registry.map(function(e){
+					return e.id=="selectFileButton";
+				 						}))
+				{ 
+					hqDijit.registry.remove("selectFileButton");
+				};
+				
+			
+				hqDojo.byId("selectFileButton").innerHTML = "<fmt:message key='admin.managers.plugin.button.select.files' />"
+				hqDojo.byId("selectedFileList").innerHTML = "";
+				uploader = new hqDojox.form.FileUploader({
+					selectMultipleFiles:true,
+					fileListId:"selectedFileList",
+					isDebug:false,
+					uploadUrl:"<spring:url value='/app/admin/managers/plugin/upload'/>",
+					force:"html",
+					fileMask:[
+						["jar File", "*.jar"],
+						["xml File", "*.xml"]
+					]
+				}, "selectFileButton");
+			
+				hqDojo.connect(uploader, "onComplete", function(dataArray){
+					if (dataArray[0].success){
+						hqDojo.attr("progressMessage", "class", "information");
+					} else {
+						hqDojo.attr("progressMessage", "class", "error");
+					}	
+					hqDojo.byId("progressMessage").innerHTML=dataArray[0].message;
+					var anim = [hqDojo.fadeIn({
+									node: "progressMessage",
+									duration: 500
+								}),
+								hqDojo.fadeOut({
+									node: "progressMessage",
+									delay: 5000,
+									duration: 500
+								})];
+					hqDojo.fx.chain(anim).play();						
+				});
+				hqDijit.byId("uploadPanelDialog").show();
+			});
+			
+			hqDojo.connect(hqDojo.byId("uploadButton"), "onclick", function(e){
+				var fileTypeCorrect=true;
+				var pluginList = hqDojo.query("input[type=file]", hqDojo.byId("hqDijit_FileUploaderForm_0"));
+				var newPluginList = pluginList.slice(0,pluginList.length-1);
+					
+				newPluginList.forEach(function(input) {
+			  		//check file type
+					var filePath = input.value;
+				   	if(!checkFileType(filePath)){
+			   			fileTypeCorrect=false;
+			   		}
+				   	//change name, for backend!
+    	   			hqDojo.attr(input, "name", "plugins");
+				});
+				if(fileTypeCorrect){
+					hqDijit.byId("uploadPanelDialog").hide();
+					uploader.upload();
+					hqDijit.registry.remove("selectFileButton");
+				}
+			});
+						
+			function checkFileType(filePath){
+				var ext = filePath.substr(filePath.length - 4);			
+				if (ext != ".jar" && ext != ".xml") {
+					hqDojo.byId("validationMessage").innerHTML = "<fmt:message key='admin.managers.plugin.message.invalid.file.extension' />";
+					var anim = [hqDojo.fadeIn({
+									node: "validationMessage",
+									duration: 500
+								}),
+								hqDojo.fadeOut({
+									node: "validationMessage",
+									delay: 5000,
+									duration: 500
+								})];
+					hqDojo.fx.chain(anim).play();
+					return false;
+				}
+				return true;
+			}
+			
+			hqDojo.connect(hqDojo.byId("showRemoveConfirmationButton"), "onclick", function(e) {
+				var checkedPlugins = hqDojo.filter(hqDojo.query("input[type=checkbox]"), function(e){ return e.checked; });
+				if(checkedPlugins.length>0){
+					hqDijit.byId("removePanelDialog").show();
+				}else{
+					hqDojo.byId("removeErrorMsg").innerHTML = '<fmt:message key="admin.managers.Plugin.remove.error.dialog.empty" />';
+					hqDijit.byId("removeErrorPanelDialog").show();
+				}
+			});
+
+			hqDojo.connect(hqDojo.byId("removeButton"), "onclick", function(e) {
+				var xhrArgs = {
+					preventCache:true,
+					form: hqDojo.byId("deleteForm"),
+					url: "<spring:url value='/app/admin/managers/plugin/delete' />",
+					load: function(response) {
+						if (response=="success") {
+							hqDojo.publish("refreshDataGrid");
+							hqDojo.attr("progressMessage", "class", "information");
+							hqDojo.byId("progressMessage").innerHTML = '<fmt:message key="admin.managers.plugin.message.remove.success" />';
+							var anim = [hqDojo.fadeIn({
+										node: "progressMessage",
+										duration: 500
+									}),
+									hqDojo.fadeOut({
+										node: "progressMessage",
+										delay: 1000,
+										duration: 500
+									})];	
+						}else{
+							hqDojo.attr("progressMessage", "class", "error");
+							hqDojo.byId("progressMessage").innerHTML = '<fmt:message key="admin.managers.Plugin.remove.error.dialog.failure" />';
+							var anim = [hqDojo.fadeIn({
+										node: "progressMessage",
+										duration: 500
+									}),
+									hqDojo.fadeOut({
+										node: "progressMessage",
+										delay: 10000,
+										duration: 500
+									})];
+						}
+						hqDojo.fx.chain(anim).play();	
+					},
+					error: function(response,arg){
+						hqDojo.attr("progressMessage", "class", "error");
+						hqDojo.byId("progressMessage").innerHTML = '<fmt:message key="admin.managers.Plugin.remove.error.dialog.failure" />';
+						var anim = [hqDojo.fadeIn({
+									node: "progressMessage",
+									duration: 500
+									}),
+									hqDojo.fadeOut({
+										node: "progressMessage",
+										delay: 10000,
+										duration: 500
+									})];
+					
+						hqDojo.fx.chain(anim).play();
+					}
+				};
+				hqDojo.xhrPost(xhrArgs);
+				refreshPage();
+				hqDijit.byId("removePanelDialog").hide(); 
+			});
+		}
 		
 		hqDojo.subscribe("refreshDataGrid", function() {
 			hqDojo.xhrGet({
-				url: "<spring:url value="/app/admin/managers/plugin/list" />",
+				preventCache:true,
+				url: "<spring:url value='/app/admin/managers/plugin/list' />",
 				handleAs: "json",
 				headers: { 
                 	"Content-Type": "application/json",
                 	"Accept": "application/json"
                 },
                 load: function(response, args) {
+                	updateTime();
                 	hqDojo.empty("pluginList");
-                	
-                	var index = 0;
-                	
+                	var index = 1;
                 	hqDojo.forEach(response, function(summary) {
                 		var li = hqDojo.create("li", {
-                			"class": "gridrow clear" + (((index+1) % 2 == 0) ? " even" : "")
+                			"class": "gridrow clear" + (((index) % 2 == 0) ? " even" : "")
                 		}, "pluginList");
                 		var span = hqDojo.create("span", {
                 			"class": "first column span-1"
                 		}, li);
-                		var input = hqDojo.create("input", {
-                			"type": "checkbox",
-                			"value": summary.id,
-                			"class": "checkbox",
-                			"name":"deleteId"
-                		}, span);
+                		if(${mechanismOn}){
+	                		var input = hqDojo.create("input", {
+    	            			"type": "checkbox",
+    	            			"name": "deleteId",
+        	        			"value": summary.id
+                			}, span);
+                		}
                 		span = hqDojo.create("span", {
-                			"class": "column span-3",
+                			"class": "column span-small",
                 			"innerHTML": summary.name
                 		}, li);
+
                 		span = hqDojo.create("span", {
-                			"class": "column span-3",
+                			"class": "column span-med",
                 			"innerHTML": summary.version
                 		}, li);
-                		span = hqDojo.create("span", {
-                			"class": "column span-4",
+                		spanName = hqDojo.create("span", {
+                			"class": "column span-med",
                 			"innerHTML": summary.jarName
                 		}, li);
+                		if(summary.disabled){
+                			span = hqDojo.create("span",{
+                				"class":"notFound",
+                				"innerHTML":"<br/><fmt:message key='admin.managers.Plugin.column.plugin.disabled'/>"
+                			},spanName);
+                		}
                 		span = hqDojo.create("span", {
-                			"class": "column span-4",
+                			"class": "column span-med",
                 			"innerHTML": summary.initialDeployDate
                 		}, li);
                 		span = hqDojo.create("span", {
-                			"class": "column span-4",
+                			"class": "column span-med",
                 			"innerHTML": summary.updatedDate
                 		}, li);
 
                 		var statusSpan = hqDojo.create("span", {
-                			"class": "last column span-3"
+                			"class": "last column span-status"
                 		}, li);
                 		
                 		if (summary.allAgentCount>0){      
-	                		if (summary.inProgressAgentCount>0) {
-	                		    statusSpan.innerHTML+=summary.inProgressAgentCount+"&nbsp;";
-    	           				hqDojo.create("img",{
-        	       					"src": "/images/arrow_refresh.png",
-	        	       			}, statusSpan);
-	        	       			statusSpan.innerHTML+="&nbsp;&nbsp;&nbsp;";
-                			}	
                 			if(summary.successAgentCount>0){
                 				statusSpan.innerHTML+=summary.successAgentCount+"&nbsp;";
    	            				hqDojo.create("img",{
-       	        					"src": "/images/icon_available_green.gif",
+       	        					"src": "/images/dark-green-circle.png",
+       	        					"class": "successIcon"
            	    				}, statusSpan); 
            	    				statusSpan.innerHTML+="&nbsp;&nbsp;&nbsp;";
                 			}
+                			if (summary.inProgressAgentCount>0 || summary.errorAgentCount > 0){
+                				var errorAgentSpan = hqDojo.create("span",{
+        	        				"id":summary.name+"_"+summary.id,
+            	    				"class":"agentStatusSpan"
+                					}, statusSpan);
+	                		if (summary.inProgressAgentCount>0) {
+	                		    errorAgentSpan.innerHTML+=summary.inProgressAgentCount+"&nbsp;";
+    	           				hqDojo.create("img",{
+        	       					"src": "/images/dark-blue-circle.png",
+        	       					"class": "inProgressIcon",
+        	       					"id":summary.name+"_"+summary.id
+	        	       			}, errorAgentSpan);
+	        	       			errorAgentSpan.innerHTML+="&nbsp;&nbsp;&nbsp;";
+                			}			
 	                		if (summary.errorAgentCount > 0) {
-    	            			var errorAgentSpan = hqDojo.create("span",{
-        	        				"id":"errorAgent_"+(index+1),
-            	    				"class":"errorAgentSpan"
-                				}, statusSpan);
                 				errorAgentSpan.innerHTML+= summary.errorAgentCount+"&nbsp;";
                 				hqDojo.create("img",{
-                					"src": "/images/icon_available_red.gif",
+                					"src": "/images/dark-red-circle.png",
+                					"class": "errorIcon",
+                					"id":summary.name+"_"+summary.id
                 				}, errorAgentSpan);
                 				errorAgentSpan.innerHTML+="</img>";
-                				
-                				hqDojo.connect(hqDojo.byId("errorAgent_${index+1}"),"onmouseenter", function(e){
-									hqDijit.popup.open({
-										popup: dialog_${index+1}, 
-                       		 			around: hqDojo.byId("errorAgent_${index+1}")
-									});
-								});
+                			}
+                			
                 			}
                 		}
-                		
-
                 		index++;
                 	});
-                
-				
+                	/*
+					var hashObj = hqDojo.queryToObject(hqDojo.hash());
+					if(hashObj.deleteIds!=""){
+						hqDojo.forEach(hashObj.deleteIds.split(","),function(pluginId){
+							var checkbox = hqDojo.query("input[value='"+pluginId+"']");
+							if(checkbox[0]!=null){
+								checkbox[0].checked="true";
+							}
+						});
+					}*/
 
-				
+					hqDojo.behavior.apply();
+					hqDojo.query(".notFound").forEach(function(e){
+						new hqDijit.Tooltip({
+							connectId: [e],
+							label: "<fmt:message key='admin.managers.Plugin.column.plugin.disabled.tip' />"
+						});		
+					});
+					
+					hqDojo.query(".inProgressIcon").forEach(function(e){
+						new hqDijit.Tooltip({
+							connectId: [e],
+							label: "<fmt:message key='admin.managers.Plugin.tip.icon.in.progress' />"
+						});		
+					});
+					hqDojo.query(".successIcon").forEach(function(e){
+						new hqDijit.Tooltip({
+							connectId: [e],
+							label: "<fmt:message key='admin.managers.Plugin.tip.icon.success' />"
+						});		
+					});	
+					hqDojo.query(".errorIcon").forEach(function(e){
+						new hqDijit.Tooltip({
+							connectId: [e],
+							label: "<fmt:message key='admin.managers.Plugin.tip.icon.error' />"
+						});		
+					});
                 },
                 error: function(response, args) {
                 	
                 }
 			});
 		});
-		hqDojo.connect(hqDojo.byId("uploadForm"), "onsubmit", function(e) {
-			var filePath = hqDojo.byId("plugin").value;
-			var ext = filePath.substr(filePath.length - 4);
-			
-			if (ext != ".jar" && ext != ".xml") {
-				hqDojo.byId("validationMessage").innerHTML = "<fmt:message key='admin.managers.plugin.message.invalid.file.extension' />";
-				
-				var anim = [hqDojo.fadeIn({
-								node: "validationMessage",
-								duration: 500
-							}),
-							hqDojo.fadeOut({
-								node: "validationMessage",
-								delay: 5000,
-								duration: 500
-							})];
-				hqDojo.fx.chain(anim).play();
-				
-				return false;
-			}
-			
-			hqDojo.io.iframe.send({
-				form: "uploadForm",
-				handleAs: "json",
-				url: "<spring:url value="/app/admin/managers/plugin/upload" />",
-				load: function(response, args) {
-					var diplayCount = 5000;
-					
-					if (response.success) {
-						hqDojo.attr("progressMessage", "class", "information");
-						hqDojo.publish("refreshDataGrid");
-					} else {
-						hqDojo.attr("progressMessage", "class", "error");
-						diplayCount = 10000;
-					}
-					
-					hqDojo.byId("progressMessage").innerHTML = response.message;
-					var anim = [hqDojo.fadeIn({
-									node: "progressMessage",
-									duration: 500
-								}),
-								hqDojo.fadeOut({
-									node: "progressMessage",
-									delay: diplayCount,
-									duration: 500
-								})];
-					hqDojo.fx.chain(anim).play();						
-				},
-				error: function(response, args) {
-					hqDojo.attr("progressMessage", "class", "error");
-					hqDojo.byId("progressMessage").innerHTML = response.message;
-					var anim = [hqDojo.fadeIn({
-									node: "progressMessage",
-									duration: 500
-								}),
-								hqDojo.fadeOut({
-									node: "progressMessage",
-									delay: 10000,
-									duration: 500
-								})];
-					hqDojo.fx.chain(anim).play();						
-				}
-			});
-			
-			hqDijit.byId("uploadPanelDialog").hide();
-			
-			return false;
-		});
-
-		hqDojo.connect(hqDojo.byId("removeButton"), "onclick", function(e) {
-			var xhrArgs = {
-				form: hqDojo.byId("deleteForm"),
-				url: "/app/admin/managers/plugin/delete",
-				load: function(response) {
-					if (response=="success") {
-						hqDojo.publish("refreshDataGrid");
-						hqDojo.attr("progressMessage", "class", "information");
-						hqDojo.byId("progressMessage").innerHTML = "remove success";
-						var anim = [hqDojo.fadeIn({
-									node: "progressMessage",
-									duration: 500
-								}),
-								hqDojo.fadeOut({
-									node: "progressMessage",
-									delay: 1000,
-									duration: 500
-								})];	
-					}else{
-						hqDojo.attr("progressMessage", "class", "error");
-						hqDojo.byId("progressMessage").innerHTML = '<fmt:message key="admin.managers.Plugin.remove.error.dialog.failure" />';
-						var anim = [hqDojo.fadeIn({
-									node: "progressMessage",
-									duration: 500
-								}),
-								hqDojo.fadeOut({
-									node: "progressMessage",
-									delay: 10000,
-									duration: 500
-								})];
-					}
-					hqDojo.fx.chain(anim).play();	
-				},
-				error: function(response,arg){
-					hqDojo.attr("progressMessage", "class", "error");
-					hqDojo.byId("progressMessage").innerHTML = '<fmt:message key="admin.managers.Plugin.remove.error.dialog.failure" />';
-					var anim = [hqDojo.fadeIn({
-								node: "progressMessage",
-								duration: 500
-								}),
-								hqDojo.fadeOut({
-									node: "progressMessage",
-									delay: 10000,
-									duration: 500
-								})];
-					
-					hqDojo.fx.chain(anim).play();
-				}
-			};
-
-			hqDojo.xhrPost(xhrArgs);
-			refreshPage();
-			hqDijit.byId("removePanelDialog").hide(); 
-		});
-		
-
+		var timer = new hqDojox.timing.Timer();
+		timer.setInterval(10000);
+		timer.onTick = refreshPage;
+		//timer.start();
 	});
-	
-	setInterval("refreshPage()",10000);
+
 </script>

@@ -213,7 +213,7 @@ public class MeasurementTemplateDAO
     }
 
     @SuppressWarnings("unchecked")
-    List<MeasurementTemplate> findDerivedByMonitorableType(String name) {
+    public List<MeasurementTemplate> findDerivedByMonitorableType(String name) {
         // Oracle doesn't like 'distinct' qualifier on select when
         // there are BLOB attributes. The Oracle exception is
         // (ORA-00932: inconsistent datatypes: expected - got BLOB)

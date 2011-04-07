@@ -116,10 +116,8 @@ var onloads = [];
 	    }
 	}
 	
-	onloads.push(refreshPortlets);
-
 	hqDojo.ready(function() {
-		initOnloads();
+		refreshPortlets();
 	});
 </script>
 <html:link page="/Resource.do?eid=" linkName="viewResUrl" styleId="viewResUrl" style="display:none;"></html:link>

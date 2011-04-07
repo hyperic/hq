@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.product.server.session;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -47,7 +48,6 @@ import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServiceManager;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
@@ -262,7 +262,7 @@ public class ProductManagerImpl implements ProductManager {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void deploymentNotify(String pluginName)
+    public void deploymentNotify(String pluginName, File dir)
     throws PluginNotFoundException, VetoException, NotFoundException {
         ProductPlugin pplugin = (ProductPlugin) getProductPluginManager().getPlugin(pluginName);
         boolean created = false;
@@ -273,7 +273,7 @@ public class ProductManagerImpl implements ProductManager {
 
         if (pluginVal != null && pInfo.name.equals(pluginVal.getName()) &&
                 pInfo.md5.equals(pluginVal.getMD5())) {
-            log.info(pluginName + " plugin up to date");
+            log.info(pluginName + " plugin up to date (" + dir + ")");
             if (forceUpdate(pluginName)) {
                 log.info(pluginName + " configured to force update");
             } else {
@@ -281,7 +281,7 @@ public class ProductManagerImpl implements ProductManager {
                 return;
             }
         } else {
-            log.info(pluginName + " unknown -- registering");
+            log.info(pluginName + " unknown -- registering (" + dir + ")");
             created = (pluginVal == null);
         }
 
@@ -336,14 +336,6 @@ public class ProductManagerImpl implements ProductManager {
         } catch (PluginException e) {
             log.error("Error updating service types.  Cause: " + e.getMessage());
         }
-    }
-    
-    public boolean deployPluginIfValid(AuthzSubject subj, byte[] pluginJar) {
-        // XXX need to implement this
-        if (pluginJar == null) {
-            return false;
-        }
-        return true;
     }
 
     private void updatePlugin(String pluginName)

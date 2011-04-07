@@ -25,62 +25,50 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.collect;
 
+import java.util.Date;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
-import org.hyperic.util.config.ConfigResponse;
-import org.springframework.amqp.rabbit.admin.QueueInfo;
 
-import java.util.List;
 import java.util.Properties;
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitQueue;
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitStatsObject;
 import org.hyperic.hq.product.Metric;
 
 /**
  * QueueCollector
  * @author Helena Edelson
  */
-public class QueueCollector extends RabbitMQListCollector {
+public class QueueCollector extends RabbitStatsCollector {
 
     private static final Log logger = LogFactory.getLog(QueueCollector.class);
 
-    public void collect(HypericRabbitAdmin rabbitAdmin) {
+    public RabbitStatsObject collectStats(HypericRabbitAdmin rabbitAdmin) {
         Properties props = getProperties();
         String vhost = (String) props.get(MetricConstants.VHOST);
+        String queue = (String) props.get(MetricConstants.QUEUE);
         if (logger.isDebugEnabled()) {
             String node = (String) props.get(MetricConstants.NODE);
-            logger.debug("[collect] vhost=" + vhost + " node=" + node);
+            logger.debug("[collect] queue='" + queue + "' vhost='" + vhost + "' node='" + node + "'");
         }
 
-        List<QueueInfo> queues = rabbitAdmin.getQueues(vhost);
-        if (queues != null) {
-            for (QueueInfo q : queues) {
-                logger.debug("[collect] QueueInfo="+q.getName());
-                setValue(q.getName() + "." + Metric.ATTR_AVAIL, Metric.AVAIL_UP);
-                setValue(q.getName() + ".messages", q.getMessages());
-                setValue(q.getName() + ".consumers", q.getConsumers());
-                setValue(q.getName() + ".transactions", q.getTransactions());
-                setValue(q.getName() + ".acksUncommitted", q.getAcksUncommitted());
-                setValue(q.getName() + ".messagesReady", q.getMessagesReady());
-                setValue(q.getName() + ".messagesUnacknowledged", q.getMessagesUnacknowledged());
-                setValue(q.getName() + ".messagesUncommitted", q.getMessageUncommitted());
-                setValue(q.getName() + ".memory", q.getMemory());
-            }
-        }
-    }
+        RabbitStatsObject res = null;
 
-    /**
-     * Assemble custom key/value data for each object to set
-     * as custom properties in the ServiceResource to display
-     * in the UI.
-     * @param queue
-     * @return
-     */
-    public static ConfigResponse getAttributes(QueueInfo queue) {
-        String durable = queue.isDurable() ? "durable" : "not durable";
-        ConfigResponse res = new ConfigResponse();
-        res.setValue("durable", durable);
-        res.setValue("name", queue.getName());
-        res.setValue("pid", queue.getPid().substring(5, queue.getPid().length() - 1));
+        try {
+            HypericRabbitAdmin admin = new HypericRabbitAdmin(props);
+            RabbitQueue q = admin.getVirtualQueue(vhost, queue);
+            setAvailability(q.getIdleSince() == null ? Metric.AVAIL_UP : Metric.AVAIL_PAUSED);
+            setValue("idleTime", q.getIdleSince() == null ? 0 : new Date().getTime() - q.getIdleSince().getTime());
+            setValue("messages", q.getMessages());
+            setValue("consumers", q.getConsumers());
+            setValue("messagesReady", q.getMessagesReady());
+            setValue("messagesUnacknowledged", q.getMessagesUnacknowledged());
+            setValue("memory", q.getMemory());
+            res = q;
+        } catch (Exception ex) {
+            setAvailability(false);
+            logger.debug(ex.getMessage(), ex);
+        }
         return res;
     }
 

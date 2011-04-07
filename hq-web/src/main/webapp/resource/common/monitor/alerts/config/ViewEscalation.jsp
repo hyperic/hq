@@ -46,8 +46,6 @@
 <script type="text/javascript">
 <c:choose>
 <c:when test="${not empty escalationJSON}">
-onloads.push(showViewEscResponse);
-
 function showViewEscResponse() {
     var tmp = <c:out value="${escalationJSON}" escapeXml="false"/> ;
     var notifyAll = tmp.escalation.notifyAll
@@ -286,6 +284,9 @@ function showViewEscResponse() {
       }
    }    
 
+	hqDojo.ready(function() {
+		showViewEscResponse();
+	});
 </c:when>
 <c:when test="${not empty primaryAlert}">
 	function disableEscForRecoveryAlert() {
@@ -293,11 +294,12 @@ function showViewEscResponse() {
 		hqDojo.byId('escIdSel').disabled = true;
 	}
 
-	onloads.push(disableEscForRecoveryAlert);
+	hqDojo.ready(function() {
+		disableEscForRecoveryAlert();
+	}
 </c:when>
 </c:choose>
-	
-    function addOption(sel, val, txt, selected) {
+	function addOption(sel, val, txt, selected) {
         var o = document.createElement('option');
         var t = document.createTextNode(txt);
 
@@ -338,7 +340,9 @@ function showViewEscResponse() {
 		    </c:if>
    		}
 
-   		onloads.push( initEsc );
+    	hqDojo.ready(function() {
+    		initEsc();
+    	});
 
     	function hideExample() {
             hqDojo.byId('example').style.display= 'none';
