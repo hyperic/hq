@@ -1,6 +1,7 @@
 <%@ page language="java" %>
 <%@ page isErrorPage="true" %>
 <%@ page import="javax.servlet.ServletException" %>
+<%@ page import="org.springframework.web.util.HtmlUtils" %>
 <%@ page import="org.hyperic.util.StringUtil" %>
 <%@ page import="org.hyperic.hq.auth.shared.SessionTimeoutException" %>
 <%@ page import="org.hyperic.hq.auth.shared.SessionNotFoundException" %>
@@ -88,9 +89,9 @@ if (root != null &&
 
 <c:catch> 
   <c:if test="${not empty exception}">
-  	<div id="exception<%=randomNum%>" style="display:none;"><%=StringUtil.getStackTrace(exception)%></div>
+  	<div id="exception<%=randomNum%>" style="display:none;"><%=HtmlUtils.htmlEscape(StringUtil.getStackTrace(exception))%></div>
 	<c:if test="${not empty root}"> 
-    	<div id="root<%=randomNum%>" style="display:none;"><%=StringUtil.getStackTrace(root)%></div>
+    	<div id="root<%=randomNum%>" style="display:none;"><%=HtmlUtils.htmlEscape(StringUtil.getStackTrace(root))%></div>
    	</c:if> 
   </c:if> 
 </c:catch>
