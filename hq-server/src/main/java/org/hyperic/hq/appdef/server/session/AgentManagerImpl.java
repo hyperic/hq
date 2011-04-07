@@ -76,6 +76,7 @@ import org.hyperic.hq.bizapp.shared.lather.PluginReport_args;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManager;
+import org.hyperic.hq.common.shared.TransactionRetry;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.product.server.session.PluginDAO;
@@ -93,7 +94,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.orm.hibernate3.HibernateOptimisticLockingFailureException;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -124,6 +124,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     private ConcurrentStatsCollector concurrentStatsCollector;
     private AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle;
     private PluginManager pluginManager;
+    private TransactionRetry transactionRetry;
 
     @Autowired
     public AgentManagerImpl(AgentTypeDAO agentTypeDao,
@@ -135,7 +136,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                             AgentPluginUpdater agentPluginUpdater, PluginDAO pluginDAO,
                             ConcurrentStatsCollector concurrentStatsCollector,
                             AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle,
-                            PluginManager pluginManager) {
+                            PluginManager pluginManager, TransactionRetry transactionRetry) {
         this.agentPluginUpdater = agentPluginUpdater;
         this.pluginDAO = pluginDAO;
         this.agentTypeDao = agentTypeDao;
@@ -150,6 +151,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         this.concurrentStatsCollector = concurrentStatsCollector;
         this.agentPluginSyncRestartThrottle = agentPluginSyncRestartThrottle;
         this.pluginManager = pluginManager;
+        this.transactionRetry = transactionRetry;
     }
     
     @PostConstruct
@@ -160,32 +162,17 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                 if (!pluginManager.isPluginSyncEnabled()) {
                     return;
                 }
-                AgentManager am = applicationContext.getBean(AgentManager.class);
+                final AgentManager am = applicationContext.getBean(AgentManager.class);
                 for (final PluginStatusZevent zevent : events) {
-                    Exception ex = null;
-                    int tries = 0;
-                    while (tries++ < 3) {
-                        try {
+                    final Runnable runner = new Runnable() {
+                        public void run() {
                             am.updateAgentPluginStatus(zevent.getPluginReport());
-                            ex = null;
-                            break;
-                        } catch (HibernateOptimisticLockingFailureException e) {
-                            ex = e;
-                            if (tries < 3) {
-                                log.warn("retrying updateAgentPluginStatus, tries=" + tries +
-                                         " error: " + e);
-                            }
-                            log.debug(e, e);
                         }
-                        try {
-                            // sleep for one second on stale state exception
-                            Thread.sleep(1000);
-                        } catch (InterruptedException e) {
-                            log.debug(e,e);
-                        }
-                    }
-                    if (ex != null) {
-                        log.error(ex,ex);
+                    };
+                    try {
+                        transactionRetry.runTransaction(runner, 3, 1000);
+                    } catch (Exception e) {
+                        log.error(e,e);
                     }
                 }
             }
