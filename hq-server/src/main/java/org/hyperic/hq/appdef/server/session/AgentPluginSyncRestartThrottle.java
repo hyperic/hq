@@ -32,7 +32,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.PostConstruct;
 
@@ -58,11 +62,12 @@ public class AgentPluginSyncRestartThrottle {
      *  agentId to timestamp of agent reboot attempt time
      *  if agent does not check in by RECORD_TIMEOUT then the record is expired
      */
-    private final Map<Integer, Long> agentRestartTimstampMap = new HashMap<Integer, Long>();
+    private final Map<Integer, Long> agentRestartTimestampMap = new HashMap<Integer, Long>();
     /** agentIds */
     private final TreeSet<Integer> pendingRestarts = new TreeSet<Integer>();
     @SuppressWarnings("unused")
     private Thread throttler;
+    private ScheduledThreadPoolExecutor invalidator;
     private final AtomicBoolean shutdown = new AtomicBoolean(false);
     private final Object LOCK = new Object();
     private AuthzSubject overlord;
@@ -80,8 +85,25 @@ public class AgentPluginSyncRestartThrottle {
         concurrentStatsCollector.register(ConcurrentStatsCollector.AGENT_PLUGIN_SYNC_RESTARTS);
         concurrentStatsCollector.register(ConcurrentStatsCollector.AGENT_PLUGIN_SYNC_PENDING_RESTARTS);
         throttler = startThrottlerThread();
+        invalidator = startExecutor();
     }
     
+    private ScheduledThreadPoolExecutor startExecutor() {
+        ScheduledThreadPoolExecutor rtn = new ScheduledThreadPoolExecutor(1, new ThreadFactory() {
+            private AtomicLong i = new AtomicLong(0);
+            public Thread newThread(Runnable r) {
+                return new Thread(r, "PluginSyncRestartInvalidator-" + i.getAndIncrement());
+            }
+        });
+        final Runnable runner = new Runnable() {
+            public void run() {
+                getNumRecords(true);
+            }
+        };
+        rtn.scheduleWithFixedDelay(runner, RECORD_TIMEOUT, RECORD_TIMEOUT, TimeUnit.MILLISECONDS);
+        return rtn;
+    }
+
     public Set<Integer> getQueuedAgentIds() {
         synchronized (LOCK) {
             return new HashSet<Integer>(pendingRestarts);
@@ -90,7 +112,7 @@ public class AgentPluginSyncRestartThrottle {
     
     public Map<Integer, Long> getAgentIdsInRestartState() {
         synchronized (LOCK) {
-            return new HashMap<Integer, Long>(agentRestartTimstampMap);
+            return new HashMap<Integer, Long>(agentRestartTimestampMap);
         }
     }
     
@@ -121,52 +143,62 @@ public class AgentPluginSyncRestartThrottle {
     }
 
     private int restartAgents() {
-        final int numRestarts = invalidateAndGetNumRecords();
-        if (pendingRestarts.isEmpty()) {
-            return 0;
-        }
-        if (numRestarts >= MAX_CONCURRENT_RESTARTS) {
-            return 0;
-        }
-        final int max = MAX_CONCURRENT_RESTARTS - numRestarts;
-        final long now = System.currentTimeMillis();
-        final AgentManager agentManager = Bootstrap.getBean(AgentManager.class);
-        int i=0;
-        for (i=0; i<max; i++) {
-            final Integer agentId = pendingRestarts.pollFirst();
-            if (agentId == null) {
-                break;
+        synchronized (LOCK) {
+            final int numRestarts = getNumRecords(false);
+            if (pendingRestarts.isEmpty()) {
+                return 0;
             }
-            try {
-                agentManager.restartAgent(overlord, agentId);
-                agentRestartTimstampMap.put(agentId, now);
-            } catch (Exception e) {
-                log.error(e,e);
+            if (numRestarts >= MAX_CONCURRENT_RESTARTS) {
+                return 0;
             }
+            final int max = MAX_CONCURRENT_RESTARTS - numRestarts;
+            final long now = System.currentTimeMillis();
+            final AgentManager agentManager = Bootstrap.getBean(AgentManager.class);
+            int i=0;
+            for (i=0; i<max; i++) {
+                final Integer agentId = pendingRestarts.pollFirst();
+                if (agentId == null) {
+                    break;
+                }
+                try {
+                    agentManager.restartAgent(overlord, agentId);
+                    agentRestartTimestampMap.put(agentId, now);
+                } catch (Exception e) {
+                    log.error(e,e);
+                }
+            }
+            return i;
         }
-        return i;
     }
 
-    private int invalidateAndGetNumRecords() {
+    private int getNumRecords(boolean invalidate) {
         final long now = System.currentTimeMillis();
         int rtn = 0;
-        final Iterator<Entry<Integer, Long>> it=agentRestartTimstampMap.entrySet().iterator();
         final Set<Integer> restartFailures = new HashSet<Integer>();
-        while (it.hasNext()) {
-            final Entry<Integer, Long> entry = it.next();
-            final Long timestamp = entry.getValue();
-            if ((now - timestamp) >= RECORD_TIMEOUT) {
-                restartFailures.add(entry.getKey());
-                it.remove();
-                continue;
+        synchronized (LOCK) {
+            final Iterator<Entry<Integer, Long>> it=agentRestartTimestampMap.entrySet().iterator();
+            while (it.hasNext()) {
+                final Entry<Integer, Long> entry = it.next();
+                final Long timestamp = entry.getValue();
+                if ((now - timestamp) >= RECORD_TIMEOUT) {
+                    if (invalidate) {
+                        restartFailures.add(entry.getKey());
+	                    it.remove();
+                    }
+                    continue;
+                }
+                rtn++;
             }
-            rtn++;
         }
-        if (!restartFailures.isEmpty()) {
-            final PluginManager pm = Bootstrap.getBean(PluginManager.class);
-            for (final Integer agentId : restartFailures) {
-                pm.updateAgentPluginSyncStatusInNewTran(
-                    AgentPluginStatusEnum.SYNC_FAILURE, agentId, null);
+        if (invalidate) {
+            final boolean debug = log.isDebugEnabled();
+            if (!restartFailures.isEmpty()) {
+                final PluginManager pm = Bootstrap.getBean(PluginManager.class);
+                for (final Integer agentId : restartFailures) {
+                    if (debug) log.debug("invalidating restart status for agentId=" + agentId);
+                    pm.updateAgentPluginSyncStatusInNewTran(
+                        agentId, AgentPluginStatusEnum.SYNC_IN_PROGRESS, AgentPluginStatusEnum.SYNC_FAILURE);
+                }
             }
         }
         return rtn;
@@ -175,7 +207,7 @@ public class AgentPluginSyncRestartThrottle {
     public void checkinAfterRestart(Integer agentId) {
         boolean removed = false;
         synchronized (LOCK) {
-            removed = agentRestartTimstampMap.remove(agentId) != null;
+            removed = agentRestartTimestampMap.remove(agentId) != null;
         }
         if (log.isDebugEnabled()) {
             log.debug("agentId=" + agentId + " checking in after reboot, removed = " + removed);
@@ -196,6 +228,7 @@ public class AgentPluginSyncRestartThrottle {
     public void shutdown() {
         shutdown.set(true);
         LOCK.notifyAll();
+        invalidator.shutdown();
     }
 
 }

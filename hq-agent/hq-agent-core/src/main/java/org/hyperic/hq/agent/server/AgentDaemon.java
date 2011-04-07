@@ -33,12 +33,14 @@ import java.io.PrintStream;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.TreeSet;
 import java.util.Vector;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
@@ -695,7 +697,11 @@ public class AgentDaemon
             pluginDir = 
                 bootProps.getProperty(AgentConfig.PROP_PDK_PLUGIN_DIR[0]);
 
-            Collection<PluginInfo> excludes = new ArrayList<PluginInfo>();
+            Collection<PluginInfo> excludes = new TreeSet<PluginInfo>(new Comparator<PluginInfo>() {
+                public int compare(PluginInfo p1, PluginInfo p2) {
+                    return p1.name.compareTo(p2.name);
+                }
+            });
             Collection<PluginInfo> plugins = new ArrayList<PluginInfo>();
             plugins.addAll(this.ppm.registerPlugins(pluginDir, excludes));
             //check .. and higher for hq-plugins
