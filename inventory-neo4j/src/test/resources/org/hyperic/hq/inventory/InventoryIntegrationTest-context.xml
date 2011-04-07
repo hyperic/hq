@@ -27,8 +27,6 @@
 
 	<tx:annotation-driven mode="aspectj"
 		transaction-manager="transactionManager" />
-
-	<jdbc:embedded-database id="dataSource" type="HSQL" />
 	
 	<bean id="messagePublisher" class="org.hyperic.hq.messaging.MockMessagePublisher"/>
 
