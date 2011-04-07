@@ -25,15 +25,39 @@
 
 package org.hyperic.hq.product.shared;
 
+import java.util.Collections;
+import java.util.Map;
+import java.util.TreeMap;
+
 @SuppressWarnings("serial")
 public class PluginDeployException extends Exception {
+    
+    public final Map<Integer, String> params;
 
-    public PluginDeployException(String msg, Exception e) {
+    public PluginDeployException(String msg, Exception e, String ... params) {
         super(msg, e);
+        this.params = getParams(params);
     }
 
-    public PluginDeployException(String msg) {
+    public PluginDeployException(String msg, String ... params) {
         super(msg);
+        this.params = getParams(params);
+    }
+    
+    private Map<Integer, String> getParams(String[] params) {
+        if (params.length == 0) {
+            return Collections.emptyMap();
+        }
+        final Map<Integer, String> rtn = new TreeMap<Integer, String>();
+        int i=0;
+        for (final String param : params) {
+            rtn.put(i++, param);
+        }
+        return rtn;
+    }
+
+    public Map<Integer, String> getParameters() {
+        return params;
     }
 
 }

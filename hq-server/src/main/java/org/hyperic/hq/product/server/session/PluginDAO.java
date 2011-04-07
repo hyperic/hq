@@ -27,13 +27,13 @@
 package org.hyperic.hq.product.server.session;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import org.hibernate.SessionFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.product.Plugin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-
 
 @Repository
 public class PluginDAO extends HibernateDAO<Plugin> {
@@ -58,14 +58,17 @@ public class PluginDAO extends HibernateDAO<Plugin> {
         return (Plugin) getSession().createQuery(sql).setString(0, name).uniqueResult();
     }
 
-    // XXX do i need this?
-    public Plugin getByMd5(String md5) {
-        String hql = "from Plugin where MD5 = :md5";
-        return (Plugin) getSession().createQuery(hql).setString("md5", md5).uniqueResult();
-    }
-
     public Plugin getByFilename(String filename) {
         String hql = "from Plugin where path = :filename";
         return (Plugin) getSession().createQuery(hql).setString("filename", filename).uniqueResult();
+    }
+
+    @SuppressWarnings("unchecked")
+    public Collection<Plugin> getPluginsByFileNames(Collection<String> pluginFileNames) {
+        if (pluginFileNames.isEmpty()) {
+            return Collections.emptyList();
+        }
+        String hql = "from Plugin where path = (:filenames)";
+        return getSession().createQuery(hql).setParameterList("filenames", pluginFileNames).list();
     }
 }
