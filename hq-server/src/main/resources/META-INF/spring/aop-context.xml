@@ -34,8 +34,7 @@
 
    	<context:spring-configured />
 
-	<tx:annotation-driven mode="aspectj"
-		transaction-manager="transactionManager" />
+	<tx:annotation-driven mode="aspectj"/>
 
 	<bean id="performanceMonitorAspect" class="org.hyperic.hq.monitor.aop.aspects.PerformanceMonitor"
 		factory-method="aspectOf">
