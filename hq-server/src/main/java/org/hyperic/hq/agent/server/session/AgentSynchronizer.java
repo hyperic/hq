@@ -105,11 +105,11 @@ public class AgentSynchronizer implements DiagnosticObject {
             new ScheduledThreadPoolExecutor(NUM_WORKERS, new ThreadFactory() {
             private AtomicLong i = new AtomicLong(0);
             public Thread newThread(Runnable r) {
-                return new Thread(r, "AgentSynchronizer" + i.getAndIncrement());
+                return new Thread(r, "AgentSynchronizer-" + i.getAndIncrement());
             }
         });
         for (int i=0; i<NUM_WORKERS; i++) {
-            SchedulerThread worker = new SchedulerThread("AgentSynchronizer" + i, i*1000);
+            SchedulerThread worker = new SchedulerThread("AgentSynchronizer-" + i, i*1000);
             executor.scheduleWithFixedDelay(worker, i+1, NUM_WORKERS, TimeUnit.SECONDS);
         }
         concurrentStatsCollector.register(ConcurrentStatsCollector.AGENT_SYNC_JOB_QUEUE_ADDS);

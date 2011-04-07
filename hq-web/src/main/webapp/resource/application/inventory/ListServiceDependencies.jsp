@@ -32,7 +32,7 @@
   USA.
  --%>
 
-<link rel=stylesheet href="<html:rewrite page="/css/"/>win.css" type="text/css">
+<link rel=stylesheet href="<html:rewrite page="/css/win.css"/>" type="text/css">
 
 <hq:constant symbol="NUM_APPSVC_DEPENDEES_ATTR" var="DependeePageSize" />
 <hq:constant symbol="NUM_APPSVC_DEPENDERS_ATTR" var="DependerPageSize" />

@@ -81,7 +81,7 @@ public class ConfigPortalAction
             throw new PermissionException("User not authorized to configure " + "server settings");
         }
 
-        setResource(request);
+        setResource(request, response);
 
         super.configMetrics(mapping, form, request, response);
 

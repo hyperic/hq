@@ -33,6 +33,7 @@ import java.util.Properties;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -66,6 +67,7 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.hq.ui.util.UIUtils;
 import org.hyperic.util.config.ConfigResponse;
+import org.springframework.web.util.UriTemplate;
 
 
 
@@ -89,11 +91,11 @@ public abstract class ResourceController
         this.controlBoss = controlBoss;
     }
 
-    protected AppdefEntityID setResource(HttpServletRequest request) throws Exception {
-        return setResource(request, false);
+    protected AppdefEntityID setResource(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        return setResource(request, response, false);
     }
 
-    protected AppdefEntityID setResource(HttpServletRequest request, boolean config) throws Exception {
+    protected AppdefEntityID setResource(HttpServletRequest request, HttpServletResponse response, boolean config) throws Exception {
         AppdefEntityID entityId = null;
 
         try {
@@ -102,10 +104,10 @@ public abstract class ResourceController
             // not a problem, this can be null
         }
 
-        return setResource(request, entityId, config);
+        return setResource(request, response, entityId, config);
     }
 
-    protected AppdefEntityID setResource(HttpServletRequest request, AppdefEntityID entityId, boolean config)
+    protected AppdefEntityID setResource(HttpServletRequest request, HttpServletResponse response, AppdefEntityID entityId, boolean config)
         throws Exception {
         Integer sessionId = RequestUtils.getSessionId(request);
 
@@ -186,7 +188,8 @@ public abstract class ResourceController
                             // TODO This is ugly and I hate putting it in, but there's no easy way to link into a 
                             // plugin right now...
                             if (parent != null && parent.getTo().getPrototype().getName().equals(AuthzConstants.platformPrototypeVmwareVsphereVm)) {
-                                cprops.put("VM Instance", "<a href='/mastheadAttach.do?typeId=" + descriptor.getAttachment().getId() + "&sn=" + parent.getTo().getId() + "'>" + parent.getTo().getName() + "</a>");
+                                UriTemplate uriTemplate = new UriTemplate("/mastheadAttach.do?typeId={typeId}&sn={sn}");
+                            	cprops.put("VM Instance", "<a href='" + response.encodeURL(uriTemplate.expand(descriptor.getAttachment().getId(), parent.getTo().getId()).toASCIIString()) + "'>" + parent.getTo().getName() + "</a>");
                             } else {
                                 pluginLinkMap.put("pluginId", descriptor.getAttachment().getId());
                                 pluginLinkMap.put("selectedId", resourceObj.getId());

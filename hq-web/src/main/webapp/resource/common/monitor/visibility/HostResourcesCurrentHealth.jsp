@@ -133,7 +133,7 @@
     		</c:if>
 
     		<td class="ListCell">
-    			<a href="<c:out value="${url}"/>">
+    			<a href="${url}">
     				<c:out value="${summary.resourceName}"/>
     			</a>
     		</td>

@@ -110,7 +110,7 @@
     <div id="navTabContainer">
         <c:set var="pageURL" value="${requestURL}"/>
         <div id="dashTab" class="tab">
-        	<a href="/Dashboard.do"><fmt:message key="header.dashboard"/></a>
+        	<a href="<html:rewrite page="/Dashboard.do" />"><fmt:message key="header.dashboard"/></a>
         </div>
         <div id="resTab" class="tab">
         	<a href="<html:rewrite page="/ResourceHub.do"/>" onclick="useBreadcrumbHrefIfAvailable(this);"><fmt:message key="header.resources"/></a>
@@ -138,7 +138,7 @@
           	</ul>
         </div>
         <div id="adminTab" class="tab">
-        	<a href="/Admin.do"><fmt:message key="header.admin"/></a>
+        	<a href="<html:rewrite page="/Admin.do" />"><fmt:message key="header.admin"/></a>
         </div>
     </div>
     <script type="text/javascript">
@@ -212,7 +212,7 @@
             </c:otherwise>
         </c:choose>
          <span><a href="<html:rewrite page="/j_spring_security_logout" />"><fmt:message key="header.SignOut"/></a></span>
-        <span><html:link href="javascript:void(0)" onclick="tutorialWin=window.open('http://www.hyperic.com/demo/screencasts.html','tutorials','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');tutorialWin.focus();return false;"><fmt:message key="header.Screencasts"/></html:link></span>
+        <span><html:link href="#" onclick="tutorialWin=window.open('http://www.hyperic.com/demo/screencasts.html','tutorials','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');tutorialWin.focus();return false;"><fmt:message key="header.Screencasts"/></html:link></span>
         <span><a id="hqHelpLink" href="<hq:help/>" onclick="helpWin=window.open((typeof help != 'undefined' ? help : this.href),'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');helpWin.focus();return false;"><fmt:message key="header.Help"/></a></span>
     </div>
     <div id="headerSearch">

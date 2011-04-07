@@ -136,10 +136,10 @@ symbol="SUMMARY_TYPE_SINGLETON" var="SINGLETON" />
         <c:out value="${summary.resourceType.name}"/>
       </c:when>
       <c:when test="${summary.summaryType == AUTOGROUP}">
-        <a href="<c:out value="${url}" />"><c:out value="${summary.resourceType.name}"/></a>
+        <a href="${url}">${summary.resourceType.name}</a>
       </c:when>
       <c:otherwise>
-        <a href="<c:out value="${url}" />"><c:out value="${summary.entityName}"/></a>
+        <a href="${url}">${summary.entityName}</a>
       </c:otherwise>
     </c:choose>
     </td>

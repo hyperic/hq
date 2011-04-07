@@ -95,7 +95,7 @@
 	</tiles:insert>
 
   	<!-- JSON available at /dashboard/ViewCriticalAlerts.do -->
-  	<html:form styleId="${widgetInstanceName}${portlet.token}_FixForm" method="POST" action="/alerts/RemoveAlerts.do">
+  	<html:form styleId="${widgetInstanceName}${portlet.token}_FixForm" method="POST" action="/alerts/RemoveAlerts">
   		<html:hidden property="output" value="json" />
   		<table width="100%" cellpadding="0" cellspacing="0" border="0" id="<c:out value="${tableName}"/>" class="portletLRBorder">
      		<thead>

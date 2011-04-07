@@ -32,7 +32,7 @@
  --%>
 
 
-<html:form action="/resource/group/inventory/NewGroup.do">
+<html:form action="/resource/group/inventory/NewGroup">
 
 <tiles:insert definition=".page.title.resource.group.new"/>
 

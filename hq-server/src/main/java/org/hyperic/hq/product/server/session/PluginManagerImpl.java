@@ -468,6 +468,24 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
     }
      
     @Transactional(propagation=Propagation.REQUIRES_NEW, readOnly=false)
+    public void updateAgentPluginSyncStatusInNewTran(Integer agentId, AgentPluginStatusEnum from,
+                                                     AgentPluginStatusEnum to) {
+        final Collection<Plugin> plugins = pluginDAO.findAll();
+        final Map<String, AgentPluginStatus> statusMap =
+            agentPluginStatusDAO.getStatusByAgentId(agentId);
+        for (final Plugin plugin : plugins) {
+            if (plugin == null || plugin.isDisabled()) {
+                continue;
+            }
+            final AgentPluginStatus status = statusMap.get(plugin.getName());
+            if (status == null || !status.getLastSyncStatus().equals(from.toString())) {
+                continue;
+            }
+            status.setLastSyncStatus(to.toString());
+        }
+    }
+     
+    @Transactional(propagation=Propagation.REQUIRES_NEW, readOnly=false)
     public void updateAgentPluginSyncStatusInNewTran(AgentPluginStatusEnum s, Integer agentId,
                                                      Collection<Plugin> plugins) {
         if (plugins == null) {
@@ -501,7 +519,13 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
                                                            Collection<String> pluginFileNames) {
         final Collection<AgentPluginStatus> statuses =
             agentPluginStatusDAO.getStatusByAgentAndFileNames(agentId, pluginFileNames);
+        final long now = System.currentTimeMillis();
         for (final AgentPluginStatus status: statuses) {
+            // only setLastSyncAttempt if it changes from !"in progress" to "in progress"
+            if (!status.getLastSyncStatus().equals(AgentPluginStatusEnum.SYNC_IN_PROGRESS.toString())
+                    && s == AgentPluginStatusEnum.SYNC_IN_PROGRESS) {
+                status.setLastSyncAttempt(now);
+            }
             status.setLastSyncStatus(s.toString());
         }
     }

@@ -184,4 +184,10 @@ public interface PluginManager {
      */
     File getCustomPluginDir();
 
+    /**
+     * updates {@link AgentPluginStatus} objs with the lastSyncStatus of "from" to "to"
+     */
+    void updateAgentPluginSyncStatusInNewTran(Integer agentId,
+        AgentPluginStatusEnum from, AgentPluginStatusEnum to);
+
 }
