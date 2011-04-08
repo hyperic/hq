@@ -129,7 +129,7 @@
 	</table>
 
 	<display:table cellspacing="0" cellpadding="0" width="100%" action="${sortAction}" items="${Definitions}">
-		<display:column width="1%" property="id" title="<input type=\"checkbox\" onclick=\ "ToggleAll(this, widgetProperties)\" name=\"listToggleAll\">"  
+		<display:column width="1%" property="id" title="<input type=\"checkbox\" onclick=\"ToggleAll(this, widgetProperties)\" name=\"listToggleAll\">"  
                    isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox" >
     		<display:checkboxdecorator name="definitions"
 				onclick="ToggleSelection(this,widgetProperties)"
