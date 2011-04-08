@@ -73,7 +73,7 @@ public class ServiceFactory {
         serviceType.setDescription(resourceType.getDescription());
         serviceType.setId(resourceType.getId());
         serviceType.setName(resourceType.getName());
-        serviceType.setPlugin(pluginRepository.findByResourceType(resourceType).getName());
+        serviceType.setPlugin(pluginRepository.findByResourceType(resourceType.getId()).getName());
         // TODO for types, we just fake out sort name for now. Can't do
         // setProperty on ResourceType
         serviceType.setSortName(resourceType.getName().toUpperCase());

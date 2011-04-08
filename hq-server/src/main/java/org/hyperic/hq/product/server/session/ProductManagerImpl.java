@@ -349,7 +349,7 @@ public class ProductManagerImpl implements ProductManager {
     			
     			entity = new ResourceType(resourceType.getName(),resourceType.getDescription());
     			resourceTypeDao.persist(entity);
-    			plugin.addResourceType(entity);
+    			plugin.addResourceType(entity.getId());
     			for (org.hyperic.hq.pdk.domain.OperationType ot : resourceType.getOperationTypes()) {
     	            OperationType opType = new OperationType(ot.getName());
     	            entity.addOperationType(opType);

@@ -71,7 +71,7 @@ public class PlatformFactory {
         // platformType.setModifiedTime(modifiedTime)
         platformType.setId(resourceType.getId());
         platformType.setName(resourceType.getName());
-        platformType.setPlugin(pluginRepository.findByResourceType(resourceType).getName());
+        platformType.setPlugin(pluginRepository.findByResourceType(resourceType.getId()).getName());
         // TODO for types, we just fake out sort name for now. Can't do
         // setProperty on ResourceType
         platformType.setSortName(resourceType.getName().toUpperCase());

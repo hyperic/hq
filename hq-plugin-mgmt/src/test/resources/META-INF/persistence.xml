@@ -3,7 +3,6 @@
 <persistence-unit name="spring-jpa" transaction-type="RESOURCE_LOCAL">
      <provider>org.hibernate.ejb.HibernatePersistence</provider>
      <class>org.hyperic.hq.plugin.mgmt.domain.Plugin</class>
-     <class>org.hyperic.hq.inventory.domain.ResourceType</class>
      <shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
       <properties>
             <property name="hibernate.hbm2ddl.auto" value="update"/>

@@ -843,7 +843,7 @@ public class ServiceManagerImpl implements ServiceManager {
             Collection<ResourceType> serviceTypes = getAllServiceResourceTypes();
             Set<ResourceType> curServices = new HashSet<ResourceType>();
             for(ResourceType curResourceType: serviceTypes) {
-                if(pluginRepository.findByResourceType(curResourceType).getName().equals(plugin)) {
+                if(pluginRepository.findByResourceType(curResourceType.getId()).getName().equals(plugin)) {
                     curServices.add(curResourceType);
                 }
             }
@@ -956,7 +956,7 @@ public class ServiceManagerImpl implements ServiceManager {
     private ResourceType createServiceType(ServiceTypeInfo sinfo, String plugin) throws NotFoundException {
         ResourceType serviceType = new ResourceType(sinfo.getName());
         resourceTypeDao.persist(serviceType);
-        pluginRepository.findByName(plugin).addResourceType(serviceType);
+        pluginRepository.findByName(plugin).addResourceType(serviceType.getId());
         serviceType.setDescription(sinfo.getDescription());
         serviceType.addPropertyType(createServicePropertyType(ServiceFactory.AUTO_INVENTORY_IDENTIFIER,String.class));
         serviceType.addPropertyType(createServicePropertyType(ServiceFactory.CREATION_TIME,Long.class));

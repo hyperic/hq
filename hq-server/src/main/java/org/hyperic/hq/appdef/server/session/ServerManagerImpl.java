@@ -990,7 +990,7 @@ public class ServerManagerImpl implements ServerManager {
         Collection<ResourceType> serverTypes = getAllServerResourceTypes();
         Set<ResourceType> curServers = new HashSet<ResourceType>();
         for(ResourceType curResourceType: serverTypes) {
-            if(pluginRepository.findByResourceType(curResourceType).getName().equals(plugin)) {
+            if(pluginRepository.findByResourceType(curResourceType.getId()).getName().equals(plugin)) {
                 curServers.add(curResourceType);
             }
         }
@@ -1074,7 +1074,7 @@ public class ServerManagerImpl implements ServerManager {
     private ResourceType createServerResourceType(ServerTypeInfo sinfo, String plugin)  {
         ResourceType stype = new ResourceType(sinfo.getName());
         resourceTypeDao.persist(stype);
-        pluginRepository.findByName(plugin).addResourceType(stype);
+        pluginRepository.findByName(plugin).addResourceType(stype.getId());
         stype.setDescription(sinfo.getDescription());
        
         stype.addPropertyType(createServerPropertyType(ServerFactory.WAS_AUTODISCOVERED,Boolean.class));

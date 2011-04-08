@@ -1560,7 +1560,7 @@ public class PlatformManagerImpl implements PlatformManager {
         Collection<ResourceType> platformTypes = findAllPlatformResourceTypes();
         Set<ResourceType> curPlatforms = new HashSet<ResourceType>();
         for(ResourceType curResourceType: platformTypes) {
-            if(pluginRepository.findByResourceType(curResourceType).getName().equals(plugin)) {
+            if(pluginRepository.findByResourceType(curResourceType.getId()).getName().equals(plugin)) {
                 curPlatforms.add(curResourceType);
             }
         }
@@ -1586,7 +1586,7 @@ public class PlatformManagerImpl implements PlatformManager {
         log.debug("Creating new PlatformType: " + name);
         ResourceType pt = new ResourceType(name);
         resourceTypeDao.persist(pt);
-        pluginRepository.findByName(plugin).addResourceType(pt);
+        pluginRepository.findByName(plugin).addResourceType(pt.getId());
         pt.addPropertyType(createPropertyType(PlatformFactory.CERT_DN,String.class));
         pt.addPropertyType(createPropertyType(PlatformFactory.FQDN,String.class));
         pt.addPropertyType(createPropertyType(PlatformFactory.COMMENT_TEXT,String.class));
