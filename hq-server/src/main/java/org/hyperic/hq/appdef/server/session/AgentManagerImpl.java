@@ -188,9 +188,18 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                 if (!pluginManager.isPluginSyncEnabled()) {
                     return;
                 }
-                AgentManager am = applicationContext.getBean(AgentManager.class);
+                final AgentManager am = applicationContext.getBean(AgentManager.class);
                 for (final PluginDeployedZevent zevent : events) {
-                    am.syncPluginToAgents(zevent.getFileName());
+                    final Runnable runner = new Runnable() {
+                        public void run() {
+                            am.syncPluginToAgents(zevent.getFileName());
+                        }
+                    };
+                    try {
+                        transactionRetry.runTransaction(runner, 3, 1000);
+                    } catch (Exception e) {
+                        log.error(e,e);
+                    }
                 }
             }
             public String toString() {
@@ -1428,17 +1437,37 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
             log.error("attempted to initite plugin transfer of " + filename + " but plugin " +
                       "is disabled in HQ");
             return;
+        } else if (plugin.isDeleted()) {
+            log.error("attempted to initite plugin transfer of " + filename + " but plugin " +
+                      "is marked as deleted in HQ");
+            return;
         }
         final Collection<Agent> agents = agentPluginStatusDAO.getAutoUpdatingAgents();
         final Map<Agent, AgentPluginStatus> map = agentPluginStatusDAO.getPluginStatusByFileName(filename);
         final Map<Integer, Collection<Plugin>> toSync = new HashMap<Integer, Collection<Plugin>>();
+        final long now = System.currentTimeMillis();
         for (final Agent agent : agents) {
             if (agent == null) {
                 continue;
             }
-            final AgentPluginStatus status = map.get(agent);
+            AgentPluginStatus status = map.get(agent);
             if (status == null || !status.getMD5().equals(plugin.getMD5())) {
                 toSync.put(agent.getId(), Collections.singletonList(plugin));
+                if (status == null) {
+                    status = new AgentPluginStatus();
+                    status.setAgent(agent);
+                    status.setFileName(plugin.getPath());
+                    status.setMD5(plugin.getMD5());
+                    status.setPluginName(plugin.getName());
+                    status.setProductName(plugin.getName());
+                    status.setLastCheckin(0);
+                    status.setLastSyncAttempt(now);
+                    status.setLastSyncStatus(AgentPluginStatusEnum.SYNC_IN_PROGRESS.toString());
+                    agentPluginStatusDAO.save(status);
+                } else {
+                    status.setLastSyncAttempt(now);
+                    status.setLastSyncStatus(AgentPluginStatusEnum.SYNC_IN_PROGRESS.toString());
+                }
             }
         }
         agentPluginUpdater.queuePluginTransfer(toSync, null);
