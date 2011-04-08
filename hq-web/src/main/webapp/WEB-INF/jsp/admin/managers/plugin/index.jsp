@@ -47,9 +47,9 @@
 	
 	<ul id="pluginList">
 		<c:forEach var="pluginSummary" items="${pluginSummaries}" varStatus="index">
-			<li class="gridrow clear<c:if test="${index.count % 2 == 0}"> even</c:if>">
+			<li class="gridrow clear<c:if test="${index.count % 2 == 0}"> even</c:if>" <c:if test="${pluginSummary.deleted}">style="background-color:grey;"</c:if> >
 				<span class="first column span-1">
-					<c:if test="${mechanismOn}">
+					<c:if test="${mechanismOn && !pluginSummary.deleted}">
                     	<input type="checkbox" value="${pluginSummary.id}_${pluginSummary.jarName} (${pluginSummary.name})" name="deleteId"/>&nbsp; 
 					</c:if>
 				</span>
@@ -448,6 +448,7 @@
 			
 				hqDojo.connect(uploader, "onComplete", function(dataArray){
 					if (dataArray[0].success){
+						hqDojo.byId("progressMessage").innerHTML=dataArray[0].message;
 						hqDojo.attr("progressMessage", "class", "information");
 						var anim = [hqDojo.fadeIn({
 										node: "progressMessage",

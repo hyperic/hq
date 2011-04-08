@@ -129,6 +129,7 @@ public class PluginManagerController extends BaseController implements Applicati
             pluginSummary.put("updatedDate", formatter.format(plugin.getModifiedTime()));
             pluginSummary.put("version", plugin.getVersion());   
             pluginSummary.put("disabled", plugin.isDisabled());
+            pluginSummary.put("deleted", plugin.isDeleted());
             pluginSummaries.add(pluginSummary);
         }
 
@@ -271,7 +272,6 @@ public class PluginManagerController extends BaseController implements Applicati
                 }
             }
             log.error(e,e);
-            messageKey = "admin.managers.plugin.message.io.failure";
         }
         model.addAttribute("params", messageParams);
         model.addAttribute("success", success);
