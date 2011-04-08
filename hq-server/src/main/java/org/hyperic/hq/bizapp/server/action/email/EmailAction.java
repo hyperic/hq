@@ -216,9 +216,9 @@ public class EmailAction extends EmailActionConfig
             String logStr = "No notifications sent, see server log for details.";
             if (appEnt != null) {
 
-            	Resource resource = alertDef.getResource();
-            	if (resource != null && !resource.isInAsyncDeleteState()) {
-
+            	Integer resourceId = alertDef.getResource();
+            	if (resourceId != null) {
+            	    Resource resource = Bootstrap.getBean(ResourceManager.class).findResourceById(resourceId);
             		String[] body = new String[addrs.size()];
             		String[] htmlBody = new String[addrs.size()];
             		EmailRecipient[] to = (EmailRecipient[])

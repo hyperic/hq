@@ -55,7 +55,6 @@ import org.hyperic.hq.galerts.server.session.GtriggerType;
 import org.hyperic.hq.galerts.server.session.GtriggerTypeInfo;
 import org.hyperic.hq.galerts.shared.GalertManager;
 import org.hyperic.hq.galerts.shared.GtriggerManager;
-import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.util.TimeUtil;
 import org.hyperic.util.config.ConfigResponse;
@@ -229,7 +228,7 @@ public class GalertBossImpl implements GalertBoss {
         throws SessionException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         Escalatable esc = galertManager.findEscalatableAlert(id);
-        Resource resource = esc.getDefinition().getDefinitionInfo().getResource();
+        Integer resource = esc.getDefinition().getDefinitionInfo().getResource();
 
         // HQ-1295: Does user have sufficient permissions?
         // ...check that users can view alerts...

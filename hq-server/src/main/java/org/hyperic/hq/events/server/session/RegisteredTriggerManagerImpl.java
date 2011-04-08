@@ -262,7 +262,7 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
                     initialState = 
                         new AlertFiredEvent(alert.getId(), 
                                             ad.getId(), 
-                                            ad.getResource().getId(), 
+                                            ad.getResource(), 
                                             ad.getName(),
                                             alert.getTimestamp(), 
                                             null);

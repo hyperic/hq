@@ -28,7 +28,6 @@ import org.hibernate.annotations.OnDeleteAction;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
-import org.hyperic.hq.inventory.domain.Resource;
 
 @Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
 @Entity
@@ -56,10 +55,9 @@ public class ResourceAlertDefinition
     @Column(name = "ID", nullable = false)
     private Integer id;
 
-    @ManyToOne
-    @JoinColumn(name = "RESOURCE_ID")
+    @Column(name = "RESOURCE_ID")
     @Index(name = "ALERT_DEF_RES_ID_IDX")
-    private Resource resource;
+    private Integer resource;
 
     @ManyToOne
     private ResourceTypeAlertDefinition resourceTypeAlertDefinition;
@@ -141,7 +139,7 @@ public class ResourceAlertDefinition
         return getAlertDefinitionState().getLastFired();
     }
 
-    public Resource getResource() {
+    public Integer getResource() {
         return resource;
     }
 
@@ -193,7 +191,7 @@ public class ResourceAlertDefinition
         getAlertDefinitionState().setLastFired(lastFired);
     }
 
-    public void setResource(Resource resource) {
+    public void setResource(Integer resource) {
         this.resource = resource;
     }
 

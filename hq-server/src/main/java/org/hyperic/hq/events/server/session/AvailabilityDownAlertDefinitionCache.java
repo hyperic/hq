@@ -31,7 +31,6 @@ import net.sf.ehcache.Element;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
-import org.hyperic.hq.inventory.domain.Resource;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -98,8 +97,7 @@ public class AvailabilityDownAlertDefinitionCache  {
      }
      
      private boolean isOkToRemove(AlertDefinition def) {
-         Resource r = def.getResource();
-         return (r != null && !r.isInAsyncDeleteState());
+         return (def.getResource() != null);
      }
 
 }

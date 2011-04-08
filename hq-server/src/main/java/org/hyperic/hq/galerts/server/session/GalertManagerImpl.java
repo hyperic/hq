@@ -302,7 +302,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
         throws ResourceDeletedException {
         Resource r = def.getResource();
         if (r == null || r.isInAsyncDeleteState()) {
-            throw ResourceDeletedException.newInstance(r);
+            throw ResourceDeletedException.newInstance(r.getId());
         }
         Map<GalertAuxLog, AlertAuxLog> gAuxLogToAuxLog = new HashMap<GalertAuxLog, AlertAuxLog>(); // Stores
         // real

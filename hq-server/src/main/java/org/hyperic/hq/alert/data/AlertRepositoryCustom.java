@@ -2,11 +2,11 @@ package org.hyperic.hq.alert.data;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.AlertInfo;
-import org.hyperic.hq.inventory.domain.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -16,7 +16,7 @@ public interface AlertRepositoryCustom {
 
     @Transactional(readOnly = true)
     long countByCreateTimeAndPriority(long begin, long end, int priority, boolean inEsc,
-                                         boolean notFixed, Integer groupId, Integer alertDefId);
+                                         boolean notFixed, Set<Integer> groupMembers, Integer alertDefId);
 
     @Transactional
     int deleteByAlertDefinition(AlertDefinition def);
@@ -26,15 +26,15 @@ public interface AlertRepositoryCustom {
     
     @Transactional(readOnly = true)
     Page<Alert> findByCreateTimeAndPriority(long begin, long end, int priority, boolean inEsc,
-                                            boolean notFixed, Integer groupId, Integer alertDefId,
+                                            boolean notFixed, Set<Integer> groupMembers, Integer alertDefId,
                                             Pageable pageable);
     @Transactional(readOnly = true)
     List<Alert> findByCreateTimeAndPriority(long begin, long end, int priority, boolean inEsc,
-                                            boolean notFixed, Integer groupId, Integer alertDefId,
+                                            boolean notFixed, Set<Integer> groupMembers, Integer alertDefId,
                                             Sort sort);
 
     @Transactional(readOnly = true)
-    List<Alert> findByResourceInRange(Resource res, long begin, long end, boolean nameSort,
+    List<Alert> findByResourceInRange(Integer res, long begin, long end, boolean nameSort,
                                       boolean asc);
 
     @Transactional(readOnly = true)

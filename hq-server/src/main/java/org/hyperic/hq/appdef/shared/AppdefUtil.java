@@ -31,9 +31,10 @@ import java.util.Map;
 
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.inventory.domain.RelationshipTypes;
 import org.hyperic.hq.inventory.domain.Resource;
-import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
 
 /** AppdefUtil - utility methods for appdef entities and
@@ -119,6 +120,10 @@ public class AppdefUtil {
         int entityID = rv.getId();
             
         return new AppdefEntityID(getAppdefType(resType), entityID);
+    }
+    
+    public static AppdefEntityID newAppdefEntityId(Integer resourceId) {
+        return newAppdefEntityId(Bootstrap.getBean(ResourceManager.class).findResourceById(resourceId));
     }
     
     public static int getAppdefType(ResourceType rv) {

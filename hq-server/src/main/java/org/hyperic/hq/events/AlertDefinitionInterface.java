@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.events;
 
-import org.hyperic.hq.inventory.domain.Resource;
 
 public interface AlertDefinitionInterface {
     public Integer getId();
@@ -35,5 +34,5 @@ public interface AlertDefinitionInterface {
     public boolean isNotifyFiltered();
     public boolean isDeleted();
     public boolean performsEscalations();
-    public Resource getResource();
+    public Integer getResource();
 }

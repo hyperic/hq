@@ -16,7 +16,6 @@ import org.hyperic.hq.events.server.session.AlertCondition;
 import org.hyperic.hq.events.server.session.AlertDefinitionState;
 import org.hyperic.hq.events.server.session.RegisteredTrigger;
 import org.hyperic.hq.events.server.session.ResourceAlertDefinition;
-import org.hyperic.hq.inventory.domain.Resource;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,9 +38,7 @@ public class RegisteredTriggerRepositoryIntegrationTest {
 
     @Test
     public void testFindAllEnabledTriggers() {
-        Resource resource2 = new Resource();
-        resource2.setName("Resource 2");
-        entityManager.persist(resource2);
+        int resource2 = 98777;
         ResourceAlertDefinition alertdef = new ResourceAlertDefinition();
         alertdef.setName("High CPU");
         alertdef.setResource(resource2);
@@ -74,9 +71,7 @@ public class RegisteredTriggerRepositoryIntegrationTest {
 
     @Test
     public void testFindByAlertDefinition() {
-        Resource resource2 = new Resource();
-        resource2.setName("Resource 2");
-        entityManager.persist(resource2);
+        int resource2 = 98777;
         ResourceAlertDefinition alertdef2 = new ResourceAlertDefinition();
         alertdef2.setName("High Heap");
         alertdef2.setResource(resource2);
@@ -90,9 +85,7 @@ public class RegisteredTriggerRepositoryIntegrationTest {
 
     @Test
     public void testFindTriggerIdsByAlertDefinitionIds() {
-        Resource resource2 = new Resource();
-        resource2.setName("Resource 2");
-        entityManager.persist(resource2);
+        int resource2 = 98777;
         ResourceAlertDefinition alertdef = new ResourceAlertDefinition();
         alertdef.setName("High CPU");
         alertdef.setResource(resource2);

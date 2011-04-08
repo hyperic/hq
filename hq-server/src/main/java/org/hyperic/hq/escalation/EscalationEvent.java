@@ -46,7 +46,7 @@ public class EscalationEvent
     public EscalationEvent(Escalatable alert, String msg) {
         super();
         setTimestamp(System.currentTimeMillis());
-        resource = alert.getDefinition().getDefinitionInfo().getResource().getId();
+        resource = alert.getDefinition().getDefinitionInfo().getResource();
         _alertName = alert.getDefinition().getName();
         _msg = msg;
     }

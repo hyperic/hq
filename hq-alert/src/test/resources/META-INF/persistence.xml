@@ -16,9 +16,6 @@
 		<class>org.hyperic.hq.events.server.session.Action</class>
 		<class>org.hyperic.hq.escalation.server.session.Escalation</class>
 		<class>org.hyperic.hq.escalation.server.session.EscalationState</class>
-		<class>org.hyperic.hq.inventory.domain.Resource</class>
-		<class>org.hyperic.hq.inventory.domain.ResourceGroup</class>
-		<class>org.hyperic.hq.inventory.domain.ResourceType</class>
 		<class>org.hyperic.hq.auth.domain.AuthzSubject</class>
 		<class>org.hyperic.hq.auth.domain.Role</class>
 		<class>org.hyperic.hq.auth.domain.RoleCalendar</class>

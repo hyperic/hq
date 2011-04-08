@@ -673,9 +673,9 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
     
     private void setAlertDefinitionValue(AlertDefinition def, AlertDefinitionValue val) {
         if(def instanceof ResourceTypeAlertDefinition) {
-            ((ResourceTypeAlertDefinition)def).setResourceType(resourceManager.findResourceTypeById(val.getAppdefId()));
+            ((ResourceTypeAlertDefinition)def).setResourceType(val.getAppdefId());
         }else {
-            ((ResourceAlertDefinition)def).setResource(resourceManager.findResourceById(val.getAppdefId()));
+            ((ResourceAlertDefinition)def).setResource(val.getAppdefId());
         }
         setValue(def, val);
     }
@@ -1270,8 +1270,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
      */
     @Transactional(readOnly=true)
     public boolean isAlertDefined(AppdefEntityID id, Integer parentId) {
-        Resource res = resourceManager.findResource(id);
-        return resAlertDefRepository.findByResourceAndResourceTypeAlertDefinition(res, parentId) != null;
+        return resAlertDefRepository.findByResourceAndResourceTypeAlertDefinition(id.getId(), parentId) != null;
     }
 
     /**
@@ -1317,8 +1316,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
      */
     @Transactional(readOnly=true)
     public Integer findChildAlertDefinitionId(AppdefEntityID aeid, Integer pid, boolean allowStale) {
-        Resource res = resourceManager.findResource(aeid);
-        AlertDefinition def = resAlertDefRepository.findByResourceAndResourceTypeAlertDefinition(res, pid);
+        AlertDefinition def = resAlertDefRepository.findByResourceAndResourceTypeAlertDefinition(aeid.getId(), pid);
 
         return def == null ? null : def.getId();
     }
@@ -1380,7 +1378,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
         throws PermissionException {
         // ...check that user has view permission on alert definitions...
         alertPermissionManager.canViewAlertDefinition(subject, id);
-        return resAlertDefRepository.findByResource(resourceManager.findResource(id),new Sort("name"));
+        return resAlertDefRepository.findByResource(id.getId(),new Sort("name"));
     }
 
     /**
@@ -1391,14 +1389,14 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
         throws PermissionException {
         // ...check that user has view permission on alert definitions...
         alertPermissionManager.canViewAlertDefinition(subj, id);
-        Resource res = resourceManager.findResource(id);
+       
 
         List<ResourceAlertDefinition> adefs;
         Direction direction = pc.isAscending() ? Direction.ASC : Direction.DESC;
         if (pc.getSortattribute() == SortAttribute.CTIME) {
-            adefs = resAlertDefRepository.findByResource(res, new Sort(direction,"ctime"));
+            adefs = resAlertDefRepository.findByResource(id.getId(), new Sort(direction,"ctime"));
         } else {
-            adefs = resAlertDefRepository.findByResource(res, new Sort(direction,"name"));
+            adefs = resAlertDefRepository.findByResource(id.getId(), new Sort(direction,"name"));
         }
         // TODO:G
         return _valuePager.seek(adefs, pc.getPagenum(), pc.getPagesize());
@@ -1412,7 +1410,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
     public List<ResourceTypeAlertDefinition> findAlertDefinitionsByType(AuthzSubject subject, int prototype)
         throws PermissionException {
         // TODO: Check admin permission?
-        return resTypeAlertDefRepository.findByResourceType(resourceManager.findResourceTypeById(prototype));
+        return resTypeAlertDefRepository.findByResourceType(prototype);
     }
 
     /**

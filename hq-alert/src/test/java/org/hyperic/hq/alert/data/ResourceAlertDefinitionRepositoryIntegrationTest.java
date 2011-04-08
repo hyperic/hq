@@ -13,8 +13,6 @@ import javax.persistence.PersistenceContext;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.events.server.session.ResourceAlertDefinition;
 import org.hyperic.hq.events.server.session.ResourceTypeAlertDefinition;
-import org.hyperic.hq.inventory.domain.Resource;
-import org.hyperic.hq.inventory.domain.ResourceType;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,19 +34,15 @@ public class ResourceAlertDefinitionRepositoryIntegrationTest {
 
     private ResourceTypeAlertDefinition parentdef;
 
-    private Resource resource1;
+    private Integer resource1 = 1234;
 
     @Autowired
     private ResourceAlertDefinitionRepository resourceAlertDefinitionRepository;
 
-    private ResourceType resourceType1;
+    private Integer resourceType1 = 5678;
 
     @Before
     public void setUp() {
-        resourceType1 = new ResourceType("Tomcat");
-        entityManager.persist(resourceType1);
-        resource1 = new Resource("Resource1", resourceType1);
-        entityManager.persist(resource1);
         parentdef = new ResourceTypeAlertDefinition();
         parentdef.setName("High CPU");
         parentdef.setResourceType(resourceType1);
@@ -59,9 +53,7 @@ public class ResourceAlertDefinitionRepositoryIntegrationTest {
     public void testFindByEscalation() {
         Escalation escalation = new Escalation("Escalation1", "Important", true, 1l, true, true);
         entityManager.persist(escalation);
-        Resource resource2 = new Resource();
-        resource2.setName("Resource 2");
-        entityManager.persist(resource2);
+        int resource2 = 555;
         ResourceAlertDefinition alertdef2 = new ResourceAlertDefinition();
         alertdef2.setName("High Heap");
         alertdef2.setResource(resource1);
@@ -85,9 +77,7 @@ public class ResourceAlertDefinitionRepositoryIntegrationTest {
 
     @Test
     public void testFindByResource() {
-        Resource resource2 = new Resource();
-        resource2.setName("Resource 2");
-        entityManager.persist(resource2);
+        int resource2 = 555;
         ResourceAlertDefinition alertdef2 = new ResourceAlertDefinition();
         alertdef2.setName("High Heap");
         alertdef2.setResource(resource1);
@@ -143,8 +133,7 @@ public class ResourceAlertDefinitionRepositoryIntegrationTest {
 
     @Test
     public void testSetChildrenActive() {
-        Resource resource2 = new Resource("Resource2", resourceType1);
-        entityManager.persist(resource2);
+        int resource2 = 555;
         ResourceAlertDefinition alertdef = new ResourceAlertDefinition();
         alertdef.setName("High CPU");
         alertdef.setResource(resource1);
@@ -167,8 +156,7 @@ public class ResourceAlertDefinitionRepositoryIntegrationTest {
         Escalation escalation = new Escalation("Escalation1", "Important", true, 1l, true, true);
         entityManager.persist(escalation);
         parentdef.setEscalation(escalation);
-        Resource resource2 = new Resource("Resource 2", resourceType1);
-        entityManager.persist(resource2);
+        int resource2 = 555;
         ResourceAlertDefinition alertdef2 = new ResourceAlertDefinition();
         alertdef2.setName("High CPU");
         alertdef2.setResource(resource1);

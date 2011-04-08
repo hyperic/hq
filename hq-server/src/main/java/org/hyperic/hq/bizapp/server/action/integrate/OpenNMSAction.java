@@ -41,6 +41,7 @@ import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.ActionExecutionInfo;
@@ -82,7 +83,7 @@ public class OpenNMSAction implements ActionInterface {
         AlertDefinitionInterface alertdef =
             alert.getAlertDefinitionInterface();
 
-        Resource resource = alertdef.getResource();
+        Resource resource = Bootstrap.getBean(ResourceManager.class).findResourceById(alertdef.getResource());
         
         Map params = new HashMap();
         
