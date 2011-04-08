@@ -313,7 +313,11 @@
 							var statusLi = hqDojo.create("li",{
 								"innerHTML":agentStatus.agentName
 							});
-							statusLi.innerHTML+=" <fmt:message key="admin.managers.Plugin.tip.status.sync.date" /> "+agentStatus.syncDate;
+							if(agentStatus.syncDate==0){
+								statusLi.innerHTML+=" <fmt:message key="admin.managers.Plugin.tip.status.no.sync" />";
+							}else{
+								statusLi.innerHTML+=" <fmt:message key="admin.managers.Plugin.tip.status.sync.date" /> "+agentStatus.syncDate;
+							}
 							if(agentStatus.status=="error"){
 								hqDojo.addClass(statusLi,"errorAgent");
 							}else{
