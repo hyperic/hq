@@ -13,7 +13,6 @@
 		<class>org.hyperic.hq.hqu.server.session.ViewAdmin</class>
 		<class>org.hyperic.hq.hqu.server.session.ViewMasthead</class>
 		<class>org.hyperic.hq.hqu.server.session.ViewResource</class>
-		<class>org.hyperic.hq.inventory.domain.Resource</class>
 		<shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
 		<properties>
 			<property name="hibernate.hbm2ddl.auto" value="update" />
