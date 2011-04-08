@@ -29,17 +29,13 @@ import java.io.Serializable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Index;
-import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.util.data.IEventPoint;
 
 @Immutable
@@ -62,10 +58,9 @@ public class EventLog implements IEventPoint, Serializable {
     @Column(name = "INSTANCE_ID")
     private Integer instanceId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "RESOURCE_ID", nullable = false)
+    @Column(name = "RESOURCE_ID", nullable = false)
     @Index(name = "EVENT_LOG_RES_ID_IDX")
-    private Resource resource;
+    private Integer resource;
 
     @Column(name = "STATUS", length = 100)
     private String status;
@@ -83,7 +78,7 @@ public class EventLog implements IEventPoint, Serializable {
     protected EventLog() {
     }
 
-    public EventLog(Resource r, String subject, String type, String detail, long timestamp,
+    public EventLog(Integer r, String subject, String type, String detail, long timestamp,
                        String status, Integer instanceId) {
         resource = r;
         this.subject = subject;
@@ -122,7 +117,7 @@ public class EventLog implements IEventPoint, Serializable {
         return instanceId;
     }
 
-    public Resource getResource() {
+    public Integer getResource() {
         return resource;
     }
 
@@ -164,7 +159,7 @@ public class EventLog implements IEventPoint, Serializable {
         this.instanceId = instanceId;
     }
 
-    protected void setResource(Resource r) {
+    protected void setResource(Integer r) {
         resource = r;
     }
 
