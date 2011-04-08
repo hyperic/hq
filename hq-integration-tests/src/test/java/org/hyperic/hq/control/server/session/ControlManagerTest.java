@@ -29,6 +29,8 @@ public class ControlManagerTest
     private ControlManager controlManager;
 
     private Service service;
+    
+    private ServiceType serviceType;
 
     @Before
     public void setUp() throws Exception {
@@ -39,9 +41,9 @@ public class ControlManagerTest
             "TestPlatform1", 2);
         ServerType serverType = serverManager.findServerTypeByName("PluginTestServer 1.0");
         Server server = createServer(platform, serverType, "Server1");
-        ServiceType webModuleStats = serviceManager
+        serviceType = serviceManager
             .findServiceTypeByName("PluginTestServer 1.0 Web Module Stats");
-        service = createService(server.getId(), webModuleStats, "Service1", "", "");
+        service = createService(server.getId(), serviceType, "Service1", "", "");
     }
 
     @Test
@@ -81,6 +83,6 @@ public class ControlManagerTest
         assertEquals(
             expected,
             new HashSet<String>(controlManager.getActions(authzSubjectManager.getOverlordPojo(),
-               new AppdefEntityTypeID(AppdefEntityConstants.APPDEF_TYPE_SERVICE,service.getId()))));
+               new AppdefEntityTypeID(AppdefEntityConstants.APPDEF_TYPE_SERVICE,serviceType.getId()))));
     }
 }
