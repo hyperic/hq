@@ -38,7 +38,7 @@
 <head>
 <title><fmt:message key="error.Error.Title"/></title>
 <link rel=stylesheet href="<html:rewrite page="/css/win.css"/>" type="text/css">
-<link rel=stylesheet href="<html:rewrite page="HQ_40.css"/>" type="text/css">
+<link rel=stylesheet href="<html:rewrite page="/css/HQ_40.css"/>" type="text/css">
 <script  src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
 <script  type="text/javascript">
   var help = "<hq:help/>";
