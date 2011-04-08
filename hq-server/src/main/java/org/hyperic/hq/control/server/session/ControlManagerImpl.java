@@ -529,7 +529,7 @@ public class ControlManagerImpl implements ControlManager {
 
         // Send a control event
         ControlEvent event = new ControlEvent(cLocal.getSubject(),  cLocal
-            .getResource().getId(), cLocal.getAction(), cLocal.getScheduled().booleanValue(), cLocal.getDateScheduled(), status);
+            .getResource(), cLocal.getAction(), cLocal.getScheduled().booleanValue(), cLocal.getDateScheduled(), status);
         event.setMessage(msg);
         messagePublisher.publishMessage(MessagePublisher.EVENTS_TOPIC, event);
     }

@@ -665,7 +665,7 @@ public class ControlScheduleManagerImpl
                                               String jobName, String jobOrderData) {
         ControlSchedule s = new ControlSchedule();
         try {
-            s.setResource(resource);
+            s.setResource(resource.getId());
             s.setSubject(subject);
             s.setScheduleValue(schedule);
             s.setNextFireTime(nextFire);
@@ -700,8 +700,7 @@ public class ControlScheduleManagerImpl
     public Integer createHistory(AppdefEntityID id, Integer groupId, Integer batchId, String subjectName,
                                         String action, String args, Boolean scheduled, long startTime, long stopTime,
                                         long scheduleTime, String status, String description, String errorMessage) {
-        Resource resource = resourceManager.findResourceById(id.getId());
-        ControlHistory controlHistory = new ControlHistory(resource, groupId, batchId, subjectName, action, truncateText(MAX_HISTORY_TEXT_SIZE,
+        ControlHistory controlHistory = new ControlHistory(id.getId(), groupId, batchId, subjectName, action, truncateText(MAX_HISTORY_TEXT_SIZE,
             args), scheduled, startTime, stopTime, scheduleTime, status, truncateText(MAX_HISTORY_TEXT_SIZE,
             description), truncateText(MAX_HISTORY_TEXT_SIZE, errorMessage));
         controlHistoryRepository.save(controlHistory);
@@ -769,7 +768,9 @@ public class ControlScheduleManagerImpl
     private class ControlHistoryLocalComparatorAsc implements Comparator<ControlHistory> {
 
         public int compare(ControlHistory o1, ControlHistory o2) {
-            return o1.getResource().getName().compareTo(o2.getResource().getName());
+            Resource res1 = resourceManager.findResourceById(o1.getResource());
+            Resource res2 = resourceManager.findResourceById(o2.getResource());
+            return res1.getName().compareTo(res2.getName());
         }
 
         public boolean equals(Object other) {
@@ -780,7 +781,9 @@ public class ControlScheduleManagerImpl
     private class ControlHistoryLocalComparatorDesc implements Comparator<ControlHistory> {
 
         public int compare(ControlHistory o1, ControlHistory o2) {
-            return -(o1.getResource().getName().compareTo(o2.getResource().getName()));
+            Resource res1 = resourceManager.findResourceById(o1.getResource());
+            Resource res2 = resourceManager.findResourceById(o2.getResource());
+            return -(res1.getName().compareTo(res2.getName()));
         }
 
         public boolean equals(Object other) {

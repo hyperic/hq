@@ -38,15 +38,12 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
-import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.scheduler.ScheduleValue;
 
 @Entity
@@ -71,9 +68,8 @@ public class ControlSchedule implements Serializable {
     @Index(name = "CTL_SCHEDULE_NEXTFIRETIME_IDX")
     private long nextFireTime;
 
-    @ManyToOne
-    @JoinColumn(name = "RESOURCE_ID", nullable = false)
-    private Resource resource;
+    @Column(name = "RESOURCE_ID", nullable = false)
+    private Integer resource;
 
     @Basic(fetch = FetchType.LAZY)
     @Lob
@@ -133,7 +129,7 @@ public class ControlSchedule implements Serializable {
         return this.nextFireTime;
     }
 
-    public Resource getResource() {
+    public Integer getResource() {
         return resource;
     }
 
@@ -190,7 +186,7 @@ public class ControlSchedule implements Serializable {
         this.nextFireTime = nextFireTime;
     }
 
-    public void setResource(Resource resource) {
+    public void setResource(Integer resource) {
         this.resource = resource;
     }
 

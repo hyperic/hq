@@ -39,9 +39,11 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.util.MessageResources;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.control.server.session.ControlHistory;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.portlet.BaseRSSAction;
 import org.hyperic.hq.ui.action.portlet.RSSFeed;
@@ -64,11 +66,15 @@ public class RSSAction
     extends BaseRSSAction {
 
     private ControlBoss controlBoss;
+    
+    private ResourceManager resourceManager;
 
     @Autowired
-    public RSSAction(DashboardManager dashboardManager, ConfigBoss configBoss, ControlBoss controlBoss) {
+    public RSSAction(DashboardManager dashboardManager, ConfigBoss configBoss, ControlBoss controlBoss,
+                     ResourceManager resourceManager) {
         super(dashboardManager, configBoss);
         this.controlBoss = controlBoss;
+        this.resourceManager = resourceManager;
     }
 
     public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
@@ -126,8 +132,8 @@ public class RSSAction
 
                 StringBuffer desc = new StringBuffer(fmtd.toString());
                 desc.append(" ").append(res.getMessage("common.label.Dash")).append(" ").append(hist.getAction());
-
-                feed.addItem(hist.getResource().getName(), link, desc.toString(), current);
+                Resource resource = resourceManager.findResourceById(hist.getResource());
+                feed.addItem(resource.getName(), link, desc.toString(), current);
             }
         }
         request.setAttribute("rssFeed", feed);
