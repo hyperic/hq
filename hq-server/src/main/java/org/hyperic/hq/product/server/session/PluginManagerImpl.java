@@ -246,7 +246,7 @@ pluginDAO.remove(plugin);
         }
         deployPlugins(files);
     }
-    
+
     private File getFileAndValidateXML(String filename, byte[] bytes)
     throws PluginDeployException {
         FileWriter writer = null;
