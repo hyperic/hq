@@ -11581,7 +11581,7 @@ has already been defined.
             create index APS_PLUGIN_NAME_IDX on EAM_AGENT_PLUGIN_STATUS(PLUGIN_NAME)
         </statement>
         <statement targetDB="oracle">
-            alter table EAM_PLUGIN add DISABLED number(1) not null default 0
+            alter table EAM_PLUGIN add DISABLED number(1) default 0 not null
         </statement>
         <statement targetDB="postgresql">
             alter table EAM_PLUGIN add DISABLED boolean not null default false
@@ -11590,7 +11590,7 @@ has already been defined.
             alter table EAM_PLUGIN add DISABLED bit not null default 0
         </statement>
         <statement targetDB="oracle">
-            alter table EAM_PLUGIN add MTIME number(19,0) not null default 0
+            alter table EAM_PLUGIN add MTIME number(19,0) default 0 not null
         </statement>
         <statement targetDB="postgresql">
             alter table EAM_PLUGIN add MTIME int8 not null default 0
@@ -11619,7 +11619,7 @@ has already been defined.
  <schemaSpec version="3.204">
     <schema-directSQL>
         <statement targetDB="oracle">
-            alter table EAM_PLUGIN add DELETED number(1) not null default 0
+            alter table EAM_PLUGIN add DELETED number(1) default 0 not null
         </statement>
         <statement targetDB="postgresql">
             alter table EAM_PLUGIN add DELETED boolean not null default false
