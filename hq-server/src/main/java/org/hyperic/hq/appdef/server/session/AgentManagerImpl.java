@@ -188,9 +188,18 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                 if (!pluginManager.isPluginSyncEnabled()) {
                     return;
                 }
-                AgentManager am = applicationContext.getBean(AgentManager.class);
+                final AgentManager am = applicationContext.getBean(AgentManager.class);
                 for (final PluginDeployedZevent zevent : events) {
-                    am.syncPluginToAgents(zevent.getFileName());
+                    final Runnable runner = new Runnable() {
+                        public void run() {
+                            am.syncPluginToAgents(zevent.getFileName());
+                        }
+                    };
+                    try {
+                        transactionRetry.runTransaction(runner, 3, 1000);
+                    } catch (Exception e) {
+                        log.error(e,e);
+                    }
                 }
             }
             public String toString() {
