@@ -304,5 +304,17 @@ public class ResourceDaoIntegrationTest {
         expected.add(resource3);
         assertEquals(expected, resourceDao.findByOwner("bob"));
     }
+    
+    @Test
+    public void testPersistRoot() {
+        Resource resource1 = new Resource("Some Resource", type);
+        resourceDao.persistRoot(resource1);
+        assertEquals(resource1,resourceDao.findRoot());
+    }
+    
+    @Test
+    public void testFindRootNoRoot() {
+        assertNull(resourceDao.findRoot());
+    }
 
 }

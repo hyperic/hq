@@ -83,6 +83,7 @@ public class ResourceType {
      * 
      * @param configType The ConfigType to add
      */
+    @Transactional("neoTxManager")
     public void addConfigType(ConfigType configType) {
         // TODO can't do this in a detached env b/c relationship doesn't take
         // unless both items are node-backed
@@ -94,6 +95,7 @@ public class ResourceType {
      * 
      * @param operationType The OperationType to add
      */
+    @Transactional("neoTxManager")
     public void addOperationType(OperationType operationType) {
         // TODO can't do this in a detached env b/c relationship doesn't take
         // unless both items are node-backed
@@ -105,6 +107,7 @@ public class ResourceType {
      * 
      * @param propertyType The PropertyType to add
      */
+    @Transactional("neoTxManager")
     public void addPropertyType(PropertyType propertyType) {
         // TODO can't do this in a detached env b/c relationship doesn't take
         // unless both items are node-backed

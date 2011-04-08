@@ -331,7 +331,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
             ResourceType system= new ResourceType("System");
             resourceTypeDao.persist(system);
             Resource root = new Resource("Root", system);
-            resourceDao.persist(root);
+            resourceDao.persistRoot(root);
         }     
     }
     

@@ -48,4 +48,10 @@ public interface ResourceDao extends GenericDao<Resource> {
      * @param resource The new resource
      */
     void persist(Resource resource);
+    
+    /**
+     * Persists a new Resource to use as the Root resource for traversal of rootless objects
+     * @param resource The new root resource
+     */
+    void persistRoot(Resource resource);
 }

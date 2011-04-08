@@ -147,7 +147,7 @@ public class Neo4jResourceDao implements ResourceDao {
 
     @Transactional(value="neoTxManager",readOnly = true)
     public Resource findRoot() {
-        return findById(1);
+       return resourceFinder.findByPropertyValue("root", "root", true);
     }
 
     private int getSortFieldType(Class<?> type) {
@@ -170,6 +170,13 @@ public class Neo4jResourceDao implements ResourceDao {
             return SortField.FLOAT;
         }
         throw new IllegalArgumentException("Sort field type " + type + " is not allowed");
+    }
+    
+    @Transactional("neoTxManager")
+    public void persistRoot(Resource resource) {
+        persist(resource);
+        //add an index for lookup later.  Property name/value can be anything here, the unique index name is important
+        graphDatabaseContext.getIndex(Resource.class, "root").add(resource.getPersistentState(), "root", true);
     }
 
     @Transactional("neoTxManager")
