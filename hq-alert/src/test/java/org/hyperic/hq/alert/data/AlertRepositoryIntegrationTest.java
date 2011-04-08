@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -33,8 +34,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import edu.emory.mathcs.backport.java.util.Collections;
-
 @DirtiesContext
 @Transactional
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -53,7 +52,7 @@ public class AlertRepositoryIntegrationTest {
     @PersistenceContext
     private EntityManager entityManager;
 
-    private Integer resource2=56934;
+    private Integer resource2 = 56934;
 
     @Before
     public void setUp() {
@@ -115,7 +114,6 @@ public class AlertRepositoryIntegrationTest {
             timestamp + 3000, 3, false, true, null, null));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testCountByCreateTimeAndPriorityGroup() {
         long timestamp = System.currentTimeMillis();
@@ -131,7 +129,8 @@ public class AlertRepositoryIntegrationTest {
         alert3.setCtime(timestamp + 2000);
         alertRepository.save(alert3);
         assertEquals(2l, alertRepository.countByCreateTimeAndPriority(timestamp - 6000,
-            timestamp + 3000, 3, false, false, new HashSet<Integer>(Collections.singletonList(resource2)), null));
+            timestamp + 3000, 3, false, false,
+            new HashSet<Integer>(Collections.singletonList(resource2)), null));
     }
 
     @Test
@@ -289,7 +288,6 @@ public class AlertRepositoryIntegrationTest {
             timestamp + 3000, 3, false, true, null, null, new Sort("ctime")));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testFindByCreateTimeAndPriorityGroup() {
         long timestamp = System.currentTimeMillis();
@@ -310,7 +308,8 @@ public class AlertRepositoryIntegrationTest {
         expected.add(alert);
         assertEquals(new PageImpl<Alert>(expected, request, 2l),
             alertRepository.findByCreateTimeAndPriority(timestamp - 6000, timestamp + 3000, 3,
-                false, false, new HashSet<Integer>(Collections.singletonList(resource2)), null, request));
+                false, false, new HashSet<Integer>(Collections.singletonList(resource2)), null,
+                request));
     }
 
     @Test
@@ -423,12 +422,12 @@ public class AlertRepositoryIntegrationTest {
         alertRepository.save(alert3);
         assertEquals(timestamp - 5000, alertRepository.getOldestUnfixedAlertTime());
     }
-    
+
     @Test
     public void testGetOldestUnfixedAlertTimeNoAlerts() {
         alertRepository.delete(alert);
         alertRepository.delete(alert2);
-        assertEquals(0l,alertRepository.getOldestUnfixedAlertTime());
+        assertEquals(0l, alertRepository.getOldestUnfixedAlertTime());
     }
 
     @Test
