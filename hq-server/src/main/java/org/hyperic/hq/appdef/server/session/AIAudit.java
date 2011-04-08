@@ -32,7 +32,6 @@ import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditImportance;
 import org.hyperic.hq.common.server.session.AuditNature;
 import org.hyperic.hq.common.server.session.AuditPurpose;
-import org.hyperic.hq.inventory.domain.Resource;
 
 @Entity
 @DiscriminatorValue("ai")
@@ -40,7 +39,7 @@ public class AIAudit extends Audit {
 
     protected AIAudit() {}
     
-    public AIAudit(AuthzSubject s, Resource r, AuditPurpose p, AuditImportance i, AuditNature n, String msg) {
+    public AIAudit(AuthzSubject s, Integer r, AuditPurpose p, AuditImportance i, AuditNature n, String msg) {
         super(s, r, p, n, i, msg);
     }
 

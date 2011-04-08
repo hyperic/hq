@@ -28,7 +28,6 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
 import org.hyperic.hq.auth.domain.AuthzSubject;
-import org.hyperic.hq.inventory.domain.Resource;
 @Entity
 @DiscriminatorValue("resource")
 public class ResourceAudit
@@ -36,7 +35,7 @@ public class ResourceAudit
     
     protected ResourceAudit() {}
 
-    ResourceAudit(Resource r, AuthzSubject s, AuditPurpose p, AuditImportance i, AuditNature n, String msg, long start,
+    ResourceAudit(Integer r, AuthzSubject s, AuditPurpose p, AuditImportance i, AuditNature n, String msg, long start,
                   long end) {
         super(s, r, p, n, i, msg);
         setStartTime(start);

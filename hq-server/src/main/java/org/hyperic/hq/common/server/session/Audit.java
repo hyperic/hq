@@ -101,10 +101,9 @@ public abstract class Audit implements Serializable {
     @Column(name = "PURPOSE", nullable = false)
     private int purpose;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "RESOURCE_ID", nullable = false)
+    @Column(name = "RESOURCE_ID", nullable = false)
     @Index(name = "RESOURCE_ID_IDX")
-    private Resource resource;
+    private Integer resource;
 
     @Column(name = "START_TIME", nullable = false)
     private long startTime;
@@ -121,7 +120,7 @@ public abstract class Audit implements Serializable {
     protected Audit() {
     }
 
-    protected Audit(AuthzSubject subject, Resource r, AuditPurpose purpose, AuditNature nature,
+    protected Audit(AuthzSubject subject, Integer r, AuditPurpose purpose, AuditNature nature,
                     AuditImportance importance, String message) {
         this.purpose = purpose.getCode();
         this.importance = importance.getCode();
@@ -233,7 +232,7 @@ public abstract class Audit implements Serializable {
         return AuditPurpose.findByCode(purpose);
     }
 
-    public Resource getResource() {
+    public Integer getResource() {
         return resource;
     }
 
@@ -318,7 +317,7 @@ public abstract class Audit implements Serializable {
         purpose = p;
     }
 
-    protected void setResource(Resource r) {
+    protected void setResource(Integer r) {
         resource = r;
     }
 
@@ -336,7 +335,7 @@ public abstract class Audit implements Serializable {
 
     public String toString() {
         return "Audit[user=" + subject.getName() + ",purpose=" + purpose + ",time=" + startTime +
-               ",resource=" + (resource != null ? resource.getName() : "N/A") + ",msg=" + message +
+               ",resource=" + resource + ",msg=" + message +
                "]";
     }
 

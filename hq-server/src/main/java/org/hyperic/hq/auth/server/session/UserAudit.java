@@ -32,7 +32,6 @@ import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditImportance;
 import org.hyperic.hq.common.server.session.AuditNature;
 import org.hyperic.hq.common.server.session.AuditPurpose;
-import org.hyperic.hq.inventory.domain.Resource;
 
 @Entity
 @DiscriminatorValue("user")
@@ -41,7 +40,7 @@ public class UserAudit
     
     protected UserAudit() {}
 
-    UserAudit(Resource r, AuthzSubject s, AuditPurpose p, AuditImportance i, AuditNature n, String msg) {
+    UserAudit(Integer r, AuthzSubject s, AuditPurpose p, AuditImportance i, AuditNature n, String msg) {
         super(s, r, p, n, i, msg);
         long now = System.currentTimeMillis();
         setStartTime(now);
