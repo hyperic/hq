@@ -128,8 +128,8 @@
 			<a href="#" class="cancelLink"><fmt:message key="admin.managers.plugin.button.cancel" /></a>
 		</div>
 	</div>
-	<div id="removeErrorPanel" style="visibility:hidden;">
-		<p id="removeErrorMsg"><fmt:message key="admin.managers.Plugin.remove.error.dialog.empty" /></p>
+	<div id="errorMsgPanel" style="visibility:hidden;">
+		<p id="errorMsg"></p>
 		<div>
 			<a href="#" class="cancelLink"><fmt:message key="admin.managers.plugin.button.cancel" /></a>
 		</div>
@@ -186,7 +186,6 @@
 			var height = windowCoords.h-footerCoords.h-headerCoords.h-150;
 			if(height>400){
 				var heightString = height+"px";
-				console.debug(heightString);
 				hqDojo.style(hqDojo.byId("pluginList"),"height",heightString);
 			}
 		}
@@ -387,25 +386,25 @@
 				id: "removePanelDialog",
 				title: "<fmt:message key="admin.managers.plugin.remove.dialog.title" />"
 			});
-			var removeErrorPanelDialog = new hqDijit.Dialog({
-				id: "removeErrorPanelDialog",
+			var errorMsgPanelDialog = new hqDijit.Dialog({
+				id: "errorMsgPanelDialog",
 				title: "<fmt:message key="admin.managers.Plugin.remove.error.dialog.title" />"
 			});
 			
 			var uploadPanel = hqDojo.byId("uploadPanel");
 			var confirmationPanel = hqDojo.byId("confirmationPanel");
-			var removeErrorPanel = hqDojo.byId("removeErrorPanel");
+			var errorMsgPanel = hqDojo.byId("errorMsgPanel");
 		
 			hqDojo.style(uploadDialog.closeButtonNode, "visibility", "hidden");
 			hqDojo.style(removeDialog.closeButtonNode, "visibility", "hidden");
-			hqDojo.style(removeErrorPanelDialog.closeButtonNode,"visibility", "hidden" );
+			hqDojo.style(errorMsgPanelDialog.closeButtonNode,"visibility", "hidden" );
 			uploadDialog.setContent(uploadPanel);
 			removeDialog.setContent(confirmationPanel);
-			removeErrorPanelDialog.setContent(removeErrorPanel);
+			errorMsgPanelDialog.setContent(errorMsgPanel);
 		
 			hqDojo.style(uploadPanel, "visibility", "visible");
 			hqDojo.style(confirmationPanel, "visibility", "visible");
-			hqDojo.style(removeErrorPanel, "visibility", "visible");
+			hqDojo.style(errorMsgPanel, "visibility", "visible");
 
 			hqDojo.query("#uploadPanelDialog .cancelLink").onclick(function(e) {
 				uncheckCheckboxes();
@@ -417,8 +416,8 @@
 				uncheckCheckboxes();
 				hqDijit.byId("removePanelDialog").hide();
 			});
-			hqDojo.query("#removeErrorPanelDialog .cancelLink").onclick(function(e) {
-				hqDijit.byId("removeErrorPanelDialog").hide();
+			hqDojo.query("#errorMsgPanelDialog .cancelLink").onclick(function(e) {
+				hqDijit.byId("errorMsgPanelDialog").hide();
 			});
 
 		
@@ -450,20 +449,20 @@
 				hqDojo.connect(uploader, "onComplete", function(dataArray){
 					if (dataArray[0].success){
 						hqDojo.attr("progressMessage", "class", "information");
+						var anim = [hqDojo.fadeIn({
+										node: "progressMessage",
+										duration: 500
+									}),
+									hqDojo.fadeOut({
+										node: "progressMessage",
+										delay: 5000,
+										duration: 500
+									})];
+						hqDojo.fx.chain(anim).play();		
 					} else {
-						hqDojo.attr("progressMessage", "class", "error");
-					}	
-					hqDojo.byId("progressMessage").innerHTML=dataArray[0].message;
-					var anim = [hqDojo.fadeIn({
-									node: "progressMessage",
-									duration: 500
-								}),
-								hqDojo.fadeOut({
-									node: "progressMessage",
-									delay: 5000,
-									duration: 500
-								})];
-					hqDojo.fx.chain(anim).play();						
+						hqDojo.byId("errorMsg").innerHTML=dataArray[0].message;
+						hqDijit.byId("errorMsgPanelDialog").show();
+					}					
 				});
 				hqDijit.byId("uploadPanelDialog").show();
 			});
@@ -529,7 +528,8 @@
 					});
 					hqDijit.byId("removePanelDialog").show();
 				}else{
-					hqDijit.byId("removeErrorPanelDialog").show();
+					hqDojo.byId("errorMsg").innerHTML='<fmt:message key="admin.managers.Plugin.remove.error.dialog.empty" />';
+					hqDijit.byId("errorMsgPanelDialog").show();
 				}
 			});
 

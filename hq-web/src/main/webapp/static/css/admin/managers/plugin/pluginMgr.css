@@ -123,11 +123,11 @@
 		text-align: left;
 	}
 
-	#removeErrorPanel, #confirmationPanel {
+	#errorMsgPanel, #confirmationPanel {
 		width: 400px;
 		text-align: left;
 	}
-	#removeErrorPanel div{
+	#errorMsgPanel div{
 		text-align: right;
 	}
 		

@@ -227,7 +227,8 @@ public class PluginManagerController extends BaseController implements Applicati
         List<String> filename = new ArrayList<String>() ;
         AuthzSubject subject;
         Map<String, byte[]> pluginInfo = new HashMap<String, byte[]>();
-
+        String[] messageParams = new String[3];
+        
         try{
             for (int i= 0 ; i<plugins.length;i++){
                 MultipartFile plugin = plugins[i];
@@ -261,10 +262,18 @@ public class PluginManagerController extends BaseController implements Applicati
             log.error(e,e);
             messageKey = "admin.managers.plugin.message.io.failure";
         } catch (PluginDeployException e){
+            messageKey = e.getMessage();
+            Map<Integer, String> param = e.getParameters();
+            
+            if(param!=null){
+                for(int i = 0; i<param.size();i++){
+                    messageParams[i]=param.get(String.valueOf(i));
+                }
+            }
             log.error(e,e);
             messageKey = "admin.managers.plugin.message.io.failure";
         }
-
+        model.addAttribute("params", messageParams);
         model.addAttribute("success", success);
         model.addAttribute("messageKey", messageKey);
         
