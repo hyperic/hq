@@ -68,8 +68,9 @@ public class Neo4jResourceGroupDao implements ResourceGroupDao {
 
     @Transactional(value="neoTxManager",readOnly = true)
     public ResourceGroup findById(Integer id) {
+        //TODO once id becomes a String, look up by indexed property.  Using id index doesn't work for some reason.
         ResourceGroup group = (ResourceGroup) finderFactory.createNodeEntityFinder(Resource.class)
-            .findByPropertyValue(null, "id", id);
+            .findById(id);
         if (group != null) {
             group.persist();
         }

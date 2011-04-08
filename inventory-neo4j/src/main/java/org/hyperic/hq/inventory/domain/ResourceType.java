@@ -41,7 +41,6 @@ public class ResourceType {
     private transient GraphDatabaseContext graphDatabaseContext;
 
     @GraphProperty
-    @Indexed
     private Integer id;
 
     @NotNull

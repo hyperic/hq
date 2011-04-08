@@ -49,7 +49,6 @@ public class Resource {
 
  // TODO unique ID string instead of number
     @GraphProperty
-    @Indexed
     private Integer id;
 
     @GraphProperty

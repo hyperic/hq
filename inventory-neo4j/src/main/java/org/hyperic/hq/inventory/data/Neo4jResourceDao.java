@@ -82,7 +82,8 @@ public class Neo4jResourceDao implements ResourceDao {
 
     @Transactional(value="neoTxManager",readOnly = true)
     public Resource findById(Integer id) {
-        Resource resource = resourceFinder.findByPropertyValue(null, "id", id);
+        //TODO once id becomes a String, look up by indexed property.  Using id index doesn't work for some reason.
+        Resource resource = resourceFinder.findById(id);
         if (resource != null) {
             resource.persist();
         }
