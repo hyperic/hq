@@ -27,7 +27,6 @@ package org.hyperic.hq.measurement.galerts;
 
 import org.hyperic.hq.galerts.processor.Gtrigger;
 import org.hyperic.hq.galerts.server.session.GtriggerType;
-import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 
@@ -80,7 +79,7 @@ public class MeasurementGtriggerType
         return new ConfigSchema();
     }
 
-    public boolean validForGroup(ResourceGroup g) {
+    public boolean validForGroup(Integer g) {
         return true;
     }
 }

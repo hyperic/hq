@@ -15,8 +15,6 @@ import org.hyperic.hq.galerts.server.session.GalertAuxLog;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.server.session.GalertDefPartition;
 import org.hyperic.hq.galerts.server.session.GalertLog;
-import org.hyperic.hq.inventory.domain.Resource;
-import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.galerts.MetricAuxLog;
 import org.hyperic.hq.measurement.server.session.Category;
@@ -48,7 +46,7 @@ public class MetricAuxLogRepositoryIntegrationTest {
     @PersistenceContext
     private EntityManager entityManager;
 
-    private ResourceGroup group;
+    private Integer group = 887755;
 
     private GalertLog log;
 
@@ -57,7 +55,7 @@ public class MetricAuxLogRepositoryIntegrationTest {
     @Autowired
     private MetricAuxLogRepository metricAuxLogRepository;
 
-    private Resource resource;
+    private Integer resource = 8889;
 
     private MeasurementTemplate template;
 
@@ -72,9 +70,6 @@ public class MetricAuxLogRepositoryIntegrationTest {
         entityManager.persist(type);
         category = new Category("Availability");
         entityManager.persist(category);
-        this.resource = new Resource();
-        resource.setName("Resource1");
-        entityManager.persist(resource);
         this.template = new MeasurementTemplate("Queue Size", "Availability", "messages",
             MeasurementConstants.COLL_TYPE_DYNAMIC, true, 1234, true, "service:queueSize", type,
             category, "tomcat");
@@ -82,9 +77,6 @@ public class MetricAuxLogRepositoryIntegrationTest {
         this.measurement = new Measurement(resource, template, 1234);
         measurement.setDsn("queueSize");
         entityManager.persist(measurement);
-        group = new ResourceGroup();
-        group.setName("Group2");
-        entityManager.persist(group);
         def1 = new GalertDef("Platforms Down", "desc", AlertSeverity.HIGH, true, group);
         entityManager.persist(def1);
         log = new GalertLog(def1, new ExecutionReason("Threshold Exceeded",
@@ -115,9 +107,7 @@ public class MetricAuxLogRepositoryIntegrationTest {
 
     @Test
     public void testDeleteByMetricIds() {
-        Resource resource2 = new Resource();
-        resource2.setName("Resource2");
-        entityManager.persist(resource2);
+        int resource2 = 9931;
         MeasurementTemplate template2 = new MeasurementTemplate("Free Mem", "Availability", "MB",
             MeasurementConstants.COLL_TYPE_DYNAMIC, true, 1234, true, "service:queueSize", type,
             category, "tomcat");

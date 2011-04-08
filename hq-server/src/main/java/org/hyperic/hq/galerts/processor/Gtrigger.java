@@ -28,7 +28,6 @@ package org.hyperic.hq.galerts.processor;
 import java.util.Set;
 
 import org.hyperic.hq.galerts.server.session.ExecutionStrategy;
-import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.zevents.Zevent;
 
 
@@ -52,7 +51,7 @@ public abstract class Gtrigger {
 
     public abstract Set getInterestedEvents();
 
-    public abstract void setGroup(ResourceGroup g);
+    public abstract void setGroup(Integer group);
     
     void setAlertDef(MemGalertDef def) {
         _alertDef = def;

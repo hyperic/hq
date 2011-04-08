@@ -2,6 +2,7 @@ package org.hyperic.hq.escalation.data;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -21,7 +22,6 @@ import org.hyperic.hq.galerts.server.session.GalertDefPartition;
 import org.hyperic.hq.galerts.server.session.GalertEscalatable;
 import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
 import org.hyperic.hq.galerts.server.session.GalertLog;
-import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -59,9 +59,7 @@ public class EscalationStateRepositoryIntegrationTest {
         entityManager.persist(escalation);
         Escalation escalation2 = new Escalation("Escalation2", "Important", true, 1l, true, true);
         entityManager.persist(escalation2);
-        ResourceGroup group = new ResourceGroup();
-        group.setName("Group2");
-        entityManager.persist(group);
+        int group = 988;
         def1 = new GalertDef("Platforms Down", "desc", AlertSeverity.HIGH, true, group);
         def1.setEscalation(escalation);
         entityManager.persist(def1);

@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.server.session.GalertLog;
-import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -22,18 +21,18 @@ public interface GalertLogRepository extends JpaRepository<GalertLog, Integer>,
     @Transactional
     @Query("delete from GalertLog l where l.def in (select d from GalertDef d where d.group=:group)")
     @Modifying
-    void deleteByGroup(@Param("group") ResourceGroup group);
+    void deleteByGroup(@Param("group") Integer group);
 
-    List<GalertLog> findByDefGroupOrderByTimestampAsc(@Param("group") ResourceGroup group);
+    List<GalertLog> findByDefGroupOrderByTimestampAsc(@Param("group") Integer group);
 
     @Transactional(readOnly = true)
     @Query("select l from GalertLog l where l.def.group = :group and l.fixed=false and l.timestamp >= :begin and l.timestamp <= :end")
-    List<GalertLog> findUnfixedByGroupAndTimestampBetween(@Param("group") ResourceGroup group,
+    List<GalertLog> findUnfixedByGroupAndTimestampBetween(@Param("group") Integer group,
                                                           @Param("begin") long begin,
                                                           @Param("end") long end);
 
     @Transactional(readOnly = true)
     @Query("select count(l) from GalertLog l where l.def.group = :group")
-    Long countByGroup(@Param("group") ResourceGroup group);
+    Long countByGroup(@Param("group") Integer group);
 
 }

@@ -53,8 +53,6 @@ import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.AlertSeverity;
-import org.hyperic.hq.inventory.domain.Resource;
-import org.hyperic.hq.inventory.domain.ResourceGroup;
 
 @Entity
 @Table(name = "EAM_GALERT_DEFS")
@@ -78,10 +76,9 @@ public class GalertDef implements AlertDefinitionInterface, PerformsEscalations,
     @Index(name = "GALERT_DEFS_ESC_ID_IDX")
     private Escalation escalation;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "GROUP_ID", nullable = false)
+    @Column(name = "GROUP_ID", nullable = false)
     @Index(name = "GALERT_DEFS_GROUP_ID_IDX")
-    private ResourceGroup group;
+    private Integer group;
 
     @Id
     @GenericGenerator(name = "mygen1", strategy = "increment")
@@ -113,7 +110,7 @@ public class GalertDef implements AlertDefinitionInterface, PerformsEscalations,
     }
 
     public GalertDef(String name, String desc, AlertSeverity severity, boolean enabled,
-                     ResourceGroup group) {
+                     Integer group) {
         this.name = name;
         this.desc = desc;
         this.severity=severity.getCode();
@@ -181,7 +178,7 @@ public class GalertDef implements AlertDefinitionInterface, PerformsEscalations,
         return escalation;
     }
 
-    public ResourceGroup getGroup() {
+    public Integer getGroup() {
         return group;
     }
 
@@ -205,7 +202,7 @@ public class GalertDef implements AlertDefinitionInterface, PerformsEscalations,
         return getSeverity().getCode();
     }
 
-    public Resource getResource() {
+    public Integer getResource() {
         return getGroup();
     }
 
@@ -277,7 +274,7 @@ public class GalertDef implements AlertDefinitionInterface, PerformsEscalations,
         this.escalation = escalation;
     }
 
-    protected void setGroup(ResourceGroup group) {
+    protected void setGroup(Integer group) {
         this.group = group;
     }
 

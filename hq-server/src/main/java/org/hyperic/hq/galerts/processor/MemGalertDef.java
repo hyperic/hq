@@ -41,7 +41,6 @@ import org.hyperic.hq.galerts.server.session.ExecutionStrategy;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyInfo;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.server.session.GtriggerInfo;
-import org.hyperic.hq.inventory.domain.ResourceGroup;
 
 
 /**
@@ -87,7 +86,7 @@ class MemGalertDef {
     }
     
     private void initializeStrategy(ExecutionStrategyInfo sInfo,
-                                    ResourceGroup group) 
+                                    Integer group) 
     {
         ExecutionStrategy strat = sInfo.getStrategy();
         List triggers = new ArrayList();

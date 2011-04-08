@@ -747,9 +747,7 @@ public class MeasurementGtrigger
         return Bootstrap.getBean(MeasurementManager.class);
     }
      
-    public void setGroup(ResourceGroup rg) {
-        _resourceGroup = rg;
-        
+    public void setGroup(Integer rg) { 
         _interestedEvents.clear();
         ResourceGroupManager gMan = Bootstrap.getBean(ResourceGroupManager.class); 
         AuthzSubjectManager sMan = Bootstrap.getBean(AuthzSubjectManager.class); 
@@ -757,12 +755,12 @@ public class MeasurementGtrigger
             
         try {
             ResourceGroup g = gMan.findResourceGroupById(sMan.getOverlordPojo(),
-                                                         rg.getId());
+                                                         rg);
                                              
-            
+            _resourceGroup = g;
             _groupSize = gMan.getNumMembers(g);
             
-            _log.debug("Resource group set: id="+rg.getId()+", size="+_groupSize);
+            _log.debug("Resource group set: id="+rg +", size="+_groupSize);
             
             List derivedMeas = getMeasurementsCollecting();
             

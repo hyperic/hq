@@ -213,7 +213,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
     public PageList<GalertDef> findAlertDefs(ResourceGroup g, PageControl pc) {
         Pager pager = Pager.getDefaultPager();
         // TODO: G
-        return pager.seek(galertDefRepository.findByGroupExcludeDeletedOrderByName(g), pc);
+        return pager.seek(galertDefRepository.findByGroupExcludeDeletedOrderByName(g.getId()), pc);
     }
 
   
@@ -300,9 +300,9 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
      */
     public GalertLog createAlertLog(GalertDef def, ExecutionReason reason)
         throws ResourceDeletedException {
-        Resource r = def.getResource();
-        if (r == null || r.isInAsyncDeleteState()) {
-            throw ResourceDeletedException.newInstance(r.getId());
+        Integer r = def.getResource();
+        if (r == null) {
+            throw ResourceDeletedException.newInstance(r);
         }
         Map<GalertAuxLog, AlertAuxLog> gAuxLogToAuxLog = new HashMap<GalertAuxLog, AlertAuxLog>(); // Stores
         // real
@@ -403,7 +403,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
      */
     @Transactional(readOnly = true)
     public List<GalertLog> findAlertLogs(ResourceGroup group) {
-        return gAlertLogRepository.findByDefGroupOrderByTimestampAsc(group);
+        return gAlertLogRepository.findByDefGroupOrderByTimestampAsc(group.getId());
     }
 
     /**
@@ -412,7 +412,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
     @Transactional(readOnly = true)
     public PageList<GalertLog> findAlertLogsByTimeWindow(ResourceGroup group, long begin, long end,
                                                          PageControl pc) {
-        Page<GalertLog> results = gAlertLogRepository.findByGroupAndTimestampBetween(group, begin, end,new PageRequest(pc.getPagenum(),
+        Page<GalertLog> results = gAlertLogRepository.findByGroupAndTimestampBetween(group.getId(), begin, end,new PageRequest(pc.getPagenum(),
             pc.getPagesize(),new Sort(pc.isAscending()? Direction.ASC: Direction.DESC,"timestamp")));
         return new PageList<GalertLog>(results.getContent(),(int)results.getTotalElements());
     }
@@ -422,7 +422,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
      */
     public List<GalertLog> findUnfixedAlertLogsByTimeWindow(ResourceGroup group, long begin,
                                                             long end) {
-        return gAlertLogRepository.findUnfixedByGroupAndTimestampBetween(group, begin, end);
+        return gAlertLogRepository.findUnfixedByGroupAndTimestampBetween(group.getId(), begin, end);
     }
 
     /**
@@ -479,9 +479,6 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
         List<GalertLog> result = new ArrayList<GalertLog>();
         for (GalertLog l : alerts) {
             GalertDef def = l.getAlertDef();
-            if (def.getResource().isInAsyncDeleteState()) {
-                continue;
-            }
 
             // Filter by appdef entity
             AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(def.getResource());
@@ -541,10 +538,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
         throws PermissionException {
         for (int i = 0; i < ids.length; i++) {
             if (ids[i].isGroup()) {
-                ResourceGroup group = resourceGroupManager.findResourceGroupById(subj, ids[i]
-                    .getId());
-
-                counts[i] = gAlertLogRepository.countByGroup(group).intValue();
+                counts[i] = gAlertLogRepository.countByGroup(ids[i].getId()).intValue();
             }
         }
         return counts;
@@ -561,7 +555,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
      * 
      */
     public void deleteAlertLogs(ResourceGroup group) {
-        gAlertLogRepository.deleteByGroup(group);
+        gAlertLogRepository.deleteByGroup(group.getId());
     }
 
     /**
@@ -646,7 +640,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
                                     AlertSeverity severity, boolean enabled, ResourceGroup group) {
         GalertDef def;
 
-        def = new GalertDef(name, description, severity, enabled, group);
+        def = new GalertDef(name, description, severity, enabled, group.getId());
 
         galertDefRepository.save(def);
         galertProcessor.validateAlertDef(def);
@@ -733,7 +727,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
      * 
      */
     public void processGroupDeletion(ResourceGroup g) {
-        Collection<GalertDef> defs = galertDefRepository.findByGroup(g);
+        Collection<GalertDef> defs = galertDefRepository.findByGroup(g.getId());
 
         for (GalertDef def : defs) {
             _log.debug("Cascade deleting GalertDef[" + def.getName() + "]");
