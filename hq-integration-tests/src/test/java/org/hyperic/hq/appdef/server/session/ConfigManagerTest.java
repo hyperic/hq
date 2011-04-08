@@ -87,6 +87,9 @@ public class ConfigManagerTest
         Config actualControl = platform.getResource().getConfig(ProductPlugin.TYPE_CONTROL);
         assertEquals(1, actualControl.getValues().size());
         assertEquals("30", actualControl.getValue("timeout"));
+        
+        //TODO this cleanup won't be necessary once we get tx figured out
+        platform.getResource().getType().getConfigType("NewProp").remove();
     }
 
     @Test
@@ -106,6 +109,9 @@ public class ConfigManagerTest
         assertEquals(2, actualProduct.getValues().size());
         assertEquals("smooth", actualProduct.getValue("DisplayName"));
         assertEquals("hello!", actualProduct.getValue("NewProp"));
+        
+        //TODO this cleanup won't be necessary once we get tx figured out
+        platform.getResource().getType().getConfigType("NewProp").remove();
     }
 
     @Test

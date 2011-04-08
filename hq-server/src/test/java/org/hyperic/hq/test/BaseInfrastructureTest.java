@@ -27,6 +27,7 @@ package org.hyperic.hq.test;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -42,6 +43,7 @@ import org.hibernate.Session;
 import org.hyperic.hq.agent.mgmt.domain.Agent;
 import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.appdef.server.session.PlatformManagerImpl;
 import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServerType;
@@ -76,8 +78,12 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.context.IntegrationTestContextLoader;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
+import org.hyperic.hq.inventory.data.ResourceDao;
+import org.hyperic.hq.inventory.data.ResourceTypeDao;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
+import org.hyperic.hq.inventory.domain.ResourceType;
+import org.hyperic.hq.plugin.mgmt.data.PluginRepository;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.hq.product.ServiceTypeInfo;
 import org.junit.After;
@@ -131,6 +137,15 @@ abstract public class BaseInfrastructureTest {
 
     @Autowired
     protected ApplicationManager applicationManager;
+    
+    @Autowired
+    private ResourceDao resourceDao;
+    
+    @Autowired
+    private ResourceTypeDao resourceTypeDao;
+    
+    @Autowired
+    private PluginRepository pluginRepository;
 
     //The test plugin is automatically deployed when the integration test starts
     protected static final String TEST_PLUGIN_NAME="test";
@@ -145,20 +160,50 @@ abstract public class BaseInfrastructureTest {
         startTime = System.nanoTime();
         logger.debug("****** Test starting ******");
     }
+    
+    private void deleteInventory() {
+        Resource root = resourceDao.findRoot();
+        List<Resource> resources = resourceDao.findAll();
+        for(Resource resource: resources) {
+            if(! resource.equals(root)) {
+                resource.remove();
+            }
+        }
+        Set<String> typeNames = new HashSet<String>();
+        int[] groupTypes = AppdefEntityConstants.getAppdefGroupTypes();
+        for(int i=0;i< groupTypes.length;i++) {
+           typeNames.add(AppdefEntityConstants.getAppdefGroupTypeName(groupTypes[i]));
+        }
+        typeNames.add("System");
+        typeNames.add(PlatformManagerImpl.IP_RESOURCE_TYPE_NAME);
+        typeNames.add(AppdefEntityConstants.APPDEF_NAME_APPLICATION);
+        typeNames.add("PluginTestPlatform");
+        typeNames.add("PluginTestServer 1.0");
+        typeNames.add("PluginTestServer 1.0 Web Module Stats");
+        List<ResourceType> resourceTypes = resourceTypeDao.findAll();
+        for(ResourceType resourceType: resourceTypes) {
+            if(!(typeNames.contains(resourceType.getName()))) {
+                resourceType.remove();
+            }
+        }
+    }
 
     @After
     public void after() {
+        //TODO this shouldn't be necessary once we can choose a dedicated tx manager for each test
+        deleteInventory();
         // Clear the query cache
         ((Session)entityManager.getDelegate()).getSessionFactory().getCache().evictQueryRegions();
         // Clear the 2nd level cache including regions with queries
         CacheManager.getInstance().clearAll();
         endTime = System.nanoTime();
         logger.debug(buildMessage());
+        
     }
 
     @AfterClass
     public static void tearDown() {
-
+        
     }
 
     /**
