@@ -88,7 +88,7 @@ public interface AvailabilityManager {
      * Get the list of Raw RLE objects for a resource
      * @return List<AvailabilityDataRLE>
      */
-    public List<AvailabilityDataRLE> getHistoricalAvailData(Resource res, long begin, long end);
+    public List<AvailabilityDataRLE> getHistoricalAvailData(Integer res, long begin, long end);
 
     public Map<Integer, double[]> getAggregateData(Integer[] mids, long begin, long end);
 

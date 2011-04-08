@@ -32,8 +32,8 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionManager;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
@@ -62,14 +62,16 @@ public class BackfillPointsServiceImpl implements BackfillPointsService {
     private AvailabilityManager availabilityManager;
     private PermissionManager permissionManager;
     private AvailabilityCache availabilityCache;
+    private ResourceManager resourceManager;
 
     @Autowired
     public BackfillPointsServiceImpl(AvailabilityManager availabilityManager,
                                      PermissionManager permissionManager,
-                                     AvailabilityCache availabilityCache) {
+                                     AvailabilityCache availabilityCache, ResourceManager resourceManager) {
         this.availabilityManager = availabilityManager;
         this.permissionManager = permissionManager;
         this.availabilityCache = availabilityCache;
+        this.resourceManager = resourceManager;
     }
 
     public Map<Integer, DataPoint> getBackfillPoints(long current) {
@@ -110,7 +112,7 @@ public class BackfillPointsServiceImpl implements BackfillPointsService {
                     final long t = TimingVoodoo.roundDownTime(now - interval, interval);
                     final DataPoint point = new DataPoint(meas.getId(), new MetricValue(
                         AVAIL_PAUSED, t));
-                    resource = meas.getResource();
+                    resource = resourceManager.findResourceById(meas.getResource());
                     rtn.put(resource.getId(), new ResourceDataPoint(resource, point));
                 } else if (last.getValue() == AVAIL_DOWN || (now - lastTimestamp) > interval * 2) {
                     // HQ-1664: This is a hack: Give a 5 minute grace period for
@@ -127,7 +129,7 @@ public class BackfillPointsServiceImpl implements BackfillPointsService {
                     t = (last.getValue() == AVAIL_PAUSED) ? TimingVoodoo.roundDownTime(now,
                         interval) : t;
                     DataPoint point = new DataPoint(meas.getId(), new MetricValue(AVAIL_DOWN, t));
-                    resource = meas.getResource();
+                    resource = resourceManager.findResourceById(meas.getResource());
                     rtn.put(resource.getId(), new ResourceDataPoint(resource, point));
                 }
             }
@@ -204,7 +206,7 @@ public class BackfillPointsServiceImpl implements BackfillPointsService {
                 final MetricValue val = new MetricValue(AVAIL_DOWN, backfillTime);
                 final MeasDataPoint point = new MeasDataPoint(meas.getId(), val, meas.getTemplate()
                     .isAvailability());
-                rtn.put(meas.getResource().getId(), point);
+                rtn.put(meas.getResource(), point);
             }
         }
         return rtn;

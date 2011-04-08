@@ -49,7 +49,6 @@ import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
-import org.hyperic.hq.inventory.domain.Resource;
 
 @Entity
 @Table(name = "EAM_MEASUREMENT", uniqueConstraints = { @UniqueConstraint(columnNames = { "RESOURCE_ID",
@@ -85,10 +84,9 @@ public class Measurement implements ContainerManagedTimestampTrackable, Serializ
     @Column(name = "MTIME", nullable = false)
     private long mtime;
 
-    @ManyToOne
-    @JoinColumn(name = "RESOURCE_ID")
+    @Column(name = "RESOURCE_ID")
     @Index(name = "MEAS_RES_IDX")
-    private Resource resource;
+    private Integer resource;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "TEMPLATE_ID", nullable = false)
@@ -102,12 +100,12 @@ public class Measurement implements ContainerManagedTimestampTrackable, Serializ
     public Measurement() {
     }
 
-    public Measurement(Resource resource, MeasurementTemplate template) {
+    public Measurement(Integer resource, MeasurementTemplate template) {
         this.resource = resource;
         this.template = template;
     }
 
-    public Measurement(Resource resource, MeasurementTemplate template, long interval) {
+    public Measurement(Integer resource, MeasurementTemplate template, long interval) {
         this(resource, template);
         this.interval = interval;
     }
@@ -172,7 +170,7 @@ public class Measurement implements ContainerManagedTimestampTrackable, Serializ
         return mtime;
     }
 
-    public Resource getResource() {
+    public Integer getResource() {
         return resource;
     }
 
@@ -224,7 +222,7 @@ public class Measurement implements ContainerManagedTimestampTrackable, Serializ
         this.mtime = mtime;
     }
 
-    public void setResource(Resource resource) {
+    public void setResource(Integer resource) {
         this.resource = resource;
     }
 

@@ -40,9 +40,7 @@ import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
-import org.hyperic.hq.appdef.shared.PlatformManager;
-import org.hyperic.hq.appdef.shared.ServerManager;
-import org.hyperic.hq.appdef.shared.ServiceManager;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -68,25 +66,20 @@ public class ReportProcessorImpl implements ReportProcessor {
     private static final long PRIORITY_OFFSET = MINUTE * 3;
 
     private MeasurementManager measurementManager;
-    private PlatformManager platformManager;
-    private ServerManager serverManager;
-    private ServiceManager serviceManager;
     private SRNManager srnManager;
     private ReportStatsCollector reportStatsCollector;
     private MeasurementInserterHolder measurementInserterManager;
     private AgentManager agentManager;
     private ZeventEnqueuer zEventManager;
+    private ResourceManager resourceManager;
 
     @Autowired
     public ReportProcessorImpl(MeasurementManager measurementManager,
-                               PlatformManager platformManager, ServerManager serverManager,
-                               ServiceManager serviceManager, SRNManager srnManager,
+                               ResourceManager resourceManager, SRNManager srnManager,
                                ReportStatsCollector reportStatsCollector, MeasurementInserterHolder measurementInserterManager,
                                AgentManager agentManager, ZeventEnqueuer zEventManager) {
         this.measurementManager = measurementManager;
-        this.platformManager = platformManager;
-        this.serverManager = serverManager;
-        this.serviceManager = serviceManager;
+        this.resourceManager = resourceManager;
         this.srnManager = srnManager;
         this.reportStatsCollector = reportStatsCollector;
         this.measurementInserterManager = measurementInserterManager;
@@ -199,15 +192,15 @@ public class ReportProcessorImpl implements ReportProcessor {
             // Need to check if resource was asynchronously deleted (type ==
             // null)
             if (debug) watch.markTimeBegin("getResource");
-            final Resource res = m.getResource();
+            final Integer resId = m.getResource();
             if (debug) watch.markTimeEnd("getResource");
-            if (res == null || res.isInAsyncDeleteState()) {
+            if (resId == null) {
                 if (debug) {
                     log.debug("dropping metricId=" + m.getId() + " since resource is in async delete state");
                 }
                 continue;
             }
-            
+            final Resource res = resourceManager.findResourceById(resId);
             if (debug) watch.markTimeBegin("resMatchesAgent");
             // TODO reosurceMatchesAgent() and the call to getAgent() can be
             // consolidated, the agent match can be checked by getting the agent

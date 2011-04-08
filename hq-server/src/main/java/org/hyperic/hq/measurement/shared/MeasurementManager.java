@@ -168,7 +168,7 @@ public interface MeasurementManager {
     public List<Measurement> findMeasurements(AuthzSubject subject, AppdefEntityID id, String cat,
                                               PageControl pc);
 
-    Map<Integer,List<Measurement>> getEnabledMeasurements(List<Resource> resources);
+    Map<Integer,List<Measurement>> getEnabledMeasurements(List<Integer> resources);
     /**
      * Look up a list of enabled Measurements for a category
      * @return a list of {@link Measurement}

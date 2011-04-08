@@ -161,7 +161,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      */
     @Transactional(readOnly = true)
     public Measurement getAvailMeasurement(Resource resource) {
-        return measurementRepository.findAvailabilityMeasurementByResource(resource);
+        return measurementRepository.findAvailabilityMeasurementByResource(resource.getId());
     }
 
     /**
@@ -184,7 +184,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      */
     @Transactional(readOnly = true)
     public long getDowntime(Resource resource, long begin, long end) throws MeasurementNotFoundException {
-        Measurement meas = measurementRepository.findAvailabilityMeasurementByResource(resource);
+        Measurement meas = measurementRepository.findAvailabilityMeasurementByResource(resource.getId());
         if (meas == null) {
             throw new MeasurementNotFoundException("Availability measurement " + "not found for resource " +
                                                    resource.getId());
@@ -273,13 +273,13 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
                         		// measurement could be null if resource has not been configured
                         		continue;
                         	}
-                            Resource r = m.getResource();
-                            if (r == null || r.isInAsyncDeleteState()) {
+                            Integer r = m.getResource();
+                            if (r == null) {
                                 continue;
                             }
                             // availability measurement in scheduled downtime are disabled
                             if (!m.isEnabled() && eids.contains(AppdefUtil.newAppdefEntityId(r))) {
-                                measMap.put(r.getId(), m);
+                                measMap.put(r, m);
                             }
                         }
                     }
@@ -336,7 +336,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      * 
      */
     @Transactional(readOnly = true)
-    public List<AvailabilityDataRLE> getHistoricalAvailData(Resource res, long begin, long end) {
+    public List<AvailabilityDataRLE> getHistoricalAvailData(Integer res, long begin, long end) {
         return availabilityDataRepository.getHistoricalAvails(res, begin, end);
     }
 
@@ -579,11 +579,11 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             for (Measurement m : measurements) {
                 // populate the Map if value doesn't exist
                 if (measCache != null) {
-                    List<Measurement> measids =  measCache.get(m.getResource().getId());
+                    List<Measurement> measids =  measCache.get(m.getResource());
                     if (measids == null) {
                         measids = new ArrayList<Measurement>();
                         measids.add(m);
-                        measCache.put(m.getResource().getId(), measids);
+                        measCache.put(m.getResource(), measids);
                     }
                    
                 }

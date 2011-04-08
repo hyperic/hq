@@ -3,9 +3,8 @@ package org.hyperic.hq.measurement.data;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import org.hyperic.hq.inventory.domain.Resource;
-import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.measurement.server.session.CollectionSummary;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,32 +12,32 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public interface MeasurementRepositoryCustom {
 
-    Measurement findAvailabilityMeasurementByResource(Resource resource);
+    Measurement findAvailabilityMeasurementByResource(Integer resource);
 
-    List<Measurement> findAvailabilityMeasurementsByGroup(ResourceGroup group);
+    List<Measurement> findAvailabilityMeasurementsByGroupMembers(Set<Integer> groupMembers);
 
-    List<Measurement> findAvailabilityMeasurementsByResources(Collection<Resource> resources);
+    List<Measurement> findAvailabilityMeasurementsByResources(Collection<Integer> resources);
 
-    List<Measurement> findByResources(List<Resource> resources);
+    List<Measurement> findByResources(List<Integer> resources);
 
     List<Measurement> findByTemplatesAndResources(Integer[] templateIds, Integer[] resourceIds,
                                                   boolean onlyEnabled);
 
-    List<Measurement> findDesignatedByGroupAndCategoryOrderByTemplate(ResourceGroup group,
+    List<Measurement> findDesignatedByGroupAndCategoryOrderByTemplate(Set<Integer> groupMembers,
                                                                       String category);
 
-    List<Measurement> findDesignatedByResourceAndCategory(Resource resource, String category);
+    List<Measurement> findDesignatedByResourceAndCategory(Integer resource, String category);
 
-    List<Measurement> findDesignatedByResourcesAndCategory(List<Resource> resources, String category);
+    List<Measurement> findDesignatedByResourcesAndCategory(List<Integer> resources, String category);
 
-    List<Measurement> findEnabledByResourceGroupAndTemplate(ResourceGroup group, Integer templateId);
+    List<Measurement> findEnabledByResourceGroupAndTemplate(Set<Integer> groupMembers, Integer templateId);
 
     /**
-     * @param {@link List} of {@link Resource}s
+     * @param {@link List} of Resource IDs
      * @return {@link Map} of {@link Integer} representing resourceId to
      *         {@link List} of {@link Measurement}s
      */
-    Map<Integer, List<Measurement>> findEnabledByResources(List<Resource> resources);
+    Map<Integer, List<Measurement>> findEnabledByResources(List<Integer> resources);
 
     List<CollectionSummary> findMetricCountSummaries();
 

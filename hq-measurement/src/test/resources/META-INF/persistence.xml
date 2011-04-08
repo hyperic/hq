@@ -10,8 +10,6 @@
      <class>org.hyperic.hq.measurement.server.session.MeasurementTemplate</class>
      <class>org.hyperic.hq.measurement.server.session.Measurement</class>
      <class>org.hyperic.hq.measurement.server.session.ScheduleRevNum</class>
-     <class>org.hyperic.hq.inventory.domain.Resource</class>
-     <class>org.hyperic.hq.inventory.domain.ResourceGroup</class>
      <shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
       <properties>
             <property name="hibernate.hbm2ddl.auto" value="update"/>

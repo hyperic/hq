@@ -42,7 +42,6 @@ import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
-import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
@@ -329,9 +328,9 @@ public class TemplateManagerImpl implements TemplateManager {
                 m.setInterval(template.getDefaultInterval());
             }
 
-            List<Resource> resources = measurementRepository.findMeasurementResourcesByTemplate(template.getId());
+            List<Integer> resources = measurementRepository.findMeasurementResourcesByTemplate(template.getId());
             List<AppdefEntityID> appdefEntityIds = new ArrayList<AppdefEntityID>();
-            for(Resource resource: resources) {
+            for(Integer resource: resources) {
                 appdefEntityIds.add(AppdefUtil.newAppdefEntityId(resource));
             }
             toReschedule.addAll(appdefEntityIds);

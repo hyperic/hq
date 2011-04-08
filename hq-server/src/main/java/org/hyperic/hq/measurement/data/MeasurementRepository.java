@@ -4,7 +4,6 @@ import java.util.List;
 
 import javax.persistence.QueryHint;
 
-import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,7 +16,7 @@ public interface MeasurementRepository extends JpaRepository<Measurement, Intege
     MeasurementRepositoryCustom {
 
     @Transactional(readOnly = true)
-    @Query("select m from Measurement m join m.template t where m.resource is not null and m.resource.id in (:ids) and  upper(t.alias) = '"
+    @Query("select m from Measurement m join m.template t where m.resource is not null and m.resource in (:ids) and upper(t.alias) = '"
            + "AVAILABILITY' ")
     @QueryHints({ @QueryHint(name = "org.hibernate.cacheable", value = "true"),
                  @QueryHint(name = "org.hibernate.cacheRegion", value = "Measurement.findAvailMeasurementsByInstances") })
@@ -35,13 +34,13 @@ public interface MeasurementRepository extends JpaRepository<Measurement, Intege
     @Query("select m from Measurement m where m.resource = :resource")
     @QueryHints({ @QueryHint(name = "org.hibernate.cacheable", value = "true"),
                  @QueryHint(name = "org.hibernate.cacheRegion", value = "Measurement.findByResource") })
-    List<Measurement> findByResource(@Param("resource") Resource resource);
+    List<Measurement> findByResource(@Param("resource") Integer resource);
 
     @Transactional(readOnly = true)
     @Query("select m from Measurement m " + "join m.template t " + "join t.category c "
            + "where m.resource = :resource and m.enabled = true and c.name = :category "
            + "order by t.name")
-    List<Measurement> findByResourceAndCategoryOrderByTemplate(@Param("resource") Resource resource,
+    List<Measurement> findByResourceAndCategoryOrderByTemplate(@Param("resource") Integer resource,
                                                                @Param("category") String category);
 
     List<Measurement> findByTemplate(Integer templateId);
@@ -50,7 +49,7 @@ public interface MeasurementRepository extends JpaRepository<Measurement, Intege
 
     @Transactional(readOnly = true)
     @Query("select distinct m from Measurement m " + "join m.template t "
-           + "where t.id=:template and m.resource.id=:resource")
+           + "where t.id=:template and m.resource=:resource")
     @QueryHints({ @QueryHint(name = "org.hibernate.cacheable", value = "true"),
                  @QueryHint(name = "org.hibernate.cacheRegion", value = "Measurement.findByTemplateForInstance") })
     Measurement findByTemplateAndResource(@Param("template") Integer templateId,
@@ -62,21 +61,21 @@ public interface MeasurementRepository extends JpaRepository<Measurement, Intege
     @QueryHints({ @QueryHint(name = "org.hibernate.cacheable", value = "true"),
                  @QueryHint(name = "org.hibernate.cacheRegion", value = "Measurement.findByTemplateForInstance") })
     List<Measurement> findByTemplatesAndResource(@Param("ids") List<Integer> templateIds,
-                                                 @Param("resource") Resource resource);
+                                                 @Param("resource") Integer resource);
 
     @Transactional(readOnly = true)
     @Query("select m from Measurement m " + "join m.template t "
            + "where m.resource = :resource and " + "t.designate = true " + "order by t.name")
     @QueryHints({ @QueryHint(name = "org.hibernate.cacheable", value = "true"),
                  @QueryHint(name = "org.hibernate.cacheRegion", value = "Measurement.findDesignatedByResource") })
-    List<Measurement> findDesignatedByResourceOrderByTemplate(@Param("resource") Resource resource);
+    List<Measurement> findDesignatedByResourceOrderByTemplate(@Param("resource") Integer resource);
 
     @Transactional(readOnly = true)
     @Query("select m from Measurement m " + "join m.template t " + "where m.enabled = true and "
            + "m.resource = :resource " + "order by t.name")
     @QueryHints({ @QueryHint(name = "org.hibernate.cacheable", value = "true"),
                  @QueryHint(name = "org.hibernate.cacheRegion", value = "Measurement.findEnabledByResource") })
-    List<Measurement> findEnabledByResourceOrderByTemplate(@Param("resource") Resource resource);
+    List<Measurement> findEnabledByResourceOrderByTemplate(@Param("resource") Integer resource);
 
     /**
      * Used primarily for preloaded 2nd level cache measurement objects
@@ -91,7 +90,7 @@ public interface MeasurementRepository extends JpaRepository<Measurement, Intege
     List<Integer> findIdsByResourceNull();
 
     @Transactional(readOnly = true)
-    @Query("select m.id from Measurement m where m.template.id = :templateId and m.resource.id in (:resourceIds)")
+    @Query("select m.id from Measurement m where m.template.id = :templateId and m.resource in (:resourceIds)")
     @QueryHints({ @QueryHint(name = "org.hibernate.cacheable", value = "true"),
                  @QueryHint(name = "org.hibernate.cacheRegion", value = "Measurement.findIdsByTemplateForInstances") })
     List<Integer> findIdsByTemplateAndResources(@Param("templateId") Integer templateId,
@@ -99,7 +98,7 @@ public interface MeasurementRepository extends JpaRepository<Measurement, Intege
 
     @Transactional(readOnly = true)
     @Query("select distinct m.resource from Measurement m where m.template.id = :templateId")
-    List<Resource> findMeasurementResourcesByTemplate(@Param("templateId") Integer templateId);
+    List<Integer> findMeasurementResourcesByTemplate(@Param("templateId") Integer templateId);
 
     /**
      * @param id The resource to look up.
@@ -107,7 +106,7 @@ public interface MeasurementRepository extends JpaRepository<Measurement, Intege
      */
     @Transactional(readOnly = true)
     @Query("select min(m.interval) " + "from Measurement m " + "where m.enabled = true and "
-           + "m.resource.id = :resource " + "group by resource.id")
+           + "m.resource = :resource " + "group by resource")
     Long getMinInterval(@Param("resource") Integer resourceId);
 
     /**
@@ -117,8 +116,8 @@ public interface MeasurementRepository extends JpaRepository<Measurement, Intege
      *         the Long collection interval.
      */
     @Transactional(readOnly = true)
-    @Query("select m.resource.id, min(m.interval) " + "from Measurement m "
-           + "where m.enabled = true group by m.resource.id")
+    @Query("select m.resource, min(m.interval) " + "from Measurement m "
+           + "where m.enabled = true group by m.resource")
     List<Object[]> getMinIntervals();
 
 }

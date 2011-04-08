@@ -208,7 +208,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         ZeventManager.getInstance().enqueueEventsAfterCommit(events);
     }
 
-    private Measurement createMeasurement(Resource instance, MeasurementTemplate mt,
+    private Measurement createMeasurement(Integer instance, MeasurementTemplate mt,
                                           ConfigResponse props, long interval)
         throws MeasurementCreateException {
         String dsn = translate(mt.getTemplate(), props);
@@ -242,17 +242,12 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     public List<Measurement> createMeasurements(AppdefEntityID id, Integer[] templates,
                                                 long[] intervals, ConfigResponse props)
         throws MeasurementCreateException, TemplateNotFoundException {
-        Resource resource = resourceManager.findResource(id);
-        if (resource == null || resource.isInAsyncDeleteState()) {
-            return Collections.emptyList();
-        }
-
         if (intervals.length != templates.length) {
             throw new IllegalArgumentException(
                 "The templates and intervals lists must be the same size");
         }
 
-        List<Measurement> metrics = measurementRepository.findByTemplatesAndResource(Arrays.asList(templates), resource);
+        List<Measurement> metrics = measurementRepository.findByTemplatesAndResource(Arrays.asList(templates), id.getId());
 
         // Put the metrics in a map for lookup
         Map<Integer, Measurement> lookup = new HashMap<Integer, Measurement>(metrics.size());
@@ -270,7 +265,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
             if (m == null) {
                 // No measurement, create it
-                m = createMeasurement(resource, t, props, intervals[i]);
+                m = createMeasurement(id.getId(), t, props, intervals[i]);
             } else {
                 m.setEnabled(intervals[i] != 0);
                 m.setInterval(intervals[i]);
@@ -381,7 +376,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     private void updateMeasurements(AuthzSubject subject, AppdefEntityID id, ConfigResponse props)
         throws PermissionException, MeasurementCreateException {
         try {
-            List<Measurement> all = measurementRepository.findByResource(resourceManager.findResource(id));
+            List<Measurement> all = measurementRepository.findByResource(id.getId());
             List<Measurement> mcol = new ArrayList<Measurement>();
             for (Measurement dm : all) {
                 // Translate all dsns
@@ -469,8 +464,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     @Transactional(readOnly = true)
     public void getLiveMeasurementValues(AuthzSubject subject, AppdefEntityID id)
         throws PermissionException, LiveMeasurementException, MeasurementNotFoundException {
-        List<Measurement> mcol = measurementRepository.findEnabledByResourceOrderByTemplate(resourceManager
-            .findResource(id));
+        List<Measurement> mcol = measurementRepository.findEnabledByResourceOrderByTemplate(id.getId());
         String[] dsns = new String[mcol.size()];
         Integer availMeasurement = null; // For insert of AVAIL down
 
@@ -512,11 +506,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
      */
     @Transactional(readOnly = true)
     public int getEnabledMetricsCount(AuthzSubject subject, AppdefEntityID id) {
-        final Resource res = resourceManager.findResource(id);
-        if (res == null || res.isInAsyncDeleteState()) {
-            return 0;
-        }
-        final List<Measurement> mcol = measurementRepository.findEnabledByResourceOrderByTemplate(res);
+        final List<Measurement> mcol = measurementRepository.findEnabledByResourceOrderByTemplate(id.getId());
         return mcol.size();
     }
 
@@ -544,10 +534,10 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                 ResourceGroup grp = (ResourceGroup) resource;
                 Collection<Resource> mems = resourceGroupManager.getMembers(grp);
                 for (Resource res : mems) {
-                    rtn.put(res, measurementRepository.findByTemplatesAndResource(templs, res));
+                    rtn.put(res, measurementRepository.findByTemplatesAndResource(templs, res.getId()));
                 }
             } else {
-                rtn.put(resource, measurementRepository.findByTemplatesAndResource(templs, resource));
+                rtn.put(resource, measurementRepository.findByTemplatesAndResource(templs, resource.getId()));
             }
         }
         return rtn;
@@ -565,7 +555,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     public Measurement findMeasurement(AuthzSubject subject, Integer tid, AppdefEntityID aeid)
         throws MeasurementNotFoundException {
         List<Measurement> metrics = measurementRepository.findByTemplatesAndResource(
-            Collections.singletonList(tid), resourceManager.findResource(aeid));
+            Collections.singletonList(tid), aeid.getId());
 
         if (metrics.size() == 0) {
             throw new MeasurementNotFoundException("No measurement found " + "for " + aeid +
@@ -611,7 +601,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         ArrayList<Measurement> results = new ArrayList<Measurement>();
         for (AppdefEntityID aeid : aeids) {
             results.addAll(measurementRepository.findByTemplatesAndResource(Collections.singletonList(tid),
-                resourceManager.findResource(aeid)));
+                aeid.getId()));
         }
         return results;
     }
@@ -641,9 +631,9 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
         // See if category is valid
         if (cat == null || Arrays.binarySearch(MeasurementConstants.VALID_CATEGORIES, cat) < 0) {
-            meas = measurementRepository.findEnabledByResourceOrderByTemplate(resourceManager.findResource(id));
+            meas = measurementRepository.findEnabledByResourceOrderByTemplate(id.getId());
         } else {
-            meas = measurementRepository.findByResourceAndCategoryOrderByTemplate(resourceManager.findResource(id), cat);
+            meas = measurementRepository.findByResourceAndCategoryOrderByTemplate(id.getId(), cat);
         }
 
         return meas;
@@ -654,7 +644,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
      * @return {@link Map} of {@link Integer} representing resourceId to
      * {@link List} of {@link Measurement}s
      */
-    public Map<Integer,List<Measurement>> getEnabledMeasurements(List<Resource> resources) {
+    public Map<Integer,List<Measurement>> getEnabledMeasurements(List<Integer> resources) {
         return measurementRepository.findEnabledByResources(resources);
     }
     
@@ -670,9 +660,9 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
         // See if category is valid
         if (cat == null || Arrays.binarySearch(MeasurementConstants.VALID_CATEGORIES, cat) < 0) {
-            mcol = measurementRepository.findEnabledByResourceOrderByTemplate(resourceManager.findResource(id));
+            mcol = measurementRepository.findEnabledByResourceOrderByTemplate(id.getId());
         } else {
-            mcol = measurementRepository.findByResourceAndCategoryOrderByTemplate(resourceManager.findResource(id), cat);
+            mcol = measurementRepository.findByResourceAndCategoryOrderByTemplate(id.getId(), cat);
         }
         return mcol;
     }
@@ -684,7 +674,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
      */
     @Transactional(readOnly = true)
     public List<Measurement> findDesignatedMeasurements(AppdefEntityID id) {
-        return measurementRepository.findDesignatedByResourceOrderByTemplate(resourceManager.findResource(id));
+        return measurementRepository.findDesignatedByResourceOrderByTemplate(id.getId());
     }
 
     /**
@@ -695,7 +685,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     @Transactional(readOnly = true)
     public List<Measurement> findDesignatedMeasurements(AuthzSubject subject, AppdefEntityID id,
                                                         String cat) {
-        return measurementRepository.findDesignatedByResourceAndCategory(resourceManager.findResource(id),
+        return measurementRepository.findDesignatedByResourceAndCategory(id.getId(),
             cat);
     }
 
@@ -707,12 +697,12 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     @Transactional(readOnly = true)
     public List<Measurement> findDesignatedMeasurements(AuthzSubject subject, ResourceGroup g,
                                                         String cat) {
-        return measurementRepository.findDesignatedByGroupAndCategoryOrderByTemplate(g, cat);
+        return measurementRepository.findDesignatedByGroupAndCategoryOrderByTemplate(g.getMemberIds(), cat);
     }
  
     @Transactional(readOnly=true)
     public List<Measurement> getMetricsCollecting(ResourceGroup g, Integer templateId) {
-        return measurementRepository.findEnabledByResourceGroupAndTemplate(g, templateId);
+        return measurementRepository.findEnabledByResourceGroupAndTemplate(g.getMemberIds(), templateId);
     }
     
     /**
@@ -722,9 +712,9 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
      * 
      */
     public Map<Integer,List<Measurement>> findEnabledMeasurements(Collection<AppdefEntityID> aeids) {
-        final List<Resource> resources = new ArrayList<Resource>(aeids.size());
+        final List<Integer> resources = new ArrayList<Integer>(aeids.size());
         for (AppdefEntityID aeid : aeids) {
-            resources.add(resourceManager.findResource(aeid));
+            resources.add(aeid.getId());
         }
         return measurementRepository.findEnabledByResources(resources);
     }
@@ -744,7 +734,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
      */
     @Transactional(readOnly = true)
     public Measurement getAvailabilityMeasurement(Resource r) {
-        return measurementRepository.findAvailabilityMeasurementByResource(r);
+        return measurementRepository.findAvailabilityMeasurementByResource(r.getId());
     }
 
     /**
@@ -776,9 +766,9 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
           return new HashMap<AppdefEntityID, Measurement>(0,1);
         }
         Map<AppdefEntityID, Measurement> midMap = new HashMap<AppdefEntityID, Measurement>(ids.length);
-        ArrayList<Resource> resources = new ArrayList<Resource>(ids.length);
+        ArrayList<Integer> resources = new ArrayList<Integer>(ids.length);
         for (AppdefEntityID id : ids) {
-            resources.add(resourceManager.findResource(id));
+            resources.add(id.getId());
         }
         List<Measurement> list = measurementRepository.findDesignatedByResourcesAndCategory(resources, cat);
         for (Measurement m:list) {
@@ -798,7 +788,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     public Map<Integer, List<Measurement>> getAvailMeasurements(Collection<?> resources) {
         final Map<Integer, List<Measurement>> rtn = new HashMap<Integer, List<Measurement>>(
             resources.size());
-        final List<Resource> res = new ArrayList<Resource>(resources.size());
+        final List<Integer> res = new ArrayList<Integer>(resources.size());
         for (Object o : resources) {
             Resource resource = null;
             if (o == null) {
@@ -818,7 +808,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             } else if (o instanceof ResourceGroup) {
                 ResourceGroup grp = (ResourceGroup) o;
                 resource = grp;
-                rtn.put(resource.getId(), measurementRepository.findAvailabilityMeasurementsByGroup(grp));
+                rtn.put(resource.getId(), measurementRepository.findAvailabilityMeasurementsByGroupMembers(grp.getMemberIds()));
                 continue;
             } else if (o instanceof AppdefResourceValue) {
                 AppdefResourceValue r = (AppdefResourceValue) o;
@@ -830,17 +820,16 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             if (resource == null || resource.isInAsyncDeleteState()) {
                 continue;
             }
-           
-          
+  
             if (resource instanceof ResourceGroup && !(applicationManager.isApplication((ResourceGroup)resource))) {
                 ResourceGroup grp = (ResourceGroup)resource;
-                rtn.put(resource.getId(), measurementRepository.findAvailabilityMeasurementsByGroup(grp));
+                rtn.put(resource.getId(), measurementRepository.findAvailabilityMeasurementsByGroupMembers(grp.getMemberIds()));
                 continue;
             } else if (resource instanceof ResourceGroup && (applicationManager.isApplication((ResourceGroup)resource))) {
                 rtn.putAll(getAvailMeas(resource));
                 continue;
             }
-            res.add(resource);
+            res.add(resource.getId());
         }
         List<Measurement> ids = measurementRepository.findAvailabilityMeasurementsByResources(res);
         // may be null if measurements have not been configured
@@ -848,7 +837,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             return Collections.emptyMap();
         }
         for (Measurement m : ids) {
-            rtn.put(m.getResource().getId(), Collections.singletonList(m));
+            rtn.put(m.getResource(), Collections.singletonList(m));
         }
         return rtn;
     }
@@ -916,8 +905,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         Map<Integer, Long> intervals = new HashMap<Integer, Long>(tids.length);
 
         for (AppdefEntityID aeid : aeids) {
-            Resource res = resourceManager.findResource(aeid);
-            List<Measurement> metrics = measurementRepository.findByTemplatesAndResource(Arrays.asList(tids), res);
+            List<Measurement> metrics = measurementRepository.findByTemplatesAndResource(Arrays.asList(tids),aeid.getId());
 
             for (Measurement dm : metrics) {
                 Long interval = new Long(dm.getInterval());
@@ -1011,7 +999,6 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
      */
     public void enableMeasurements(AuthzSubject subject, Integer[] mids) throws PermissionException {
         StopWatch watch = new StopWatch();
-        Resource resource = null;
         AppdefEntityID appId = null;
         List<AppdefEntityID> appIdList = new ArrayList<AppdefEntityID>();
         List<Integer> midsList = Arrays.asList(mids);
@@ -1021,7 +1008,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             Measurement meas = measurementRepository.findOne(mid);
 
             if (!meas.isEnabled()) {
-                resource = meas.getResource();
+                Integer resource = meas.getResource();
                 appId = AppdefUtil.newAppdefEntityId(resource);
 
                 permissionManager.checkModifyPermission(subject.getId(), appId);
@@ -1052,7 +1039,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         if (meas.isEnabled()) {
             return;
         }
-        Resource resource = meas.getResource();
+        Integer resource = meas.getResource();
         AppdefEntityID appId = AppdefUtil.newAppdefEntityId(resource);
         permissionManager.checkModifyPermission(subject.getId(), appId);
       
@@ -1078,7 +1065,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         Measurement meas = measurementRepository.findOne(mId);
         meas.setEnabled((interval != 0));
         meas.setInterval(interval);
-        Resource resource = meas.getResource();
+        Integer resource = meas.getResource();
         AppdefEntityID appId = AppdefUtil.newAppdefEntityId(resource);
         permissionManager.checkModifyPermission(subject.getId(), appId);
         enqueueZeventForMeasScheduleChange(meas, interval);
@@ -1090,7 +1077,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
      * 
      */
     public void disableMeasurements(AuthzSubject subject, Resource res) throws PermissionException {
-        List<Measurement> mcol = measurementRepository.findEnabledByResourceOrderByTemplate(res);
+        List<Measurement> mcol = measurementRepository.findEnabledByResourceOrderByTemplate(res.getId());
 
         if (mcol.size() == 0) {
             return;
@@ -1117,7 +1104,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
      */
     @Transactional(readOnly = true)
     public List<Measurement> findMeasurements(AuthzSubject subject, Resource res) {
-        return measurementRepository.findByResource(res);
+        return measurementRepository.findByResource(res.getId());
     }
 
     /**
@@ -1130,8 +1117,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         // Authz check
         permissionManager.checkModifyPermission(subject.getId(), id);
 
-        Resource resource = resourceManager.findResource(id);
-        List<Measurement> mcol = measurementRepository.findByResource(resource);
+        List<Measurement> mcol = measurementRepository.findByResource(id.getId());
         HashSet<Integer> tidSet = null;
         if (tids != null) {
             tidSet = new HashSet<Integer>(Arrays.asList(tids));
@@ -1413,7 +1399,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     }
 
     public void onApplicationEvent(ResourceDeleteRequestedEvent event) {
-        List<Measurement> measurements = measurementRepository.findByResource(event.getResource());
+        List<Measurement> measurements = measurementRepository.findByResource(event.getResource().getId());
         measurementRepository.removeMeasurements(measurements);
     }
 
@@ -1482,7 +1468,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
         try {
             dm = measurementRepository.findOne(event.getInstanceId());
-            event.setResource(dm.getResource().getId());
+            event.setResource(dm.getResource());
             event.setUnits(dm.getTemplate().getUnits());
         } catch (Exception e) {
             if (event == null) {

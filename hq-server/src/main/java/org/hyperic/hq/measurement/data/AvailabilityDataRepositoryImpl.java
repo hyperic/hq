@@ -14,7 +14,6 @@ import javax.persistence.TypedQuery;
 
 import org.hyperic.hibernate.DialectAccessor;
 import org.hyperic.hibernate.dialect.HQDialect;
-import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.AvailabilityDataRLE;
 import org.hyperic.hq.measurement.server.session.Measurement;
@@ -222,7 +221,7 @@ public class AvailabilityDataRepositoryImpl implements AvailabilityDataCustom {
             .getResultList();
     }
 
-    public List<AvailabilityDataRLE> getHistoricalAvails(Resource resource, long start, long end) {
+    public List<AvailabilityDataRLE> getHistoricalAvails(Integer resource, long start, long end) {
         String sql = new StringBuilder().append("SELECT rle")
             .append(" FROM AvailabilityDataRLE rle").append(" JOIN rle.measurement m")
             .append(" WHERE m.resource = :resource").append(" AND rle.endtime > :startime")

@@ -1356,7 +1356,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
         List<Measurement> mms = measurementManager.findMeasurements(subject, tid, aeids);
         for (Measurement mm : mms) {
 
-            Integer instanceId = mm.getResource().getId();
+            Integer instanceId = mm.getResource();
             AppdefResourceValue resource = (AppdefResourceValue) resourceMap.get(instanceId
                 .intValue());
 
@@ -2291,7 +2291,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
         for (Measurement m : metrics) {
 
             try {
-                midMap.put(m.getResource().getId(), m);
+                midMap.put(m.getResource(), m);
             } catch (IllegalArgumentException e) {
                 // Resource has been deleted, waiting for purging. Ignore.
             }
@@ -3098,7 +3098,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
                     continue;
                 }
 
-                mmap.put(m.getResource(), m);
+                mmap.put(resourceManager.findResourceById(m.getResource()), m);
             }
             entry.setValue(mmap);
         }
@@ -3114,7 +3114,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
         List<Measurement> metrics = measCache.remove(group.getId());
         for (Measurement meas : metrics) {
 
-            measCache.put(meas.getResource().getId(), Collections.singletonList(meas));
+            measCache.put(meas.getResource(), Collections.singletonList(meas));
         }
 
         // Members are sorted
