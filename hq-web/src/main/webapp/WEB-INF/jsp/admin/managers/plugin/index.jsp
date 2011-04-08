@@ -460,6 +460,20 @@
 		
 		uncheckCheckboxes();
 		updateTime();
+		resizeContent();
+		
+		function resizeContent(){
+			var windowCoords = hqDojo.window.getBox();
+			var footerCoords = hqDojo.position(hqDojo.byId("footer"), true);
+			var headerCoords = hqDojo.position(hqDojo.byId("header"), true);
+			var height = windowCoords.h-footerCoords.h-headerCoords.h-150;
+			if(height>400){
+				var heightString = height+"px";
+				console.debug(heightString);
+				hqDojo.style(hqDojo.byId("pluginList"),"height",heightString);
+			}
+		}
+		
 		function uncheckCheckboxes(){
 			hqDojo.forEach( hqDojo.query("input[type=checkbox]"), function(e){
 					e.checked=false;
