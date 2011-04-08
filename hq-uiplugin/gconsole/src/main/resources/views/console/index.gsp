@@ -31,9 +31,9 @@
     </fieldset>
 </div>
 <script type="text/javascript">
+document.navTabCat = "Admin";
+
 hqDojo.ready(function() {
-	document.navTabCat = "Admin";
-	
 	hqDojo.connect(hqDojo.byId("executeLink"), "onclick", function(e) {
 		hqDojo.byId('timeStatus').innerHTML = '... executing';
 		
