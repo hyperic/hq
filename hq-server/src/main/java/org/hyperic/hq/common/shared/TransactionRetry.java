@@ -56,8 +56,8 @@ public class TransactionRetry {
             } catch (HibernateOptimisticLockingFailureException e) {
                 ex = e;
                 if (tries < maxRetries) {
-                    log.warn("retrying updateAgentPluginStatus, tries=" + tries +
-                             " error: " + e);
+                    log.warn("retrying operation thread=" + Thread.currentThread().getName()+
+                             ", tries=" + tries + " error: " + e);
                 }
                 log.debug(e, e);
             }
