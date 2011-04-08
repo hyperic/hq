@@ -38,10 +38,7 @@
     <name>Hyperic Rabbit Operation Service Tests</name>
 
     <properties>
-        <maven.test.failure.ignore>true</maven.test.failure.ignore>
-        <spring.amqp.version>1.0.0.M2</spring.amqp.version>
-        <rabbitmq.version>2.3.1</rabbitmq.version>
-        <otp.version>1.5.3</otp.version>
+        <maven.test.failure.ignore>true</maven.test.failure.ignore> 
         <spring.framework.version>3.1.0.BUILD-20110310181504</spring.framework.version>
     </properties>
     <profiles>
@@ -55,6 +52,11 @@
     </profiles>
     <dependencies>
         <!-- HQ Operation Service -->
+        <dependency>
+            <groupId>org.hyperic.hq</groupId>
+            <artifactId>hq-operations</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.hyperic.hq</groupId>
             <artifactId>hq-operation-service</artifactId>
@@ -81,6 +83,11 @@
             <version>${project.version}</version>
         </dependency>
         <!-- HQ -->
+        <dependency>
+            <groupId>org.hyperic.hq</groupId>
+            <artifactId>hq-pdk</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.hyperic.hq</groupId>
             <artifactId>hq-server</artifactId>
@@ -163,10 +170,8 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>org.springframework.test</artifactId>
-            <version>${spring.framework.version}</version>
-            <scope>provided</scope>
+            <version>${spring.framework.version}</version> 
         </dependency>
-        <!-- JSON -->
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
             <artifactId>jackson-core-asl</artifactId>
@@ -178,30 +183,13 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-        </dependency>
-
-        <!--<dependency>
+        </dependency> 
+        <dependency>
            <groupId>org.mockito</groupId>
            <artifactId>mockito-all</artifactId>
            <version>${mockito.version}</version>
            <scope>test</scope>
        </dependency>
-        <dependency>
-           <groupId>org.slf4j</groupId>
-           <artifactId>slf4j-api</artifactId>
-       </dependency>
-       <dependency>
-           <groupId>org.slf4j</groupId>
-           <artifactId>jcl-over-slf4j</artifactId>
-       </dependency>
-       <dependency>
-           <groupId>org.slf4j</groupId>
-           <artifactId>log4j-over-slf4j</artifactId>
-       </dependency>
-       <dependency>
-           <groupId>org.slf4j</groupId>
-           <artifactId>slf4j-simple</artifactId>
-       </dependency> -->
     </dependencies>
 
     <build>
@@ -223,6 +211,22 @@
                     <target>1.6</target>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.5</version>
+                <configuration>
+                    <includes>
+                        <include>**/*Test*.java</include>
+                    </includes>
+                    <excludes>
+                        <exclude>**/RoutingKeyTests.java</exclude>
+                        <exclude>**/*Benchmark*.java</exclude>
+                        <exclude>**/*Integration*.java</exclude>
+                        <exclude>**/*Abstract*.java</exclude>
+                    </excludes>
+                </configuration>
+            </plugin> 
         </plugins>
         <resources>
             <resource>

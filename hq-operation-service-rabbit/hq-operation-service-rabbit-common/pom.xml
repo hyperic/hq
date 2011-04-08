@@ -40,6 +40,11 @@
     <dependencies>
         <dependency>
             <groupId>org.hyperic.hq</groupId>
+            <artifactId>hq-operations</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hyperic.hq</groupId>
             <artifactId>hq-operation-service</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -96,7 +101,6 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
         </dependency>
-        <!-- Hyperic -->
         <dependency>
             <groupId>org.hyperic.hq</groupId>
             <artifactId>hq-pdk</artifactId>

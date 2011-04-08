@@ -3,7 +3,6 @@ package org.hyperic.hq.operation.rabbit.core;
 import org.hyperic.hq.operation.OperationDiscoverer;
 import org.hyperic.hq.operation.OperationDiscoveryException;
 import org.hyperic.hq.operation.OperationRegistry;
-import org.hyperic.hq.operation.OperationRoutingRegistry;
 import org.hyperic.hq.operation.annotation.Operation;
 import org.hyperic.hq.operation.annotation.OperationEndpoint;
 import org.hyperic.hq.operation.rabbit.util.DiscoveryValidator;

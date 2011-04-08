@@ -22,23 +22,33 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
+package org.hyperic.hq.operation.rabbit.core;
 
-package org.hyperic.hq.operation.rabbit.demo.ordering.servers;
-
-import org.hyperic.hq.operation.rabbit.core.SimpleAsyncResponseHandler;
+import org.hyperic.hq.operation.annotation.Operation;
+import org.hyperic.hq.operation.rabbit.util.OperationRouting;
 
 /**
- * Asynchronously Receives messages.
  * @author Helena Edelson
  */
-public class SimpleServerResponseHandler extends SimpleAsyncResponseHandler {
-
-    
+public interface RoutingRegistry {
+  
     /**
-     * Async message handler.
-     * @param message the message converted from byte[]
+     * Registers the routing mapping for the given operation
+     * @param operation The operation meta-data to map the exchangeName and routing key 
      */
-    public void handleMessage(String message) {
+    void register(Operation operation);
 
-    }
+    /**
+     *
+     * @param operation the operation
+     */
+    void create(final Operation operation);
+
+    /**
+     * Returns the routing data by operation name
+     * @param operationName The operation's name
+     * @return the specific mapping for a given operation
+     */
+    OperationRouting getMapping(String operationName);
+
 }

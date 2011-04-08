@@ -1,7 +1,6 @@
 package org.hyperic.hq.operation.rabbit.core;
 
 import org.hyperic.hq.operation.*;
-import org.hyperic.hq.operation.rabbit.mapping.AbstractRabbitOperationEntity;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -11,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author Helena Edelson
  */
-public class RabbitOperationEndpoint extends AbstractRabbitOperationEntity implements OperationRegistry, Handler, OperationSupported {
+public class RabbitOperationEndpoint extends AbstractRabbitOperationEntity implements OperationRegistry, Handler {
  
     private final Map<String, MethodInvoker> operationEndpoints = new ConcurrentHashMap<String, MethodInvoker>();
 
@@ -28,7 +27,8 @@ public class RabbitOperationEndpoint extends AbstractRabbitOperationEntity imple
      * @param endpointCandidate The instance to invoke the method on
      */
     public void register(String operationName, Method endpointMethod, Object endpointCandidate) {
-        this.operationEndpoints.put(operationName, new MethodInvoker(endpointMethod, endpointCandidate, this.converter));
+        if (!this.operationEndpoints.containsKey(operationName))
+            this.operationEndpoints.put(operationName, new MethodInvoker(endpointMethod, endpointCandidate, this.converter));
     }
 
     /**
@@ -37,6 +37,9 @@ public class RabbitOperationEndpoint extends AbstractRabbitOperationEntity imple
      * @throws EnvelopeHandlingException
      */
     public void handle(Envelope envelope) throws EnvelopeHandlingException {
+        if (!this.operationEndpoints.containsKey(envelope.getOperationName()))
+           throw new OperationNotSupportedException(envelope.getOperationName());
+
         MethodInvoker methodInvoker = this.operationEndpoints.get(envelope.getOperationName());
 
         try {
@@ -58,14 +61,4 @@ public class RabbitOperationEndpoint extends AbstractRabbitOperationEntity imple
             throw new EnvelopeHandlingException("Exception sending response to operation", e);
         }*/
     }
- 
-    /**
-     * Tests whether the operation has been registered with this registry
-     * This implementation supports query by type
-     * @param operation The operation name
-     * @return true if the operation name is a key in the handler's mapping, false if not
-     */
-    public boolean supports(OperationData operation) {
-       return this.operationEndpoints.containsKey(operation.getOperationName());
-    } 
 }

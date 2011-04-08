@@ -18,7 +18,7 @@ public class OperationNotSupportedException extends RuntimeException {
      * @param context The exception message
      */
     public OperationNotSupportedException(String context) {
-        super(context);
+        super(context + " is not supported.");
     }
 
     /**

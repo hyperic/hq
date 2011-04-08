@@ -1,10 +1,9 @@
 package org.hyperic.hq.operation.rabbit.core;
 
-import org.apache.log4j.Logger;
+import org.hyperic.hq.operation.Dispatcher;
 import org.hyperic.hq.operation.OperationData;
 import org.hyperic.hq.operation.OperationFailedException;
 import org.hyperic.hq.operation.OperationService;
-import org.hyperic.hq.operation.rabbit.connection.SingleConnectionFactory; 
 
 import java.io.IOException;
 
@@ -13,30 +12,25 @@ import java.io.IOException;
  */
 public class RabbitOperationService implements OperationService {
 
-    protected final Logger logger = Logger.getLogger(this.getClass());
 
     /**
      * Injection of template with pre-configured exchange and routing key
      */
     private RabbitTemplate rabbitTemplate;
 
+    private final Dispatcher dispatcher;
+
     /**
      * Used by non-Spring clients and guest credentials
      */
-    public RabbitOperationService() {
-        this(new SimpleRabbitTemplate(new SingleConnectionFactory()));
-    }
-
-    /**
-     * Used by the Server
-     * @param rabbitTemplate
-     */
-    public RabbitOperationService(RabbitTemplate rabbitTemplate) {
-        this.rabbitTemplate = rabbitTemplate;
+    public RabbitOperationService(Dispatcher dispatcher) {
+        this.dispatcher = dispatcher; 
     }
 
     //TODO add constructor w/credentials
-
+    /*       when(this.converter.write(context)).thenReturn("");
+        this.operationService.perform("test.operation.name", "0", context, this.operationStatusCallback);*/
+    
     /** 
      * @param operation The operation that should be performed. Based on the operation name,
      * the framework knows where to route it

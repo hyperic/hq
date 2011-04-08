@@ -1,16 +1,37 @@
+/*
+ * NOTE: This copyright does *not* cover user programs that use HQ
+ * program services by normal system calls through the application
+ * program interfaces provided as part of the Hyperic Plug-in Development
+ * Kit or the Hyperic Client Development Kit - this is merely considered
+ * normal use of the program, and does *not* fall under the heading of
+ * "derived work".
+ *
+ * Copyright (C) [2009-2010], VMware, Inc.
+ * This file is part of HQ.
+ *
+ * HQ is free software; you can redistribute it and/or modify
+ * it under the terms version 2 of the GNU General Public License as
+ * published by the Free Software Foundation. This program is distributed
+ * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ * USA.
+ */
 package org.hyperic.hq.operation.rabbit.core;
 
 import com.rabbitmq.client.*;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.operation.AbstractOperation;
 import org.hyperic.hq.operation.Converter;
 import org.hyperic.hq.operation.rabbit.connection.ChannelTemplate;
 import org.hyperic.hq.operation.rabbit.connection.SingleConnectionFactory;
 import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
-import org.hyperic.hq.operation.rabbit.mapping.RabbitBindingsRegistry;
 import org.hyperic.hq.operation.rabbit.util.MessageConstants;
-import org.hyperic.hq.operation.rabbit.util.Routings;
+import org.hyperic.hq.operation.rabbit.util.RoutingConstants;
 
 import java.io.IOException;
 import java.util.Random;
@@ -20,15 +41,13 @@ import java.util.Random;
  */
 public class SimpleRabbitTemplate implements RabbitTemplate {
 
-    protected final Log logger = LogFactory.getLog(this.getClass());
+    //protected final Log logger = LogFactory.getLog(this.getClass());
 
     private final Converter<Object, String> converter;
 
     private final ChannelTemplate channelTemplate;
 
-    private final Routings routings;
-
-    private final RabbitBindingsRegistry bindingsRegistry;
+    private final OperationToRoutingKeyRegistry bindingsRegistry;
 
     private final Object monitor = new Object();
 
@@ -55,37 +74,24 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
     }
 
     /**
-     * Creates an instance
+     * Creates a new instance that creates a connection and sends messages to a specific exchange
      * @param connectionFactory Used to create a connection to send messages on
      */
     public SimpleRabbitTemplate(ConnectionFactory connectionFactory) {
-        this(connectionFactory, null);
+        this(connectionFactory, RoutingConstants.DEFAULT_EXCHANGE);
     }
 
     /**
      * Creates a new instance that creates a connection and sends messages to a specific exchange
-     * @param connectionFactory Used to create a connection to send messages on
-     * @param exchangeName      The exchange name to use. May be null.
-     */
-    public SimpleRabbitTemplate(ConnectionFactory connectionFactory, String exchangeName) {
-        this(connectionFactory, null, exchangeName);
-    }
-
-    /**
-     * Creates a new instance that creates a connection and sends messages to a specific exchange
-     * @param cf           ConnectionFactory used to create a connection
-     * @param serverId     If a serverId exists it is used to initialize org.hyperic.hq.operation.rabbit.mapping.Routings
-     *                     and if not, a default server id is generated to initialize org.hyperic.hq.operation.rabbit.mapping.Routings.
+     * @param cf ConnectionFactory used to create a connection
      * @param exchangeName The exchange name to use. if null, uses the AMQP default
-     * @see org.hyperic.hq.operation.rabbit.util.Routings
      */
-    public SimpleRabbitTemplate(ConnectionFactory cf, String exchangeName, String serverId) {
+    public SimpleRabbitTemplate(ConnectionFactory cf, String exchangeName) {
         this.channelTemplate = new ChannelTemplate(cf);
         this.converter = new JsonMappingConverter();
-        this.routings = serverId != null ? new Routings(serverId) : new Routings();
         this.exchangeName = exchangeName != null ? exchangeName : "";
         this.usesNonGuestCredentials = !cf.getUsername().equals(defaultCredential) && !cf.getPassword().equals(defaultCredential);
-        this.bindingsRegistry = new RabbitBindingsRegistry(cf);
+        this.bindingsRegistry = new OperationToRoutingKeyRegistry(cf);
     }
 
     /**
@@ -102,12 +108,12 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
         publish(exchangeName, routingKey, data);
     }
 
-    private void publish(String exchangeName, String routingKey, Object data) throws IOException {
+    private void publish(String exchangeName, String routingKey, Object data) throws IOException { 
         byte[] bytes = this.converter.write(data).getBytes(MessageConstants.CHARSET);
 
         synchronized (this.monitor) {
             this.channel.basicPublish(exchangeName, routingKey, MessageConstants.DEFAULT_MESSAGE_PROPERTIES, bytes);
-            logger.debug("sent=" + data);
+            //logger.debug("sent=" + data);
         }
     }
 
@@ -129,7 +135,7 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
             while (true) {
                 GetResponse response = channel.basicGet(agentQueue, false);
                 if (response != null && response.getProps().getCorrelationId().equals(correlationId)) {
-                    this.logger.debug("received=" + response);
+                    //this.logger.debug("received=" + response);
                     Object received = this.converter.read(new String(response.getBody()), Object.class);
                     this.channel.basicAck(response.getEnvelope().getDeliveryTag(), false);
                     return received;
@@ -165,7 +171,7 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
         String correlationId = bp.getCorrelationId();
 
         synchronized (monitor) {
-            this.channel.basicPublish(routings.getToAgentExchange(), "test", bp, bytes);
+            this.channel.basicPublish(RoutingConstants.TO_AGENT_EXCHANGE, "test", bp, bytes);
             while (true) {
                 GetResponse response = channel.basicGet(agentQueue, false);
                 if (response != null && response.getProps().getCorrelationId().equals(correlationId)) {
@@ -184,7 +190,7 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
             try {
                 this.channel.close();
             } catch (IOException e) {
-                this.logger.error(e);
+                //this.logger.error(e);
             }
         }
     }

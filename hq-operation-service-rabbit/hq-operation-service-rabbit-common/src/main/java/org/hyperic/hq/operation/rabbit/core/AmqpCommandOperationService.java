@@ -33,7 +33,6 @@ import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.operation.OperationService;
 import org.hyperic.hq.operation.rabbit.util.OperationConstants;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Map;
@@ -42,6 +41,7 @@ import java.util.Map;
 /**
  * Created by the client factory on the server and AgentClient on the Agent.
  * Temporary to handle legacy command strategy.
+ * TODO complete overhaul
  * TODO error strategy
  * TODO route to agents.authToken.operation
  * @author Helena Edelson
@@ -50,7 +50,7 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
 
     protected final Log logger = LogFactory.getLog(this.getClass());
 
-    protected SimpleRabbitTemplate simpleRabbitTemplate;
+    protected RabbitTemplate rabbitTemplate;
 
     protected boolean unidirectional;
 
@@ -63,14 +63,6 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
      * The implementation for Server, Agent, and AgentHandler
      */
     protected AgentCommandsClient client;
-     
-    /**
-     * temporary: for the legacy Agent constructor
-     * @param client
-     */
-    public AmqpCommandOperationService(AgentCommandsClient client) {
-        this(new RabbitOperationService(), client, false);
-    }
 
     /**
      * Temporary: for the legacy Server constructor
@@ -82,44 +74,21 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
         this.operationService = operationService;
         this.unidirectional = agentUnidirectional;
         this.client = client;
-        this.simpleRabbitTemplate = new SimpleRabbitTemplate();
+        this.rabbitTemplate = new SimpleRabbitTemplate();// TODO add creds
     }
-
-    public SimpleRabbitTemplate getTemplate() {
-        return simpleRabbitTemplate;
-    }
-
-    /**
-     * The first to be overridden.
-     * Do we really need to return a duration during the transition?
-     * @return duration
-     * @see org.hyperic.hq.agent.client.AgentCommandsClient#ping()
+ 
+    /*
+     * TODO remove
      */
     public long ping() { 
-        logger.info("***.ping()");
-        if (unidirectional) return 0;
-
-        boolean valid = false;
-
-        try {
-            valid = simpleRabbitTemplate.hasValidConfigurations();
-        }
-        catch (Exception e) {
-            handleException(e, "ping");
-        }
-        return valid ? 1 : 0;
+        return 0;
     }
-
-    public void timedPing(int append) throws IOException, InterruptedException {
-        simpleRabbitTemplate.timedTest(append);
-    }
-
 
     public void restart() {
         try {
             client.restart();
         } catch (Exception e) {
-            handleException(e, OperationConstants.RESTART);
+            handleException(e, OperationConstants.OPERATION_NAME_AGENT_RESTART);
         }
     }
 
@@ -127,7 +96,7 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
         try {
             client.die();
         } catch (Exception e) {
-            handleException(e, OperationConstants.DIE);
+            handleException(e, OperationConstants.OPERATION_NAME_AGENT_DIE);
         }
     }
 
@@ -135,7 +104,7 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
         try {
             return client.getCurrentAgentBundle();
         } catch (Exception e) {
-            handleException(e, OperationConstants.GET_AGENT_BUNDLE);
+            handleException(e, OperationConstants.OPERATION_NAME_GET_AGENT_BUNDLE);
             return null;
         }
     }
@@ -144,7 +113,7 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
         try {
             return client.upgrade(tarFile, destination);
         } catch (Exception e) {
-            handleException(e, OperationConstants.UPGRADE);
+            handleException(e, OperationConstants.OPERATION_NAME_AGENT_UPGRADE);
             return null;
         }
     }
@@ -153,7 +122,7 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
         try {
             return client.agentSendFileData(destFiles, streams);
         } catch (Exception e) {
-            handleException(e, OperationConstants.SEND_FILE);
+            handleException(e, OperationConstants.OPERATION_NAME_SEND_FILE);
             return null;
         }
     }
@@ -162,7 +131,7 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
         try {
             return client.agentRemoveFile(files);
         } catch (Exception e) {
-            handleException(e, OperationConstants.REMOVE_FILE);
+            handleException(e, OperationConstants.OPERATION_NAME_REMOVE_FILE);
             return null;
         }
     }
@@ -173,26 +142,7 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
      * Currently, AgentRemoteException or AgentConnectionException can
      * be thrown from legacy implementations.
      */
-    protected void handleException(Throwable t, String operation) {
-        logger.error(t.getClass().getSimpleName() + " thrown while executing " + operation, t);
+    protected void handleException(Throwable t, String operationName) {
+        //todo
     }
-
-
-
-    /* if (unidirectional) return 0;
-        logger.info("***********.ping()");
-        long sendTime = System.currentTimeMillis();
-        long duration = 0;
-
-        try {
-
-            logger.info("Sending " + Operations.PING);
-            operationService.send(Operations.PING);
-            duration = System.currentTimeMillis() - sendTime;
-            logger.info("***********ping() executed, returning duration=" + duration);
-
-        } catch (Exception e) {
-            handleException(e, Operations.PING);
-        }
-        return duration;*/
 }

@@ -23,22 +23,27 @@
  * USA.
  */
 
-package org.hyperic.hq.operation.rabbit.demo.ordering.servers;
-
-import org.hyperic.hq.operation.rabbit.core.SimpleAsyncResponseHandler;
-
+package org.hyperic.hq.operation.rabbit.util;
+ 
 /**
- * Asynchronously Receives messages.
  * @author Helena Edelson
  */
-public class SimpleServerResponseHandler extends SimpleAsyncResponseHandler {
+public class OperationRouting {
 
-    
-    /**
-     * Async message handler.
-     * @param message the message converted from byte[]
-     */
-    public void handleMessage(String message) {
+    private final String exchangeName;
 
+    private final String value;
+
+    public OperationRouting(String exchangeName, String value) {
+        this.exchangeName = exchangeName;
+        this.value = value;
+    }
+
+    public String getExchangeName() {
+        return exchangeName;
+    }
+
+    public String getValue() {
+        return value;
     }
 }

@@ -3,8 +3,11 @@ package org.hyperic.hq.operation.rabbit.core;
 import org.hyperic.hq.operation.OperationDiscoverer;
 import org.hyperic.hq.operation.OperationDiscoveryException;
 import org.hyperic.hq.operation.OperationRegistry;
-import org.hyperic.hq.operation.OperationRoutingRegistry;
-import org.hyperic.hq.operation.rabbit.mapping.AbstractOperationValidator;
+import org.hyperic.hq.operation.annotation.Operation;
+import org.hyperic.hq.operation.annotation.OperationDispatcher;
+import org.hyperic.hq.operation.rabbit.util.DiscoveryValidator;
+
+import java.lang.reflect.Method;
 
 /**
  * Detects and maps operations and operation dispatchers to the messaging system
@@ -19,12 +22,11 @@ public class AnnotatedOperationDispatcherDiscoverer extends DiscoveryValidator i
      * @param operationRegistry The operationRegistry to register with
      * @throws OperationDiscoveryException
      */
-    public void discover(Object dispatcherCandidate, OperationRegistry operationRegistry, OperationRoutingRegistry routingRegistry) throws OperationDiscoveryException {
+    public void discover(Object dispatcherCandidate, OperationRegistry operationRegistry) throws OperationDiscoveryException {
         Class<?> candidateClass = dispatcherCandidate.getClass();
         if (candidateClass.isAnnotationPresent(OperationDispatcher.class)) {
             for (Method method : candidateClass.getDeclaredMethods()) {
                 if (method.isAnnotationPresent(Operation.class)) {
-                    register(routingRegistry, method.getAnnotation(Operation.class));
                     validateReturnType(method, dispatcherCandidate);
                     validateParameterTypes(method, dispatcherCandidate);
                     if (!method.isAccessible()) {
@@ -45,12 +47,4 @@ public class AnnotatedOperationDispatcherDiscoverer extends DiscoveryValidator i
     void register(OperationRegistry operationRegistry, Method method, Object dispatcher) {
         operationRegistry.register(method.getAnnotation(Operation.class).operationName(), method, dispatcher);
     }
-
-    /**
-     * @param routingRegistry the registry implementation to use
-     * @param operation the operation routing meta-data
-     */
-    void register(OperationRoutingRegistry routingRegistry, Operation operation) {
-        routingRegistry.register(operation);
-    }  
 }

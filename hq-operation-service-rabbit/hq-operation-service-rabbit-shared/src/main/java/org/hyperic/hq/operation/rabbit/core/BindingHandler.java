@@ -23,22 +23,18 @@
  * USA.
  */
 
-package org.hyperic.hq.operation.rabbit.demo.ordering.servers;
+package org.hyperic.hq.operation.rabbit.core;
 
-import org.hyperic.hq.operation.rabbit.core.SimpleAsyncResponseHandler;
+import org.hyperic.hq.operation.annotation.Operation;
+import org.hyperic.hq.operation.rabbit.connection.ChannelException;
 
 /**
- * Asynchronously Receives messages.
  * @author Helena Edelson
  */
-public class SimpleServerResponseHandler extends SimpleAsyncResponseHandler {
+public interface BindingHandler {
 
-    
-    /**
-     * Async message handler.
-     * @param message the message converted from byte[]
-     */
-    public void handleMessage(String message) {
+    void declareAndBind(Operation operation) throws ChannelException;
 
-    }
+    void declareAndBind(String operationName, String exchangeName, String bindingPattern) throws ChannelException;
+     
 }
