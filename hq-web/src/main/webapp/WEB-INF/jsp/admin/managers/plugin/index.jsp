@@ -4,295 +4,8 @@
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
 
-<style>
+<link rel="stylesheet" type="text/css" href="<spring:url value="/static/css/admin/managers/plugin/pluginMgr.css"/>" />
 
-	.mechanismOff{
-		border-bottom: 1px solid gray;
-	}
-
-	#selectedFileList{
-		border: 1px solid #CCCCCC;
-    	height: 100px;
-    	overflow-x: hidden;
-    	overflow-y: auto;
-    	width: 350px;
-    	text-align: left;
-	}
-	.fileToUploadClose{
-		width:10px;
-	}
-	
-	#selectedFileList table{
-		padding: 0px;
-		margin: 0px;
-	}
-        
-	.selectFileBtn{
-		-moz-border-radius: 4px 4px 4px 4px;
-	    background: url("<spring:url value="/images/4.0/backgrounds/button-green-background.jpg"/>") repeat-x scroll center bottom #2DBF3D;
-    	border: 1px solid #84B96D;
-	    color: #FFFFFF;
-	    font-size: 0.9em;
-	    font-weight: bold;
-	    padding: 3px 15px;
-	    width: 90px;
-	    height: 16px;
-	    float:right;
-	}
-	#uploadButtonBar{
-		text-align: right;
-	}
-
-	#pluginManagerPanel {
-		padding: 0.5em 1.5em;
-		width:90%;
-		min-width:400px;
-	}
-	
-	#pluginManagerPanel span a {
-		font-weight: bold;
-		text-decoration: none;
-	}
-	
-	#pluginManagerPanel h1 {
-		color: #444;
-		font-size: 1.5em;
-		font-weight: bold;
-		margin-bottom: 0.5em;
-	}
-	
-	#pluginManagerPanel .actionbar {
-		background: url("<spring:url value="/images/4.0/backgrounds/table_header_large.png"/>") repeat-x 0 0 transparent;
-		overflow: hidden;
-		border: 1px solid gray;
-		border-top: 0;
-	}
-	
-	#pluginManagerPanel .actionbar input[type="button"],
-	#uploadPanel input[type="submit"],
-	#confirmationPanel input[type="button"] {
-		margin-right: 0.5em;
-	}
-	
-	#pluginManagerPanel .actionbar input[type="button"]{
-		margin: 0.25em 1em;
-	}
-	
-	#pluginManagerPanel ul {
-		margin: 0;
-		padding: 0;
-		list-style: none;
-		background-color: #fff;
-		border: 1px solid gray;
-		border-top: 0;
-		border-bottom: 0;
-		overflow-y: scroll;
-		overflow-x: hidden;
-		height: 400px;
-	}
-
-	#pluginManagerPanel .gridheader {
-		background: url("<spring:url value="/images/4.0/backgrounds/table_header_large.png"/>") repeat-x 0 0 transparent;
-		overflow: hidden;
-		font-weight: bold;
-		font-size: 1.1em;
-		color: #444;
-		border: 1px solid gray;
-		border-bottom: 0;
-		height: 29px;
-	}
-	
-	#pluginManagerPanel .gridheader span.column {
-		padding-top: 0.25em;
-		padding-left: 0.5em;
-		height: 25px;	
-	}
-	
-	#pluginManagerPanel .gridrow {
-		overflow: hidden;
-	}
-	
-	#pluginManagerPanel .gridrow span.column {
-		padding: 0.5em 0;
-		padding-left: 0.5em;
-	}
-	
-	#pluginManagerPanel .gridrow span.first {
-		text-align: center;
-	}
-	
-	#pluginManagerPanel li.even {
-		background-color: #eee;
-	}
-	
-	#uploadPanel {
-		width: 400px;
-		text-align: left;
-	}
-
-	#removeErrorPanel, #confirmationPanel {
-		width: 400px;
-		text-align: left;
-	}
-	#removeErrorPanel div{
-		text-align: right;
-	}
-		
-	#uploadForm fieldset {
-		border: 0;
-	}
-	
-	#uploadForm div {
-		text-align: right;
-	}
-	
-	#confirmationPanel div {
-		text-align: right;
-	}
-	
-	#validationMessage {
-	    font-weight: bold;
-	}
-	
-	#progressMessage {
-	    font-weight: bold;
-	    margin-right: 1em;
-	}
-	
-	#progressMessage.information {
-	    color: #00bb00;
-	}
-	
-	#validationMessage.error,
-	#progressMessage.error{
-	    color: #bb0000;
-	}
-	#showUploadFormButton {
-		float:right;
-	}	
-	#showRemoveConfirmationButton{
-		float:left;
-	}
-	#pluginList .notFound{
-		color:red;
-	}
-	.agentStatusSpan{
-		color: #0066CC;
-		font-weight: bold;
-		height:50px;
-	}
-	.agentStatusSpan:focus,
-	.agentStatusSpan:hover{
-		color: #0066FF;
-	}
-	.errorAgentTip{
-		overflow:auto;
-	}
-	.errorAgentTitle{
-		font-weight: bold;
-		height:8px;
-	}
-	.topInfo, #currentTimeInfo{
-		font-weight: bold;
-		/* float: right;*/
-		height: 20px;
-		color: #777777;
-	}
-	.closeButton{
-		margin-right:5px;
-		float:right;
-		visibility:hidden;
-	}
-	#showStatusPanelDialog{
-		width: 505px;
-		height: 410px;
-		text-align: left;
-	}
-	
-	#statusButtonBar {
-		text-align: right;
-		vertical-align:bottom;
-	}
-	#agentList{
-		border: solid 1px;
-		border-color: #BBBBBB;
-		height: 290px;
-		overflow: auto;
-		margin: 10px;
-		padding: 0px 30px;
-		width:410px;
-	}
-	
-	.errorAgent{
-		list-style-image: url("<spring:url value="/images/icon_available_red.gif"/>");
-	}
-	.inProgressAgent{
-		list-style-image: url("<spring:url value="/images/4.0/icons/alert.png"/>");
-	}
-	#searchText{
-		background: url("<spring:url value="/images/4.0/icons/search.png"/>") no-repeat scroll 3px center #FFFFFF;
-		color: #444444;
-		padding: 0.25em 0.25em 0.25em 20px;
-		width:250px;
-	}
-	input[type="text"]{
-		margin:0.5em 0;
-	}
-	.selectInstruction{
-		font-weight:bold;
-		width:290px;
-		float:left;
-	}
-	#selectedFileList{
-		width:400px;
-	}
-	.uploaderInsideNode{
-	}
-	#selectFileBtn{
-		width:60px;
-		float:right;
-	}
-	.fileToUploadClose{
-		background: url("<spring:url value="/images/dash_movecontent_del-on.gif"/>") no-repeat scroll 5px center #FFFFFF
-	}
-	#afterSelectFileInstruction{
-		text-align:center;
-		color:#777777;
-	}
-	.mechanismOffInstruction{
-		background:yellow; 
-	}	
-	#loadingIcon{
-		width:15px;
-	}
-	.infoIcon{
-		width:12px;
-	}
-
-    #pluginManagerPanel .gridheader, #pluginManagerPanel .gridrow, 
-    	#pluginManagerPanel .actionbar, #pluginManagerPanel ul{
-    	min-width:980px;
-	}
-	.span-small{
-		width:10%;
-	}
-	.span-med{
-		width:15%;
-	}
-	.span-status{
-		min-width: 120px;
-		width:10%;
-	}
-	#selectFileButton{
-		width:60px;
-	}
-	#progressMessage{
-		float:left; 
-		margin:0px 100px; 
-		padding:5px 0px;
-	}
-
-</style>
 <section id="pluginManagerPanel" class="container top">
 	<h1><fmt:message key="admin.managers.plugin.title" /></h1>
 	<p id="instruction"><fmt:message key="${instruction}" /></p>
@@ -301,20 +14,20 @@
 		<span style="float:right;" id="refreshTimeInfo"><fmt:message key="admin.managers.Plugin.information.refresh.time"/> <span id="timeNow"></span>
 		</span>
 		<span style="float:right;">&nbsp;&nbsp;</span>
-		<img style="float:right;" id="refreshIcon" style="float:right;" src="<spring:url value="images/icon_info_small.gif" />" alt="refresh" /> 
+		<img style="float:right;" id="refreshIcon" style="float:right;" src="<spring:url value="/static/images/arrow_refresh.png" />" alt="refresh" /> 
 	</div>
 
 	<div class="topInfo">
 		<span id="agentInfo" style="float:right">
 			<fmt:message key="admin.managers.Plugin.information.agent.count"/>:&nbsp;
 		    <span id="agentInfoAllCount">${allAgentCount}</span>
-		    <img src="<spring:url value="/images/icon_info_small.gif"/>" class="infoIcon"/> <br/>
+		    <img src="<spring:url value="/static/images/icon_info_small.gif"/>" class="infoIcon" alt="info"/> <br/>
 		</span>
 	    <span style="float:left">
 	        <fmt:message key="admin.managers.Plugin.information.legend"/>
-	    	<img src="<spring:url value="/images/icon_available_green.gif"/>"/> <fmt:message key="admin.managers.Plugin.tip.icon.success"/>
-	    	&nbsp; <img src="<spring:url value="/images/4.0/icons/alert.png"/>"/> <fmt:message key="admin.managers.Plugin.tip.icon.in.progress"/>
-	   		&nbsp;<img src="<spring:url value="/images/icon_available_red.gif"/>"/> <fmt:message key="admin.managers.Plugin.tip.icon.error"/>
+	    	<img src="<spring:url value="/static/images/icon_available_green.gif"/>" alt="scuccessful"/> <fmt:message key="admin.managers.Plugin.tip.icon.success"/>
+	    	&nbsp; <img src="<spring:url value="/static/images/alert.png"/>" alt="in progress"/> <fmt:message key="admin.managers.Plugin.tip.icon.in.progress"/>
+	   		&nbsp;<img src="<spring:url value="/static/images/icon_available_red.gif"/>" alt="failure"/> <fmt:message key="admin.managers.Plugin.tip.icon.error"/>
 	    </span>		
 	</div>
 	
@@ -323,8 +36,10 @@
 		<span class="column span-small"><fmt:message key="admin.managers.plugin.column.header.product.plugin" /></span>
 		<span class="column span-med"><fmt:message key="admin.managers.plugin.column.header.version" /></span>
 		<span class="column span-med"><fmt:message key="admin.managers.plugin.column.header.jar.name" /></span>
-		<span class="column span-med" id="addedTimeHeader"><fmt:message key="admin.managers.plugin.column.header.initial.deploy.date" /><img src="/images/icon_info_small.gif" class="infoIcon"></span>
-		<span class="column span-med" id="updatedTimeHeader"><fmt:message key="admin.managers.plugin.column.header.last.sync.date" /><img src="/images/icon_info_small.gif" class="infoIcon"></span>
+		<span class="column span-med" id="addedTimeHeader"><fmt:message key="admin.managers.plugin.column.header.initial.deploy.date" />
+									<img src="<spring:url value="/static/images/icon_info_small.gif"/>" alt="info" class="infoIcon"></span>
+		<span class="column span-med" id="updatedTimeHeader"><fmt:message key="admin.managers.plugin.column.header.last.sync.date" />
+									<img src="<spring:url value="/static/images/icon_info_small.gif"/>" alt="info" class="infoIcon"></span>
 		<span class="column span-status"><fmt:message key="admin.managers.plugin.column.header.status" /></span>
 	</div>
 	
@@ -350,16 +65,18 @@
 				<span class="last column span-status" >
 					<c:if test="${pluginSummary.allAgentCount>0}">
 					    <c:if test="${pluginSummary.successAgentCount>0}">
-					    	${pluginSummary.successAgentCount}&nbsp;<img class="successIcon" src="<spring:url value="/images/icon_available_green.gif" />"/>&nbsp;&nbsp;
+					    	${pluginSummary.successAgentCount}&nbsp;<img class="successIcon" alt="successful" src="<spring:url value="/static/images/icon_available_green.gif" />"/>&nbsp;&nbsp;
 					    </c:if>
 					    
 					    <c:if test="${pluginSummary.inProgressAgentCount>0 ||pluginSummary.errorAgentCount>0 }">
 					    	<span id="${pluginSummary.name}_${pluginSummary.id}" class="agentStatusSpan">				    	
 							<c:if test="${pluginSummary.inProgressAgentCount>0}">
-						        ${pluginSummary.inProgressAgentCount}&nbsp;<img id="${pluginSummary.name}_${pluginSummary.id}" class="inProgressIcon" src="<spring:url value="/images/arrow_refresh.png"/>"/>&nbsp;&nbsp;
+						        ${pluginSummary.inProgressAgentCount}&nbsp;
+						        <img id="${pluginSummary.name}_${pluginSummary.id}" alt="in progress" class="inProgressIcon" src="<spring:url value="/static/images/alert.png"/>"/>&nbsp;&nbsp;
 						   	</c:if>	
 						   	<c:if test="${pluginSummary.errorAgentCount>0}">	   		
-					   			${pluginSummary.errorAgentCount}&nbsp;<img id="${pluginSummary.name}_${pluginSummary.id}" class="errorIcon" src="<spring:url value="/images/icon_available_red.gif"/>"/>
+					   			${pluginSummary.errorAgentCount}&nbsp;
+					   			<img id="${pluginSummary.name}_${pluginSummary.id}" alt="failure" class="errorIcon" src="<spring:url value="/static/images/icon_available_red.gif"/>"/>
 							</c:if>
 							</span>
 						</c:if>
@@ -422,7 +139,7 @@
 <div id="showStatusPanel" style="visibility:hidden;">
 	<div style="text-align:center; margin:0px;">
 		<input type="text" id="searchText"/>
-		<img id="loadingIcon" src="<spring:url value="/images/4.0/icons/ajax-loader-blue.gif"/>" style=""/>
+		<img id="loadingIcon" src="<spring:url value="/static/images/ajax-loader-blue.gif"/>" alt="loading"/>
 	</div>
 	<input type="hidden" id="pluginId"/>
 	<input type ="hidden" id="pluginName"/>
@@ -430,8 +147,9 @@
 	<ul id="agentList"></ul>
 	
 	<div id="statusButtonBar">
-	    <span style="float:left">&nbsp;&nbsp; <img src="/images/4.0/icons/alert.png"/> <fmt:message key="admin.managers.Plugin.tip.icon.in.progress"/>
-	   							  &nbsp;<img src="/images/icon_available_red.gif"/> <fmt:message key="admin.managers.Plugin.tip.icon.error"/>
+	    <span style="float:left">&nbsp;&nbsp; <fmt:message key="admin.managers.Plugin.information.legend"/>
+	    						  &nbsp;<img src="<spring:url value="/static/images/alert.png"/>" alt="in progress"/> <fmt:message key="admin.managers.Plugin.tip.icon.in.progress"/>
+	   							  &nbsp;<img src="<spring:url value="/static/images/icon_available_red.gif"/>" alt="failure"/> <fmt:message key="admin.managers.Plugin.tip.icon.error"/>
 	    </span>
 		<a href="#" class="cancelLink"><fmt:message key="admin.managers.plugin.button.close" /></a>
 	</div>
@@ -456,8 +174,7 @@
 		var timer = new hqDojox.timing.Timer();
 		timer.setInterval(120000);
 		timer.onTick = refreshPage;
-		
-		
+
 		uncheckCheckboxes();
 		updateTime();
 		resizeContent();
@@ -945,7 +662,8 @@
                 			if(summary.successAgentCount>0){
                 				statusSpan.innerHTML+=summary.successAgentCount+"&nbsp;";
    	            				hqDojo.create("img",{
-       	        					"src": "/images/icon_available_green.gif",
+       	        					"src": "<spring:url value="/static/images/icon_available_green.gif"/>",
+       	        					"alt": "successful",
        	        					"class": "successIcon"
            	    				}, statusSpan); 
            	    				statusSpan.innerHTML+="&nbsp;&nbsp;&nbsp;";
@@ -958,7 +676,8 @@
 	                		if (summary.inProgressAgentCount>0) {
 	                		    errorAgentSpan.innerHTML+=summary.inProgressAgentCount+"&nbsp;";
     	           				hqDojo.create("img",{
-        	       					"src": "/images/4.0/icons/alert.png",
+        	       					"src": "<spring:url value="/images/4.0/icons/alert.png"/>",
+        	       					"alt": "in progress",
         	       					"class": "inProgressIcon",
         	       					"id":summary.name+"_"+summary.id
 	        	       			}, errorAgentSpan);
@@ -967,7 +686,8 @@
 	                		if (summary.errorAgentCount > 0) {
                 				errorAgentSpan.innerHTML+= summary.errorAgentCount+"&nbsp;";
                 				hqDojo.create("img",{
-                					"src": "/images/icon_available_red.gif",
+                					"src": "<spring:url value="/images/icon_available_red.gif"/>",
+                					"alt": "failure",
                 					"class": "errorIcon",
                 					"id":summary.name+"_"+summary.id
                 				}, errorAgentSpan);
