@@ -613,14 +613,20 @@
                 	timer.start();
                 	hqDojo.empty("pluginList");
                 	var index = 1;
+                	
                 	hqDojo.forEach(response, function(summary) {
+                		var greyBackGround="";
+                		if(summary.deleted){
+                			greyBackGround = "background-color:grey;";
+                		}
                 		var li = hqDojo.create("li", {
-                			"class": "gridrow clear" + (((index) % 2 == 0) ? " even" : "")
+                			"class": "gridrow clear" + (((index) % 2 == 0) ? " even" : ""),
+                			"style": greyBackGround
                 		}, "pluginList");
                 		var span = hqDojo.create("span", {
                 			"class": "first column span-1"
                 		}, li);
-                		if(${mechanismOn}){
+                		if(${mechanismOn} && (summary.deleted!=false) ){
 	                		var input = hqDojo.create("input", {
     	            			"type": "checkbox",
     	            			"name": "deleteId",
