@@ -69,6 +69,14 @@ public class ResourceGroup
     public Set<Resource> getMembers() {
         return members;
     }
+    
+    public Set<Integer> getMemberIds() {
+        Set<Integer> memberIds = new HashSet<Integer>();
+        for(Resource member: members) {
+            memberIds.add(member.getId());
+        }
+        return memberIds;
+    }
 
     /**
      * 

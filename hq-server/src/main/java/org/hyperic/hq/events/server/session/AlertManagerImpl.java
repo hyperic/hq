@@ -438,11 +438,7 @@ public class AlertManagerImpl implements AlertManager,
         }
         Set<Integer> groupMembers = null;
         if(groupId != null) {
-            groupMembers = new HashSet<Integer>();
-            Collection<Resource> members = resourceGroupManager.getMembers(resourceGroupManager.findResourceGroupById(groupId));
-            for(Resource member: members) {
-                groupMembers.add(member.getId());
-            }
+            groupMembers = resourceGroupManager.findResourceGroupById(groupId).getMemberIds();
         }
         return alertRepository.findByCreateTimeAndPriority(endTime - timeRange, endTime, priority,
             inEsc, notFixed, groupMembers, alertDefId, sort);
@@ -475,11 +471,7 @@ public class AlertManagerImpl implements AlertManager,
         PageRequest pageRequest = new PageRequest(pageInfo.getPageNum(), pageInfo.getPageSize(), sort);
         Set<Integer> groupMembers = null;
         if(groupId != null) {
-            groupMembers = new HashSet<Integer>();
-            Collection<Resource> members = resourceGroupManager.getMembers(resourceGroupManager.findResourceGroupById(groupId));
-            for(Resource member: members) {
-                groupMembers.add(member.getId());
-            }
+            groupMembers = resourceGroupManager.findResourceGroupById(groupId).getMemberIds();
         }
         return alertRepository.findByCreateTimeAndPriority(endTime - timeRange, endTime, priority,
             inEsc, notFixed, groupMembers, alertDefId, pageRequest).getContent();
@@ -577,11 +569,7 @@ public class AlertManagerImpl implements AlertManager,
         endTime = TimingVoodoo.roundUpTime(endTime, 60000);
         Set<Integer> groupMembers = null;
         if(groupId != null) {
-            groupMembers = new HashSet<Integer>();
-            Collection<Resource> members = resourceGroupManager.getMembers(resourceGroupManager.findResourceGroupById(groupId));
-            for(Resource member: members) {
-                groupMembers.add(member.getId());
-            }
+            groupMembers = resourceGroupManager.findResourceGroupById(groupId).getMemberIds();
         }
         Number count = alertRepository.countByCreateTimeAndPriority(endTime - timeRange, endTime, 0,
             false, true, groupMembers, null);
