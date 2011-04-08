@@ -9,7 +9,11 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpSession;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatus;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatusEnum;
@@ -39,8 +43,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 @Controller
 @RequestMapping("/admin/managers/plugin")
@@ -210,6 +212,8 @@ public class PluginManagerController extends BaseController implements Applicati
         } catch (SessionTimeoutException e) {
             log.error(e,e);
         } catch (PermissionException e) {
+            log.error(e,e);
+        } catch (PluginDeployException e) {
             log.error(e,e);
         }
         
