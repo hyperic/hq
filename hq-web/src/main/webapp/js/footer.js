@@ -29,19 +29,21 @@ var browserH = 28;
 function setFoot() {
 	var footerContent = hqDojo.byId("footerContent");
 
-	footerContent.style.marginTop = "0px";
+	if (footerContent) {
+		footerContent.style.marginTop = "0px";
 
-	var WindowSize = {
-		width: window.innerWidth || (window.document.documentElement.clientWidth || window.document.body.clientWidth),
-		height: window.innerHeight || (window.document.documentElement.clientHeight || window.document.body.clientHeight)
-	};
+		var WindowSize = {
+			width: window.innerWidth || (window.document.documentElement.clientWidth || window.document.body.clientWidth),
+			height: window.innerHeight || (window.document.documentElement.clientHeight || window.document.body.clientHeight)
+		};
 	
-	winH = WindowSize.height;
-	conH = hqDojo.position("header").h + hqDojo.position("migContainer").h;
+		winH = WindowSize.height;
+		conH = hqDojo.position("header").h + hqDojo.position("migContainer").h;
 	
-	var myHeight = winH - conH - footerH + browserH;
+		var myHeight = winH - conH - footerH + browserH;
 	
-	if (myHeight > 0) {
-		footerContent.style.marginTop = myHeight + "px";
+		if (myHeight > 0) {
+			footerContent.style.marginTop = myHeight + "px";
+		}
 	}
 }
