@@ -174,8 +174,6 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         if (pm.hasAdminPermission(whoami.getId()) || resourceDao.findByOwner(whoami.getName()).contains(resource)) {
             resource.setOwner(newOwner.getName());
             resource.setModifiedBy(whoami.getName());
-            //TODO how to do a tx update?
-            //resourceDao.merge(resource);
         } else {
             throw new PermissionException("Only an owner or admin may " + "reassign ownership.");
         }

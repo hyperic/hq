@@ -285,8 +285,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 app.removeMember(resourceManager.findResourceById(o.getId()));
             }
         }
-        //TODO how to do a tx update?
-        //resourceGroupDao.merge(app);
     }
 
     /**

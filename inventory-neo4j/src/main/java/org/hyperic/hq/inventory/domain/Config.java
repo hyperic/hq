@@ -81,6 +81,7 @@ public class Config {
         graphDatabaseContext.removeNodeEntity(this);
     }
 
+    @Transactional("neoTxManager")
     public void setType(ConfigType configType) {
         // TODO can't do this in a detached env b/c relationship doesn't take
         // unless both items are node-backed

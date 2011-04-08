@@ -131,10 +131,11 @@ public class ServiceManagerImpl implements ServiceManager {
         //  .findResourceTypeByName(AuthzConstants.serverResType), server.getId(),
         //AuthzConstants.serverOpAddService);
         Resource s = new Resource(name, type);
-        resourceDao.persist(s);
         s.setDescription(desc);
         s.setModifiedBy(subject.getName());
         s.setLocation(location);
+        s.setOwner(subject.getName());
+        resourceDao.persist(s);
         s.setProperty(ServiceFactory.AUTO_INVENTORY_IDENTIFIER,name);
         s.setProperty(ServiceFactory.AUTO_DISCOVERY_ZOMBIE,false);
         s.setProperty(ServiceFactory.SERVICE_RT,false);
@@ -143,7 +144,6 @@ public class ServiceManagerImpl implements ServiceManager {
         s.setProperty(ServiceFactory.MODIFIED_TIME,System.currentTimeMillis());
         s.setProperty(AppdefResource.SORT_NAME, name.toUpperCase());
         s.setProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_SERVICE);
-        s.setOwner(subject.getName());
         agentRepository.findByManagedResource(parent.getId()).addManagedResource(s.getId());
         parent.relateTo(s, RelationshipTypes.SERVICE);
         parent.relateTo(s, RelationshipTypes.CONTAINS);
@@ -770,8 +770,6 @@ public class ServiceManagerImpl implements ServiceManager {
         Resource resource = resourceManager.findResourceById(svc.getId());
         resource.setModifiedBy(subject.getName());
         resource.setProperty(ServiceFactory.AUTO_DISCOVERY_ZOMBIE,zombieStatus);
-        //TODO how to do a tx update?
-        //resourceDao.merge(resource);
     }
     
     private void updateService(ServiceValue valueHolder, Resource service) {
@@ -783,8 +781,6 @@ public class ServiceManagerImpl implements ServiceManager {
         service.setModifiedBy( valueHolder.getModifiedBy() );
         service.setLocation( valueHolder.getLocation() );
         service.setName( valueHolder.getName() );
-        //TODO how to do a tx update?
-        //resourceDao.merge(service);
         Resource parent = service.getResourceTo(RelationshipTypes.SERVICE);
         if(valueHolder.getParent() != null && !(parent.getId().equals(valueHolder.getParent().getId()))) {
             service.removeRelationships(parent, RelationshipTypes.SERVICE);
@@ -863,8 +859,6 @@ public class ServiceManagerImpl implements ServiceManager {
                     // Just update it
                     if (!sinfo.getDescription().equals(serviceType.getDescription())) {
                         serviceType.setDescription(sinfo.getDescription());
-                        //TODO how to do a tx update?
-                        //resourceTypeDao.merge(serviceType);
                     }
 
                     //TODO  update platform association
@@ -955,9 +949,9 @@ public class ServiceManagerImpl implements ServiceManager {
     
     private ResourceType createServiceType(ServiceTypeInfo sinfo, String plugin) throws NotFoundException {
         ResourceType serviceType = new ResourceType(sinfo.getName());
+        serviceType.setDescription(sinfo.getDescription());
         resourceTypeDao.persist(serviceType);
         pluginRepository.findByName(plugin).addResourceType(serviceType.getId());
-        serviceType.setDescription(sinfo.getDescription());
         serviceType.addPropertyType(createServicePropertyType(ServiceFactory.AUTO_INVENTORY_IDENTIFIER,String.class));
         serviceType.addPropertyType(createServicePropertyType(ServiceFactory.CREATION_TIME,Long.class));
         serviceType.addPropertyType(createServicePropertyType(ServiceFactory.MODIFIED_TIME,Long.class));

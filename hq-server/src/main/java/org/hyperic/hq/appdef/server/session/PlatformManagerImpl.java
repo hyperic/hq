@@ -120,7 +120,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class PlatformManagerImpl implements PlatformManager {
     
-    static final String IP_RESOURCE_TYPE_NAME = "IP";
+    public static final String IP_RESOURCE_TYPE_NAME = "IP";
     
     private final Log log = LogFactory.getLog(PlatformManagerImpl.class.getName());
 
@@ -434,10 +434,11 @@ public class PlatformManagerImpl implements PlatformManager {
                               ResourceType type) 
     {
         Resource p = new Resource(pv.getName(), type);
-        resourceDao.persist(p);
         p.setDescription(pv.getDescription());
         p.setLocation(pv.getLocation());
         p.setModifiedBy(pv.getModifiedBy());
+        p.setOwner(owner.getName());
+        resourceDao.persist(p);
         p.setProperty(PlatformFactory.CERT_DN,pv.getCertdn());
         p.setProperty(PlatformFactory.COMMENT_TEXT,pv.getCommentText());
         p.setProperty(PlatformFactory.CPU_COUNT,pv.getCpuCount());
@@ -447,7 +448,6 @@ public class PlatformManagerImpl implements PlatformManager {
         p.setProperty(PlatformFactory.MODIFIED_TIME,System.currentTimeMillis());
         p.setProperty(AppdefResource.SORT_NAME, pv.getName().toUpperCase());
         agent.addManagedResource(p.getId());
-        p.setOwner(owner.getName());
         for (IpValue ipv : pv.getAddedIpValues()) {
             addIp(toPlatform(p), ipv.getAddress(), ipv.getNetmask(), ipv.getMACAddress());
         }
@@ -1517,8 +1517,6 @@ public class PlatformManagerImpl implements PlatformManager {
             // get the agent token and set the agent to the platform
             existing.getAgent().addManagedResource(platform.getId());
         }
-        //TODO how to do a tx update?
-        //resourceDao.merge(platform);
     }
 
     /**
@@ -1626,8 +1624,6 @@ public class PlatformManagerImpl implements PlatformManager {
          resource.setModifiedBy(owner);
          resource.setProperty(PlatformFactory.CPU_COUNT,aiplatform.getCpuCount());
          resource.setDescription(aiplatform.getDescription());
-         //TODO how to do a tx update?
-         //resourceDao.merge(resource);
     }
 
     /**
@@ -1861,8 +1857,6 @@ public class PlatformManagerImpl implements PlatformManager {
     private void updateIp(Resource ip, String netmask, String macAddress) {
         ip.setProperty(PlatformFactory.NETMASK,netmask);
         ip.setProperty(PlatformFactory.MAC_ADDRESS,macAddress);
-        //TODO how to do a tx update?
-        //resourceDao.merge(ip);
     }
 
     /**

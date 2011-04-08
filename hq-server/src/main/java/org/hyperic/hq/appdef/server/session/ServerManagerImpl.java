@@ -227,10 +227,11 @@ public class ServerManagerImpl implements ServerManager {
     private Resource create(AuthzSubject owner, ServerValue sv, Resource p)  {
         ResourceType st = resourceManager.findResourceTypeById(sv.getServerType().getId());
         Resource s = new Resource(sv.getName(), st);
-        resourceDao.persist(s);
         s.setDescription(sv.getDescription());
         s.setLocation(sv.getLocation());
         s.setModifiedBy(sv.getModifiedBy());
+        s.setOwner(owner.getName());
+        resourceDao.persist(s);
         s.setProperty(ServerFactory.INSTALL_PATH,sv.getInstallPath());
         String aiid = sv.getAutoinventoryIdentifier();
         if (aiid != null) {
@@ -250,7 +251,6 @@ public class ServerManagerImpl implements ServerManager {
         s.setProperty(ServerFactory.CREATION_TIME, System.currentTimeMillis());
         s.setProperty(ServerFactory.MODIFIED_TIME,System.currentTimeMillis());
         s.setProperty(AppdefResource.SORT_NAME, sv.getName().toUpperCase());
-        s.setOwner(owner.getName());
         agentRepository.findByManagedResource(p.getId()).addManagedResource(s.getId());
         return s;
    }
@@ -928,8 +928,6 @@ public class ServerManagerImpl implements ServerManager {
         server.setProperty(ServerFactory.AUTO_INVENTORY_IDENTIFIER, existing.getAutoinventoryIdentifier() );
         server.setProperty(ServerFactory.INSTALL_PATH, existing.getInstallPath() );
         server.setProperty(ServerFactory.SERVICES_AUTO_MANAGED, existing.getServicesAutomanaged() );
-        //TODO how to do a tx update?
-        //resourceDao.merge(server);
     }
 
     /**
@@ -1073,9 +1071,9 @@ public class ServerManagerImpl implements ServerManager {
     
     private ResourceType createServerResourceType(ServerTypeInfo sinfo, String plugin)  {
         ResourceType stype = new ResourceType(sinfo.getName());
+        stype.setDescription(sinfo.getDescription());
         resourceTypeDao.persist(stype);
         pluginRepository.findByName(plugin).addResourceType(stype.getId());
-        stype.setDescription(sinfo.getDescription());
        
         stype.addPropertyType(createServerPropertyType(ServerFactory.WAS_AUTODISCOVERED,Boolean.class));
         stype.addPropertyType(createServerPropertyType(ServerFactory.AUTO_INVENTORY_IDENTIFIER,String.class));

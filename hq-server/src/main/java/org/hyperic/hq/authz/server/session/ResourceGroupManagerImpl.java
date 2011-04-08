@@ -173,10 +173,11 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         }
         ResourceType groupType = resourceTypeDao.findByName(AppdefEntityConstants.getAppdefGroupTypeName(cInfo.getGroupTypeId()));
         ResourceGroup res = new ResourceGroup(cInfo.getName(), groupType,cInfo.isPrivateGroup());
-        resourceGroupDao.persist(res);
         res.setLocation(cInfo.getLocation());
         res.setDescription(cInfo.getDescription());
         res.setModifiedBy(whoami.getName());
+        resourceGroupDao.persist(res);
+       
         for(Resource resource : resources) {
             res.addMember(resource);
         }

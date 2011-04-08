@@ -577,6 +577,7 @@ public class Resource {
      * 
      * @param description The Resource description
      */
+    @Transactional("neoTxManager")
     public void setDescription(String description) {
         this.description = description;
     }
@@ -589,6 +590,7 @@ public class Resource {
      * 
      * @param location The Resource location
      */
+    @Transactional("neoTxManager")
     public void setLocation(String location) {
         this.location = location;
     }
@@ -597,6 +599,7 @@ public class Resource {
      * 
      * @param modifiedBy The user that last modified the Resource
      */
+    @Transactional("neoTxManager")
     public void setModifiedBy(String modifiedBy) {
         this.modifiedBy = modifiedBy;
     }
@@ -605,6 +608,7 @@ public class Resource {
      * 
      * @param name The name of the Resource
      */
+    @Transactional("neoTxManager")
     public void setName(String name) {
         this.name = name;
     }
@@ -613,6 +617,7 @@ public class Resource {
      * 
      * @param owner The owner of the Resource
      */
+    @Transactional("neoTxManager")
     public void setOwner(String owner) {
         this.owner = owner;
     }
@@ -660,7 +665,7 @@ public class Resource {
         messagePublisher.publishMessage(MessagePublisher.EVENTS_TOPIC, event);
         return oldValue;
     }
-
+    
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(getClass().getName()).append("[");

@@ -460,6 +460,7 @@ public class ResourceType {
      * 
      * @param description The ResourceType decscription
      */
+    @Transactional("neoTxManager")
     public void setDescription(String description) {
         this.description = description;
     }
