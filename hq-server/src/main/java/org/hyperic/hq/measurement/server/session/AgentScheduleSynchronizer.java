@@ -42,12 +42,11 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.mgmt.data.AgentRepository;
 import org.hyperic.hq.agent.mgmt.domain.Agent;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.authz.shared.ResourceManager;
-import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.shared.MeasurementProcessor;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.hq.zevents.Zevent;
@@ -69,8 +68,8 @@ public class AgentScheduleSynchronizer {
     private ZeventEnqueuer zEventManager;
 
     private AgentManager agentManager;
-
-    private ResourceManager resourceManager;
+    
+    private AgentRepository agentRepository;
 
     private final Map<Integer, Collection<AppdefEntityID>> scheduleAeids = new HashMap<Integer, Collection<AppdefEntityID>>();
 
@@ -88,12 +87,12 @@ public class AgentScheduleSynchronizer {
     public AgentScheduleSynchronizer(ZeventEnqueuer zEventManager, AgentManager agentManager,
                                      MeasurementProcessor measurementProcessor,
                                      ConcurrentStatsCollector concurrentStatsCollector,
-                                     ResourceManager resourceManager) {
+                                     AgentRepository agentRepository) {
         this.zEventManager = zEventManager;
         this.agentManager = agentManager;
         this.measurementProcessor = measurementProcessor;
         this.concurrentStatsCollector = concurrentStatsCollector;
-        this.resourceManager = resourceManager;
+        this.agentRepository = agentRepository;
     }
 
     @PostConstruct
@@ -144,19 +143,13 @@ public class AgentScheduleSynchronizer {
 
                 synchronized (scheduleAeids) {
                     for (AppdefEntityID id : toSchedule) {
-                        Resource resource = resourceManager.findResourceById(id.getId());
-                        // Resource may have been deleted while we are
-                        // processing this
-                        if (resource != null) {
-                            Collection<AppdefEntityID> tmp;
-                            int agentId = agentManager.getAgent(resource).getId();
-                             if (null == (tmp = scheduleAeids.get(agentId))) {
-                                    tmp = new HashSet<AppdefEntityID>();
-                                    scheduleAeids.put(agentId, tmp);
-                             }
-                             tmp.add(id);
-                           
+                        Collection<AppdefEntityID> tmp;
+                        int agentId = agentRepository.findByManagedResource(id.getId()).getId();
+                        if (null == (tmp = scheduleAeids.get(agentId))) {
+                            tmp = new HashSet<AppdefEntityID>();
+                            scheduleAeids.put(agentId, tmp);
                         }
+                        tmp.add(id); 
                     }
                 }
                 synchronized (unscheduleAeids) {
