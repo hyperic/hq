@@ -63,7 +63,7 @@ public class AvailabilityDataRepositoryImpl implements AvailabilityDataCustom {
         }
         String sql = new StringBuilder().append("SELECT m, min(rle.availVal),")
             .append(" max(rle.availVal),").append(" avg(rle.availVal),")
-            .append(" (cast(:endtime as long) - cast(:startime as long)) / m.interval, ").append(" sum(")
+            .append(" (:endtime  - :startime) / m.interval, ").append(" sum(")
             .append(TOTAL_UPTIME)
             .append("), ")
             .append(" sum(")
