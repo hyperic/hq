@@ -55,9 +55,7 @@
 		<property name="jpaDialect">
 			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaDialect" />
 		</property>
-		<property name="persistenceProvider">
-			<bean class="org.hyperic.hibernate.HibernateConfigHolder" />
-		</property>
+		<property name="persistenceProvider" ref="persistenceProvider"/>
 		<property name="persistenceUnitManager">
 			<bean
 				class="org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager">
@@ -65,6 +63,8 @@
 			</bean>
 		</property>
 	</bean>
+	
+	<bean id="persistenceProvider" class="org.hyperic.hibernate.HibernateConfigHolder" />
 
 	<bean class="org.springframework.orm.hibernate3.HibernateTemplate">
 		<constructor-arg ref="sessionFactory" />
