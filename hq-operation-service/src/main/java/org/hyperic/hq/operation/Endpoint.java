@@ -4,7 +4,7 @@ package org.hyperic.hq.operation;
  * TODO exeptions
  * @author Helena Edelson
  */
-public interface Handler {
+public interface Endpoint {
 
     /**
      * Handle this envelope

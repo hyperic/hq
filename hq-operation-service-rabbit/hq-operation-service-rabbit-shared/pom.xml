@@ -38,6 +38,12 @@
     <name>Hyperic Rabbit Operation Service Implementation</name>
  
     <dependencies>
+        <!-- Temporary-->
+        <dependency>
+            <groupId>org.hyperic.hq</groupId>
+            <artifactId>hq-pdk</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.hyperic.hq</groupId>
             <artifactId>hq-operation-service</artifactId>

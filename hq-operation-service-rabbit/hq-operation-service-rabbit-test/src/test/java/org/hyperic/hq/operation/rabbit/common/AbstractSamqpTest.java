@@ -2,6 +2,7 @@ package org.hyperic.hq.operation.rabbit.common;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
@@ -13,6 +14,7 @@ import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
 /**
  * @author Helena Edelson
  */
+@Ignore
 public class AbstractSamqpTest {
     protected SimpleMessageListenerContainer requestListener;
 

@@ -1,7 +1,6 @@
 package org.hyperic.hq.operation.rabbit.shared;
 
-import org.hyperic.hq.operation.rabbit.util.OperationConstants;
-import org.hyperic.hq.operation.rabbit.util.RoutingConstants;
+import org.hyperic.hq.operation.rabbit.util.Constants;
 import org.junit.Ignore;
 
 import java.net.InetAddress;
@@ -39,10 +38,10 @@ public final class Routings {
      * @param serverId
      */
     public Routings(String serverId) {
-        this.agentOperations = OperationConstants.AGENT_OPERATIONS;
-        this.serverOperations = OperationConstants.SERVER_OPERATIONS;
-        this.agentRoutingKeyPrefix = RoutingConstants.AGENT_ROUTING_KEY_PREFIX;
-        this.serverPrefix = RoutingConstants.SERVER_ROUTING_KEY_PREFIX + serverId;
+        this.agentOperations = Constants.AGENT_OPERATIONS;
+        this.serverOperations = Constants.SERVER_OPERATIONS;
+        this.agentRoutingKeyPrefix = Constants.AGENT_ROUTING_KEY_PREFIX;
+        this.serverPrefix = Constants.SERVER_ROUTING_KEY_PREFIX + serverId;
         this.defaultToAgentBindingKey = agentRoutingKeyPrefix + "";
         this.defaultToServerBindingKey = agentRoutingKeyPrefix + "";
     }
@@ -95,15 +94,15 @@ public final class Routings {
     }
 
     public String getSharedExchangeType() {
-        return RoutingConstants.SHARED_EXCHANGE_TYPE;
+        return Constants.SHARED_EXCHANGE_TYPE;
     }
 
     public String getOperationRequest() {
-        return RoutingConstants.OPERATION_REQUEST;
+        return Constants.OPERATION_REQUEST;
     }
 
     public String getOperationResponse() {
-        return RoutingConstants.OPERATION_RESPONSE;
+        return Constants.OPERATION_RESPONSE;
     }
 
     public String getOperationPrefix() {
@@ -111,18 +110,18 @@ public final class Routings {
     }
 
     public String getToServerUnauthenticatedExchange() {
-        return RoutingConstants.TO_SERVER_EXCHANGE;
+        return Constants.TO_SERVER_EXCHANGE;
     }
 
     public String getToServerExchange() {
-        return RoutingConstants.TO_SERVER_AUTHENTICATED_EXCHANGE;
+        return Constants.TO_SERVER_AUTHENTICATED_EXCHANGE;
     }
 
     public String getToAgentUnauthenticatedExchange() {
-        return RoutingConstants.TO_AGENT_EXCHANGE;
+        return Constants.TO_AGENT_EXCHANGE;
     }
 
     public String getToAgentExchange() {
-        return RoutingConstants.TO_AGENT_AUTHENTICATED_EXCHANGE;
+        return Constants.TO_AGENT_AUTHENTICATED_EXCHANGE;
     } 
 }

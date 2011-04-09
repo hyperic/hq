@@ -5,7 +5,7 @@ import org.junit.Test;
 /**
  * @author Helena Edelson
  */
-public class HandlerTests {
+public class EndpointTests {
 
     @Test
     public void placeholder() {

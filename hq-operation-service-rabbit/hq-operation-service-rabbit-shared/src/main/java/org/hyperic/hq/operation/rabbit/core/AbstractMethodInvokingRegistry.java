@@ -1,0 +1,155 @@
+/*
+ * NOTE: This copyright does *not* cover user programs that use HQ
+ * program services by normal system calls through the application
+ * program interfaces provided as part of the Hyperic Plug-in Development
+ * Kit or the Hyperic Client Development Kit - this is merely considered
+ * normal use of the program, and does *not* fall under the heading of
+ * "derived work".
+ *
+ * Copyright (C) [2009-2010], VMware, Inc.
+ * This file is part of HQ.
+ *
+ * HQ is free software; you can redistribute it and/or modify
+ * it under the terms version 2 of the GNU General Public License as
+ * published by the Free Software Foundation. This program is distributed
+ * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ * USA.
+ */
+package org.hyperic.hq.operation.rabbit.core;
+
+import com.rabbitmq.client.ConnectionFactory;
+import org.hyperic.hq.operation.*;
+import org.hyperic.hq.operation.annotation.Operation;
+import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * @author Helena Edelson
+ */
+public abstract class AbstractMethodInvokingRegistry implements OperationRegistry, OperationDiscoverer {
+
+    /**
+     * Will consist of either dispatchers or endpoints
+     */
+    protected final Map<String, MethodInvoker> operationMappings = new ConcurrentHashMap<String, MethodInvoker>();
+
+    protected final RoutingRegistry routingRegistry;
+
+    protected final RabbitTemplate rabbitTemplate;
+
+    protected final Converter<Object, String> converter;
+
+
+    public AbstractMethodInvokingRegistry(ConnectionFactory connectionFactory) {
+        this(connectionFactory, new JsonMappingConverter(), new OperationToRoutingKeyRegistry(connectionFactory));
+    }
+
+    public AbstractMethodInvokingRegistry(ConnectionFactory connectionFactory, Converter<Object, String> converter,
+                                          RoutingRegistry routingRegistry) {
+        this.rabbitTemplate = new SimpleRabbitTemplate(connectionFactory);
+        this.converter = converter;
+        this.routingRegistry = routingRegistry;
+    }
+
+
+    abstract public void discover(Object candidate);
+
+    abstract public boolean validArguments(String operationName, String exchangeName, String value);
+ 
+    /**
+     * Discovers, evaluates, validates and registers candidates.
+     * @param candidate  the dispatcher candidate class
+     * @param annotation the annotation to test
+     * @throws org.hyperic.hq.operation.OperationDiscoveryException
+     *
+     */
+    public void discover(Object candidate, Class<? extends Annotation> annotation) throws OperationDiscoveryException {
+        Class<?> candidateClass = candidate.getClass();
+        if (candidateClass.isAnnotationPresent(annotation)) {
+            for (Method method : candidateClass.getDeclaredMethods()) {
+                if (method.isAnnotationPresent(Operation.class)) { 
+                    if (!method.isAccessible()) method.setAccessible(true);
+                    register(method, candidate, annotation);
+                }
+            }
+        }
+    }
+
+    /**
+     * Registers a method as operation with a Registry for future dispatch.
+     * Registers dispatchers and delegates to RoutingRegistry for further work.
+     * @param method    the method
+     * @param candidate the candidate instance
+     */
+    public void register(Method method, Object candidate, Class<? extends Annotation> annotation) {
+        if (!this.operationMappings.containsKey(method.getAnnotation(Operation.class).operationName())) {
+            this.operationMappings.put(method.getAnnotation(Operation.class).operationName(), new MethodInvoker(method, candidate, this.converter));
+            this.routingRegistry.register(method.getAnnotation(Operation.class));
+        }
+    }
+
+    /**
+     * Checks whether the operation is supported, if so returns the value
+     * from the map for invocation.
+     * @param operationName the potential key
+     * @return if supported returns the MethodInvoker of type OperationDispatcher or OperationEndpoint,
+     * if not, throws and OperationNotSupportedException
+     */
+    public MethodInvoker map(String operationName) {
+        if (!this.operationMappings.containsKey(operationName)) throw new OperationNotSupportedException(operationName);
+        return this.operationMappings.get(operationName);
+    }
+
+    public Map<String, MethodInvoker> getOperationMappings() {
+        return operationMappings;
+    }
+
+    public static final class MethodInvoker {
+
+        private final Converter<Object,String> converter;
+
+        private final Method method;
+
+        private final Object instance;
+
+        private final String operationName;
+
+        public MethodInvoker(Method method, Object instance, Converter<Object,String> converter) {
+            this.method = method;
+            this.instance = instance; 
+            this.converter = converter;
+            this.operationName = method.getAnnotation(Operation.class).operationName();
+        }
+
+        /**
+         * @param context
+         * @return the result of dispatching the method represented by this object
+         * @throws IllegalAccessException
+         * @throws InvocationTargetException
+         */
+        public Object invoke(String context) throws IllegalAccessException, InvocationTargetException {
+            Object data = this.converter.read(context, this.method.getParameterTypes()[0]);
+            return this.method.invoke(this.instance, data);
+        }
+
+        @Override
+        public String toString() {
+            return new StringBuilder("operationName=").append(this.operationName).append(" method=").append(this.method)
+                    .append(" instance=").append(this.instance).append(" converter=").append(this.converter).toString();
+        }
+    }
+
+
+}

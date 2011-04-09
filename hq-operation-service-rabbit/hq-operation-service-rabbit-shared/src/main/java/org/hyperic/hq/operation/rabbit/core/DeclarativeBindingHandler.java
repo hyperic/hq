@@ -31,7 +31,7 @@ import org.hyperic.hq.operation.annotation.Operation;
 import org.hyperic.hq.operation.rabbit.connection.ChannelCallback;
 import org.hyperic.hq.operation.rabbit.connection.ChannelException;
 import org.hyperic.hq.operation.rabbit.connection.ChannelTemplate;
-import org.hyperic.hq.operation.rabbit.util.RoutingConstants;
+import org.hyperic.hq.operation.rabbit.util.Constants;
 
 import java.io.IOException;
 
@@ -52,7 +52,18 @@ public class DeclarativeBindingHandler implements BindingHandler {
      * @param operation the operaton meta-data
      */
     public void declareAndBind(final Operation operation) throws ChannelException {
-         declareAndBind(operation.operationName(), operation.exchangeName(), operation.value());
+        Channel channel = this.channelTemplate.createChannel();
+        String exchange = getExchangeType(operation.exchangeName());
+        try {
+            channel.exchangeDeclare(exchange, Constants.SHARED_EXCHANGE_TYPE, true, false, null);
+            String queue = channel.queueDeclare(operation.operationName(), true, true, false, null).getQueue();
+            channel.queueBind(queue, operation.exchangeName(), operation.value());
+        } catch (IOException e) {
+            throw new ChannelException(e.getMessage());
+        } finally {
+            this.channelTemplate.releaseResources(channel);
+        }
+        //declareAndBind(operation.operationName(), operation.exchangeName(), operation.value());
     }
 
     public void declareAndBind(final String operationName, final String exchangeName, final String bindingPattern) throws ChannelException {
@@ -60,7 +71,7 @@ public class DeclarativeBindingHandler implements BindingHandler {
             public Object doInChannel(Channel channel) throws ChannelException {
                 try {
                     String exchange = getExchangeType(exchangeName);
-                    channel.exchangeDeclare(exchange, RoutingConstants.SHARED_EXCHANGE_TYPE, true, false, null);
+                    channel.exchangeDeclare(exchange, Constants.SHARED_EXCHANGE_TYPE, true, false, null);
                     String queue = channel.queueDeclare(operationName, true, true, false, null).getQueue();
                     channel.queueBind(queue, exchange, bindingPattern);
                     return true;
@@ -70,13 +81,13 @@ public class DeclarativeBindingHandler implements BindingHandler {
             }
         });
     }
-  
+
     /**
      * If the exchangeType is null, returns the default, "topic"
      * @param exchangeType direct, fanout, topic, header. Can be null.xxx
      * @return String exchange type
      */
     private String getExchangeType(String exchangeType) {
-        return exchangeType != null ? exchangeType : RoutingConstants.SHARED_EXCHANGE_TYPE;
+        return exchangeType != null ? exchangeType : Constants.SHARED_EXCHANGE_TYPE;
     }
 }

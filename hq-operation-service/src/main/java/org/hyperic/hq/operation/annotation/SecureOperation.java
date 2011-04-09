@@ -37,7 +37,7 @@ import java.lang.annotation.*;
 @Operation
 public @interface SecureOperation {
 
-    String operationName();
+    String operationName() default "";
 
     String exchangeName() default "";
 

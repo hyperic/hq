@@ -27,12 +27,8 @@ package org.hyperic.hq.operation.annotation;
 
 import java.lang.annotation.*;
 
-/**
- * Stereotype annotation indicating that a class can be delegated to as a Messaging Endpoint
- * @author Helena Edelson
- */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME) 
-@Documented 
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
 public @interface OperationDispatcher {
 }

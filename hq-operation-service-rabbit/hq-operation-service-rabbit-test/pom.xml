@@ -202,7 +202,7 @@
                 <groupId>com.atlassian.maven.plugins</groupId>
                 <artifactId>maven-clover2-plugin</artifactId>
             </plugin>
-            <plugin>
+            <!--<plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.1</version>
@@ -210,7 +210,7 @@
                     <source>1.6</source>
                     <target>1.6</target>
                 </configuration>
-            </plugin>
+            </plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -219,11 +219,11 @@
                     <includes>
                         <include>**/*Test*.java</include>
                     </includes>
-                    <excludes>
-                        <exclude>**/RoutingKeyTests.java</exclude>
+                    <excludes> 
+                        <exclude>**/RoutingKey*.java</exclude>
                         <exclude>**/*Benchmark*.java</exclude>
                         <exclude>**/*Integration*.java</exclude>
-                        <exclude>**/*Abstract*.java</exclude>
+                        <exclude>**/Abstract*.java</exclude>
                     </excludes>
                 </configuration>
             </plugin> 

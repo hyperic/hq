@@ -49,8 +49,7 @@ public final class ChannelTemplate implements ChannelOperations {
      * @param connectionFactory {@link com.rabbitmq.client.ConnectionFactory}
      */
     public ChannelTemplate(com.rabbitmq.client.ConnectionFactory connectionFactory) {
-        this.connectionFactory = connectionFactory;
-        validateConnection();
+        this.connectionFactory = connectionFactory; 
     }
 
     /**
@@ -126,7 +125,7 @@ public final class ChannelTemplate implements ChannelOperations {
 
         try {
             channel.close();
-            closeConnection(channel.getConnection());
+            //closeConnection(channel.getConnection());
         }
         catch (IOException e) {
             logger.debug("Connection is already closed.", e);

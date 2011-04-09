@@ -28,9 +28,8 @@ import com.rabbitmq.client.ConnectionFactory;
 import org.hyperic.hq.operation.OperationNotSupportedException;
 import org.hyperic.hq.operation.annotation.Operation;
 import org.hyperic.hq.operation.rabbit.connection.ChannelTemplate;
-import org.hyperic.hq.operation.rabbit.util.OperationConstants;
+import org.hyperic.hq.operation.rabbit.util.Constants;
 import org.hyperic.hq.operation.rabbit.util.OperationRouting;
-import org.hyperic.hq.operation.rabbit.util.RoutingConstants;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -78,7 +77,7 @@ public class OperationToRoutingKeyRegistry implements RoutingRegistry {
 
     }
 
-    public OperationRouting getMapping(String operationName) {
+    public OperationRouting map(String operationName) {
         if (!this.operationToRoutingKeyMappings.containsKey(operationName)) throw new OperationNotSupportedException(operationName);
         return this.operationToRoutingKeyMappings.get(operationName);
     }
@@ -109,8 +108,8 @@ public class OperationToRoutingKeyRegistry implements RoutingRegistry {
      */
     private List<String> createAgentOperationRoutingKeys(final String agentToken) {
         List<String> keys = new ArrayList<String>();
-        for (String operation : OperationConstants.AGENT_OPERATIONS) {
-            keys.add(new StringBuilder(RoutingConstants.AGENT_ROUTING_KEY_PREFIX)
+        for (String operation : Constants.AGENT_OPERATIONS) {
+            keys.add(new StringBuilder(Constants.AGENT_ROUTING_KEY_PREFIX)
                     .append(agentToken).append(OPERATION_PREFIX).append(operation).toString());
         }
         return keys;
@@ -118,8 +117,8 @@ public class OperationToRoutingKeyRegistry implements RoutingRegistry {
 
     private List<String> createServerOperationRoutingKeys() {
         List<String> keys = new ArrayList<String>();
-        for (String operation : OperationConstants.SERVER_OPERATIONS) {
-            keys.add(new StringBuilder(RoutingConstants.SERVER_ROUTING_KEY_PREFIX + this.serverId).append(OPERATION_PREFIX).append(operation).toString());
+        for (String operation : Constants.SERVER_OPERATIONS) {
+            keys.add(new StringBuilder(Constants.SERVER_ROUTING_KEY_PREFIX + this.serverId).append(OPERATION_PREFIX).append(operation).toString());
         }
         return keys;
     }

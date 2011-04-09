@@ -32,18 +32,18 @@ public class OperationRouting {
 
     private final String exchangeName;
 
-    private final String value;
+    private final String routingKey;
 
-    public OperationRouting(String exchangeName, String value) {
+    public OperationRouting(String exchangeName, String routingKey) {
         this.exchangeName = exchangeName;
-        this.value = value;
+        this.routingKey = routingKey;
     }
 
     public String getExchangeName() {
         return exchangeName;
     }
 
-    public String getValue() {
-        return value;
+    public String getRoutingKey() {
+        return routingKey;
     }
 }

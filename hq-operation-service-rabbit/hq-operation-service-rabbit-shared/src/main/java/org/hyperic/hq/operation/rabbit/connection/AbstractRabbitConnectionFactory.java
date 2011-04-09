@@ -31,7 +31,6 @@ import com.rabbitmq.client.ConnectionFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -69,7 +68,7 @@ abstract class AbstractRabbitConnectionFactory extends ConnectionFactory {
         setPassword(password);
     }
 
-    @PreDestroy
+    // no spring agent yet @PreDestroy
     final void closeConnection() {
         synchronized (this.monitor) {
             for (Connection connection : this.connections.values()) {

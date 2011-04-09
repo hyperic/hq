@@ -100,12 +100,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.hyperic.hq</groupId>
-            <artifactId>hq-pdk</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+        </dependency> 
     </dependencies>
 
     <build>

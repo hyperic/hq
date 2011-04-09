@@ -49,6 +49,6 @@ public interface RoutingRegistry {
      * @param operationName The operation's name
      * @return the specific mapping for a given operation
      */
-    OperationRouting getMapping(String operationName);
+    OperationRouting map(String operationName);
 
 }

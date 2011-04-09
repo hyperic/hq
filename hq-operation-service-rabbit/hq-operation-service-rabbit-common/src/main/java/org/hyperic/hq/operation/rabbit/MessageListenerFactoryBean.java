@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.hq.operation.rabbit.handler;
+package org.hyperic.hq.operation.rabbit;
 
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;

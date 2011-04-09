@@ -25,13 +25,16 @@
 package org.hyperic.hq.operation.rabbit.core;
 
 import com.rabbitmq.client.*;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.operation.AbstractOperation;
 import org.hyperic.hq.operation.Converter;
+import org.hyperic.hq.operation.rabbit.connection.ChannelException;
 import org.hyperic.hq.operation.rabbit.connection.ChannelTemplate;
 import org.hyperic.hq.operation.rabbit.connection.SingleConnectionFactory;
 import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
+import org.hyperic.hq.operation.rabbit.util.Constants;
 import org.hyperic.hq.operation.rabbit.util.MessageConstants;
-import org.hyperic.hq.operation.rabbit.util.RoutingConstants;
 
 import java.io.IOException;
 import java.util.Random;
@@ -41,7 +44,7 @@ import java.util.Random;
  */
 public class SimpleRabbitTemplate implements RabbitTemplate {
 
-    //protected final Log logger = LogFactory.getLog(this.getClass());
+    protected final Log logger = LogFactory.getLog(this.getClass());
 
     private final Converter<Object, String> converter;
 
@@ -78,7 +81,7 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
      * @param connectionFactory Used to create a connection to send messages on
      */
     public SimpleRabbitTemplate(ConnectionFactory connectionFactory) {
-        this(connectionFactory, RoutingConstants.DEFAULT_EXCHANGE);
+        this(connectionFactory, Constants.DEFAULT_EXCHANGE);
     }
 
     /**
@@ -113,7 +116,7 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
 
         synchronized (this.monitor) {
             this.channel.basicPublish(exchangeName, routingKey, MessageConstants.DEFAULT_MESSAGE_PROPERTIES, bytes);
-            //logger.debug("sent=" + data);
+            logger.debug("sent=" + data);
         }
     }
 
@@ -135,7 +138,7 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
             while (true) {
                 GetResponse response = channel.basicGet(agentQueue, false);
                 if (response != null && response.getProps().getCorrelationId().equals(correlationId)) {
-                    //this.logger.debug("received=" + response);
+                    this.logger.debug("received=" + response);
                     Object received = this.converter.read(new String(response.getBody()), Object.class);
                     this.channel.basicAck(response.getEnvelope().getDeliveryTag(), false);
                     return received;
@@ -171,11 +174,11 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
         String correlationId = bp.getCorrelationId();
 
         synchronized (monitor) {
-            this.channel.basicPublish(RoutingConstants.TO_AGENT_EXCHANGE, "test", bp, bytes);
+            this.channel.basicPublish(Constants.TO_AGENT_EXCHANGE, "test", bp, bytes);
             while (true) {
                 GetResponse response = channel.basicGet(agentQueue, false);
-                if (response != null && response.getProps().getCorrelationId().equals(correlationId)) {
-                    //this.logger.debug("received=" + this.converter.toObject(new String(response.getBody()), Object.class));
+                if (response.getProps().getCorrelationId().equals(correlationId)) {
+                    this.logger.debug("received=" + this.converter.read(new String(response.getBody()), Object.class));
                     break;
                 }
             }
@@ -190,7 +193,7 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
             try {
                 this.channel.close();
             } catch (IOException e) {
-                //this.logger.error(e);
+                throw new ChannelException(e);
             }
         }
     }

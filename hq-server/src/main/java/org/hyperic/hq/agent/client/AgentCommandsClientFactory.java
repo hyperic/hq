@@ -25,10 +25,10 @@
 
 package org.hyperic.hq.agent.client;
 
-import org.hyperic.hq.operation.rabbit.core.AmqpCommandOperationService;
-import org.hyperic.hq.rabbit.OperationService;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.bizapp.agent.client.SecureAgentConnection;
+import org.hyperic.hq.operation.OperationService;
+import org.hyperic.hq.operation.rabbit.core.AmqpCommandOperationService;
 import org.hyperic.hq.transport.AgentProxyFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
