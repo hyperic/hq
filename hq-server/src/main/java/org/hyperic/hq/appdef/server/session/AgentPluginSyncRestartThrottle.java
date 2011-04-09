@@ -212,7 +212,7 @@ public class AgentPluginSyncRestartThrottle {
                 final PluginManager pm = Bootstrap.getBean(PluginManager.class);
                 for (final Integer agentId : restartFailures) {
                     if (debug) log.debug("invalidating restart status for agentId=" + agentId);
-                    pm.updateAgentPluginSyncStatusInNewTran(
+                    pm.updateAgentPluginSyncStatus(
                         agentId, AgentPluginStatusEnum.SYNC_IN_PROGRESS, AgentPluginStatusEnum.SYNC_FAILURE);
                 }
             }

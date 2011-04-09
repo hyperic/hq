@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -87,18 +88,14 @@ implements AgentPluginUpdater, ApplicationListener<ContextRefreshedEvent>, Appli
         } if (removeMap == null) {
             removeMap = Collections.emptyMap();
         }
+        pluginManager.updateAgentPluginSyncStatus(
+            AgentPluginStatusEnum.SYNC_IN_PROGRESS, updateMap, removeMap);
         final AgentManager agentManager = Bootstrap.getBean(AgentManager.class);
         final Set<Integer> agentIds = new HashSet<Integer>();
         agentIds.addAll(updateMap.keySet());
         agentIds.addAll(removeMap.keySet());
         for (final Integer agentId : agentIds) {
             final Collection<Plugin> plugins = updateMap.get(agentId);
-            // SYNC_SUCCESS is set on the status when in AgentPluginSyncRestartThrottle,
-            // after the agent restarts
-            if (plugins != null) {
-                pluginManager.updateAgentPluginSyncStatusInNewTran(
-                    AgentPluginStatusEnum.SYNC_IN_PROGRESS, agentId, plugins);
-            }
 // XXX create a spring managed prototype instead of an anon class
             final AgentDataTransferJob job =
                 getPluginSyncJob(agentId, plugins, removeMap.get(agentId), agentManager);
@@ -170,39 +167,50 @@ implements AgentPluginUpdater, ApplicationListener<ContextRefreshedEvent>, Appli
         };
     }
 
-    public void queuePluginRemoval(final Integer agentId, final Collection<String> pluginFileNames) {
-        if (isDisabled() || agentId == null || pluginFileNames == null || pluginFileNames.isEmpty()) {
+    public void queuePluginRemoval(Map<Integer, Collection<String>> agentToFileNames) {
+        if (agentToFileNames == null || agentToFileNames.isEmpty()) {
             return;
         }
-        final AgentDataTransferJob job = new AgentDataTransferJob() {
-            public String getJobDescription() {
-                return AGENT_PLUGIN_REMOVE;
-            }
-            public int getAgentId() {
-                return agentId;
-            }
-            public void execute() {
-                final AgentManager agentManager = Bootstrap.getBean(AgentManager.class);
-                // NOTE: AgentPluginStatus objects are removed when the agent restarts and
-                // doesn't check in a Plugin
-                pluginManager.updateAgentPluginStatusByFileNameInNewTran(
-                    AgentPluginStatusEnum.SYNC_IN_PROGRESS, agentId, pluginFileNames);
-                try {
-                    final Map<String, Boolean> result =
-                        agentManager.agentRemovePlugins(overlord, agentId, pluginFileNames);
-                    // only reboot the agent if we actually removed a plugin
-                    for (Boolean res : result.values()) {
-                        if (res.booleanValue()) {
-                            agentPluginSyncRestartThrottle.restartAgent(agentId);
-                        }
+        pluginManager.updateAgentPluginSyncStatus(
+            AgentPluginStatusEnum.SYNC_IN_PROGRESS, null, agentToFileNames);
+        for (final Entry<Integer, Collection<String>> entry : agentToFileNames.entrySet()) {
+            final Integer agentId = entry.getKey();
+            final Collection<String> pluginFileNames = entry.getValue();
+            final AgentRemovePluginTransferJob job =
+                new AgentRemovePluginTransferJob(agentId, pluginFileNames);
+            agentSynchronizer.addAgentJob(job);
+        }
+    }
+    
+    private class AgentRemovePluginTransferJob implements AgentDataTransferJob {
+        private Integer agentId;
+        private Collection<String> pluginFileNames;
+        private AgentRemovePluginTransferJob(Integer agentId, Collection<String> pluginFileNames) {
+            this.agentId = agentId;
+            this.pluginFileNames = pluginFileNames;
+        }
+        public String getJobDescription() {
+            return AGENT_PLUGIN_REMOVE;
+        }
+        public int getAgentId() {
+            return agentId;
+        }
+        public void execute() {
+            final AgentManager agentManager = Bootstrap.getBean(AgentManager.class);
+            try {
+                final Map<String, Boolean> result =
+                    agentManager.agentRemovePlugins(overlord, agentId, pluginFileNames);
+                // only reboot the agent if we actually removed a plugin
+                for (Boolean res : result.values()) {
+                    if (res.booleanValue()) {
+                        agentPluginSyncRestartThrottle.restartAgent(agentId);
                     }
-                } catch (Exception e) {
-                    throw new SystemException("error removing pluginFiles=" + pluginFileNames +
-                                              " from agentId=" + agentId, e);
                 }
+            } catch (Exception e) {
+                throw new SystemException("error removing pluginFiles=" + pluginFileNames +
+                                          " from agentId=" + agentId, e);
             }
-        };
-        agentSynchronizer.addAgentJob(job);
+        }
     }
 
     public void setApplicationContext(ApplicationContext ctx) throws BeansException {

@@ -1333,12 +1333,18 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
 
     private void processRemainingStatuses(Map<String, AgentPluginStatus> statusByFileName,
                                           Map<Integer, Collection<Plugin>> updateMap, Agent agent) {
+        final Map<String, Long> map = agentPluginStatusDAO.getFileNameCounts();
         for (final Entry<String, AgentPluginStatus> entry: statusByFileName.entrySet()) {
             final String filename = entry.getKey();
             final AgentPluginStatus status = entry.getValue();
             final Plugin plugin = pluginDAO.getByFilename(filename);
-            if (plugin == null) {
+            if (plugin == null || plugin.isDeleted()) {
                 agentPluginStatusDAO.remove(status);
+                // if no more agents have this plugin then remove it
+                final Long num = map.get(filename);
+                if (num == null || num <= 1) {
+                    pluginDAO.remove(plugin);
+                }
             } else {
                 setPluginToUpdate(updateMap, agent.getId(), plugin);
             }
@@ -1530,7 +1536,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
             final Collection<Plugin> plugins = new HashSet<Plugin>(list.size());
             for (AgentPluginStatus s : list) {
                 final Plugin plugin = pluginsByName.get(s.getPluginName());
-                if (plugin == null) {
+                if (plugin == null || plugin.isDeleted()) {
                     addToRemoveMap(removeMap, agent, s.getFileName());
                     continue;
                 }

@@ -141,9 +141,11 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         final Collection<Plugin> plugins = pluginDAO.getPluginsByFileNames(pluginFileNames);
         removePluginsAndAssociatedResources(subj, plugins);
         final AgentPluginUpdater agentPluginUpdater = Bootstrap.getBean(AgentPluginUpdater.class);
+        final Map<Integer, Collection<String>> toRemove = new HashMap<Integer, Collection<String>>(agents.size());
         for (final Agent agent : agents) {
-            agentPluginUpdater.queuePluginRemoval(agent.getId(), pluginFileNames);
+            toRemove.put(agent.getId(), pluginFileNames);
         }
+        agentPluginUpdater.queuePluginRemoval(toRemove);
         deletePluginFiles(pluginFileNames);
     }
 
@@ -155,8 +157,6 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
                     monitorableTypeDAO.findByPluginName(plugin.getName());
                 resourceManager.removeResourcesAndTypes(subj, map.values());
                 plugin.setDeleted(true);
-// XXX [HHQ-4708] this is a stop-gap until the task is implemented
-pluginDAO.remove(plugin);
             }
         }
     }
@@ -464,9 +464,9 @@ pluginDAO.remove(plugin);
         return agentPluginStatusDAO.getOutOfSyncPluginNamesByAgentId(agentId);
     }
      
-    @Transactional(propagation=Propagation.REQUIRES_NEW, readOnly=false)
-    public void updateAgentPluginSyncStatusInNewTran(Integer agentId, AgentPluginStatusEnum from,
-                                                     AgentPluginStatusEnum to) {
+    @Transactional(readOnly=false)
+    public void updateAgentPluginSyncStatus(Integer agentId, AgentPluginStatusEnum from,
+                                            AgentPluginStatusEnum to) {
         final Collection<Plugin> plugins = pluginDAO.findAll();
         final Map<String, AgentPluginStatus> statusMap =
             agentPluginStatusDAO.getStatusByAgentId(agentId);
@@ -481,10 +481,67 @@ pluginDAO.remove(plugin);
             status.setLastSyncStatus(to.toString());
         }
     }
-     
+
+    @Transactional(readOnly=false)
+    public void updateAgentPluginSyncStatus(AgentPluginStatusEnum status,
+                                            Map<Integer, Collection<Plugin>> agentToPlugins,
+                                            Map<Integer, Collection<String>> agentToFileNames) {
+        if (agentToPlugins == null) {
+            agentToPlugins = Collections.emptyMap();
+        }
+        if (agentToFileNames == null) {
+            agentToFileNames = Collections.emptyMap();
+        }
+        if (agentToPlugins.isEmpty() && agentToFileNames.isEmpty()) {
+            return;
+        }
+        final long now = System.currentTimeMillis();
+        final Set<Integer> agentIds = new HashSet<Integer>(agentToPlugins.keySet());
+        agentIds.addAll(agentToFileNames.keySet());
+        final Map<Integer, Map<String, AgentPluginStatus>> statusMap =
+            agentPluginStatusDAO.getStatusByAgentIds(agentIds);
+        for (final Entry<Integer, Collection<Plugin>> entry : agentToPlugins.entrySet()) {
+            final Integer agentId = entry.getKey();
+            final Map<String, AgentPluginStatus> map = statusMap.get(agentId);
+            if (map == null) {
+                continue;
+            }
+            final Collection<Plugin> plugins = entry.getValue();
+            updateStatuses(agentId, plugins, map, now, status);
+        }
+        for (final Entry<Integer, Collection<String>> entry : agentToFileNames.entrySet()) {
+            final Integer agentId = entry.getKey();
+            final Map<String, AgentPluginStatus> map = statusMap.get(agentId);
+            if (map == null) {
+                continue;
+            }
+            final Collection<String> filenames = entry.getValue();
+            final Collection<Plugin> plugins = pluginDAO.getPluginsByFileNames(filenames);
+            updateStatuses(agentId, plugins, map, now, status);
+        }
+    }
+
+    private void updateStatuses(Integer agentId, Collection<Plugin> plugins,
+                                Map<String, AgentPluginStatus> map, long now,
+                                AgentPluginStatusEnum s) {
+        final String inProgress = AgentPluginStatusEnum.SYNC_IN_PROGRESS.toString();
+        for (final Plugin plugin : plugins) {
+            final AgentPluginStatus status = map.get(plugin.getName());
+            if (status == null) {
+                continue;
+            }
+            if (!status.getLastSyncStatus().equals(inProgress)
+                    && s == AgentPluginStatusEnum.SYNC_IN_PROGRESS) {
+                status.setLastSyncAttempt(now);
+            }
+            status.setLastSyncStatus(s.toString());
+        }
+    }
+
     @Transactional(propagation=Propagation.REQUIRES_NEW, readOnly=false)
     public void updateAgentPluginSyncStatusInNewTran(AgentPluginStatusEnum s, Integer agentId,
                                                      Collection<Plugin> plugins) {
+        final String inProgress = AgentPluginStatusEnum.SYNC_IN_PROGRESS.toString();
         if (plugins == null) {
             plugins = pluginDAO.findAll();
         }
@@ -503,23 +560,7 @@ pluginDAO.remove(plugin);
                 continue;
             }
             // only setLastSyncAttempt if it changes from !"in progress" to "in progress"
-            if (!status.getLastSyncStatus().equals(AgentPluginStatusEnum.SYNC_IN_PROGRESS.toString())
-                    && s == AgentPluginStatusEnum.SYNC_IN_PROGRESS) {
-                status.setLastSyncAttempt(now);
-            }
-            status.setLastSyncStatus(s.toString());
-        }
-    }
-
-    @Transactional(propagation=Propagation.REQUIRES_NEW, readOnly=false)
-    public void updateAgentPluginStatusByFileNameInNewTran(AgentPluginStatusEnum s, Integer agentId,
-                                                           Collection<String> pluginFileNames) {
-        final Collection<AgentPluginStatus> statuses =
-            agentPluginStatusDAO.getStatusByAgentAndFileNames(agentId, pluginFileNames);
-        final long now = System.currentTimeMillis();
-        for (final AgentPluginStatus status: statuses) {
-            // only setLastSyncAttempt if it changes from !"in progress" to "in progress"
-            if (!status.getLastSyncStatus().equals(AgentPluginStatusEnum.SYNC_IN_PROGRESS.toString())
+            if (!status.getLastSyncStatus().equals(inProgress)
                     && s == AgentPluginStatusEnum.SYNC_IN_PROGRESS) {
                 status.setLastSyncAttempt(now);
             }

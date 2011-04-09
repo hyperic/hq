@@ -48,6 +48,6 @@ public interface AgentPluginUpdater {
      * queues a plugin for removal from the the specified agent and removes the associated
      * {@link AgentPluginStatus} object
      */
-    public void queuePluginRemoval(Integer agentId, Collection<String> pluginFileNames);
+    public void queuePluginRemoval(Map<Integer, Collection<String>> agentToFileNames);
 
 }

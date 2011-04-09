@@ -31,6 +31,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.hibernate.Hibernate;
 import org.hibernate.SQLQuery;
@@ -186,9 +187,9 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
                            .list();
     }
 
-    @SuppressWarnings("unchecked")
     public Map<String, AgentPluginStatus> getStatusByAgentId(Integer agentId) {
         final String hql = "from AgentPluginStatus where agent.id = :agentId";
+        @SuppressWarnings("unchecked")
         final Collection<AgentPluginStatus> list =
             getSession().createQuery(hql)
                         .setParameter("agentId", agentId)
@@ -197,6 +198,30 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
             new HashMap<String, AgentPluginStatus>(list.size());
         for (final AgentPluginStatus status : list) {
             rtn.put(status.getPluginName(), status);
+        }
+        return rtn;
+    }
+
+    public Map<Integer, Map<String, AgentPluginStatus>> getStatusByAgentIds(Collection<Integer> agentIds) {
+        if (agentIds == null || agentIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        final String hql = "from AgentPluginStatus where agent.id in (:agentIds)";
+        @SuppressWarnings("unchecked")
+        final Collection<AgentPluginStatus> list =
+            getSession().createQuery(hql)
+                        .setParameterList("agentIds", agentIds, new IntegerType())
+                        .list();
+        final Map<Integer, Map<String, AgentPluginStatus>> rtn =
+            new HashMap<Integer, Map<String, AgentPluginStatus>>(list.size());
+        for (final AgentPluginStatus status : list) {
+            final Integer agentId = status.getAgent().getId();
+            Map<String, AgentPluginStatus> map = rtn.get(status.getAgent().getId());
+            if (map == null) {
+                map = new HashMap<String, AgentPluginStatus>();
+                rtn.put(agentId, map);
+            }
+            map.put(status.getPluginName(), status);
         }
         return rtn;
     }
@@ -319,6 +344,17 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
                 continue;
             }
             rtn.put(agent, status);
+        }
+        return rtn;
+    }
+
+    public Map<String, Long> getFileNameCounts() {
+        final String hql = "select fileName, count(*) from AgentPluginStatus group by fileName";
+        @SuppressWarnings("unchecked")
+        final List<Object[]> list = getSession().createQuery(hql).list();
+        final Map<String, Long> rtn = new HashMap<String, Long>(list.size());
+        for (final Object[] obj : list) {
+            rtn.put((String) obj[0], ((Number) obj[1]).longValue());
         }
         return rtn;
     }
