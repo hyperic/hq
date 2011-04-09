@@ -831,11 +831,10 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             }
             res.add(resource.getId());
         }
-        List<Measurement> ids = measurementRepository.findAvailabilityMeasurementsByResources(res);
-        // may be null if measurements have not been configured
-        if (ids == null) {
+        if(res.isEmpty()) {
             return Collections.emptyMap();
         }
+        List<Measurement> ids = measurementRepository.findAvailabilityMeasurementsByResources(res);
         for (Measurement m : ids) {
             rtn.put(m.getResource(), Collections.singletonList(m));
         }
