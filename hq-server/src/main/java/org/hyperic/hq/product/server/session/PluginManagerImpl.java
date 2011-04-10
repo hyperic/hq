@@ -530,7 +530,8 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
             if (status == null) {
                 continue;
             }
-            if (!status.getLastSyncStatus().equals(inProgress)
+            final String lastSyncStatus = status.getLastSyncStatus();
+            if ((lastSyncStatus == null || !lastSyncStatus.equals(inProgress))
                     && s == AgentPluginStatusEnum.SYNC_IN_PROGRESS) {
                 status.setLastSyncAttempt(now);
             }
