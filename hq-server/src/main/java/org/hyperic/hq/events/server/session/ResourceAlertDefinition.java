@@ -120,7 +120,9 @@ public class ResourceAlertDefinition
             value.addTrigger(t.getRegisteredTriggerValue());
         }
         value.cleanTrigger();
-        value.setParentId(resourceTypeAlertDefinition.getId());
+        if(resourceTypeAlertDefinition != null) {
+            value.setParentId(resourceTypeAlertDefinition.getId());
+        }
         return value;
     }
 
