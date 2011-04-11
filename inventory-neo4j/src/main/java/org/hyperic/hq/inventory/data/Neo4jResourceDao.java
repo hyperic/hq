@@ -9,7 +9,6 @@ import javax.annotation.PostConstruct;
 
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
-import org.hyperic.hq.inventory.NotUniqueException;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.IndexHits;
@@ -122,8 +121,7 @@ public class Neo4jResourceDao implements ResourceDao {
         return new PageImpl<Resource>(resources, pageInfo, indexHits.size());
     }
 
-    // TODO Assumes name is unique...I think we want to change that behavior in
-    // the product
+    // TODO Get rid of assumption that name is unique and use identifier
     @Transactional(value="neoTxManager",readOnly = true)
     public Resource findByName(String name) {
         Resource resource = resourceFinder.findByPropertyValue(null, "name", name);
@@ -182,10 +180,6 @@ public class Neo4jResourceDao implements ResourceDao {
 
     @Transactional("neoTxManager")
     public void persist(Resource resource) {
-        if (findByName(resource.getName()) != null) {
-            throw new NotUniqueException("Resource with name " + resource.getName() +
-                                         " already exists");
-        }
         resource.persist();
         //TODO meaningful id
         resource.setId(resource.getNodeId().intValue());

@@ -427,10 +427,4 @@ public class ResourceIntegrationTest {
     public void testGetConfigInvalidType() {
         assertNull(traderJoes.getConfig("Measurement"));
     }
-
-    @Test(expected = NotUniqueException.class)
-    public void testPersistResourceAlreadyExists() {
-        resourceDao.persist(new Resource("Trader Joes", store));
-    }
-
 }
