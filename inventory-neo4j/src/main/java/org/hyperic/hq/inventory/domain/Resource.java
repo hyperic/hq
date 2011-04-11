@@ -47,7 +47,7 @@ public class Resource {
     @Autowired
     private transient GraphDatabaseContext graphDatabaseContext;
 
- // TODO unique ID string instead of number
+    // TODO unique ID string instead of number
     @GraphProperty
     private Integer id;
 
@@ -259,18 +259,25 @@ public class Resource {
      */
     public Map<String, Object> getProperties(boolean includeHidden) {
         Map<String, Object> properties = new HashMap<String, Object>();
+        // TODO perf tradeoff of hidden properties
         for (String key : getPersistentState().getPropertyKeys()) {
             if (!(includeHidden)) {
-                PropertyType propType = type.getPropertyType(key);
-                if (propType != null && propType.isHidden()) {
-                    continue;
-                }
+                // PropertyType propType = type.getPropertyType(key);
+                // if (propType != null && propType.isHidden()) {
+                // continue;
+                // }
             }
-            try {
+            // filter out the properties we've defined at class-level, like
+            // name
+            if (!(key.equals("location")) && !(key.equals("name")) &&
+                !(key.equals("description")) && !(key.equals("modifiedBy")) &&
+                !(key.equals("owner")) && !(key.equals("id")) && !(key.equals("privateGroup"))) {
+                // try {
                 properties.put(key, getProperty(key));
-            } catch (IllegalArgumentException e) {
+                // } catch (IllegalArgumentException e) {
                 // filter out the properties we've defined at class-level, like
                 // name
+                // }
             }
         }
         return properties;
@@ -284,16 +291,19 @@ public class Resource {
      *         {@link ResourceType}
      */
     public Object getProperty(String key) {
-        PropertyType propertyType = type.getPropertyType(key);
-        if (propertyType == null) {
-            throw new IllegalArgumentException("Property " + key +
-                                               " is not defined for resource of type " +
-                                               type.getName());
-        }
+        // TODO set default values when Resource created
+        // PropertyType propertyType = type.getPropertyType(key);
+        // if (propertyType == null) {
+        // throw new IllegalArgumentException("Property " + key +
+        // " is not defined for resource of type " +
+        // type.getName());
+        // }
+
         try {
             return getPersistentState().getProperty(key);
         } catch (NotFoundException e) {
-            return propertyType.getDefaultValue();
+            return "";
+            // return propertyType.getDefaultValue();
         }
     }
 
@@ -638,16 +648,18 @@ public class Resource {
             // default value
             throw new IllegalArgumentException("Null property values are not allowed");
         }
-        PropertyType propertyType = type.getPropertyType(key);
-        if (propertyType == null) {
-            throw new IllegalArgumentException("Property " + key +
-                                               " is not defined for resource of type " +
-                                               type.getName());
-        }
-        if (propertyType.getPropertyValidator() != null) {
-            // TODO validation
-            // propertyType.getPropertyValidator().validate()
-        }
+        // TODO maybe set properties and indexes up front and validate that way.
+        // This call is very expensive in initial import
+        // PropertyType propertyType = type.getPropertyType(key);
+        // if (propertyType == null) {
+        // throw new IllegalArgumentException("Property " + key +
+        // " is not defined for resource of type " +
+        // type.getName());
+        // }
+        // if (propertyType.getPropertyValidator() != null) {
+        // TODO validation
+        // propertyType.getPropertyValidator().validate()
+        // }
         Object oldValue = null;
         try {
             oldValue = getPersistentState().getProperty(key);
@@ -655,17 +667,17 @@ public class Resource {
             // could be first time
         }
         getPersistentState().setProperty(key, value);
-        if (propertyType.isIndexed()) {
-
+        // if (propertyType.isIndexed()) {
+        if (key.equals("AppdefTypeId") || key.equals("mixed") || key.equals("groupEntResType")) {
             graphDatabaseContext.getIndex(Resource.class, null).add(getPersistentState(), key,
                 value);
         }
-        
+
         CPropChangeEvent event = new CPropChangeEvent(getId(), key, oldValue, value);
         messagePublisher.publishMessage(MessagePublisher.EVENTS_TOPIC, event);
         return oldValue;
     }
-    
+
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(getClass().getName()).append("[");
