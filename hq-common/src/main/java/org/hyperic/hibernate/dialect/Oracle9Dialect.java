@@ -185,4 +185,8 @@ public class Oracle9Dialect
     public String getMetricDataHint() {
         return "";
     }
+    
+    public boolean requiresCast() {
+        return false;
+    }
 }
