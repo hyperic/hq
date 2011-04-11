@@ -552,7 +552,7 @@ public class PlatformManagerTest
     public void testCreatePlatformType() throws NotFoundException {
         String platformTypeName = "platformType";
         PlatformType pType = platformManager.createPlatformType(platformTypeName,
-            BaseInfrastructureTest.TEST_PLUGIN_NAME);
+            testPlugin);
         assertEquals(pType.getName(), platformTypeName);
         assertEquals(pType.getPlugin(), BaseInfrastructureTest.TEST_PLUGIN_NAME);
         assertEquals(resourceManager.findResourceTypeById(pType.getId()).getName(),

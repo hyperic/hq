@@ -84,6 +84,7 @@ import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.plugin.mgmt.data.PluginRepository;
+import org.hyperic.hq.plugin.mgmt.domain.Plugin;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.hq.product.ServiceTypeInfo;
 import org.junit.After;
@@ -146,6 +147,8 @@ abstract public class BaseInfrastructureTest {
     
     @Autowired
     private PluginRepository pluginRepository;
+    
+    protected Plugin testPlugin;
 
     //The test plugin is automatically deployed when the integration test starts
     protected static final String TEST_PLUGIN_NAME="test";
@@ -157,6 +160,7 @@ abstract public class BaseInfrastructureTest {
 
     @Before
     public void before() {
+        this.testPlugin = pluginRepository.findByName(TEST_PLUGIN_NAME);
         startTime = System.nanoTime();
         logger.debug("****** Test starting ******");
     }
@@ -246,7 +250,7 @@ abstract public class BaseInfrastructureTest {
         serverTypeInfo.setName(serverTypeName);
         serverTypeInfo.setVersion(serverVersion);
         serverTypeInfo.setValidPlatformTypes(validPlatformTypes);
-        return serverManager.createServerType(serverTypeInfo, TEST_PLUGIN_NAME);
+        return serverManager.createServerType(serverTypeInfo, testPlugin);
     }
 
     protected ServiceType createServiceType(String serviceTypeName,
@@ -254,7 +258,7 @@ abstract public class BaseInfrastructureTest {
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
         sinfo.setDescription(serviceTypeName);
         sinfo.setName(serviceTypeName);
-        return serviceManager.createServiceType(sinfo, TEST_PLUGIN_NAME, resourceManager.findResourceTypeById(serverType.getId()));
+        return serviceManager.createServiceType(sinfo,testPlugin, resourceManager.findResourceTypeById(serverType.getId()));
     }
     
     protected ServiceType createServiceType(String serviceTypeName,
@@ -262,7 +266,7 @@ abstract public class BaseInfrastructureTest {
         ServiceTypeInfo sinfo = new ServiceTypeInfo();
         sinfo.setDescription(serviceTypeName);
         sinfo.setName(serviceTypeName);
-        return serviceManager.createServiceType(sinfo, TEST_PLUGIN_NAME, new String[] {platformType.getName()});
+        return serviceManager.createServiceType(sinfo, testPlugin, new String[] {platformType.getName()});
     }
 
     protected Service createService(Integer parentId, ServiceType serviceType, String serviceName,
@@ -280,7 +284,7 @@ abstract public class BaseInfrastructureTest {
 
     protected PlatformType createPlatformType(String typeName)
         throws NotFoundException {
-        return platformManager.createPlatformType(typeName, TEST_PLUGIN_NAME);
+        return platformManager.createPlatformType(typeName, testPlugin);
     }
 
     protected ResourceGroup createPlatformResourceGroup(Set<Platform> platforms, String groupName)
