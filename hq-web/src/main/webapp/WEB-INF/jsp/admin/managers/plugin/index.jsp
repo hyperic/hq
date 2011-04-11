@@ -179,6 +179,8 @@
 		updateTime();
 		resizeContent();
 		
+		hqDojo.connect(window, "onresize", resizeContent);
+		
 		function resizeContent(){
 			var windowCoords = hqDojo.window.getBox();
 			var footerCoords = hqDojo.position(hqDojo.byId("footer"), true);
@@ -626,7 +628,7 @@
                 		var span = hqDojo.create("span", {
                 			"class": "first column span-1"
                 		}, li);
-                		if(${mechanismOn} && (summary.deleted!=false) ){
+                		if(${mechanismOn} && (!summary.deleted) ){
 	                		var input = hqDojo.create("input", {
     	            			"type": "checkbox",
     	            			"name": "deleteId",
