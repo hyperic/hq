@@ -1,6 +1,5 @@
 package org.hyperic.hq.measurement.data;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -15,8 +14,6 @@ public interface MeasurementRepositoryCustom {
     Measurement findAvailabilityMeasurementByResource(Integer resource);
 
     List<Measurement> findAvailabilityMeasurementsByGroupMembers(Set<Integer> groupMembers);
-
-    List<Measurement> findAvailabilityMeasurementsByResources(Collection<Integer> resources);
 
     List<Measurement> findByResources(List<Integer> resources);
 

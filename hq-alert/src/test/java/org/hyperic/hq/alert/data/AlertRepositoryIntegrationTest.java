@@ -132,6 +132,25 @@ public class AlertRepositoryIntegrationTest {
             timestamp + 3000, 3, false, false,
             new HashSet<Integer>(Collections.singletonList(resource2)), null));
     }
+    
+    @Test
+    public void testCountByCreateTimeAndPriorityGroupNoMembers() {
+        long timestamp = System.currentTimeMillis();
+        alert.setCtime(timestamp);
+        alert2.setCtime(timestamp - 5000);
+        int resource1 = 555;
+        ResourceAlertDefinition alertdef = new ResourceAlertDefinition();
+        alertdef.setName("High CPU");
+        alertdef.setResource(resource1);
+        entityManager.persist(alertdef);
+        Alert alert3 = new Alert();
+        alert3.setAlertDefinition(alertdef);
+        alert3.setCtime(timestamp + 2000);
+        alertRepository.save(alert3);
+        assertEquals(0l, alertRepository.countByCreateTimeAndPriority(timestamp - 6000,
+            timestamp + 3000, 3, false, false,
+            new HashSet<Integer>(0), null));
+    }
 
     @Test
     public void testCountByCreateTimeAndPriorityInEscalation() {
@@ -309,6 +328,28 @@ public class AlertRepositoryIntegrationTest {
         assertEquals(new PageImpl<Alert>(expected, request, 2l),
             alertRepository.findByCreateTimeAndPriority(timestamp - 6000, timestamp + 3000, 3,
                 false, false, new HashSet<Integer>(Collections.singletonList(resource2)), null,
+                request));
+    }
+    
+    @Test
+    public void testFindByCreateTimeAndPriorityGroupNoMembers() {
+        long timestamp = System.currentTimeMillis();
+        alert.setCtime(timestamp);
+        alert2.setCtime(timestamp - 5000);
+        int resource1 = 555;
+        ResourceAlertDefinition alertdef = new ResourceAlertDefinition();
+        alertdef.setName("High CPU");
+        alertdef.setResource(resource1);
+        entityManager.persist(alertdef);
+        Alert alert3 = new Alert();
+        alert3.setAlertDefinition(alertdef);
+        alert3.setCtime(timestamp + 2000);
+        alertRepository.save(alert3);
+        PageRequest request = new PageRequest(0, 5, new Sort("ctime"));
+        List<Alert> expected = new ArrayList<Alert>();
+        assertEquals(new PageImpl<Alert>(expected, request, 0l),
+            alertRepository.findByCreateTimeAndPriority(timestamp - 6000, timestamp + 3000, 3,
+                false, false, new HashSet<Integer>(0), null,
                 request));
     }
 

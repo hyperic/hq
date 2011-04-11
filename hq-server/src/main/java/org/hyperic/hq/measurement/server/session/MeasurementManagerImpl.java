@@ -803,13 +803,13 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             } else if (o instanceof AppdefResource) {
                 AppdefResource r = (AppdefResource) o;
                 resource = resourceManager.findResource(r.getEntityId());
-            } else if (o instanceof Resource) {
-                resource = (Resource) o;
             } else if (o instanceof ResourceGroup) {
                 ResourceGroup grp = (ResourceGroup) o;
                 resource = grp;
                 rtn.put(resource.getId(), measurementRepository.findAvailabilityMeasurementsByGroupMembers(grp.getMemberIds()));
                 continue;
+            } else if (o instanceof Resource) {
+                    resource = (Resource) o;
             } else if (o instanceof AppdefResourceValue) {
                 AppdefResourceValue r = (AppdefResourceValue) o;
                 AppdefEntityID aeid = r.getEntityId();
@@ -831,12 +831,11 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             }
             res.add(resource.getId());
         }
-        if(res.isEmpty()) {
-            return Collections.emptyMap();
-        }
-        List<Measurement> ids = measurementRepository.findAvailabilityMeasurementsByResources(res);
-        for (Measurement m : ids) {
-            rtn.put(m.getResource(), Collections.singletonList(m));
+        if(! res.isEmpty()) {
+            List<Measurement> ids = measurementRepository.findAvailabilityMeasurementsByResources(res);
+            for (Measurement m : ids) {
+                rtn.put(m.getResource(), Collections.singletonList(m));
+            }
         }
         return rtn;
     }

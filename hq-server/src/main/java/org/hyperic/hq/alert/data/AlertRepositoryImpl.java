@@ -39,6 +39,9 @@ public class AlertRepositoryImpl implements AlertRepositoryCustom {
 
     public long countByCreateTimeAndPriority(long begin, long end, int priority, boolean inEsc,
                                              boolean notFixed, Set<Integer> groupMembers, Integer alertDefId) {
+        if(groupMembers != null && groupMembers.isEmpty()) {
+            return 0l;
+        }
         Query query = getAlertQuery(begin, end, priority, inEsc, notFixed, groupMembers, alertDefId,
             true, null);
         return (Long) query.getSingleResult();

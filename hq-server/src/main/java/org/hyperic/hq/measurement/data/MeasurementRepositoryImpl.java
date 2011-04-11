@@ -4,7 +4,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -47,15 +46,21 @@ public class MeasurementRepositoryImpl implements MeasurementRepositoryCustom {
     }
 
     public Measurement findAvailabilityMeasurementByResource(Integer resource) {
-        List<Measurement> list = findAvailabilityMeasurementsByResources(Collections
-            .singletonList(resource));
-        if (list.size() == 0) {
+        final String sql = new StringBuilder().append("select m from Measurement m ")
+            .append("join m.template t ").append("where m.resource=:resource AND ")
+            .append(ALIAS_CLAUSE).toString();
+        try {
+            return entityManager.createQuery(sql, Measurement.class)
+                .setParameter("resource", resource).getSingleResult();
+        } catch (NoResultException e) {
             return null;
         }
-        return list.get(0);
     }
 
     public List<Measurement> findAvailabilityMeasurementsByGroupMembers(Set<Integer> groupMembers) {
+        if (groupMembers.isEmpty()) {
+            return new ArrayList<Measurement>(0);
+        }
         String ql = "select m from  " + "Measurement m join m.template t " +
                     "where m.resource in (:resources) and " + ALIAS_CLAUSE;
         return entityManager.createQuery(ql, Measurement.class)
@@ -65,39 +70,10 @@ public class MeasurementRepositoryImpl implements MeasurementRepositoryCustom {
             .getResultList();
     }
 
-    public List<Measurement> findAvailabilityMeasurementsByResources(Collection<Integer> resources) {
-        if (resources.isEmpty()) {
-            return Collections.emptyList();
-        }
-        List<Integer> resList = new ArrayList<Integer>(resources);
-
-        List<Measurement> rtn = new ArrayList<Measurement>(resList.size());
-        final String sql = new StringBuilder().append("select m from Measurement m ")
-            .append("join m.template t ").append("where m.resource in (:resources) AND ")
-            .append(ALIAS_CLAUSE).toString();
-        final TypedQuery<Measurement> query = entityManager.createQuery(sql, Measurement.class);
-
-        // should be a unique result if only one resource is being examined
-        if (resources.size() == 1) {
-            query.setParameter("resources", resList);
-            try {
-                Measurement result = query.getSingleResult();
-                rtn.add(result);
-            }catch(NoResultException e) {
-                //shouldn't happen
-            }
-            
-        } else {
-            for (int i = 0; i < resList.size(); i += BATCH_SIZE) {
-                int end = Math.min(i + BATCH_SIZE, resList.size());
-                query.setParameter("resources", resList.subList(i, end));
-                rtn.addAll(query.getResultList());
-            }
-        }
-        return rtn;
-    }
-
     public List<Measurement> findByResources(List<Integer> resources) {
+        if (resources.isEmpty()) {
+            return new ArrayList<Measurement>(0);
+        }
         List<Measurement> measurements = new ArrayList<Measurement>();
         String ql = "select m from Measurement m " + "where m.resource in (:resources)";
         final TypedQuery<Measurement> query = entityManager.createQuery(ql, Measurement.class);
@@ -112,6 +88,9 @@ public class MeasurementRepositoryImpl implements MeasurementRepositoryCustom {
 
     public List<Measurement> findByTemplatesAndResources(Integer[] templateIds,
                                                          Integer[] resourceIds, boolean onlyEnabled) {
+        if (templateIds.length == 0 || resourceIds.length == 0) {
+            return new ArrayList<Measurement>(0);
+        }
         // sort to take advantage of query cache
         final List<Integer> resourceIdList = new ArrayList<Integer>(Arrays.asList(resourceIds));
         final List<Integer> templateIdList = new ArrayList<Integer>(Arrays.asList(templateIds));
@@ -146,6 +125,9 @@ public class MeasurementRepositoryImpl implements MeasurementRepositoryCustom {
 
     public List<Measurement> findDesignatedByGroupAndCategoryOrderByTemplate(Set<Integer> groupMembers,
                                                                              String category) {
+        if (groupMembers.isEmpty()) {
+            return new ArrayList<Measurement>(0);
+        }
         String sql = "select m from Measurement m join m.template t " + "join t.category c "
                      + "where m.resource in (:resources) "
                      + "and t.designate = true and c.name = :cat order by t.name";
@@ -180,6 +162,9 @@ public class MeasurementRepositoryImpl implements MeasurementRepositoryCustom {
 
     public List<Measurement> findEnabledByResourceGroupAndTemplate(Set<Integer> groupMembers,
                                                                    Integer templateId) {
+        if (groupMembers.isEmpty()) {
+            return new ArrayList<Measurement>(0);
+        }
         String sql = "select m from Measurement m where m.resource in (:resources) "
                      + "and m.template.id = :template and m.enabled = true";
 
