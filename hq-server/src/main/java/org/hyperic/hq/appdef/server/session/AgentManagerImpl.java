@@ -1322,7 +1322,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         final Collection<Integer> pluginIds = agentPluginStatusDAO.getPluginsNotOnAgent(agent.getId());
         for (final Integer pluginId : pluginIds) {
             final Plugin plugin = pluginDAO.get(pluginId);
-            if (plugin == null || plugin.isDisabled()) {
+            if (plugin == null || plugin.isDisabled() || plugin.isDeleted()) {
                 continue;
             }
             if (!creates.contains(plugin.getPath())) {
@@ -1373,7 +1373,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                 status = new AgentPluginStatus();
                 creates.add(filename);
             }
-            if (currPlugin == null) {
+            if (currPlugin == null || currPlugin.isDeleted()) {
                 // the agent has a plugin that is unknown to the server, remove it!
                 setFileNameToRemove(removeMap, agent.getId(), filename);
             } else if (!md5.equals(currPlugin.getMD5())) {
@@ -1396,7 +1396,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         status.setPluginName(pluginName);
         status.setProductName(productName);
         status.setLastCheckin(now);
-        if (currPlugin != null && currPlugin.getMD5().equals(status.getMD5())) {
+        if (currPlugin != null && !currPlugin.isDeleted()
+                && currPlugin.getMD5().equals(status.getMD5())) {
             status.setLastSyncStatus(AgentPluginStatusEnum.SYNC_SUCCESS.toString());
         }
         agentPluginStatusDAO.saveOrUpdate(status);
