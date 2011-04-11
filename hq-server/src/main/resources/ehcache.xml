@@ -220,6 +220,12 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
+   <cache name="org.hyperic.hq.agent.mgmt.domain.Agent.managedResources"
+         maxElementsInMemory="5000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.agent.mgmt.domain.AgentType"
          maxElementsInMemory="2"
          eternal="true"
@@ -228,6 +234,13 @@
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="Agent.findByAgentToken"
          maxElementsInMemory="5000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+         
+  <cache name="Agent.findByManagedResource"
+         maxElementsInMemory="20000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"

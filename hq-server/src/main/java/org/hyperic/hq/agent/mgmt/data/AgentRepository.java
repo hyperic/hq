@@ -29,6 +29,8 @@ public interface AgentRepository extends JpaRepository<Agent, Integer>, AgentRep
 
     @Transactional(readOnly = true)
     @Query("select a from Agent a where :resource in elements(a.managedResources)")
+    @QueryHints({ @QueryHint(name = "org.hibernate.cacheable", value = "true"),
+                 @QueryHint(name = "org.hibernate.cacheRegion", value = "Agent.findByManagedResource") })
     Agent findByManagedResource(@Param("resource") Integer resourceId);
 
 }

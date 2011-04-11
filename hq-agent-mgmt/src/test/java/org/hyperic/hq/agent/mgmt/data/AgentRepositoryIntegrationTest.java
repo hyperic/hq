@@ -87,6 +87,7 @@ public class AgentRepositoryIntegrationTest {
         int resourceId = 1234;
         agent.addManagedResource(resourceId);
         assertEquals(agent, agentRepository.findByManagedResource(resourceId));
+        verifyQueryCaching("Agent.findByManagedResource");
     }
 
     @Test

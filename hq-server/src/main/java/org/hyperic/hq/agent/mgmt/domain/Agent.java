@@ -37,6 +37,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
@@ -81,6 +82,8 @@ public class Agent implements ContainerManagedTimestampTrackable, Serializable {
     @ElementCollection
     @CollectionTable(name = "MANAGED_RESOURCES", joinColumns = @JoinColumn(name = "AGENT_ID"))
     @Column(name = "RESOURCE_ID")
+    @OrderColumn
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     private Set<Integer> managedResources = new HashSet<Integer>();
 
     @Column(name = "MTIME")
