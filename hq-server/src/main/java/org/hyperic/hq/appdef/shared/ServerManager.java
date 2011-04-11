@@ -37,6 +37,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.plugin.mgmt.domain.Plugin;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -89,9 +90,9 @@ public interface ServerManager {
     VetoException;
 
     
-    ServerType createServerType(ServerTypeInfo sinfo, String plugin) throws NotFoundException;
+    ServerType createServerType(ServerTypeInfo sinfo, Plugin plugin) throws NotFoundException;
     
-    ServerType createVirtualServerType(ServerTypeInfo sinfo, String plugin) throws NotFoundException;
+    ServerType createVirtualServerType(ServerTypeInfo sinfo, Plugin plugin) throws NotFoundException;
 
     /**
      * Find all server types
@@ -256,7 +257,7 @@ public interface ServerManager {
     /**
      * Update server types
      */
-    public void updateServerTypes(String plugin, org.hyperic.hq.product.ServerTypeInfo[] infos) throws 
+    public void updateServerTypes(Plugin plugin, org.hyperic.hq.product.ServerTypeInfo[] infos) throws 
           VetoException, NotFoundException;
 
 

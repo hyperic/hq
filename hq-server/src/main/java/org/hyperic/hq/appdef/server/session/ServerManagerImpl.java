@@ -75,6 +75,7 @@ import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.plugin.mgmt.data.PluginRepository;
+import org.hyperic.hq.plugin.mgmt.domain.Plugin;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.ArrayUtil;
@@ -964,7 +965,7 @@ public class ServerManagerImpl implements ServerManager {
      * Update server types
      * 
      */
-    public void updateServerTypes(String plugin, ServerTypeInfo[] infos) throws VetoException, NotFoundException {
+    public void updateServerTypes(Plugin plugin, ServerTypeInfo[] infos) throws VetoException, NotFoundException {
         // First, put all of the infos into a Hash
         HashMap<String, ServerTypeInfo> infoMap = new HashMap<String, ServerTypeInfo>();
         for (int i = 0; i < infos.length; i++) {
@@ -1050,7 +1051,7 @@ public class ServerManagerImpl implements ServerManager {
         }
     }
     
-    public ServerType createServerType(ServerTypeInfo sinfo, String plugin) throws NotFoundException {
+    public ServerType createServerType(ServerTypeInfo sinfo, Plugin plugin) throws NotFoundException {
         log.debug("Creating new ServerType: " + sinfo.getName());
         ResourceType stype = createServerResourceType(sinfo, plugin);
         PropertyType appdefType = createServerPropertyType(AppdefResourceType.APPDEF_TYPE_ID, Integer.class);
@@ -1061,7 +1062,7 @@ public class ServerManagerImpl implements ServerManager {
         return serverFactory.createServerType(stype);
     }
     
-    public ServerType createVirtualServerType(ServerTypeInfo sinfo, String plugin) throws NotFoundException {
+    public ServerType createVirtualServerType(ServerTypeInfo sinfo, Plugin plugin) throws NotFoundException {
         log.debug("Creating new Virtual ServerType: " + sinfo.getName());
         ResourceType stype = createServerResourceType(sinfo, plugin);
         String newPlats[] = sinfo.getValidPlatformTypes();
@@ -1069,21 +1070,22 @@ public class ServerManagerImpl implements ServerManager {
         return serverFactory.createServerType(stype);
     }
     
-    private ResourceType createServerResourceType(ServerTypeInfo sinfo, String plugin)  {
+    private ResourceType createServerResourceType(ServerTypeInfo sinfo, Plugin plugin)  {
         ResourceType stype = new ResourceType(sinfo.getName());
         stype.setDescription(sinfo.getDescription());
         resourceTypeDao.persist(stype);
-        pluginRepository.findByName(plugin).addResourceType(stype.getId());
-       
-        stype.addPropertyType(createServerPropertyType(ServerFactory.WAS_AUTODISCOVERED,Boolean.class));
-        stype.addPropertyType(createServerPropertyType(ServerFactory.AUTO_INVENTORY_IDENTIFIER,String.class));
-        stype.addPropertyType(createServerPropertyType(ServerFactory.AUTODISCOVERY_ZOMBIE,Boolean.class));
-        stype.addPropertyType(createServerPropertyType(ServerFactory.CREATION_TIME,Long.class));
-        stype.addPropertyType(createServerPropertyType(ServerFactory.MODIFIED_TIME,Long.class));
-        stype.addPropertyType(createServerPropertyType(AppdefResource.SORT_NAME,String.class));
-        stype.addPropertyType(createServerPropertyType(ServerFactory.INSTALL_PATH,String.class));
-        stype.addPropertyType(createServerPropertyType(ServerFactory.SERVICES_AUTO_MANAGED,Boolean.class));
-        stype.addPropertyType(createServerPropertyType(ServerFactory.RUNTIME_AUTODISCOVERY,Boolean.class));
+        plugin.addResourceType(stype.getId());
+        Set<PropertyType> propertyTypes = new HashSet<PropertyType>();
+        propertyTypes.add(createServerPropertyType(ServerFactory.WAS_AUTODISCOVERED,Boolean.class));
+        propertyTypes.add(createServerPropertyType(ServerFactory.AUTO_INVENTORY_IDENTIFIER,String.class));
+        propertyTypes.add(createServerPropertyType(ServerFactory.AUTODISCOVERY_ZOMBIE,Boolean.class));
+        propertyTypes.add(createServerPropertyType(ServerFactory.CREATION_TIME,Long.class));
+        propertyTypes.add(createServerPropertyType(ServerFactory.MODIFIED_TIME,Long.class));
+        propertyTypes.add(createServerPropertyType(AppdefResource.SORT_NAME,String.class));
+        propertyTypes.add(createServerPropertyType(ServerFactory.INSTALL_PATH,String.class));
+        propertyTypes.add(createServerPropertyType(ServerFactory.SERVICES_AUTO_MANAGED,Boolean.class));
+        propertyTypes.add(createServerPropertyType(ServerFactory.RUNTIME_AUTODISCOVERY,Boolean.class));
+        stype.addPropertyTypes(propertyTypes);
         return stype;
     }
     

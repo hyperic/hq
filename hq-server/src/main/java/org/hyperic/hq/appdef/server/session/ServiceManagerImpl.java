@@ -68,6 +68,7 @@ import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.plugin.mgmt.data.PluginRepository;
+import org.hyperic.hq.plugin.mgmt.domain.Plugin;
 import org.hyperic.hq.product.ServiceTypeInfo;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.pager.PageControl;
@@ -816,7 +817,7 @@ public class ServiceManagerImpl implements ServiceManager {
         return svc;
     }
 
-    public void updateServiceTypes(String plugin, ServiceTypeInfo[] infos)
+    public void updateServiceTypes(Plugin plugin, ServiceTypeInfo[] infos)
     throws VetoException, NotFoundException {
     	final boolean debug = log.isDebugEnabled();
         StopWatch watch = new StopWatch();
@@ -922,14 +923,14 @@ public class ServiceManagerImpl implements ServiceManager {
         }
     }
 
-    public ServiceType createServiceType(ServiceTypeInfo sinfo, String plugin,
+    public ServiceType createServiceType(ServiceTypeInfo sinfo, Plugin plugin,
                                           ResourceType parentType) throws NotFoundException {
         ResourceType serviceType = createServiceType(sinfo, plugin);
         parentType.relateTo(serviceType, RelationshipTypes.SERVICE);
         return serviceFactory.createServiceType(serviceType);
     }
     
-    public ServiceType createServiceType(ServiceTypeInfo sinfo, String plugin,
+    public ServiceType createServiceType(ServiceTypeInfo sinfo, Plugin plugin,
                                          String[] platformTypes) throws NotFoundException {
         ResourceType serviceType = createServiceType(sinfo, plugin);
         findAndSetPlatformType(platformTypes, serviceType);
@@ -947,21 +948,23 @@ public class ServiceManagerImpl implements ServiceManager {
     }
 
     
-    private ResourceType createServiceType(ServiceTypeInfo sinfo, String plugin) throws NotFoundException {
+    private ResourceType createServiceType(ServiceTypeInfo sinfo, Plugin plugin) throws NotFoundException {
         ResourceType serviceType = new ResourceType(sinfo.getName());
         serviceType.setDescription(sinfo.getDescription());
         resourceTypeDao.persist(serviceType);
-        pluginRepository.findByName(plugin).addResourceType(serviceType.getId());
-        serviceType.addPropertyType(createServicePropertyType(ServiceFactory.AUTO_INVENTORY_IDENTIFIER,String.class));
-        serviceType.addPropertyType(createServicePropertyType(ServiceFactory.CREATION_TIME,Long.class));
-        serviceType.addPropertyType(createServicePropertyType(ServiceFactory.MODIFIED_TIME,Long.class));
-        serviceType.addPropertyType(createServicePropertyType(AppdefResource.SORT_NAME,String.class));
-        serviceType.addPropertyType(createServicePropertyType(ServiceFactory.AUTO_DISCOVERY_ZOMBIE,Boolean.class));
-        serviceType.addPropertyType(createServicePropertyType(ServiceFactory.END_USER_RT,Boolean.class));
-        serviceType.addPropertyType(createServicePropertyType(ServiceFactory.SERVICE_RT,Boolean.class));
+        plugin.addResourceType(serviceType.getId());
+        Set<PropertyType> propertyTypes = new HashSet<PropertyType>();
+        propertyTypes.add(createServicePropertyType(ServiceFactory.AUTO_INVENTORY_IDENTIFIER,String.class));
+        propertyTypes.add(createServicePropertyType(ServiceFactory.CREATION_TIME,Long.class));
+        propertyTypes.add(createServicePropertyType(ServiceFactory.MODIFIED_TIME,Long.class));
+        propertyTypes.add(createServicePropertyType(AppdefResource.SORT_NAME,String.class));
+        propertyTypes.add(createServicePropertyType(ServiceFactory.AUTO_DISCOVERY_ZOMBIE,Boolean.class));
+        propertyTypes.add(createServicePropertyType(ServiceFactory.END_USER_RT,Boolean.class));
+        propertyTypes.add(createServicePropertyType(ServiceFactory.SERVICE_RT,Boolean.class));
         PropertyType appdefType = createServicePropertyType(AppdefResourceType.APPDEF_TYPE_ID, Integer.class);
         appdefType.setIndexed(true);
-        serviceType.addPropertyType(appdefType);
+        propertyTypes.add(appdefType);
+        serviceType.addPropertyTypes(propertyTypes);
         return serviceType;
     }
     

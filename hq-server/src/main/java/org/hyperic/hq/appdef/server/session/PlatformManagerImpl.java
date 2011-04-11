@@ -96,6 +96,7 @@ import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.measurement.server.session.AgentScheduleSyncZevent;
 import org.hyperic.hq.plugin.mgmt.data.PluginRepository;
+import org.hyperic.hq.plugin.mgmt.domain.Plugin;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.PlatformTypeInfo;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
@@ -1547,7 +1548,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * 
      * 
      */
-    public void updatePlatformTypes(String plugin, PlatformTypeInfo[] infos) throws VetoException,
+    public void updatePlatformTypes(Plugin plugin, PlatformTypeInfo[] infos) throws VetoException,
         NotFoundException {
         // First, put all of the infos into a Hash
         HashMap<String, PlatformTypeInfo> infoMap = new HashMap<String, PlatformTypeInfo>();
@@ -1580,21 +1581,23 @@ public class PlatformManagerImpl implements PlatformManager {
         }
     }
 
-    public PlatformType createPlatformType(String name, String plugin) throws NotFoundException {
+    public PlatformType createPlatformType(String name, Plugin plugin) throws NotFoundException {
         log.debug("Creating new PlatformType: " + name);
         ResourceType pt = new ResourceType(name);
         resourceTypeDao.persist(pt);
-        pluginRepository.findByName(plugin).addResourceType(pt.getId());
-        pt.addPropertyType(createPropertyType(PlatformFactory.CERT_DN,String.class));
-        pt.addPropertyType(createPropertyType(PlatformFactory.FQDN,String.class));
-        pt.addPropertyType(createPropertyType(PlatformFactory.COMMENT_TEXT,String.class));
-        pt.addPropertyType(createPropertyType(PlatformFactory.CPU_COUNT,Integer.class));
-        pt.addPropertyType(createPropertyType(PlatformFactory.CREATION_TIME,Long.class));
-        pt.addPropertyType(createPropertyType(PlatformFactory.MODIFIED_TIME,Long.class));
-        pt.addPropertyType(createPropertyType(AppdefResource.SORT_NAME,String.class));
+        plugin.addResourceType(pt.getId());
+        Set<PropertyType> propertyTypes = new HashSet<PropertyType>();
+        propertyTypes.add(createPropertyType(PlatformFactory.CERT_DN,String.class));
+        propertyTypes.add(createPropertyType(PlatformFactory.FQDN,String.class));
+        propertyTypes.add(createPropertyType(PlatformFactory.COMMENT_TEXT,String.class));
+        propertyTypes.add(createPropertyType(PlatformFactory.CPU_COUNT,Integer.class));
+        propertyTypes.add(createPropertyType(PlatformFactory.CREATION_TIME,Long.class));
+        propertyTypes.add(createPropertyType(PlatformFactory.MODIFIED_TIME,Long.class));
+        propertyTypes.add(createPropertyType(AppdefResource.SORT_NAME,String.class));
         PropertyType appdefType = createPropertyType(AppdefResourceType.APPDEF_TYPE_ID, Integer.class);
         appdefType.setIndexed(true);
-        pt.addPropertyType(appdefType);
+        propertyTypes.add(appdefType);
+        pt.addPropertyTypes(propertyTypes);
         resourceManager.findRootResourceType().relateTo(pt, RelationshipTypes.PLATFORM);
         pt.relateTo(resourceManager.findResourceTypeByName(IP_RESOURCE_TYPE_NAME),RelationshipTypes.IP);
         return platformFactory.createPlatformType(pt);
@@ -1990,11 +1993,13 @@ public class PlatformManagerImpl implements PlatformManager {
             resourceTypeDao.persist(ipType);
             //TODO ipType isn't really getting a plugin here.  
             //Maybe give it System plugin or consider making it a first class citizen in new model?
-            ipType.addPropertyType(createPropertyType(PlatformFactory.IP_ADDRESS,String.class));
-            ipType.addPropertyType(createPropertyType(PlatformFactory.NETMASK,String.class));
-            ipType.addPropertyType(createPropertyType(PlatformFactory.MAC_ADDRESS,String.class));
-            ipType.addPropertyType(createPropertyType(PlatformFactory.CREATION_TIME,Long.class));
-            ipType.addPropertyType(createPropertyType(PlatformFactory.MODIFIED_TIME,Long.class));
+            Set<PropertyType> ipPropTypes = new HashSet<PropertyType>();
+            ipPropTypes.add(createPropertyType(PlatformFactory.IP_ADDRESS,String.class));
+            ipPropTypes.add(createPropertyType(PlatformFactory.NETMASK,String.class));
+            ipPropTypes.add(createPropertyType(PlatformFactory.MAC_ADDRESS,String.class));
+            ipPropTypes.add(createPropertyType(PlatformFactory.CREATION_TIME,Long.class));
+            ipPropTypes.add(createPropertyType(PlatformFactory.MODIFIED_TIME,Long.class));
+            ipType.addPropertyTypes(ipPropTypes);
         }
     }
 

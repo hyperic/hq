@@ -70,6 +70,7 @@ public class Plugin implements ContainerManagedTimestampTrackable, Serializable 
     @Column(name = "PATH", length = 500, nullable = false)
     private String path;
 
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     @ElementCollection
     @CollectionTable(name = "PLUGIN_RESOURCE_TYPES", joinColumns = { @JoinColumn(name = "RESOURCE_TYPE_ID") })
     @Column(name = "PLUGIN_ID")
