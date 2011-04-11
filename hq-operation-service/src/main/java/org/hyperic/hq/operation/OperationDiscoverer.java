@@ -9,13 +9,6 @@ import java.lang.annotation.Annotation;
 public interface OperationDiscoverer {
 
     /**
-     * Implementors can pass the dispatcherCandidate and the
-     * particular annotation type to discover(candidate, annotation)
-     * @param candidate The candidate instance which can be a dispatcher or endpoint
-     */
-    void discover(Object candidate);
-
-    /**
      * Evaluates a discoverer candidate and if valid, registers it.
      * @param candidate The candidate instance which can be a dispatcher or endpoint
      * @throws OperationDiscoveryException

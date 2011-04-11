@@ -27,6 +27,7 @@ package org.hyperic.hq.operation.rabbit.core;
 import com.rabbitmq.client.ConnectionFactory;
 import org.hyperic.hq.operation.*;
 import org.hyperic.hq.operation.annotation.Operation;
+import org.hyperic.hq.operation.rabbit.connection.SingleConnectionFactory;
 import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
 
 import java.lang.annotation.Annotation;
@@ -38,7 +39,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author Helena Edelson
  */
-public abstract class AbstractMethodInvokingRegistry implements OperationRegistry, OperationDiscoverer {
+public class OperationMethodInvokingRegistry implements OperationRegistry, OperationDiscoverer {
 
     /**
      * Will consist of either dispatchers or endpoints
@@ -47,26 +48,24 @@ public abstract class AbstractMethodInvokingRegistry implements OperationRegistr
 
     protected final RoutingRegistry routingRegistry;
 
-    protected final RabbitTemplate rabbitTemplate;
+    protected final OperationService operationService;
 
     protected final Converter<Object, String> converter;
 
 
-    public AbstractMethodInvokingRegistry(ConnectionFactory connectionFactory) {
-        this(connectionFactory, new JsonMappingConverter(), new OperationToRoutingKeyRegistry(connectionFactory));
+    public OperationMethodInvokingRegistry() {
+        this(new SingleConnectionFactory(), new JsonMappingConverter());
     }
 
-    public AbstractMethodInvokingRegistry(ConnectionFactory connectionFactory, Converter<Object, String> converter,
-                                          RoutingRegistry routingRegistry) {
-        this.rabbitTemplate = new SimpleRabbitTemplate(connectionFactory);
+    public OperationMethodInvokingRegistry(ConnectionFactory connectionFactory, Converter<Object, String> converter) {
+        this(new AnnotatedRabbitOperationService(connectionFactory), new OperationToRoutingKeyRegistry(connectionFactory), converter);
+    }
+
+    public OperationMethodInvokingRegistry(OperationService operationService, RoutingRegistry routingRegistry, Converter<Object, String> converter) {
+        this.operationService = operationService;
         this.converter = converter;
         this.routingRegistry = routingRegistry;
     }
-
-
-    abstract public void discover(Object candidate);
-
-    abstract public boolean validArguments(String operationName, String exchangeName, String value);
  
     /**
      * Discovers, evaluates, validates and registers candidates.
@@ -79,7 +78,7 @@ public abstract class AbstractMethodInvokingRegistry implements OperationRegistr
         Class<?> candidateClass = candidate.getClass();
         if (candidateClass.isAnnotationPresent(annotation)) {
             for (Method method : candidateClass.getDeclaredMethods()) {
-                if (method.isAnnotationPresent(Operation.class)) { 
+                if (method.isAnnotationPresent(Operation.class)) {
                     if (!method.isAccessible()) method.setAccessible(true);
                     register(method, candidate, annotation);
                 }
@@ -104,10 +103,10 @@ public abstract class AbstractMethodInvokingRegistry implements OperationRegistr
      * Checks whether the operation is supported, if so returns the value
      * from the map for invocation.
      * @param operationName the potential key
-     * @return if supported returns the MethodInvoker of type OperationDispatcher or OperationEndpoint,
-     * if not, throws and OperationNotSupportedException
+     * @return if supported, returns the MethodInvoker of type OperationDispatcher or OperationEndpoint
+     * @throws org.hyperic.hq.operation.OperationNotSupportedException if method not supported
      */
-    public MethodInvoker map(String operationName) {
+    public MethodInvoker map(String operationName) throws OperationNotSupportedException {
         if (!this.operationMappings.containsKey(operationName)) throw new OperationNotSupportedException(operationName);
         return this.operationMappings.get(operationName);
     }
@@ -118,7 +117,7 @@ public abstract class AbstractMethodInvokingRegistry implements OperationRegistr
 
     public static final class MethodInvoker {
 
-        private final Converter<Object,String> converter;
+        private final Converter<Object, String> converter;
 
         private final Method method;
 
@@ -126,22 +125,32 @@ public abstract class AbstractMethodInvokingRegistry implements OperationRegistr
 
         private final String operationName;
 
-        public MethodInvoker(Method method, Object instance, Converter<Object,String> converter) {
+        public MethodInvoker(Method method, Object instance, Converter<Object, String> converter) {
             this.method = method;
-            this.instance = instance; 
+            this.instance = instance;
             this.converter = converter;
             this.operationName = method.getAnnotation(Operation.class).operationName();
         }
 
         /**
-         * @param context
+         * Reads the String content to create the specified data Object
+         * and invokes the given method with that object
+         * @param content the json content
          * @return the result of dispatching the method represented by this object
          * @throws IllegalAccessException
          * @throws InvocationTargetException
          */
-        public Object invoke(String context) throws IllegalAccessException, InvocationTargetException {
-            Object data = this.converter.read(context, this.method.getParameterTypes()[0]);
+        public Object invoke(String content) throws IllegalAccessException, InvocationTargetException {
+            Object data = this.converter.read(content, this.method.getParameterTypes()[0]);
             return this.method.invoke(this.instance, data);
+        }
+        
+        public Object getReturnType() {
+            return this.method.getReturnType();
+        }
+
+        public boolean operationHasReturnType() {
+            return !void.class.equals(this.method.getReturnType());
         }
 
         @Override
@@ -149,7 +158,5 @@ public abstract class AbstractMethodInvokingRegistry implements OperationRegistr
             return new StringBuilder("operationName=").append(this.operationName).append(" method=").append(this.method)
                     .append(" instance=").append(this.instance).append(" converter=").append(this.converter).toString();
         }
-    }
-
-
+    } 
 }

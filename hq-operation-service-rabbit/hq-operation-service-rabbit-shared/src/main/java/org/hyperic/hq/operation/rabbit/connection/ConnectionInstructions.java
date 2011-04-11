@@ -22,28 +22,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
+package org.hyperic.hq.operation.rabbit.connection;
 
-package org.hyperic.hq.operation.rabbit.util;
- 
+
 /**
  * @author Helena Edelson
  */
-public class OperationRouting {
-
-    private final String exchangeName;
-
-    private final String routingKey;
-
-    public OperationRouting(String exchangeName, String routingKey) {
-        this.exchangeName = exchangeName;
-        this.routingKey = routingKey;
-    }
-
-    public String getExchangeName() {
-        return exchangeName;
-    }
-
-    public String getRoutingKey() {
-        return routingKey;
-    }
+public class ConnectionInstructions {
 }

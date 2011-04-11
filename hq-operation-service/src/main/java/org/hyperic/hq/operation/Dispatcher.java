@@ -5,6 +5,6 @@ package org.hyperic.hq.operation;
  */
 public interface Dispatcher {
  
-    void dispatch(Envelope envelope);
+    Object dispatch(String operationName, Object data);
     
 }

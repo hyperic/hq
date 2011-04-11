@@ -26,7 +26,7 @@ package org.hyperic.hq.operation.rabbit;
 
 import org.hyperic.hq.operation.OperationDiscoverer;
 import org.hyperic.hq.operation.annotation.OperationEndpoint;
-import org.hyperic.hq.operation.rabbit.core.AnnotatedOperationEndpointDiscoverer;
+import org.hyperic.hq.operation.rabbit.core.AnnotatedRabbitOperationService;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 
@@ -38,7 +38,7 @@ public final class OperationEndpointDiscovererBeanPostProcessor implements BeanP
     private final OperationDiscoverer operationEndpointDiscoverer;
 
     public OperationEndpointDiscovererBeanPostProcessor() {
-        this(new AnnotatedOperationEndpointDiscoverer());
+        this(new AnnotatedRabbitOperationService());
     }
 
     OperationEndpointDiscovererBeanPostProcessor(OperationDiscoverer operationEndpointDiscoverer) {

@@ -39,7 +39,7 @@ import java.io.IOException;
  * @author Helena Edelson
  */
 public class DeclarativeBindingHandler implements BindingHandler {
-
+ 
     private final ChannelTemplate channelTemplate;
 
     public DeclarativeBindingHandler(ConnectionFactory connectionFactory) {

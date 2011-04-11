@@ -27,9 +27,9 @@ package org.hyperic.hq.operation.rabbit.core;
 import com.rabbitmq.client.ConnectionFactory;
 import org.hyperic.hq.operation.OperationNotSupportedException;
 import org.hyperic.hq.operation.annotation.Operation;
-import org.hyperic.hq.operation.rabbit.connection.ChannelTemplate;
+import org.hyperic.hq.operation.rabbit.connection.SingleConnectionFactory;
 import org.hyperic.hq.operation.rabbit.util.Constants;
-import org.hyperic.hq.operation.rabbit.util.OperationRouting;
+import org.hyperic.hq.operation.rabbit.util.OperationToRoutingMapping;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -47,16 +47,17 @@ import static org.hyperic.hq.operation.rabbit.util.BindingPatternConstants.OPERA
  */
 public class OperationToRoutingKeyRegistry implements RoutingRegistry {
 
-    private final Map<String, OperationRouting> operationToRoutingKeyMappings = new ConcurrentHashMap<String, OperationRouting>();
+    private final Map<String, OperationToRoutingMapping> operationToRoutingKeyMappings = new ConcurrentHashMap<String, OperationToRoutingMapping>();
 
     private final BindingHandler bindingHandler;
 
-    private final ChannelTemplate channelTemplate;
-
     private final String serverId;
 
-    public OperationToRoutingKeyRegistry(ConnectionFactory connectionFactory) { 
-        this.channelTemplate = new ChannelTemplate(connectionFactory);
+    public OperationToRoutingKeyRegistry() {
+        this(new SingleConnectionFactory());
+    }
+    
+    public OperationToRoutingKeyRegistry(ConnectionFactory connectionFactory) {  
         this.bindingHandler = new DeclarativeBindingHandler(connectionFactory);
         this.serverId = getDefaultServerId();
     }
@@ -69,7 +70,7 @@ public class OperationToRoutingKeyRegistry implements RoutingRegistry {
         if (!this.operationToRoutingKeyMappings.containsKey(operation.operationName())) {
             bindingHandler.declareAndBind(operation);
             this.operationToRoutingKeyMappings.put(operation.operationName(),
-                    new OperationRouting(operation.exchangeName(), operation.value()));
+                    new OperationToRoutingMapping(operation.exchangeName(), operation.value(), null));
         }
     }
 
@@ -77,7 +78,7 @@ public class OperationToRoutingKeyRegistry implements RoutingRegistry {
 
     }
 
-    public OperationRouting map(String operationName) {
+    public OperationToRoutingMapping map(String operationName) {
         if (!this.operationToRoutingKeyMappings.containsKey(operationName)) throw new OperationNotSupportedException(operationName);
         return this.operationToRoutingKeyMappings.get(operationName);
     }

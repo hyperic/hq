@@ -50,8 +50,6 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
 
     private final ChannelTemplate channelTemplate;
 
-    private final OperationToRoutingKeyRegistry bindingsRegistry;
-
     private final Object monitor = new Object();
 
     protected final boolean usesNonGuestCredentials;
@@ -94,7 +92,6 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
         this.converter = new JsonMappingConverter();
         this.exchangeName = exchangeName != null ? exchangeName : "";
         this.usesNonGuestCredentials = !cf.getUsername().equals(defaultCredential) && !cf.getPassword().equals(defaultCredential);
-        this.bindingsRegistry = new OperationToRoutingKeyRegistry(cf);
     }
 
     /**
@@ -108,10 +105,6 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
     }
 
     public void send(String exchangeName, String routingKey, Object data) throws IOException {
-        publish(exchangeName, routingKey, data);
-    }
-
-    private void publish(String exchangeName, String routingKey, Object data) throws IOException { 
         byte[] bytes = this.converter.write(data).getBytes(MessageConstants.CHARSET);
 
         synchronized (this.monitor) {
@@ -129,7 +122,7 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
      * @throws IOException
      */
     public Object sendAndReceive(String exchangeName, String routingKey, Object data) throws IOException {
-        publish(exchangeName, routingKey, data);
+        send(exchangeName, routingKey, data);
 
         AMQP.BasicProperties bp = getBasicProperties(data);
         String correlationId = bp.getCorrelationId();
@@ -197,4 +190,9 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
             }
         }
     }
+
+    private boolean validArguments(String operationName, String exchangeName, String value) {
+        return operationName == null || exchangeName == null || value == null;
+    }
+
 }

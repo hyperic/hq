@@ -25,7 +25,7 @@
 package org.hyperic.hq.operation.rabbit.core;
 
 import org.hyperic.hq.operation.annotation.Operation;
-import org.hyperic.hq.operation.rabbit.util.OperationRouting;
+import org.hyperic.hq.operation.rabbit.util.OperationToRoutingMapping;
 
 /**
  * @author Helena Edelson
@@ -49,6 +49,6 @@ public interface RoutingRegistry {
      * @param operationName The operation's name
      * @return the specific mapping for a given operation
      */
-    OperationRouting map(String operationName);
+    OperationToRoutingMapping map(String operationName);
 
 }
