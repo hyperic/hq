@@ -101,6 +101,20 @@ public class ResourceType {
         operationType.persist();
         operationTypes.add(operationType);
     }
+    
+    /**
+     * 
+     * @param operationType The OperationType to add
+     */
+    @Transactional("neoTxManager")
+    public void addOperationTypes(Set<OperationType> operationTypes) {
+        // TODO can't do this in a detached env b/c relationship doesn't take
+        // unless both items are node-backed
+        for(OperationType operationType: operationTypes) {
+            operationType.persist();
+        }
+        this.operationTypes.addAll(operationTypes);
+    }
 
     /**
      * 
@@ -112,6 +126,16 @@ public class ResourceType {
         // unless both items are node-backed
         propertyType.persist();
         propertyTypes.add(propertyType);
+    }
+    
+    @Transactional("neoTxManager")
+    public void addPropertyTypes(Set<PropertyType> propertyTypes) {
+        for(PropertyType propertyType: propertyTypes) {
+        // TODO can't do this in a detached env b/c relationship doesn't take
+        // unless both items are node-backed
+            propertyType.persist();
+        }
+        this.propertyTypes.addAll(propertyTypes);
     }
 
     private Set<ResourceTypeRelationship> convertRelationships(ResourceType entity,

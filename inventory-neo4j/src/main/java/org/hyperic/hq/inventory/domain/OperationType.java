@@ -58,6 +58,20 @@ public class OperationType {
         argType.persist();
         operationArgTypes.add(argType);
     }
+    
+    /**
+     * Adds metadata about arguments to be passed to the operation
+     * @param argTypes The argument types for the operation
+     */
+    @Transactional("neoTxManager")
+    public void addOperationArgTypes(Set<OperationArgType> argTypes) {
+        // TODO can't do this in a detached env b/c relationship doesn't take
+        // unless both items are node-backed
+        for(OperationArgType argType: argTypes) {
+            argType.persist();
+        }
+        this.operationArgTypes.addAll(argTypes);
+    }
 
     /**
      * 

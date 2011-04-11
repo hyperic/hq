@@ -132,19 +132,21 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
             if(resourceTypeDao.findByName(AppdefEntityConstants.getAppdefGroupTypeName(groupTypes[i])) == null) {
                 ResourceType groupType = new ResourceType(AppdefEntityConstants.getAppdefGroupTypeName(groupTypes[i]));
                 resourceTypeDao.persist(groupType);
-                setPropertyType(groupType,"groupEntType",Integer.class,false);
-                setPropertyType(groupType,"groupEntResType",Integer.class,true);
-                setPropertyType(groupType,"mixed",Boolean.class,true);
+                Set<PropertyType> propTypes = new HashSet<PropertyType>();
+                propTypes.add(createPropertyType("groupEntType",Integer.class,false));
+                propTypes.add(createPropertyType("groupEntResType",Integer.class,true));
+                propTypes.add(createPropertyType("mixed",Boolean.class,true));
+                groupType.addPropertyTypes(propTypes);
             }
         }
     }
     
-    private void setPropertyType(ResourceType groupType, String propTypeName, Class<?> type,boolean indexed) {
+    private PropertyType createPropertyType(String propTypeName, Class<?> type,boolean indexed) {
         PropertyType propType = new PropertyType(propTypeName,type);
         propType.setDescription(propTypeName);
         propType.setHidden(true);
         propType.setIndexed(indexed);
-        groupType.addPropertyType(propType);
+        return propType;
     }
     
     /**

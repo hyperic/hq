@@ -866,21 +866,23 @@ public class ApplicationManagerImpl implements ApplicationManager {
         if(resourceTypeDao.findByName(AppdefEntityConstants.APPDEF_NAME_APPLICATION) == null) {
             ResourceType groupType = new ResourceType(AppdefEntityConstants.APPDEF_NAME_APPLICATION);
             resourceTypeDao.persist(groupType);
-            setPropertyType(groupType,AppdefResource.SORT_NAME,String.class);
-            setPropertyType(groupType,ApplicationManagerImpl.BUSINESS_CONTACT,String.class);
-            setPropertyType(groupType,ApplicationManagerImpl.CREATION_TIME,Long.class);
-            setPropertyType(groupType,ApplicationManagerImpl.ENG_CONTACT,String.class);
-            setPropertyType(groupType,ApplicationManagerImpl.MODIFIED_TIME,Long.class);
-            setPropertyType(groupType,ApplicationManagerImpl.OPS_CONTACT,String.class);
+            Set<PropertyType> propTypes = new HashSet<PropertyType>();
+            propTypes.add(createPropertyType(AppdefResource.SORT_NAME,String.class));
+            propTypes.add(createPropertyType(ApplicationManagerImpl.BUSINESS_CONTACT,String.class));
+            propTypes.add(createPropertyType(ApplicationManagerImpl.CREATION_TIME,Long.class));
+            propTypes.add(createPropertyType(ApplicationManagerImpl.ENG_CONTACT,String.class));
+            propTypes.add(createPropertyType(ApplicationManagerImpl.MODIFIED_TIME,Long.class));
+            propTypes.add(createPropertyType(ApplicationManagerImpl.OPS_CONTACT,String.class));
+            groupType.addPropertyTypes(propTypes);
         }
        
     }
         
-    private void setPropertyType(ResourceType groupType, String propTypeName, Class<?> type) {
+    private PropertyType createPropertyType(String propTypeName, Class<?> type) {
         PropertyType propType = new PropertyType(propTypeName,type);
         propType.setDescription(propTypeName);
         propType.setHidden(true);
-        groupType.addPropertyType(propType);
+        return propType;
     }
 
     private void trimStrings(ApplicationValue app) {

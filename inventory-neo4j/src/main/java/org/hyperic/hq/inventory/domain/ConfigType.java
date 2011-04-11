@@ -57,6 +57,16 @@ public class ConfigType {
         configOptionType.persist();
         configOptionTypes.add(configOptionType);
     }
+    
+    @Transactional("neoTxManager")
+    public void addConfigOptionTypes(Set<ConfigOptionType> configOptionTypes) {
+        for(ConfigOptionType configOptionType: configOptionTypes) {
+            // TODO can't do this in a detached env b/c relationship doesn't take
+            // unless both items are node-backed
+            configOptionType.persist();
+        }
+        this.configOptionTypes.addAll(configOptionTypes);
+    }
 
     /**
      * 
