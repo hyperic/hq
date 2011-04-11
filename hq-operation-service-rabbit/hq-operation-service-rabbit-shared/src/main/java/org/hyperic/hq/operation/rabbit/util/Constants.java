@@ -31,6 +31,13 @@ package org.hyperic.hq.operation.rabbit.util;
  */
 public class Constants {
 
+    public static final String OPERATION_REQUEST = ".request";
+
+    public static final String OPERATION_RESPONSE = ".response";
+
+    public static final String OPERATION_NAME_GUEST_REQUEST = "hq.guest.request";
+
+    public static final String OPERATION_NAME_GUEST_RESPONSE = "hq.guest.response";
 
     public static final String OPERATION_NAME_AGENT_REGISTER = "hq-agent.config.register";
 
@@ -153,6 +160,5 @@ public class Constants {
      * Exchange name to use to send to an authenticated agent
      */
     public static final String TO_AGENT_AUTHENTICATED_EXCHANGE = "to.agent.authenticated.exchange";
-    public static final String OPERATION_REQUEST = ".request";
-    public static final String OPERATION_RESPONSE = ".response";
+
 }

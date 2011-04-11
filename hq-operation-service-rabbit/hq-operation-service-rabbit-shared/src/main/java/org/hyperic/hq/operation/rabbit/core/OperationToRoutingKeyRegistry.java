@@ -27,7 +27,6 @@ package org.hyperic.hq.operation.rabbit.core;
 import com.rabbitmq.client.ConnectionFactory;
 import org.hyperic.hq.operation.OperationNotSupportedException;
 import org.hyperic.hq.operation.annotation.Operation;
-import org.hyperic.hq.operation.rabbit.connection.SingleConnectionFactory;
 import org.hyperic.hq.operation.rabbit.util.Constants;
 import org.hyperic.hq.operation.rabbit.util.OperationToRoutingMapping;
 
@@ -53,10 +52,6 @@ public class OperationToRoutingKeyRegistry implements RoutingRegistry {
 
     private final String serverId;
 
-    public OperationToRoutingKeyRegistry() {
-        this(new SingleConnectionFactory());
-    }
-    
     public OperationToRoutingKeyRegistry(ConnectionFactory connectionFactory) {  
         this.bindingHandler = new DeclarativeBindingHandler(connectionFactory);
         this.serverId = getDefaultServerId();
@@ -68,16 +63,39 @@ public class OperationToRoutingKeyRegistry implements RoutingRegistry {
      */
     public void register(Operation operation) {
         if (!this.operationToRoutingKeyMappings.containsKey(operation.operationName())) {
-            bindingHandler.declareAndBind(operation);
+            bindingHandler.declareAndBind(operation); 
             this.operationToRoutingKeyMappings.put(operation.operationName(),
                     new OperationToRoutingMapping(operation.exchangeName(), operation.value(), null));
         }
     }
 
-    public void create(Operation operation) {
-
+    /**
+     * Unregisters the mapping and removes the components themselves
+     * @param operation The operation meta-data to map 
+     */
+    public void unRegister(Operation operation) {
+        if (this.operationToRoutingKeyMappings.containsKey(operation.operationName())) {
+            // call binding handler, add a remove method
+           this.operationToRoutingKeyMappings.remove(operation.operationName()); 
+        }
     }
 
+    /**
+     * Automatically handled by spring
+     * @return
+     */
+    public List<String> createServerOperationRoutingKeys() {
+        List<String> keys = new ArrayList<String>();
+        for (String operation : Constants.SERVER_OPERATIONS) {
+            keys.add(new StringBuilder(Constants.SERVER_ROUTING_KEY_PREFIX + this.serverId).append(OPERATION_PREFIX).append(operation).toString());
+        }
+        return keys;
+    }
+
+    /** 
+     * @param operationName The operation's name
+     * @return
+     */
     public OperationToRoutingMapping map(String operationName) {
         if (!this.operationToRoutingKeyMappings.containsKey(operationName)) throw new OperationNotSupportedException(operationName);
         return this.operationToRoutingKeyMappings.get(operationName);
@@ -88,38 +106,18 @@ public class OperationToRoutingKeyRegistry implements RoutingRegistry {
     this.serverPrefix = RoutingConstants.SERVER_ROUTING_KEY_PREFIX + serverId;
     this.defaultToAgentBindingKey = agentRoutingKeyPrefix + "";
     this.defaultToServerBindingKey = agentRoutingKeyPrefix + "";*/
-
-
+  
     /**
-     * @param agentToken can be <code>null</code> for server calls
-     */
-    public void guestRegistration(String agentToken) {
-    }
-
-    /**
-     * @param agentToken can be <code>null</code> for server calls
-     */
-    public void authenticatedRegistration(String agentToken) {
-    }
-
-    /**
-     * hq-agents.agent-1302212470776-5028906219606536735-6762208433280624914.operations.config.registration.request
+     * agentToken = 1302212470776-5028906219606536735-6762208433280624914
+     * hq-agents.agent-{agentToken}.operations.config.registration.request
      * @param agentToken
      * @return
      */
-    private List<String> createAgentOperationRoutingKeys(final String agentToken) {
+    public List<String> createAgentOperationRoutingKeys(final String agentToken) {
         List<String> keys = new ArrayList<String>();
         for (String operation : Constants.AGENT_OPERATIONS) {
             keys.add(new StringBuilder(Constants.AGENT_ROUTING_KEY_PREFIX)
                     .append(agentToken).append(OPERATION_PREFIX).append(operation).toString());
-        }
-        return keys;
-    }
-
-    private List<String> createServerOperationRoutingKeys() {
-        List<String> keys = new ArrayList<String>();
-        for (String operation : Constants.SERVER_OPERATIONS) {
-            keys.add(new StringBuilder(Constants.SERVER_ROUTING_KEY_PREFIX + this.serverId).append(OPERATION_PREFIX).append(operation).toString());
         }
         return keys;
     }
@@ -135,6 +133,10 @@ public class OperationToRoutingKeyRegistry implements RoutingRegistry {
         } catch (UnknownHostException e) {
             return UUID.randomUUID().toString();
         }
+    }
+
+    private boolean validArguments(String operationName, String exchangeName, String value) {
+        return operationName == null || exchangeName == null || value == null;
     }
 
 }

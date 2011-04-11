@@ -27,6 +27,7 @@ package org.hyperic.hq.operation.rabbit.connection;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -42,13 +43,13 @@ public final class ChannelTemplate implements ChannelOperations {
     /**
      * ConnectionFactory to create {@link com.rabbitmq.client.Connection connections}.
      */
-    private final com.rabbitmq.client.ConnectionFactory connectionFactory;
+    private final ConnectionFactory connectionFactory;
 
     /**
      * Creates a new instance
      * @param connectionFactory {@link com.rabbitmq.client.ConnectionFactory}
      */
-    public ChannelTemplate(com.rabbitmq.client.ConnectionFactory connectionFactory) {
+    public ChannelTemplate(ConnectionFactory connectionFactory) {
         this.connectionFactory = connectionFactory; 
     }
 

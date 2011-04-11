@@ -17,7 +17,7 @@ public interface RabbitTemplate {
      * @throws org.hyperic.hq.operation.rabbit.connection.ChannelException
      * if an error occurs during the send process. 
      */
-    void send(String exchangeName, String routingKey, Object data) throws ChannelException, IOException;
+    Boolean send(String exchangeName, String routingKey, Object data) throws ChannelException, IOException;
 
     /**
      * Sends a message and synchronously receives the response

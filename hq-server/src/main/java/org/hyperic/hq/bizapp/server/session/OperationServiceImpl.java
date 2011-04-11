@@ -16,7 +16,7 @@ import org.hyperic.hq.control.shared.ControlManager;
 import org.hyperic.hq.ha.HAService;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.ReportProcessor;
-import org.hyperic.hq.operation.OperationData;
+import org.hyperic.hq.operation.Envelope;
 import org.hyperic.hq.operation.OperationFailedException;
 import org.hyperic.hq.operation.OperationService;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
@@ -92,16 +92,7 @@ public class OperationServiceImpl implements OperationService {
     	this.secureCommands.addAll(Arrays.asList(CommandInfo.SECURE_COMMANDS)); 
     }
 
-
-    public void perform(OperationData operation) throws OperationFailedException {
-
-    }
-
-    public void perform(OperationData operation, String exchangeName, String routingKey) throws OperationFailedException {
-
-    }
-
-    public Object performAndReceive(OperationData operation, String exchangeName, String routingKey) throws OperationFailedException {
+    public Object perform(Envelope envelope) throws OperationFailedException {
         return null;
     }
 }

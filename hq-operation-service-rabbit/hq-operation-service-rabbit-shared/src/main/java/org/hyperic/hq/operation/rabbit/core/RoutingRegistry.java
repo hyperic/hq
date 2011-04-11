@@ -34,16 +34,17 @@ public interface RoutingRegistry {
   
     /**
      * Registers the routing mapping for the given operation
-     * @param operation The operation meta-data to map the exchangeName and routing key 
+     * @param operation The operation meta-data to map  
      */
     void register(Operation operation);
 
     /**
-     *
-     * @param operation the operation
+     * Removes the routing mapping for the given operation,
+     * for example when an agent is removed
+     * @param operation The operation meta-data to map 
      */
-    void create(final Operation operation);
-
+    void unRegister(Operation operation);
+ 
     /**
      * Returns the routing data by operation name
      * @param operationName The operation's name

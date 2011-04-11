@@ -29,6 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.operation.AbstractOperation;
 import org.hyperic.hq.operation.Converter;
+import org.hyperic.hq.operation.rabbit.connection.ChannelCallback;
 import org.hyperic.hq.operation.rabbit.connection.ChannelException;
 import org.hyperic.hq.operation.rabbit.connection.ChannelTemplate;
 import org.hyperic.hq.operation.rabbit.connection.SingleConnectionFactory;
@@ -84,13 +85,13 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
 
     /**
      * Creates a new instance that creates a connection and sends messages to a specific exchange
-     * @param cf ConnectionFactory used to create a connection
+     * @param cf           ConnectionFactory used to create a connection
      * @param exchangeName The exchange name to use. if null, uses the AMQP default
      */
     public SimpleRabbitTemplate(ConnectionFactory cf, String exchangeName) {
         this.channelTemplate = new ChannelTemplate(cf);
         this.converter = new JsonMappingConverter();
-        this.exchangeName = exchangeName != null ? exchangeName : "";
+        this.exchangeName = exchangeName;
         this.usesNonGuestCredentials = !cf.getUsername().equals(defaultCredential) && !cf.getPassword().equals(defaultCredential);
     }
 
@@ -104,12 +105,28 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
         send(this.exchangeName, routingKey, data);
     }
 
-    public void send(String exchangeName, String routingKey, Object data) throws IOException {
-        byte[] bytes = this.converter.write(data).getBytes(MessageConstants.CHARSET);
+    /**
+     * this.converter.write(data).getBytes(MessageConstants.CHARSET);
+     * @param exchangeName the exchange name to use
+     * @param routingKey   The routing key to use
+     * @param data         The data to send
+     * @throws IOException
+     */
+    public Boolean send(final String exchangeName, final String routingKey, final Object data) throws IOException {
+        final byte[] bytes = this.converter.write(data).getBytes(MessageConstants.CHARSET);
 
         synchronized (this.monitor) {
-            this.channel.basicPublish(exchangeName, routingKey, MessageConstants.DEFAULT_MESSAGE_PROPERTIES, bytes);
-            logger.debug("sent=" + data);
+            return this.channelTemplate.execute(new ChannelCallback<Boolean>() {
+                public Boolean doInChannel(Channel channel) throws ChannelException {
+                    try {
+                        channel.basicPublish(exchangeName, routingKey, MessageConstants.DEFAULT_MESSAGE_PROPERTIES, bytes);
+                        logger.debug("sent=" + data);
+                        return true;
+                    } catch (IOException e) {
+                        throw new ChannelException("Could not bind queue to exchange", e);
+                    }
+                }
+            });
         }
     }
 
@@ -157,7 +174,6 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
     }
 
 
-
     // TODO remove
 
     public void timedTest(int append) throws IOException, InterruptedException {
@@ -190,9 +206,4 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
             }
         }
     }
-
-    private boolean validArguments(String operationName, String exchangeName, String value) {
-        return operationName == null || exchangeName == null || value == null;
-    }
-
 }

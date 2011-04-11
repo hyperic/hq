@@ -27,7 +27,6 @@ package org.hyperic.hq.operation.rabbit.core;
 import com.rabbitmq.client.ConnectionFactory;
 import org.hyperic.hq.operation.*;
 import org.hyperic.hq.operation.annotation.Operation;
-import org.hyperic.hq.operation.rabbit.connection.SingleConnectionFactory;
 import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
 
 import java.lang.annotation.Annotation;
@@ -48,21 +47,14 @@ public class OperationMethodInvokingRegistry implements OperationRegistry, Opera
 
     protected final RoutingRegistry routingRegistry;
 
-    protected final OperationService operationService;
-
     protected final Converter<Object, String> converter;
 
-
-    public OperationMethodInvokingRegistry() {
-        this(new SingleConnectionFactory(), new JsonMappingConverter());
+ 
+    public OperationMethodInvokingRegistry(ConnectionFactory connectionFactory) {
+        this(new OperationToRoutingKeyRegistry(connectionFactory), new JsonMappingConverter());
     }
 
-    public OperationMethodInvokingRegistry(ConnectionFactory connectionFactory, Converter<Object, String> converter) {
-        this(new AnnotatedRabbitOperationService(connectionFactory), new OperationToRoutingKeyRegistry(connectionFactory), converter);
-    }
-
-    public OperationMethodInvokingRegistry(OperationService operationService, RoutingRegistry routingRegistry, Converter<Object, String> converter) {
-        this.operationService = operationService;
+    public OperationMethodInvokingRegistry(RoutingRegistry routingRegistry, Converter<Object, String> converter) {
         this.converter = converter;
         this.routingRegistry = routingRegistry;
     }
@@ -115,6 +107,9 @@ public class OperationMethodInvokingRegistry implements OperationRegistry, Opera
         return operationMappings;
     }
 
+    /**
+     *
+     */
     public static final class MethodInvoker {
 
         private final Converter<Object, String> converter;

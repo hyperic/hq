@@ -69,4 +69,9 @@ public class OperationToRoutingMapping {
     public boolean operationRequiresResponse() {
         return this.replyTo != null;
     }
+
+    @Override
+    public String toString() {
+        return new StringBuilder(this.exchangeName).append(" ").append(this.getRoutingKey()).toString();
+    }
 }

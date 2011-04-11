@@ -29,12 +29,11 @@ import com.rabbitmq.client.ConnectionFactory;
 import org.hyperic.hq.operation.rabbit.connection.ChannelException;
 import org.hyperic.hq.operation.rabbit.core.BindingHandler;
 import org.hyperic.hq.operation.rabbit.core.DeclarativeBindingHandler;
-import org.springframework.beans.factory.FactoryBean;
 
 /**
  * @author Helena Edelson
  */
-public class QueueFactoryBean implements FactoryBean<String> {
+public class QueueFactoryBean /*implements FactoryBean<String>*/ {
 
     private final BindingHandler declarativeBindingHandler;
 
