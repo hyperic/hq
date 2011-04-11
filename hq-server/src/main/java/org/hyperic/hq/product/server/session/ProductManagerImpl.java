@@ -569,12 +569,9 @@ public class ProductManagerImpl implements ProductManager {
     }
     
     private void updateConfigType(ResourceType appdefType, String configTypeName, ConfigSchema configSchema) {
-        List<ConfigOption> options = configSchema.getOptions();
-        if(options.isEmpty()) {
-            return;
-        }
         ConfigType configType = new ConfigType(configTypeName);
         appdefType.addConfigType(configType);
+        List<ConfigOption> options = configSchema.getOptions();
         Set<ConfigOptionType> optionTypes = new HashSet<ConfigOptionType>();
         for(ConfigOption option: options) {
             ConfigOptionType configOptType = new ConfigOptionType(option.getName(), option.getDescription());
