@@ -92,6 +92,10 @@
 		<level value="warn"/>
 	</logger>
 	
+	<logger name="org.hibernate.ejb.AbstractQueryImpl">
+		<level value="warn"/>
+	</logger>
+	
 	<logger name="org.apache.tools.ant">
 		<level value="error" />
 	</logger>
