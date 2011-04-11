@@ -181,15 +181,6 @@
     <plugin type="log_track"
             class="org.hyperic.hq.product.Log4JLogTrackPlugin"/>
 
-    <plugin type="config_track"
-            class="org.hyperic.hq.product.FileChangeTrackPlugin">
-            <monitored>
-            	<!--folder recursive='true' path='/conf' filter='wrapper.conf'/-->
-            	<folder path="wtpwebapps" recursive="true" filter=".*.txt"/>
-            	<!-- folder recursive='true' path='/webapps' /-->
-            </monitored>
-    </plugin>
-
     <property name="DEFAULT_PROGRAM"
               value="bin/catalina.sh"/>
 
@@ -558,11 +549,22 @@
               value="catalina.base"/>
     <plugin type="autoinventory"
             class="org.hyperic.hq.plugin.tomcat.TomcatServerDetector"/>
-    <plugin type="config_track"
-            class="org.hyperic.hq.product.FileChangeTrackPlugin"/>
-    
+
+
      &internal-services;
      &hibernate-services;
+
+    <plugin type="config_track"
+            class="org.hyperic.hq.product.ConfigFileTrackPlugin"/>
+    <!-- plugin type="config_track"
+            class="org.hyperic.hq.product.FileChangeTrackPlugin">
+            <monitored>
+            	<folder path="wtpwebapps" recursive="true" filter=".*.txt"/>
+            </monitored>
+    </plugin-->
+     <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="true" />
+ 
+    
   </server>
 
   <!-- ==================== Plugin Help =========================== -->

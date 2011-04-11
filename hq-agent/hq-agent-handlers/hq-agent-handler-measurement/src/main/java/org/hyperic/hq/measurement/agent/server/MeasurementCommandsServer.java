@@ -46,8 +46,6 @@ import org.hyperic.hq.agent.server.AgentServerHandler;
 import org.hyperic.hq.agent.server.AgentStartException;
 import org.hyperic.hq.agent.server.AgentStorageProvider;
 import org.hyperic.hq.agent.server.AgentTransportLifecycle;
-import org.hyperic.hq.agent.server.ConfigStorage;
-import org.hyperic.hq.agent.server.ConfigStorage.Key;
 import org.hyperic.hq.bizapp.agent.CommandsAPIInfo;
 import org.hyperic.hq.bizapp.client.MeasurementCallbackClient;
 import org.hyperic.hq.bizapp.client.StorageProviderFetcher;
@@ -72,15 +70,10 @@ import org.hyperic.hq.product.ConfigTrackPluginManager;
 import org.hyperic.hq.product.LogTrackPluginManager;
 import org.hyperic.hq.product.MeasurementPluginManager;
 import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.util.config.ConfigResponse;
 
 public class MeasurementCommandsServer 
     implements AgentServerHandler, AgentNotificationHandler {
     private static final long THREAD_JOIN_WAIT = 10 * 1000;
-    
-    private static final String FOLDER_TRACK_PREFIX  = "folder-track-config";
-    private static final String FOLDER_TRACK_KEYLIST = "folder-track-keylist";
-
 
     private MeasurementCommandsAPI   verAPI;         // Common API specifics
     private Thread                   scheduleThread; // Thread of scheduler
@@ -90,7 +83,6 @@ public class MeasurementCommandsServer
     private AgentStorageProvider     storage;        // Agent storage
     private Map                      validProps;     // Map of valid props
     private AgentConfig        bootConfig;     // Agent boot config
-    private ConfigStorage            folderMonitorStorage; // Folder Monitoring storage
     private MeasurementSchedule      schedStorage;   // Schedule storage
     private MeasurementPluginManager pluginManager;  // Plugin manager
     private Log                      log;            // Our log
@@ -112,7 +104,6 @@ public class MeasurementCommandsServer
         this.storage        = null;
         this.validProps     = Collections.synchronizedMap(new HashMap());
         this.bootConfig     = null;
-        this.folderMonitorStorage = null;
         this.schedStorage   = null;
         this.pluginManager  = null;
         this.log            = LogFactory.getLog(MeasurementCommandsServer.class);
@@ -202,11 +193,6 @@ public class MeasurementCommandsServer
             measurementCommandsService.removeTrackPlugin(ta);
             
             return new TrackPluginRemove_result();
-        }  else if(cmd.equals(this.verAPI.command_pushRuntimeDiscoveryConfig)) {
-            //TrackPluginActivate_args ta = new TrackPluginActivate_args(args);
-            measurementCommandsService.activateTrackPlugin(args);
-            
-            return null; //new TrackPluginRemove_result();
         } else {
             throw new AgentRemoteException("Unknown command: " + cmd);
         }
@@ -222,7 +208,6 @@ public class MeasurementCommandsServer
             this.bootConfig   = agent.getBootConfig();
             this.schedStorage = new MeasurementSchedule(this.storage, bootConfig.getBootProperties());
             logMeasurementSchedule(this.schedStorage);
-            this.folderMonitorStorage = new ConfigStorage(agent.getStorageProvider(), FOLDER_TRACK_KEYLIST, FOLDER_TRACK_PREFIX);
         } catch(AgentRunningException exc){
             throw new AgentAssertionException("Agent should be running here", exc);
         }
@@ -261,7 +246,6 @@ public class MeasurementCommandsServer
                 new MeasurementCommandsService(this.storage, 
                                                this.validProps,
                                                this.schedStorage, 
-                                               this.folderMonitorStorage,
                                                this.pluginManager, 
                                                this.ltPluginManager,
                                                this.ctPluginManager,
@@ -293,16 +277,6 @@ public class MeasurementCommandsServer
             this.measurementCommandsService.scheduleMeasurement(meas);
         }
 
-        Map<Key, ConfigResponse> folderConfigs = this.folderMonitorStorage.load();
-        for (Map.Entry<Key, ConfigResponse> entry: folderConfigs.entrySet()){
-            //final TrackPluginActivate_args args = new TrackPluginActivate_args(entry.getValue());
-            try {
-                this.measurementCommandsService.activateTrackPlugin(entry.getKey(), entry.getValue());
-            } catch (AgentRemoteException e) {
-                log.error(e.getMessage(), e);
-            }
-        }
-        
         agent.registerMonitor("camMetric.schedule", this.scheduleObject);
         agent.registerMonitor("camMetric.sender", this.senderObject);
 

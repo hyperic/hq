@@ -47,37 +47,37 @@ import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 
 public class FileChangeTrackPlugin extends ConfigFileTrackPlugin{
-    static final String PROP_FILES =
-        ProductPlugin.TYPE_CONFIG_TRACK + ".files";
     
-    private Map<String, FolderDto> _monitoredDirs = new HashMap<String, FolderDto>();
+    private Map<String, FolderDto> monitoredDirs = new HashMap<String, FolderDto>();
      
     protected static Log log =
         LogFactory.getLog(FileChangeTrackPlugin.class.getName());
 
 
-    private EventHandler _eventHandler = null;
+    private EventHandler eventHandler = null;
     
-    private String _appdefEntityID;
+//    private String _appdefEntityID;
         
     protected  class EventHandler  implements IChangeListener{
         public void onChange(EventMessage eventMsg) {
             // check if the event belongs to this plugin
-            final String installDir = config.getValue(INSTALL_PATH);
+            final String installpath =
+                config.getValue(ProductPlugin.PROP_INSTALLPATH);
+            
             final String pathToCheck = EventActionsEnum.RENAME.equals(eventMsg.getType()) 
                 ? eventMsg.getOldFullPath() 
                 : eventMsg.getFullPath();
                     
-            if (!pathToCheck.startsWith(installDir))
-                return;
-            
-            final String id = getAppdefEntityID();
-            if (id == null){
-                log.error("Plugin id null, event not sent");
+            if (installpath == null || pathToCheck == null){
+                log.error("Unexpected null value - install path: "+installpath+", path to check: "+pathToCheck);
                 return;
             }
+            
+            if (!pathToCheck.startsWith(installpath))
+                return;
+            
             TrackEvent event = 
-                new TrackEvent(id,
+                new TrackEvent(getName(),
                                System.currentTimeMillis(),
                                LogTrackPlugin.LOGLEVEL_INFO,
                                eventMsg.getType().protocolValue(),
@@ -89,18 +89,26 @@ public class FileChangeTrackPlugin extends ConfigFileTrackPlugin{
         }
     }
 
-    public void init(PluginManager manager)
-        throws PluginException {
-        super.init(manager);
+    /*** temporary implementation just so something should show up ***/
+    protected String getDefaultConfigFile(TypeInfo info, ConfigResponse config) {
+        final List<MonitoredFolderConfig> configs = data.getMonitoredFolders();
+        if (configs == null || configs.size() <= 0)
+            return "";
 
+        final StringBuffer sb = new StringBuffer();
+        for (final MonitoredFolderConfig folderConf: configs){
+            if (sb.length() > 0)
+                sb.append(",");
+            sb.append(folderConf.getPath()+";"+folderConf.isRecursive()+";"+folderConf.getFilter());
+        }
+        return sb.toString();
     }
+
     
     /** currently a placeholder... **/
     public ConfigSchema getConfigSchema(TypeInfo info, ConfigResponse config) {
         return super.getConfigSchema(info, config);
     }
-
-    private static final String INSTALL_PATH = "config.installpath";
 
     public void configure(ConfigResponse config)
         throws PluginException {
@@ -108,20 +116,20 @@ public class FileChangeTrackPlugin extends ConfigFileTrackPlugin{
         log.info("FileChangeTrackPlugin plugin configure()");
 
         this.config = config;
-        setAppdefEntityID( config.getValue("entity.type")+":"+config.getValue("entity.id"));
 
         final PluginData data = getPluginData();
         final List<MonitoredFolderConfig> configs = data.getMonitoredFolders();
         if (configs == null || configs.size() <= 0)
             return;
         
-        final String installDir = config.getValue(INSTALL_PATH);
-        final Collection<FolderDto> folders = convert(installDir, configs);
+        final String installpath =
+            config.getValue(ProductPlugin.PROP_INSTALLPATH);
+        final Collection<FolderDto> folders = convert(installpath, configs);
         
         final IFileMonitor monitor = getManager().getFileMonitor();
-        if (_eventHandler == null){
-            _eventHandler = new EventHandler();
-            monitor.addListener(_eventHandler);
+        if (eventHandler == null){
+            eventHandler = new EventHandler();
+            monitor.addListener(eventHandler);
         }
 
         monitor.addMonitoredDirs(folders);
@@ -130,13 +138,13 @@ public class FileChangeTrackPlugin extends ConfigFileTrackPlugin{
     public void shutdown()
         throws PluginException {
         final IFileMonitor monitor = getManager().getFileMonitor();
-        if (_eventHandler != null){
-            monitor.removeListener(_eventHandler);
-            _eventHandler = null;
+        if (eventHandler != null){
+            monitor.removeListener(eventHandler);
+            eventHandler = null;
         }
-        if (_monitoredDirs != null && _monitoredDirs.size() > 0){
-            monitor.removeMonitoredDirs(_monitoredDirs.values());
-            _monitoredDirs.clear();
+        if (monitoredDirs != null && monitoredDirs.size() > 0){
+            monitor.removeMonitoredDirs(monitoredDirs.values());
+            monitoredDirs.clear();
         }
         super.shutdown();
     }
@@ -147,10 +155,10 @@ public class FileChangeTrackPlugin extends ConfigFileTrackPlugin{
         
         for (final MonitoredFolderConfig config:configs){
             final FolderDto folder = convert(installDir, config);
-            _monitoredDirs.put(folder.getPath(), folder);
+            monitoredDirs.put(folder.getPath(), folder);
         }
           
-        return _monitoredDirs.values();
+        return monitoredDirs.values();
     }
     
     private FolderDto convert(final String installDir, final MonitoredFolderConfig folderConfig){
@@ -161,15 +169,5 @@ public class FileChangeTrackPlugin extends ConfigFileTrackPlugin{
         dto.setFilter(folderConfig.getFilter());
         dto.setRecursive(folderConfig.isRecursive());
         return dto;
-    }
-
-    protected String getAppdefEntityID() {
-        return _appdefEntityID;
-    }
-
-    protected void setAppdefEntityID(String appdefEntityID) {
-        _appdefEntityID = appdefEntityID;
-    }
-
- 
+    } 
 }

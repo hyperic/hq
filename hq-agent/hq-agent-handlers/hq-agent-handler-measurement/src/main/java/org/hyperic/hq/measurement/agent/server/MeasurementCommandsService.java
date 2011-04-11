@@ -31,12 +31,9 @@ import java.util.Vector;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentRemoteException;
-import org.hyperic.hq.agent.AgentRemoteValue;
 import org.hyperic.hq.agent.PropertyPair;
 import org.hyperic.hq.agent.server.AgentStorageException;
 import org.hyperic.hq.agent.server.AgentStorageProvider;
-import org.hyperic.hq.agent.server.ConfigStorage;
-import org.hyperic.hq.agent.server.ConfigStorage.Key;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.measurement.agent.ScheduledMeasurement;
 import org.hyperic.hq.measurement.agent.client.MeasurementCommandsClient;
@@ -51,7 +48,6 @@ import org.hyperic.hq.measurement.agent.commands.TrackPluginRemove_args;
 import org.hyperic.hq.measurement.agent.commands.UnscheduleMeasurements_args;
 import org.hyperic.hq.measurement.server.session.SRN;
 import org.hyperic.hq.product.ConfigTrackPluginManager;
-import org.hyperic.hq.product.FileChangeTrackPlugin;
 import org.hyperic.hq.product.GenericPlugin;
 import org.hyperic.hq.product.LogTrackPluginManager;
 import org.hyperic.hq.product.MeasurementPluginManager;
@@ -78,7 +74,6 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
     private final AgentStorageProvider _storage;
     private final Map _validProps;
     private final MeasurementSchedule _schedStorage;
-    private final ConfigStorage _folderMonitorStorage;
     private final MeasurementPluginManager _pluginManager;
     private final LogTrackPluginManager _ltPluginManager;
     private final ConfigTrackPluginManager _ctPluginManager;
@@ -88,7 +83,6 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
     public MeasurementCommandsService(AgentStorageProvider storage, 
                                       Map validProps, 
                                       MeasurementSchedule schedStorage, 
-                                      ConfigStorage folderMonitorStorage,
                                       MeasurementPluginManager pluginManager, 
                                       LogTrackPluginManager ltPluginManager, 
                                       ConfigTrackPluginManager ctPluginManager, 
@@ -96,7 +90,6 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
         _storage = storage;
         _validProps = validProps;
         _schedStorage = schedStorage;
-        _folderMonitorStorage = folderMonitorStorage;
         _pluginManager = pluginManager;
         _ltPluginManager = ltPluginManager;
         _ctPluginManager = ctPluginManager;
@@ -401,58 +394,6 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
     private void unscheduleMeasurements(AppdefEntityID id)
         throws UnscheduledItemException {
         _scheduleObject.unscheduleMeasurements(id);
-    }
-
-    private static final String PROP_TYPE_NAME = "entity.typeName";
-    private static final String INSTALL_PATH = "config.installpath";
-
-    public void activateTrackPlugin(final AgentRemoteValue rv)
-        throws AgentRemoteException{
-        final Key key = _folderMonitorStorage.getKey(rv);
-        ConfigResponse cr = new ConfigResponse();
-        ConfigStorage.copy(ConfigStorage.NO_PREFIX, rv, ConfigStorage.NO_PREFIX, cr);
-
-        activateTrackPlugin(key, cr);
-    }
-
-    public void activateTrackPlugin(Key key, ConfigResponse configResponse) throws AgentRemoteException{
-        final String pluginType =  configResponse.getValue(PROP_TYPE_NAME);
-        final String installPath =  configResponse.getValue(INSTALL_PATH);       
-        activateTrackPlugin(pluginType, installPath, configResponse, key);
-    }
-
-    public void activateTrackPlugin(String pluginType, String installPath, ConfigResponse configResponse, Key key)
-            throws AgentRemoteException {
-        GenericPlugin plugin = null;
-        try {
-            plugin = _ctPluginManager.getPlugin(pluginType);
-        } catch (PluginNotFoundException e) {
-            _log.info(e.getMessage(), e);
-        }   
-        if (plugin == null)
-            return;
-        
-        if (!(plugin instanceof FileChangeTrackPlugin)){
-            if (_log.isDebugEnabled())
-                _log.debug(plugin.getName()+" not of class FileChangeTrackPlugin, and will be skipped.");
-            return;
-        }
-        try{
-            _folderMonitorStorage.put(key, configResponse);
-        } catch (AgentStorageException e) {
-            _log.error(e.getMessage(), e);
-        }
-
-        try{
-            _ctPluginManager.updatePlugin(plugin, configResponse);
-        } catch (PluginNotFoundException e) {
-            _log.error(e.getMessage(), e);
-        } catch (PluginExistsException e) {
-            _log.error(e.getMessage(), e);
-        } catch (PluginException e) {
-            _log.error(e.getMessage(), e);
-            throw new AgentRemoteException(e.getMessage());
-        }
     }
 
 }

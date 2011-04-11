@@ -25,7 +25,6 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.detect;
 
-
 import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -45,7 +44,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentCommand;
 import org.hyperic.hq.agent.AgentRemoteValue;
 import org.hyperic.hq.agent.server.AgentDaemon;
-import org.hyperic.hq.agent.server.AgentServerHandler;
 import org.hyperic.hq.autoinventory.agent.client.AICommandsUtils;
 import org.hyperic.hq.plugin.rabbitmq.core.*;
 import org.hyperic.hq.plugin.rabbitmq.manage.RabbitTransientResourceManager;
@@ -120,10 +118,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
             AgentRemoteValue configARV = AICommandsUtils.createArgForRuntimeDiscoveryConfig(0, 0, "RabbitMQ", null, cf);
             logger.debug("[runAutoDiscovery] configARV=" + configARV);
             AgentCommand ac = new AgentCommand(1, 1, "autoinv:pushRuntimeDiscoveryConfig", configARV);
-            List<AgentServerHandler> handlers = AgentDaemon.getMainInstance().getCommandDispatcher().getHandlers(ac);
-            for (AgentServerHandler h: handlers)
-                AgentDaemon.getMainInstance().getCommandDispatcher().processRequest(ac, h, null, null);
- //            AgentDaemon.getMainInstance().getCommandDispatcher().processRequest(ac, null, null);
+            AgentDaemon.getMainInstance().getCommandDispatcher().processRequest(ac, null, null);
             logger.debug("[runAutoDiscovery] << OK");
         } catch (Exception ex) {
             logger.debug("[runAutoDiscovery]" + ex.getMessage(), ex);

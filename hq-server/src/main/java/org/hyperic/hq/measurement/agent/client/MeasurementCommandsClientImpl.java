@@ -28,7 +28,6 @@ package org.hyperic.hq.measurement.agent.client;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.client.AbstractCommandsClient;
-import org.hyperic.hq.agent.server.ConfigStorage.Key;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.measurement.agent.commands.DeleteProperties_args;
 import org.hyperic.hq.measurement.agent.commands.GetMeasurements_args;
@@ -164,18 +163,5 @@ public class MeasurementCommandsClientImpl
             safeDestroyService(proxy);
         }
     }
-
-    public void activateTrackPlugin(String pluginType, String installPath,
-                                    ConfigResponse configResponse, Key key) throws AgentRemoteException,
-        AgentConnectionException {
-        MeasurementCommandsClient proxy = null;
-        
-        try {
-            proxy = (MeasurementCommandsClient)getAsynchronousProxy(MeasurementCommandsClient.class, false);
-            proxy.activateTrackPlugin(pluginType, installPath, configResponse, key);    
-        } finally {
-            safeDestroyService(proxy);
-        }
-    }    
 
 }

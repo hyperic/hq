@@ -55,9 +55,7 @@ public final class MeasurementCommandsAPI extends AgentAPIInfo {
         commandPrefix + "setProperties";
     public static final String command_deleteProperties = 
         commandPrefix + "deleteProperties";
-    public static final String command_pushRuntimeDiscoveryConfig =
-        "autoinv:pushRuntimeDiscoveryConfig";
-    
+
     // Commands for enabling and disabling log and config
     // track plugins.
     public static final String trackPrefix = "track:";
@@ -73,8 +71,7 @@ public final class MeasurementCommandsAPI extends AgentAPIInfo {
         command_setProperties,
         command_deleteProperties,
         command_trackAdd,
-        command_trackRemove,
-        command_pushRuntimeDiscoveryConfig
+        command_trackRemove
     };
 
     public MeasurementCommandsAPI(){
