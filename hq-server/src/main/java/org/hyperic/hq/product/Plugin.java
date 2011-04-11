@@ -190,6 +190,12 @@ public class Plugin extends PersistedObject implements ContainerManagedTimestamp
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
     }
+    
+    public String toString() {
+        return new StringBuilder()
+            .append(name).append(";").append(path)
+            .toString();
+    }
 
     public boolean equals(Object obj)
     {

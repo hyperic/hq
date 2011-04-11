@@ -94,8 +94,13 @@ implements AgentPluginUpdater, ApplicationListener<ContextRefreshedEvent>, Appli
         final Set<Integer> agentIds = new HashSet<Integer>();
         agentIds.addAll(updateMap.keySet());
         agentIds.addAll(removeMap.keySet());
+        final boolean debug = log.isDebugEnabled();
         for (final Integer agentId : agentIds) {
             final Collection<Plugin> plugins = updateMap.get(agentId);
+            if (debug) {
+                log.debug("queue plugin transfer for agentId=" + agentId +
+                          " plugins=" + plugins);
+            }
 // XXX create a spring managed prototype instead of an anon class
             final AgentDataTransferJob job =
                 getPluginSyncJob(agentId, plugins, removeMap.get(agentId), agentManager);
