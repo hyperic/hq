@@ -290,7 +290,7 @@ public class PluginManagerController extends BaseController implements Applicati
             
             if(param!=null){
                 for(int i = 0; i<param.size();i++){
-                    messageParams[i]=param.get(String.valueOf(i));
+                    messageParams[i]=param.get(i);
                 }
             }
             log.error(e,e);
