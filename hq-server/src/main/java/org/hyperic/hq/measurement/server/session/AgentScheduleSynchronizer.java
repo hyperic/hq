@@ -42,7 +42,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.agent.mgmt.data.AgentRepository;
+import org.hyperic.hq.agent.mgmt.data.ManagedResourceRepository;
 import org.hyperic.hq.agent.mgmt.domain.Agent;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
@@ -69,7 +69,7 @@ public class AgentScheduleSynchronizer {
 
     private AgentManager agentManager;
     
-    private AgentRepository agentRepository;
+    private ManagedResourceRepository managedResourceRepository;
 
     private final Map<Integer, Collection<AppdefEntityID>> scheduleAeids = new HashMap<Integer, Collection<AppdefEntityID>>();
 
@@ -87,12 +87,12 @@ public class AgentScheduleSynchronizer {
     public AgentScheduleSynchronizer(ZeventEnqueuer zEventManager, AgentManager agentManager,
                                      MeasurementProcessor measurementProcessor,
                                      ConcurrentStatsCollector concurrentStatsCollector,
-                                     AgentRepository agentRepository) {
+                                     ManagedResourceRepository managedResourceRepository) {
         this.zEventManager = zEventManager;
         this.agentManager = agentManager;
         this.measurementProcessor = measurementProcessor;
         this.concurrentStatsCollector = concurrentStatsCollector;
-        this.agentRepository = agentRepository;
+        this.managedResourceRepository = managedResourceRepository;
     }
 
     @PostConstruct
@@ -123,7 +123,7 @@ public class AgentScheduleSynchronizer {
                         AgentScheduleSyncZevent event = (AgentScheduleSyncZevent) z;
                         toSchedule.addAll(event.getEntityIds());
                         if (debug)
-                            log.debug("Schduling eids=[" + event.getEntityIds() + "]");
+                            log.debug("Scheduling eids=[" + event.getEntityIds() + "]");
                     } else if (z instanceof AgentUnscheduleZevent) {
                         AgentUnscheduleZevent event = (AgentUnscheduleZevent) z;
                         String token = event.getAgentToken();
@@ -144,12 +144,16 @@ public class AgentScheduleSynchronizer {
                 synchronized (scheduleAeids) {
                     for (AppdefEntityID id : toSchedule) {
                         Collection<AppdefEntityID> tmp;
-                        int agentId = agentRepository.findByManagedResource(id.getId()).getId();
-                        if (null == (tmp = scheduleAeids.get(agentId))) {
-                            tmp = new HashSet<AppdefEntityID>();
-                            scheduleAeids.put(agentId, tmp);
+                        Agent agent =  managedResourceRepository.findAgentByResource(id.getId());
+                        if(agent == null) {
+                            log.warn("Could not find agent for entity: " + id);
+                        } else {
+                            if (null == (tmp = scheduleAeids.get(agent.getId()))) {
+                                tmp = new HashSet<AppdefEntityID>();
+                                scheduleAeids.put(agent.getId(), tmp);
+                            }
+                            tmp.add(id);
                         }
-                        tmp.add(id); 
                     }
                 }
                 synchronized (unscheduleAeids) {

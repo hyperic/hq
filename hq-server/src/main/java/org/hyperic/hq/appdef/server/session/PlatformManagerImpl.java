@@ -1969,7 +1969,10 @@ public class PlatformManagerImpl implements PlatformManager {
         Collection<Platform> plats  = new HashSet<Platform>();
         Collection<Resource> resources = getAllPlatforms();
         for(Resource resource: resources) {
-            if(managedResourceRepository.findAgentByResource(resource.getId()).equals(agt)) {
+            Agent resourceAgent = managedResourceRepository.findAgentByResource(resource.getId());
+            if(resourceAgent == null) {
+                log.warn("No agent for resource " + resource);
+            }else if(resourceAgent.equals(agt)) {
                 plats.add(toPlatform(resource));
             }
         }
