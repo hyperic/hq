@@ -61,7 +61,6 @@ import org.hyperic.hq.events.ext.RegisteredTriggers;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.data.MeasurementDataSourceException;
-import org.hyperic.hq.measurement.data.MeasurementRepository;
 import org.hyperic.hq.measurement.ext.MeasurementEvent;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.measurement.shared.DataManager;
@@ -80,6 +79,7 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -147,7 +147,8 @@ public class DataManagerImpl implements DataManager {
     private RegisteredTriggers registeredTriggers;
     private ConcurrentStatsCollector concurrentStatsCollector;
     private DialectAccessor dialectAccessor;
-    private int transactionTimeout=900;
+    @Value("${server.transaction.timeout}")
+    private int transactionTimeout;
     
     @Autowired
     public DataManagerImpl(DBUtil dbUtil,

@@ -166,4 +166,8 @@ public class PostgreSQLDialect
     public String getMetricDataHint() {
         return "";
     }
+    
+    public boolean requiresCast() {
+        return false;
+    }
 }

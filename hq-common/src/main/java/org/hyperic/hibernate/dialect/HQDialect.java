@@ -28,15 +28,13 @@ package org.hyperic.hibernate.dialect;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public interface HQDialect
-{
+public interface HQDialect {
     /**
-     * Returns the table optimize statement for
-     * a particular database
-     *
+     * Returns the table optimize statement for a particular database
+     * 
      * @param table - name of table
-     * @param cost - based on the database,
-     *               may be table percentage or random number
+     * @param cost - based on the database, may be table percentage or random
+     *        number
      */
     public String getOptimizeStmt(String table, int cost);
 
@@ -47,15 +45,15 @@ public interface HQDialect
     public boolean useMetricUnion();
 
     /**
-     * Returns true if using the EAM_NUMBERS table to iterate over a
-     * certain amount of time ranges is optimal for the database
+     * Returns true if using the EAM_NUMBERS table to iterate over a certain
+     * amount of time ranges is optimal for the database
      */
     public boolean useEamNumbers();
 
     /**
-     * Returns -1 if Max Expressions supported in the db is unlimited.
-     * This applies mainly to SQL in statements e.g. where ids in (0, 1, 2,...)
-     * Or a sequence of SQL 'and' or 'or' statements in one statement
+     * Returns -1 if Max Expressions supported in the db is unlimited. This
+     * applies mainly to SQL in statements e.g. where ids in (0, 1, 2,...) Or a
+     * sequence of SQL 'and' or 'or' statements in one statement
      */
     public int getMaxExpressions();
 
@@ -63,32 +61,29 @@ public interface HQDialect
      * Returns true if the database supports a multi insert stmt.
      */
     public boolean supportsMultiInsertStmt();
-    
 
     /**
      * Returns a db specific SQL syntax for a POSIX style Regular Expression.
      * @param column - the column to match against
-     * @param regex - the POSIX style regex.  The param passed in allows for
-     * prepared statement type syntax.  If that is not desired put quotes around
-     * the value to ensure the SQL will not fail.
+     * @param regex - the POSIX style regex. The param passed in allows for
+     *        prepared statement type syntax. If that is not desired put quotes
+     *        around the value to ensure the SQL will not fail.
      * @param ignoreCase - similar to grep -i
      * @param invertMatch - similar to grep -v
      */
-    public String getRegExSQL(String column, String regex, boolean ignoreCase,
-                              boolean invertMatch);
+    public String getRegExSQL(String column, String regex, boolean ignoreCase, boolean invertMatch);
 
     /**
-     * Returns true if the database supports an insert stmt which
-     * updates when the unique key is violated
+     * Returns true if the database supports an insert stmt which updates when
+     * the unique key is violated
      */
     public boolean supportsDuplicateInsertStmt();
 
     /**
      * Returns true if the database contains the specified tableName
      */
-    public boolean tableExists(Statement stmt, String tableName)
-        throws SQLException;
-    
+    public boolean tableExists(Statement stmt, String tableName) throws SQLException;
+
     /**
      * Returns the limit string.
      * 
@@ -100,12 +95,11 @@ public interface HQDialect
     /**
      * Returns true if the database contains the specified viewName
      */
-    public boolean viewExists(Statement stmt, String viewName)
-        throws SQLException;
+    public boolean viewExists(Statement stmt, String viewName) throws SQLException;
 
     /**
-     * If true, tells the ComboGenerator to use the SequenceGenerator, else
-     * uses the MultipleHiLoPerTableGenerator
+     * If true, tells the ComboGenerator to use the SequenceGenerator, else uses
+     * the MultipleHiLoPerTableGenerator
      */
     public boolean usesSequenceGenerator();
 
@@ -113,14 +107,22 @@ public interface HQDialect
      * true if the database supports PL/SQL
      */
     public boolean supportsPLSQL();
-    
+
     /**
      * @return the limit sql associated with the offset and limit params
      */
     public String getLimitBuf(String sql, int offset, int limit);
 
     /**
-     * @return emptyString or a string representing the optimizer hint.  null is not expected here
+     * @return emptyString or a string representing the optimizer hint. null is
+     *         not expected here
      */
     public String getMetricDataHint();
+
+    /**
+     * 
+     * @return true if numbers have to be explicitly cast using SQL cast when
+     *         performing operations such as division
+     */
+    public boolean requiresCast();
 }
