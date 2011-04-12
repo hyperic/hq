@@ -54,7 +54,7 @@
 		<c:forEach var="pluginSummary" items="${pluginSummaries}" varStatus="index">
 			<li class="gridrow clear <c:if test="${pluginSummary.deleted}"> grey </c:if> <c:if test="${index.count % 2 == 0}"> even</c:if>" >
 				<span class="first column span-1">
-					<c:if test="${mechanismOn && !pluginSummary.deleted}">
+					<c:if test="${mechanismOn && !pluginSummary.deleted && !pluginSummary.inProgress}">
                     	<input type="checkbox" value="${pluginSummary.id}_${pluginSummary.jarName} (${pluginSummary.name})" name="deleteId"/>&nbsp; 
 					</c:if>
 				</span>
@@ -277,11 +277,13 @@
 
 		new hqDijit.Tooltip({
 			connectId:["addedTimeHeader"],
+			position:["left"],
 			label: "<fmt:message key='admin.managers.plugin.column.header.initial.deploy.date.tip' />"
 		});
 		
 		new hqDijit.Tooltip({
 			connectId:["updatedTimeHeader"],
+			position:["left"],
 			label: "<fmt:message key='admin.managers.plugin.column.header.last.sync.date.tip' />"
 		});
 		
@@ -642,7 +644,7 @@
                 		var span = hqDojo.create("span", {
                 			"class": "first column span-1"
                 		}, li);
-                		if(${mechanismOn} && (!summary.deleted) ){
+                		if(${mechanismOn} && (!summary.deleted) && (!summary.inProgress)){
 	                		var input = hqDojo.create("input", {
     	            			"type": "checkbox",
     	            			"name": "deleteId",
