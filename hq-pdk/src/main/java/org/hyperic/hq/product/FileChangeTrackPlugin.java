@@ -61,20 +61,15 @@ public class FileChangeTrackPlugin extends ConfigFileTrackPlugin{
     protected  class EventHandler  implements IChangeListener{
         public void onChange(EventMessage eventMsg) {
             // check if the event belongs to this plugin
-            final String installpath =
-                config.getValue(ProductPlugin.PROP_INSTALLPATH);
             
             final String pathToCheck = EventActionsEnum.RENAME.equals(eventMsg.getType()) 
                 ? eventMsg.getOldFullPath() 
                 : eventMsg.getFullPath();
                     
-            if (installpath == null || pathToCheck == null){
-                log.error("Unexpected null value - install path: "+installpath+", path to check: "+pathToCheck);
+            if (pathToCheck == null){
+                log.error("Unexpected null value path");
                 return;
             }
-            
-            if (!pathToCheck.startsWith(installpath))
-                return;
             
             TrackEvent event = 
                 new TrackEvent(getName(),
@@ -124,24 +119,20 @@ public class FileChangeTrackPlugin extends ConfigFileTrackPlugin{
         
         final String installpath =
             config.getValue(ProductPlugin.PROP_INSTALLPATH);
+        
         final Collection<FolderDto> folders = convert(installpath, configs);
         
         final IFileMonitor monitor = getManager().getFileMonitor();
         if (eventHandler == null){
             eventHandler = new EventHandler();
-            monitor.addListener(eventHandler);
         }
 
-        monitor.addMonitoredDirs(folders);
+        monitor.addMonitoredDirs(folders, eventHandler);
       }
 
     public void shutdown()
         throws PluginException {
         final IFileMonitor monitor = getManager().getFileMonitor();
-        if (eventHandler != null){
-            monitor.removeListener(eventHandler);
-            eventHandler = null;
-        }
         if (monitoredDirs != null && monitoredDirs.size() > 0){
             monitor.removeMonitoredDirs(monitoredDirs.values());
             monitoredDirs.clear();
@@ -165,7 +156,10 @@ public class FileChangeTrackPlugin extends ConfigFileTrackPlugin{
         if (folderConfig == null)
             return null;
         final FolderDto dto = new FolderDto();
-        dto.setPath(installDir + File.separator +folderConfig.getPath());
+        final String path = folderConfig.getPath();
+        final boolean isAbsolute = path.charAt(1) == ':' || path.charAt(0) == '/'; 
+        final String basePath = isAbsolute ? "" : path+ File.separator ;
+        dto.setPath(basePath + folderConfig.getPath());
         dto.setFilter(folderConfig.getFilter());
         dto.setRecursive(folderConfig.isRecursive());
         return dto;
