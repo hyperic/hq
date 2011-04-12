@@ -27,6 +27,7 @@
 package org.hyperic.hq.appdef.server.session;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 import org.hyperic.hq.agent.server.session.AgentDataTransferJob;
@@ -35,6 +36,7 @@ import org.hyperic.hq.appdef.shared.AgentPluginUpdater;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.product.shared.PluginManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -49,14 +51,17 @@ public class AgentRemovePluginJob implements AgentDataTransferJob {
     private AuthzSubject overlord;
     private AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle;
     private AgentManager agentManager;
+    private PluginManager pluginManager;
 
     @Autowired
     public AgentRemovePluginJob(AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle,
                                 AuthzSubjectManager authzSubjectManager,
+                                PluginManager pluginManager,
                                 AgentManager agentManager) {
         this.agentPluginSyncRestartThrottle = agentPluginSyncRestartThrottle;
         this.overlord = authzSubjectManager.getOverlordPojo();
         this.agentManager = agentManager;
+        this.pluginManager = pluginManager;
     }
 
     public String getJobDescription() {
@@ -93,6 +98,11 @@ public class AgentRemovePluginJob implements AgentDataTransferJob {
 
     public Collection<String> getPluginFileNames() {
         return pluginFileNames;
+    }
+
+    public void onFailure() {
+        pluginManager.updateAgentPluginSyncStatus(
+            AgentPluginStatusEnum.SYNC_FAILURE, null, Collections.singletonMap(agentId, pluginFileNames));
     }
 
 }

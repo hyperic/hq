@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -279,7 +280,12 @@ public class AgentCommandsClientImpl
         AgentCommandsClient proxy = null;
         try {
             proxy = (AgentCommandsClient)getAsynchronousProxy(AgentCommandsClient.class, false);
-            return proxy.agentRemoveFile(files);
+            final Map<String, Boolean> rtn = proxy.agentRemoveFile(files);
+            if (rtn == null) {
+                _log.error("error removing files from agent=" + getAgent() + " files=" + files);
+                return Collections.emptyMap();
+            }
+            return rtn;
         } finally {
             safeDestroyService(proxy);
         }

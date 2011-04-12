@@ -79,15 +79,24 @@ implements AgentPluginUpdater, ApplicationContextAware {
         agentIds.addAll(removeMap.keySet());
         final boolean debug = log.isDebugEnabled();
         for (final Integer agentId : agentIds) {
-            final Collection<Plugin> plugins = updateMap.get(agentId);
+            Collection<Plugin> plugins = updateMap.get(agentId);
+            Collection<String> toRemove = removeMap.get(agentId);
+            if (plugins == null) {
+                plugins = Collections.emptyList();
+            }
+            if (toRemove == null) {
+                toRemove = Collections.emptyList();
+            }
             if (debug) {
                 log.debug("queue plugin transfer for agentId=" + agentId +
                           " plugins=" + plugins);
+                log.debug("queue plugin remove for agentId=" + agentId +
+                          " filenames=" + toRemove);
             }
             final PluginSyncJob job = ctx.getBean(PluginSyncJob.class);
             job.setAgentId(agentId);
             job.setPlugins(plugins);
-            job.setToRemove(removeMap.get(agentId));
+            job.setToRemove(toRemove);
             agentSynchronizer.addAgentJob(job);
         }
     }
