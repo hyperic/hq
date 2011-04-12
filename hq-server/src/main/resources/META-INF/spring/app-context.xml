@@ -240,7 +240,7 @@
 		<bean class="org.hyperic.hq.bizapp.server.action.integrate.OpenNMSAction" />
 	</util:list>
 	
-	<task:scheduler id="scheduler" />
+	<task:scheduler id="scheduler" pool-size="4"/>
 	
 	<!--  Executor that ControlManager uses to run tasks that wait for control action results -->
 	<task:executor id="controlExecutor" pool-size="1-5" queue-capacity="500" rejection-policy="CALLER_RUNS"/>
