@@ -4,7 +4,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.inventory.domain.RelationshipTypes;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
-import org.hyperic.hq.plugin.mgmt.data.PluginRepository;
+import org.hyperic.hq.plugin.mgmt.data.PluginResourceTypeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,15 +27,15 @@ public class ServiceFactory {
 
     private PlatformFactory platformFactory;
     
-    private PluginRepository pluginRepository;
+    private PluginResourceTypeRepository pluginResourceTypeRepository;
     
 
     @Autowired
     public ServiceFactory(ServerFactory serverFactory, PlatformFactory platformFactory, 
-                          PluginRepository pluginRepository) {
+                          PluginResourceTypeRepository pluginResourceTypeRepository) {
         this.serverFactory = serverFactory;
         this.platformFactory = platformFactory;
-        this.pluginRepository = pluginRepository;
+        this.pluginResourceTypeRepository = pluginResourceTypeRepository;
     }
 
     public Service createService(Resource resource) {
@@ -73,7 +73,7 @@ public class ServiceFactory {
         serviceType.setDescription(resourceType.getDescription());
         serviceType.setId(resourceType.getId());
         serviceType.setName(resourceType.getName());
-        serviceType.setPlugin(pluginRepository.findByResourceType(resourceType.getId()).getName());
+        serviceType.setPlugin(pluginResourceTypeRepository.findNameByResourceType(resourceType.getId()));
         // TODO for types, we just fake out sort name for now. Can't do
         // setProperty on ResourceType
         serviceType.setSortName(resourceType.getName().toUpperCase());

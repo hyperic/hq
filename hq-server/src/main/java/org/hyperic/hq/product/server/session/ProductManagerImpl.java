@@ -67,7 +67,9 @@ import org.hyperic.hq.pdk.domain.MetricInfo;
 import org.hyperic.hq.pdk.domain.PluginDefinition;
 import org.hyperic.hq.pdk.domain.PluginDefinition.Triple;
 import org.hyperic.hq.plugin.mgmt.data.PluginRepository;
+import org.hyperic.hq.plugin.mgmt.data.PluginResourceTypeRepository;
 import org.hyperic.hq.plugin.mgmt.domain.Plugin;
+import org.hyperic.hq.plugin.mgmt.domain.PluginResourceType;
 import org.hyperic.hq.product.FlexibleProductPlugin;
 import org.hyperic.hq.product.MeasurementInfo;
 import org.hyperic.hq.product.PlatformTypeInfo;
@@ -111,6 +113,7 @@ public class ProductManagerImpl implements ProductManager {
     private PluginAuditFactory pluginAuditFactory;
     private ResourceManager resourceManager;
     private ResourceTypeDao resourceTypeDao;
+    private PluginResourceTypeRepository pluginResourceTypeRepository;
 	
     @Autowired
     public ProductManagerImpl(PluginRepository pluginRepository, AlertDefinitionManager alertDefinitionManager,
@@ -119,7 +122,8 @@ public class ProductManagerImpl implements ProductManager {
                               ServiceManager serviceManager, PlatformManager platformManager,
                               AlertDefinitionXmlParser alertDefinitionXmlParser,
                               PluginAuditFactory pluginAuditFactory,
-                              ResourceManager resourceManager, ResourceTypeDao resourceTypeDao) {        
+                              ResourceManager resourceManager, ResourceTypeDao resourceTypeDao,
+                              PluginResourceTypeRepository pluginResourceTypeRepository) {        
         this.pluginRepository = pluginRepository;
         this.alertDefinitionManager = alertDefinitionManager;
         this.templateManager = templateManager;
@@ -131,6 +135,7 @@ public class ProductManagerImpl implements ProductManager {
         this.pluginAuditFactory = pluginAuditFactory;
         this.resourceManager = resourceManager;
         this.resourceTypeDao = resourceTypeDao;
+        this.pluginResourceTypeRepository = pluginResourceTypeRepository;
     }
 
     /**
@@ -351,7 +356,8 @@ public class ProductManagerImpl implements ProductManager {
     			
     			entity = new ResourceType(resourceType.getName(),resourceType.getDescription());
     			resourceTypeDao.persist(entity);
-    			plugin.addResourceType(entity.getId());
+    			PluginResourceType pluginResourceType = new PluginResourceType(plugin.getName(),entity.getId());
+    			pluginResourceTypeRepository.save(pluginResourceType);
     			Set<OperationType> opTypes = new HashSet<OperationType>();
     			for (org.hyperic.hq.pdk.domain.OperationType ot : resourceType.getOperationTypes()) {
     	            OperationType opType = new OperationType(ot.getName());

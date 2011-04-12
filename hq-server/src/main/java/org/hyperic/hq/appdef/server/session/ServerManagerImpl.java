@@ -74,8 +74,9 @@ import org.hyperic.hq.inventory.domain.RelationshipTypes;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
-import org.hyperic.hq.plugin.mgmt.data.PluginRepository;
+import org.hyperic.hq.plugin.mgmt.data.PluginResourceTypeRepository;
 import org.hyperic.hq.plugin.mgmt.domain.Plugin;
+import org.hyperic.hq.plugin.mgmt.domain.PluginResourceType;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.ArrayUtil;
@@ -101,7 +102,7 @@ public class ServerManagerImpl implements ServerManager {
 
     private static final String VALUE_PROCESSOR = "org.hyperic.hq.appdef.server.session.PagerProcessor_server";
     private Pager valuePager;
-    private PluginRepository pluginRepository;
+    private PluginResourceTypeRepository pluginResourceTypeRepository;
     private AgentRepository agentRepository;
     private PermissionManager permissionManager;
     private ResourceManager resourceManager;
@@ -121,7 +122,7 @@ public class ServerManagerImpl implements ServerManager {
                               AuditManager auditManager,
                              AuthzSubjectManager authzSubjectManager, ResourceGroupManager resourceGroupManager,
                              ZeventEnqueuer zeventManager, ResourceAuditFactory resourceAuditFactory,
-                             PluginRepository pluginRepository, ServerFactory serverFactory,
+                             PluginResourceTypeRepository pluginResourceTypeRepository, ServerFactory serverFactory,
                              ServiceManager serviceManager, ServiceFactory serviceFactory, ResourceDao resourceDao,
                              ResourceTypeDao resourceTypeDao, AgentRepository agentRepository) {
         this.permissionManager = permissionManager;
@@ -131,7 +132,7 @@ public class ServerManagerImpl implements ServerManager {
         this.resourceGroupManager = resourceGroupManager;
         this.zeventManager = zeventManager;
         this.resourceAuditFactory = resourceAuditFactory;
-        this.pluginRepository = pluginRepository;
+        this.pluginResourceTypeRepository = pluginResourceTypeRepository;
         this.serverFactory = serverFactory;
         this.serviceManager = serviceManager;
         this.serviceFactory = serviceFactory;
@@ -989,7 +990,7 @@ public class ServerManagerImpl implements ServerManager {
         Collection<ResourceType> serverTypes = getAllServerResourceTypes();
         Set<ResourceType> curServers = new HashSet<ResourceType>();
         for(ResourceType curResourceType: serverTypes) {
-            if(pluginRepository.findByResourceType(curResourceType.getId()).getName().equals(plugin)) {
+            if(pluginResourceTypeRepository.findNameByResourceType(curResourceType.getId()).equals(plugin)) {
                 curServers.add(curResourceType);
             }
         }
@@ -1074,7 +1075,8 @@ public class ServerManagerImpl implements ServerManager {
         ResourceType stype = new ResourceType(sinfo.getName());
         stype.setDescription(sinfo.getDescription());
         resourceTypeDao.persist(stype);
-        plugin.addResourceType(stype.getId());
+        PluginResourceType pluginResType = new PluginResourceType(plugin.getName(), stype.getId());
+        pluginResourceTypeRepository.save(pluginResType);
         Set<PropertyType> propertyTypes = new HashSet<PropertyType>();
         propertyTypes.add(createServerPropertyType(ServerFactory.WAS_AUTODISCOVERED,Boolean.class));
         propertyTypes.add(createServerPropertyType(ServerFactory.AUTO_INVENTORY_IDENTIFIER,String.class));

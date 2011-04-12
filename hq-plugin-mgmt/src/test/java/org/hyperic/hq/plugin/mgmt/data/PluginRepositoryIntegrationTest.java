@@ -35,15 +35,4 @@ public class PluginRepositoryIntegrationTest {
         assertNull(pluginRepository.findByName("tomcat"));
     }
 
-    @Test
-    public void testFindByResourceType() {
-        int type = 123;
-        int type2 = 456;
-        Plugin plugin = new Plugin("tomcat", "/some/place", "hash");
-        plugin.addResourceType(type);
-        plugin.addResourceType(type2);
-        pluginRepository.save(plugin);
-        assertEquals(plugin, pluginRepository.findByResourceType(type));
-
-    }
 }

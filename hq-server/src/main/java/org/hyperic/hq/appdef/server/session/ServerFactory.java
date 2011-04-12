@@ -3,7 +3,7 @@ package org.hyperic.hq.appdef.server.session;
 import org.hyperic.hq.inventory.domain.RelationshipTypes;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
-import org.hyperic.hq.plugin.mgmt.data.PluginRepository;
+import org.hyperic.hq.plugin.mgmt.data.PluginResourceTypeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,13 +28,13 @@ public class ServerFactory {
     
     private PlatformFactory platformFactory;
     
-    private PluginRepository pluginRepository;
+    private PluginResourceTypeRepository pluginResourceTypeRepository;
     
     
     @Autowired
-    public ServerFactory(PlatformFactory platformFactory, PluginRepository pluginRepository) {
+    public ServerFactory(PlatformFactory platformFactory, PluginResourceTypeRepository pluginResourceTypeRepository) {
         this.platformFactory = platformFactory;
-        this.pluginRepository = pluginRepository;
+        this.pluginResourceTypeRepository = pluginResourceTypeRepository;
     }
   
     public Server createServer(Resource serverResource) {
@@ -72,7 +72,7 @@ public class ServerFactory {
         serverType.setDescription(serverResType.getDescription());
         serverType.setId(serverResType.getId());
         serverType.setName(serverResType.getName());
-        serverType.setPlugin(pluginRepository.findByResourceType(serverResType.getId()).getName());
+        serverType.setPlugin(pluginResourceTypeRepository.findNameByResourceType(serverResType.getId()));
         //TODO for types, we just fake out sort name for now.  Can't do setProperty on ResourceType
         serverType.setSortName(serverResType.getName().toUpperCase());
         if(!(serverResType.getResourceTypesTo(RelationshipTypes.VIRTUAL).isEmpty())) {

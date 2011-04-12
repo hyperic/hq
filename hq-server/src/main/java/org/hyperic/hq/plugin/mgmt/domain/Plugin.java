@@ -26,16 +26,11 @@
 package org.hyperic.hq.plugin.mgmt.domain;
 
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
 
-import javax.persistence.CollectionTable;
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
@@ -70,12 +65,6 @@ public class Plugin implements ContainerManagedTimestampTrackable, Serializable 
     @Column(name = "PATH", length = 500, nullable = false)
     private String path;
 
-    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-    @ElementCollection
-    @CollectionTable(name = "PLUGIN_RESOURCE_TYPES", joinColumns = { @JoinColumn(name = "RESOURCE_TYPE_ID") })
-    @Column(name = "PLUGIN_ID")
-    private Set<Integer> resourceTypes = new HashSet<Integer>();
-
     @Column(name = "VERSION_COL", nullable = false)
     @Version
     private Long version;
@@ -91,10 +80,6 @@ public class Plugin implements ContainerManagedTimestampTrackable, Serializable 
         this.name = name;
         this.path = path;
         this.md5 = md5;
-    }
-
-    public void addResourceType(Integer resourceType) {
-        resourceTypes.add(resourceType);
     }
 
     /**
@@ -156,10 +141,6 @@ public class Plugin implements ContainerManagedTimestampTrackable, Serializable 
 
     public String getPath() {
         return this.path;
-    }
-
-    public Set<Integer> getResourceTypes() {
-        return resourceTypes;
     }
 
     public long getVersion() {

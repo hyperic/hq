@@ -95,8 +95,9 @@ import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.measurement.server.session.AgentScheduleSyncZevent;
-import org.hyperic.hq.plugin.mgmt.data.PluginRepository;
+import org.hyperic.hq.plugin.mgmt.data.PluginResourceTypeRepository;
 import org.hyperic.hq.plugin.mgmt.domain.Plugin;
+import org.hyperic.hq.plugin.mgmt.domain.PluginResourceType;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.PlatformTypeInfo;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
@@ -147,7 +148,9 @@ public class PlatformManagerImpl implements PlatformManager {
 
     private ResourceAuditFactory resourceAuditFactory;
     
-    private PluginRepository pluginRepository;
+   
+    
+    private PluginResourceTypeRepository pluginResourceTypeRepository;
     
     private ServerManager serverManager;
     
@@ -167,7 +170,7 @@ public class PlatformManagerImpl implements PlatformManager {
                                ResourceGroupManager resourceGroupManager,
                                AuditManager auditManager, AgentManager agentManager,
                                ZeventEnqueuer zeventManager,
-                               ResourceAuditFactory resourceAuditFactory, PluginRepository pluginRepository,
+                               ResourceAuditFactory resourceAuditFactory, PluginResourceTypeRepository pluginResourceTypeRepository,
                                ServerManager serverManager, PlatformFactory platformFactory,
                                ServiceManager serviceManager, ServerFactory serverFactory,
                                ResourceDao resourceDao, ResourceTypeDao resourceTypeDao) {
@@ -179,7 +182,7 @@ public class PlatformManagerImpl implements PlatformManager {
         this.agentManager = agentManager;
         this.zeventManager = zeventManager;
         this.resourceAuditFactory = resourceAuditFactory;
-        this.pluginRepository = pluginRepository;
+        this.pluginResourceTypeRepository = pluginResourceTypeRepository;
         this.serverManager = serverManager;
         this.platformFactory = platformFactory;
         this.serviceManager = serviceManager;
@@ -1559,7 +1562,7 @@ public class PlatformManagerImpl implements PlatformManager {
         Collection<ResourceType> platformTypes = findAllPlatformResourceTypes();
         Set<ResourceType> curPlatforms = new HashSet<ResourceType>();
         for(ResourceType curResourceType: platformTypes) {
-            if(pluginRepository.findByResourceType(curResourceType.getId()).getName().equals(plugin)) {
+            if(pluginResourceTypeRepository.findNameByResourceType(curResourceType.getId()).equals(plugin)) {
                 curPlatforms.add(curResourceType);
             }
         }
@@ -1585,7 +1588,8 @@ public class PlatformManagerImpl implements PlatformManager {
         log.debug("Creating new PlatformType: " + name);
         ResourceType pt = new ResourceType(name);
         resourceTypeDao.persist(pt);
-        plugin.addResourceType(pt.getId());
+        PluginResourceType pluginResourceType = new PluginResourceType(plugin.getName(),pt.getId());
+        pluginResourceTypeRepository.save(pluginResourceType);
         Set<PropertyType> propertyTypes = new HashSet<PropertyType>();
         propertyTypes.add(createPropertyType(PlatformFactory.CERT_DN,String.class));
         propertyTypes.add(createPropertyType(PlatformFactory.FQDN,String.class));

@@ -7,7 +7,7 @@ import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.inventory.domain.RelationshipTypes;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
-import org.hyperic.hq.plugin.mgmt.data.PluginRepository;
+import org.hyperic.hq.plugin.mgmt.data.PluginResourceTypeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,7 +33,7 @@ public class PlatformFactory {
     static final String FQDN = "FQDN";
     
     @Autowired
-    private PluginRepository pluginRepository;
+    private PluginResourceTypeRepository pluginResourceTypeRepository;
     
     @Autowired
     private AgentRepository agentRepository;
@@ -71,7 +71,7 @@ public class PlatformFactory {
         // platformType.setModifiedTime(modifiedTime)
         platformType.setId(resourceType.getId());
         platformType.setName(resourceType.getName());
-        platformType.setPlugin(pluginRepository.findByResourceType(resourceType.getId()).getName());
+        platformType.setPlugin(pluginResourceTypeRepository.findNameByResourceType(resourceType.getId()));
         // TODO for types, we just fake out sort name for now. Can't do
         // setProperty on ResourceType
         platformType.setSortName(resourceType.getName().toUpperCase());
