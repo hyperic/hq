@@ -34,6 +34,7 @@ import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
@@ -51,7 +52,7 @@ public class AgentPluginStartupSync implements ApplicationContextAware,
     private TaskScheduler taskScheduler;
 
     @Autowired
-    public AgentPluginStartupSync(AgentManager agentManager, TaskScheduler taskScheduler) {
+    public AgentPluginStartupSync(AgentManager agentManager, @Value("#{scheduler}")TaskScheduler taskScheduler) {
         this.agentManager = agentManager;
         this.taskScheduler = taskScheduler;
     }
