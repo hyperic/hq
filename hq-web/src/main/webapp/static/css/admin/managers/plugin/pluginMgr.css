@@ -169,6 +169,13 @@
 	#pluginList .notFound{
 		color:red;
 	}
+    #pluginList .deleting{
+		color:white;
+	}
+    #pluginCount{
+		color:#777777;
+		font-size:0.7em;
+	}
 	.agentStatusSpan{
 		color: #0066CC;
 		font-weight: bold;

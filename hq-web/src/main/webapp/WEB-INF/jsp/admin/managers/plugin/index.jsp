@@ -7,7 +7,9 @@
 <link rel="stylesheet" type="text/css" href="<spring:url value="/static/css/admin/managers/plugin/pluginMgr.css"/>" />
 
 <section id="pluginManagerPanel" class="container top">
-	<h1><fmt:message key="admin.managers.plugin.title" /></h1>
+	<h1><fmt:message key="admin.managers.plugin.title" /> <span id="pluginCount">&nbsp;(
+			<fmt:message key="admin.managers.plugin.title.note"/> <span id="noPlugins">${info.pluginCount}</span>)
+	</span></h1> 
 	<p id="instruction"><fmt:message key="${instruction}" /></p>
 	
 	<div id="currentTimeInfo">
@@ -20,14 +22,17 @@
 	<div class="topInfo">
 		<span id="agentInfo" style="float:right">
 			<fmt:message key="admin.managers.Plugin.information.agent.count"/>:&nbsp;
-		    <span id="agentInfoAllCount">${allAgentCount}</span>
+		    <span id="agentInfoAllCount">${info.allAgentCount}</span>
 		    <img src="<spring:url value="/static/images/icon_info_small.gif"/>" class="infoIcon" alt="info"/> <br/>
 		</span>
 	    <span style="float:left">
 	        <fmt:message key="admin.managers.Plugin.information.legend"/>
-	    	<img src="<spring:url value="/static/images/icon_available_green.gif"/>" alt="scuccessful"/> <fmt:message key="admin.managers.Plugin.tip.icon.success"/>
-	    	&nbsp; <img src="<spring:url value="/static/images/alert.png"/>" alt="in progress"/> <fmt:message key="admin.managers.Plugin.tip.icon.in.progress"/>
-	   		&nbsp;<img src="<spring:url value="/static/images/icon_available_red.gif"/>" alt="failure"/> <fmt:message key="admin.managers.Plugin.tip.icon.error"/>
+	    	<img src="<spring:url value="/static/images/icon_available_green.gif"/>" alt="scuccessful"/> 
+	    		<fmt:message key="admin.managers.Plugin.tip.icon.success"/> (<span id="successCount">${info.successCount}</span>)
+	    	&nbsp; <img src="<spring:url value="/static/images/alert.png"/>" alt="in progress"/> 
+	    		<fmt:message key="admin.managers.Plugin.tip.icon.in.progress"/> (<span id="inProgressCount">${info.inProgressCount}</span>)
+	   		&nbsp;<img src="<spring:url value="/static/images/icon_available_red.gif"/>" alt="failure"/> 
+	   			<fmt:message key="admin.managers.Plugin.tip.icon.error"/> (<span id="errorCount">${info.errorCount}</span>)
 	    </span>		
 	</div>
 	
@@ -53,7 +58,11 @@
                     	<input type="checkbox" value="${pluginSummary.id}_${pluginSummary.jarName} (${pluginSummary.name})" name="deleteId"/>&nbsp; 
 					</c:if>
 				</span>
-				<span class="column span-small">${pluginSummary.name}</span>
+				<span class="column span-small">${pluginSummary.name}
+					<c:if test="${pluginSummary.deleted}">
+						<br/><span class="deleting"><fmt:message key="admin.managers.Plugin.column.plugin.deleting"/></span>
+					</c:if>				
+				</span>
 				<span class="column span-med">${pluginSummary.version}&nbsp;</span>
 				<span class="column span-med">${pluginSummary.jarName}&nbsp;
 					<c:if test="${pluginSummary.disabled}">
@@ -240,6 +249,10 @@
                 },				
 				load: function(response){
 					hqDojo.byId("agentInfoAllCount").innerHTML=response.allAgentCount;
+					hqDojo.byId("noPlugins").innerHTML=response.pluginCount;
+					hqDojo.byId("successCount").innerHTML=response.successCount;
+					hqDojo.byId("inProgressCount").innerHTML=response.inProgressCount;
+					hqDojo.byId("errorCount").innerHTML=response.errorCount;
 				}
 			}
 				
@@ -635,10 +648,16 @@
         	        			"value": summary.id+"_"+summary.jarName+" ("+summary.name+")"
                 			}, span);
                 		}
-                		span = hqDojo.create("span", {
+                		var pluginName = hqDojo.create("span", {
                 			"class": "column span-small",
                 			"innerHTML": summary.name
                 		}, li);
+                		if(summary.deleted){
+                			span = hqDojo.create("span",{
+                				"class":"deleting",
+                				"innerHTML":"<br/><fmt:message key='admin.managers.Plugin.column.plugin.deleting'/>"
+                			},pluginName);
+                		}
 						if(summary.version==null){
 							var version = "";
 						}else{
