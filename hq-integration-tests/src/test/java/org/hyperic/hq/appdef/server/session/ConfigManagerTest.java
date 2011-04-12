@@ -45,13 +45,13 @@ public class ConfigManagerTest
         String agentToken = "agentToken123";
         createAgent("127.0.0.1", 2144, "authToken", agentToken, "4.5");
         flush();
-        platform = createPlatform(agentToken, "PluginTestPlatform", "TestPlatform1",
+        createPlatformType("MyType");
+        platform = createPlatform(agentToken, "MyType", "TestPlatform1",
             "TestPlatform1", 2);
         platformManager.addIp(platform, "10.1.4.5", "255:255:255:0", "181");
-        ServerType serverType = serverManager.findServerTypeByName("PluginTestServer 1.0");
+        ServerType serverType = createServerType("MyServerType", "1.0", new String[] {"MyType"});
         server = createServer(platform, serverType, "Server1");
-        ServiceType serviceType = serviceManager
-            .findServiceTypeByName("PluginTestServer 1.0 Web Module Stats");
+        ServiceType serviceType = createServiceType("MyServiceType",serverType);
         service = createService(server.getId(), serviceType, "Service1", "A svc", "Somewhere");
     }
 
@@ -87,9 +87,6 @@ public class ConfigManagerTest
         Config actualControl = platform.getResource().getConfig(ProductPlugin.TYPE_CONTROL);
         assertEquals(1, actualControl.getValues().size());
         assertEquals("30", actualControl.getValue("timeout"));
-        
-        //TODO this cleanup won't be necessary once we get tx figured out
-        platform.getResource().getType().getConfigType("NewProp").remove();
     }
 
     @Test
@@ -109,9 +106,6 @@ public class ConfigManagerTest
         assertEquals(2, actualProduct.getValues().size());
         assertEquals("smooth", actualProduct.getValue("DisplayName"));
         assertEquals("hello!", actualProduct.getValue("NewProp"));
-        
-        //TODO this cleanup won't be necessary once we get tx figured out
-        platform.getResource().getType().getConfigType("NewProp").remove();
     }
 
     @Test
