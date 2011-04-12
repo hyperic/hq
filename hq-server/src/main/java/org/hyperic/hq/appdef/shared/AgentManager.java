@@ -445,40 +445,63 @@ public interface AgentManager {
     public long pingAgent(AuthzSubject subject, Agent agent) throws PermissionException, AgentNotFoundException,
         AgentConnectionException, AgentRemoteException, IOException, ConfigPropertyException;
 
-// XXX javadoc!
+    /**
+     * updates the AgentPluginStatus objs which are delivered from the agent upon startup.
+     * calls to this will trigger an agent sync on three different scenarios
+     * 1) plugins not on the reporting agent will be pushed
+     * 2) plugins on the agent where their md5 checksums differ will be pushed
+     * 3) plugins on the agent but not on the server, or in a deleted state, will be removed
+     */
     public void updateAgentPluginStatus(PluginReport_args arg);
 
-// XXX javadoc!
+    /**
+     * queues the {@link PluginReport_args} obj into a background queue.  Eventually calls
+     * updateAgentPluginStatus(PluginReport_args)
+     * @see AgentManager#updateAgentPluginStatus(PluginReport_args)
+     */
     public void updateAgentPluginStatusInBackground(PluginReport_args arg);
 
-// XXX javadoc!
     /**
-     * @return {@link FileDataResult}[] if sizes are 0 then file was not transferred
+     * @return {@link FileDataResult}[] if sizes are 0 length then file was not transferred
      */
     public FileDataResult[] transferAgentPlugins(AuthzSubject subj, Integer agentId, Collection<String> jarNames)
     throws PermissionException, AgentConnectionException, AgentNotFoundException,
            AgentRemoteException, FileNotFoundException, IOException, ConfigPropertyException;
     
-// XXX may want to change Boolean so that it is a status string "SUCCESS" or an error message
     /**
      * Removes plugin jars from the plugin directory on the remote Agent.
      * @return {@link Map} of {@link String} = pluginJarName to
      * {@link Boolean} = file delete was successful or failed.
+     * XXX may want to change Boolean so that it is a status string "SUCCESS" or an error message
      */
     public Map<String, Boolean> agentRemovePlugins(AuthzSubject subject, Integer agentId,
                                                    Collection<String> pluginJarNames)
     throws AgentConnectionException, AgentRemoteException, PermissionException;
 
-// XXX javadoc!
+    /**
+     * will sync all agent with the appropriate plugins.
+     * There are three checks per agent:
+     * 1) plugins not on an agent will be pushed
+     * 2) plugins on the agent where their md5 checksums differ will be pushed
+     * 3) plugins on the agent but not on the server, or in a deleted state, will be removed
+     */
     public void syncAllAgentPlugins();
 
-// XXX javadoc!
+    /**
+     * syncs the specified pluginFileName all Auto Updating Agents
+     */
     public void syncPluginToAgents(String pluginName);
 
-// XXX javadoc!
+    /**
+     * syncs the specified pluginFileName all Auto Updating Agents after commit
+     * @see AgentManager#syncPluginToAgents(String)
+     * @see AgentManager#getNumAutoUpdatingAgents()
+     */
     public void syncPluginToAgentsAfterCommit(String pluginFileName);
 
-// XXX javadoc!
+    /**
+     * @return long representing the unique agent_ids in the EAM_AGENT_PLUGIN_STATUS table
+     */
     public long getNumAutoUpdatingAgents();
 
 }

@@ -392,7 +392,6 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         }
         final String lastSyncStatus = status.getLastSyncStatus();
         if (lastSyncStatus == null) {
-// XXX need to handle this case
             return;
         }
         final AgentPluginStatusEnum e = AgentPluginStatusEnum.valueOf(lastSyncStatus);
