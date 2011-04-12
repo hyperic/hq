@@ -3,7 +3,7 @@
 	document.navTabCat = "Admin";
 
 	function getSystemStats() {
-  		hqDojo.xhrPost({
+  		hqDojo.xhrGet({
     		url: '<%= urlFor(action:"getSystemStats") %>',
     		handleAs: "json-comment-filtered",
     		load: function(response, args) {

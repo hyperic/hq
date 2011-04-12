@@ -56,7 +56,14 @@
                 <table cellpadding="0" cellspacing="0" border="0" width="100%">
                     <tr>
                         <td class="BlockTitle"><fmt:message key="common.header.EscalationName"/></td>
-                        <c:if test="${not empty param.escId && useroperations['createEscalation']}"><td class="BlockTitle" id="createButton" style="text-align: right;"><html:link page="/admin/config/Config.do?mode=escalate"><html:img src="/images/tbb_new.gif" border="0"/></html:link></td> </c:if>
+                        <c:if test="${not empty param.escId && useroperations['createEscalation']}">
+                        	<td class="BlockTitle" id="createButton" style="text-align: right;">
+                        		<html:link action="/admin/config/Config.do">
+                        			<html:param name="mode" value="escalate" />
+                        			<html:img src="/images/tbb_new.gif" border="0"/>
+                        		</html:link>
+                        	</td>
+                        </c:if>
                 </tr>
             </table>
         </td>
@@ -119,7 +126,9 @@ function showEscRows(originalRequest) {
       td2.setAttribute("align", "left");
     }
     else {
-      td2.innerHTML = '<html:img page="/images/icon_right_arrow.gif" border="0" width="10" height="10" style="display:none;padding-right:5px;"/>' + '<a href="<html:rewrite page="/admin/config/Config.do?mode=escalate&escId="/>' + schemes[i].id + '" onclick="changeHighlight(this);">' + schemes[i].name.escapeHTML() + '</a>';
+      var editUrl = "<html:rewrite page="/admin/config/Config.do?mode=escalate&escId={escId}"/>";
+    
+      td2.innerHTML = '<html:img page="/images/icon_right_arrow.gif" border="0" width="10" height="10" style="display:none;padding-right:5px;"/>' + '<a href="' + editUrl.replace("{escId}", schemes[i].id) + '" onclick="changeHighlight(this);">' + schemes[i].name.escapeHTML() + '</a>';
 
       td2.setAttribute((document.all ? 'className' : 'class'), 'ListCell');
     }
@@ -129,7 +138,9 @@ function showEscRows(originalRequest) {
     td3.setAttribute('align', 'right');
 
     if (schemes.length > 1) {
-      td3.innerHTML = '<a href="<html:rewrite action="/admin/config/RemoveEscalation"/>' + '?esc=' + schemes[i].id + '">' + hqDojo.byId('deleteBtn').innerHTML + '</a>';
+    	var url = "<html:rewrite action="/admin/config/RemoveEscalation?esc={escId}"/>";
+    	
+      	td3.innerHTML = '<a href="' + url.replace("{escId}", schemes[i].id) + '">' + hqDojo.byId('deleteBtn').innerHTML + '</a>';
     } else {
         td3.innerHTML="&nbsp;";
     }
@@ -149,7 +160,7 @@ function showEscRows(originalRequest) {
 
   function initEscalationSchemes() {
     new Ajax.Request('<html:rewrite action="/escalation/ListAllEscalationName"/>', {onSuccess:showEscRows});
-    document.EscalationSchemeForm.action = '<html:rewrite action="/admin/config/Config.do"/>';
+    document.EscalationSchemeForm.action = '<html:rewrite action="/admin/config/Config"/>';
     document.EscalationSchemeForm.mode.value = 'escalate';
   }
 

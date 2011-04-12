@@ -99,7 +99,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
             <input type="checkbox" onclick="ToggleSelection(this, widgetProperties)" class="listMember" name="charts" value="|<c:out value="${chart.key},${chart.value}"/>">
           </c:otherwise>
           </c:choose>
-          <html:link page="${chart.value}"><c:out value="${chart.key}"/></html:link>
+          <html:link page="${chart.value}">${chart.key}</html:link>
         </span>
         </li>
         </c:forEach>

@@ -118,16 +118,11 @@
   var goButtonLink;
 </script>
 
-<c:choose>
-  <c:when test="${not empty addToListParamName && not empty addToListParamValue}">
-    <c:url var="addToListUrl" value="${addToListUrl}">
+<c:if test="${not empty addToListParamName && not empty addToListParamValue}">
+	<c:url var="addToListUrl" value="${addToListUrl}">
       <c:param name="${addToListParamName}" value="${addToListParamValue}"/>
     </c:url>
-  </c:when>
-  <c:otherwise>
-    <c:url var="addToListUrl" value="${addToListUrl}"/>
-  </c:otherwise>
-</c:choose>
+</c:if>
 
 <!--  ADD TO LIST TOOLBAR -->
 <table width="100%" cellpadding="5" cellspacing="0" border="0" class="ToolbarContent">

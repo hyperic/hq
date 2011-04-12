@@ -71,7 +71,9 @@
       					<fmt:message key="resource.common.monitor.visibility.HostPlatformTH"/>
       				</div>
       
-      				<html:link page="/resource/platform/monitor/Visibility.do?mode=${param['mode']}&eid=${summary.parentResourceTypeId}:${summary.parentResourceId}">
+      				<html:link action="/resource/platform/monitor/Visibility">
+      					<html:param name="mode" value="${param['mode']}"/>
+      					<html:param name="eid" value="${summary.parentResourceTypeId}:${summary.parentResourceId}"/>
       					<c:out value="${summary.parentResourceName}" default="PARENT RESOURCE NAME NOT SET"/>
       				</html:link>
       			</li>
