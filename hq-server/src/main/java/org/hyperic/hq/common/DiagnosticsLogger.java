@@ -35,6 +35,7 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 
@@ -50,7 +51,7 @@ public class DiagnosticsLogger implements Runnable {
 
     private Log log = LogFactory.getLog(DiagnosticsLogger.class);
 
-    @Autowired
+   
     private TaskScheduler taskScheduler;
 
     // List of DiagnosticObjects, may want to convert to a Map if we ever
@@ -59,9 +60,13 @@ public class DiagnosticsLogger implements Runnable {
     private List<DiagnosticObject> diagnosticObjects = new ArrayList<DiagnosticObject>();
 
     // How often the thread prints info
-    private long interval = Long.getLong("org.hq.diagnostic.interval", 1000 * 60 * 10).longValue(); // 10
-                                                                                                     // minutes
-
+    private long interval = Long.getLong("org.hq.diagnostic.interval", 1000 * 60 * 10).longValue(); // 10 minutes
+    
+    @Autowired
+    public DiagnosticsLogger(@Value("#{scheduler}")TaskScheduler taskScheduler) {
+        this.taskScheduler = taskScheduler;
+    }
+    
     public long getInterval() {
         return interval;
     }

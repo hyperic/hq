@@ -51,6 +51,7 @@ import org.hyperic.util.stats.StatUnreachableException;
 import org.hyperic.util.stats.StatsObject;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
@@ -73,7 +74,8 @@ public class ConcurrentStatsWriter implements ApplicationListener<ContextRefresh
     public static final int WRITE_PERIOD = 15;
     
     @Autowired
-    public ConcurrentStatsWriter(ConcurrentStatsCollector concurrentStatsCollector, TaskScheduler taskScheduler) {
+    public ConcurrentStatsWriter(ConcurrentStatsCollector concurrentStatsCollector, 
+                                 @Value("#{scheduler}")TaskScheduler taskScheduler) {
     	this.concurrentStatsCollector = concurrentStatsCollector;
     	this.taskScheduler = taskScheduler;
     }
