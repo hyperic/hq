@@ -291,3 +291,6 @@
 		margin:0px 100px; 
 		padding:5px 0px;
 	}
+    #pluginManagerPanel li.grey{
+        background-color:#BBB;
+    }

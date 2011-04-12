@@ -7,8 +7,8 @@
 <link rel="stylesheet" type="text/css" href="<spring:url value="/static/css/admin/managers/plugin/pluginMgr.css"/>" />
 
 <section id="pluginManagerPanel" class="container top">
-	<h1><fmt:message key="admin.managers.plugin.title" /> <span id="pluginCount">&nbsp;(
-			<fmt:message key="admin.managers.plugin.title.note"/> <span id="noPlugins">${info.pluginCount}</span>)
+	<h1><fmt:message key="admin.managers.plugin.title" /> <span id="pluginCount">&nbsp;
+			(<fmt:message key="admin.managers.plugin.title.note"/> <span id="noPlugins">${info.pluginCount}</span>)
 	</span></h1> 
 	<p id="instruction"><fmt:message key="${instruction}" /></p>
 	
@@ -52,7 +52,7 @@
 	
 	<ul id="pluginList">
 		<c:forEach var="pluginSummary" items="${pluginSummaries}" varStatus="index">
-			<li class="gridrow clear<c:if test="${index.count % 2 == 0}"> even</c:if>" <c:if test="${pluginSummary.deleted}">style="background-color:grey;"</c:if> >
+			<li class="gridrow clear <c:if test="${pluginSummary.deleted}"> grey </c:if> <c:if test="${index.count % 2 == 0}"> even</c:if>" >
 				<span class="first column span-1">
 					<c:if test="${mechanismOn && !pluginSummary.deleted}">
                     	<input type="checkbox" value="${pluginSummary.id}_${pluginSummary.jarName} (${pluginSummary.name})" name="deleteId"/>&nbsp; 
@@ -630,13 +630,14 @@
                 	var index = 1;
                 	
                 	hqDojo.forEach(response, function(summary) {
-                		var greyBackGround="";
-                		if(summary.deleted){
-                			greyBackGround = "background-color:grey;";
-                		}
+						var liClass = "";
+						if(summary.deleted){
+							liClass = " grey";
+						}else{
+							liClass=(((index) % 2 == 0) ? " even" : "");
+						}
                 		var li = hqDojo.create("li", {
-                			"class": "gridrow clear" + (((index) % 2 == 0) ? " even" : ""),
-                			"style": greyBackGround
+                			"class": "gridrow clear" + liClass 
                 		}, "pluginList");
                 		var span = hqDojo.create("span", {
                 			"class": "first column span-1"
