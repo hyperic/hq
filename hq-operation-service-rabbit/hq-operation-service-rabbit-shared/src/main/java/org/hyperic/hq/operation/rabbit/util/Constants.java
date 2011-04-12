@@ -161,4 +161,8 @@ public class Constants {
      */
     public static final String TO_AGENT_AUTHENTICATED_EXCHANGE = "to.agent.authenticated.exchange";
 
+    public static final String GUEST_USER = "guest";
+
+    public static final String GUEST_PASS = "guest";
+
 }

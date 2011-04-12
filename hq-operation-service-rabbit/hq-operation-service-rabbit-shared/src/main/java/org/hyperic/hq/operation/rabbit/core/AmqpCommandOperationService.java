@@ -50,8 +50,6 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
 
     protected final Log logger = LogFactory.getLog(this.getClass());
 
-    protected RabbitTemplate rabbitTemplate;
-
     protected boolean unidirectional;
 
     /**
@@ -73,8 +71,7 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
     public AmqpCommandOperationService(OperationService operationService, AgentCommandsClient client, boolean agentUnidirectional) {
         this.operationService = operationService;
         this.unidirectional = agentUnidirectional;
-        this.client = client;
-        this.rabbitTemplate = new SimpleRabbitTemplate();// TODO add creds
+        this.client = client; 
     }
  
     /*

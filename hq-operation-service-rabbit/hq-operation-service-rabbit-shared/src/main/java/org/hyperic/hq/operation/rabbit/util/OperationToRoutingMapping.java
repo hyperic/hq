@@ -36,6 +36,8 @@ public class OperationToRoutingMapping {
 
     private final String routingKey;
 
+    private final String queueName;
+
     private final String replyTo;
 
     /**
@@ -44,9 +46,10 @@ public class OperationToRoutingMapping {
      * @param routingKey the routing key to use
      * @param replyTo the exchange to reply to; can be null of the operation is one-way
      */
-    public OperationToRoutingMapping(String exchangeName, String routingKey, String replyTo) {
+    public OperationToRoutingMapping(String exchangeName, String routingKey, String queueName, String replyTo) {
         this.exchangeName = exchangeName;
         this.routingKey = routingKey;
+        this.queueName = queueName;
         this.replyTo = replyTo;
     }
 
@@ -62,6 +65,10 @@ public class OperationToRoutingMapping {
         return replyTo;
     }
 
+    public String getQueueName() {
+        return queueName;
+    }
+
     /**
      * Is this a request-response pattern
      * @return true if the endpoint returns data to the dispatcher
@@ -72,6 +79,6 @@ public class OperationToRoutingMapping {
 
     @Override
     public String toString() {
-        return new StringBuilder(this.exchangeName).append(" ").append(this.getRoutingKey()).toString();
+        return new StringBuilder(this.exchangeName).append(" ").append(this.getRoutingKey()).append(" ").append(this.queueName).toString();
     }
 }

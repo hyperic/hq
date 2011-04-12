@@ -30,6 +30,8 @@ import org.hyperic.hq.operation.annotation.OperationDispatcher;
 import org.hyperic.hq.operation.annotation.OperationEndpoint;
 import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
 import org.hyperic.hq.operation.rabbit.util.OperationToRoutingMapping;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -38,6 +40,7 @@ import java.lang.reflect.InvocationTargetException;
 /**
  * @author Helena Edelson
  */
+@Component("operationService")
 public class AnnotatedRabbitOperationService implements OperationService, Dispatcher, Endpoint, OperationDiscoverer {
 
     private OperationMethodInvokingRegistry dispatchers;
@@ -49,7 +52,6 @@ public class AnnotatedRabbitOperationService implements OperationService, Dispat
     private Converter<Object, String> converter;
 
     public AnnotatedRabbitOperationService() {
-
     }
     
     /**
@@ -57,19 +59,20 @@ public class AnnotatedRabbitOperationService implements OperationService, Dispat
      * @param connectionFactory The connectionFactory to use
      * @param converter         The convert used to convert a context to a message
      */
+    @Autowired
     public AnnotatedRabbitOperationService(ConnectionFactory connectionFactory, Converter<Object, String> converter) {
         this.converter = converter != null ? converter : new JsonMappingConverter();
         this.rabbitTemplate = new SimpleRabbitTemplate(connectionFactory);
         this.dispatchers = new OperationMethodInvokingRegistry(connectionFactory);
         this.endpoints = new OperationMethodInvokingRegistry(connectionFactory);
     }
-
+  
     /**
      * @param candidate  The candidate instance which can be a dispatcher or endpoint
      * @param annotation a dispatcher or endpoint
      * @throws OperationDiscoveryException
      */
-    public void discover(Object candidate, Class<? extends Annotation> annotation) throws OperationDiscoveryException {  
+    public void discover(Object candidate, Class<? extends Annotation> annotation) throws OperationDiscoveryException {
         if (annotation.equals(OperationDispatcher.class)) {
             this.dispatchers.discover(candidate, OperationDispatcher.class);
         } else {
@@ -86,7 +89,6 @@ public class AnnotatedRabbitOperationService implements OperationService, Dispat
         OperationToRoutingMapping mapping = getOperationToRoutingMapping(envelope.getType(), envelope.getOperationName());
 
         try {
-            /* still working this out */
             if (mapping.operationRequiresResponse() && mapping.getReplyTo() != null) {
                 return rabbitTemplate.sendAndReceive(mapping.getExchangeName(), mapping.getRoutingKey(), envelope);
             } else {
@@ -149,7 +151,7 @@ public class AnnotatedRabbitOperationService implements OperationService, Dispat
         return endpoints;
     }
 
-    private OperationToRoutingMapping getOperationToRoutingMapping(Class<? extends Annotation> annotationType, String operationName) {
+    public OperationToRoutingMapping getOperationToRoutingMapping(Class<? extends Annotation> annotationType, String operationName) {
         return annotationType.equals(OperationDispatcher.class) ?
                 this.dispatchers.routingRegistry.map(operationName) : this.endpoints.routingRegistry.map(operationName);
     }

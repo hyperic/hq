@@ -68,10 +68,8 @@ public class LegacyAgentCommandsClientImpl implements AgentCommandsClient {
 
         long sendTime = System.currentTimeMillis();
         this.agentConn.sendCommand(AgentCommandsAPI.command_ping,
-                                   this.verAPI.getVersion(), args, false);
-        long duration = System.currentTimeMillis() - sendTime;
-        logger.info(".ping()********* returning " + duration);
-        return duration;
+                                   this.verAPI.getVersion(), args, false); 
+        return System.currentTimeMillis() - sendTime;
     }
 
     /**

@@ -25,17 +25,21 @@
 
 package org.hyperic.hq.operation.rabbit.connection;
 
+import com.rabbitmq.client.AlreadyClosedException;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
 /**
  * @author Helena Edelson
  */
+@Component
 public final class ChannelTemplate implements ChannelOperations {
 
     private final Log logger = LogFactory.getLog(getClass());
@@ -49,6 +53,7 @@ public final class ChannelTemplate implements ChannelOperations {
      * Creates a new instance
      * @param connectionFactory {@link com.rabbitmq.client.ConnectionFactory}
      */
+    @Autowired
     public ChannelTemplate(ConnectionFactory connectionFactory) {
         this.connectionFactory = connectionFactory; 
     }
@@ -97,8 +102,7 @@ public final class ChannelTemplate implements ChannelOperations {
     public Connection createConnection() throws ConnectionException {
         try {
             return this.connectionFactory.newConnection();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw translateConnectionException(e);
         }
     }
@@ -127,8 +131,9 @@ public final class ChannelTemplate implements ChannelOperations {
         try {
             channel.close();
             //closeConnection(channel.getConnection());
-        }
-        catch (IOException e) {
+        } catch (AlreadyClosedException e) {
+            // do nothing
+        } catch (IOException e) {
             logger.debug("Connection is already closed.", e);
         }
     }

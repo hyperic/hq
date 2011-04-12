@@ -27,21 +27,21 @@ package org.hyperic.hq.bizapp.client;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.lather.NullLatherValue;
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.bizapp.agent.ProviderInfo;
-import org.hyperic.hq.bizapp.shared.lather.CommandInfo;
-import org.hyperic.hq.bizapp.shared.lather.RegisterAgent_args;
-import org.hyperic.hq.bizapp.shared.lather.RegisterAgent_result;
-import org.hyperic.hq.bizapp.shared.lather.UpdateAgent_args;
-import org.hyperic.hq.bizapp.shared.lather.UpdateAgent_result;
-import org.hyperic.hq.bizapp.shared.lather.UserIsValid_args;
-import org.hyperic.hq.bizapp.shared.lather.UserIsValid_result;
+import org.hyperic.hq.bizapp.shared.lather.*;
+import org.hyperic.hq.operation.annotation.Operation;
+import org.hyperic.hq.operation.annotation.OperationDispatcher;
+import org.hyperic.hq.operation.rabbit.util.Constants;
+import org.hyperic.lather.NullLatherValue;
+import org.springframework.stereotype.Component;
 
-public class BizappCallbackClient 
-    extends AgentCallbackClient
-{
+@OperationDispatcher @Component
+public class BizappCallbackClient extends AgentCallbackClient {
     private final Log log = LogFactory.getLog(BizappCallbackClient.class);
+
+    public BizappCallbackClient() {
+    }
     
     public BizappCallbackClient(ProviderFetcher fetcher, AgentConfig config){
         super(fetcher);
@@ -98,6 +98,7 @@ public class BizappCallbackClient
      * @param unidirectional <code>true</code> if the agent is unidirectional.
      * @return The result containing the new agent token.
      */
+    @Operation(operationName = Constants.OPERATION_NAME_AGENT_REGISTER, exchangeName = Constants.TO_SERVER_EXCHANGE, value = Constants.OPERATION_NAME_AGENT_REGISTER)
     public RegisterAgentResult registerAgent(String oldAgentToken, 
                                              String user, String pword, 
                                              String authToken,

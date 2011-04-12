@@ -28,6 +28,8 @@ import com.rabbitmq.client.ConnectionFactory;
 import org.hyperic.hq.operation.*;
 import org.hyperic.hq.operation.annotation.Operation;
 import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -38,7 +40,8 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author Helena Edelson
  */
-public class OperationMethodInvokingRegistry implements OperationRegistry, OperationDiscoverer {
+@Component("operationDiscoverer")
+public class OperationMethodInvokingRegistry implements OperationRegistry {
 
     /**
      * Will consist of either dispatchers or endpoints
@@ -54,6 +57,7 @@ public class OperationMethodInvokingRegistry implements OperationRegistry, Opera
         this(new OperationToRoutingKeyRegistry(connectionFactory), new JsonMappingConverter());
     }
 
+    @Autowired
     public OperationMethodInvokingRegistry(RoutingRegistry routingRegistry, Converter<Object, String> converter) {
         this.converter = converter;
         this.routingRegistry = routingRegistry;
@@ -72,6 +76,7 @@ public class OperationMethodInvokingRegistry implements OperationRegistry, Opera
             for (Method method : candidateClass.getDeclaredMethods()) {
                 if (method.isAnnotationPresent(Operation.class)) {
                     if (!method.isAccessible()) method.setAccessible(true);
+                    System.out.println("\n\n*****************discovered bean " + candidate + " has " + annotation);
                     register(method, candidate, annotation);
                 }
             }
@@ -88,6 +93,7 @@ public class OperationMethodInvokingRegistry implements OperationRegistry, Opera
         if (!this.operationMappings.containsKey(method.getAnnotation(Operation.class).operationName())) {
             this.operationMappings.put(method.getAnnotation(Operation.class).operationName(), new MethodInvoker(method, candidate, this.converter));
             this.routingRegistry.register(method.getAnnotation(Operation.class));
+            System.out.println("\n\n*****************registered bean " + candidate + " has " + annotation);
         }
     }
 

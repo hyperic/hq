@@ -44,7 +44,7 @@ public class ProviderInfo {
         
         unidirectionalPort = -1;
     }
-    
+
     public void setNewTransport(boolean unidirectional, int unidirectionalPort) {
         this.isNewTransport = true;
         this.unidirectional = unidirectional;

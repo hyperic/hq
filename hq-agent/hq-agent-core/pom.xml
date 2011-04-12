@@ -1,20 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-	<modelVersion>4.0.0</modelVersion>
-	
-	<parent>
-		<groupId>org.hyperic.hq</groupId>
-		<artifactId>hq-parent</artifactId>
-		<version>4.6.0.BUILD-SNAPSHOT</version>
-	</parent>
-	
-	<groupId>org.hyperic.hq.agent</groupId>
-	<artifactId>hq-agent-core</artifactId>
-	<packaging>jar</packaging>
-	<name>Hyperic HQ Agent - Core</name>
+    <modelVersion>4.0.0</modelVersion>
 
-	<dependencies>
+    <parent>
+        <groupId>org.hyperic.hq</groupId>
+        <artifactId>hq-parent</artifactId>
+        <version>4.6.0.BUILD-SNAPSHOT</version>
+    </parent>
+
+    <groupId>org.hyperic.hq.agent</groupId>
+    <artifactId>hq-agent-core</artifactId>
+    <packaging>jar</packaging>
+    <name>Hyperic HQ Agent - Core</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.hyperic.hq</groupId>
             <artifactId>hq-operations</artifactId>
@@ -30,58 +43,58 @@
             <artifactId>hq-operation-service-rabbit-shared</artifactId>
             <version>${project.version}</version>
         </dependency>
-		<dependency>
-			<groupId>org.hyperic.hq</groupId>
-			<artifactId>hq-lather</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq</groupId>
-			<artifactId>hq-pdk</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq</groupId>
-			<artifactId>hq-util</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq.hqapi</groupId>
-			<artifactId>hqapi1</artifactId>
+        <dependency>
+            <groupId>org.hyperic.hq</groupId>
+            <artifactId>hq-lather</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hyperic.hq</groupId>
+            <artifactId>hq-pdk</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hyperic.hq</groupId>
+            <artifactId>hq-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hyperic.hq.hqapi</groupId>
+            <artifactId>hqapi1</artifactId>
             <scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>commons-logging</groupId>
-			<artifactId>commons-logging</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>tanukisoft</groupId>
-			<artifactId>wrapper</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-		</dependency>
-	</dependencies>
-	
-	<build>
-		<plugins>
-			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<configuration>
-					<descriptors>
-						<descriptor>src/main/assembly/agent.xml</descriptor>
-					</descriptors>
-				</configuration>
-			</plugin>
-			<plugin>
-				<artifactId>maven-source-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</build>
+        </dependency>
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>tanukisoft</groupId>
+            <artifactId>wrapper</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptors>
+                        <descriptor>src/main/assembly/agent.xml</descriptor>
+                    </descriptors>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

@@ -25,16 +25,11 @@
 
 package org.hyperic.hq.agent.server;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
 import org.hyperic.hq.agent.AgentCommand;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteValue;
+
+import java.io.*;
 
 
 /**
@@ -59,6 +54,7 @@ public abstract class AgentServerConnection {
      * Close the connection.
      */
     public abstract void close();
+
     
     /**
      * Read the command invocation information from the client

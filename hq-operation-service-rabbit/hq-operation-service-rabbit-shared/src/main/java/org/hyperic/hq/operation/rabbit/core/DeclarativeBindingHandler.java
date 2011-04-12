@@ -32,16 +32,22 @@ import org.hyperic.hq.operation.rabbit.connection.ChannelCallback;
 import org.hyperic.hq.operation.rabbit.connection.ChannelException;
 import org.hyperic.hq.operation.rabbit.connection.ChannelTemplate;
 import org.hyperic.hq.operation.rabbit.util.Constants;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
 /**
  * @author Helena Edelson
  */
+@Component
 public class DeclarativeBindingHandler implements BindingHandler {
  
     private final ChannelTemplate channelTemplate;
 
+    private final Object monitor = new Object();
+
+    @Autowired
     public DeclarativeBindingHandler(ConnectionFactory connectionFactory) {
         this.channelTemplate = new ChannelTemplate(connectionFactory);
     }
@@ -51,15 +57,19 @@ public class DeclarativeBindingHandler implements BindingHandler {
      * Queues declared are durable, exclusive, non-auto-delete
      * @param operation the operaton meta-data
      */
-    public void declareAndBind(final Operation operation) throws ChannelException {
+    public String declareAndBind(final Operation operation) throws ChannelException {
         Channel channel = this.channelTemplate.createChannel();
         String exchange = getExchangeType(operation.exchangeName());
         try {
-            channel.exchangeDeclare(exchange, Constants.SHARED_EXCHANGE_TYPE, true, false, null);
-            String queue = channel.queueDeclare(operation.operationName(), true, true, false, null).getQueue();
-            channel.queueBind(queue, operation.exchangeName(), operation.value());
+            synchronized(monitor) {
+                channel.exchangeDeclare(exchange, Constants.SHARED_EXCHANGE_TYPE, true, false, null);
+                String queue = channel.queueDeclare().getQueue();
+                // TODO unique String queue = channel.queueDeclare(operation.operationName(), true, true, false, null).getQueue();
+                channel.queueBind(queue, operation.exchangeName(), operation.value());
+                return queue;
+            }
         } catch (IOException e) {
-            throw new ChannelException(e.getMessage());
+            throw new ChannelException(e.getCause());
         } finally {
             this.channelTemplate.releaseResources(channel);
         }

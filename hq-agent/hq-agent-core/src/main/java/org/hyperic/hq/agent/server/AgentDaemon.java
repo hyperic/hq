@@ -86,7 +86,7 @@ public class AgentDaemon
     private volatile boolean     running;         // Are we running?
 
     private ProductPluginManager ppm;
-    
+ 
     public static AgentDaemon getMainInstance(){
         synchronized(AgentDaemon.mainInstanceLock){
             return AgentDaemon.mainInstance;

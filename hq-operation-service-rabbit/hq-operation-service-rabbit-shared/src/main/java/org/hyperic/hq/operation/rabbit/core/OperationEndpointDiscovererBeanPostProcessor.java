@@ -22,25 +22,24 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-package org.hyperic.hq.operation.rabbit;
+package org.hyperic.hq.operation.rabbit.core;
 
 import org.hyperic.hq.operation.OperationDiscoverer;
 import org.hyperic.hq.operation.annotation.OperationEndpoint;
-import org.hyperic.hq.operation.rabbit.core.AnnotatedRabbitOperationService;
 import org.springframework.beans.FatalBeanException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Helena Edelson
  */
+@Component
 public final class OperationEndpointDiscovererBeanPostProcessor implements BeanPostProcessor {
 
     private final OperationDiscoverer operationEndpointDiscoverer;
-
-    public OperationEndpointDiscovererBeanPostProcessor() {
-        this(new AnnotatedRabbitOperationService());
-    }
-
+ 
+    @Autowired
     OperationEndpointDiscovererBeanPostProcessor(OperationDiscoverer operationEndpointDiscoverer) {
         this.operationEndpointDiscoverer = operationEndpointDiscoverer;
     }

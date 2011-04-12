@@ -36,6 +36,8 @@ import org.hyperic.hq.operation.rabbit.connection.SingleConnectionFactory;
 import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
 import org.hyperic.hq.operation.rabbit.util.Constants;
 import org.hyperic.hq.operation.rabbit.util.MessageConstants;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Random;
@@ -43,6 +45,7 @@ import java.util.Random;
 /**
  * @author Helena Edelson
  */
+@Component
 public class SimpleRabbitTemplate implements RabbitTemplate {
 
     protected final Log logger = LogFactory.getLog(this.getClass());
@@ -63,8 +66,6 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
 
     protected String agentQueue;
 
-    protected String defaultCredential = "guest";
-
     protected QueueingConsumer queueingConsumer;
 
     /**
@@ -79,20 +80,21 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
      * Creates a new instance that creates a connection and sends messages to a specific exchange
      * @param connectionFactory Used to create a connection to send messages on
      */
+    @Autowired
     public SimpleRabbitTemplate(ConnectionFactory connectionFactory) {
-        this(connectionFactory, Constants.DEFAULT_EXCHANGE);
+        this(connectionFactory, null);
     }
 
     /**
      * Creates a new instance that creates a connection and sends messages to a specific exchange
      * @param cf           ConnectionFactory used to create a connection
      * @param exchangeName The exchange name to use. if null, uses the AMQP default
-     */
+     */ 
     public SimpleRabbitTemplate(ConnectionFactory cf, String exchangeName) {
         this.channelTemplate = new ChannelTemplate(cf);
         this.converter = new JsonMappingConverter();
         this.exchangeName = exchangeName;
-        this.usesNonGuestCredentials = !cf.getUsername().equals(defaultCredential) && !cf.getPassword().equals(defaultCredential);
+        this.usesNonGuestCredentials = !cf.getUsername().equals(Constants.GUEST_USER) && !cf.getPassword().equals(Constants.GUEST_USER);
     }
 
     /**
@@ -116,7 +118,7 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
         final byte[] bytes = this.converter.write(data).getBytes(MessageConstants.CHARSET);
 
         synchronized (this.monitor) {
-            return this.channelTemplate.execute(new ChannelCallback<Boolean>() {
+            boolean success = this.channelTemplate.execute(new ChannelCallback<Boolean>() {
                 public Boolean doInChannel(Channel channel) throws ChannelException {
                     try {
                         channel.basicPublish(exchangeName, routingKey, MessageConstants.DEFAULT_MESSAGE_PROPERTIES, bytes);
@@ -127,6 +129,7 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
                     }
                 }
             });
+            return success;
         }
     }
 

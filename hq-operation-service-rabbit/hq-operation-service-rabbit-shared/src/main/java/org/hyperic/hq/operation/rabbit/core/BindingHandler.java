@@ -33,7 +33,7 @@ import org.hyperic.hq.operation.rabbit.connection.ChannelException;
  */
 public interface BindingHandler {
 
-    void declareAndBind(Operation operation) throws ChannelException;
+    String declareAndBind(Operation operation) throws ChannelException;
 
     void declareAndBind(String operationName, String exchangeName, String bindingPattern) throws ChannelException;
      

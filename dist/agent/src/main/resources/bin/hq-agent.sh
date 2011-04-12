@@ -183,9 +183,12 @@ CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}/hq-lather-${project.version}.
 CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}/hq-operations-${project.version}.jar"
 CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}/hq-operation-service-${project.version}.jar"
 CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}/hq-operation-service-rabbit-shared-${project.version}.jar"
-CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}/hq-operation-service-rabbit-common-${project.version}.jar"
 CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}/amqp-client-2.3.1.jar"
 CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}/commons-io-1.3.2.jar"
+
+CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}/spring-beans-3.0.5.RELEASE.jar"
+CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}/spring-content-3.0.5.RELEASE.jar"
+CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}/spring-core-3.0.5.RELEASE.jar"
 
 CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/hq-common-${project.version}.jar"
 CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/hq-util-${project.version}.jar"

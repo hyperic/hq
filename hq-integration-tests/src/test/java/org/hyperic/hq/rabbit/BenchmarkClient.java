@@ -1,21 +1,13 @@
 package org.hyperic.hq.rabbit;
 
 import org.hyperic.hq.agent.*;
-import org.hyperic.hq.agent.client.LegacyAgentCommandsClientImpl;
-import org.hyperic.hq.rabbit.core.AmqpCommandOperationService;
-import org.hyperic.hq.bizapp.agent.ProviderInfo;
-import org.hyperic.hq.bizapp.agent.client.SecureAgentConnection;
-import org.hyperic.hq.bizapp.client.AgentCallbackClient;
 import org.hyperic.hq.bizapp.client.AgentCallbackClientException;
 import org.hyperic.hq.bizapp.client.BizappCallbackClient;
-import org.hyperic.hq.bizapp.client.StaticProviderFetcher;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Map;
-
-import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Helena Edelson
@@ -25,18 +17,18 @@ public class BenchmarkClient {
     private BizappCallbackClient bcc;
 
     /** an AgentCommandsClient */
-    private AmqpCommandOperationService acc;
+   // private AmqpCommandOperationService acc;
 
     public BenchmarkClient(String host, int port) throws AgentConfigException {
-        this.acc = new AmqpCommandOperationService(new LegacyAgentCommandsClientImpl(new SecureAgentConnection(host, port, "")));
+       /* this.acc = new AmqpCommandOperationService(new LegacyAgentCommandsClientImpl(new SecureAgentConnection(host, port, "")));
         ProviderInfo providerInfo = new ProviderInfo(AgentCallbackClient.getDefaultProviderURL(host, port, false), "no-auth");
         assertNotNull("'providerInfo' must not be null", providerInfo);
         this.bcc = new BizappCallbackClient(new StaticProviderFetcher(providerInfo), AgentConfig.newInstance());
-        assertNotNull("'bizappCallbackClient' must not be null", bcc);
+        assertNotNull("'bizappCallbackClient' must not be null", bcc);*/
     }
 
     public void rabbitPing(int append) throws IOException, InterruptedException {
-        acc.timedPing(append);
+        //acc.timedPing(append);
     }
 
     public void latherPing() throws AgentCallbackClientException {

@@ -30,12 +30,14 @@ import org.codehaus.jackson.map.SerializationConfig;
 import org.hyperic.hq.operation.ConversionException;
 import org.hyperic.hq.operation.Converter;
 import org.hyperic.hq.operation.rabbit.util.MessageConstants;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
 /**
  * @author Helena Edelson
  */
+@Component
 public class JsonMappingConverter implements Converter<Object, String> {
 
     private final ObjectMapper objectMapper;

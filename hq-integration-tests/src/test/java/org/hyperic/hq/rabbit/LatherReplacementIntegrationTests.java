@@ -14,11 +14,11 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Helena Edelson
  */
-//@Ignore
+//@Ignore("'AGENT_HOME' must be set")
 public class LatherReplacementIntegrationTests extends BaseInfrastructureTest {
 
     /** Must configure */
-    private final static String AGENT_HOME = "/Users/hedelson/tools/hyperic/agent-4.6.0.BUILD-SNAPSHOT";
+    private final static String AGENT_HOME = "/path/to/agent-4.6.0.BUILD-SNAPSHOT";
 
     private BizappCallbackClient bizappClient;
 

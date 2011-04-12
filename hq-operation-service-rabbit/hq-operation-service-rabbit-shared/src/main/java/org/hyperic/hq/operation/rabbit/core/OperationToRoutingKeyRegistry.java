@@ -27,8 +27,11 @@ package org.hyperic.hq.operation.rabbit.core;
 import com.rabbitmq.client.ConnectionFactory;
 import org.hyperic.hq.operation.OperationNotSupportedException;
 import org.hyperic.hq.operation.annotation.Operation;
+import org.hyperic.hq.operation.rabbit.connection.ChannelException;
 import org.hyperic.hq.operation.rabbit.util.Constants;
 import org.hyperic.hq.operation.rabbit.util.OperationToRoutingMapping;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -44,6 +47,7 @@ import static org.hyperic.hq.operation.rabbit.util.BindingPatternConstants.OPERA
  * Agent does not have Spring
  * @author Helena Edelson
  */
+@Component
 public class OperationToRoutingKeyRegistry implements RoutingRegistry {
 
     private final Map<String, OperationToRoutingMapping> operationToRoutingKeyMappings = new ConcurrentHashMap<String, OperationToRoutingMapping>();
@@ -52,20 +56,26 @@ public class OperationToRoutingKeyRegistry implements RoutingRegistry {
 
     private final String serverId;
 
+    @Autowired
     public OperationToRoutingKeyRegistry(ConnectionFactory connectionFactory) {  
         this.bindingHandler = new DeclarativeBindingHandler(connectionFactory);
         this.serverId = getDefaultServerId();
+
+       /* ListenerContainer listener = new ListenerContainer();
+        listener.setConnectionFactory(connectionFactory);
+        listener.setMessageListener(new MessageListenerAdapter(handler));
+        listener.setQueues(queues);*/
     }
 
     /**
      * Registers operation to routing key and exchange mappings
      * @param operation the operation to extract and register
      */
-    public void register(Operation operation) {
+    public void register(Operation operation) throws ChannelException {
         if (!this.operationToRoutingKeyMappings.containsKey(operation.operationName())) {
-            bindingHandler.declareAndBind(operation); 
+            String queueName = this.bindingHandler.declareAndBind(operation);
             this.operationToRoutingKeyMappings.put(operation.operationName(),
-                    new OperationToRoutingMapping(operation.exchangeName(), operation.value(), null));
+                    new OperationToRoutingMapping(operation.exchangeName(), operation.value(), queueName, null));
         }
     }
 
