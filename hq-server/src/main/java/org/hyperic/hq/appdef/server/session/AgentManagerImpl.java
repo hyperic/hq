@@ -49,6 +49,7 @@ import org.hyperic.hq.agent.client.AgentCommandsClientFactory;
 import org.hyperic.hq.agent.commands.AgentUpgrade_result;
 import org.hyperic.hq.agent.mgmt.data.AgentRepository;
 import org.hyperic.hq.agent.mgmt.data.AgentTypeRepository;
+import org.hyperic.hq.agent.mgmt.data.ManagedResourceRepository;
 import org.hyperic.hq.agent.mgmt.domain.Agent;
 import org.hyperic.hq.agent.mgmt.domain.AgentType;
 import org.hyperic.hq.appdef.server.session.AgentConnections.AgentConnection;
@@ -96,6 +97,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     private AgentCommandsClientFactory agentCommandsClientFactory;
     private ApplicationContext applicationContext;
     private ResourceDao resourceDao;
+    private ManagedResourceRepository managedResourceRepository;
 
     @Autowired
     public AgentManagerImpl(AgentTypeRepository agentTypeRepository,
@@ -103,13 +105,14 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                             PermissionManager permissionManager, 
                             ServerConfigManager serverConfigManager,
                             AgentCommandsClientFactory agentCommandsClientFactory,
-                            ResourceDao resourceDao) {
+                            ResourceDao resourceDao, ManagedResourceRepository managedResourceRepository) {
         this.agentTypeRepository = agentTypeRepository;
         this.agentDao = agentDao;
         this.permissionManager = permissionManager;
         this.serverConfigManager = serverConfigManager;
         this.agentCommandsClientFactory = agentCommandsClientFactory;
         this.resourceDao = resourceDao;
+        this.managedResourceRepository = managedResourceRepository;
     }
 
     /**
@@ -163,7 +166,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      */
     @Transactional(readOnly = true)
     public int getAgentCountUsed() {
-        return (int)agentDao.countUsed();
+        return (int)managedResourceRepository.countUsedAgents();
     }
     
     /**
@@ -501,7 +504,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     
     @Transactional(readOnly = true)
     public Agent getAgent(Resource resource)  {
-        return agentDao.findByManagedResource(resource.getId());
+        return managedResourceRepository.findAgentByResource(resource.getId());
     }
 
     /**

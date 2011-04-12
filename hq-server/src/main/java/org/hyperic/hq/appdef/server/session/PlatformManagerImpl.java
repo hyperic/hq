@@ -44,7 +44,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.mgmt.data.AgentRepository;
+import org.hyperic.hq.agent.mgmt.data.ManagedResourceRepository;
 import org.hyperic.hq.agent.mgmt.domain.Agent;
+import org.hyperic.hq.agent.mgmt.domain.ManagedResource;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
@@ -148,7 +150,7 @@ public class PlatformManagerImpl implements PlatformManager {
 
     private ResourceAuditFactory resourceAuditFactory;
     
-   
+    private ManagedResourceRepository managedResourceRepository;
     
     private PluginResourceTypeRepository pluginResourceTypeRepository;
     
@@ -173,7 +175,8 @@ public class PlatformManagerImpl implements PlatformManager {
                                ResourceAuditFactory resourceAuditFactory, PluginResourceTypeRepository pluginResourceTypeRepository,
                                ServerManager serverManager, PlatformFactory platformFactory,
                                ServiceManager serviceManager, ServerFactory serverFactory,
-                               ResourceDao resourceDao, ResourceTypeDao resourceTypeDao) {
+                               ResourceDao resourceDao, ResourceTypeDao resourceTypeDao, 
+                               ManagedResourceRepository managedResourceRepository) {
         this.permissionManager = permissionManager;
         this.agentDAO = agentDAO;
         this.resourceManager = resourceManager;
@@ -189,6 +192,7 @@ public class PlatformManagerImpl implements PlatformManager {
         this.serverFactory = serverFactory;
         this.resourceDao = resourceDao;
         this.resourceTypeDao  = resourceTypeDao;
+        this.managedResourceRepository = managedResourceRepository;
     }
     
     private Platform toPlatform(Resource resource) {
@@ -427,7 +431,8 @@ public class PlatformManagerImpl implements PlatformManager {
         p.setProperty(PlatformFactory.CPU_COUNT,aip.getCpuCount());
         p.setProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_PLATFORM);
         p.setModifiedBy(initialOwner);
-        agent.addManagedResource(p.getId());
+        ManagedResource managedResource =  new ManagedResource(p.getId(), agent);
+        managedResourceRepository.save(managedResource);
         p.setOwner(subject.getName());
         resourceManager.findRootResource().relateTo(p, RelationshipTypes.PLATFORM);
         resourceManager.findRootResource().relateTo(p, RelationshipTypes.CONTAINS);
@@ -451,7 +456,8 @@ public class PlatformManagerImpl implements PlatformManager {
         p.setProperty(PlatformFactory.CREATION_TIME, System.currentTimeMillis());
         p.setProperty(PlatformFactory.MODIFIED_TIME,System.currentTimeMillis());
         p.setProperty(AppdefResource.SORT_NAME, pv.getName().toUpperCase());
-        agent.addManagedResource(p.getId());
+        ManagedResource managedResource =  new ManagedResource(p.getId(), agent);
+        managedResourceRepository.save(managedResource);
         for (IpValue ipv : pv.getAddedIpValues()) {
             addIp(toPlatform(p), ipv.getAddress(), ipv.getNetmask(), ipv.getMACAddress());
         }
@@ -893,7 +899,7 @@ public class PlatformManagerImpl implements PlatformManager {
             if (porker && // Let agent porker
                 // create new platforms
                 !(p.getProperty(PlatformFactory.FQDN).equals(fqdn) || p.getProperty(PlatformFactory.CERT_DN).equals(certdn) || 
-                    agentDAO.findByManagedResource(p.getId()).getAgentToken().equals(agentToken))) {
+                    managedResourceRepository.findAgentByResource(p.getId()).getAgentToken().equals(agentToken))) {
                 p = null;
             }
         }
@@ -914,7 +920,7 @@ public class PlatformManagerImpl implements PlatformManager {
             Agent agent = agentManager.getAgent(agentToken);
             Collection<Resource> platforms = getAllPlatforms();
             for (Resource platform : platforms) {
-                if(agent.equals(agentDAO.findByManagedResource(platform.getId()))) {
+                if(agent.equals(managedResourceRepository.findAgentByResource(platform.getId()))) {
                     String platType = platform.getType().getName();
                     // need to check if the platform is not a platform device
                     if (PlatformDetector.isSupportedPlatform(platType)) {
@@ -1009,7 +1015,7 @@ public class PlatformManagerImpl implements PlatformManager {
         Set<Resource> agentPlatforms = new HashSet<Resource>();
         Collection<Resource> platforms = getAllPlatforms();
         for (Resource platform : platforms) {
-            if(agentToken.equals(agentDAO.findByManagedResource(platform.getId()).getAgentToken())) {
+            if(agentToken.equals(managedResourceRepository.findAgentByResource(platform.getId()).getAgentToken())) {
                 agentPlatforms.add(platform);
             }
         }
@@ -1415,7 +1421,7 @@ public class PlatformManagerImpl implements PlatformManager {
 
             // See if we need to create an AIPlatform
             if (existing.getAgent() != null) {
-                if (agentDAO.findByManagedResource(plat.getId()) == null) {
+                if (managedResourceRepository.findAgentByResource(plat.getId()) == null) {
                     // Create AIPlatform for manually created platform
 
                     AIPlatformValue aiPlatform = new AIPlatformValue();
@@ -1436,7 +1442,7 @@ public class PlatformManagerImpl implements PlatformManager {
                     }
 
                     getAIQueueManager().queue(subject, aiPlatform, false, false, true);
-                } else if (!agentDAO.findByManagedResource(plat.getId()).equals(existing.getAgent())) {
+                } else if (!managedResourceRepository.findAgentByResource(plat.getId()).equals(existing.getAgent())) {
                     // Need to enqueue the ResourceUpdatedZevent if the
                     // agent changed to get the metrics scheduled
                     List<ResourceUpdatedZevent> events = new ArrayList<ResourceUpdatedZevent>();
@@ -1519,7 +1525,10 @@ public class PlatformManagerImpl implements PlatformManager {
         // if there is a agent
         if (existing.getAgent() != null) {
             // get the agent token and set the agent to the platform
-            existing.getAgent().addManagedResource(platform.getId());
+            if(managedResourceRepository.findAgentByResource(platform.getId()) == null) {
+                ManagedResource managedResource =  new ManagedResource(platform.getId(), existing.getAgent());
+                managedResourceRepository.save(managedResource);
+            }
         }
     }
 
@@ -1686,7 +1695,10 @@ public class PlatformManagerImpl implements PlatformManager {
             // make sure we have the current agent that exists on the platform
             // and associate it
             agent = agentManager.getAgent(aiplatform.getAgentToken());
-            agent.addManagedResource(platform.getId());
+            if(managedResourceRepository.findAgentByResource(platform.getId()) == null) {
+                ManagedResource managedResource =  new ManagedResource(platform.getId(), agent);
+                managedResourceRepository.save(managedResource);
+            }
         } catch (AgentNotFoundException e) {
             // the agent should exist at this point even if it is a new agent.
             // something failed at another stage of this process
@@ -1728,7 +1740,10 @@ public class PlatformManagerImpl implements PlatformManager {
                     agentManager.pingAgent(subj, agent);
                     log.info("updating ip for agentId=" + agent.getId() + " and platformid=" +
                              platform.getId() + " from ip=" + origIp + " to ip=" + ip.getAddress());
-                    agent.addManagedResource(platform.getId());
+                    if(managedResourceRepository.findAgentByResource(platform.getId()) == null) {
+                        ManagedResource managedResource =  new ManagedResource(platform.getId(), agent);
+                        managedResourceRepository.save(managedResource);
+                    }
                     enableMeasurements(subj, platform);
                     break;
                 } catch (AgentConnectionException e) {
@@ -1740,7 +1755,7 @@ public class PlatformManagerImpl implements PlatformManager {
                 // make sure address does not change if/when last ping fails
                 agent.setAddress(origIp);
             }
-            if (agentDAO.findByManagedResource(platform.getId()) == null) {
+            if (managedResourceRepository.findAgentByResource(platform.getId()) == null) {
                 log.warn("Removing agent reference from platformid=" + platform.getId() +
                          ".  Server cannot ping the agent from any IP " +
                          "associated with the platform");
@@ -1954,7 +1969,7 @@ public class PlatformManagerImpl implements PlatformManager {
         Collection<Platform> plats  = new HashSet<Platform>();
         Collection<Resource> resources = getAllPlatforms();
         for(Resource resource: resources) {
-            if(agentDAO.findByManagedResource(resource.getId()).equals(agt)) {
+            if(managedResourceRepository.findAgentByResource(resource.getId()).equals(agt)) {
                 plats.add(toPlatform(resource));
             }
         }

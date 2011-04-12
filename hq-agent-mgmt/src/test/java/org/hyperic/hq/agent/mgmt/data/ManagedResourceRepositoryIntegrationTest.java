@@ -1,9 +1,7 @@
 package org.hyperic.hq.agent.mgmt.data;
 
 import static org.junit.Assert.assertEquals;
-
-import java.util.HashSet;
-import java.util.Set;
+import static org.junit.Assert.assertNull;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -12,6 +10,7 @@ import net.sf.ehcache.CacheManager;
 
 import org.hyperic.hq.agent.mgmt.domain.Agent;
 import org.hyperic.hq.agent.mgmt.domain.AgentType;
+import org.hyperic.hq.agent.mgmt.domain.ManagedResource;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,29 +25,23 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "classpath:org/hyperic/hq/agent/mgmt/data/jpa-integration-test-context.xml" })
-public class AgentRepositoryIntegrationTest {
-
-    private Agent agent;
-
-    private Agent agent2;
+public class ManagedResourceRepositoryIntegrationTest {
 
     @Autowired
-    private AgentRepository agentRepository;
-
-    private AgentType agentType;
+    private ManagedResourceRepository managedResourceRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
 
+    private Agent agent;
+
     @Before
     public void setUp() {
-        agentType = new AgentType();
+        AgentType agentType = new AgentType();
         agentType.setName("Unidirectional");
         entityManager.persist(agentType);
-        agent = new Agent(agentType, "127.0.0.1", 2144, true, "auth", "token", "5.0");
-        agentRepository.save(agent);
-        agent2 = new Agent(agentType, "127.0.0.1", 2133, true, "auth", "token2", "5.0");
-        agentRepository.save(agent2);
+        this.agent = new Agent(agentType, "127.0.0.1", 2144, true, "auth", "token", "5.0");
+        entityManager.persist(agent);
     }
 
     @After
@@ -57,31 +50,30 @@ public class AgentRepositoryIntegrationTest {
     }
 
     @Test
-    public void testFindByAddress() {
-        Set<Agent> expected = new HashSet<Agent>();
-        expected.add(agent);
-        expected.add(agent2);
-        assertEquals(expected, new HashSet<Agent>(agentRepository.findByAddress("127.0.0.1")));
+    public void testCountUsedAgents() {
+        ManagedResource managedResource = new ManagedResource(123, agent);
+        managedResourceRepository.save(managedResource);
+        ManagedResource managedResource2 = new ManagedResource(456, agent);
+        managedResourceRepository.save(managedResource2);
+        assertEquals(1l, managedResourceRepository.countUsedAgents());
     }
 
     @Test
-    public void testFindByAddressAndPort() {
-        assertEquals(agent, agentRepository.findByAddressAndPort("127.0.0.1", 2144));
+    public void testFindByManagedResource() {
+        int resourceId = 1234;
+        ManagedResource managedResource = new ManagedResource(resourceId, agent);
+        managedResourceRepository.save(managedResource);
+        assertEquals(agent, managedResourceRepository.findAgentByResource(resourceId));
+        verifyQueryCaching("Agent.findByManagedResource");
     }
 
     @Test
-    public void testFindByAgentToken() {
-        assertEquals(agent, agentRepository.findByAgentToken("token"));
-        verifyQueryCaching("Agent.findByAgentToken");
-    }
-
-    @Test
-    public void testLoadAgentTokenQueryCache() throws Exception {
-        agentRepository.loadAgentTokenQueryCache();
-        assertEquals(2, CacheManager.getInstance().getCache("Agent.findByAgentToken").getSize());
+    public void testFindByManagedResourceNone() {
+        assertNull(managedResourceRepository.findAgentByResource(1234));
     }
 
     private void verifyQueryCaching(String cacheName) {
         assertEquals(1, CacheManager.getInstance().getCache(cacheName).getSize());
     }
+
 }

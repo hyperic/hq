@@ -220,8 +220,8 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
-   <cache name="org.hyperic.hq.agent.mgmt.domain.Agent.managedResources"
-         maxElementsInMemory="5000"
+   <cache name="org.hyperic.hq.agent.mgmt.domain.ManagedResource"
+         maxElementsInMemory="20000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"

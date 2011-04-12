@@ -79,13 +79,6 @@ public class Agent implements ContainerManagedTimestampTrackable, Serializable {
     @Column(name = "ID")
     private Integer id;
 
-    @ElementCollection
-    @CollectionTable(name = "MANAGED_RESOURCES", joinColumns = @JoinColumn(name = "AGENT_ID"))
-    @Column(name = "RESOURCE_ID")
-    @OrderColumn
-    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-    private Set<Integer> managedResources = new HashSet<Integer>();
-
     @Column(name = "MTIME")
     private Long modifiedTime;
 
@@ -111,10 +104,6 @@ public class Agent implements ContainerManagedTimestampTrackable, Serializable {
         this.authToken = authToken;
         this.agentToken = agentToken;
         this.agentVersion = version;
-    }
-
-    public void addManagedResource(Integer resourceId) {
-        managedResources.add(resourceId);
     }
 
     public boolean allowContainerManagedCreationTime() {
@@ -179,10 +168,6 @@ public class Agent implements ContainerManagedTimestampTrackable, Serializable {
         return id;
     }
 
-    public Set<Integer> getManagedResources() {
-        return managedResources;
-    }
-
     public long getModifiedTime() {
         return modifiedTime != null ? modifiedTime.longValue() : 0;
     }
@@ -216,10 +201,6 @@ public class Agent implements ContainerManagedTimestampTrackable, Serializable {
 
     public boolean isUnidirectional() {
         return unidirectional;
-    }
-
-    public void removeManagedResource(Resource resource) {
-        managedResources.remove(resource);
     }
 
     public void setAddress(String address) {

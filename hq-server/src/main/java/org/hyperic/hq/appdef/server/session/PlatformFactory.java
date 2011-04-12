@@ -2,7 +2,7 @@ package org.hyperic.hq.appdef.server.session;
 
 import java.util.Set;
 
-import org.hyperic.hq.agent.mgmt.data.AgentRepository;
+import org.hyperic.hq.agent.mgmt.data.ManagedResourceRepository;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.inventory.domain.RelationshipTypes;
 import org.hyperic.hq.inventory.domain.Resource;
@@ -31,16 +31,16 @@ public class PlatformFactory {
     static final String CERT_DN = "certDN";
 
     static final String FQDN = "FQDN";
-    
+
     @Autowired
     private PluginResourceTypeRepository pluginResourceTypeRepository;
-    
+
     @Autowired
-    private AgentRepository agentRepository;
+    private ManagedResourceRepository managedResourceRepository;
 
     public Platform createPlatform(Resource resource) {
         Platform platform = new Platform();
-        platform.setAgent(agentRepository.findByManagedResource(resource.getId()));
+        platform.setAgent(managedResourceRepository.findAgentByResource(resource.getId()));
         platform.setCertdn((String) resource.getProperty(CERT_DN));
         platform.setCommentText((String) resource.getProperty(COMMENT_TEXT));
         platform.setCpuCount((Integer) resource.getProperty(CPU_COUNT));
@@ -71,7 +71,8 @@ public class PlatformFactory {
         // platformType.setModifiedTime(modifiedTime)
         platformType.setId(resourceType.getId());
         platformType.setName(resourceType.getName());
-        platformType.setPlugin(pluginResourceTypeRepository.findNameByResourceType(resourceType.getId()));
+        platformType.setPlugin(pluginResourceTypeRepository.findNameByResourceType(resourceType
+            .getId()));
         // TODO for types, we just fake out sort name for now. Can't do
         // setProperty on ResourceType
         platformType.setSortName(resourceType.getName().toUpperCase());

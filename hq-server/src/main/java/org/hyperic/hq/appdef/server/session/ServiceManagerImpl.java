@@ -40,7 +40,9 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.agent.mgmt.data.AgentRepository;
+import org.hyperic.hq.agent.mgmt.data.ManagedResourceRepository;
+import org.hyperic.hq.agent.mgmt.domain.Agent;
+import org.hyperic.hq.agent.mgmt.domain.ManagedResource;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
@@ -105,7 +107,7 @@ public class ServiceManagerImpl implements ServiceManager {
     private ZeventEnqueuer zeventEnqueuer;
     private ResourceDao resourceDao;
     private ResourceTypeDao resourceTypeDao;
-    private AgentRepository agentRepository;
+    private ManagedResourceRepository managedResourceRepository;
 
     @Autowired
     public ServiceManagerImpl(PermissionManager permissionManager,
@@ -113,7 +115,7 @@ public class ServiceManagerImpl implements ServiceManager {
                               AuthzSubjectManager authzSubjectManager, PluginResourceTypeRepository pluginResourceTypeRepository,
                               ServiceFactory serviceFactory,
                               ResourceGroupManager resourceGroupManager, ZeventEnqueuer zeventEnqueuer,
-                              ResourceDao resourceDao, ResourceTypeDao resourceTypeDao, AgentRepository agentRepository) {
+                              ResourceDao resourceDao, ResourceTypeDao resourceTypeDao, ManagedResourceRepository managedResourceRepository) {
         this.permissionManager = permissionManager;
         this.resourceManager = resourceManager;
         this.authzSubjectManager = authzSubjectManager;
@@ -123,7 +125,7 @@ public class ServiceManagerImpl implements ServiceManager {
         this.zeventEnqueuer = zeventEnqueuer;
         this.resourceDao = resourceDao;
         this.resourceTypeDao = resourceTypeDao;
-        this.agentRepository = agentRepository;
+        this.managedResourceRepository = managedResourceRepository;
     }
     
     private Resource create(AuthzSubject subject,ResourceType type, Resource parent, String name, String desc,
@@ -146,7 +148,9 @@ public class ServiceManagerImpl implements ServiceManager {
         s.setProperty(ServiceFactory.MODIFIED_TIME,System.currentTimeMillis());
         s.setProperty(AppdefResource.SORT_NAME, name.toUpperCase());
         s.setProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_SERVICE);
-        agentRepository.findByManagedResource(parent.getId()).addManagedResource(s.getId());
+        Agent agent = managedResourceRepository.findAgentByResource(parent.getId());
+        ManagedResource managedResource = new ManagedResource(s.getId(),agent);
+        managedResourceRepository.save(managedResource);
         parent.relateTo(s, RelationshipTypes.SERVICE);
         parent.relateTo(s, RelationshipTypes.CONTAINS);
         return s;
