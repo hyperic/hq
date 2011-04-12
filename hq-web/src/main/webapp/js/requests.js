@@ -16,16 +16,9 @@
         if (mList && mList.length > 0) {
 
             var tbody = problemTable.getElementsByTagName('tbody')[0];
-            var browser = BrowserDetect.browser;
 
-            if (browser == "Safari") {
-                for (var i = tbody.childNodes.length; i > 1; i--) {
+            for (var i = tbody.childNodes.length - 1; i > 1; i--) {
                 tbody.removeChild(tbody.childNodes[i]);
-                }
-            } else {
-                for (var i = tbody.childNodes.length - 1; i > 1; i--) {
-                tbody.removeChild(tbody.childNodes[i]);
-                }
             }
         
             for (var i = 0; i < mList.length; i++) {
@@ -279,18 +272,9 @@
         	hqDojo.style(noAvailTable, "display", "");
         } else {
             var tbody = availTable.getElementsByTagName('tbody')[0];
-            var browser = BrowserDetect.browser;
             
-            if (browser == "Safari") {
-
-            for (var i = tbody.childNodes.length; i > 1; i--) {
+            for (var i = tbody.childNodes.length - 1; i > 1; i--) {
                 tbody.removeChild(tbody.childNodes[i]);
-                }
-            } else {
-
-             for (var i = tbody.childNodes.length - 1; i > 1; i--) {
-                tbody.removeChild(tbody.childNodes[i]);
-                 }
             }
 
             for (var i = 0; i < availList.length; i++) {
@@ -381,16 +365,9 @@
 
         if (metricTable && metricValues.values) {
             var tbody = metricTable.getElementsByTagName('tbody')[0];
-            var browser = BrowserDetect.browser;
             
-            if (browser == "Safari") {
-                for (var a = tbody.childNodes.length; a > 0; a--) {
+            for (var a = tbody.childNodes.length - 1; a > 0; a--) {
                 tbody.removeChild(tbody.childNodes[a]);
-                }
-            } else {
-                for (var a = tbody.childNodes.length - 1; a > 0; a--) {
-                tbody.removeChild(tbody.childNodes[a]);
-                }
             }
 
             // Create table headers
