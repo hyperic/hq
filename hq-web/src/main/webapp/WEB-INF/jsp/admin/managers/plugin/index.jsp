@@ -7,7 +7,9 @@
 <link rel="stylesheet" type="text/css" href="<spring:url value="/static/css/admin/managers/plugin/pluginMgr.css"/>" />
 
 <section id="pluginManagerPanel" class="container top">
-	<h1><fmt:message key="admin.managers.plugin.title" /></h1>
+	<h1><fmt:message key="admin.managers.plugin.title" /> <span id="pluginCount">&nbsp;
+			(<fmt:message key="admin.managers.plugin.title.note"/> <span id="noPlugins">${info.pluginCount}</span>)
+	</span></h1> 
 	<p id="instruction"><fmt:message key="${instruction}" /></p>
 	
 	<div id="currentTimeInfo">
@@ -20,14 +22,17 @@
 	<div class="topInfo">
 		<span id="agentInfo" style="float:right">
 			<fmt:message key="admin.managers.Plugin.information.agent.count"/>:&nbsp;
-		    <span id="agentInfoAllCount">${allAgentCount}</span>
+		    <span id="agentInfoAllCount">${info.allAgentCount}</span>
 		    <img src="<spring:url value="/static/images/icon_info_small.gif"/>" class="infoIcon" alt="info"/> <br/>
 		</span>
 	    <span style="float:left">
 	        <fmt:message key="admin.managers.Plugin.information.legend"/>
-	    	<img src="<spring:url value="/static/images/icon_available_green.gif"/>" alt="scuccessful"/> <fmt:message key="admin.managers.Plugin.tip.icon.success"/>
-	    	&nbsp; <img src="<spring:url value="/static/images/alert.png"/>" alt="in progress"/> <fmt:message key="admin.managers.Plugin.tip.icon.in.progress"/>
-	   		&nbsp;<img src="<spring:url value="/static/images/icon_available_red.gif"/>" alt="failure"/> <fmt:message key="admin.managers.Plugin.tip.icon.error"/>
+	    	<img src="<spring:url value="/static/images/icon_available_green.gif"/>" alt="scuccessful"/> 
+	    		<fmt:message key="admin.managers.Plugin.tip.icon.success"/> (<span id="successCount">${info.successCount}</span>)
+	    	&nbsp; <img src="<spring:url value="/static/images/alert.png"/>" alt="in progress"/> 
+	    		<fmt:message key="admin.managers.Plugin.tip.icon.in.progress"/> (<span id="inProgressCount">${info.inProgressCount}</span>)
+	   		&nbsp;<img src="<spring:url value="/static/images/icon_available_red.gif"/>" alt="failure"/> 
+	   			<fmt:message key="admin.managers.Plugin.tip.icon.error"/> (<span id="errorCount">${info.errorCount}</span>)
 	    </span>		
 	</div>
 	
@@ -47,13 +52,17 @@
 	
 	<ul id="pluginList">
 		<c:forEach var="pluginSummary" items="${pluginSummaries}" varStatus="index">
-			<li class="gridrow clear<c:if test="${index.count % 2 == 0}"> even</c:if>" <c:if test="${pluginSummary.deleted}">style="background-color:grey;"</c:if> >
+			<li class="gridrow clear <c:if test="${pluginSummary.deleted}"> grey </c:if> <c:if test="${index.count % 2 == 0}"> even</c:if>" >
 				<span class="first column span-1">
 					<c:if test="${mechanismOn && !pluginSummary.deleted}">
                     	<input type="checkbox" value="${pluginSummary.id}_${pluginSummary.jarName} (${pluginSummary.name})" name="deleteId"/>&nbsp; 
 					</c:if>
 				</span>
-				<span class="column span-small">${pluginSummary.name}</span>
+				<span class="column span-small">${pluginSummary.name}
+					<c:if test="${pluginSummary.deleted}">
+						<br/><span class="deleting"><fmt:message key="admin.managers.Plugin.column.plugin.deleting"/></span>
+					</c:if>				
+				</span>
 				<span class="column span-med">${pluginSummary.version}&nbsp;</span>
 				<span class="column span-med">${pluginSummary.jarName}&nbsp;
 					<c:if test="${pluginSummary.disabled}">
@@ -179,6 +188,8 @@
 		updateTime();
 		resizeContent();
 		
+		hqDojo.connect(window, "onresize", resizeContent);
+		
 		function resizeContent(){
 			var windowCoords = hqDojo.window.getBox();
 			var footerCoords = hqDojo.position(hqDojo.byId("footer"), true);
@@ -238,6 +249,10 @@
                 },				
 				load: function(response){
 					hqDojo.byId("agentInfoAllCount").innerHTML=response.allAgentCount;
+					hqDojo.byId("noPlugins").innerHTML=response.pluginCount;
+					hqDojo.byId("successCount").innerHTML=response.successCount;
+					hqDojo.byId("inProgressCount").innerHTML=response.inProgressCount;
+					hqDojo.byId("errorCount").innerHTML=response.errorCount;
 				}
 			}
 				
@@ -615,28 +630,35 @@
                 	var index = 1;
                 	
                 	hqDojo.forEach(response, function(summary) {
-                		var greyBackGround="";
-                		if(summary.deleted){
-                			greyBackGround = "background-color:grey;";
-                		}
+						var liClass = "";
+						if(summary.deleted){
+							liClass = " grey";
+						}else{
+							liClass=(((index) % 2 == 0) ? " even" : "");
+						}
                 		var li = hqDojo.create("li", {
-                			"class": "gridrow clear" + (((index) % 2 == 0) ? " even" : ""),
-                			"style": greyBackGround
+                			"class": "gridrow clear" + liClass 
                 		}, "pluginList");
                 		var span = hqDojo.create("span", {
                 			"class": "first column span-1"
                 		}, li);
-                		if(${mechanismOn} && (summary.deleted!=false) ){
+                		if(${mechanismOn} && (!summary.deleted) ){
 	                		var input = hqDojo.create("input", {
     	            			"type": "checkbox",
     	            			"name": "deleteId",
         	        			"value": summary.id+"_"+summary.jarName+" ("+summary.name+")"
                 			}, span);
                 		}
-                		span = hqDojo.create("span", {
+                		var pluginName = hqDojo.create("span", {
                 			"class": "column span-small",
                 			"innerHTML": summary.name
                 		}, li);
+                		if(summary.deleted){
+                			span = hqDojo.create("span",{
+                				"class":"deleting",
+                				"innerHTML":"<br/><fmt:message key='admin.managers.Plugin.column.plugin.deleting'/>"
+                			},pluginName);
+                		}
 						if(summary.version==null){
 							var version = "";
 						}else{

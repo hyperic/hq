@@ -68,7 +68,7 @@ public class PluginManagerController extends BaseController implements Applicati
     @RequestMapping(method = RequestMethod.GET)
     public String index(Model model) {
         model.addAttribute("pluginSummaries", getPluginSummaries());
-        model.addAttribute("allAgentCount",agentManager.getNumAutoUpdatingAgents());
+        model.addAttribute("info",getAgentInfo());
         model.addAttribute("mechanismOn", pluginManager.isPluginSyncEnabled());
         if (pluginManager.isPluginSyncEnabled()){
             model.addAttribute("instruction", "admin.managers.plugin.instructions");
@@ -139,6 +139,28 @@ public class PluginManagerController extends BaseController implements Applicati
     @RequestMapping(method = RequestMethod.GET, value="/info", headers="Accept=application/json")
     public @ResponseBody Map<String, Object> getAgentInfo() {
         Map<String, Object> info = new HashMap<String,Object>();
+        
+        Map<Integer, Map<AgentPluginStatusEnum, Integer>> allPluginStatus = 
+            pluginManager.getPluginRollupStatus();
+        List<Plugin> plugins =  pluginManager.getAllPlugins();
+        int successCount=0;
+        int errorCount=0;
+        int inProgressCount=0;
+        
+        for (Plugin plugin : plugins) {
+            int pluginId = plugin.getId();
+            Map<AgentPluginStatusEnum, Integer> pluginStatus = 
+                allPluginStatus.get(pluginId);
+            if (pluginStatus!=null){
+                successCount += pluginStatus.get(AgentPluginStatusEnum.SYNC_SUCCESS);
+                errorCount += pluginStatus.get(AgentPluginStatusEnum.SYNC_FAILURE);
+                inProgressCount += pluginStatus.get(AgentPluginStatusEnum.SYNC_IN_PROGRESS);
+            }
+        }
+        info.put("inProgressCount",inProgressCount);
+        info.put("errorCount", errorCount);
+        info.put("successCount", successCount);
+        info.put("pluginCount", plugins.size());
         info.put("allAgentCount", agentManager.getNumAutoUpdatingAgents());
         return info;
     }
@@ -268,7 +290,7 @@ public class PluginManagerController extends BaseController implements Applicati
             
             if(param!=null){
                 for(int i = 0; i<param.size();i++){
-                    messageParams[i]=param.get(String.valueOf(i));
+                    messageParams[i]=param.get(i);
                 }
             }
             log.error(e,e);

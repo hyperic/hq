@@ -33,4 +33,6 @@ public interface AgentDataTransferJob {
     
     public void execute();
 
+    public void onFailure();
+
 }
