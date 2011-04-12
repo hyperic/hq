@@ -148,4 +148,11 @@ public class PluginSyncJob implements AgentDataTransferJob {
         return toRemove;
     }
 
+    public void onFailure() {
+        pluginManager.updateAgentPluginSyncStatus(
+            AgentPluginStatusEnum.SYNC_FAILURE,
+            Collections.singletonMap(agentId, plugins),
+            Collections.singletonMap(agentId, toRemove));
+    }
+
 }

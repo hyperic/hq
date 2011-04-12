@@ -196,7 +196,12 @@ public class AgentSynchronizer implements DiagnosticObject {
         final Thread thread = new Thread(name) {
             public void run() {
                 if (agentIsAlive(job)) {
-                    job.execute();
+                    try {
+                        job.execute();
+                    } catch (Throwable e) {
+                        job.onFailure();
+                        log.error(e,e);
+                    }
                     return;
                 }
                 AvailabilityManager availabilityManager = Bootstrap.getBean(AvailabilityManager.class);
@@ -222,6 +227,7 @@ public class AgentSynchronizer implements DiagnosticObject {
                     }
                 } else {
                     log.warn("Could not ping agent in order to run job " + getJobInfo(job));
+                    job.onFailure();
                 }
             }
         };
