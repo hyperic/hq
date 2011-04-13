@@ -81,6 +81,8 @@ public class PluginManagerController extends BaseController implements Applicati
     @RequestMapping(method = RequestMethod.GET, value="/list", headers="Accept=application/json")
     public @ResponseBody List<Map<String, Object>> getPluginSummaries() {
         List<Map<String, Object>> pluginSummaries = new ArrayList<Map<String,Object>>();
+        List<Map<String, Object>> inProgressPluginSummaries = new ArrayList<Map<String,Object>>();
+        List<Map<String, Object>> finalPluginSummaries = new ArrayList<Map<String,Object>>();
         List<Plugin> plugins =  pluginManager.getAllPlugins();
         
         
@@ -89,7 +91,7 @@ public class PluginManagerController extends BaseController implements Applicati
                 return o1.getName().compareTo(o2.getName());
             }
         };
-        
+       
         Collections.sort(plugins, sortByPluginName);
         
         
@@ -130,10 +132,18 @@ public class PluginManagerController extends BaseController implements Applicati
             pluginSummary.put("version", plugin.getVersion());   
             pluginSummary.put("disabled", plugin.isDisabled());
             pluginSummary.put("deleted", plugin.isDeleted());
-            pluginSummaries.add(pluginSummary);
+            if(errorAgentCount>0){
+                finalPluginSummaries.add(pluginSummary);
+            }else if(inProgressAgentCount>0){
+                inProgressPluginSummaries.add(pluginSummary);
+            }else{
+                pluginSummaries.add(pluginSummary);
+            }
         }
+        finalPluginSummaries.addAll(inProgressPluginSummaries);
+        finalPluginSummaries.addAll(pluginSummaries);
 
-        return pluginSummaries;
+        return finalPluginSummaries;
     }
     
     @RequestMapping(method = RequestMethod.GET, value="/info", headers="Accept=application/json")
