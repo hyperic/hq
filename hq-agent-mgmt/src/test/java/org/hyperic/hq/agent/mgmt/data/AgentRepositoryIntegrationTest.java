@@ -62,6 +62,7 @@ public class AgentRepositoryIntegrationTest {
         expected.add(agent);
         expected.add(agent2);
         assertEquals(expected, new HashSet<Agent>(agentRepository.findByAddress("127.0.0.1")));
+        verifyQueryCaching("Agent.findByAddress");
     }
 
     @Test
@@ -76,9 +77,10 @@ public class AgentRepositoryIntegrationTest {
     }
 
     @Test
-    public void testLoadAgentTokenQueryCache() throws Exception {
-        agentRepository.loadAgentTokenQueryCache();
+    public void testLoadQueryCaches() throws Exception {
+        agentRepository.loadQueryCaches();
         assertEquals(2, CacheManager.getInstance().getCache("Agent.findByAgentToken").getSize());
+        assertEquals(1, CacheManager.getInstance().getCache("Agent.findByAddress").getSize());
     }
 
     private void verifyQueryCaching(String cacheName) {

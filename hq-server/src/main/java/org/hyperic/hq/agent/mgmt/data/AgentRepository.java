@@ -13,7 +13,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface AgentRepository extends JpaRepository<Agent, Integer>, AgentRepositoryCustom {
 
-    List<Agent> findByAddress(String address);
+    @Transactional(readOnly = true)
+    @Query("select a from Agent a where a.address = :address")
+    @QueryHints({ @QueryHint(name = "org.hibernate.cacheable", value = "true"),
+                 @QueryHint(name = "org.hibernate.cacheRegion", value = "Agent.findByAddress") })
+    List<Agent> findByAddress(@Param("address") String address);
 
     Agent findByAddressAndPort(String address, int port);
 

@@ -17,7 +17,7 @@ public class AgentRepositoryImpl implements AgentRepositoryCustom {
 
     @SuppressWarnings("unchecked")
     @PostConstruct
-    public void loadAgentTokenQueryCache() {
+    public void loadQueryCaches() {
         jpaTemplate.execute(new JpaCallback() {
             public Object doInJpa(EntityManager entityManager) {
                 List<String> tokens = entityManager.createQuery("select a.agentToken from Agent a",
@@ -31,6 +31,15 @@ public class AgentRepositoryImpl implements AgentRepositoryCustom {
                             Agent.class).setHint("org.hibernate.cacheable", true)
                         .setHint("org.hibernate.cacheRegion", "Agent.findByAgentToken")
                         .setParameter("agentToken", token).getSingleResult();
+                }
+                List<String> addresses = entityManager.createQuery(
+                    "select distinct a.address from Agent a", String.class).getResultList();
+                for (String address : addresses) {
+                    entityManager
+                        .createQuery("select a from Agent a where a.address = :address",
+                            Agent.class).setHint("org.hibernate.cacheable", true)
+                        .setHint("org.hibernate.cacheRegion", "Agent.findByAddress")
+                        .setParameter("address", address).getResultList();
                 }
                 return null;
             }
