@@ -86,6 +86,7 @@
 	<util:list id="preloadCaches">
 		<value>org.hyperic.hq.agent.mgmt.domain.AgentType</value>
 		<value>org.hyperic.hq.agent.mgmt.domain.Agent</value>
+		<value>org.hyperic.hq.agent.mgmt.domain.ManagedResource</value>
 		<value>org.hyperic.hq.measurement.server.session.Category</value>
 		<value>org.hyperic.hq.measurement.server.session.MonitorableType
 		</value>

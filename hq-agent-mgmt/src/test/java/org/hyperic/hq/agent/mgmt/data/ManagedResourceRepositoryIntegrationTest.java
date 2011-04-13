@@ -71,6 +71,16 @@ public class ManagedResourceRepositoryIntegrationTest {
     public void testFindByManagedResourceNone() {
         assertNull(managedResourceRepository.findAgentByResource(1234));
     }
+    
+    @Test
+    public void testLoadFindByManagedResourceQueryCache() {
+        ManagedResource managedResource = new ManagedResource(123, agent);
+        managedResourceRepository.save(managedResource);
+        ManagedResource managedResource2 = new ManagedResource(456, agent);
+        managedResourceRepository.save(managedResource2);
+        managedResourceRepository.loadFindByManagedResourceQueryCache();
+        assertEquals(2, CacheManager.getInstance().getCache("Agent.findByManagedResource").getSize());
+    }
 
     private void verifyQueryCaching(String cacheName) {
         assertEquals(1, CacheManager.getInstance().getCache(cacheName).getSize());

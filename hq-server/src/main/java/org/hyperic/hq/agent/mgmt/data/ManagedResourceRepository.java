@@ -10,8 +10,9 @@ import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
-public interface ManagedResourceRepository extends JpaRepository<ManagedResource, Integer> {
-    
+public interface ManagedResourceRepository extends JpaRepository<ManagedResource, Integer>,
+    ManagedResourceRepositoryCustom {
+
     @Transactional(readOnly = true)
     @Query("select count(distinct m.agent) from ManagedResource m")
     long countUsedAgents();
