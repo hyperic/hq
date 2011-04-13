@@ -61,7 +61,7 @@
 </c:otherwise>
 </c:choose>
 <c:set var="selectedDashboardId" value="${sessionScope['.user.dashboard.selected.id']}"/>
-<form method="POST" action="<html:rewrite page="/app/dashboard/${selectedDashboardId}/portlets" />"
+<form method="POST" action="<html:rewrite page="/app/dashboard/${selectedDashboardId}/portlets" />">
 	<html:hidden property="wide" value="${wide}"/>
   	<table cellpadding="0" cellspacing="0" border="0" width="100%">
     <tr valign="top">
