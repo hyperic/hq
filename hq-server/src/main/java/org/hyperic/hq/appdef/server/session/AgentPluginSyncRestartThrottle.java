@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -32,11 +33,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.PostConstruct;
 
@@ -51,6 +48,8 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.product.shared.PluginManager;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -66,9 +65,7 @@ public class AgentPluginSyncRestartThrottle {
     private final Map<Integer, Long> agentRestartTimestampMap = new HashMap<Integer, Long>();
     /** agentIds */
     private final TreeSet<Integer> pendingRestarts = new TreeSet<Integer>();
-    @SuppressWarnings("unused")
-    private Thread throttler;
-    private ScheduledThreadPoolExecutor invalidator;
+    private TaskScheduler taskScheduler;
     private final AtomicBoolean shutdown = new AtomicBoolean(false);
     private final Object LOCK = new Object();
     private AuthzSubject overlord;
@@ -78,28 +75,20 @@ public class AgentPluginSyncRestartThrottle {
     @Autowired
     public AgentPluginSyncRestartThrottle(AuthzSubjectManager authzSubjectManager,
                                           ConcurrentStatsCollector concurrentStatsCollector,
-                                          TransactionRetry transactionRetry) {
+                                          TransactionRetry transactionRetry,
+                                          @Value("#{scheduler}")TaskScheduler taskScheduler) {
         this.overlord = authzSubjectManager.getOverlordPojo();
         this.concurrentStatsCollector = concurrentStatsCollector;
         this.transactionRetry = transactionRetry;
+        this.taskScheduler = taskScheduler;
     }
     
     @PostConstruct
     public void initialize() {
         concurrentStatsCollector.register(ConcurrentStatsCollector.AGENT_PLUGIN_SYNC_RESTARTS);
         concurrentStatsCollector.register(ConcurrentStatsCollector.AGENT_PLUGIN_SYNC_PENDING_RESTARTS);
-        throttler = startThrottlerThread();
-        invalidator = startExecutor();
-    }
-    
-    private ScheduledThreadPoolExecutor startExecutor() {
-        ScheduledThreadPoolExecutor rtn = new ScheduledThreadPoolExecutor(1, new ThreadFactory() {
-            private AtomicLong i = new AtomicLong(0);
-            public Thread newThread(Runnable r) {
-                return new Thread(r, "PluginSyncRestartInvalidator-" + i.getAndIncrement());
-            }
-        });
-        final Runnable runner = new Runnable() {
+        startThrottlerThread();
+        taskScheduler.scheduleWithFixedDelay(new Runnable() {
             public void run() {
                 try {
                     final boolean debug = log.isDebugEnabled();
@@ -115,11 +104,9 @@ public class AgentPluginSyncRestartThrottle {
                     log.error("ERROR running PluginSyncRestartInvalidator: " + t,t);
                 }
             }
-        };
-        rtn.scheduleWithFixedDelay(runner, RECORD_TIMEOUT, RECORD_TIMEOUT, TimeUnit.MILLISECONDS);
-        return rtn;
+        }, new Date(System.currentTimeMillis() + RECORD_TIMEOUT),  RECORD_TIMEOUT);
     }
-
+    
     public Set<Integer> getQueuedAgentIds() {
         synchronized (LOCK) {
             return new HashSet<Integer>(pendingRestarts);
@@ -132,8 +119,8 @@ public class AgentPluginSyncRestartThrottle {
         }
     }
     
-    private Thread startThrottlerThread() {
-        final Thread rtn = new Thread("AgentPluginSyncRestartThrottle") {
+    private void startThrottlerThread() {
+        taskScheduler.schedule(new Runnable() {
             public void run() {
                 while (!shutdown.get()) {
                     try {
@@ -145,17 +132,14 @@ public class AgentPluginSyncRestartThrottle {
                         }
                         if (restarts > 0) {
                             concurrentStatsCollector.addStat(
-                           	    restarts, ConcurrentStatsCollector.AGENT_PLUGIN_SYNC_RESTARTS);
+                                restarts, ConcurrentStatsCollector.AGENT_PLUGIN_SYNC_RESTARTS);
                         }
                     } catch (Throwable t) {
                         log.error(t,t);
                     }
                 }
             }
-        };
-        rtn.setDaemon(true);
-        rtn.start();
-        return rtn;
+        }, new Date(System.currentTimeMillis() + 5000));
     }
 
     private int restartAgents() {
@@ -244,7 +228,6 @@ public class AgentPluginSyncRestartThrottle {
     public void shutdown() {
         shutdown.set(true);
         LOCK.notifyAll();
-        invalidator.shutdown();
     }
 
 }

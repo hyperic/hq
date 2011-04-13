@@ -26,48 +26,35 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import java.util.Date;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AgentPluginStartupSync extends Thread
-implements ApplicationContextAware, ApplicationListener<ContextRefreshedEvent> {
+public class AgentPluginStartupSync implements ApplicationContextAware,
+    ApplicationListener<ContextRefreshedEvent> {
 
-    private static final Log log = LogFactory.getLog(AgentPluginStartupSync.class);
+    private final Log log = LogFactory.getLog(AgentPluginStartupSync.class);
     private ApplicationContext ctx;
     private AgentManager agentManager;
+    private TaskScheduler taskScheduler;
 
     @Autowired
-    public AgentPluginStartupSync(AgentManager agentManager) {
-        super("AgentPluginStartupSync");
-        setDaemon(true);
+    public AgentPluginStartupSync(AgentManager agentManager, @Value("#{scheduler}")TaskScheduler taskScheduler) {
         this.agentManager = agentManager;
-    }
-
-    public void run() {
-        try {
-            // want all agents to be able to check in their PluginInfo before this runs
-            log.info("will start agent plugin sync in 5 minutes");
-            Thread.sleep(5*MeasurementConstants.MINUTE);
-        } catch (InterruptedException e) {
-            log.debug(e,e);
-        }
-        try {
-            log.info("starting agent plugin sync");
-            agentManager.syncAllAgentPlugins();
-            log.info("agent plugin sync complete");
-        } catch (Throwable t) {
-            log.error("error running plugin sync to agents",t);
-        }
+        this.taskScheduler = taskScheduler;
     }
 
     public void setApplicationContext(ApplicationContext ctx) throws BeansException {
@@ -75,10 +62,22 @@ implements ApplicationContextAware, ApplicationListener<ContextRefreshedEvent> {
     }
 
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        if(event.getApplicationContext() != this.ctx) {
+        if (event.getApplicationContext() != this.ctx) {
             return;
         }
-        start();
+        taskScheduler.schedule(new Runnable() {
+            public void run() {
+                try {
+                    log.info("starting agent plugin sync");
+                    agentManager.syncAllAgentPlugins();
+                    log.info("agent plugin sync complete");
+                } catch (Throwable t) {
+                    log.error("error running plugin sync to agents", t);
+                }
+
+            }
+
+        }, new Date(System.currentTimeMillis() + (5 * MeasurementConstants.MINUTE)));
     }
 
 }
