@@ -27,8 +27,6 @@ package org.hyperic.hq.agent.client;
 
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.bizapp.agent.client.SecureAgentConnection;
-import org.hyperic.hq.operation.OperationService;
-import org.hyperic.hq.operation.rabbit.core.AmqpCommandOperationService;
 import org.hyperic.hq.transport.AgentProxyFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -43,7 +41,31 @@ public class AgentCommandsClientFactory {
 
     private final AgentProxyFactory agentProxyFactory;
 
-    private OperationService operationService;
+    @Autowired
+    public AgentCommandsClientFactory(AgentProxyFactory agentProxyFactory) {
+        this.agentProxyFactory = agentProxyFactory;
+    }
+
+    public AgentCommandsClient getClient(Agent agent) {
+        if (agent.isNewTransportAgent()) {
+            return new AgentCommandsClientImpl(agent, agentProxyFactory);
+        } else {
+            return new LegacyAgentCommandsClientImpl(new SecureAgentConnection(agent.getAddress(),
+                agent.getPort(), agent.getAuthToken()));
+        }
+    }
+
+    public AgentCommandsClient getClient(String agentAddress, int agentPort, String authToken,
+                                         boolean isNewTransportAgent, boolean unidirectional) {
+        if (isNewTransportAgent) {
+            return new AgentCommandsClientImpl(agentProxyFactory, agentAddress, agentPort, unidirectional);
+        } else {
+            return new LegacyAgentCommandsClientImpl(new SecureAgentConnection(agentAddress,
+                agentPort, authToken));
+        }
+    }
+    
+    /*private OperationService operationService;
 
     @Autowired
     public AgentCommandsClientFactory(AgentProxyFactory agentProxyFactory, OperationService operationService) {
@@ -51,7 +73,7 @@ public class AgentCommandsClientFactory {
         this.operationService = operationService;
     }
 
-    /**
+    *//**
      * Returns the implementation of AgentCommandsClient to perform communication operations.
      * @param agentAddress        the agent address
      * @param agentPort           the agent port
@@ -59,16 +81,16 @@ public class AgentCommandsClientFactory {
      * @param isNewTransportAgent true if agent is new transport agent, false if not. NOTE: will do away with this
      * @param unidirectional      whether or not this is a unidirectional agent
      * @return org.hyperic.hq.amqp.AmqpAgentCommandsClient
-     */
+     *//*
     public AgentCommandsClient getClient(String agentAddress, int agentPort, String authToken, boolean isNewTransportAgent, boolean unidirectional) {
         return getClient(Agent.create(agentAddress, agentPort, unidirectional, authToken, isNewTransportAgent));
     }
 
-    /**
+    *//**
      * Returns the implementation of AgentCommandsClient to perform communication operations.
      * @param agent the Agent
      * @return org.hyperic.hq.amqp.AmqpAgentCommandsClient
-     */
+     *//*
     public AgentCommandsClient getClient(Agent agent) {
         if (agent.isUnidirectional())
             throw new UnsupportedOperationException("unidirectional transport not supported.");
@@ -76,16 +98,16 @@ public class AgentCommandsClientFactory {
         return new AmqpCommandOperationService(operationService, createClient(agent), agent.isUnidirectional());
     }
 
-    /**
+    *//**
      * Handles logic for creation of the appropriate legacy client implementation.
      * @param agent
      * @return the client to return
      * @see org.hyperic.hq.agent.client.AgentCommandsClient
-     */
+     *//*
     private AgentCommandsClient createClient(Agent agent) {
         return agent.getIsNewTransportAgent() ? new AgentCommandsClientImpl(agent, agentProxyFactory)
                 : new LegacyAgentCommandsClientImpl(new SecureAgentConnection(agent.getAddress(), agent.getPort(), agent.getAuthToken()));
-    }
+    }*/
 
     /*
     private final AgentProxyFactory agentProxyFactory;

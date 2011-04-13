@@ -191,7 +191,6 @@ public class AgentCommandsClientImpl
      * @see org.hyperic.hq.agent.client.AgentCommandsClient#ping()
      */
     public long ping() throws AgentRemoteException, AgentConnectionException {
-        logger.info("*************starting ping() on server");
         if (_agentRegistrationClient && getAgent().isUnidirectional()) {
             // The unidirectional client does not work yet since the agent 
             // is not aware of its agent token at this time
@@ -209,7 +208,6 @@ public class AgentCommandsClientImpl
             return (recvTime-sendTime);
         } finally {
             safeDestroyService(proxy);
-            logger.info("*************completed ping() on server");
         }
     }
     

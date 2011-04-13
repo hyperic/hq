@@ -28,6 +28,13 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
-    <bean class="com.rabbitmq.client.ConnectionFactory"/>
+    <bean id="rabbitConnectionFactory" class="com.rabbitmq.client.ConnectionFactory"/>
+
+    <bean id="springRabbitConnectionFactory" class="org.springframework.amqp.rabbit.connection.SingleConnectionFactory"/>
+
+    <bean class="org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer">
+        <property name="connectionFactory" ref="springRabbitConnectionFactory"/>
+        <property name="queues"
+    </bean>
 
 </beans>

@@ -3,6 +3,7 @@ package org.hyperic.hq.agent.server;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.commands.AgentReceiveFileData_args;
+import org.hyperic.hq.operation.OperationService;
 import org.hyperic.hq.operation.rabbit.core.AmqpCommandOperationService;
 
 import java.io.InputStream;
@@ -12,19 +13,12 @@ import java.io.InputStream;
  */
 public class AgentHandlerAmqpOperationCommandsService extends AmqpCommandOperationService implements AgentCommandsClient {
 
-    
-    /**
-     * For now, wrapping the logic of each legacy client method except
-     * for ping()
-     * @param agentDaemon
-     * @throws AgentRunningException
-     */
-    public AgentHandlerAmqpOperationCommandsService(AgentDaemon agentDaemon) throws AgentRunningException {
-        this(new AgentCommandsService(agentDaemon));
+    public AgentHandlerAmqpOperationCommandsService(OperationService operationService, AgentDaemon agentDaemon) throws AgentRunningException {
+        this(operationService, new AgentCommandsService(agentDaemon));
     }
 
-    public AgentHandlerAmqpOperationCommandsService(AgentCommandsClient legacyClient) throws AgentRunningException {
-        super(legacyClient); 
+    public AgentHandlerAmqpOperationCommandsService(OperationService operationService, AgentCommandsClient legacyClient) throws AgentRunningException {
+        super(operationService, legacyClient);
     }
 
     /**
@@ -34,7 +28,6 @@ public class AgentHandlerAmqpOperationCommandsService extends AmqpCommandOperati
      * @throws AgentRemoteException
      */
     void agentSendFileData(AgentReceiveFileData_args data, InputStream stream) throws AgentRemoteException {
-        //Assert.isInstanceOf(AgentCommandsService.class, legacyClient);
         ((AgentCommandsService) client).agentSendFileData(data, stream);
     }
 

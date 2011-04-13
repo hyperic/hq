@@ -35,5 +35,19 @@ public interface OperationService {
      * @throws OperationFailedException
      */
     Object perform(Envelope envelope) throws OperationFailedException;
+
+    /**
+     * 
+     * @param operationName
+     * @param data
+     * @return
+     */
+    Object dispatch(String operationName, Object data);
+
+    /**
+     * Handle this envelope
+     * @param envelope The envelope to handle
+     */
+    void handle(Envelope envelope) throws EnvelopeHandlingException;
    
 }

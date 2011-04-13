@@ -30,7 +30,7 @@ package org.hyperic.hq.operation.rabbit.util;
  * @author Helena Edelson
  */
 public class Constants {
-
+    //authToken
     public static final String OPERATION_REQUEST = ".request";
 
     public static final String OPERATION_RESPONSE = ".response";
@@ -39,7 +39,11 @@ public class Constants {
 
     public static final String OPERATION_NAME_GUEST_RESPONSE = "hq.guest.response";
 
-    public static final String OPERATION_NAME_AGENT_REGISTER = "hq-agent.config.register";
+    public static final String OPERATION_NAME_SERVER_TO_AGENT_PING = "hq.guest.request";
+
+    public static final String OPERATION_NAME_AGENT_REGISTER_REQUEST = "hq-agent.config.register.request";
+
+    public static final String OPERATION_NAME_AGENT_REGISTER_RESPONSE = "hq-agent.config.register.request";
 
     public static final String OPERATION_NAME_METRICS_REPORT = "hq-agent.metrics.report";
 

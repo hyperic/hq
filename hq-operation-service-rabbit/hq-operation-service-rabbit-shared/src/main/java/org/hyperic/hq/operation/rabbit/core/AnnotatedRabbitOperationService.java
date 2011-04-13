@@ -26,8 +26,6 @@ package org.hyperic.hq.operation.rabbit.core;
 
 import com.rabbitmq.client.ConnectionFactory;
 import org.hyperic.hq.operation.*;
-import org.hyperic.hq.operation.annotation.OperationDispatcher;
-import org.hyperic.hq.operation.annotation.OperationEndpoint;
 import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
 import org.hyperic.hq.operation.rabbit.util.OperationToRoutingMapping;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,30 +39,25 @@ import java.lang.reflect.InvocationTargetException;
  * @author Helena Edelson
  */
 @Component("operationService")
-public class AnnotatedRabbitOperationService implements OperationService, Dispatcher, Endpoint, OperationDiscoverer {
+public class AnnotatedRabbitOperationService implements OperationService, OperationDiscoverer {
 
-    private OperationMethodInvokingRegistry dispatchers;
-
-    private OperationMethodInvokingRegistry endpoints;
-
+    private OperationMethodInvokingRegistry mappings;
+ 
     private RabbitTemplate rabbitTemplate;
 
     private Converter<Object, String> converter;
 
-    public AnnotatedRabbitOperationService() {
-    }
-    
     /**
      * Creates a new instance that sends messages to a Rabbit broker
      * @param connectionFactory The connectionFactory to use
-     * @param converter         The convert used to convert a context to a message
+     * @param routingRegistry
+     * @param converter The convert used to convert a context to a message
      */
     @Autowired
-    public AnnotatedRabbitOperationService(ConnectionFactory connectionFactory, Converter<Object, String> converter) {
+    public AnnotatedRabbitOperationService(ConnectionFactory connectionFactory, RoutingRegistry routingRegistry, Converter<Object, String> converter) {
         this.converter = converter != null ? converter : new JsonMappingConverter();
         this.rabbitTemplate = new SimpleRabbitTemplate(connectionFactory);
-        this.dispatchers = new OperationMethodInvokingRegistry(connectionFactory);
-        this.endpoints = new OperationMethodInvokingRegistry(connectionFactory);
+        this.mappings = new OperationMethodInvokingRegistry(routingRegistry, converter);
     }
   
     /**
@@ -73,11 +66,7 @@ public class AnnotatedRabbitOperationService implements OperationService, Dispat
      * @throws OperationDiscoveryException
      */
     public void discover(Object candidate, Class<? extends Annotation> annotation) throws OperationDiscoveryException {
-        if (annotation.equals(OperationDispatcher.class)) {
-            this.dispatchers.discover(candidate, OperationDispatcher.class);
-        } else {
-            this.endpoints.discover(candidate, OperationEndpoint.class);
-        }
+        this.mappings.discover(candidate, annotation);
     }
 
     /**
@@ -86,14 +75,13 @@ public class AnnotatedRabbitOperationService implements OperationService, Dispat
      * @throws OperationFailedException
      */
     public Object perform(Envelope envelope) throws OperationFailedException {
-        OperationToRoutingMapping mapping = getOperationToRoutingMapping(envelope.getType(), envelope.getOperationName());
+        OperationToRoutingMapping mapping = this.mappings.routingRegistry.map(envelope.getOperationName());
 
         try {
-            if (mapping.operationRequiresResponse() && mapping.getReplyTo() != null) {
-                return rabbitTemplate.sendAndReceive(mapping.getExchangeName(), mapping.getRoutingKey(), envelope);
-            } else {
-                return rabbitTemplate.send(mapping.getExchangeName(), mapping.getRoutingKey(), envelope); 
-            }
+            return mapping.operationRequiresResponse() ?
+                    rabbitTemplate.sendAndReceive(mapping.getExchangeName(), mapping.getRoutingKey(), envelope)
+                        : rabbitTemplate.send(mapping.getExchangeName(), mapping.getRoutingKey(), envelope);
+
         } catch (IOException e) {
             throw new OperationFailedException(e.getMessage(), e);
         }
@@ -105,8 +93,8 @@ public class AnnotatedRabbitOperationService implements OperationService, Dispat
      * @return
      */
     public Object dispatch(String operationName, Object data) throws OperationFailedException {
-        OperationMethodInvokingRegistry.MethodInvoker invoker = this.dispatchers.map(operationName);
-        Envelope envelope = new Envelope(operationName, this.converter.write(data), null, OperationDispatcher.class);
+        OperationMethodInvokingRegistry.MethodInvoker invoker = this.mappings.map(operationName);
+        Envelope envelope = new Envelope(operationName, this.converter.write(data));
 
         if (invoker.operationHasReturnType()) {
             return perform(envelope); 
@@ -122,16 +110,15 @@ public class AnnotatedRabbitOperationService implements OperationService, Dispat
      * @throws EnvelopeHandlingException
      */
     public void handle(Envelope envelope) throws EnvelopeHandlingException {
-        if (!this.endpoints.operationMappings.containsKey(envelope.getOperationName()))
+        if (!this.mappings.operationMappings.containsKey(envelope.getOperationName()))
             throw new OperationNotSupportedException(envelope.getOperationName());
 
-        OperationMethodInvokingRegistry.MethodInvoker invoker = this.endpoints.map(envelope.getOperationName());
-
-        Object response;
+        OperationMethodInvokingRegistry.MethodInvoker invoker = this.mappings.map(envelope.getOperationName());
+ 
         try {
-            response = invoker.invoke(envelope.getContent());
+            Object response = invoker.invoke(envelope.getContent());
             if (response != null) {
-                Envelope responseEnvelope = new Envelope(envelope.getOperationName(), this.converter.write(response), "replyto", OperationEndpoint.class);
+                Envelope responseEnvelope = new Envelope(envelope.getOperationName(), this.converter.write(response));
                 perform(responseEnvelope);
             }
         }
@@ -143,17 +130,7 @@ public class AnnotatedRabbitOperationService implements OperationService, Dispat
         }
     }
 
-    public OperationMethodInvokingRegistry getDispatchers() {
-        return dispatchers;
+    public OperationMethodInvokingRegistry getMappings() {
+        return mappings;
     }
-
-    public OperationMethodInvokingRegistry getEndpoints() {
-        return endpoints;
-    }
-
-    public OperationToRoutingMapping getOperationToRoutingMapping(Class<? extends Annotation> annotationType, String operationName) {
-        return annotationType.equals(OperationDispatcher.class) ?
-                this.dispatchers.routingRegistry.map(operationName) : this.endpoints.routingRegistry.map(operationName);
-    }
-              
 }

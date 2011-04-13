@@ -29,13 +29,14 @@ public class AbstractAgentOperation extends AbstractOperation {
     @JsonCreator
     public AbstractAgentOperation(@JsonProperty("username") String username,
                          @JsonProperty("password") String password, @JsonProperty("agentIp") String agentIp,
-                         @JsonProperty("agentPort") int agentPort) {
+                         @JsonProperty("agentPort") int agentPort, @JsonProperty("unidirectional") boolean unidirectional) {
 
         super(true);
         this.username = username;
         this.password = password;
         this.agentIp = agentIp;
         this.agentPort = agentPort;
+        this.unidirectional = unidirectional;
     }
 
     @JsonCreator
@@ -86,82 +87,10 @@ public class AbstractAgentOperation extends AbstractOperation {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(this.username).append(this.password)
-                .append(this.agentIp).append(this.agentPort).append(super.toString());
+                .append(this.agentIp).append(this.agentPort).append(this.unidirectional).append(super.toString());
          
         return agentToken != null ? new StringBuilder(this.agentToken).append(sb).toString() : sb.toString();
-    }
-
-    /* Everything from here down is legacy and should be re-evaluated */
-
- 
-   /*public void setNewTransportAgent(boolean unidirectional) {
-        this.setStringValue(PROP_NEWTRANSPORTTYPE, Boolean.TRUE.toString());
-        this.setStringValue(PROP_UNIDIRECTIONAL, String.valueOf(unidirectional));
-    }
-
-    public boolean isUnidirectional() {
-        boolean unidirectional = false;
-
-        try {
-            unidirectional = Boolean.valueOf(getStringValue(PROP_UNIDIRECTIONAL)).booleanValue();
-        } catch (Exception e) {
-            // this is an older agent that does not support the unidirectional transport
-        }
-
-        return unidirectional;
-    }
-
-    public boolean isNewTransportAgent() {
-        boolean newTransportAgent = false;
-
-        try {
-            newTransportAgent = Boolean.valueOf(getStringValue(PROP_NEWTRANSPORTTYPE)).booleanValue();
-        } catch (Exception e) {
-            // this is an older agent that does not support the new transport
-        }
-
-        return newTransportAgent;
-    }
-
-    public void setUser(String user) {
-        this.setStringValue(PROP_USER, user);
-    }
-
-    public String getUser() {
-        return this.getStringValue(PROP_USER);
-    }
-
-    public void setPword(String pword) {
-        this.setStringValue(PROP_PWORD, pword);
-    }
-
-    public String getPword() {
-        return this.getStringValue(PROP_PWORD);
-    }
-
-    public void setAgentIP(String agentIP) {
-        this.setStringValue(PROP_AGENTIP, agentIP);
-    }
-
-    public String getAgentIP() {
-        return this.getStringValue(PROP_AGENTIP);
-    }
-
-    public void setAgentPort(int agentPort) {
-        this.setIntValue(PROP_AGENTPORT, agentPort);
-    }
-
-    public int getAgentPort() {
-        return this.getIntValue(PROP_AGENTPORT);
-    }
-
-    public void setAgentToken(String agentToken) {
-        this.setStringValue(PROP_AGENTTOKEN, agentToken);
-    }
-
-    public String getAgentToken() {
-        return this.getStringValue(PROP_AGENTTOKEN);
-    }*/
+    } 
 
     /**
      * TODO better port test

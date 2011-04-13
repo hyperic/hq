@@ -51,22 +51,26 @@ public final class AgentApplicationContext {
         }
     }
 
-    protected static AbstractApplicationContext create(Class<?>... annotatedClasses) {
+    public static AbstractApplicationContext create(Class<?>... annotatedClasses) {
+        if (applicationContext != null) return applicationContext;
+
         AnnotationConfigApplicationContext ctx = null;
 
         try {
             ctx = new AnnotationConfigApplicationContext(annotatedClasses);
-            ctx.registerShutdownHook();
+            //ctx.registerShutdownHook();
             ctx.scan("org.hyperic.hq.bizapp.client", "org.hyperic.hq.operation");
         }
         catch (BeansException e) {
             shutdown();
-        } 
+        } catch (IllegalStateException e) {
+            System.out.println(e.getCause() + " " + e.getMessage());
+        }
         return ctx;
     }
 
 
-    public AbstractApplicationContext getApplicationContext() {
+    public static AbstractApplicationContext getApplicationContext() {
         return applicationContext;
     }
 

@@ -66,11 +66,9 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
      * Temporary: for the legacy Server constructor
      * @param operationService    pre-configured operation service
      * @param client        the legacy client implementation
-     * @param agentUnidirectional currently just used for the server ping operation
      */
-    public AmqpCommandOperationService(OperationService operationService, AgentCommandsClient client, boolean agentUnidirectional) {
+    public AmqpCommandOperationService(OperationService operationService, AgentCommandsClient client) {
         this.operationService = operationService;
-        this.unidirectional = agentUnidirectional;
         this.client = client; 
     }
  

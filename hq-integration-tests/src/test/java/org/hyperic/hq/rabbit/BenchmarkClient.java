@@ -1,7 +1,6 @@
 package org.hyperic.hq.rabbit;
 
 import org.hyperic.hq.agent.*;
-import org.hyperic.hq.bizapp.client.AgentCallbackClientException;
 import org.hyperic.hq.bizapp.client.BizappCallbackClient;
 
 import java.io.IOException;
@@ -16,9 +15,7 @@ public class BenchmarkClient {
 
     private BizappCallbackClient bcc;
 
-    /** an AgentCommandsClient */
-   // private AmqpCommandOperationService acc;
-
+   
     public BenchmarkClient(String host, int port) throws AgentConfigException {
        /* this.acc = new AmqpCommandOperationService(new LegacyAgentCommandsClientImpl(new SecureAgentConnection(host, port, "")));
         ProviderInfo providerInfo = new ProviderInfo(AgentCallbackClient.getDefaultProviderURL(host, port, false), "no-auth");
@@ -29,10 +26,6 @@ public class BenchmarkClient {
 
     public void rabbitPing(int append) throws IOException, InterruptedException {
         //acc.timedPing(append);
-    }
-
-    public void latherPing() throws AgentCallbackClientException {
-        bcc.bizappPing();
     }
 
     public void restart() throws AgentRemoteException, AgentConnectionException {

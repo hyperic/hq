@@ -30,7 +30,9 @@ import com.rabbitmq.client.ConnectionFactory;
 import org.hyperic.hq.operation.annotation.Operation;
 import org.hyperic.hq.operation.annotation.OperationDispatcher;
 import org.hyperic.hq.operation.annotation.OperationEndpoint;
+import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
 import org.hyperic.hq.operation.rabbit.core.AnnotatedRabbitOperationService;
+import org.hyperic.hq.operation.rabbit.core.OperationToRoutingKeyRegistry;
 import org.hyperic.hq.operation.rabbit.util.Constants;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -64,15 +66,15 @@ public class AnnotationTests {
  
     @Before
     public void prepare() {
-        this.operationService = new AnnotatedRabbitOperationService(new ConnectionFactory(), null);
+        ConnectionFactory cf = new ConnectionFactory();
+        this.operationService = new AnnotatedRabbitOperationService(cf, new OperationToRoutingKeyRegistry(cf), new JsonMappingConverter());
     }
 
     @Test
     public void discover() {
         this.operationService.discover(new TestDispatcher(), OperationDispatcher.class);
         this.operationService.discover(new TestEndpoint(), OperationEndpoint.class);
-        assertEquals(this.operationService.getDispatchers().getOperationMappings().size(), 1);
-        assertEquals(this.operationService.getEndpoints().getOperationMappings().size(), 1);
+        assertEquals(this.operationService.getMappings().getOperationMappings().size(), 1);
     }
 
 }

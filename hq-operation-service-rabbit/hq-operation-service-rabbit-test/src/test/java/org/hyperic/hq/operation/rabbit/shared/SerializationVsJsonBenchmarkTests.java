@@ -1,7 +1,7 @@
 package org.hyperic.hq.operation.rabbit.shared;
 
 import org.hyperic.hq.operation.AbstractOperation;
-import org.hyperic.hq.operation.RegisterAgent;
+import org.hyperic.hq.operation.RegisterAgentRequest;
 import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,7 +25,7 @@ public class SerializationVsJsonBenchmarkTests {
 
     @Before
     public void prepare() {
-        this.data = new RegisterAgent("authTokenValue", "5.0", 1, "localhost", 7071, "hqadmin", "hqadmin");
+        this.data = new RegisterAgentRequest("authTokenValue", "5.0", 1, "localhost", 7071, "hqadmin", "hqadmin", false);
 
         this.json = "{\"authToken\":\"authTokenValue\",\"version\":\"5.0\",\"cpuCount\":1,\"agentIp\":\"localhost\",\"agentPort\":7071,\"username\":\"hqadmin\",\"password\":\"hqadmin\"," +
                 "\"agentToken\":null,\"unidirectional\":false,\"newTransportAgent\":false,\"operationName\":\"RegisterAgent\"," +
@@ -42,7 +42,7 @@ public class SerializationVsJsonBenchmarkTests {
             this.serialDurationTotal += duration1;
 
             long startTime2 = System.nanoTime();
-            Object jsonResult = this.converter.write(this.converter.read(json, RegisterAgent.class));
+            Object jsonResult = this.converter.write(this.converter.read(json, RegisterAgentRequest.class));
             long duration2 = System.nanoTime() - startTime2;
             this.jsonDurationTotal += duration2;
             System.out.println("serial=" + duration1 + " json=" + duration2);

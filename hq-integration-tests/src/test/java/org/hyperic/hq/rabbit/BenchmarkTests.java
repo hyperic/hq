@@ -41,7 +41,7 @@ public class BenchmarkTests extends BaseInfrastructureTest {
             rabbitDurationTotal += (System.currentTimeMillis() - startTime);
 
             long startTime2 = System.currentTimeMillis();
-            benchmark.latherPing();
+            /*refactored: TODO benchmark.();*/
             latherDurationTotal += (System.currentTimeMillis() - startTime2); 
         }
 

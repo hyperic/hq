@@ -25,19 +25,14 @@
 
 package org.hyperic.hq.rabbit;
 
-import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.bizapp.agent.ProviderInfo;
 import org.hyperic.hq.bizapp.agent.client.AgentClient;
 import org.hyperic.hq.bizapp.client.AgentCallbackClient;
-import org.hyperic.hq.bizapp.client.AgentCallbackClientException;
-import org.hyperic.hq.bizapp.client.BizappCallbackClient;
-import org.hyperic.hq.bizapp.client.StaticProviderFetcher;
 import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Helena Edelson
@@ -64,19 +59,17 @@ public class SpringAgentTest extends BaseInfrastructureTest {
                     AgentClient.main(new String[]{"start"});
                     ProviderInfo providerInfo = new ProviderInfo(AgentCallbackClient.getDefaultProviderURL(host, port, false), "no-auth");
                     assertNotNull(providerInfo);
-                    BizappCallbackClient bcc = new BizappCallbackClient(new StaticProviderFetcher(providerInfo), AgentConfig.newInstance());
-                    assertTrue(bcc.userIsValid("hqadmin", "hqadmin"));
 
-                    bcc.registerAgent(null, "hqadmin", "hqadmin", "", "localhost", 7071, "", 1, false, false);
+                    //AgentClient.main(new String[]{"setup"});
+
+                    AgentClient.main(new String[]{"status"});
 
                     Thread.sleep(5000);
                     AgentClient.main(new String[]{"die"});
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     logger.error("", e);
-                } catch (AgentCallbackClientException e) {
-                    logger.error("", e);
-                }
+                }  
             }
         }).start();
 

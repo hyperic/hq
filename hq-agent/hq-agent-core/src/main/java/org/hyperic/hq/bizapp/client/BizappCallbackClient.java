@@ -30,17 +30,25 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.bizapp.agent.ProviderInfo;
 import org.hyperic.hq.bizapp.shared.lather.*;
+import org.hyperic.hq.operation.OperationService;
+import org.hyperic.hq.operation.RegisterAgentRequest;
+import org.hyperic.hq.operation.RegisterAgentResponse;
 import org.hyperic.hq.operation.annotation.Operation;
 import org.hyperic.hq.operation.annotation.OperationDispatcher;
 import org.hyperic.hq.operation.rabbit.util.Constants;
 import org.hyperic.lather.NullLatherValue;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @OperationDispatcher @Component
 public class BizappCallbackClient extends AgentCallbackClient {
     private final Log log = LogFactory.getLog(BizappCallbackClient.class);
 
-    public BizappCallbackClient() {
+    private OperationService operationService;
+
+    @Autowired
+    public BizappCallbackClient(OperationService operationService) {
+        this.operationService = operationService;
     }
     
     public BizappCallbackClient(ProviderFetcher fetcher, AgentConfig config){
@@ -57,15 +65,10 @@ public class BizappCallbackClient extends AgentCallbackClient {
         }
         
     }
- 
-    public void bizappPing()
-        throws AgentCallbackClientException
-    {
-        ProviderInfo provider;
 
-        provider = this.getProvider();
-        this.invokeLatherCall(provider, CommandInfo.CMD_PING, 
-                              NullLatherValue.INSTANCE);
+    public void bizappPing() throws AgentCallbackClientException{
+        ProviderInfo provider = this.getProvider();
+        this.invokeLatherCall(provider, CommandInfo.CMD_PING, NullLatherValue.INSTANCE);
     }
 
     public boolean userIsValid(String user, String pword)
@@ -98,45 +101,27 @@ public class BizappCallbackClient extends AgentCallbackClient {
      * @param unidirectional <code>true</code> if the agent is unidirectional.
      * @return The result containing the new agent token.
      */
-    @Operation(operationName = Constants.OPERATION_NAME_AGENT_REGISTER, exchangeName = Constants.TO_SERVER_EXCHANGE, value = Constants.OPERATION_NAME_AGENT_REGISTER)
-    public RegisterAgentResult registerAgent(String oldAgentToken, 
-                                             String user, String pword, 
-                                             String authToken,
-                                             String agentIP, int agentPort,
-                                             String version,
-                                             int cpuCount, 
-                                             boolean isNewTransportAgent, 
-                                             boolean unidirectional)
-        throws AgentCallbackClientException
-    {
-        RegisterAgent_result res;
-        RegisterAgent_args args;
-        ProviderInfo provider;
+    @Operation(operationName = Constants.OPERATION_NAME_AGENT_REGISTER_REQUEST, exchangeName = Constants.TO_SERVER_EXCHANGE, value = Constants.OPERATION_NAME_AGENT_REGISTER_REQUEST)
+    public RegisterAgentResult registerAgent(String oldAgentToken, String user, String pword, String authToken, String agentIP, int agentPort,
+                      String version, int cpuCount,  boolean isNewTransportAgent, boolean unidirectional) throws AgentCallbackClientException {
 
-        provider = this.getProvider();
+        //ProviderInfo provider = this.getProvider();
 
-        args = new RegisterAgent_args();
-        args.setUser(user);
-        args.setPword(pword);
-        
+        RegisterAgentRequest registerAgentRequest;
         if (oldAgentToken != null) {
-            args.setAgentToken(oldAgentToken);    
+            registerAgentRequest = new RegisterAgentRequest(oldAgentToken, authToken, version, cpuCount, agentIP, agentPort, user, pword, unidirectional, isNewTransportAgent);
+        } else {
+            registerAgentRequest = new RegisterAgentRequest(authToken, version, cpuCount, agentIP, agentPort, user, pword, unidirectional);
         }
+        System.out.println("registerAgentRequest="+registerAgentRequest);
+        System.out.println("operationservice="+this.operationService);
 
-        args.setAuthToken(authToken);
-        args.setAgentIP(agentIP);
-        args.setAgentPort(agentPort);
-        args.setVersion(version);
-        args.setCpuCount(cpuCount);
-        
-        if (isNewTransportAgent) {
-            args.setNewTransportAgent(unidirectional);            
-        }
-
-        res = (RegisterAgent_result)this.invokeLatherCall(provider,
+        RegisterAgentResponse resp = (RegisterAgentResponse) this.operationService.dispatch(Constants.OPERATION_NAME_AGENT_REGISTER_REQUEST, registerAgentRequest);
+        return new RegisterAgentResult(resp.getAgentToken());
+      /*  RegisterAgent_result res = (RegisterAgent_result)this.invokeLatherCall(provider,
                                                 CommandInfo.CMD_REGISTER_AGENT,
-                                                args);
-        return new RegisterAgentResult(res.getResult());
+                                                args); 
+        return new RegisterAgentResult(res.getResult());*/
     }
 
     public String updateAgent(String agentToken, String user, String pword,

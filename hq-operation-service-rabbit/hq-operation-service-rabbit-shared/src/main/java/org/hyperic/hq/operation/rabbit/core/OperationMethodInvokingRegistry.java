@@ -24,10 +24,11 @@
  */
 package org.hyperic.hq.operation.rabbit.core;
 
-import com.rabbitmq.client.ConnectionFactory;
-import org.hyperic.hq.operation.*;
+import org.hyperic.hq.operation.Converter;
+import org.hyperic.hq.operation.OperationDiscoveryException;
+import org.hyperic.hq.operation.OperationNotSupportedException;
+import org.hyperic.hq.operation.OperationRegistry;
 import org.hyperic.hq.operation.annotation.Operation;
-import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -51,12 +52,7 @@ public class OperationMethodInvokingRegistry implements OperationRegistry {
     protected final RoutingRegistry routingRegistry;
 
     protected final Converter<Object, String> converter;
-
  
-    public OperationMethodInvokingRegistry(ConnectionFactory connectionFactory) {
-        this(new OperationToRoutingKeyRegistry(connectionFactory), new JsonMappingConverter());
-    }
-
     @Autowired
     public OperationMethodInvokingRegistry(RoutingRegistry routingRegistry, Converter<Object, String> converter) {
         this.converter = converter;

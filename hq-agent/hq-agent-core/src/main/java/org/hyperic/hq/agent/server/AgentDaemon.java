@@ -33,8 +33,12 @@ import org.hyperic.hq.agent.*;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorException;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorInterface;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorSimple;
+import org.hyperic.hq.agent.spring.AgentApplicationContext;
+import org.hyperic.hq.agent.spring.SpringAgentConfiguration;
+import org.hyperic.hq.bizapp.client.BizappCallbackClient;
 import org.hyperic.hq.bizapp.client.PlugininventoryCallbackClient;
 import org.hyperic.hq.bizapp.client.StorageProviderFetcher;
+import org.hyperic.hq.operation.rabbit.core.AnnotatedRabbitOperationService;
 import org.hyperic.hq.product.*;
 import org.hyperic.util.PluginLoader;
 import org.hyperic.util.security.SecurityUtil;
@@ -84,8 +88,11 @@ public class AgentDaemon
     private Hashtable            notifyHandlers = new Hashtable();
     private Hashtable            monitorClients;
     private volatile boolean     running;         // Are we running?
-
     private ProductPluginManager ppm;
+
+    private static AgentApplicationContext agentApplicationContext;
+    private AnnotatedRabbitOperationService operationService;
+    private BizappCallbackClient bizappCallbackClient;
  
     public static AgentDaemon getMainInstance(){
         synchronized(AgentDaemon.mainInstanceLock){
@@ -107,6 +114,11 @@ public class AgentDaemon
         synchronized(AgentDaemon.mainInstanceLock){
             if(AgentDaemon.mainInstance == null){
                 AgentDaemon.mainInstance = this;
+            }
+            if (agentApplicationContext == null) {
+                agentApplicationContext = new AgentApplicationContext(SpringAgentConfiguration.class);
+                this.bizappCallbackClient = agentApplicationContext.getBean(BizappCallbackClient.class);
+                this.operationService = agentApplicationContext.getBean(AnnotatedRabbitOperationService.class);
             }
         }
     }

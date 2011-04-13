@@ -6,6 +6,7 @@ import org.hyperic.hq.bizapp.agent.ProviderInfo;
 import org.hyperic.hq.bizapp.client.*;
 import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertNotNull;
@@ -14,12 +15,12 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Helena Edelson
  */
-//@Ignore("'AGENT_HOME' must be set")
+@Ignore("'AGENT_HOME' must be set")
 public class LatherReplacementIntegrationTests extends BaseInfrastructureTest {
 
-    /** Must configure */
+    /** Must configure */     
     private final static String AGENT_HOME = "/path/to/agent-4.6.0.BUILD-SNAPSHOT";
-
+ 
     private BizappCallbackClient bizappClient;
 
     private AutoinventoryCallbackClient autoinventoryClient;
@@ -48,19 +49,13 @@ public class LatherReplacementIntegrationTests extends BaseInfrastructureTest {
     }
 
     @Test
-    public void ping() throws AgentCallbackClientException {
-        bizappClient.bizappPing();
-    }
-
-    @Test
     public void bizappUserIsValid() throws AgentConfigException, AgentCallbackClientException, InterruptedException {
         assertTrue(bizappClient.userIsValid(user, pass));
     }
 
     @Test
-    public void bizappRegisterAgent() throws AgentCallbackClientException {
-        RegisterAgentResult result = bizappClient.registerAgent("", user, pass, "", host, port, "", 1, false, false);
-        assertNotNull(result.response);
+    public void bizappRegisterAgent() throws AgentCallbackClientException { 
+        assertNotNull(bizappClient.registerAgent("", user, pass, "", host, port, "", 1, false, false));
     }
 
     // not ready yet @Test

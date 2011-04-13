@@ -3,7 +3,7 @@ package org.hyperic.hq.operation.rabbit.shared;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import org.hyperic.hq.operation.Envelope;
-import org.hyperic.hq.operation.RegisterAgent;
+import org.hyperic.hq.operation.RegisterAgentRequest;
 import org.hyperic.hq.operation.annotation.Operation;
 import org.hyperic.hq.operation.annotation.OperationDispatcher;
 import org.hyperic.hq.operation.annotation.OperationEndpoint;
@@ -28,7 +28,7 @@ public class OperationServiceTests {
 
     private JsonMappingConverter converter = new JsonMappingConverter();
 
-    private RegisterAgent registerAgent = new RegisterAgent("testAuth", "5.0", 1, "localhost", 0, "hqadmin", "hqadmin");
+    private RegisterAgentRequest registerAgentRequest = new RegisterAgentRequest("testAuth", "5.0", 1, "localhost", 0, "hqadmin", "hqadmin", false);
 
     @OperationDispatcher
     static class TestDispatcher {
@@ -49,15 +49,16 @@ public class OperationServiceTests {
     @Before
     public void prepare() {
         /* not working with mock yet */
-        this.operationService = new AnnotatedRabbitOperationService(new ConnectionFactory(), null);
+        ConnectionFactory cf = new ConnectionFactory();
+        this.operationService = new AnnotatedRabbitOperationService(cf, new OperationToRoutingKeyRegistry(cf), new JsonMappingConverter());
     }
 
     @Test
     public void perform() {
         this.operationService.discover(new TestDispatcher(), OperationDispatcher.class);
-        assertNotNull(this.operationService.getDispatchers().map(Constants.OPERATION_NAME_AGENT_REGISTER));
-        Envelope envelope = new Envelope(Constants.OPERATION_NAME_AGENT_REGISTER, converter.write(registerAgent), Constants.TO_AGENT_EXCHANGE, OperationDispatcher.class);
-        assertTrue(envelope.getContent().equals(converter.write(registerAgent)));
+        assertNotNull(this.operationService.getMappings().map(Constants.OPERATION_NAME_AGENT_REGISTER));
+        Envelope envelope = new Envelope(Constants.OPERATION_NAME_AGENT_REGISTER, converter.write(registerAgentRequest));
+        assertTrue(envelope.getContent().equals(converter.write(registerAgentRequest)));
         assertTrue((Boolean) this.operationService.perform(envelope));
     }
 
@@ -65,15 +66,14 @@ public class OperationServiceTests {
     public void discover() {
         this.operationService.discover(new TestDispatcher(), OperationDispatcher.class);
         this.operationService.discover(new TestEndpoint(), OperationEndpoint.class);
-        assertEquals(this.operationService.getDispatchers().getOperationMappings().size(), 1);
-        assertEquals(this.operationService.getEndpoints().getOperationMappings().size(), 1);
+        assertEquals(this.operationService.getMappings().getOperationMappings().size(), 1);
     }
 
     @Test
     public void dispatch() {
         this.operationService.discover(new TestDispatcher(), OperationDispatcher.class);
-        this.operationService.dispatch(Constants.OPERATION_NAME_AGENT_REGISTER, registerAgent);
-        OperationMethodInvokingRegistry.MethodInvoker invoker = this.operationService.getDispatchers().getOperationMappings().get(Constants.OPERATION_NAME_AGENT_REGISTER);
+        this.operationService.dispatch(Constants.OPERATION_NAME_AGENT_REGISTER, registerAgentRequest);
+        OperationMethodInvokingRegistry.MethodInvoker invoker = this.operationService.getMappings().getOperationMappings().get(Constants.OPERATION_NAME_AGENT_REGISTER);
         assertTrue(invoker.toString().contains(Constants.OPERATION_NAME_AGENT_REGISTER));
     }
 
@@ -81,13 +81,13 @@ public class OperationServiceTests {
     public void handle() throws InvocationTargetException, IllegalAccessException {
         this.operationService.discover(new TestEndpoint(), OperationEndpoint.class);
         this.operationService.discover(new TestDispatcher(), OperationDispatcher.class);
-        this.operationService.dispatch(Constants.OPERATION_NAME_AGENT_REGISTER, registerAgent);
+        this.operationService.dispatch(Constants.OPERATION_NAME_AGENT_REGISTER, registerAgentRequest);
 
-        OperationMethodInvokingRegistry.MethodInvoker invoker = this.operationService.getDispatchers().map(Constants.OPERATION_NAME_AGENT_REGISTER);
+        OperationMethodInvokingRegistry.MethodInvoker invoker = this.operationService.getMappings().map(Constants.OPERATION_NAME_AGENT_REGISTER);
         assertNotNull(invoker);
 
-        invoker.invoke(converter.write(registerAgent));
-        Envelope envelope = new Envelope(Constants.OPERATION_NAME_AGENT_REGISTER, converter.write(registerAgent), "test.response.exchange", OperationEndpoint.class);
+        invoker.invoke(converter.write(registerAgentRequest));
+        Envelope envelope = new Envelope(Constants.OPERATION_NAME_AGENT_REGISTER, converter.write(registerAgentRequest));
 
         this.operationService.handle(envelope);
     }
