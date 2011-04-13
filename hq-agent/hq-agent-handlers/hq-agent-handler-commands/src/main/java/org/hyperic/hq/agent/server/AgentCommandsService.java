@@ -522,8 +522,8 @@ public class AgentCommandsService implements AgentCommandsClient {
                     rtn.put(filename, false);
                     continue;
                 }
-                file.delete();
-                rtn.put(filename, true);
+                final boolean removed = file.delete();
+                rtn.put(filename, removed);
             } catch (Exception e) {
                 _log.warn("could not remove file " + filename + ": " + e);
                 _log.debug(e,e);
