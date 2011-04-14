@@ -1,14 +1,3 @@
 build
 target
 junit_results
-hq-agent
-hq-common
-hq-installer
-hq-bootstrap
-hq-lather
-hq-pdk
-hq-plugin
-hq-server
-hq-uiplugin
-hq-util
-hq-web

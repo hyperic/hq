@@ -126,7 +126,7 @@ class SNMPSession_v3
     
     void init(String host, String port, String transport, String user, 
               String authType, String authPassword, 
-              String privType, String privPassword, String retries, String timeout) 
+              String privType, String privPassword) 
         throws SNMPException
     {                        
         OID authProtocol = getAuthProtocol(authType);
@@ -152,7 +152,7 @@ class SNMPSession_v3
 
         this.target = target;
 
-        initSession(host, port, transport, retries, timeout);
+        initSession(host, port, transport);
         
         // Need this check for unidirectional agents
         if (this.target.getAddress() == null) {
