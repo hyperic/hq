@@ -1208,7 +1208,9 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
             if (fileName == null) {
                 continue;
             }
-            final String path= AGENT_BUNDLE_HOME_PROP + "/pdk/plugins/" + fileName;
+            StringBuilder destFile = new StringBuilder(fileName);
+            destFile.insert(destFile.length()-4, AgentUpgradeManager.REMOVED_PLUGIN_EXTENSION);
+            final String path= AGENT_BUNDLE_HOME_PROP + "/tmp/" + destFile.toString();
             filenames.add(path);
             pathToFileName.put(path, fileName);
             if (debug) log.debug("removing " + path + " from agent=" + agent);

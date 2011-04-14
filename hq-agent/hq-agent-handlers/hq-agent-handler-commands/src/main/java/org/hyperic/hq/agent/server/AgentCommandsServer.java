@@ -86,6 +86,7 @@ public class AgentCommandsServer
                                             OutputStream outStream)
         throws AgentRemoteException 
     {
+        if (log.isDebugEnabled()) log.debug("dispatching cmd=" + cmd);
         if(cmd.equals(AgentCommandsAPI.command_ping)){
             new AgentPing_args(args);  // Just parse the args
 

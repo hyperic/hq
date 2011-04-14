@@ -512,18 +512,16 @@ public class AgentCommandsService implements AgentCommandsClient {
 
     public Map<String, Boolean> agentRemoveFile(Collection<String> files) {
         final Map<String, Boolean> rtn = new HashMap<String, Boolean>();
+        final boolean debug = _log.isDebugEnabled();
         for (final String filename : files) {
             if (filename == null) {
                 continue;
             }
             try {
                 final File file = new File(resolveAgentBundleHomePath(filename));
-                if (!file.exists() || !file.isFile()) {
-                    rtn.put(filename, false);
-                    continue;
-                }
-                final boolean removed = file.delete();
-                rtn.put(filename, removed);
+                boolean created = file.createNewFile();
+                if (debug) _log.debug("removing file=" + file.getAbsolutePath());
+                rtn.put(filename, created);
             } catch (Exception e) {
                 _log.warn("could not remove file " + filename + ": " + e);
                 _log.debug(e,e);
