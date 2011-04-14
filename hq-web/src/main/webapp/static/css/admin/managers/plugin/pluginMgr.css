@@ -174,7 +174,7 @@
 	}
     #pluginCount{
 		color:#777777;
-		font-size:0.7em;
+		font-weight: bold;
 	}
 	.agentStatusSpan{
 		color: #0066CC;
@@ -194,7 +194,6 @@
 	}
 	.topInfo, #currentTimeInfo{
 		font-weight: bold;
-		/* float: right;*/
 		height: 20px;
 		color: #777777;
 	}
@@ -294,3 +293,28 @@
     #pluginManagerPanel li.grey{
         background-color:#BBB;
     }
+
+	#agentSummaryPanel{
+		width:400px;
+		
+	}
+	#agentSummaryPanel .cancelLink{
+		float:right;
+	}
+	#agentSummaryList{
+		max-height: 290px;
+		overflow: auto;
+		margin: 10px;
+		padding: 0px 30px;
+		max-width:350px;
+		margin-left:0px;
+	}
+	#agentSummarySpan{
+		float:right;
+		color:#06C;
+		font-weight:bold;
+		cursor:pointer;
+	}
+	#agentSummarySpan:focus, #agentSummarySpan:hover{
+		color:#09F;
+	}

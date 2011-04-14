@@ -7,33 +7,39 @@
 <link rel="stylesheet" type="text/css" href="<spring:url value="/static/css/admin/managers/plugin/pluginMgr.css"/>" />
 
 <section id="pluginManagerPanel" class="container top">
-	<h1><fmt:message key="admin.managers.plugin.title" /> <span id="pluginCount">&nbsp;
-			(<fmt:message key="admin.managers.plugin.title.note"/> <span id="noPlugins">${info.pluginCount}</span>)
-	</span></h1> 
+	<h1><fmt:message key="admin.managers.plugin.title" /> </h1> 
 	<p id="instruction"><fmt:message key="${instruction}" /></p>
 	
 	<div id="currentTimeInfo">
+		<span id="pluginCount"><fmt:message key="admin.managers.plugin.title.note"/> <span id="noPlugins">${info.pluginCount}</span>
+		</span>
+		
 		<span style="float:right;" id="refreshTimeInfo"><fmt:message key="admin.managers.Plugin.information.refresh.time"/> <span id="timeNow"></span>
 		</span>
 		<span style="float:right;">&nbsp;&nbsp;</span>
 		<img style="float:right;" id="refreshIcon" style="float:right;" src="<spring:url value="/static/images/arrow_refresh.png" />" alt="refresh" /> 
+
 	</div>
 
 	<div class="topInfo">
-		<span id="agentInfo" style="float:right">
-			<fmt:message key="admin.managers.Plugin.information.agent.count"/>:&nbsp;
-		    <span id="agentInfoAllCount">${info.allAgentCount}</span>
-		    <img src="<spring:url value="/static/images/icon_info_small.gif"/>" class="infoIcon" alt="info"/> <br/>
+		<span id="agentInfo" style="float:left">
+			<fmt:message key="admin.managers.Plugin.information.agent.count"/>:
+		    <span id="agentInfoAllCount">${info.allAgentCount}</span>&nbsp;&nbsp;&nbsp;<br/>
 		</span>
-	    <span style="float:left">
-	        <fmt:message key="admin.managers.Plugin.information.legend"/>
-	    	<img src="<spring:url value="/static/images/icon_available_green.gif"/>" alt="scuccessful"/> 
-	    		<fmt:message key="admin.managers.Plugin.tip.icon.success"/> (<span id="successCount">${info.successCount}</span>)
-	    	&nbsp; <img src="<spring:url value="/static/images/alert.png"/>" alt="in progress"/> 
-	    		<fmt:message key="admin.managers.Plugin.tip.icon.in.progress"/> (<span id="inProgressCount">${info.inProgressCount}</span>)
-	   		&nbsp;<img src="<spring:url value="/static/images/icon_available_red.gif"/>" alt="failure"/> 
-	   			<fmt:message key="admin.managers.Plugin.tip.icon.error"/> (<span id="errorCount">${info.errorCount}</span>)
-	    </span>		
+		<span id="agentSummarySpan" style="float:left">
+	        <fmt:message key="admin.managers.Plugin.information.summary"/>
+	    </span>	
+
+<span style="float:right">
+                <fmt:message key="admin.managers.Plugin.information.legend"/>
+                <img src="<spring:url value="/static/images/icon_available_green.gif"/>" alt="scuccessful"/> 
+                        <fmt:message key="admin.managers.Plugin.tip.icon.success"/>
+                <img src="<spring:url value="/static/images/alert.png"/>" alt="in progress"/> 
+                        <fmt:message key="admin.managers.Plugin.tip.icon.in.progress"/>
+            	<img src="<spring:url value="/static/images/icon_available_red.gif"/>" alt="failure"/> 
+                        <fmt:message key="admin.managers.Plugin.tip.icon.error"/>
+            </span> 
+
 	</div>
 	
 	<div class="gridheader clear">
@@ -41,10 +47,8 @@
 		<span class="column span-small"><fmt:message key="admin.managers.plugin.column.header.product.plugin" /></span>
 		<span class="column span-med"><fmt:message key="admin.managers.plugin.column.header.version" /></span>
 		<span class="column span-med"><fmt:message key="admin.managers.plugin.column.header.jar.name" /></span>
-		<span class="column span-med" id="addedTimeHeader"><fmt:message key="admin.managers.plugin.column.header.initial.deploy.date" />
-									<img src="<spring:url value="/static/images/icon_info_small.gif"/>" alt="info" class="infoIcon"></span>
-		<span class="column span-med" id="updatedTimeHeader"><fmt:message key="admin.managers.plugin.column.header.last.sync.date" />
-									<img src="<spring:url value="/static/images/icon_info_small.gif"/>" alt="info" class="infoIcon"></span>
+		<span class="column span-med" id="addedTimeHeader"><fmt:message key="admin.managers.plugin.column.header.initial.deploy.date" /></span>
+		<span class="column span-med" id="updatedTimeHeader"><fmt:message key="admin.managers.plugin.column.header.last.sync.date" /></span>
 		<span class="column span-status"><fmt:message key="admin.managers.plugin.column.header.status" /></span>
 	</div>
 	
@@ -103,6 +107,7 @@
 			<input id="showUploadFormButton" type="button" value="<fmt:message key="admin.managers.plugin.button.add.plugin" />" />
 		</div>	
 	</c:if>
+
 </section>
 
 
@@ -162,7 +167,12 @@
 	    </span>
 		<a href="#" class="cancelLink"><fmt:message key="admin.managers.plugin.button.close" /></a>
 	</div>
-	
+</div>
+
+<div id="agentSummaryPanel" style="visibility:hidden;">
+	<span><fmt:message key="admin.managers.Plugin.summary.message" /></span>
+	<ul id="agentSummaryList"></ul>
+	<a href="#" class="cancelLink"><fmt:message key="admin.managers.plugin.button.close" /></a>
 </div>
 
 <script  djConfig="parseOnLoad: true">
@@ -250,9 +260,6 @@
 				load: function(response){
 					hqDojo.byId("agentInfoAllCount").innerHTML=response.allAgentCount;
 					hqDojo.byId("noPlugins").innerHTML=response.pluginCount;
-					hqDojo.byId("successCount").innerHTML=response.successCount;
-					hqDojo.byId("inProgressCount").innerHTML=response.inProgressCount;
-					hqDojo.byId("errorCount").innerHTML=response.errorCount;
 				}
 			}
 				
@@ -348,10 +355,38 @@
 	 	               	"Content-Type": "application/json",
     	            	"Accept": "application/json"
         	        }
-				
 			};
 			hqDojo.xhrGet(xhrArgs);			
 			hqDojo.byId("showStatusPanelDialog_title").innerHTML=hqDojo.byId("pluginName").value + "&nbsp;-&nbsp;"+ "<fmt:message key="admin.managers.Plugin.tip.status.title" />";
+		}
+		
+		function seeAgentSummary(){
+			hqDijit.byId("agentSummaryPanelDialog").show();
+			var agentUl = hqDojo.byId("agentSummaryList");
+			var xhrArgs = {
+					preventCache:true,
+					url: "<spring:url value='/app/admin/managers/plugin/agent/summary'/>",
+					load: function(response) {
+						hqDojo.forEach(response, function(agent){
+							var li = hqDojo.create("li",{
+								"innerHTML":agent.agentName +":&nbsp;&nbsp;"
+							});
+							if(agent.errorCount>0){
+								li.innerHTML += "<img src='<spring:url value="/static/images/icon_available_red.gif"/>' alt='failure'/> " +agent.errorCount+" " ;
+							}
+							if(agent.inProgressCount>0){
+								li.innerHTML += "<img src='<spring:url value="/static/images/alert.png"/>' alt='in progress'/> " +agent.inProgressCount+" " ;
+							}
+							agentUl.appendChild(li);
+						});
+					},
+					handleAs: "json",
+					headers: { 
+	 	               	"Content-Type": "application/json",
+    	            	"Accept": "application/json"
+        	        }	
+			};
+			hqDojo.xhrGet(xhrArgs);
 		}
 
 		hqDojo.behavior.add({
@@ -365,6 +400,11 @@
 					seeStatusDetail(pluginId);
 				},
 				found: function(node){hqDojo.style(node,"cursor","pointer");}
+			},
+			"#agentSummarySpan":{
+				onclick: function(evt){
+					seeAgentSummary();
+				}
 			}
 		});
 		
@@ -380,7 +420,7 @@
 		hqDojo.style(showStatusPanel, "visibility", "visible");
 			
 		hqDojo.query("#showStatusPanelDialog .cancelLink").onclick(function(e) {
-			uncheckCheckboxes();
+			//uncheckCheckboxes();
 			hqDijit.byId("showStatusPanelDialog").hide();
 			hqDojo.empty("agentList");
 			hqDojo.byId("searchText").value="";
@@ -391,10 +431,27 @@
 			seeStatusDetail(pluginId,hqDojo.byId("searchText").value);			
 		});
 		
+		var agentSummaryDialog = new hqDijit.Dialog({
+			id:"agentSummaryPanelDialog",
+			title: "<fmt:message key="admin.managers.Plugin.summary.title" />"
+		});
+		var agentSummaryPanel = hqDojo.byId("agentSummaryPanel");
+		hqDojo.style(agentSummaryDialog.closeButtonNode,"visibility","hidden");
+		agentSummaryDialog.setContent(agentSummaryPanel);
+		hqDojo.style(agentSummaryPanel,"visibility","visible");
+		hqDojo.query("#agentSummaryPanelDialog .cancelLink").onclick(function(e){
+			hqDijit.byId("agentSummaryPanelDialog").hide();
+			hqDojo.empty("agentSummaryList");
+		});
+		
+		
+		
 		if(${!mechanismOn}){
 			hqDojo.attr("deleteForm","class","mechanismOff");
 			hqDojo.addClass(hqDojo.byId("instruction"),"mechanismOffInstruction");
 		}
+
+		
 	
 		if (${mechanismOn}){
 		

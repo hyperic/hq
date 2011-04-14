@@ -175,6 +175,48 @@ public class PluginManagerController extends BaseController implements Applicati
         return info;
     }
 
+    @RequestMapping(method = RequestMethod.GET, value="/agent/summary", headers="Accept=application/json")
+    public @ResponseBody List<Map<String, Object>> getAgentStatusSummary() {
+        List<Map<String, Object>> agentSummaries = new ArrayList<Map<String, Object>>();
+        //List<Plugin> plugins =  pluginManager.getAllPlugins();
+        List<Agent> allAgents = agentManager.getAgents();
+        
+        for(Agent agent:allAgents){
+            Collection<AgentPluginStatus> pluginStatus = agent.getPluginStatuses();
+            int errorCount=0;
+            int inProgressCount=0;
+            List<Map<String, Object>> statusDetail = new ArrayList<Map<String, Object>>();            
+            
+            for(AgentPluginStatus status:pluginStatus){
+                AgentPluginStatusEnum e =AgentPluginStatusEnum.valueOf(status.getLastSyncStatus());
+                if(e==AgentPluginStatusEnum.SYNC_FAILURE || e==AgentPluginStatusEnum.SYNC_IN_PROGRESS){
+                    Map<String, Object> detail = new HashMap<String, Object>();
+                    detail.put("pluginName", status.getPluginName());
+                    detail.put("lastSyncTime", status.getLastSyncAttempt());
+                    statusDetail.add(detail);
+                    
+                    if(e==AgentPluginStatusEnum.SYNC_FAILURE){
+                        errorCount++;
+                        detail.put("status", "error");                        
+                    }else{
+                        inProgressCount++;
+                        detail.put("status", "inProgress");
+                    }       
+                }
+            }
+            if(errorCount>0 || inProgressCount>0){
+                Map<String, Object> agentDetail = new HashMap<String,Object>();
+                agentDetail.put("agentName", getAgentName(agent));
+                agentDetail.put("errorCount", errorCount);
+                agentDetail.put("inProgressCount", inProgressCount);
+                agentDetail.put("statusDetail", statusDetail);
+                
+                agentSummaries.add(agentDetail);
+            }            
+        }
+        return agentSummaries;
+    }    
+    
     @RequestMapping(method = RequestMethod.GET, value="/status/{pluginId}", headers="Accept=application/json")
     public @ResponseBody List<Map<String, Object>> getAgentStatus(@PathVariable int pluginId, @RequestParam("searchWord") String searchWord) {
         Collection<AgentPluginStatus> errorAgentStatusList = 
