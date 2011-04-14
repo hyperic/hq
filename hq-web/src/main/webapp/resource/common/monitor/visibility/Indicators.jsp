@@ -103,7 +103,12 @@
 			<td class="ListHeaderInactive" nowrap="true">
 				<fmt:message key="resource.common.monitor.visibility.IndicatorCharts" />&nbsp;
 				<fmt:message key="common.label.Pipe" />&nbsp;
-				<a href='<html:rewrite page="/ResourceCurrentHealth.do"/>?eid=<c:out value="${eid}"/>&view=<c:out value="${view}"/>&alertDefaults=true'>
+				<c:url var="resourceCurrentHealthUrl" value="/ResourceCurrentHealth.do">
+					<c:param name="eid" value="${eid}"/>
+					<c:param name="view" value="${view}"/>
+					<c:param name="alertDefaults" value="true"/>
+				</c:url>
+				<a href='<html:rewrite page=""/>?eid=<c:out value="${eid}"/>&view=<c:out value="${view}"/>&alertDefaults=true'>
 					<fmt:message key="resource.common.monitor.visibility.now" />
 				</a>
 			</td>

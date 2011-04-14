@@ -201,7 +201,7 @@
       									<c:if test="${not empty pluginLinkInfo}">
 											<tr>
 												<td colspan="100%" style="padding-top: 10px;">
-													<a href="<html:rewrite page="/mastheadAttach.do?typeId=${pluginLinkInfo.pluginId}&sn=${pluginLinkInfo.selectedId}"/>">View in HQ vSphere</a>
+													<a href="<html:rewrite action="/mastheadAttach"><html:param name="typeId" value="${pluginLinkInfo.pluginId}"/><html:param name="sn" value="${pluginLinkInfo.selectedId}"/></html:rewrite>">View in HQ vSphere</a>
 												</td>
 											</tr>
 										</c:if>					
