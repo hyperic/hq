@@ -126,7 +126,10 @@
 
     <c:forEach var="summary" items="${summaries}">
   		<tr class="ListRow">
-  			<c:url var="url" value="/resource/${summary.resourceEntityTypeName}/monitor/Visibility.do?mode=${mode}&eid=${summary.resourceTypeId}:${summary.resourceId}"/>
+  			<c:url var="url" value="/resource/${summary.resourceEntityTypeName}/monitor/Visibility.do">
+  				<c:param name="mode" value="${mode}"/>
+  				<c:param name="eid" value="${summary.resourceTypeId}:${summary.resourceId}"/>
+  			</c:url>
     
     		<c:if test="${checkboxes}">
     			<td class="ListCellCheckbox" width="3%">

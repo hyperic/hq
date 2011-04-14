@@ -491,8 +491,12 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   <c:param name="view" value="${ResourceHubForm.view}"/>
 </c:url>
 
+<c:url var="listNewUrl" value="/resource/platform/Inventory.do">
+	<c:param name="mode" value="new"/>
+</c:url>
+
 <tiles:insert definition=".toolbar.list">
-  <tiles:put name="listNewUrl" value="/resource/platform/Inventory.do?mode=new"/>
+  <tiles:put name="listNewUrl" beanName="listNewUrl"/>
   <tiles:put name="deleteOnly" value="true"/>
   <tiles:put name="includeGroup" value="true"/>
   <tiles:put name="listItems" beanName="AllResources"/>

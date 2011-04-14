@@ -115,26 +115,30 @@
 
 <c:choose>
   <c:when test="${resource.entityId.type == PLATFORM}">
-    <c:set var="editUrl" value="/resource/platform/Inventory.do?mode=edit&eid=${resource.entityId.appdefKey}"/>
+    <c:set var="entityIdType" value="platform"/>
   </c:when>
   <c:when test="${resource.entityId.type == SERVER}">
-    <c:set var="editUrl" value="/resource/server/Inventory.do?mode=edit&eid=${resource.entityId.appdefKey}"/>
+    <c:set var="entityIdType" value="server"/>
   </c:when>
   <c:when test="${resource.entityId.type == SERVICE}">
-    <c:set var="editUrl" value="/resource/service/Inventory.do?mode=edit&eid=${resource.entityId.appdefKey}"/>
+    <c:set var="entityIdType" value="service"/>
   </c:when>
   <c:when test="${resource.entityId.type == APPLICATION}">
-    <c:set var="editUrl" value="/resource/application/Inventory.do?mode=edit&eid=${resource.entityId.appdefKey}"/>
+    <c:set var="entityIdType" value="application"/>
     <c:set var="canModify" value="${useroperations['modifyApplication']}"/>
   </c:when>
   <c:when test="${resource.entityId.type == GROUP}">
-    <c:set var="editUrl" value="/resource/group/Inventory.do?mode=edit&eid=${resource.entityId.appdefKey}"/>
+    <c:set var="entityIdType" value="group"/>
     <c:set var="canModify" value="${(webUser.id == resourceOwner.id) || useroperations['modifyResourceGroup']}"/>
   </c:when>
 </c:choose>
 
+<c:url var="editUrl" value="/resource/${entityIdType}/Inventory.do">
+	<c:param name="mode" value="edit"/>
+	<c:param name="eid" value="${resource.entityId.appdefKey}"/>
+</c:url>
 <c:if test="${canModify}">
-<tiles:insert definition=".toolbar.edit">
-  <tiles:put name="editUrl" beanName="editUrl"/>
-</tiles:insert>
+	<tiles:insert definition=".toolbar.edit">
+	  	<tiles:put name="editUrl" beanName="editUrl"/>
+	</tiles:insert>
 </c:if>

@@ -300,7 +300,7 @@
 			               			handle: 'widgetHandle',
 			               			onUpdate: function() {
 			                    		hqDojo.xhrPost({
-			                        		url: "<html:rewrite page="/dashboard/ReorderPortlets.do"/>",
+			                        		url: "<html:rewrite action="/dashboard/ReorderPortlets"/>",
 			                        		postData: Sortable.serialize('<c:out value="narrowList_${narrow}"/>'),
 			                        		load: function(){ }
 			                    		});

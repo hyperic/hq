@@ -47,16 +47,24 @@
 </tiles:insert>
 
 <script type="text/javascript">
-	var baseUrl = "<html:rewrite page="/resource/common/monitor/visibility/IndicatorCharts.do"/>";
-		baseUrl += "?eid=<c:out value="${eid}"/>";
-
+	<c:url var="baseUrl" value="/resource/common/monitor/visibility/IndicatorCharts.do">
+		<c:param name="eid" value="${eid}"/>
+	</c:url>
 	<c:if test="${not empty ctype}">
-		baseUrl += "&ctype=<c:out value="${ctype}"/>";
+		<c:url var="baseUrl" value="${baseUrl}">
+			<c:param name="ctype" value="${ctype}"/>
+		</c:url>
 	</c:if>
-  
+
+	var baseUrl = '${baseUrl}';
+	
 	function addMetric(metric) {
-	    var frameUrl = baseUrl + "&view=<c:out value="${view}"/>";
-	    	frameUrl += "&action=add&addMetric=" + metric;
+		<c:url var="baseUrl" value="${baseUrl}">
+			<c:param name="view" value="${view}"/>
+			<c:param name="action" value="add"/>
+			<c:param name="addMetric" value="{addMetric}"/>
+		</c:url>
+	    var frameUrl = '${baseUrl}'.replace("{addMetric}", metric);
 	
 	    window.parent.frames[0].location = frameUrl;
 	}

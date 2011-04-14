@@ -132,7 +132,7 @@
     			</tr>
          		<tr class="ListRow" id="<c:out value="ackInstruction${portlet.token}"/>" style="display: none;">
            			<td class="ListCell" colspan="6" align="right" style="font-style: italic;">
-              			<c:url var="path" value="/"/>
+              			<c:url var="path" value="/images/icon_ack.gif"/>
             			<fmt:message key="dash.settings.criticalAlerts.ack.instruction">
                 			<fmt:param value="${path}"/>
               			</fmt:message>

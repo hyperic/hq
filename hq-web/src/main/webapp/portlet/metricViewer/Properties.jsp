@@ -34,7 +34,8 @@
 
 <hq:pageSize var="pageSize"/>
 <c:set var="widgetInstanceName" value="resources"/>
-<c:url var="selfAction" value="/dashboard/Admin.do?mode=metricViewer">
+<c:url var="selfAction" value="/dashboard/Admin.do">
+	<c:param name="mode" value="metricViewer"/>
  	<c:if test="${not empty param.token}">
  		<c:param name="token" value="${param.token}"/>
  	</c:if>

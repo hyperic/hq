@@ -120,7 +120,7 @@
 
 <c:if test="${not empty addToListParamName && not empty addToListParamValue}">
 	<c:url var="addToListUrl" value="${addToListUrl}">
-      <c:param name="${addToListParamName}" value="${addToListParamValue}"/>
+      	<c:param name="${addToListParamName}" value="${addToListParamValue}"/>
     </c:url>
 </c:if>
 

@@ -34,7 +34,9 @@
 
 <hq:pageSize var="pageSize"/>
 <c:set var="widgetInstanceName" value="savedQueriesList"/>
-<c:url var="selfAction" value="/dashboard/Admin.do?mode=savedQueries"/>
+<c:url var="selfAction" value="/dashboard/Admin.do">
+	<c:param name="mode" value="savedQueries"/>
+</c:url>
 
 <script  src="<html:rewrite page="/js/prototype.js"/>" type="text/javascript"></script>
 <script  src="<html:rewrite page="/js/scriptaculous.js"/>" type="text/javascript"></script>

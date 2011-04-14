@@ -24,8 +24,10 @@
 <c:choose>
 <c:when test="${resourceViewTabAttachment ne null}">
 	<div id="attachPointContainer" style="padding:4px;">
-		<c:url var="attachUrl" context="/hqu/${resourceViewTabAttachment.plugin.name}" value="${resourceViewTabAttachment.path}"/>
-		<c:import url="${attachUrl}?attachId=${param.id}"/>
+		<c:url var="attachUrl" context="/hqu/${resourceViewTabAttachment.plugin.name}" value="${resourceViewTabAttachment.path}">
+			<c:param name="attachId" value="${param.id}" />
+		</c:url>
+		<c:import url="${attachUrl}"/>
 	</div>
 </c:when>
 <c:when test="${empty resourceViewTabAttachments}">

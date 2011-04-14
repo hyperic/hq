@@ -106,10 +106,13 @@
 
 <!--  GENERAL PROPERTIES TOOLBAR -->
 <c:if test="${webUser.id == User.id || useroperations['modifySubject']}">
-<tiles:insert definition=".toolbar.edit">
-  <tiles:put name="editUrl" value="/admin/user/UserAdmin.do?mode=edit"/>
-  <tiles:put name="editParamName" value="u"/>
-  <tiles:put name="editParamValue" beanName="User" beanProperty="id"/>
-</tiles:insert>
+	<c:url var="editAction" value="/admin/user/UserAdmin.do">
+		<c:param name="mode" value="edit" />
+	</c:url>
+	<tiles:insert definition=".toolbar.edit">
+  		<tiles:put name="editUrl" beanName="editAction"/>
+  		<tiles:put name="editParamName" value="u"/>
+  		<tiles:put name="editParamValue" beanName="User" beanProperty="id"/>
+	</tiles:insert>
 </c:if>
 <br>

@@ -36,7 +36,7 @@
     function getUpdateStatus(opt) {
         if (opt == "<fmt:message key="header.Acknowledge"/>") {
         	var postData = { update: true};
-            var updateUrl = 'Dashboard.do?';
+            var updateUrl = '<html:rewrite action="/Dashboard"/>';
             hqDojo.xhrPost({
          	 	url: updateUrl,
          	 	content: postData,

@@ -108,6 +108,9 @@ function showEscRows(originalRequest) {
     escalations.appendChild(tr);
   }
 
+  var editEscUrl = "<html:rewrite action="/admin/config/Config"><html:param name="mode" value="escalate"/><html:param name="escId" value="{escId}"/></html:rewrite>";
+  var removeEscUrl = "<html:rewrite action="/admin/config/RemoveEscalation"><html:param name="esc" value="{escId}"/></html:rewrite>";
+  
   for (var i = 0; i < schemes.length; i++) {
     var tr = document.createElement("tr");
     if ((i % 2) == 0) {
@@ -126,9 +129,7 @@ function showEscRows(originalRequest) {
       td2.setAttribute("align", "left");
     }
     else {
-      var editUrl = "<html:rewrite page="/admin/config/Config.do?mode=escalate&escId={escId}"/>";
-    
-      td2.innerHTML = '<html:img page="/images/icon_right_arrow.gif" border="0" width="10" height="10" style="display:none;padding-right:5px;"/>' + '<a href="' + editUrl.replace("{escId}", schemes[i].id) + '" onclick="changeHighlight(this);">' + schemes[i].name.escapeHTML() + '</a>';
+      td2.innerHTML = '<html:img page="/images/icon_right_arrow.gif" border="0" width="10" height="10" style="display:none;padding-right:5px;"/>' + '<a href="' + editEscUrl.replace("{escId}", schemes[i].id) + '" onclick="changeHighlight(this);">' + schemes[i].name.escapeHTML() + '</a>';
 
       td2.setAttribute((document.all ? 'className' : 'class'), 'ListCell');
     }
@@ -138,9 +139,7 @@ function showEscRows(originalRequest) {
     td3.setAttribute('align', 'right');
 
     if (schemes.length > 1) {
-    	var url = "<html:rewrite action="/admin/config/RemoveEscalation?esc={escId}"/>";
-    	
-      	td3.innerHTML = '<a href="' + url.replace("{escId}", schemes[i].id) + '">' + hqDojo.byId('deleteBtn').innerHTML + '</a>';
+      	td3.innerHTML = '<a href="' + removeEscUrl.replace("{escId}", schemes[i].id) + '">' + hqDojo.byId('deleteBtn').innerHTML + '</a>';
     } else {
         td3.innerHTML="&nbsp;";
     }
