@@ -34,6 +34,7 @@ import org.hyperic.hq.events.shared.RegisteredTriggerManager;
 import org.hyperic.hq.ha.HAService;
 import org.hyperic.hq.measurement.server.session.AvailabilityCheckService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.MethodInvokingRunnable;
 import org.springframework.stereotype.Service;
@@ -79,7 +80,7 @@ public class HAServiceImpl implements HAService {
     };
 
     @Autowired
-    public HAServiceImpl(TaskScheduler scheduler,
+    public HAServiceImpl(@Value("#{scheduler}")TaskScheduler scheduler,
                          AvailabilityCheckService availabilityCheckService,
                          RegisteredTriggerManager registeredTriggerManager) {
         this.scheduler = scheduler;

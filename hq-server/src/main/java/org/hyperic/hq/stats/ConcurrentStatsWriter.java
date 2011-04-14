@@ -36,11 +36,10 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.logging.Log;
@@ -52,10 +51,12 @@ import org.hyperic.util.stats.StatUnreachableException;
 import org.hyperic.util.stats.StatsObject;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -63,18 +64,20 @@ public class ConcurrentStatsWriter implements ApplicationListener<ContextRefresh
 	private static final Log log = LogFactory.getLog(ConcurrentStatsWriter.class.getName());
 	private static final String BASE_FILENAME = "hqstats";
 	
-	private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
+	private final TaskScheduler taskScheduler;
 	private ApplicationContext applicationContext;
 	private ConcurrentStatsCollector concurrentStatsCollector;
 	private String currFilename;
     private FileWriter file;
     private String baseDir;
-    
+    /** Write period is in seconds **/
     public static final int WRITE_PERIOD = 15;
     
     @Autowired
-    public ConcurrentStatsWriter(ConcurrentStatsCollector concurrentStatsCollector) {
+    public ConcurrentStatsWriter(ConcurrentStatsCollector concurrentStatsCollector, 
+                                 @Value("#{scheduler}")TaskScheduler taskScheduler) {
     	this.concurrentStatsCollector = concurrentStatsCollector;
+    	this.taskScheduler = taskScheduler;
     }
     
     public void onApplicationEvent(ContextRefreshedEvent event) {
@@ -84,8 +87,8 @@ public class ConcurrentStatsWriter implements ApplicationListener<ContextRefresh
         setupBasedir();
         setFileInfo();
         printHeader();
-        executor.scheduleWithFixedDelay(
-                new StatsWriter(), WRITE_PERIOD, WRITE_PERIOD, TimeUnit.SECONDS);
+        taskScheduler.scheduleWithFixedDelay(
+             new StatsWriter(), new Date(System.currentTimeMillis() + (WRITE_PERIOD * 1000)), WRITE_PERIOD*1000);
         concurrentStatsCollector.setStarted(true);
         log.info("ConcurrentStatsCollector has started");
     }

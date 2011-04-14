@@ -30,7 +30,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.FileDataResult;
 import org.hyperic.hq.agent.server.session.AgentDataTransferJob;
 import org.hyperic.hq.appdef.shared.AgentManager;
@@ -56,6 +59,7 @@ public class PluginSyncJob implements AgentDataTransferJob {
     private AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle;
     private AuthzSubject overlord;
     private PluginManager pluginManager;
+    private static final Log log = LogFactory.getLog(PluginSyncJob.class);
 
     @Autowired
     public PluginSyncJob(AgentManager agentManager,
@@ -85,12 +89,30 @@ public class PluginSyncJob implements AgentDataTransferJob {
             if (toRemove != null && !toRemove.isEmpty()) {
                 removeResult = agentManager.agentRemovePlugins(overlord, getAgentId(), toRemove);
             }
+            logDebugs(transferResult, removeResult);
             restartAgentIfFilesUpdated(transferResult, removeResult, agentManager);
         } catch (Exception e) {
             pluginManager.updateAgentPluginSyncStatusInNewTran(
                 AgentPluginStatusEnum.SYNC_FAILURE, getAgentId(), plugins);
             throw new SystemException(
                 "error transferring agent plugins to agentId=" + getAgentId(), e);
+        }
+    }
+
+    private void logDebugs(FileDataResult[] transferResult, Map<String, Boolean> removeResult) {
+        final boolean debug = log.isDebugEnabled();
+        if (!debug) {
+            return;
+        }
+        if (transferResult != null) {
+            for (int i=0; i<transferResult.length; i++) {
+                if (debug) log.debug(transferResult[i]);
+            }
+        }
+        if (removeResult != null) {
+            for (Entry<String, Boolean> entry : removeResult.entrySet()) {
+                if (debug) log.debug(entry.getKey() + ":" + entry.getValue());
+            }
         }
     }
 
@@ -111,6 +133,7 @@ public class PluginSyncJob implements AgentDataTransferJob {
     private void restartAgentIfFilesUpdated(FileDataResult[] transferResult,
                                             Map<String, Boolean> removeResult,
                                             AgentManager agentManager) {
+// XXX need to rework this, if data transfer fails, what should I do??        
         if (removeResult != null && !removeResult.isEmpty()) {
             for (final Boolean removed : removeResult.values()) {
                 if (removed) {

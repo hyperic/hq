@@ -92,7 +92,7 @@
 		<c:param name="aetid" value="${param.aetid}" />
 	</c:if>
 </c:url>
-<c:url var="monitorAction" value="/alerts/config/Config.do">
+<c:url var="monitorAction" value="/admin/config/Config.do">
 	<c:param name="mode" value="monitor" />
 </c:url>
 
