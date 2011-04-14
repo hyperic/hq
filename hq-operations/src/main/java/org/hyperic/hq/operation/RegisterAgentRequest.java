@@ -4,13 +4,11 @@ import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
-/**
- * @author Helena Edelson
- */
+ 
 public class RegisterAgentRequest extends AbstractAgentOperation {
 
     private static final long serialVersionUID = 1876820746657883192L;
-    
+
     private String authToken;
 
     private String version;
@@ -18,30 +16,17 @@ public class RegisterAgentRequest extends AbstractAgentOperation {
     private int cpuCount;
 
     @JsonCreator
-    public RegisterAgentRequest(@JsonProperty("authToken") String authToken, @JsonProperty("version") String version,
+    public RegisterAgentRequest(@JsonProperty("agentToken") String agentToken, @JsonProperty("authToken") String authToken, @JsonProperty("version") String version,
                          @JsonProperty("cpuCount") int cpuCount, @JsonProperty("agentIp") String agentIp,
                          @JsonProperty("agentPort") int agentPort, @JsonProperty("username") String username,
                          @JsonProperty("password") String password, @JsonProperty("unidirectional") boolean unidirectional) {
 
-        super(username, password, agentIp, agentPort, unidirectional);
+        super(agentToken, username, password, agentIp, agentPort, unidirectional, false);
         this.authToken = authToken;
         this.version = version;
         this.cpuCount = cpuCount;
     }
-
-    @JsonCreator
-    public RegisterAgentRequest(@JsonProperty("agentToken") String agentToken, @JsonProperty("authToken") String authToken,
-                         @JsonProperty("version") String version, @JsonProperty("cpuCount") int cpuCount, @JsonProperty("agentIp") String agentIp,
-                         @JsonProperty("agentPort") int agentPort, @JsonProperty("username") String username,
-                         @JsonProperty("password") String password, @JsonProperty("unidirectional") boolean unidirectional,
-                         @JsonProperty("newTransportAgent") boolean newTransportAgent) {
-
-        super(agentToken, username, password, agentIp, agentPort, unidirectional, newTransportAgent);
-        this.authToken = authToken;
-        this.version = version;
-        this.cpuCount = cpuCount;
-    }
-
+ 
     public String getAuthToken() {
         return authToken;
     }

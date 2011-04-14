@@ -30,6 +30,7 @@ import org.hyperic.hq.operation.annotation.Operation;
 import org.hyperic.hq.operation.rabbit.connection.ChannelException;
 import org.hyperic.hq.operation.rabbit.util.Constants;
 import org.hyperic.hq.operation.rabbit.util.OperationToRoutingMapping;
+import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -52,6 +53,8 @@ public class OperationToRoutingKeyRegistry implements RoutingRegistry {
 
     private final Map<String, OperationToRoutingMapping> operationToRoutingKeyMappings = new ConcurrentHashMap<String, OperationToRoutingMapping>();
 
+    private final Map<String, SimpleMessageListenerContainer> handlerMappings = new ConcurrentHashMap<String, SimpleMessageListenerContainer>();
+
     private final BindingHandler bindingHandler;
 
     private final String serverId;
@@ -60,11 +63,6 @@ public class OperationToRoutingKeyRegistry implements RoutingRegistry {
     public OperationToRoutingKeyRegistry(ConnectionFactory connectionFactory) {  
         this.bindingHandler = new DeclarativeBindingHandler(connectionFactory);
         this.serverId = getDefaultServerId();
-
-       /* ListenerContainer listener = new ListenerContainer();
-        listener.setConnectionFactory(connectionFactory);
-        listener.setMessageListener(new MessageListenerAdapter(handler));
-        listener.setQueues(queues);*/
     }
 
     /**
@@ -74,22 +72,24 @@ public class OperationToRoutingKeyRegistry implements RoutingRegistry {
     public void register(Operation operation) throws ChannelException {
         if (!this.operationToRoutingKeyMappings.containsKey(operation.operationName())) {
             String queueName = this.bindingHandler.declareAndBind(operation);
+
             this.operationToRoutingKeyMappings.put(operation.operationName(),
                     new OperationToRoutingMapping(operation.exchangeName(), operation.value(), queueName, null));
         }
     }
 
-    /**
-     * Unregisters the mapping and removes the components themselves
-     * @param operation The operation meta-data to map 
-     */
-    public void unRegister(Operation operation) {
-        if (this.operationToRoutingKeyMappings.containsKey(operation.operationName())) {
-            // call binding handler, add a remove method
-           this.operationToRoutingKeyMappings.remove(operation.operationName()); 
-        }
-    }
+    /*public void registerHandler() { 
+        MessageListenerAdapter mla = new MessageListenerAdapter();
+        mla.setDefaultListenerMethod("registerAgentRequest");
+        mla.setDelegate(registerAgentService);
+        mla.setResponseExchange(Constants.TO_SERVER_AUTHENTICATED_EXCHANGE);
+        mla.setResponseRoutingKey(Constants.OPERATION_NAME_AGENT_REGISTER_RESPONSE);
 
+        SimpleMessageListenerContainer listener = new SimpleMessageListenerContainer(new SingleConnectionFactory());
+        listener.setMessageListener(mla);
+        listener.setQueueName("hq-agents.config");
+    }*/
+ 
     /**
      * Automatically handled by spring
      * @return
@@ -111,12 +111,11 @@ public class OperationToRoutingKeyRegistry implements RoutingRegistry {
         return this.operationToRoutingKeyMappings.get(operationName);
     }
 
-    /* working on... how to get around no spring on agent */
-    /*this.agentRoutingKeyPrefix = RoutingConstants.AGENT_ROUTING_KEY_PREFIX;
-    this.serverPrefix = RoutingConstants.SERVER_ROUTING_KEY_PREFIX + serverId;
-    this.defaultToAgentBindingKey = agentRoutingKeyPrefix + "";
-    this.defaultToServerBindingKey = agentRoutingKeyPrefix + "";*/
-  
+    public SimpleMessageListenerContainer mapListener(String operationName) {
+        if (!this.handlerMappings.containsKey(operationName)) throw new OperationNotSupportedException(operationName);
+        return this.handlerMappings.get(operationName);
+    }
+ 
     /**
      * agentToken = 1302212470776-5028906219606536735-6762208433280624914
      * hq-agents.agent-{agentToken}.operations.config.registration.request
@@ -143,6 +142,10 @@ public class OperationToRoutingKeyRegistry implements RoutingRegistry {
         } catch (UnknownHostException e) {
             return UUID.randomUUID().toString();
         }
+    }
+
+    public Map<String, SimpleMessageListenerContainer> getHandlerMappings() {
+        return handlerMappings;
     }
 
     private boolean validArguments(String operationName, String exchangeName, String value) {

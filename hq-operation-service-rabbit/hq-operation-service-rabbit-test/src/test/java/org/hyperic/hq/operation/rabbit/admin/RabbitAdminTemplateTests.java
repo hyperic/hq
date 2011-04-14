@@ -27,6 +27,7 @@ package org.hyperic.hq.operation.rabbit.admin;
 
 import org.hyperic.hq.operation.rabbit.admin.erlang.BrokerStatus;
 import org.hyperic.hq.operation.rabbit.admin.erlang.Node;
+import org.hyperic.hq.operation.rabbit.admin.erlang.Queue;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -59,5 +60,10 @@ public class RabbitAdminTemplateTests {
     public void testUsers() {
         List<String> users = adminTemplate.listUsers();
         Assert.assertTrue(users.size() > 0);
+    }
+
+    @Test
+    public void testQueues() {
+        List<Queue> queues = adminTemplate.getQueues(); 
     }
 }

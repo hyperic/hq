@@ -25,8 +25,9 @@
 
 package org.hyperic.hq.bizapp.server.operations;
 
-import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
-import org.hyperic.hq.operation.rabbit.util.Constants;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.ConnectionFactory;
+import org.hyperic.hq.operation.rabbit.connection.ChannelTemplate;
 import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
@@ -43,17 +44,41 @@ public class RabbitServerConfiguration {
     @Autowired
     private RegisterAgentService registerAgentService;
 
+    @Autowired
+    private ConnectionFactory connectionFactory;
+
     @Bean
     public SimpleMessageListenerContainer registerAgentHandler() {
-        MessageListenerAdapter mla = new MessageListenerAdapter(new JsonMappingConverter());
-        mla.setDefaultListenerMethod("registerAgentRequest");
-        mla.setDelegate(registerAgentService);
-        mla.setResponseExchange(Constants.TO_SERVER_AUTHENTICATED_EXCHANGE);
-        mla.setResponseRoutingKey(Constants.OPERATION_NAME_AGENT_REGISTER_RESPONSE);
+        ChannelTemplate template = new ChannelTemplate(new ConnectionFactory());
+        Channel channel = template.createChannel();
+        String requestQueue = null;
+                try {
+                    //channel.exchangeDeclare("test.exchange", "topic", true, false, null);
+                    requestQueue = channel.queueDeclare("request", true, false, false, null).getQueue();
+                    //channel.queueBind(queue, "", "request.*");
 
+                    //channel.exchangeDeclare("test.exchange", "topic", true, false, null);
+                    String responseQueue = channel.queueDeclare("response", true, false, false, null).getQueue();
+                    //channel.queueBind(q, "", "response.*");
+
+
+        } catch (Exception e) {
+            System.out.println(e.getCause());
+        }  finally {
+            template.releaseResources(channel);
+        }
+
+        /*   MessageListenerAdapter mla = new MessageListenerAdapter();
+                mla.setDefaultListenerMethod("test");
+                mla.setDelegate(this);
+               mla.setResponseExchange(Constants.TO_AGENT_EXCHANGE);
+                mla.setResponseRoutingKey("register.agent.response");
+        */
         SimpleMessageListenerContainer listener = new SimpleMessageListenerContainer(new SingleConnectionFactory());
-        listener.setMessageListener(mla);
-        listener.setQueueName("test.queue");
+        listener.setMessageListener(new MessageListenerAdapter(registerAgentService));
+        listener.setQueueName(requestQueue);
+        listener.afterPropertiesSet();
+        listener.start();
         return listener;
     }
 }

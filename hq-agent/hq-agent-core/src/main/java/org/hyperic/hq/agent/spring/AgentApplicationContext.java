@@ -66,6 +66,9 @@ public final class AgentApplicationContext {
         } catch (IllegalStateException e) {
             System.out.println(e.getCause() + " " + e.getMessage());
         }
+        for (Object bean: ctx.getBeanDefinitionNames()) {
+            System.out.println(bean);
+        }
         return ctx;
     }
 

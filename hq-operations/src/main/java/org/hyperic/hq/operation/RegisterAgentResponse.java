@@ -28,9 +28,7 @@ package org.hyperic.hq.operation;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
 
-/**
- * @author Helena Edelson
- */
+
 public class RegisterAgentResponse {
 
    private static final long serialVersionUID = 1876820746657883192L;

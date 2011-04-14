@@ -6,7 +6,6 @@ import org.hyperic.hq.bizapp.agent.ProviderInfo;
 import org.hyperic.hq.bizapp.client.*;
 import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertNotNull;
@@ -15,12 +14,14 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Helena Edelson
  */
-@Ignore("'AGENT_HOME' must be set")
+//@Ignore("'AGENT_HOME' must be set")
 public class LatherReplacementIntegrationTests extends BaseInfrastructureTest {
 
-    /** Must configure */     
-    private final static String AGENT_HOME = "/path/to/agent-4.6.0.BUILD-SNAPSHOT";
- 
+    /**
+     * Must configure
+     */
+    private final static String AGENT_HOME = "/Users/hedelson/tools/hyperic/agent-4.6.0.BUILD-SNAPSHOT";
+
     private BizappCallbackClient bizappClient;
 
     private AutoinventoryCallbackClient autoinventoryClient;
@@ -42,25 +43,28 @@ public class LatherReplacementIntegrationTests extends BaseInfrastructureTest {
     @Before
     public void prepare() {
         System.setProperty("agent.install.home", AGENT_HOME);
-        System.setProperty("agent.bundle.home", AGENT_HOME + "/bin"); 
+        System.setProperty("agent.bundle.home", AGENT_HOME + "/bin");
         ProviderInfo providerInfo = new ProviderInfo(AgentCallbackClient.getDefaultProviderURL(host, port, false), "no-auth");
         this.bizappClient = new BizappCallbackClient(new StaticProviderFetcher(providerInfo), AgentConfig.newInstance());
         assertNotNull("'bcc' must not be null", bizappClient);
     }
 
     @Test
+    public void bizappRegisterAgent() throws AgentCallbackClientException, InterruptedException {
+        RegisterAgentResult result = this.bizappClient.registerAgent("", user, pass, "", host, port, "", 1, false, false);
+        assertNotNull(result.response);
+        assertTrue(result.response.startsWith("token:"));
+    }
+
+    // not migrated yet
+
+    @Test
     public void bizappUserIsValid() throws AgentConfigException, AgentCallbackClientException, InterruptedException {
         assertTrue(bizappClient.userIsValid(user, pass));
     }
-
-    @Test
-    public void bizappRegisterAgent() throws AgentCallbackClientException { 
-        assertNotNull(bizappClient.registerAgent("", user, pass, "", host, port, "", 1, false, false));
-    }
-
-    // not ready yet @Test
+ 
     public void bizappUpdateAgent() throws InterruptedException, AgentCallbackClientException {
         String result = bizappClient.updateAgent("", user, pass, host, port, false, false);
-        assertNotNull(result); 
+        assertNotNull(result);
     }
 }

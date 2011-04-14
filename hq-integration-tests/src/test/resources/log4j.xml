@@ -91,6 +91,14 @@
 	<!-- ============================== -->
 	<!-- 3rd party loggers -->
 	<!-- ============================== -->
+    <logger name="org.hyperic.hq.operation">
+		<level value="debug" />
+	</logger>
+    <logger name="com.rabbitmq">
+		<level value="debug" />
+	</logger>
+
+
 
 	<logger name="org.springframework">
 		<level value="warn" />

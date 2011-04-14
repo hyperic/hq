@@ -37,13 +37,6 @@ public interface RoutingRegistry {
      * @param operation The operation meta-data to map  
      */
     void register(Operation operation);
-
-    /**
-     * Removes the routing mapping for the given operation,
-     * for example when an agent is removed
-     * @param operation The operation meta-data to map 
-     */
-    void unRegister(Operation operation);
  
     /**
      * Returns the routing data by operation name

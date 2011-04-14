@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.rabbit;
 
+import org.hyperic.hq.agent.AgentConfig;
+import org.hyperic.hq.agent.server.AgentDaemon;
 import org.hyperic.hq.bizapp.agent.ProviderInfo;
 import org.hyperic.hq.bizapp.agent.client.AgentClient;
 import org.hyperic.hq.bizapp.client.AgentCallbackClient;
@@ -51,6 +53,31 @@ public class SpringAgentTest extends BaseInfrastructureTest {
     }
 
     @Test
+    public void daemonSpringAgentTest() throws InterruptedException {
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    AgentClient.main(new String[]{"start"});
+                    AgentConfig config = AgentConfig.newInstance();
+
+                    /*AgentDaemon agentDaemon = AgentDaemon.newInstance(config);
+                                            agentDaemon.configure(config);
+                    */
+                    AgentDaemon.RunnableAgent agentDaemon = new AgentDaemon.RunnableAgent(config);
+                    agentDaemon.run();
+                    Thread.sleep(1000);
+
+                } catch (InterruptedException e) {
+                    logger.debug("", e);
+                }
+            }
+        }).start();
+
+        Thread.sleep(5000);
+        System.exit(0);
+    }
+
+    @Test
     public void veryBasicSpringAgentTest() throws InterruptedException {
         new Thread(new Runnable() {
             public void run() {
@@ -59,17 +86,13 @@ public class SpringAgentTest extends BaseInfrastructureTest {
                     AgentClient.main(new String[]{"start"});
                     ProviderInfo providerInfo = new ProviderInfo(AgentCallbackClient.getDefaultProviderURL(host, port, false), "no-auth");
                     assertNotNull(providerInfo);
-
                     //AgentClient.main(new String[]{"setup"});
-
                     AgentClient.main(new String[]{"status"});
-
-                    Thread.sleep(5000);
                     AgentClient.main(new String[]{"die"});
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     logger.error("", e);
-                }  
+                }
             }
         }).start();
 

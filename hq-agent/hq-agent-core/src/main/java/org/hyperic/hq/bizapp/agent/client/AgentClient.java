@@ -33,6 +33,7 @@ import org.hyperic.hq.agent.AgentConfigException;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
+import org.hyperic.hq.agent.client.LegacyAgentCommandsClientImpl;
 import org.hyperic.hq.agent.server.AgentDaemon;
 import org.hyperic.hq.agent.server.LoggingOutputStream;
 import org.hyperic.hq.bizapp.agent.ProviderInfo;
@@ -106,25 +107,21 @@ public class AgentClient {
     private boolean             redirectedOutputs = false;
 
     public AgentClient(AgentConfig config, SecureAgentConnection conn){
-        this.agtCommands = null;//new AmqpCommandOperationService(new LegacyAgentCommandsClientImpl(conn));
-        //this.agtCommands = new LegacyAgentCommandsClientImpl(conn);
+        //this.agtCommands = null;//new AmqpCommandOperationService(new LegacyAgentCommandsClientImpl(conn));
+        this.agtCommands = new LegacyAgentCommandsClientImpl(conn);
         this.camCommands = new CommandsClient(conn);
         this.config      = config;
         this.log         = LogFactory.getLog(AgentClient.class);
         this.nuking      = false;
     }
     
-    public long cmdPing(int numAttempts)  throws AgentConnectionException, AgentRemoteException { 
-        log.info("*********cmdPing()");
-        log.info("AgentConfig="+config);
+    public long cmdPing(int numAttempts)  throws AgentConnectionException, AgentRemoteException {
         AgentConnectionException lastExc;
 
         lastExc = new AgentConnectionException("Failed to connect to agent");
         while(numAttempts-- != 0){
             try {
-                log.info("***executing this.agtCommands.ping()");
                 long duration = this.agtCommands.ping();
-                log.info("***this.agtCommands.ping() returned " + duration);
                 return duration;
             } catch(AgentConnectionException exc){
                 // Loop around to the next attempt
@@ -406,7 +403,7 @@ public class AgentClient {
 
             try {
                 bizapp = this.testProvider(provider);
-                log.info("*********testing connectivity to the unidirectional and lather servlet container: unidirectionalProvider=" +
+                log.info("testing connectivity to the unidirectional and lather servlet container: unidirectionalProvider=" +
                                  bizapp);
                 SYSTEM_OUT.println("Success");
                 return bizapp;

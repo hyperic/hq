@@ -25,7 +25,7 @@ public class SerializationVsJsonBenchmarkTests {
 
     @Before
     public void prepare() {
-        this.data = new RegisterAgentRequest("authTokenValue", "5.0", 1, "localhost", 7071, "hqadmin", "hqadmin", false);
+        this.data = new RegisterAgentRequest("","authTokenValue", "5.0", 1, "localhost", 7071, "hqadmin", "hqadmin", false);
 
         this.json = "{\"authToken\":\"authTokenValue\",\"version\":\"5.0\",\"cpuCount\":1,\"agentIp\":\"localhost\",\"agentPort\":7071,\"username\":\"hqadmin\",\"password\":\"hqadmin\"," +
                 "\"agentToken\":null,\"unidirectional\":false,\"newTransportAgent\":false,\"operationName\":\"RegisterAgent\"," +

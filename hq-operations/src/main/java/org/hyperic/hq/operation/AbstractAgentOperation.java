@@ -9,7 +9,6 @@ public class AbstractAgentOperation extends AbstractOperation {
 
     private static final long serialVersionUID = -7404476740286545689L;
 
-    @JsonIgnore
     private String agentToken;
      
     private String username;
@@ -27,25 +26,12 @@ public class AbstractAgentOperation extends AbstractOperation {
     private boolean newTransportAgent;
 
     @JsonCreator
-    public AbstractAgentOperation(@JsonProperty("username") String username,
-                         @JsonProperty("password") String password, @JsonProperty("agentIp") String agentIp,
-                         @JsonProperty("agentPort") int agentPort, @JsonProperty("unidirectional") boolean unidirectional) {
-
-        super(true);
-        this.username = username;
-        this.password = password;
-        this.agentIp = agentIp;
-        this.agentPort = agentPort;
-        this.unidirectional = unidirectional;
-    }
-
-    @JsonCreator
     public AbstractAgentOperation(@JsonProperty("agentToken") String agentToken, @JsonProperty("username") String username,
                          @JsonProperty("password") String password, @JsonProperty("agentIp") String agentIp,
                          @JsonProperty("agentPort") int agentPort, @JsonProperty("unidirectional") boolean unidirectional,
                          @JsonProperty("newTransportAgent") boolean newTransportAgent) {
         super(true);
-        if (agentToken == null) throw new IllegalArgumentException("'agentToken' must not be null.");
+       // if (agentToken == null) throw new IllegalArgumentException("'agentToken' must not be null.");
         
         this.agentToken = agentToken;
         this.username = username;

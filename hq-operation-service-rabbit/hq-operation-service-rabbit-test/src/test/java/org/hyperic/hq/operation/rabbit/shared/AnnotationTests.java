@@ -50,7 +50,7 @@ public class AnnotationTests {
  
     @OperationDispatcher
     static class TestDispatcher {
-        @Operation(operationName = Constants.OPERATION_NAME_AGENT_REGISTER, exchangeName = Constants.TO_SERVER_EXCHANGE, value = Constants.OPERATION_NAME_AGENT_REGISTER)
+        @Operation(operationName = Constants.OPERATION_NAME_AGENT_REGISTER_REQUEST, exchangeName = Constants.TO_SERVER_EXCHANGE, value = Constants.OPERATION_NAME_AGENT_REGISTER_REQUEST)
         void register(Object data) {
             System.out.println("Invoked method=report with data=" + data);
         }
@@ -58,7 +58,7 @@ public class AnnotationTests {
 
     @OperationEndpoint
     static class TestEndpoint {
-        @Operation(operationName = Constants.OPERATION_NAME_AGENT_REGISTER, exchangeName = Constants.TO_AGENT_EXCHANGE, value = Constants.OPERATION_NAME_AGENT_REGISTER)
+        @Operation(operationName = Constants.OPERATION_NAME_AGENT_REGISTER_RESPONSE, exchangeName = Constants.TO_AGENT_EXCHANGE, value = Constants.OPERATION_NAME_AGENT_REGISTER_RESPONSE)
         void handle(Object data) {
             System.out.println("Invoked method=handle with data=" + data);
         }

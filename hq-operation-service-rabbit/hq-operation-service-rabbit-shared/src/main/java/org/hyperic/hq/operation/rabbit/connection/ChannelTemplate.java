@@ -129,10 +129,12 @@ public final class ChannelTemplate implements ChannelOperations {
         if (channel == null) return;
 
         try {
-            channel.close();
-            //closeConnection(channel.getConnection());
+            if (channel.isOpen()) {
+                channel.close();
+                closeConnection(channel.getConnection());
+            }  
         } catch (AlreadyClosedException e) {
-            // do nothing
+           logger.debug("Connection is already closed.", e);
         } catch (IOException e) {
             logger.debug("Connection is already closed.", e);
         }

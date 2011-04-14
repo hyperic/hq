@@ -34,5 +34,5 @@ import org.hyperic.hq.operation.RegisterAgentRequest;
 public interface RegisterAgentService {
      
     void registerAgentRequest(RegisterAgentRequest registerAgentRequest) throws AgentConnectionException;
-
+    void handleMessage(Object o);
 }
