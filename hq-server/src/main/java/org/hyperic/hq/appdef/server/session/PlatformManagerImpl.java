@@ -59,6 +59,7 @@ import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.IpValue;
@@ -680,6 +681,18 @@ public class PlatformManagerImpl implements PlatformManager {
         //TODO perm check
         //permissionManager.checkViewPermission(subject, platform.getId());
         return platform;
+    }
+    
+    public Set<Platform> getPlatformsByAgent(Agent agent) {
+        Set<Platform> platforms = new HashSet<Platform>();
+        List<ManagedResource> managedResources = managedResourceRepository.findByAgent(agent);
+        for(ManagedResource managedResource: managedResources) {
+            Resource resource = resourceManager.findResourceById(managedResource.getResourceId());
+            if(AppdefUtil.newAppdefEntityId(resource).isPlatform()) {
+                platforms.add(toPlatform(resource));
+            }
+        }
+        return platforms;
     }
 
     /**

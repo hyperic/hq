@@ -192,6 +192,8 @@ public interface PlatformManager {
      */
     public Collection<Integer> getPlatformPksByAgentToken(AuthzSubject subject, String agentToken)
         throws PlatformNotFoundException;
+    
+    Set<Platform> getPlatformsByAgent(Agent agent);
 
     /**
      * Get the platform that hosts the server that provides the specified

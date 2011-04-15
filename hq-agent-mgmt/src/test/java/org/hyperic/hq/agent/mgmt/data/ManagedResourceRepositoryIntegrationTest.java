@@ -3,6 +3,9 @@ package org.hyperic.hq.agent.mgmt.data;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
@@ -34,10 +37,12 @@ public class ManagedResourceRepositoryIntegrationTest {
     private EntityManager entityManager;
 
     private Agent agent;
+    
+    private AgentType agentType;
 
     @Before
     public void setUp() {
-        AgentType agentType = new AgentType();
+        agentType = new AgentType();
         agentType.setName("Unidirectional");
         entityManager.persist(agentType);
         this.agent = new Agent(agentType, "127.0.0.1", 2144, true, "auth", "token", "5.0");
@@ -81,7 +86,20 @@ public class ManagedResourceRepositoryIntegrationTest {
         managedResourceRepository.loadFindByManagedResourceQueryCache();
         assertEquals(2, CacheManager.getInstance().getCache("Agent.findByManagedResource").getSize());
     }
-
+    
+    @Test
+    public void testFindByAgent() {
+        Agent agent2 = new Agent(agentType, "127.0.0.1", 2144, true, "auth", "token2", "5.0");
+        entityManager.persist(agent2);
+        ManagedResource managedResource = new ManagedResource(123, agent);
+        managedResourceRepository.save(managedResource);
+        ManagedResource managedResource2 = new ManagedResource(456, agent2);
+        managedResourceRepository.save(managedResource2);
+        List<ManagedResource> expected = new ArrayList<ManagedResource>();
+        expected.add(managedResource2);
+        assertEquals(expected,managedResourceRepository.findByAgent(agent2));
+    }
+    
     private void verifyQueryCaching(String cacheName) {
         assertEquals(1, CacheManager.getInstance().getCache(cacheName).getSize());
     }

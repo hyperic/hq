@@ -1,5 +1,7 @@
 package org.hyperic.hq.agent.mgmt.data;
 
+import java.util.List;
+
 import javax.persistence.QueryHint;
 
 import org.hyperic.hq.agent.mgmt.domain.Agent;
@@ -22,4 +24,6 @@ public interface ManagedResourceRepository extends JpaRepository<ManagedResource
     @QueryHints({ @QueryHint(name = "org.hibernate.cacheable", value = "true"),
                  @QueryHint(name = "org.hibernate.cacheRegion", value = "Agent.findByManagedResource") })
     Agent findAgentByResource(@Param("resource") Integer resourceId);
+    
+    List<ManagedResource> findByAgent(Agent agent);
 }
