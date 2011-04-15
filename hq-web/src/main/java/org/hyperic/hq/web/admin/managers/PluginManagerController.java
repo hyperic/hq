@@ -229,7 +229,12 @@ public class PluginManagerController extends BaseController implements Applicati
             if("".equals(searchWord) || agentName.contains(searchWord)){
                 Map<String,Object> errorAgent = new HashMap<String,Object>();
                 errorAgent.put("agentName", agentName); 
-                errorAgent.put("syncDate", formatter.format(errorAgentStatus.getLastSyncAttempt()));
+                if(errorAgentStatus.getLastSyncAttempt()!=0){
+                    errorAgent.put("syncDate", formatter.format(errorAgentStatus.getLastSyncAttempt())); 
+                }else{
+                    errorAgent.put("syncDate", "");
+                }
+                
                 errorAgent.put("status", "error");
                 resultAgents.add(errorAgent);
             }
@@ -242,7 +247,11 @@ public class PluginManagerController extends BaseController implements Applicati
             if("".equals(searchWord) || agentName.contains(searchWord)){
                 Map<String,Object> inProgressAgent = new HashMap<String,Object>();
                 inProgressAgent.put("agentName", agentName); 
-                inProgressAgent.put("syncDate", formatter.format(inProgressAgentStatus.getLastSyncAttempt()));
+                if(inProgressAgentStatus.getLastSyncAttempt()!=0){
+                    inProgressAgent.put("syncDate", formatter.format(inProgressAgentStatus.getLastSyncAttempt()));
+                }else{
+                    inProgressAgent.put("syncDate", "");
+                }
                 inProgressAgent.put("status", "inProgress");
                 resultAgents.add(inProgressAgent);
             }
