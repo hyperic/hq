@@ -26,8 +26,10 @@
 package org.hyperic.hq.operation.rabbit.util;
 
 import com.rabbitmq.client.AMQP;
+import org.hyperic.hq.operation.AbstractOperation;
 
 import java.nio.charset.Charset;
+import java.util.Random;
 
 /**
  * @author Helena Edelson
@@ -87,6 +89,22 @@ public final class MessageConstants {
     }
 
     private MessageConstants() {
+    }
+
+    /**
+     * Refactor this to a service
+     * @param data
+     * @return
+     */
+    public static AMQP.BasicProperties getBasicProperties(Object data) {
+        AMQP.BasicProperties bp = MessageConstants.DEFAULT_MESSAGE_PROPERTIES;
+
+        if (data != null && data.getClass().isAssignableFrom(AbstractOperation.class)) {
+            bp.setCorrelationId(((AbstractOperation) data).getOperationName());
+        } else {
+            bp.setCorrelationId(new Random().toString());
+        }
+        return bp;
     }
 
 }

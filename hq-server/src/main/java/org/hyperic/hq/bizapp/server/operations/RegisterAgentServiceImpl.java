@@ -102,15 +102,15 @@ public class RegisterAgentServiceImpl implements RegisterAgentService {
         JsonMappingConverter converter = new JsonMappingConverter();
 
         RegisterAgentRequest req = (RegisterAgentRequest) converter.read(new String((byte[]) registerAgent), RegisterAgentRequest.class);
-        System.out.println(this + " received="+req);
+        logger.info("received="+req);
 
         ChannelTemplate template = new ChannelTemplate(new ConnectionFactory());
         Channel channel = template.createChannel();
         try {
 
             byte[] bytes = converter.write(new RegisterAgentResponse("token:" + "foo")).getBytes(MessageConstants.CHARSET);
-            channel.basicPublish(Constants.TO_AGENT_EXCHANGE, "response.register", null, bytes);
-            System.out.println(this + " returning=" + "foo");
+            channel.basicPublish(Constants.TO_AGENT_EXCHANGE, "response.register", MessageConstants.getBasicProperties(null), bytes);
+            logger.info("returning=foo");
         } catch (IOException e) {
             throw new ChannelException(e.getCause());
         } finally {

@@ -34,7 +34,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.bizapp.agent.ProviderInfo;
 import org.hyperic.hq.bizapp.shared.lather.*;
-import org.hyperic.hq.operation.AbstractOperation;
 import org.hyperic.hq.operation.OperationService;
 import org.hyperic.hq.operation.RegisterAgentRequest;
 import org.hyperic.hq.operation.RegisterAgentResponse;
@@ -48,13 +47,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.Random;
 
-//@OperationDispatcher
-
+//@OperationDispatcher 
 @Component
 public class BizappCallbackClient extends AgentCallbackClient {
-    private final Log log = LogFactory.getLog(BizappCallbackClient.class);
+    private final Log logger = LogFactory.getLog(BizappCallbackClient.class);
 
     private OperationService operationService;
 
@@ -68,7 +65,7 @@ public class BizappCallbackClient extends AgentCallbackClient {
 
         // configure lather proxy settings
         if (config.isProxyServerSet()) {
-            log.info("Setting proxy server: host=" + config.getProxyIp() +
+            logger.info("Setting proxy server: host=" + config.getProxyIp() +
                     "; port=" + config.getProxyPort());
             System.setProperty(AgentConfig.PROP_LATHER_PROXYHOST,
                     config.getProxyIp());
@@ -138,11 +135,11 @@ public class BizappCallbackClient extends AgentCallbackClient {
             String responseQueue = channel.queueDeclare("response", true, false, false, null).getQueue();
             channel.queueBind(responseQueue, Constants.TO_AGENT_EXCHANGE, "response.*");
 
-           /* AMQP.BasicProperties bp = getBasicProperties(registerAgentRequest);
+            AMQP.BasicProperties bp = MessageConstants.getBasicProperties(registerAgentRequest);
             String correlationId = bp.getCorrelationId();
-*/
-            channel.basicPublish(Constants.TO_SERVER_EXCHANGE, "request.register", null, bytes);
-            System.out.println("\nagent sent=" + converter.write(registerAgentRequest));
+
+            channel.basicPublish(Constants.TO_SERVER_EXCHANGE, "request.register", bp, bytes);
+            logger.info("agent sent=" + converter.write(registerAgentRequest));
 
             while (true) {
                 GetResponse response = channel.basicGet(responseQueue, false);
@@ -150,10 +147,10 @@ public class BizappCallbackClient extends AgentCallbackClient {
                     /* TODO configure to be true:
                  if (response.getProps().getCorrelationId().equals(correlationId)) { }*/
                     String json = new String(response.getBody());
-                    System.out.println("agent received json response=" + json);
+                    logger.info("agent received json response=" + json);
 
                     RegisterAgentResponse resp = (RegisterAgentResponse) converter.read(json, RegisterAgentResponse.class);
-                    System.out.println(this.getClass().getSimpleName() + " received=" + resp);
+                    logger.info("received=" + resp);
                     channel.basicAck(response.getEnvelope().getDeliveryTag(), false);
                     return new RegisterAgentResult(resp.getAgentToken());
                 }
@@ -163,25 +160,7 @@ public class BizappCallbackClient extends AgentCallbackClient {
             throw new ChannelException(e.getCause());
         } finally {
             template.releaseResources(channel);
-        }
-
-
-        /*  RegisterAgent_result res = (RegisterAgent_result)this.invokeLatherCall(provider,
-                                              CommandInfo.CMD_REGISTER_AGENT,
-                                              args);
-      return new RegisterAgentResult(res.getResult());*/
-    }
-
-
-    protected AMQP.BasicProperties getBasicProperties(Object data) {
-        AMQP.BasicProperties bp = MessageConstants.DEFAULT_MESSAGE_PROPERTIES;
-
-        if (data.getClass().isAssignableFrom(AbstractOperation.class)) {
-            bp.setCorrelationId(((AbstractOperation) data).getOperationName());
-        } else {
-            bp.setCorrelationId(new Random().toString());
-        }
-        return bp;
+        } 
     }
 
     public String updateAgent(String agentToken, String user, String pword,
