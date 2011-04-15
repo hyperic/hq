@@ -717,18 +717,21 @@ public class ProductPluginManager
 
     public Collection<PluginInfo> registerCustomPlugins(String startDir, Collection<PluginInfo> excludes) {
         // check startDir and higher for hq-plugins
+        File customDir = getCustomDir(startDir);
+        return customDir != null ?
+            registerPlugins(customDir.toString(), excludes) : Collections.emptyList();
+    }
+    
+    private File getCustomDir(String startDir) {
         File dir = new File(startDir).getAbsoluteFile();
-        
         while (dir != null) {
             File customPluginDir = new File(dir, "hq-plugins");
-            
             if (customPluginDir.exists()) {
-                return registerPlugins(customPluginDir.toString(), excludes);
+                return customPluginDir;
             }
-            
             dir = dir.getParentFile();
         }
-        return Collections.emptyList();
+        return null;
     }
 
     private File[] listPlugins(File dir) {
@@ -750,6 +753,29 @@ public class ProductPluginManager
         } else {
             return msg;
         }
+    }
+    
+    public Collection<PluginInfo> getAllPluginInfoDirectFromFileSystem(String path, String customPath) {
+        final Collection<PluginInfo> rtn = new ArrayList<PluginInfo>();
+        final List<String> dirs = StringUtil.explode(path, File.pathSeparator);
+        File customDir = getCustomDir(customPath);
+        if (customDir != null) {
+            dirs.add(customDir.getAbsolutePath());
+        }
+        for (final String d : dirs) {
+            final File dir = new File(d);
+            if (!dir.exists() || !dir.isDirectory()) {
+                continue;
+            }
+            File[] plugins = dir.listFiles();
+            for (File plugin : plugins) {
+                String name = plugin.getName();
+                if (name.endsWith("-plugin.jar") || name.endsWith("-plugin.xml")) {
+                    rtn.add(new PluginInfo(plugin, "NONE"));
+                }
+            }
+        }
+        return rtn;
     }
 
     public Collection<PluginInfo> registerPlugins(String path, Collection<PluginInfo> excludes) {
