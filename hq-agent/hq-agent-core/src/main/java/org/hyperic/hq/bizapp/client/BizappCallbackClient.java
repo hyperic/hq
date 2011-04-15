@@ -41,6 +41,7 @@ import org.hyperic.hq.operation.RegisterAgentResponse;
 import org.hyperic.hq.operation.rabbit.connection.ChannelException;
 import org.hyperic.hq.operation.rabbit.connection.ChannelTemplate;
 import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
+import org.hyperic.hq.operation.rabbit.util.Constants;
 import org.hyperic.hq.operation.rabbit.util.MessageConstants;
 import org.hyperic.lather.NullLatherValue;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -129,18 +130,18 @@ public class BizappCallbackClient extends AgentCallbackClient {
         Channel channel = template.createChannel();
 
         try {
-            //channel.exchangeDeclare("test.exchange", "topic", true, false, null);
+            channel.exchangeDeclare(Constants.TO_SERVER_EXCHANGE, "topic", true, false, null);
             String requestQueue = channel.queueDeclare("request", true, false, false, null).getQueue();
-            //channel.queueBind(queue, "test.exchange", "agent.request.*");
+            channel.queueBind(requestQueue, Constants.TO_SERVER_EXCHANGE, "request.*");
 
-            //channel.exchangeDeclare("test.exchange", "topic", true, false, null);
+            channel.exchangeDeclare(Constants.TO_AGENT_EXCHANGE, "topic", true, false, null);
             String responseQueue = channel.queueDeclare("response", true, false, false, null).getQueue();
-            //channel.queueBind(q, "test.exchange", "agent.response.*");
+            channel.queueBind(responseQueue, Constants.TO_AGENT_EXCHANGE, "response.*");
 
-            AMQP.BasicProperties bp = getBasicProperties(registerAgentRequest);
+           /* AMQP.BasicProperties bp = getBasicProperties(registerAgentRequest);
             String correlationId = bp.getCorrelationId();
-
-            channel.basicPublish("", requestQueue, bp, bytes);
+*/
+            channel.basicPublish(Constants.TO_SERVER_EXCHANGE, "request.register", null, bytes);
             System.out.println("\nagent sent=" + converter.write(registerAgentRequest));
 
             while (true) {

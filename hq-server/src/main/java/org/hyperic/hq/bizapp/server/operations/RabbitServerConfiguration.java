@@ -28,6 +28,7 @@ package org.hyperic.hq.bizapp.server.operations;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.ConnectionFactory;
 import org.hyperic.hq.operation.rabbit.connection.ChannelTemplate;
+import org.hyperic.hq.operation.rabbit.util.Constants;
 import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
@@ -52,19 +53,19 @@ public class RabbitServerConfiguration {
         ChannelTemplate template = new ChannelTemplate(new ConnectionFactory());
         Channel channel = template.createChannel();
         String requestQueue = null;
-                try {
-                    //channel.exchangeDeclare("test.exchange", "topic", true, false, null);
-                    requestQueue = channel.queueDeclare("request", true, false, false, null).getQueue();
-                    //channel.queueBind(queue, "", "request.*");
+        try {
+            channel.exchangeDeclare(Constants.TO_SERVER_EXCHANGE, "topic", true, false, null);
+            requestQueue = channel.queueDeclare("request", true, false, false, null).getQueue();
+            channel.queueBind(requestQueue, Constants.TO_SERVER_EXCHANGE, "request.*");
 
-                    //channel.exchangeDeclare("test.exchange", "topic", true, false, null);
-                    String responseQueue = channel.queueDeclare("response", true, false, false, null).getQueue();
-                    //channel.queueBind(q, "", "response.*");
+            channel.exchangeDeclare(Constants.TO_AGENT_EXCHANGE, "topic", true, false, null);
+            String responseQueue = channel.queueDeclare("response", true, false, false, null).getQueue();
+            channel.queueBind(responseQueue, Constants.TO_AGENT_EXCHANGE, "response.*");
 
 
         } catch (Exception e) {
             System.out.println(e.getCause());
-        }  finally {
+        } finally {
             template.releaseResources(channel);
         }
 
