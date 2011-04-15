@@ -42,11 +42,12 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.operation.Converter;
 import org.hyperic.hq.operation.OperationService;
 import org.hyperic.hq.operation.RegisterAgentRequest;
 import org.hyperic.hq.operation.RegisterAgentResponse;
-import org.hyperic.hq.operation.annotation.Operation;
 import org.hyperic.hq.operation.annotation.OperationEndpoint;
+import org.hyperic.hq.operation.rabbit.connection.ChannelCallback;
 import org.hyperic.hq.operation.rabbit.connection.ChannelException;
 import org.hyperic.hq.operation.rabbit.connection.ChannelTemplate;
 import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
@@ -98,58 +99,27 @@ public class RegisterAgentServiceImpl implements RegisterAgentService {
         this.serverOperationServiceValidator = serverOperationServiceValidator;
     }
 
-    public void handleMessage(Object registerAgent) {
-        JsonMappingConverter converter = new JsonMappingConverter();
 
-        RegisterAgentRequest req = (RegisterAgentRequest) converter.read(new String((byte[]) registerAgent), RegisterAgentRequest.class);
-        logger.info("received="+req);
+    //@Operation(operationName = Constants.OPERATION_NAME_AGENT_REGISTER_RESPONSE)
+    public void registerAgentRequest(Object o) throws AgentConnectionException, PermissionException {
+        final JsonMappingConverter converter = new JsonMappingConverter();
+        RegisterAgentRequest registerAgent = (RegisterAgentRequest) converter.read(new String((byte[]) o), RegisterAgentRequest.class);
+        logger.info("received=" + registerAgent);
 
-        ChannelTemplate template = new ChannelTemplate(new ConnectionFactory());
-        Channel channel = template.createChannel();
         try {
-
-            byte[] bytes = converter.write(new RegisterAgentResponse("token:" + "foo")).getBytes(MessageConstants.CHARSET);
-            channel.basicPublish(Constants.TO_AGENT_EXCHANGE, "response.register", MessageConstants.getBasicProperties(null), bytes);
-            logger.info("returning=foo");
-        } catch (IOException e) {
-            throw new ChannelException(e.getCause());
-        } finally {
-            template.releaseResources(channel);
-        }
-    }
-
-    @Operation(operationName = Constants.OPERATION_NAME_AGENT_REGISTER_RESPONSE)
-    public void registerAgentRequest(RegisterAgentRequest registerAgent) throws AgentConnectionException {
-        try {
-            this.serverOperationServiceValidator.checkUserCanManageAgent(registerAgent.getUsername(), registerAgent.getPassword(), "register", registerAgent.getAgentIp());
+            checkUserCanManageAgent(registerAgent);
         } catch (PermissionException e) {
-            throw new AgentConnectionException("Error creating agent", e);
+            throw new PermissionException();
         }
+        System.out.println("****************still going - bad");
 
-        String version = registerAgent.getVersion();
         boolean isNewTransportAgent = registerAgent.isNewTransportAgent();
         boolean unidirectional = registerAgent.isUnidirectional();
-
-        try {
-            this.serverOperationServiceValidator.checkUserCanManageAgent(registerAgent.getUsername(),
-                    registerAgent.getPassword(), "register", registerAgent.getAgentIp());
-        } catch (PermissionException e) {
-            throw new AgentConnectionException("Error creating agent", e);
-        }
-
-        try {
-            this.serverOperationServiceValidator.testAgentConn(registerAgent.getAgentIp(), registerAgent.getAgentPort(),
-                    registerAgent.getAuthToken(), isNewTransportAgent, unidirectional);
-        } catch (AgentConnectionException e) {
-            throw new AgentConnectionException("Error creating agent", e);
-        }
-
         boolean isOldAgentToken = true;
         String agentToken = registerAgent.getAgentToken();
 
-        if (agentToken == null) {
+        if (agentToken == null || agentToken.length() == 0) {
             agentToken = SecurityUtil.generateRandomToken();
-
             while (!agentManager.isAgentTokenUnique(agentToken)) {
                 agentToken = SecurityUtil.generateRandomToken();
             }
@@ -171,42 +141,14 @@ public class RegisterAgentServiceImpl implements RegisterAgentService {
                 // No platforms found, ignore
             }
 
-            logger.info("Found pre-existing agent during agent registration. " + "Updating agent information for "
-                    + registerAgent.getAgentIp() + ":" + registerAgent.getAgentPort() + "; new transport=" + isNewTransportAgent + "; unidirectional=" + unidirectional);
+            logger.info(new StringBuilder("Found pre-existing agent during agent registration. Updating agent information for ")
+                    .append(registerAgent.getAgentIp()).append(":").append(registerAgent.getAgentPort()).append(", new transport=")
+                    .append(isNewTransportAgent).append(", unidirectional=").append(unidirectional).toString());
 
-            if (isOldAgentToken) {
-                if (isNewTransportAgent) {
-                    this.agentManager.updateNewTransportAgent(agentToken, registerAgent.getAgentIp(),
-                            registerAgent.getAgentPort(), registerAgent.getAuthToken(), version, unidirectional);
-                } else {
-                    this.agentManager.updateLegacyAgent(agentToken, registerAgent.getAgentIp(),
-                            registerAgent.getAgentPort(), registerAgent.getAuthToken(), version);
-                }
-            } else {
-                if (isNewTransportAgent) {
-                    this.agentManager.updateNewTransportAgent(registerAgent.getAgentIp(), registerAgent.getAgentPort(),
-                            registerAgent.getAuthToken(), agentToken, version, unidirectional);
-                } else {
-                    this.agentManager.updateLegacyAgent(registerAgent.getAgentIp(), registerAgent.getAgentPort(),
-                            registerAgent.getAuthToken(), agentToken, version);
-                }
-            }
+            handleOldAgentToken(isOldAgentToken, isNewTransportAgent, registerAgent, agentToken, unidirectional);
+
         } catch (AgentNotFoundException exc) {
-            logger.info(new StringBuilder("Registering agent at ").append(registerAgent.getAgentIp()).append(":").append(registerAgent.getAgentPort())
-                    .append(" transport=").append(isNewTransportAgent).append(" unidirectional=" + unidirectional).toString());
-            try {
-                if (isNewTransportAgent) {
-                    this.agentManager.createNewTransportAgent(registerAgent.getAgentIp(), registerAgent.getAgentPort(),
-                            registerAgent.getAuthToken(), agentToken, version, unidirectional);
-                } else {
-                    this.agentManager.createLegacyAgent(registerAgent.getAgentIp(), registerAgent.getAgentPort(),
-                            registerAgent.getAuthToken(), agentToken, version);
-                }
-            } catch (AgentCreateException e) {
-                throw new AgentConnectionException("Error creating agent " + agentToken, e);
-            } catch (SystemException e) {
-                throw new AgentConnectionException("Error creating agent " + agentToken, e);
-            }
+            handleTransportAgent(isNewTransportAgent, registerAgent, agentToken, unidirectional);
         } catch (SystemException e) {
             throw new AgentConnectionException("Error updating agent " + agentToken, e);
         }
@@ -215,22 +157,73 @@ public class RegisterAgentServiceImpl implements RegisterAgentService {
             rescheduleMetrics(ids);
         }
 
+        temporarySend(new RegisterAgentResponse("token:" + agentToken), converter);
 
-        ChannelTemplate template = new ChannelTemplate(new ConnectionFactory());
-        Channel channel = template.createChannel();
-        try {
-            JsonMappingConverter converter = new JsonMappingConverter();
-            byte[] bytes = converter.write(new RegisterAgentResponse("token:" + agentToken)).getBytes(MessageConstants.CHARSET); 
-            channel.basicPublish(Constants.TO_AGENT_EXCHANGE, "register.agent.response", MessageConstants.DEFAULT_MESSAGE_PROPERTIES, bytes);
-            System.out.println(this + " returning=" + agentToken);
-        } catch (IOException e) {
-            throw new ChannelException(e.getCause());
-        } finally {
-            template.releaseResources(channel);
-        }
         //this.operationService.dispatch(Constants.OPERATION_NAME_AGENT_REGISTER_RESPONSE, new RegisterAgentResponse("token:" + agentToken));
     }
 
+    private void temporarySend(final RegisterAgentResponse response, final Converter<Object,String> converter) {
+        new ChannelTemplate(new ConnectionFactory()).execute(new ChannelCallback<Object>() {
+            public Object doInChannel(Channel channel) throws ChannelException {
+                try {
+                    String json = converter.write(response);
+                    byte[] bytes = json.getBytes(MessageConstants.CHARSET);
+                    channel.basicPublish(Constants.TO_AGENT_EXCHANGE, "response.register", MessageConstants.DEFAULT_MESSAGE_PROPERTIES, bytes);
+                    logger.info(this + " returned=" + json);
+                    return true;
+                } catch (IOException e) {
+                    throw new ChannelException("Could not bind queue to exchange", e);
+                }
+            }
+        });
+    }
+
+    private void handleTransportAgent(boolean isNewTransportAgent, RegisterAgentRequest registerAgent, String agentToken,
+                                      boolean unidirectional) throws AgentConnectionException {
+
+        logger.info(new StringBuilder("Registering agent at ").append(registerAgent.getAgentIp()).append(":")
+                .append(registerAgent.getAgentPort()).append(" transport=").append(isNewTransportAgent)
+                .append(" unidirectional=").append(unidirectional).toString());
+
+        try {
+            if (isNewTransportAgent) {
+                this.agentManager.createNewTransportAgent(registerAgent.getAgentIp(), registerAgent.getAgentPort(),
+                        registerAgent.getAuthToken(), agentToken, registerAgent.getVersion(), unidirectional);
+            } else {
+                this.agentManager.createLegacyAgent(registerAgent.getAgentIp(), registerAgent.getAgentPort(),
+                        registerAgent.getAuthToken(), agentToken, registerAgent.getVersion());
+            }
+        } catch (AgentCreateException e) {
+            throw new AgentConnectionException("Error creating agent " + agentToken, e);
+        }  
+    }
+
+    private void checkUserCanManageAgent(RegisterAgentRequest registerAgent) throws PermissionException {
+        this.serverOperationServiceValidator.checkUserCanManageAgent(registerAgent.getUsername(),
+                    registerAgent.getPassword(), "register", registerAgent.getAgentIp());
+    }
+     
+    private void handleOldAgentToken(boolean isOldAgentToken, boolean isNewTransportAgent, RegisterAgentRequest registerAgent,
+                                     String agentToken, boolean unidirectional) throws AgentNotFoundException {
+
+        if (isOldAgentToken) {
+            if (isNewTransportAgent) {
+                this.agentManager.updateNewTransportAgent(agentToken, registerAgent.getAgentIp(),
+                        registerAgent.getAgentPort(), registerAgent.getAuthToken(), registerAgent.getVersion(), unidirectional);
+            } else {
+                this.agentManager.updateLegacyAgent(agentToken, registerAgent.getAgentIp(),
+                        registerAgent.getAgentPort(), registerAgent.getAuthToken(), registerAgent.getVersion());
+            }
+        } else {
+            if (isNewTransportAgent) {
+                this.agentManager.updateNewTransportAgent(registerAgent.getAgentIp(), registerAgent.getAgentPort(),
+                        registerAgent.getAuthToken(), agentToken, registerAgent.getVersion(), unidirectional);
+            } else {
+                this.agentManager.updateLegacyAgent(registerAgent.getAgentIp(), registerAgent.getAgentPort(),
+                        registerAgent.getAuthToken(), agentToken, registerAgent.getVersion());
+            }
+        } 
+    }
 
     /**
      * Reschedule all metrics on a platform when it is started for the first

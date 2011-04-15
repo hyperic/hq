@@ -12,8 +12,6 @@ import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
 import org.springframework.beans.factory.DisposableBean;
 
-import javax.annotation.PostConstruct;
-
 /**
  * @author Helena Edelson
  */
@@ -39,7 +37,7 @@ public class RabbitMessageListenerContainer extends SimpleMessageListenerContain
         setMessageListener(new MessageListenerAdapter(endpoint));
     }
 
-    @PostConstruct   /* temporary */
+   // @PostConstruct   /* temporary */
     public void prepare() {
         ChannelTemplate template = new ChannelTemplate(new ConnectionFactory());
         Channel channel = template.createChannel();

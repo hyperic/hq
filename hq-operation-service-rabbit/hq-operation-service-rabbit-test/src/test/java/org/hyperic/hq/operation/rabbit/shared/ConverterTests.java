@@ -6,6 +6,8 @@ import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Helena Edelson
@@ -14,20 +16,20 @@ public class ConverterTests {
 
     private final JsonMappingConverter converter = new JsonMappingConverter();
 
+    private final RegisterAgentRequest registerAgentRequest =
+            new RegisterAgentRequest(null, "authTokenValue", "5.0", 1, this.agentIp, this.agentPort, "hqadmin", "hqadmin", false);
+
     private final String agentIp = "localhost";
 
     private final int agentPort = 7071;
 
     
     @Test
-    public void write() {
-        String json = this.converter.write(new RegisterAgentRequest("", "testAuth", "5.0", 1, this.agentIp, this.agentPort, "hqadmin", "hqadmin", false));
-
-        assertEquals("{\"authToken\":\"testAuth\",\"version\":\"5.0\",\"cpuCount\":1,\"agentIp\":\"localhost\",\"agentPort\":7071," +
-                "\"username\":\"hqadmin\",\"password\":\"hqadmin\",\"agentToken\":null,\"unidirectional\":false," +
-                "\"newTransportAgent\":false,\"operationName\":\"RegisterAgent\",\"ensureOrder\":true,\"byteaLists\":{}," +
-                "\"byteaVals\":{},\"stringVals\":{},\"intVals\":{},\"doubleVals\":{},\"longVals\":{},\"byteAVals\":{}," +
-                "\"objectVals\":{},\"stringLists\":{},\"intLists\":{},\"doubleLists\":{},\"byteALists\":{},\"objectLists\":{}}", json);
+    public void write() { 
+        assertEquals(this.converter.write(registerAgentRequest), "{\"agentToken\":null,\"authToken\":\"authTokenValue\",\"version\":\"5.0\",\"cpuCount\":1,\"agentIp\":\"localhost\",\"agentPort\":7071," +
+                "\"username\":\"hqadmin\",\"password\":\"hqadmin\",\"unidirectional\":false,\"newTransportAgent\":false,\"operationName\":\"RegisterAgentRequest\"," +
+                "\"ensureOrder\":true,\"byteaLists\":{},\"byteaVals\":{},\"stringVals\":{},\"intVals\":{},\"doubleVals\":{},\"longVals\":{},\"byteAVals\":{}," +
+                "\"objectVals\":{},\"stringLists\":{},\"intLists\":{},\"doubleLists\":{},\"byteALists\":{},\"objectLists\":{}}");
     }
 
     @Test
@@ -41,25 +43,17 @@ public class ConverterTests {
 
     @Test
     public void read() {
-        RegisterAgentRequest request = new RegisterAgentRequest("", "authTokenValue", "5.0", 1, this.agentIp, this.agentPort, "hqadmin", "hqadmin", false);
-
-        Object response = this.converter.read("{\"authToken\":\"authTokenValue\",\"version\":\"5.0\",\"cpuCount\":1,\"agentIp\":\"localhost\",\"agentPort\":7071," +
-                "\"username\":\"hqadmin\",\"password\":\"hqadmin\",\"agentToken\":null,\"unidirectional\":false," +
-                "\"newTransportAgent\":false,\"operationName\":\"RegisterAgent\",\"ensureOrder\":false,\"byteaLists\":{}," +
-                "\"byteaVals\":{},\"stringVals\":{},\"intVals\":{},\"doubleVals\":{},\"longVals\":{},\"byteAVals\":{}," +
-                "\"objectVals\":{},\"stringLists\":{},\"intLists\":{},\"doubleLists\":{},\"byteALists\":{}," +
-                "\"objectLists\":{}}", RegisterAgentRequest.class);
-
-        assertEquals(request,response);
+        Object response = this.converter.read(converter.write(registerAgentRequest), RegisterAgentRequest.class);
+        assertNotNull(response);
+        assertTrue(response instanceof RegisterAgentRequest);
     }
 
     @Test
     public void convertRegisterAgent() {
-        String json = this.converter.write(new RegisterAgentRequest(null, "authTokenValue", "5.0", 1, this.agentIp, this.agentPort, "hqadmin", "hqadmin", false));
-        assertEquals(json,"{\"agentToken\":null,\"authToken\":\"authTokenValue\",\"version\":\"5.0\",\"cpuCount\":1,\"agentIp\":\"localhost\",\"agentPort\":7071," +
-                "\"username\":\"hqadmin\",\"password\":\"hqadmin\",\"unidirectional\":false,\"newTransportAgent\":false,\"operationName\":\"RegisterAgentRequest\"," +
-                "\"ensureOrder\":true,\"byteaLists\":{},\"byteaVals\":{},\"stringVals\":{},\"intVals\":{},\"doubleVals\":{},\"longVals\":{},\"byteAVals\":{}," +
-                "\"objectVals\":{},\"stringLists\":{},\"intLists\":{},\"doubleLists\":{},\"byteALists\":{},\"objectLists\":{}}");
+        String json = this.converter.write(registerAgentRequest);
+        RegisterAgentRequest req = (RegisterAgentRequest) this.converter.read(json, RegisterAgentRequest.class); 
+        assertTrue(json.contains(req.getAuthToken()));
         RegisterAgentResponse response = (RegisterAgentResponse) this.converter.read(this.converter.write(new RegisterAgentResponse("agentTokenValue")), RegisterAgentResponse.class);
+        assertNotNull(response);
     }
 }

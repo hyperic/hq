@@ -50,10 +50,17 @@ public class LatherReplacementIntegrationTests extends BaseInfrastructureTest {
     }
 
     @Test
-    public void bizappRegisterAgent() throws AgentCallbackClientException, InterruptedException {
-        RegisterAgentResult result = this.bizappClient.registerAgent("", user, pass, "", host, port, "", 1, false, false);
+    public void bizappRegisterAgentSuccess() throws AgentCallbackClientException, InterruptedException {
+        RegisterAgentResult result = this.bizappClient.registerAgent(null, user, pass, "fooAuthToken", host, port, "", 1, false, false);
         assertNotNull(result.response);
         assertTrue(result.response.startsWith("token:"));
+    }
+
+    @Test
+    public void bizappRegisterAgentFail() throws AgentCallbackClientException, InterruptedException {
+        RegisterAgentResult error = this.bizappClient.registerAgent(null, "invalid", pass, "fooAuthToken", host, port, "", 1, false, false);
+        assertNotNull(error.response);
+        assertTrue(error.response.contains("Permission denied"));
     }
 
     // not migrated yet

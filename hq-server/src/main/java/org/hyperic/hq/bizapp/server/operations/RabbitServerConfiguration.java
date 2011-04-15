@@ -27,7 +27,10 @@ package org.hyperic.hq.bizapp.server.operations;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.ConnectionFactory;
+import org.hyperic.hq.operation.rabbit.connection.ChannelCallback;
+import org.hyperic.hq.operation.rabbit.connection.ChannelException;
 import org.hyperic.hq.operation.rabbit.connection.ChannelTemplate;
+import org.hyperic.hq.operation.rabbit.core.RabbitErrorHandler;
 import org.hyperic.hq.operation.rabbit.util.Constants;
 import org.springframework.amqp.rabbit.connection.SingleConnectionFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
@@ -35,6 +38,8 @@ import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.io.IOException;
 
 /**
  * @author Helena Edelson
@@ -46,32 +51,39 @@ public class RabbitServerConfiguration {
     private RegisterAgentService registerAgentService;
 
     @Autowired
+    private RabbitErrorHandler rabbitErrorHandler;
+
+    @Autowired
     private ConnectionFactory connectionFactory;
 
     @Bean
     public SimpleMessageListenerContainer registerAgentHandler() {
-        ChannelTemplate template = new ChannelTemplate(new ConnectionFactory());
-        Channel channel = template.createChannel();
-        String requestQueue = null;
-        try {
-            channel.exchangeDeclare(Constants.TO_SERVER_EXCHANGE, "topic", true, false, null);
-            requestQueue = channel.queueDeclare("request", true, false, false, null).getQueue();
-            channel.queueBind(requestQueue, Constants.TO_SERVER_EXCHANGE, "request.*");
+        MessageListenerAdapter adapter = new MessageListenerAdapter(registerAgentService);
+        adapter.setDefaultListenerMethod("registerAgentRequest");
 
-            channel.exchangeDeclare(Constants.TO_AGENT_EXCHANGE, "topic", true, false, null);
-            String responseQueue = channel.queueDeclare("response", true, false, false, null).getQueue();
-            channel.queueBind(responseQueue, Constants.TO_AGENT_EXCHANGE, "response.*");
+        final SimpleMessageListenerContainer mlc = new SimpleMessageListenerContainer(new SingleConnectionFactory());
+        mlc.setMessageListener(adapter);
+        mlc.setErrorHandler(rabbitErrorHandler);
+        
+        new ChannelTemplate(new ConnectionFactory()).execute(new ChannelCallback<Object>() {
+            public Object doInChannel(Channel channel) throws ChannelException {
+                try {
+                    channel.exchangeDeclare(Constants.TO_SERVER_EXCHANGE, "topic", true, false, null);
+                    String requestQueue = channel.queueDeclare("registerAgentRequest", true, false, false, null).getQueue();
+                    channel.queueBind(requestQueue, Constants.TO_SERVER_EXCHANGE, "request.*");
 
+                    channel.exchangeDeclare(Constants.TO_AGENT_EXCHANGE, "topic", true, false, null);
+                    String responseQueue = channel.queueDeclare("registerAgent", true, false, false, null).getQueue();
+                    channel.queueBind(responseQueue, Constants.TO_AGENT_EXCHANGE, "response.*");
 
-        } catch (Exception e) {
-            System.out.println(e.getCause());
-        } finally {
-            template.releaseResources(channel);
-        }
+                    mlc.setQueueName(requestQueue);
+                    return true;
+                } catch (IOException e) {
+                    throw new ChannelException("Could not bind queue to exchange", e);
+                }
+            }
+        });
 
-        SimpleMessageListenerContainer listener = new SimpleMessageListenerContainer(new SingleConnectionFactory());
-        listener.setMessageListener(new MessageListenerAdapter(registerAgentService));
-        listener.setQueueName(requestQueue);
-        return listener;
+        return mlc;
     }
 }

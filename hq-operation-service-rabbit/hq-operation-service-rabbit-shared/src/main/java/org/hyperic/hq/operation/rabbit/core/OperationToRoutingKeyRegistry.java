@@ -25,12 +25,13 @@
 package org.hyperic.hq.operation.rabbit.core;
 
 import com.rabbitmq.client.ConnectionFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.operation.OperationNotSupportedException;
 import org.hyperic.hq.operation.annotation.Operation;
 import org.hyperic.hq.operation.rabbit.connection.ChannelException;
 import org.hyperic.hq.operation.rabbit.util.Constants;
 import org.hyperic.hq.operation.rabbit.util.OperationToRoutingMapping;
-import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -51,9 +52,9 @@ import static org.hyperic.hq.operation.rabbit.util.BindingPatternConstants.OPERA
 @Component
 public class OperationToRoutingKeyRegistry implements RoutingRegistry {
 
+    private final Log logger = LogFactory.getLog(OperationToRoutingKeyRegistry.class);
+    
     private final Map<String, OperationToRoutingMapping> operationToRoutingKeyMappings = new ConcurrentHashMap<String, OperationToRoutingMapping>();
-
-    private final Map<String, SimpleMessageListenerContainer> handlerMappings = new ConcurrentHashMap<String, SimpleMessageListenerContainer>();
 
     private final BindingHandler bindingHandler;
 
@@ -71,24 +72,11 @@ public class OperationToRoutingKeyRegistry implements RoutingRegistry {
      */
     public void register(Operation operation) throws ChannelException {
         if (!this.operationToRoutingKeyMappings.containsKey(operation.operationName())) {
-            String queueName = this.bindingHandler.declareAndBind(operation);
-
+            String queueName = this.bindingHandler.declareAndBind(operation); 
             this.operationToRoutingKeyMappings.put(operation.operationName(),
                     new OperationToRoutingMapping(operation.exchangeName(), operation.value(), queueName, null));
         }
     }
-
-    /*public void registerHandler() { 
-        MessageListenerAdapter mla = new MessageListenerAdapter();
-        mla.setDefaultListenerMethod("registerAgentRequest");
-        mla.setDelegate(registerAgentService);
-        mla.setResponseExchange(Constants.TO_SERVER_AUTHENTICATED_EXCHANGE);
-        mla.setResponseRoutingKey(Constants.OPERATION_NAME_AGENT_REGISTER_RESPONSE);
-
-        SimpleMessageListenerContainer listener = new SimpleMessageListenerContainer(new SingleConnectionFactory());
-        listener.setMessageListener(mla);
-        listener.setQueueName("hq-agents.config");
-    }*/
  
     /**
      * Automatically handled by spring
@@ -111,11 +99,6 @@ public class OperationToRoutingKeyRegistry implements RoutingRegistry {
         return this.operationToRoutingKeyMappings.get(operationName);
     }
 
-    public SimpleMessageListenerContainer mapListener(String operationName) {
-        if (!this.handlerMappings.containsKey(operationName)) throw new OperationNotSupportedException(operationName);
-        return this.handlerMappings.get(operationName);
-    }
- 
     /**
      * agentToken = 1302212470776-5028906219606536735-6762208433280624914
      * hq-agents.agent-{agentToken}.operations.config.registration.request
@@ -143,11 +126,7 @@ public class OperationToRoutingKeyRegistry implements RoutingRegistry {
             return UUID.randomUUID().toString();
         }
     }
-
-    public Map<String, SimpleMessageListenerContainer> getHandlerMappings() {
-        return handlerMappings;
-    }
-
+ 
     private boolean validArguments(String operationName, String exchangeName, String value) {
         return operationName == null || exchangeName == null || value == null;
     }

@@ -37,7 +37,6 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.operation.Envelope;
 import org.hyperic.hq.operation.OperationService;
-import org.hyperic.hq.operation.annotation.Operation;
 import org.hyperic.hq.operation.rabbit.util.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -86,7 +85,7 @@ public class ServerOperationServiceValidator {
         }
     }
 
-   @Operation(operationName = Constants.OPERATION_NAME_SERVER_TO_AGENT_PING, exchangeName = Constants.TO_AGENT_AUTHENTICATED_EXCHANGE)
+   //@Operation(operationName = Constants.OPERATION_NAME_SERVER_TO_AGENT_PING, exchangeName = Constants.TO_AGENT_AUTHENTICATED_EXCHANGE)
    void testAgentConn(String agentIP, int agentPort, String authToken, boolean isNewTransportAgent, boolean unidirectional) throws AgentConnectionException {
        try {
            this.operationService.perform(new Envelope(Constants.OPERATION_NAME_SERVER_TO_AGENT_PING, authToken));

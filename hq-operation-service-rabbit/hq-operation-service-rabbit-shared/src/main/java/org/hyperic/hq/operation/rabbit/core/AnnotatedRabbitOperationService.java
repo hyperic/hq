@@ -25,6 +25,8 @@
 package org.hyperic.hq.operation.rabbit.core;
 
 import com.rabbitmq.client.ConnectionFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.operation.*;
 import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
 import org.hyperic.hq.operation.rabbit.util.OperationToRoutingMapping;
@@ -41,7 +43,9 @@ import java.lang.reflect.InvocationTargetException;
 @Component("operationService")
 public class AnnotatedRabbitOperationService implements OperationService, OperationDiscoverer {
 
-    private OperationMethodInvokingRegistry mappings;
+    private final Log logger = LogFactory.getLog(RabbitMessageListenerContainer.class);
+ 
+    private OperationMethodInvokingRegistry operationMethodInvokingRegistry;
  
     private RabbitTemplate rabbitTemplate;
 
@@ -57,7 +61,7 @@ public class AnnotatedRabbitOperationService implements OperationService, Operat
     public AnnotatedRabbitOperationService(ConnectionFactory connectionFactory, RoutingRegistry routingRegistry, Converter<Object, String> converter) {
         this.converter = converter != null ? converter : new JsonMappingConverter();
         this.rabbitTemplate = new SimpleRabbitTemplate(connectionFactory);
-        this.mappings = new OperationMethodInvokingRegistry(routingRegistry, converter);
+        this.operationMethodInvokingRegistry = new OperationMethodInvokingRegistry(routingRegistry, converter);
     }
   
     /**
@@ -66,7 +70,7 @@ public class AnnotatedRabbitOperationService implements OperationService, Operat
      * @throws OperationDiscoveryException
      */
     public void discover(Object candidate, Class<? extends Annotation> annotation) throws OperationDiscoveryException {
-        this.mappings.discover(candidate, annotation);
+        this.operationMethodInvokingRegistry.discover(candidate, annotation);
     }
 
     /**
@@ -75,12 +79,12 @@ public class AnnotatedRabbitOperationService implements OperationService, Operat
      * @throws OperationFailedException
      */
     public Object perform(Envelope envelope) throws OperationFailedException {
-        OperationToRoutingMapping mapping = this.mappings.routingRegistry.map(envelope.getOperationName());
+        OperationToRoutingMapping mapping = this.operationMethodInvokingRegistry.routingRegistry.map(envelope.getOperationName());
 
         try {
             return mapping.operationRequiresResponse() ?
-                    rabbitTemplate.sendAndReceive(mapping.getExchangeName(), mapping.getRoutingKey(), envelope)
-                        : rabbitTemplate.send(mapping.getExchangeName(), mapping.getRoutingKey(), envelope);
+                    this.rabbitTemplate.sendAndReceive(mapping.getExchangeName(), mapping.getRoutingKey(), envelope)
+                        : this.rabbitTemplate.send(mapping.getExchangeName(), mapping.getRoutingKey(), envelope);
 
         } catch (IOException e) {
             throw new OperationFailedException(e.getMessage(), e);
@@ -93,7 +97,7 @@ public class AnnotatedRabbitOperationService implements OperationService, Operat
      * @return
      */
     public Object dispatch(String operationName, Object data) throws OperationFailedException {
-        OperationMethodInvokingRegistry.MethodInvoker invoker = this.mappings.map(operationName);
+        OperationMethodInvokingRegistry.MethodInvoker invoker = this.operationMethodInvokingRegistry.map(operationName);
         Envelope envelope = new Envelope(operationName, this.converter.write(data));
 
         if (invoker.operationHasReturnType()) {
@@ -110,10 +114,10 @@ public class AnnotatedRabbitOperationService implements OperationService, Operat
      * @throws EnvelopeHandlingException
      */
     public void handle(Envelope envelope) throws EnvelopeHandlingException {
-        if (!this.mappings.operationMappings.containsKey(envelope.getOperationName()))
+        if (!this.operationMethodInvokingRegistry.operationMappings.containsKey(envelope.getOperationName()))
             throw new OperationNotSupportedException(envelope.getOperationName());
 
-        OperationMethodInvokingRegistry.MethodInvoker invoker = this.mappings.map(envelope.getOperationName());
+        OperationMethodInvokingRegistry.MethodInvoker invoker = this.operationMethodInvokingRegistry.map(envelope.getOperationName());
  
         try {
             Object response = invoker.invoke(envelope.getContent());
@@ -131,6 +135,6 @@ public class AnnotatedRabbitOperationService implements OperationService, Operat
     }
 
     public OperationMethodInvokingRegistry getMappings() {
-        return mappings;
+        return this.operationMethodInvokingRegistry;
     }
 }

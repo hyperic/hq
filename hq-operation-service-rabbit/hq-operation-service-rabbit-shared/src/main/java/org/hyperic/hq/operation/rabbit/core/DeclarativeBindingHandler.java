@@ -27,6 +27,8 @@ package org.hyperic.hq.operation.rabbit.core;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.ConnectionFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.operation.annotation.Operation;
 import org.hyperic.hq.operation.rabbit.connection.ChannelCallback;
 import org.hyperic.hq.operation.rabbit.connection.ChannelException;
@@ -42,7 +44,9 @@ import java.io.IOException;
  */
 @Component
 public class DeclarativeBindingHandler implements BindingHandler {
- 
+
+    private final Log logger = LogFactory.getLog(DeclarativeBindingHandler.class);
+    
     private final ChannelTemplate channelTemplate;
 
     private final Object monitor = new Object();
@@ -59,13 +63,13 @@ public class DeclarativeBindingHandler implements BindingHandler {
      */
     public String declareAndBind(final Operation operation) throws ChannelException {
         Channel channel = this.channelTemplate.createChannel();
-        String exchange = getExchangeType(operation.exchangeName());
+
         try {
             synchronized(monitor) {
-                channel.exchangeDeclare(exchange, Constants.SHARED_EXCHANGE_TYPE, true, false, null);
-                String queue = channel.queueDeclare().getQueue();
-                // TODO unique String queue = channel.queueDeclare(operation.operationName(), true, true, false, null).getQueue();
+                channel.exchangeDeclare(operation.exchangeName(), Constants.SHARED_EXCHANGE_TYPE, true, false, null); 
+                String queue = channel.queueDeclare(operation.operationName(), true, false, false, null).getQueue();
                 channel.queueBind(queue, operation.exchangeName(), operation.value());
+                logger.info("**successfully created and bound queue=" + queue + " to exchange=" + operation.exchangeName() + " with pattern=" + operation.value());
                 return queue;
             }
         } catch (IOException e) {
@@ -76,28 +80,37 @@ public class DeclarativeBindingHandler implements BindingHandler {
         //declareAndBind(operation.operationName(), operation.exchangeName(), operation.value());
     }
 
+    /*ChannelTemplate template = new ChannelTemplate(new ConnectionFactory());
+        Channel channel = template.createChannel();
+        String requestQueue = null;
+        try {
+            channel.exchangeDeclare(Constants.TO_SERVER_EXCHANGE, "topic", true, false, null);
+            requestQueue = channel.queueDeclare("request", true, false, false, null).getQueue();
+            channel.queueBind(requestQueue, Constants.TO_SERVER_EXCHANGE, "request.*");
+
+            channel.exchangeDeclare(Constants.TO_AGENT_EXCHANGE, "topic", true, false, null);
+            String responseQueue = channel.queueDeclare("response", true, false, false, null).getQueue();
+            channel.queueBind(responseQueue, Constants.TO_AGENT_EXCHANGE, "response.*");
+
+
+        } catch (Exception e) {
+            System.out.println(e.getCause());
+        } finally {
+            template.releaseResources(channel);
+        }*/
+
     public void declareAndBind(final String operationName, final String exchangeName, final String bindingPattern) throws ChannelException {
         this.channelTemplate.execute(new ChannelCallback<Object>() {
             public Object doInChannel(Channel channel) throws ChannelException {
                 try {
-                    String exchange = getExchangeType(exchangeName);
-                    channel.exchangeDeclare(exchange, Constants.SHARED_EXCHANGE_TYPE, true, false, null);
+                    channel.exchangeDeclare(exchangeName, Constants.SHARED_EXCHANGE_TYPE, true, false, null);
                     String queue = channel.queueDeclare(operationName, true, true, false, null).getQueue();
-                    channel.queueBind(queue, exchange, bindingPattern);
+                    channel.queueBind(queue, exchangeName, bindingPattern);
                     return true;
                 } catch (IOException e) {
                     throw new ChannelException("Could not bind queue to exchange", e);
                 }
             }
         });
-    }
-
-    /**
-     * If the exchangeType is null, returns the default, "topic"
-     * @param exchangeType direct, fanout, topic, header. Can be null.xxx
-     * @return String exchange type
-     */
-    private String getExchangeType(String exchangeType) {
-        return exchangeType != null ? exchangeType : Constants.SHARED_EXCHANGE_TYPE;
     }
 }

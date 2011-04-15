@@ -24,11 +24,15 @@
  */
 package org.hyperic.hq.operation.rabbit.core;
 
+import com.rabbitmq.client.ConnectionFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.operation.Converter;
 import org.hyperic.hq.operation.OperationDiscoveryException;
 import org.hyperic.hq.operation.OperationNotSupportedException;
 import org.hyperic.hq.operation.OperationRegistry;
 import org.hyperic.hq.operation.annotation.Operation;
+import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -44,21 +48,22 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component("operationDiscoverer")
 public class OperationMethodInvokingRegistry implements OperationRegistry {
 
-    /**
-     * Will consist of either dispatchers or endpoints
-     */
+    private final Log logger = LogFactory.getLog(OperationMethodInvokingRegistry.class);
+
     protected final Map<String, MethodInvoker> operationMappings = new ConcurrentHashMap<String, MethodInvoker>();
+
+    private final Map<String, RabbitMessageListenerContainer> endpointListeners = new ConcurrentHashMap<String, RabbitMessageListenerContainer>();
 
     protected final RoutingRegistry routingRegistry;
 
     protected final Converter<Object, String> converter;
- 
+
     @Autowired
     public OperationMethodInvokingRegistry(RoutingRegistry routingRegistry, Converter<Object, String> converter) {
         this.converter = converter;
         this.routingRegistry = routingRegistry;
     }
- 
+
     /**
      * Discovers, evaluates, validates and registers candidates.
      * @param candidate  the dispatcher candidate class
@@ -72,7 +77,6 @@ public class OperationMethodInvokingRegistry implements OperationRegistry {
             for (Method method : candidateClass.getDeclaredMethods()) {
                 if (method.isAnnotationPresent(Operation.class)) {
                     if (!method.isAccessible()) method.setAccessible(true);
-                    System.out.println("\n\n*****************discovered bean " + candidate + " has " + annotation);
                     register(method, candidate, annotation);
                 }
             }
@@ -89,7 +93,29 @@ public class OperationMethodInvokingRegistry implements OperationRegistry {
         if (!this.operationMappings.containsKey(method.getAnnotation(Operation.class).operationName())) {
             this.operationMappings.put(method.getAnnotation(Operation.class).operationName(), new MethodInvoker(method, candidate, this.converter));
             this.routingRegistry.register(method.getAnnotation(Operation.class));
-            System.out.println("\n\n*****************registered bean " + candidate + " has " + annotation);
+            //registerHandler(method, candidate); 
+            logger.info("**registered bean " + candidate + " has " + annotation);
+        }
+    }
+
+    /**
+     * Creates a queue for each operation, such as registerAgent.
+     * Creates an exchange and a binding pattern and binds queue to exchange with key.
+     * TODO add converter
+     * MessageListenerAdapter(Object delegate, MessageConverter messageConverter) {
+     * @param handlerMethod
+     * @param endpoint
+     */
+    private void registerHandler(Method handlerMethod, Object endpoint) {
+        String queueName = handlerMethod.getAnnotation(Operation.class).operationName();
+
+        if (!this.endpointListeners.containsKey(queueName)) {
+            MessageListenerAdapter adapter = new MessageListenerAdapter(endpoint);
+            adapter.setDefaultListenerMethod(handlerMethod.getName());
+
+            RabbitMessageListenerContainer mlc = new RabbitMessageListenerContainer(new ConnectionFactory(), endpoint, queueName);
+            mlc.setMessageListener(adapter);
+            mlc.setQueueName(queueName);
         }
     }
 
@@ -107,6 +133,15 @@ public class OperationMethodInvokingRegistry implements OperationRegistry {
 
     public Map<String, MethodInvoker> getOperationMappings() {
         return operationMappings;
+    }
+
+    public RabbitMessageListenerContainer mapListener(String operationName) {
+        if (!this.endpointListeners.containsKey(operationName)) throw new OperationNotSupportedException(operationName);
+        return this.endpointListeners.get(operationName);
+    }
+
+    public Map<String, RabbitMessageListenerContainer> getEndpointListeners() {
+        return endpointListeners;
     }
 
     /**
@@ -141,7 +176,7 @@ public class OperationMethodInvokingRegistry implements OperationRegistry {
             Object data = this.converter.read(content, this.method.getParameterTypes()[0]);
             return this.method.invoke(this.instance, data);
         }
-        
+
         public Object getReturnType() {
             return this.method.getReturnType();
         }
@@ -155,5 +190,5 @@ public class OperationMethodInvokingRegistry implements OperationRegistry {
             return new StringBuilder("operationName=").append(this.operationName).append(" method=").append(this.method)
                     .append(" instance=").append(this.instance).append(" converter=").append(this.converter).toString();
         }
-    } 
+    }
 }

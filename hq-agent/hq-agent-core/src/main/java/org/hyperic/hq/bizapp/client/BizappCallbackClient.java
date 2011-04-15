@@ -37,6 +37,7 @@ import org.hyperic.hq.bizapp.shared.lather.*;
 import org.hyperic.hq.operation.OperationService;
 import org.hyperic.hq.operation.RegisterAgentRequest;
 import org.hyperic.hq.operation.RegisterAgentResponse;
+import org.hyperic.hq.operation.rabbit.connection.ChannelCallback;
 import org.hyperic.hq.operation.rabbit.connection.ChannelException;
 import org.hyperic.hq.operation.rabbit.connection.ChannelTemplate;
 import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
@@ -113,21 +114,55 @@ public class BizappCallbackClient extends AgentCallbackClient {
     public RegisterAgentResult registerAgent(String oldAgentToken, String user, String pword, String authToken, String agentIP, int agentPort,
                                              String version, int cpuCount, boolean isNewTransportAgent, boolean unidirectional) throws AgentCallbackClientException {
 
-        RegisterAgentRequest registerAgentRequest;
+        RegisterAgentRequest registerAgent;
         if (oldAgentToken != null) {
-            registerAgentRequest = new RegisterAgentRequest(oldAgentToken, authToken, version, cpuCount, agentIP, agentPort, user, pword, unidirectional);
+            registerAgent = new RegisterAgentRequest(oldAgentToken, authToken, version, cpuCount, agentIP, agentPort, user, pword, unidirectional);
         } else {
-            registerAgentRequest = new RegisterAgentRequest(null, authToken, version, cpuCount, agentIP, agentPort, user, pword, unidirectional);
+            registerAgent = new RegisterAgentRequest(null, authToken, version, cpuCount, agentIP, agentPort, user, pword, unidirectional);
         }
 
+        final RegisterAgentRequest registerAgentRequest = registerAgent;
 
-        JsonMappingConverter converter = new JsonMappingConverter();
+        final JsonMappingConverter converter = new JsonMappingConverter();
         final byte[] bytes = converter.write(registerAgentRequest).getBytes(MessageConstants.CHARSET);
 
         ChannelTemplate template = new ChannelTemplate(new ConnectionFactory());
-        Channel channel = template.createChannel();
 
-        try {
+        return template.execute(new ChannelCallback<RegisterAgentResult>() {
+            public RegisterAgentResult doInChannel(Channel channel) throws ChannelException {
+                try {
+                    channel.exchangeDeclare(Constants.TO_SERVER_EXCHANGE, "topic", true, false, null);
+                    String requestQueue = channel.queueDeclare("request", true, false, false, null).getQueue();
+                    channel.queueBind(requestQueue, Constants.TO_SERVER_EXCHANGE, "request.*");
+
+                    channel.exchangeDeclare(Constants.TO_AGENT_EXCHANGE, "topic", true, false, null);
+                    String responseQueue = channel.queueDeclare("response", true, false, false, null).getQueue();
+                    channel.queueBind(responseQueue, Constants.TO_AGENT_EXCHANGE, "response.*");
+
+                    AMQP.BasicProperties bp = MessageConstants.getBasicProperties(registerAgentRequest);
+                    String correlationId = bp.getCorrelationId();
+
+                    channel.basicPublish(Constants.TO_SERVER_EXCHANGE, "request.register", bp, bytes);
+                    logger.info("agent sent=" + converter.write(registerAgentRequest));
+
+                    while (true) {
+                        GetResponse response = channel.basicGet(responseQueue, false);
+                        if (response != null && response.getBody() != null) {
+                            //if (response.getProps().getCorrelationId().equals(correlationId)) {
+                            RegisterAgentResponse resp = (RegisterAgentResponse) converter.read(new String(response.getBody()), RegisterAgentResponse.class);
+                            logger.info("agent received=" + resp + " with token=" + resp.getAgentToken());
+                            channel.basicAck(response.getEnvelope().getDeliveryTag(), false);
+                            return new RegisterAgentResult(resp.getAgentToken());
+                            //}
+                        }
+                    }
+                } catch (IOException e) {
+                    throw new ChannelException("Could not bind queue to exchange", e);
+                }
+            }
+        });
+
+       /* try {
             channel.exchangeDeclare(Constants.TO_SERVER_EXCHANGE, "topic", true, false, null);
             String requestQueue = channel.queueDeclare("request", true, false, false, null).getQueue();
             channel.queueBind(requestQueue, Constants.TO_SERVER_EXCHANGE, "request.*");
@@ -138,19 +173,19 @@ public class BizappCallbackClient extends AgentCallbackClient {
 
             AMQP.BasicProperties bp = MessageConstants.getBasicProperties(registerAgentRequest);
             String correlationId = bp.getCorrelationId();
-
+            System.out.println("set correlationId=" + correlationId);
             channel.basicPublish(Constants.TO_SERVER_EXCHANGE, "request.register", bp, bytes);
             logger.info("agent sent=" + converter.write(registerAgentRequest));
 
             while (true) {
                 GetResponse response = channel.basicGet(responseQueue, false);
                 if (response != null && response.getBody() != null) {
-                    if (response.getProps().getCorrelationId().equals(correlationId)) {  
-                        RegisterAgentResponse resp = (RegisterAgentResponse) converter.read(new String(response.getBody()), RegisterAgentResponse.class);
-                        logger.info("received=" + resp);
-                        channel.basicAck(response.getEnvelope().getDeliveryTag(), false);
-                        return new RegisterAgentResult(resp.getAgentToken());
-                    }
+                    //if (response.getProps().getCorrelationId().equals(correlationId)) {
+                    RegisterAgentResponse resp = (RegisterAgentResponse) converter.read(new String(response.getBody()), RegisterAgentResponse.class);
+                    logger.info("agent received=" + resp + " with token=" + resp.getAgentToken());
+                    channel.basicAck(response.getEnvelope().getDeliveryTag(), false);
+                    return new RegisterAgentResult(resp.getAgentToken());
+                    //}
                 }
             }
 
@@ -158,7 +193,7 @@ public class BizappCallbackClient extends AgentCallbackClient {
             throw new ChannelException(e.getCause());
         } finally {
             template.releaseResources(channel);
-        }
+        }*/
     }
 
     public String updateAgent(String agentToken, String user, String pword,
