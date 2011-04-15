@@ -129,7 +129,7 @@ function showEscRows(originalRequest) {
       td2.setAttribute("align", "left");
     }
     else {
-      td2.innerHTML = '<html:img page="/images/icon_right_arrow.gif" border="0" width="10" height="10" style="display:none;padding-right:5px;"/>' + '<a href="' + editEscUrl.replace("{escId}", schemes[i].id) + '" onclick="changeHighlight(this);">' + schemes[i].name.escapeHTML() + '</a>';
+      td2.innerHTML = '<html:img page="/images/icon_right_arrow.gif" border="0" width="10" height="10" style="display:none;padding-right:5px;"/>' + '<a href="' + unescape(editEscUrl).replace("{escId}", schemes[i].id) + '" onclick="changeHighlight(this);">' + schemes[i].name.escapeHTML() + '</a>';
 
       td2.setAttribute((document.all ? 'className' : 'class'), 'ListCell');
     }
@@ -139,7 +139,7 @@ function showEscRows(originalRequest) {
     td3.setAttribute('align', 'right');
 
     if (schemes.length > 1) {
-      	td3.innerHTML = '<a href="' + removeEscUrl.replace("{escId}", schemes[i].id) + '">' + hqDojo.byId('deleteBtn').innerHTML + '</a>';
+      	td3.innerHTML = '<a href="' + unescape(removeEscUrl).replace("{escId}", schemes[i].id) + '">' + hqDojo.byId('deleteBtn').innerHTML + '</a>';
     } else {
         td3.innerHTML="&nbsp;";
     }

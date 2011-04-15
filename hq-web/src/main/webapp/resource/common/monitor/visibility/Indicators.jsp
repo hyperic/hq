@@ -64,7 +64,7 @@
 			<c:param name="action" value="add"/>
 			<c:param name="addMetric" value="{addMetric}"/>
 		</c:url>
-	    var frameUrl = '${baseUrl}'.replace("{addMetric}", metric);
+	    var frameUrl = unescape('${baseUrl}').replace("{addMetric}", metric);
 	
 	    window.parent.frames[0].location = frameUrl;
 	}

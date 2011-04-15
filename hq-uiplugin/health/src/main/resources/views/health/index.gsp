@@ -341,7 +341,7 @@
   		}
     
 	  	hqDojo.xhrPost({
-    		url: '<%= urlFor(action:"getDiag") %>',
+    		url: '<%= urlFor(action:"getDiag", encodeUrl:true) %>',
     		handleAs: "json-comment-filtered",
 	    	content: {
     			diag: d
@@ -373,7 +373,7 @@
   		}
     
   		hqDojo.xhrPost({
-    		url: '<%= urlFor(action:"runQuery") %>',
+    		url: '<%= urlFor(action:"runQuery", encodeUrl:true) %>',
 	    	handleAs: "json-comment-filtered",
 	    	content: {
 	    		query: q
@@ -397,7 +397,7 @@
 	  	}
 	    
 	  	hqDojo.xhrPost({
-	    	url: '<%= urlFor(action:"executeQuery") %>',
+	    	url: '<%= urlFor(action:"executeQuery", encodeUrl:true) %>',
 	    	handleAs: "json-comment-filtered",
 	    	content: {
 	    		query: q

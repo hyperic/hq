@@ -45,7 +45,7 @@ var pageData = new Array();
 </c:url>
 <c:url var="editUrl" value="/resource/application/Inventory.do">
 	<c:param name="mode" value="editResource"/>
-	<c:param nam="rid" value="${Resource.id}"/>
+	<c:param name="rid" value="${Resource.id}"/>
 	<c:param name="type" value="${entityId.type}"/>
 </c:url>
 

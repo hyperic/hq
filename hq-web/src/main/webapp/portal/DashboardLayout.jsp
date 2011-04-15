@@ -49,7 +49,7 @@
 		var portletUrl = "<html:rewrite page="/app/dashboard/${selectedDashboardId}/portlets/{portletName}"/>";
 		
 	    hqDojo.xhrPost({
-	        url: portletUrl.replace("{portletName}", name),
+	        url: unescape(portletUrl).replace("{portletName}", name),
 	        content: {
 				_method: "DELETE"
 	        },
