@@ -39,8 +39,7 @@
     <name>Hyperic Operation Service Rabbit - Modules</name>
 
     <modules>
-        <module>hq-operation-service-rabbit-shared</module>
-        <module>hq-operation-service-rabbit-common</module> 
+        <module>hq-operation-service-rabbit-shared</module> 
         <module>hq-operation-service-rabbit-admin</module>
         <module>hq-operation-service-rabbit-installer</module>
         <module>hq-operation-service-rabbit-test</module>

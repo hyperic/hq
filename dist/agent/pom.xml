@@ -124,13 +124,6 @@
             <version>${project.version}</version>
             <classifier>agent</classifier>
 			<type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.hyperic.hq.operation.rabbit</groupId>
-            <artifactId>hq-operation-service-rabbit-common</artifactId>
-            <version>${project.version}</version>
-            <classifier>agent</classifier>
-			<type>zip</type>
         </dependency>  
 		<dependency>
 			<groupId>org.hyperic.hq.agent</groupId>

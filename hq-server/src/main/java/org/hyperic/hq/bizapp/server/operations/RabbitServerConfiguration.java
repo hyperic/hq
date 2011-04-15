@@ -69,17 +69,9 @@ public class RabbitServerConfiguration {
             template.releaseResources(channel);
         }
 
-        /*   MessageListenerAdapter mla = new MessageListenerAdapter();
-                mla.setDefaultListenerMethod("test");
-                mla.setDelegate(this);
-               mla.setResponseExchange(Constants.TO_AGENT_EXCHANGE);
-                mla.setResponseRoutingKey("register.agent.response");
-        */
         SimpleMessageListenerContainer listener = new SimpleMessageListenerContainer(new SingleConnectionFactory());
         listener.setMessageListener(new MessageListenerAdapter(registerAgentService));
         listener.setQueueName(requestQueue);
-        listener.afterPropertiesSet();
-        listener.start();
         return listener;
     }
 }

@@ -105,7 +105,7 @@ public class OperationServiceTests {
 
     @Test
     public void consumerTests() {
-        ListenerContainer listenerContainer = new ListenerContainer(this.connectionFactory, 5, this.taskExecutor, this.consumingCallbackFactory);
+        RabbitMessageListenerContainer listenerContainer = new RabbitMessageListenerContainer(this.connectionFactory, 5, this.taskExecutor, this.consumingCallbackFactory);
         System.out.println(listenerContainer);
     }
 }

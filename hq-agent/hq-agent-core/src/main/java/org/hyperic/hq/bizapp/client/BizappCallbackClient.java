@@ -49,6 +49,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 
 //@OperationDispatcher 
+
 @Component
 public class BizappCallbackClient extends AgentCallbackClient {
     private final Log logger = LogFactory.getLog(BizappCallbackClient.class);
@@ -144,15 +145,12 @@ public class BizappCallbackClient extends AgentCallbackClient {
             while (true) {
                 GetResponse response = channel.basicGet(responseQueue, false);
                 if (response != null && response.getBody() != null) {
-                    /* TODO configure to be true:
-                 if (response.getProps().getCorrelationId().equals(correlationId)) { }*/
-                    String json = new String(response.getBody());
-                    logger.info("agent received json response=" + json);
-
-                    RegisterAgentResponse resp = (RegisterAgentResponse) converter.read(json, RegisterAgentResponse.class);
-                    logger.info("received=" + resp);
-                    channel.basicAck(response.getEnvelope().getDeliveryTag(), false);
-                    return new RegisterAgentResult(resp.getAgentToken());
+                    if (response.getProps().getCorrelationId().equals(correlationId)) {  
+                        RegisterAgentResponse resp = (RegisterAgentResponse) converter.read(new String(response.getBody()), RegisterAgentResponse.class);
+                        logger.info("received=" + resp);
+                        channel.basicAck(response.getEnvelope().getDeliveryTag(), false);
+                        return new RegisterAgentResult(resp.getAgentToken());
+                    }
                 }
             }
 
@@ -160,7 +158,7 @@ public class BizappCallbackClient extends AgentCallbackClient {
             throw new ChannelException(e.getCause());
         } finally {
             template.releaseResources(channel);
-        } 
+        }
     }
 
     public String updateAgent(String agentToken, String user, String pword,

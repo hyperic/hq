@@ -37,7 +37,8 @@
             <useProjectArtifact>true</useProjectArtifact>
             <useTransitiveDependencies>false</useTransitiveDependencies>
             <includes>
-                <include>org.hyperic.hq.operation.rabbit:hq-operation-service-rabbit-common</include>
+                <include>org.hyperic.hq:hq-operations</include>
+                <include>org.hyperic.hq.rabbit:hq-operation-service</include>
                 <include>com.rabbitmq:amqp-client</include>
                 <include>commons-io:commons-io</include>
                 <include>org.springframework.amqp:spring-amqp</include>
