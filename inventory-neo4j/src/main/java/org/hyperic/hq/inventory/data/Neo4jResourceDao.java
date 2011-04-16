@@ -118,7 +118,9 @@ public class Neo4jResourceDao implements ResourceDao {
             }
             currentPosition++;
         }
-        return new PageImpl<Resource>(resources, pageInfo, indexHits.size());
+        Page<Resource> page = new PageImpl<Resource>(resources, pageInfo, indexHits.size());
+        indexHits.close();
+        return page;
     }
 
     // TODO Get rid of assumption that name is unique and use identifier
