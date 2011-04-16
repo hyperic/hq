@@ -12,7 +12,7 @@
     <version>4.6.0.BUILD-SNAPSHOT</version>
 
     <properties>
-        <hqapi.version>4.1.0.BUILD-SNAPSHOT</hqapi.version>
+        <hqapi.version>4.1.0</hqapi.version>
     </properties>
 
     <dependencies>
