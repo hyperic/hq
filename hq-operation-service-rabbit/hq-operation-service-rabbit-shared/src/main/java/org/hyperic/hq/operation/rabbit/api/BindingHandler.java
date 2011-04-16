@@ -22,27 +22,17 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-package org.hyperic.hq.operation.rabbit.core;
 
-import org.hyperic.hq.operation.annotation.Operation;
-import org.hyperic.hq.operation.rabbit.util.OperationToRoutingMapping;
+package org.hyperic.hq.operation.rabbit.api;
+
+import org.hyperic.hq.operation.rabbit.annotation.Operation;
+import org.hyperic.hq.operation.rabbit.connection.ChannelException;
 
 /**
  * @author Helena Edelson
  */
-public interface RoutingRegistry {
-  
-    /**
-     * Registers the routing mapping for the given operation
-     * @param operation The operation meta-data to map  
-     */
-    void register(Operation operation);
- 
-    /**
-     * Returns the routing data by operation name
-     * @param operationName The operation's name
-     * @return the specific mapping for a given operation
-     */
-    OperationToRoutingMapping map(String operationName);
+public interface BindingHandler {
 
+    String declareAndBind(String operationName, Operation operation) throws ChannelException;
+  
 }

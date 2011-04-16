@@ -31,15 +31,14 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.hyperic.hq.operation.rabbit.api.ChannelCallback;
+import org.hyperic.hq.operation.rabbit.api.ChannelOperations;
 
 import java.io.IOException;
 
 /**
  * @author Helena Edelson
- */
-@Component
+ */ 
 public final class ChannelTemplate implements ChannelOperations {
 
     private final Log logger = LogFactory.getLog(getClass());
@@ -52,8 +51,7 @@ public final class ChannelTemplate implements ChannelOperations {
     /**
      * Creates a new instance
      * @param connectionFactory {@link com.rabbitmq.client.ConnectionFactory}
-     */
-    @Autowired
+     */ 
     public ChannelTemplate(ConnectionFactory connectionFactory) {
         this.connectionFactory = connectionFactory; 
     }

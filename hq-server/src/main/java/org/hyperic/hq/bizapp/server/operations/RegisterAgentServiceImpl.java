@@ -42,12 +42,12 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.operation.Converter;
 import org.hyperic.hq.operation.OperationService;
 import org.hyperic.hq.operation.RegisterAgentRequest;
 import org.hyperic.hq.operation.RegisterAgentResponse;
-import org.hyperic.hq.operation.annotation.OperationEndpoint;
-import org.hyperic.hq.operation.rabbit.connection.ChannelCallback;
+import org.hyperic.hq.operation.rabbit.annotation.Operation;
+import org.hyperic.hq.operation.rabbit.annotation.OperationEndpoint;
+import org.hyperic.hq.operation.rabbit.api.ChannelCallback;
 import org.hyperic.hq.operation.rabbit.connection.ChannelException;
 import org.hyperic.hq.operation.rabbit.connection.ChannelTemplate;
 import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
@@ -100,10 +100,11 @@ public class RegisterAgentServiceImpl implements RegisterAgentService {
     }
 
 
-    //@Operation(operationName = Constants.OPERATION_NAME_AGENT_REGISTER_RESPONSE)
+    @Operation(exchangeName = Constants.TO_AGENT_EXCHANGE, routingKey = Constants.ROUTING_KEY_AGENT_REGISTER_RESPONSE, bindingPattern = "response.*")
     public void registerAgentRequest(Object o) throws AgentConnectionException, PermissionException {
-        final JsonMappingConverter converter = new JsonMappingConverter();
-        RegisterAgentRequest registerAgent = (RegisterAgentRequest) converter.read(new String((byte[]) o), RegisterAgentRequest.class);
+    
+        /* TODO, put converter in the listener */ 
+        RegisterAgentRequest registerAgent = (RegisterAgentRequest) new JsonMappingConverter().read(new String((byte[]) o), RegisterAgentRequest.class);
         logger.info("received=" + registerAgent);
 
         try {
@@ -111,7 +112,7 @@ public class RegisterAgentServiceImpl implements RegisterAgentService {
         } catch (PermissionException e) {
             throw new PermissionException();
         }
-        System.out.println("****************still going - bad");
+        
 
         boolean isNewTransportAgent = registerAgent.isNewTransportAgent();
         boolean unidirectional = registerAgent.isUnidirectional();
@@ -157,19 +158,19 @@ public class RegisterAgentServiceImpl implements RegisterAgentService {
             rescheduleMetrics(ids);
         }
 
-        temporarySend(new RegisterAgentResponse("token:" + agentToken), converter);
+    temporarySend(new RegisterAgentResponse("token:" + agentToken));
 
         //this.operationService.dispatch(Constants.OPERATION_NAME_AGENT_REGISTER_RESPONSE, new RegisterAgentResponse("token:" + agentToken));
     }
 
-    private void temporarySend(final RegisterAgentResponse response, final Converter<Object,String> converter) {
+    private void temporarySend(final RegisterAgentResponse response) {
         new ChannelTemplate(new ConnectionFactory()).execute(new ChannelCallback<Object>() {
             public Object doInChannel(Channel channel) throws ChannelException {
                 try {
-                    String json = converter.write(response);
+                    String json = new JsonMappingConverter().write(response);
                     byte[] bytes = json.getBytes(MessageConstants.CHARSET);
                     channel.basicPublish(Constants.TO_AGENT_EXCHANGE, "response.register", MessageConstants.DEFAULT_MESSAGE_PROPERTIES, bytes);
-                    logger.info(this + " returned=" + json);
+                    logger.info("returned=" + json);
                     return true;
                 } catch (IOException e) {
                     throw new ChannelException("Could not bind queue to exchange", e);
@@ -178,9 +179,9 @@ public class RegisterAgentServiceImpl implements RegisterAgentService {
         });
     }
 
+
     private void handleTransportAgent(boolean isNewTransportAgent, RegisterAgentRequest registerAgent, String agentToken,
                                       boolean unidirectional) throws AgentConnectionException {
-
         logger.info(new StringBuilder("Registering agent at ").append(registerAgent.getAgentIp()).append(":")
                 .append(registerAgent.getAgentPort()).append(" transport=").append(isNewTransportAgent)
                 .append(" unidirectional=").append(unidirectional).toString());
@@ -201,8 +202,7 @@ public class RegisterAgentServiceImpl implements RegisterAgentService {
     private void checkUserCanManageAgent(RegisterAgentRequest registerAgent) throws PermissionException {
         this.serverOperationServiceValidator.checkUserCanManageAgent(registerAgent.getUsername(),
                     registerAgent.getPassword(), "register", registerAgent.getAgentIp());
-    }
-     
+    } 
     private void handleOldAgentToken(boolean isOldAgentToken, boolean isNewTransportAgent, RegisterAgentRequest registerAgent,
                                      String agentToken, boolean unidirectional) throws AgentNotFoundException {
 
@@ -249,8 +249,7 @@ public class RegisterAgentServiceImpl implements RegisterAgentService {
                 }
             }
 
-            this.zeventManager.enqueueEvents(zevents);
-
+            this.zeventManager.enqueueEvents(zevents); 
         } catch (Exception e) {
             // Not fatal, the metrics will eventually be rescheduled...
             logger.error("Unable to refresh agent schedule", e);

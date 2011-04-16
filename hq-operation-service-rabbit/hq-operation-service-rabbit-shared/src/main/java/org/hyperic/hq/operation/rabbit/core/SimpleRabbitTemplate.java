@@ -29,10 +29,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.operation.AbstractOperation;
 import org.hyperic.hq.operation.Converter;
-import org.hyperic.hq.operation.rabbit.connection.ChannelCallback;
+import org.hyperic.hq.operation.rabbit.api.ChannelCallback;
+import org.hyperic.hq.operation.rabbit.api.RabbitTemplate;
 import org.hyperic.hq.operation.rabbit.connection.ChannelException;
 import org.hyperic.hq.operation.rabbit.connection.ChannelTemplate;
-import org.hyperic.hq.operation.rabbit.connection.SingleConnectionFactory;
 import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
 import org.hyperic.hq.operation.rabbit.util.Constants;
 import org.hyperic.hq.operation.rabbit.util.MessageConstants;
@@ -56,8 +56,6 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
 
     private final Object monitor = new Object();
 
-    protected final boolean usesNonGuestCredentials;
-
     protected Channel channel;
 
     private final String exchangeName;
@@ -67,14 +65,6 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
     protected String agentQueue;
 
     protected QueueingConsumer queueingConsumer;
-
-    /**
-     * Creates an instance with the default SingleConnectionFactory
-     * and guest credentials
-     */
-    public SimpleRabbitTemplate() {
-        this(new SingleConnectionFactory());
-    }
 
     /**
      * Creates a new instance that creates a connection and sends messages to a specific exchange
@@ -87,49 +77,35 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
 
     /**
      * Creates a new instance that creates a connection and sends messages to a specific exchange
-     * @param cf           ConnectionFactory used to create a connection
+     * @param connectionFactory           ConnectionFactory used to create a connection
      * @param exchangeName The exchange name to use. if null, uses the AMQP default
-     */ 
-    public SimpleRabbitTemplate(ConnectionFactory cf, String exchangeName) {
-        this.channelTemplate = new ChannelTemplate(cf);
-        this.converter = new JsonMappingConverter();
-        this.exchangeName = exchangeName;
-        this.usesNonGuestCredentials = !cf.getUsername().equals(Constants.GUEST_USER) && !cf.getPassword().equals(Constants.GUEST_USER);
-    }
-
-    /**
-     * Sends a message
-     * @param routingKey The routing key to use
-     * @param data       The data to send
-     * @throws java.io.IOException
      */
-    public void send(String routingKey, Object data) throws IOException {
-        send(this.exchangeName, routingKey, data);
+    public SimpleRabbitTemplate(ConnectionFactory connectionFactory, String exchangeName) {
+        this.channelTemplate = new ChannelTemplate(connectionFactory);
+        this.converter = new JsonMappingConverter();
+        this.exchangeName = exchangeName; 
     }
 
     /**
-     * this.converter.write(data).getBytes(MessageConstants.CHARSET);
      * @param exchangeName the exchange name to use
      * @param routingKey   The routing key to use
      * @param data         The data to send
-     * @throws IOException
      */
-    public Boolean send(final String exchangeName, final String routingKey, final Object data) throws IOException {
-        final byte[] bytes = this.converter.write(data).getBytes(MessageConstants.CHARSET);
-
+    public Boolean send(final String exchangeName, final String routingKey, final String data) throws ChannelException {
+        final byte[] bytes = data.getBytes(MessageConstants.CHARSET);
+ 
         synchronized (this.monitor) {
-            boolean success = this.channelTemplate.execute(new ChannelCallback<Boolean>() {
+            return this.channelTemplate.execute(new ChannelCallback<Boolean>() {
                 public Boolean doInChannel(Channel channel) throws ChannelException {
                     try {
                         channel.basicPublish(exchangeName, routingKey, MessageConstants.DEFAULT_MESSAGE_PROPERTIES, bytes);
-                        logger.debug("sent=" + data);
+                        logger.info("sent " + data + " to " + exchangeName + " with " + routingKey);
                         return true;
                     } catch (IOException e) {
-                        throw new ChannelException("Could not bind queue to exchange", e);
+                        throw new ChannelException("Could not send " + data + " to " + exchangeName + " with " + routingKey, e);
                     }
                 }
             });
-            return success;
         }
     }
 
@@ -141,7 +117,7 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
      * @return the response object
      * @throws IOException
      */
-    public Object sendAndReceive(String exchangeName, String routingKey, Object data) throws IOException {
+    public Object sendAndReceive(String exchangeName, String routingKey, String data) throws ChannelException {
         send(exchangeName, routingKey, data);
 
         AMQP.BasicProperties bp = getBasicProperties(data);
@@ -149,12 +125,16 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
 
         synchronized (monitor) {
             while (true) {
-                GetResponse response = channel.basicGet(agentQueue, false);
-                if (response != null && response.getProps().getCorrelationId().equals(correlationId)) {
-                    this.logger.debug("received=" + response);
-                    Object received = this.converter.read(new String(response.getBody()), Object.class);
-                    this.channel.basicAck(response.getEnvelope().getDeliveryTag(), false);
-                    return received;
+                try {
+                    GetResponse response = channel.basicGet(agentQueue, false);
+                    if (response != null && response.getProps().getCorrelationId().equals(correlationId)) {
+                        this.logger.debug("received=" + response);
+                        Object received = this.converter.read(new String(response.getBody()), Object.class);
+                        this.channel.basicAck(response.getEnvelope().getDeliveryTag(), false);
+                        return received;
+                    }
+                } catch (IOException e) {
+                    throw new ChannelException("Could not receive from" + agentQueue, e);
                 }
             }
         }

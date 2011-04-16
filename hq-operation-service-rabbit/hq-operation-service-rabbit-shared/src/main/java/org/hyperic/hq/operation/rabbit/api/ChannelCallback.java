@@ -23,18 +23,26 @@
  * USA.
  */
 
-package org.hyperic.hq.operation.rabbit.core;
+package org.hyperic.hq.operation.rabbit.api;
 
-import org.hyperic.hq.operation.annotation.Operation;
+import com.rabbitmq.client.Channel;
 import org.hyperic.hq.operation.rabbit.connection.ChannelException;
 
+import java.io.IOException;
+
 /**
+ * Callback interface allowing the user access to a {@link com.rabbitmq.client.Channel}.
+ * The lifecycle of a Channel, including creation and cleanup, is handled for the user. 
  * @author Helena Edelson
  */
-public interface BindingHandler {
+public interface ChannelCallback<T> {
 
-    String declareAndBind(Operation operation) throws ChannelException;
-
-    void declareAndBind(String operationName, String exchangeName, String bindingPattern) throws ChannelException;
-     
+    /**
+     * A {@link com.rabbitmq.client.Channel} to do some work.
+     * @param channel The channel to work with
+     * @return Any value that needs to be returned to the original caller
+     * @throws org.hyperic.hq.operation.rabbit.connection.ChannelException
+     * @throws java.io.IOException
+     */
+    T doInChannel(Channel channel) throws ChannelException, IOException;
 }

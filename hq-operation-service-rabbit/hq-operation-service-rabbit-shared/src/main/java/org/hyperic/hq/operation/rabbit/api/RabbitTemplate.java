@@ -1,8 +1,6 @@
-package org.hyperic.hq.operation.rabbit.core;
+package org.hyperic.hq.operation.rabbit.api;
 
 import org.hyperic.hq.operation.rabbit.connection.ChannelException;
-
-import java.io.IOException;
 
 /**
  * @author Helena Edelson
@@ -16,8 +14,9 @@ public interface RabbitTemplate {
      * @param data The data to send
      * @throws org.hyperic.hq.operation.rabbit.connection.ChannelException
      * if an error occurs during the send process. 
+     * @return if successful, returns true else returns false
      */
-    Boolean send(String exchangeName, String routingKey, Object data) throws ChannelException, IOException;
+    Boolean send(final String exchangeName, final String routingKey, final String data) throws ChannelException;
 
     /**
      * Sends a message and synchronously receives the response
@@ -26,7 +25,8 @@ public interface RabbitTemplate {
      * @param data The data to send
      * @throws org.hyperic.hq.operation.rabbit.connection.ChannelException
      * if an error occurs during the send process.
+     * @return the data returned from the response
      */
-    Object sendAndReceive(String exchangeName, String routingKey, Object data) throws ChannelException, IOException;
+    Object sendAndReceive(String exchangeName, String routingKey, String data) throws ChannelException;
     
 }

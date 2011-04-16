@@ -27,9 +27,9 @@
 package org.hyperic.hq.operation.rabbit.shared;
 
 import com.rabbitmq.client.ConnectionFactory;
-import org.hyperic.hq.operation.annotation.Operation;
-import org.hyperic.hq.operation.annotation.OperationDispatcher;
-import org.hyperic.hq.operation.annotation.OperationEndpoint;
+import org.hyperic.hq.operation.rabbit.annotation.Operation;
+import org.hyperic.hq.operation.rabbit.annotation.OperationDispatcher;
+import org.hyperic.hq.operation.rabbit.annotation.OperationEndpoint;
 import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
 import org.hyperic.hq.operation.rabbit.core.AnnotatedRabbitOperationService;
 import org.hyperic.hq.operation.rabbit.core.OperationToRoutingKeyRegistry;
@@ -50,7 +50,7 @@ public class AnnotationTests {
  
     @OperationDispatcher
     static class TestDispatcher {
-        @Operation(operationName = Constants.OPERATION_NAME_AGENT_REGISTER_REQUEST, exchangeName = Constants.TO_SERVER_EXCHANGE, value = Constants.OPERATION_NAME_AGENT_REGISTER_REQUEST)
+        @Operation(operationName = Constants.ROUTING_KEY_AGENT_REGISTER_REQUEST, exchangeName = Constants.TO_SERVER_EXCHANGE, value = Constants.ROUTING_KEY_AGENT_REGISTER_REQUEST)
         void register(Object data) {
             System.out.println("Invoked method=report with data=" + data);
         }
@@ -58,7 +58,7 @@ public class AnnotationTests {
 
     @OperationEndpoint
     static class TestEndpoint {
-        @Operation(operationName = Constants.OPERATION_NAME_AGENT_REGISTER_RESPONSE, exchangeName = Constants.TO_AGENT_EXCHANGE, value = Constants.OPERATION_NAME_AGENT_REGISTER_RESPONSE)
+        @Operation(operationName = Constants.ROUTING_KEY_AGENT_REGISTER_RESPONSE, exchangeName = Constants.TO_AGENT_EXCHANGE, value = Constants.ROUTING_KEY_AGENT_REGISTER_RESPONSE)
         void handle(Object data) {
             System.out.println("Invoked method=handle with data=" + data);
         }

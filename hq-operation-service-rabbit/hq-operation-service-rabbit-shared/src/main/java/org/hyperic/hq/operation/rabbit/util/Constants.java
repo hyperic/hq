@@ -30,42 +30,53 @@ package org.hyperic.hq.operation.rabbit.util;
  * @author Helena Edelson
  */
 public class Constants {
-    //authToken
-    public static final String OPERATION_REQUEST = ".request";
 
-    public static final String OPERATION_RESPONSE = ".response";
+    public static final String REQUEST = ".request";
 
-    public static final String OPERATION_NAME_GUEST_REQUEST = "hq.guest.request";
+    public static final String RESPONSE = ".response";
 
-    public static final String OPERATION_NAME_GUEST_RESPONSE = "hq.guest.response";
+    public static final String ROUTING_KEY_AGENT_GUEST_REQUEST = "hq.agent.guest" + REQUEST;
 
-    public static final String OPERATION_NAME_SERVER_TO_AGENT_PING = "hq.guest.request";
+    public static final String ROUTING_KEY_AGENT_GUEST_RESPONSE = "hq.agent.guest" + RESPONSE;
 
-    public static final String OPERATION_NAME_AGENT_REGISTER_REQUEST = "hq-agent.config.register.request";
+    public static final String ROUTING_KEY_SERVER_GUEST_REQUEST = "hq.server.guest" + RESPONSE;
 
-    public static final String OPERATION_NAME_AGENT_REGISTER_RESPONSE = "hq-agent.config.register.request";
-
-    public static final String OPERATION_NAME_METRICS_REPORT = "hq-agent.metrics.report";
-
-    public static final String OPERATION_NAME_AGENT_START = "start";
-
-    public static final String OPERATION_NAME_AGENT_RESTART = "restart";
-
-    public static final String OPERATION_NAME_AGENT_DIE = "die";
-
-    public static final String OPERATION_NAME_AGENT_UPGRADE = "upgrade";
-
-    public static final String OPERATION_NAME_GET_AGENT_BUNDLE = "getCurrentAgentBundle";
-
-    public static final String OPERATION_NAME_SEND_FILE = "agentSendFileData";
-
-    public static final String OPERATION_NAME_REMOVE_FILE = "agentRemoveFile";
+    public static final String ROUTING_KEY_SERVER_GUEST_RESPONSE = "hq.server.guest" + RESPONSE;
 
     /**
-     * TODO implement annotations to register operations automatically on startup
-     * @Operation(OPERATION_NAME_UPDATE_SOMETHING)
-     * Object someOperation(final Object request) {
+     * Allows monitoring to begin on hq.#
      */
+    public static final String ROUTING_KEY_PING_REQUEST = "hq.guest" + RESPONSE;
+
+    /**
+     * Allows monitoring to begin on hq.#
+     */
+    public static final String ROUTING_KEY_PING_RESPONSE = "hq.guest" + RESPONSE;
+
+    /**
+     * Allows monitoring on hq.agent.#, hq.agent.config.*, hq.*.config.register* etc
+     */
+    public static final String ROUTING_KEY_AGENT_REGISTER_REQUEST = "request.register"; //"hq.agent.config.register" + REQUEST;
+
+    public static final String ROUTING_KEY_AGENT_REGISTER_RESPONSE = "response.register"; //"hq.server.config.register" + RESPONSE;
+
+    public static final String ROUTING_KEY_AGENT_METRICS_REPORT = "hq.agent.metrics.report" + REQUEST;
+
+    public static final String ROUTING_KEY_AGENT_START = "start";
+
+    public static final String ROUTING_KEY_AGENT_RESTART = "restart";
+
+    public static final String ROUTING_KEY_AGENT_DIE = "die";
+
+    public static final String ROUTING_KEY_AGENT_UPGRADE = "upgrade";
+
+    public static final String ROUTING_KEY_GET_AGENT_BUNDLE = "getCurrentAgentBundle";
+
+    public static final String ROUTING_KEY_SEND_FILE = "agentSendFileData";
+
+    public static final String ROUTING_KEY_REMOVE_FILE = "agentRemoveFile";
+
+
     public static final String[] SERVER_OPERATIONS = {
             "metrics.report.response",
             "metrics.availability.response",
@@ -97,9 +108,6 @@ public class Constants {
             "plugin.track.remove.request"
     };
 
-    /**
-     * TODO implement annotations to register operations automatically on startup
-     */
     public static final String[] AGENT_OPERATIONS = {
             "metrics.report.request",
             "metrics.availability.request",
@@ -134,36 +142,44 @@ public class Constants {
     /**
      * Prefix for agent routings
      */
-    public static final String AGENT_ROUTING_KEY_PREFIX = "hq-agents.agent-";
+    public static final String AGENT_ROUTING_KEY_PREFIX = "hq.agent.";
+
     /**
      * Prefix for server routings
      */
-    public static final String SERVER_ROUTING_KEY_PREFIX = "hq-servers.server-";
+    public static final String SERVER_ROUTING_KEY_PREFIX = "hq.server.";
+
     /**
      * The exchange type for shared agent-server exchanges
      */
     public static final String SHARED_EXCHANGE_TYPE = "topic";
+
     /**
      * The default exchange
      */
     public static final String DEFAULT_EXCHANGE = "";
+
     /**
      * Exchange name to use to send to the server as guest
      * such as for a registration operation
      */
     public static final String TO_SERVER_EXCHANGE = "to.server.exchange";
+
     /**
      * Exchange name to use to send to the server as an authenticated agent
      */
     public static final String TO_SERVER_AUTHENTICATED_EXCHANGE = "to.server.authenticated.exchange";
+
     /**
      * Exchange name to use to send to an agent as guest
      */
     public static final String TO_AGENT_EXCHANGE = "to.agent.exchange";
+
     /**
      * Exchange name to use to send to an authenticated agent
      */
     public static final String TO_AGENT_AUTHENTICATED_EXCHANGE = "to.agent.authenticated.exchange";
+
 
     public static final String GUEST_USER = "guest";
 

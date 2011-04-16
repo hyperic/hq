@@ -23,12 +23,19 @@
  *  USA.
  *
  */
-package org.hyperic.hq.operation.annotation;
+package org.hyperic.hq.operation.rabbit.annotation;
 
 import java.lang.annotation.*;
 
-@Target({ElementType.TYPE})
+/**
+ * Marks a method parameter as a candidate message payload
+ * <p>
+ * Example: void foo(@Payload Object data) 
+ *
+ * @author Helena Edelson
+ */
+@Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface OperationDispatcher {
+public @interface OperationPayload {
 }

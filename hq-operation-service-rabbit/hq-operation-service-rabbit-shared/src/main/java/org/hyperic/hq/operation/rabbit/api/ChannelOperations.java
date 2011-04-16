@@ -23,7 +23,9 @@
  * USA.
  */
 
-package org.hyperic.hq.operation.rabbit.connection;
+package org.hyperic.hq.operation.rabbit.api;
+
+import org.hyperic.hq.operation.rabbit.api.ChannelCallback;
 
 /**
  * @author Helena Edelson

@@ -3,7 +3,7 @@ package org.hyperic.hq.operation;
 /**
  * @author Helena Edelson
  */
-public class OperationDiscoveryException extends RuntimeException {
+public class OperationDiscoveryException extends Exception {
 
     /**
      * Creates a chaining-aware instance

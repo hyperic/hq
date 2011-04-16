@@ -22,26 +22,28 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
+package org.hyperic.hq.operation.rabbit.api;
 
-package org.hyperic.hq.operation.rabbit.connection;
+import org.hyperic.hq.operation.rabbit.util.OperationToRoutingMapping;
 
-import com.rabbitmq.client.Channel;
-
-import java.io.IOException;
+import java.lang.reflect.Method;
 
 /**
- * Callback interface allowing the user access to a {@link com.rabbitmq.client.Channel}.
- * The lifecycle of a Channel, including creation and cleanup, is handled for the user. 
  * @author Helena Edelson
  */
-public interface ChannelCallback<T> {
-
+public interface RoutingRegistry {
+  
     /**
-     * A {@link com.rabbitmq.client.Channel} to do some work.
-     * @param channel The channel to work with
-     * @return Any value that needs to be returned to the original caller
-     * @throws ChannelException
-     * @throws java.io.IOException
+     * Registers the routing mapping for the given operation
+     * @param method The operation to map  
      */
-    T doInChannel(Channel channel) throws ChannelException, IOException;
+    void register(Method method);
+ 
+    /**
+     * Returns the routing data by operation name
+     * @param operationName The operation's name
+     * @return the specific mapping for a given operation
+     */
+    OperationToRoutingMapping map(String operationName);
+
 }

@@ -31,7 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.operation.Converter;
 import org.hyperic.hq.operation.RegisterAgentResponse;
-import org.hyperic.hq.operation.rabbit.connection.ChannelCallback;
+import org.hyperic.hq.operation.rabbit.api.ChannelCallback;
 import org.hyperic.hq.operation.rabbit.connection.ChannelException;
 import org.hyperic.hq.operation.rabbit.connection.ChannelTemplate;
 import org.hyperic.hq.operation.rabbit.util.Constants;
@@ -54,12 +54,12 @@ public class RabbitErrorHandler implements ErrorHandler {
 
     final Converter<Object, String> converter;
 
-    final ConnectionFactory connectionFactory;
+    final ChannelTemplate template;
 
     @Autowired
     public RabbitErrorHandler(ConnectionFactory connectionFactory, final Converter<Object, String> converter) {
         this.converter = converter;
-        this.connectionFactory = connectionFactory;
+        this.template = new ChannelTemplate(connectionFactory);
     }
 
     /**
@@ -73,18 +73,22 @@ public class RabbitErrorHandler implements ErrorHandler {
         logger.error("Error handler received=" + t.getCause());
 
         final String context = t.getCause().toString();
-        /* TODO  
-        * 1. It has to know or get the appropriate error to exchange mapping (create this)
-        * 2. It also has to get the routing key for this.
-        * 3. Much of this already exists, just needs  an error context addition */
 
         if (context.contains("BadCredentialsException")) {
             temporarySend(new RegisterAgentResponse("Permission denied"), Constants.TO_AGENT_EXCHANGE, "response.register");
+        } else if (t instanceof NullPointerException) {
+            //problem with the handler/converter
         }
     }
 
+    /**
+     * TODO route these to the operation service and remove this method.
+     * @param message
+     * @param exchangeName
+     * @param routingKey
+     */
     private void temporarySend(final Object message, final String exchangeName, final String routingKey) {
-        new ChannelTemplate(new ConnectionFactory()).execute(new ChannelCallback<Object>() {
+        this.template.execute(new ChannelCallback<Object>() {
             public Object doInChannel(Channel channel) throws ChannelException {
                 try {
                     String json = converter.write(message);

@@ -98,11 +98,11 @@ public final class Routings {
     }
 
     public String getOperationRequest() {
-        return Constants.OPERATION_REQUEST;
+        return Constants.REQUEST;
     }
 
     public String getOperationResponse() {
-        return Constants.OPERATION_RESPONSE;
+        return Constants.RESPONSE;
     }
 
     public String getOperationPrefix() {

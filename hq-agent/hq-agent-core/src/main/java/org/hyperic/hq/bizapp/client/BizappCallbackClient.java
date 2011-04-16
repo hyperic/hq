@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.bizapp.client;
 
-import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.GetResponse;
@@ -37,7 +36,8 @@ import org.hyperic.hq.bizapp.shared.lather.*;
 import org.hyperic.hq.operation.OperationService;
 import org.hyperic.hq.operation.RegisterAgentRequest;
 import org.hyperic.hq.operation.RegisterAgentResponse;
-import org.hyperic.hq.operation.rabbit.connection.ChannelCallback;
+import org.hyperic.hq.operation.rabbit.annotation.Operation;
+import org.hyperic.hq.operation.rabbit.api.ChannelCallback;
 import org.hyperic.hq.operation.rabbit.connection.ChannelException;
 import org.hyperic.hq.operation.rabbit.connection.ChannelTemplate;
 import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
@@ -111,6 +111,7 @@ public class BizappCallbackClient extends AgentCallbackClient {
      * @return The result containing the new agent token.
      */
     //@Operation(operationName = Constants.OPERATION_NAME_AGENT_REGISTER_REQUEST, exchangeName = Constants.TO_SERVER_EXCHANGE, value = Constants.OPERATION_NAME_AGENT_REGISTER_REQUEST)
+    @Operation(exchangeName = Constants.TO_SERVER_EXCHANGE, routingKey = Constants.ROUTING_KEY_AGENT_REGISTER_REQUEST, bindingPattern = "request.*")
     public RegisterAgentResult registerAgent(String oldAgentToken, String user, String pword, String authToken, String agentIP, int agentPort,
                                              String version, int cpuCount, boolean isNewTransportAgent, boolean unidirectional) throws AgentCallbackClientException {
 
@@ -126,6 +127,7 @@ public class BizappCallbackClient extends AgentCallbackClient {
         final JsonMappingConverter converter = new JsonMappingConverter();
         final byte[] bytes = converter.write(registerAgentRequest).getBytes(MessageConstants.CHARSET);
 
+        /* TODO convert this to automated framework for agent */
         ChannelTemplate template = new ChannelTemplate(new ConnectionFactory());
 
         return template.execute(new ChannelCallback<RegisterAgentResult>() {
@@ -139,10 +141,8 @@ public class BizappCallbackClient extends AgentCallbackClient {
                     String responseQueue = channel.queueDeclare("response", true, false, false, null).getQueue();
                     channel.queueBind(responseQueue, Constants.TO_AGENT_EXCHANGE, "response.*");
 
-                    AMQP.BasicProperties bp = MessageConstants.getBasicProperties(registerAgentRequest);
-                    String correlationId = bp.getCorrelationId();
-
-                    channel.basicPublish(Constants.TO_SERVER_EXCHANGE, "request.register", bp, bytes);
+                    channel.basicPublish(Constants.TO_SERVER_EXCHANGE, "request.register",
+                            MessageConstants.getBasicProperties(registerAgentRequest), bytes);
                     logger.info("agent sent=" + converter.write(registerAgentRequest));
 
                     while (true) {

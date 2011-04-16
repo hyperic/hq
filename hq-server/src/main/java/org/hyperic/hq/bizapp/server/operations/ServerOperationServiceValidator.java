@@ -35,7 +35,6 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.operation.Envelope;
 import org.hyperic.hq.operation.OperationService;
 import org.hyperic.hq.operation.rabbit.util.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,10 +84,11 @@ public class ServerOperationServiceValidator {
         }
     }
 
+    /* really this type of operation is no longer needed. */
    //@Operation(operationName = Constants.OPERATION_NAME_SERVER_TO_AGENT_PING, exchangeName = Constants.TO_AGENT_AUTHENTICATED_EXCHANGE)
    void testAgentConn(String agentIP, int agentPort, String authToken, boolean isNewTransportAgent, boolean unidirectional) throws AgentConnectionException {
        try {
-           this.operationService.perform(new Envelope(Constants.OPERATION_NAME_SERVER_TO_AGENT_PING, authToken));
+           this.operationService.perform(Constants.ROUTING_KEY_PING_REQUEST, authToken);
        } catch (RuntimeException e) {
            throw new AgentConnectionException(e.getMessage());
        }

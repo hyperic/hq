@@ -23,33 +23,25 @@
  *  USA.
  */
 
-package org.hyperic.hq.bizapp.server.operations;
+package org.hyperic.hq.operation.rabbit.api;
 
-import com.rabbitmq.client.ConnectionFactory;
-import org.hyperic.hq.operation.rabbit.core.RabbitErrorHandler;
-import org.hyperic.hq.operation.rabbit.core.RabbitMessageListenerContainer;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.hyperic.hq.operation.OperationFailedException;
+import org.hyperic.hq.operation.OperationRegistry;
 
 /**
- * temporary, prior to automation
+ * @author Helena Edelson
  */
-@Configuration
-public class RabbitServerConfiguration {
+public interface OperationDispatcherRegistry extends OperationRegistry {
 
-    @Autowired
-    private RegisterAgentService registerAgentService;
-
-    @Autowired
-    private RabbitErrorHandler rabbitErrorHandler;
-
-    @Autowired
-    private ConnectionFactory connectionFactory;
+    /**
+     * Dispatches data to the messaging system by operation name
+     * and data payload. Delegates handling to the OperationService.
+     * @param operationName the operation name
+     * @param data the data to send
+     * @return if the method has a return signature, the value after
+     * invocation is returned
+     * @throws org.hyperic.hq.operation.OperationFailedException
+     */
+    Object dispatch(String operationName, Object data) throws OperationFailedException;
  
-    @Bean
-    public RabbitMessageListenerContainer registerAgentListener() {
-        return new RabbitMessageListenerContainer(connectionFactory, registerAgentService,
-            "registerAgentRequest", rabbitErrorHandler);
-    }
 }

@@ -30,24 +30,14 @@ package org.hyperic.hq.operation;
 public interface OperationService {
 
     /**
-     * Perform an operation
-     * @param envelope The envelope with meta instructions and data
-     * @throws OperationFailedException
+     * Performs an operation by operation name
+     * Delegates handling to the RabbitTemplate for handling.
+     * @param operationName the operation name
+     * @param data the data to send
+     * @return if the method has a return signature, the value after
+     * invocation is returned
+     * @throws org.hyperic.hq.operation.OperationFailedException
      */
-    Object perform(Envelope envelope) throws OperationFailedException;
-
-    /**
-     * 
-     * @param operationName
-     * @param data
-     * @return
-     */
-    Object dispatch(String operationName, Object data);
-
-    /**
-     * Handle this envelope
-     * @param envelope The envelope to handle
-     */
-    void handle(Envelope envelope) throws EnvelopeHandlingException;
-   
+    Object perform(String operationName, Object data) throws OperationFailedException;
+ 
 }

@@ -24,14 +24,6 @@ public class LatherReplacementIntegrationTests extends BaseInfrastructureTest {
 
     private BizappCallbackClient bizappClient;
 
-    private AutoinventoryCallbackClient autoinventoryClient;
-
-    private ControlCallbackClient controlClient;
-
-    private MeasurementCallbackClient measurementClient;
-
-    private PlugininventoryCallbackClient pluginInventoryClient;
-
     private final String host = "localhost";
 
     private final String user = "hqadmin";
@@ -63,8 +55,15 @@ public class LatherReplacementIntegrationTests extends BaseInfrastructureTest {
         assertTrue(error.response.contains("Permission denied"));
     }
 
-    // not migrated yet
+    /* not migrated yet */
+    private AutoinventoryCallbackClient autoinventoryClient;
 
+    private ControlCallbackClient controlClient;
+
+    private MeasurementCallbackClient measurementClient;
+
+    private PlugininventoryCallbackClient pluginInventoryClient;
+    
     @Test
     public void bizappUserIsValid() throws AgentConfigException, AgentCallbackClientException, InterruptedException {
         assertTrue(bizappClient.userIsValid(user, pass));

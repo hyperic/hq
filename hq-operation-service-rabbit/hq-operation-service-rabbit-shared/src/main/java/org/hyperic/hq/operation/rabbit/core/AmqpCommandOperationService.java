@@ -83,7 +83,7 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
         try {
             client.restart();
         } catch (Exception e) {
-            handleException(e, Constants.OPERATION_NAME_AGENT_RESTART);
+            handleException(e, "restart");
         }
     }
 
@@ -91,7 +91,7 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
         try {
             client.die();
         } catch (Exception e) {
-            handleException(e, Constants.OPERATION_NAME_AGENT_DIE);
+            handleException(e, Constants.ROUTING_KEY_AGENT_DIE);
         }
     }
 
@@ -99,7 +99,7 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
         try {
             return client.getCurrentAgentBundle();
         } catch (Exception e) {
-            handleException(e, Constants.OPERATION_NAME_GET_AGENT_BUNDLE);
+            handleException(e, "getCurrentAgentBundle");
             return null;
         }
     }
@@ -108,7 +108,7 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
         try {
             return client.upgrade(tarFile, destination);
         } catch (Exception e) {
-            handleException(e, Constants.OPERATION_NAME_AGENT_UPGRADE);
+            handleException(e, "upgrade");
             return null;
         }
     }
@@ -117,7 +117,7 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
         try {
             return client.agentSendFileData(destFiles, streams);
         } catch (Exception e) {
-            handleException(e, Constants.OPERATION_NAME_SEND_FILE);
+            handleException(e, "agentSendFileData");
             return null;
         }
     }
@@ -126,7 +126,7 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
         try {
             return client.agentRemoveFile(files);
         } catch (Exception e) {
-            handleException(e, Constants.OPERATION_NAME_REMOVE_FILE);
+            handleException(e, "agentRemoveFile");
             return null;
         }
     }

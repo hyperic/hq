@@ -36,21 +36,23 @@ public class OperationToRoutingMapping {
 
     private final String routingKey;
 
+    /* the operation name */
     private final String queueName;
 
-    private final String replyTo;
+    private final boolean hasReturnType;
 
     /**
      * Creates an instance to cache in the registry
      * @param exchangeName the exchange name to use
      * @param routingKey the routing key to use
-     * @param replyTo the exchange to reply to; can be null of the operation is one-way
+     * @param queueName the method / operation name
+     * @param hasReturnType true if the method returns !void
      */
-    public OperationToRoutingMapping(String exchangeName, String routingKey, String queueName, String replyTo) {
+    public OperationToRoutingMapping(String exchangeName, String routingKey, String queueName, boolean hasReturnType) {
         this.exchangeName = exchangeName;
         this.routingKey = routingKey;
         this.queueName = queueName;
-        this.replyTo = replyTo;
+        this.hasReturnType = hasReturnType;
     }
 
     public String getExchangeName() {
@@ -59,10 +61,6 @@ public class OperationToRoutingMapping {
 
     public String getRoutingKey() {
         return routingKey;
-    }
-
-    public String getReplyTo() {
-        return replyTo;
     }
 
     public String getQueueName() {
@@ -74,11 +72,13 @@ public class OperationToRoutingMapping {
      * @return true if the endpoint returns data to the dispatcher
      */
     public boolean operationRequiresResponse() {
-        return this.replyTo != null;
+        return hasReturnType;
     }
 
     @Override
     public String toString() {
-        return new StringBuilder(this.exchangeName).append(" ").append(this.getRoutingKey()).append(" ").append(this.queueName).toString();
+        return new StringBuilder("exchangeName=").append(this.exchangeName).append(" routingKey=")
+                .append(this.getRoutingKey()).append(" queueName=").append(this.queueName)
+                    .append(" hasReturnType=").append(this.hasReturnType).toString();
     }
 }
