@@ -103,10 +103,11 @@ public class UIPluginDeployer implements ApplicationContextAware {
         }
 
         // Watch for plugin updates
-        DirWatcher _watcher = new DirWatcher(pluginDir, cb, Arrays.asList(plugins));
-        Thread _watcherThread = new Thread(_watcher);
-        _watcherThread.setDaemon(true);
-        _watcherThread.start();
+        //TODO re-enable after weirdness in perf env
+//        DirWatcher _watcher = new DirWatcher(pluginDir, cb, Arrays.asList(plugins));
+//        Thread _watcherThread = new Thread(_watcher);
+//        _watcherThread.setDaemon(true);
+//        _watcherThread.start();
         long end = System.currentTimeMillis();
         log.info("End init Plugins: " + new Date() + " - change in millis: " + (end - start));
     }

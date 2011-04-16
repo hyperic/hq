@@ -260,15 +260,16 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
             ProductPluginManager.setPdkPluginsDir(pluginDirs.get(0).getAbsolutePath());
         }
         productPluginManager.init();
-        FileWatcher fileWatcher = new FileWatcher();
-        fileWatcher.addFileEventListener(new ProductPluginFileEventListener());
+        //TODO re-enable after resolving weird behavior in perf env
+        //FileWatcher fileWatcher = new FileWatcher();
+        //fileWatcher.addFileEventListener(new ProductPluginFileEventListener());
         for(File pluginDir: this.pluginDirs) {
             initializePlugins(pluginDir);
-            fileWatcher.addDir(pluginDir.toString(), false);
+            //fileWatcher.addDir(pluginDir.toString(), false);
         }
-        if(!(pluginDirs.isEmpty())) {
-            fileWatcher.start();
-        }
+//        if(!(pluginDirs.isEmpty())) {
+//            fileWatcher.start();
+//        }
     }
 
     private void unpackJar(URL url, File destDir, String prefix) throws Exception {
@@ -379,11 +380,13 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
                 if (FileOperation.CREATED.equals(fileEvent.getOperation())) {
                     loadAndDeployPlugin(fileEvent.getFileDetails().getFile());
                 } else if (FileOperation.DELETED.equals(fileEvent.getOperation())) {
-                    undeployPlugin(fileEvent.getFileDetails().getFile());
+                    //TODO re-enable
+                    //undeployPlugin(fileEvent.getFileDetails().getFile());
                 } else if (FileOperation.UPDATED.equals(fileEvent.getOperation()) &&
                            !(pluginDirs.contains(fileEvent.getFileDetails().getFile()))) {
-                    undeployPlugin(fileEvent.getFileDetails().getFile());
-                    loadAndDeployPlugin(fileEvent.getFileDetails().getFile());
+                    //TODO re-enable
+                    //undeployPlugin(fileEvent.getFileDetails().getFile());
+                   // loadAndDeployPlugin(fileEvent.getFileDetails().getFile());
                 }
             } catch (Exception e) {
                 log.error("Error responding to plugin file event " + fileEvent + ".  Cause: " +
