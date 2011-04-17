@@ -375,8 +375,9 @@
 		        	containment:'viewEscalationUL',
 		            onUpdate: function() {
 		                var pars = "&id=" + id;
-		                var url = '<html:rewrite action="/escalation/updateEscalationOrder"/>?' + Sortable.serialize("viewEscalationUL") + pars;
-		                new Ajax.Request(url, {method: 'post', onFailure :reportError});
+		                var url = '<html:rewrite action="/escalation/updateEscalationOrder"/>';
+		                
+		                new Ajax.Request(url, {method: 'post', parameters: Sortable.serialize("viewEscalationUL") + pars, onFailure :reportError});
 		            },
 		            constraint: 'vertical'
 		    	});
@@ -894,7 +895,7 @@
 	}
 	
 	function removeAction(id) {
-	    var url = '<html:rewrite action="/escalation/removeAction.do"/>';
+	    var url = '<html:rewrite action="/escalation/removeAction"/>';
 	    var pars = "id=" + id;
 	    pars += "&EscId=" + hqDojo.byId('id').value;
 	

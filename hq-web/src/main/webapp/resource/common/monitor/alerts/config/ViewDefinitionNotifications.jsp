@@ -114,10 +114,22 @@
 	      				<tiles:insert definition=".toolbar.addToList">
 		  					<c:choose>
 		  						<c:when test="${not empty Resource}">
-		    						<tiles:put name="addToListUrl"><c:out value="/alerts/Config.do?mode=${addMode}&eid=${Resource.entityId.appdefKey}&ad=${alertDef.id}"/></tiles:put>
+		    						<tiles:put name="addToListUrl">
+		    							<html:rewrite action="/alerts/Config">
+		    								<html:param name="mode" value="${addMode}"/>
+		    								<html:param name="eid" value="${Resource.entityId.appdefKey}"/>
+		    								<html:param name="ad" value="${alertDef.id}"/>
+		    							</html:rewrite>
+		    						</tiles:put>
 		  						</c:when>
 		  						<c:otherwise>
-		    						<tiles:put name="addToListUrl"><c:out value="/alerts/Config.do?mode=${addMode}&aetid=${ResourceType.appdefTypeKey}&ad=${alertDef.id}"/></tiles:put>
+		    						<tiles:put name="addToListUrl">
+		    							<html:rewrite action="/alerts/Config">
+		    								<html:param name="mode" value="${addMode}"/>
+		    								<html:param name="eid" value="${ResourceType.appdefTypeKey}"/>
+		    								<html:param name="ad" value="${alertDef.id}"/>
+		    							</html:rewrite>
+		    						</tiles:put>
 		  						</c:otherwise>
 		  					</c:choose>
 		        			<tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>

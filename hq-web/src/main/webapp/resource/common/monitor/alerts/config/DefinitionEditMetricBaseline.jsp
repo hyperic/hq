@@ -37,7 +37,7 @@
 <tiles:importAttribute name="BaselineValue" ignore="true"/>
 <script src="<html:rewrite page="/js/schedule.js"/>" type="text/javascript"></script>
 <script  type="text/javascript">
-var imagePath="<html:rewrite page="/images/"/>";
+var imagePath="/images/";
 var jsPath="<html:rewrite page="/js/"/>";
 var cssPath="<html:rewrite page="/css/"/>";
 

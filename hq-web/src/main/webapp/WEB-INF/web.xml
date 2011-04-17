@@ -119,7 +119,7 @@
         </init-param>
 	</filter>
 
-    <!-- filter>
+    <filter>
 		<filter-name>csrf</filter-name>
 		<filter-class>org.hyperic.hq.web.filters.CsrfIgnoreAllGetsFilter</filter-class>
 		<init-param>
@@ -146,7 +146,7 @@
 		<servlet-name>JspRedirector</servlet-name>
 		<servlet-name>lather</servlet-name>
 		<url-pattern>*.jsp</url-pattern>
-	</filter-mapping -->
+	</filter-mapping>
 
 	<filter-mapping>
 		<filter-name>UrlRewriteFilter</filter-name>
