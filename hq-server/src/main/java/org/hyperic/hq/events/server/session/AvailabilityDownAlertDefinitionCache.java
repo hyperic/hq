@@ -29,8 +29,6 @@ import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -48,7 +46,7 @@ public class AvailabilityDownAlertDefinitionCache  {
         _cache = CacheManager.getInstance().getCache(CACHENAME);
     }
 
-    public Boolean get(AppdefEntityID key) {
+    public Boolean get(Integer key) {
         Element el = _cache.get(key);
         if (el != null) {
             return (Boolean) el.getObjectValue();
@@ -56,7 +54,7 @@ public class AvailabilityDownAlertDefinitionCache  {
         return null;
     }
 
-    public void put(AppdefEntityID key, Boolean value) {
+    public void put(Integer key, Boolean value) {
         Element el = new Element(key, value);
 
         synchronized (_cacheLock) {
@@ -74,7 +72,7 @@ public class AvailabilityDownAlertDefinitionCache  {
         return _cache.getSize();
     }
 
-    private void remove(AppdefEntityID key) {
+    private void remove(Integer key) {
         synchronized (_cacheLock) {
             _cache.remove(key);
         }
@@ -84,7 +82,7 @@ public class AvailabilityDownAlertDefinitionCache  {
          synchronized (_cacheLock) {
              if (isOkToRemove(def)) {
                  //TODO change above method sig
-                 remove(AppdefUtil.newAppdefEntityId(((ResourceAlertDefinition)def).getResource()));
+                 remove(((ResourceAlertDefinition)def).getResource());
              }
 
              //TODO was this for groups?
