@@ -81,6 +81,7 @@ import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -230,6 +231,7 @@ public class DataManagerImpl implements DataManager {
      * 
      * 
      */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public boolean addData(List<DataPoint> data) {
         if (shouldAbortDataInsertion(data)) {
             return true;
