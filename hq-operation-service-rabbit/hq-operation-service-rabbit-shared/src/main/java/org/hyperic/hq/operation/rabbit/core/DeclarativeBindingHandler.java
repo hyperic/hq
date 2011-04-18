@@ -66,17 +66,7 @@ public class DeclarativeBindingHandler implements BindingHandler {
                         channel.exchangeDeclare(operation.exchange(), MessageConstants.SHARED_EXCHANGE_TYPE, true, false, null);
                         String queueName = channel.queueDeclare(operationName, true, false, false, null).getQueue();
                         channel.queueBind(queueName, operation.exchange(), operation.binding());
-                        System.out.println("*************************created queue=" + queueName + " bound to exchange=" + operation.exchange() + " with pattern=" + operation.binding());
-
-                        //@Operation(exchange = "to.server", routingKey = "request.register", binding = "request.*")
-                        
-                        /*channel.exchangeDeclare("to.server", "topic", true, false, null);
-                        String requestQueue = channel.queueDeclare("registerAgentRequest", true, false, false, null).getQueue();
-                        channel.queueBind("registerAgentRequest", "to.server", "request.*");
-
-                        channel.exchangeDeclare("to.agent", "topic", true, false, null);
-                        String responseQueue = channel.queueDeclare("agent", true, false, false, null).getQueue();
-                        channel.queueBind("agent", "to.agent", "response.*");*/
+                        logger.info("\ncreated queue=" + queueName + " bound to exchange=" + operation.exchange() + " with pattern=" + operation.binding()); 
                         return queueName;
                     }
                 } catch (IOException e) {
