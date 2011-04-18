@@ -58,11 +58,8 @@
     	<td width="30%" class="BlockContent"><c:out value="${alertDef.name}"/>
 	    	<c:if test="${canViewResourceTypeAlertTemplate}">
 	    		<br/>
-	        	<html:link action="/alerts/Config">
-	        		<html:param name="mode" value="viewDefinition"/>
-	        		<html:param name="aetid" value="${Resource.appdefResourceTypeValue.appdefTypeKey}"/>
-	        		<html:param name="ad" value="${alertDef.parentId}"/>
-	        		<fmt:message key="alert.config.props.PB.ViewTypeDef"/>
+	        	<html:link page="/alerts/Config.do?mode=viewDefinition&aetid=${Resource.appdefResourceTypeValue.appdefTypeKey}&ad=${alertDef.parentId}">
+	          		<fmt:message key="alert.config.props.PB.ViewTypeDef"/>
 	        	</html:link>
 	  		</c:if>
 	    </td>

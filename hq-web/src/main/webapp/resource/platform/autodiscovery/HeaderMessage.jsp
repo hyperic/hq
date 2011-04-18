@@ -37,10 +37,7 @@
     <c:if test="${not empty AIPlatform}">
 	<tr valign="top">
       <td class="BlockLeftAlignLabel">
-      <html:link action="/resource/platform/AutoDiscovery" paramId="aiPid" paramName="AIPlatform" paramProperty="id">
-      	<html:param name="mode" value="results"/>
-		<fmt:message key="resource.autodiscovery.currentStatus.ViewResults"/>
-	  </html:link>
+      <html:link page="/resource/platform/AutoDiscovery.do?mode=results" paramId="aiPid" paramName="AIPlatform" paramProperty="id"><fmt:message key="resource.autodiscovery.currentStatus.ViewResults"/></html:link>
       </td>
     </tr>
     </c:if>

@@ -46,10 +46,8 @@
 	autoLogout = false;
 	
 	function removePortlet(name, label) {
-		var portletUrl = "<html:rewrite page="/app/dashboard/${selectedDashboardId}/portlets/{portletName}"/>";
-		
 	    hqDojo.xhrPost({
-	        url: unescape(portletUrl).replace("{portletName}", name),
+	        url: '/app/dashboard/<c:out value="${selectedDashboardId}" />/portlets/' + name,
 	        content: {
 				_method: "DELETE"
 	        },
@@ -141,9 +139,7 @@
 		refreshPortlets();
 	});
 </script>
-<html:link action="/Resource" linkName="viewResUrl" styleId="viewResUrl" style="display:none;">
-	<html:param name="eid" value="{eid}"/>
-</html:link>
+<html:link page="/Resource.do?eid=" linkName="viewResUrl" styleId="viewResUrl" style="display:none;"></html:link>
 
 <%
   String divStart;
@@ -300,8 +296,7 @@
 			               			handle: 'widgetHandle',
 			               			onUpdate: function() {
 			                    		hqDojo.xhrPost({
-			                        		url: "<html:rewrite action="/dashboard/ReorderPortlets"/>",
-			                        		postData: Sortable.serialize('<c:out value="narrowList_${narrow}"/>'),
+			                        		url: "<html:rewrite page="/dashboard/ReorderPortlets.do"/>?"+Sortable.serialize('<c:out value="narrowList_${narrow}"/>'),
 			                        		load: function(){ }
 			                    		});
 			                    	},

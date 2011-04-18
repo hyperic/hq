@@ -371,14 +371,7 @@ abstract class BaseController {
         }
         
         path = path.findAll{it}.join('/')
-		
-		def url = HtmlUtil.urlFor(opts + [absolute:path])
-		
-		if (opts.encodeUrl) {
-			url = invokeArgs.response.encodeURL(url)
-		}
-		
-		url
+        HtmlUtil.urlFor(opts + [absolute:path])
     }
     
     public String buttonTo(opts) {

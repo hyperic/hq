@@ -37,22 +37,10 @@
 		<tiles:insert definition=".toolbar.edit">
   			<c:choose>
     			<c:when test="${not empty param.aetid}">
-      				<tiles:put name="editUrl">
-      					<html:rewrite action="/alerts/Config">
-      						<html:param name="mode" value="editSyslogAction"/>
-      						<html:param name="aetid" value="${param.aetid}"/>
-      						<html:param name="ad" value="${alertDef.id}"/>
-      					</html:rewrite>
-      				</tiles:put>
+      				<tiles:put name="editUrl"><c:out value="/alerts/Config.do?mode=editSyslogAction&aetid=${param.aetid}&ad=${alertDef.id}"/></tiles:put>
     			</c:when>
     			<c:otherwise>
-      				<tiles:put name="editUrl">
-      					<html:rewrite action="/alerts/Config">
-      						<html:param name="mode" value="editSyslogAction"/>
-      						<html:param name="aetid" value="${Resource.entityId}"/>
-      						<html:param name="ad" value="${alertDef.id}"/>
-      					</html:rewrite>
-      				</tiles:put>
+      				<tiles:put name="editUrl"><c:out value="/alerts/Config.do?mode=editSyslogAction&eid=${Resource.entityId}&ad=${alertDef.id}"/></tiles:put>
     			</c:otherwise>
   			</c:choose>
 		</tiles:insert>

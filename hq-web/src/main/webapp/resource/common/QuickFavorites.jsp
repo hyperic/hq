@@ -35,18 +35,14 @@
 
 <c:choose>
   	<c:when test="${not hasMultipleDashboard && isFavorite}">
-    	<html:link action="/resource/common/QuickFavorites">
-    		<html:param name="eid" value="${resource.entityId.appdefKey}"/>
-    		<html:param name="mode" value="remove"/>
+    	<html:link page="/resource/common/QuickFavorites.do?eid=${resource.entityId.appdefKey}&mode=remove">
     		<fmt:message key="resource.common.quickFavorites.remove"/><html:img width="11" height="9" border="0" page="/images/title_arrow.gif"/>
     	</html:link>
   	</c:when> 
   	<c:otherwise>
   		<c:choose>
   			<c:when test="${not hasMultipleDashboard}">
-  				<html:link action="/resource/common/QuickFavorites">
-  					<html:param name="eid" value="${resource.entityId.appdefKey}"/>
-  					<html:param name="mode" value="add"/>
+  				<html:link page="/resource/common/QuickFavorites.do?eid=${resource.entityId.appdefKey}&mode=add">
     				<fmt:message key="resource.common.quickFavorites.add"/><html:img width="11" height="9" border="0" page="/images/title_arrow.gif"/>
     			</html:link>
     		</c:when>

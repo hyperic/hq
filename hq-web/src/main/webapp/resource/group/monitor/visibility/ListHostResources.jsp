@@ -57,11 +57,7 @@
       </li>
     <c:if test="${showHostPlatform}">
       <li><div class="BoldText"><fmt:message key="resource.common.monitor.visibility.HostPlatformTH"/></div>
-      <html:link action="/resource/platform/monitor/Visibility">
-      	<html:param name="mode" value="${param['mode']}"/>
-      	<html:param name="eid" value="${summary.parentResourceTypeId}:${summary.parentResourceId}"/>
-      	<c:out value="${summary.parentResourceName}" default="PARENT RESOURCE NAME NOT SET"/>
-      </html:link>
+      <html:link page="/resource/platform/monitor/Visibility.do?mode=${param['mode']}&eid=${summary.parentResourceTypeId}:${summary.parentResourceId}"><c:out value="${summary.parentResourceName}" default="PARENT RESOURCE NAME NOT SET"/></html:link>
     </c:if>
       <li><div class="BoldText"><fmt:message key="resource.common.monitor.visibility.USAGETH"/></div>
         <hq:metric metric="${summary.throughput}" unit="none"  defaultKey="common.value.notavail" />
@@ -97,10 +93,7 @@
 
     <c:forEach var="summary" items="${HostHealthSummaries}">
   <tr class="ListRow">
-  <c:url var="url" value="/resource/${summary.resourceEntityTypeName}/monitor/Visibility.do">
-  	<c:param name="mode" value="${mode}"/>
-  	<c:param name="eid" value="${summary.resourceTypeId}:${summary.resourceId}"/>
-  </c:url>
+  <c:url var="url" value="/resource/${summary.resourceEntityTypeName}/monitor/Visibility.do?mode=${mode}&eid=${summary.resourceTypeId}:${summary.resourceId}"/>
     <c:if test="${checkboxes}">
     <td class="ListCellCheckbox" width="3%"><html:multibox property="host" value="${summary.resourceTypeId}:${summary.resourceId}" styleClass="${listMembersName}"/></td>
     </c:if>

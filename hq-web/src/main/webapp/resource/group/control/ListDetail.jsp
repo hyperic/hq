@@ -51,10 +51,7 @@
 <c:set var="listSize" value="${request.listSize}"/>
 <c:set var="page" value="${hstDetailAttr}"/>
 <c:set var="widgetInstanceName" value="controlAction"/>
-<c:url var="fullReturnUrl" value="${returnUrl}">
-	<c:param name="rid" value="${Resource.id}"/>
-	<c:param name="type" value="${Resource.entityId.type}"/>
-</c:url>
+<c:set var="fullReturnUrl" value="${returnUrl}&rid=${Resource.id}&type=${Resource.entityId.type}"/>
 
 <script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
 <script  type="text/javascript">

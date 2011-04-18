@@ -292,15 +292,6 @@
     		description="SNMP Privacy Passphrase (v3 only)"
     		type="secret"
     		optional="true"/>    		
-
-    <option name="snmpRetries"
-    		description="SNMP Retries"
-    		optional="true"/>    		
-
-    <option name="snmpTimeout"
-    		description="SNMP Timeout"
-    		optional="true"/>    		
-
   </config>
 
   <!-- disabled by default, change to true for testing -->

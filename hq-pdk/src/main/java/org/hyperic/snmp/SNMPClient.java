@@ -56,9 +56,6 @@ public class SNMPClient {
 
     public static final String DEFAULT_PORT_STRING = String.valueOf(DEFAULT_PORT);
     public static final String DEFAULT_COMMUNITY = System.getProperty("snmp.defaultCommunity", "public");
-    
-    public static final String DEFAULT_RETRIES = "1";
-    public static final String DEFAULT_TIMEOUT = "1500";
 
     public static final String[] VALID_VERSIONS = { "v1", "v2c", "v3" };
 
@@ -73,8 +70,6 @@ public class SNMPClient {
     public static final String PROP_PRIV_TYPE = "snmpPrivacyType";
     public static final String PROP_PRIV_PASSPHRASE = "snmpPrivacyPassPhrase";
     public static final String PROP_SECURITY_CONTEXT = "snmpSecurityContext";
-    public static final String PROP_RETRIES = "snmpRetries";
-    public static final String PROP_TIMEOUT = "snmpTimeout";
 
     private static Log log = LogFactory.getLog(SNMPClient.class);
 
@@ -216,8 +211,6 @@ public class SNMPClient {
         String authpass = props.getProperty(PROP_PASSWORD, DEFAULT_PASSWORD);
         String privtype = props.getProperty(PROP_PRIV_TYPE, DEFAULT_PRIV_TYPE);
         String privpass = props.getProperty(PROP_PRIV_PASSPHRASE, DEFAULT_PASSWORD);
-        String retries = props.getProperty(PROP_RETRIES, DEFAULT_RETRIES);
-        String timeout = props.getProperty(PROP_TIMEOUT, DEFAULT_TIMEOUT);
 
         SNMPSession session = null;
 
@@ -225,8 +218,7 @@ public class SNMPClient {
                  version.hashCode() ^ community.hashCode() ^
                  transport.hashCode() ^ user.hashCode() ^
                  authtype.hashCode() ^ authpass.hashCode() ^
-                 privtype.hashCode() ^ privpass.hashCode() ^
-                 retries.hashCode() ^ timeout.hashCode();
+                 privtype.hashCode() ^ privpass.hashCode();
 
         synchronized (sessionCache) {
             session = (SNMPSession) sessionCache.get(id);
@@ -246,14 +238,14 @@ public class SNMPClient {
 
             case SNMPClient.VERSION_2C:
 
-                ((SNMPSession_v1) session).init(address, port, community, transport, retries, timeout);
+                ((SNMPSession_v1) session).init(address, port, community, transport);
 
                 break;
 
             case SNMPClient.VERSION_3:
 
                 ((SNMPSession_v3) session).init(address, port, transport, user, 
-                                                authtype, authpass, privtype, privpass, retries, timeout);
+                                                authtype, authpass, privtype, privpass);
 
                 break;
 

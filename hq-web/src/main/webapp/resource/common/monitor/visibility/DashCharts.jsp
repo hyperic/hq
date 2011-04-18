@@ -135,7 +135,7 @@ var indicatorCharts = new Array();
 		  "name" : "MyIndicatorChartsManager",
 		  "view" : "<c:out value="${IndicatorViewsForm.view}"/>",
 		  "eid" : "<c:out value="${eid}"/>",
-		  "baseUrl" : "/resource/common/monitor/visibility/IndicatorCharts.do",
+		  "baseUrl" : "<html:rewrite page="/resource/common/monitor/visibility/IndicatorCharts.do"/>",
 		  "displaySize" : <c:out value="${IndicatorViewsForm.displaySize}"/>
   };
 

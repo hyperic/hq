@@ -41,11 +41,7 @@ initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 serversWidgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 </script>
 
-<c:url var="listNewUrl" value="/resource/server/Inventory.do">
-	<c:param name="mode" value="new"/>
-	<c:param name="rid" value="${platform.id}"/>
-	<c:param name="type" value="${platform.entityId.type}"/>
-</c:url>
+<c:set var="listNewUrl" value="/resource/server/Inventory.do?mode=new&rid=${platform.id}&type=${platform.entityId.type}"/>
 
 <c:url var="fsAction" value="${selfAction}">
   <c:if test="${not empty param.pss}">

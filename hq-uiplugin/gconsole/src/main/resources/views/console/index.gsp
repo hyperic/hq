@@ -38,7 +38,7 @@ hqDojo.ready(function() {
 		hqDojo.byId('timeStatus').innerHTML = '... executing';
 		
 		hqDojo.xhrPost({
-    		url: "<%= urlFor(action:"execute", encodeUrl:true) %>",
+    		url: "<%= urlFor(action:"execute") %>",
 	    	handleAs: "json-comment-filtered",
     		content: {
         		code:   hqDojo.byId("code").value

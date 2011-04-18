@@ -31,26 +31,6 @@
 
 <tiles:importAttribute name="resource"/>
 
-<html:link action="/resource/platform/Inventory">
-	<html:param name="mode" value="edit"/>
-	<html:param name="rid" value="${resource.id}"/>
-	<html:param name="type" value="${resource.entityId.type}"/>
-	<fmt:message key="common.resource.link.Edit"/>
-	<html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/>
-</html:link><br/>
-	
-<html:link action="/resource/server/Inventory">
-	<html:param name="mode" value="new" />
-	<html:param name="rid" value="${resource.id}" />
-	<html:param name="type" value="${resource.entityId.type}"/>
-	<fmt:message key="resource.platform.inventory.NewServerLink"/>
-	<html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/>
-</html:link><br/>
-
-<html:link action="/resource/platform/AutoDiscovery">
-	<html:param name="mode" value="new"/>
-	<html:param name="rid" value="${resource.id}"/>
-	<html:param name="type" value="${resource.entityId.type}"/>
-	<fmt:message key="resource.platform.inventory.NewDiscoveryLink"/>
-	<html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/>
-</html:link>
+<html:link page="/resource/platform/Inventory.do?mode=edit&rid=${resource.id}&type=${resource.entityId.type}"><fmt:message key="common.resource.link.Edit"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link><br>
+<html:link page="/resource/server/Inventory.do?mode=new&rid=${resource.id}&type=${resource.entityId.type}"><fmt:message key="resource.platform.inventory.NewServerLink"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link><br>
+<html:link page="/resource/platform/AutoDiscovery.do?mode=new&rid=${resource.id}&type=${resource.entityId.type}"><fmt:message key="resource.platform.inventory.NewDiscoveryLink"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link>

@@ -3,7 +3,7 @@
 	document.navTabCat = "Admin";
 
 	function getSystemStats() {
-  		hqDojo.xhrGet({
+  		hqDojo.xhrPost({
     		url: '<%= urlFor(action:"getSystemStats") %>',
     		handleAs: "json-comment-filtered",
     		load: function(response, args) {
@@ -341,7 +341,7 @@
   		}
     
 	  	hqDojo.xhrPost({
-    		url: '<%= urlFor(action:"getDiag", encodeUrl:true) %>',
+    		url: '<%= urlFor(action:"getDiag") %>',
     		handleAs: "json-comment-filtered",
 	    	content: {
     			diag: d
@@ -373,7 +373,7 @@
   		}
     
   		hqDojo.xhrPost({
-    		url: '<%= urlFor(action:"runQuery", encodeUrl:true) %>',
+    		url: '<%= urlFor(action:"runQuery") %>',
 	    	handleAs: "json-comment-filtered",
 	    	content: {
 	    		query: q
@@ -397,7 +397,7 @@
 	  	}
 	    
 	  	hqDojo.xhrPost({
-	    	url: '<%= urlFor(action:"executeQuery", encodeUrl:true) %>',
+	    	url: '<%= urlFor(action:"executeQuery") %>',
 	    	handleAs: "json-comment-filtered",
 	    	content: {
 	    		query: q

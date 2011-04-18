@@ -34,24 +34,12 @@
 <table border="0"><tr><td class="LinkBox">
 
 <c:if test="${useroperations['createApplication']}">
-  <html:link action="/resource/application/Inventory">
-  	<html:param name="mode" value="new"/>
-  	<fmt:message key="resource.hub.NewApplicationLink"/>
-  	<html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/>
-  </html:link><br/>
+  <html:link page="/resource/application/Inventory.do?mode=new"><fmt:message key="resource.hub.NewApplicationLink"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link><br>
 </c:if>
 <%-- everyone can create groups --%>
-  <html:link action="/resource/group/Inventory">
-  	<html:param name="mode" value="new"/>
-  	<fmt:message key="resource.hub.NewGroupLink"/>
-  	<html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/>
-  </html:link><br/>
+  <html:link page="/resource/group/Inventory.do?mode=new"><fmt:message key="resource.hub.NewGroupLink"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link><br>
 <c:if test="${useroperations['createPlatform']}">
-  <html:link action="/resource/platform/Inventory">
-  	<html:param name="mode" value="new"/>
-  	<fmt:message key="resource.hub.NewPlatformLink"/>
-  	<html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/>
-  </html:link><br/>
+  <html:link page="/resource/platform/Inventory.do?mode=new"><fmt:message key="resource.hub.NewPlatformLink"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link><br>
 </c:if>
 
 </td></tr></table>

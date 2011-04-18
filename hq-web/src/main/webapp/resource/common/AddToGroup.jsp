@@ -34,7 +34,7 @@
 <tiles:importAttribute name="resource" ignore="true" />
 
 <div id="add_to_existing_group_dialog" style="display:none;">
-    <form name="AddToExistingGroupForm" action="<html:rewrite action="/resource/hub/RemoveResource"/>" method="post" onsubmit="return false;">
+    <form name="AddToExistingGroupForm" action="" onsubmit="return false;">
 	<input type="hidden" name="eid" value="<c:if test="${not empty resource.entityId}"><c:out value="${resource.entityId}"/></c:if>" />
 	<div id="AddToExistingGroupStatus" style="display:none"></div>
 	<div id="AddToExistingGroupDiv" style="width:500px; height:300px;">
@@ -82,8 +82,7 @@
     var MyGroupManager = null;
     hqDojo.ready(function(){
     	MyGroupManager = new hyperic.group_manager({
-			associationsUrl: "<html:rewrite page="/app/resource/associations"/>",
-			postUrl:"<html:rewrite page="/app/resource/association"/>"
+			url: "/app/resource/"
     	});
     });
 

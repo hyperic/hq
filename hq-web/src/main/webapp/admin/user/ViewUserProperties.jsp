@@ -75,11 +75,9 @@
   <c:otherwise>
     <td width="20%" class="BlockLabel"><fmt:message key="common.label.Password"/></td>
     <td width="30%" class="BlockContent">
-     	<html:link action="/admin/user/UserAdmin">
-     		<html:param name="mode" value="editPass"/>
-     		<html:param name="u" value="${User.id}"/>
-      		<fmt:message key="admin.user.generalProperties.Change"/>
-     	</html:link>
+     <html:link page="/admin/user/UserAdmin.do?mode=editPass&u=${User.id}">
+      <fmt:message key="admin.user.generalProperties.Change"/>
+     </html:link>
     </td>
   </c:otherwise>
 </c:choose>
@@ -106,13 +104,10 @@
 
 <!--  GENERAL PROPERTIES TOOLBAR -->
 <c:if test="${webUser.id == User.id || useroperations['modifySubject']}">
-	<c:url var="editAction" value="/admin/user/UserAdmin.do">
-		<c:param name="mode" value="edit" />
-	</c:url>
-	<tiles:insert definition=".toolbar.edit">
-  		<tiles:put name="editUrl" beanName="editAction"/>
-  		<tiles:put name="editParamName" value="u"/>
-  		<tiles:put name="editParamValue" beanName="User" beanProperty="id"/>
-	</tiles:insert>
+<tiles:insert definition=".toolbar.edit">
+  <tiles:put name="editUrl" value="/admin/user/UserAdmin.do?mode=edit"/>
+  <tiles:put name="editParamName" value="u"/>
+  <tiles:put name="editParamValue" beanName="User" beanProperty="id"/>
+</tiles:insert>
 </c:if>
 <br>

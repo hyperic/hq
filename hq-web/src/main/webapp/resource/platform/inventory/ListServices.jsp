@@ -41,17 +41,10 @@
 
 <c:choose>
   <c:when test="${empty ctype}">
-    <c:url var="newServiceUrl" value="/resource/service/Inventory.do">
-    	<c:param name="mode" value="new"/>
-    	<c:param name="eid" value="${Resource.entityId.type}:${Resource.id}"/>
-    </c:url>
+    <c:set var="newServiceUrl" value="/resource/service/Inventory.do?mode=new&eid=${Resource.entityId.type}:${Resource.id}" />
   </c:when>
   <c:otherwise>
-    <c:url var="newServiceUrl" value="/resource/service/Inventory.do">
-    	<c:param name="mode" value="new"/>
-    	<c:param name="ctype" value="${ctype}"/>
-    	<c:param name="eid" value="${Resource.entityId.type}:${Resource.id}"/>
-    </c:url>
+    <c:set var="newServiceUrl" value="/resource/service/Inventory.do?mode=new&eid=${Resource.entityId.type}:${Resource.id}&ctype=${ctype}" />
   </c:otherwise>
 </c:choose>
 

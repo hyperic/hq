@@ -81,7 +81,7 @@ class HealthController
             },
             defaultSort: AgentSortField.CTIME,
             defaultSortOrder: 1,
-            rowId: {it.agent.id},
+            rowId: {it.id},
             columns: [
                 [field: [getValue: {localeBundle.fqdn},
                  description:'fqdn', sortable:false], 

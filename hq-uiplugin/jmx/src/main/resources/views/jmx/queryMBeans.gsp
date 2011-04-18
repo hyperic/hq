@@ -15,7 +15,7 @@ function invoke(id, name, op) {
         params["args"] = args.value;
     }
     hqDojo.xhrPost({
-      	url:  '/<%= urlFor(action:"invoke", encodeUrl:true) %>',
+      	url:  '/<%= urlFor(action:"invoke") %>',
       	handleAs: "json-comment-filtered",
       	content: params,
       	load:  function(response, args) {

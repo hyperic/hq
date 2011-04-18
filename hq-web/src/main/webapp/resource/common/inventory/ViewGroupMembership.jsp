@@ -44,11 +44,7 @@ initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 groupsWidgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 </script>
 
-<c:url var="addToListUrl" value="/resource/${resource.entityId.typeName}/Inventory.do">
-	<c:param name="mode" value="addGroups"/>
-	<c:param name="rid" value="${resource.id}"/>
-	<c:param name="type" value="${resource.entityId.type}"/>
-</c:url>
+<c:set var="addToListUrl" value="/resource/${resource.entityId.typeName}/Inventory.do?mode=addGroups&rid=${resource.id}&type=${resource.entityId.type}"/>
 
 <c:url var="psgAction" value="${selfAction}">
   <c:if test="${not empty param.png}">

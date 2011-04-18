@@ -116,11 +116,8 @@ function skipResources() {
           <tr class="ListRow">
             <td class="ListCell" nowrap="nowrap"><html:radio property="platformsToProcess" value="${resource.id}"/></td>
             <td colspan="2" class="ListCell">
-              	<html:link action="/resource/platform/AutoDiscovery">
-              		<html:param name="mode" value="results"/>
-              		<html:param name="aiPid" value="${resource.id}"/>
-                	${resource.name}
-              	</html:link>
+              <html:link page="/resource/platform/AutoDiscovery.do?mode=results&aiPid=${resource.id}">
+                <c:out value="${resource.name}"/></html:link>
                 <c:choose>
                   <c:when test="${empty resource.description}">
                   - <c:out value="${resource.platformTypeName}"/>

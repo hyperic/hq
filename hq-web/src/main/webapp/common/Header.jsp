@@ -36,7 +36,7 @@
     function getUpdateStatus(opt) {
         if (opt == "<fmt:message key="header.Acknowledge"/>") {
         	var postData = { update: true};
-            var updateUrl = '<html:rewrite action="/Dashboard"/>';
+            var updateUrl = 'Dashboard.do?';
             hqDojo.xhrPost({
          	 	url: updateUrl,
          	 	content: postData,
@@ -203,10 +203,8 @@
         <fmt:message key="header.Welcome"/>
          <c:choose>
             <c:when test="${useroperations['viewSubject']}">
-                <html:link action="/admin/user/UserAdmin">
-                	<html:param name="mode" value="view"/>
-                	<html:param name="u" value="${sessionScope.webUser.id}"/>
-                    ${sessionScope.webUser.firstName}
+                <html:link page="/admin/user/UserAdmin.do?mode=view&u=${sessionScope.webUser.id}">
+                    <c:out value="${sessionScope.webUser.firstName}"/>
                 </html:link>
             </c:when>
             <c:otherwise>

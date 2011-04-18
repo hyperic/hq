@@ -55,10 +55,7 @@
     symbol="CONTROL_ENABLED_ATTR" var="CONST_CONTROLLABLE" /> 
 
 <c:set var="canControl" value="${requestScope[CONST_CONTROLLABLE]}"/>
-<c:url var="selfAction" value="/resource/group/Inventory.do">
-	<c:param name="mode" value="view"/>
-	<c:param name="rid" value="${Resource.id}"/>
-</c:url>
+<c:url var="selfAction" value="/resource/group/Inventory.do?mode=view&rid=${Resource.id}"/>
     
 <!-- TITLE BAR -->
 <c:set var="entityId" value="${Resource.entityId}"/>

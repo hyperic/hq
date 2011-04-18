@@ -151,10 +151,7 @@
       											
       											<c:if test="${not empty resource}">
       												- 
-      												<html:link action="/resource/${resource.entityId.typeName}/Inventory">
-      													<html:param name="mode" value="changeOwner"/>
-      													<html:param name="rid" value="${resource.id}"/>
-      													<html:param name="type" value="${resource.entityId.type}"/>
+      												<html:link page="/resource/${resource.entityId.typeName}/Inventory.do?mode=changeOwner&rid=${resource.id}&type=${resource.entityId.type}">
       												  	<fmt:message key="resource.common.inventory.props.ChangeButton"/>
       												</html:link>
       												<br>
@@ -201,7 +198,7 @@
       									<c:if test="${not empty pluginLinkInfo}">
 											<tr>
 												<td colspan="100%" style="padding-top: 10px;">
-													<a href="<html:rewrite action="/mastheadAttach"><html:param name="typeId" value="${pluginLinkInfo.pluginId}"/><html:param name="sn" value="${pluginLinkInfo.selectedId}"/></html:rewrite>">View in HQ vSphere</a>
+													<a href="<html:rewrite page="/mastheadAttach.do?typeId=${pluginLinkInfo.pluginId}&sn=${pluginLinkInfo.selectedId}"/>">View in HQ vSphere</a>
 												</td>
 											</tr>
 										</c:if>					

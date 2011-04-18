@@ -31,11 +31,8 @@
  --%>
 
 
-<c:url var="selfUrl" value="/resource/service/Inventory.do">
-	<c:param name="mode" value="changeOwner"/>
-	<c:param name="rid" value="${Resource.id}"/>
-	<c:param name="type" value="${Resource.entityId.type}"/>
-</c:url>
+<c:set var="selfUrl" value="/resource/service/Inventory.do?mode=changeOwner&rid=${Resource.id}&type=${Resource.entityId.type}"/>
+
 <html:form action="/resource/service/inventory/ChangeOwner">
 
 <tiles:insert definition=".page.title.resource.service">

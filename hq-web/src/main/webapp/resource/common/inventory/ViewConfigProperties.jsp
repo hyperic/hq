@@ -45,11 +45,8 @@
 <tiles:importAttribute name="controlConfigOptions" ignore="true"/>
 <tiles:importAttribute name="controlConfigOptionsCount" ignore="true" />
 
-<c:url var="editAction" value="/resource/${resource.entityId.typeName}/Inventory.do">
-	<c:param name="mode" value="editConfig"/>
-	<c:param name="rid" value="${resource.id}"/>
-	<c:param name="type" value="${resourceType}"/>
-</c:url>
+<c:url var="editAction" value="/resource/${resource.entityId.typeName}/Inventory.do?mode=editConfig&rid=${resource.id}&type=${resourceType}"/>
+
 
 <hq:constant
     classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 

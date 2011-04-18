@@ -39,9 +39,9 @@
 </c:if>
 <script src="<html:rewrite page="/js/schedule.js"/>" type="text/javascript"></script>
 <script  type="text/javascript">
- var imagePath = "/images/";
- var jsPath = "/js/";
- var cssPath = "/css/";
+ var imagePath = "<html:rewrite page="/images/"/>";
+ var jsPath = "<html:rewrite page="/js/"/>";
+ var cssPath = "<html:rewrite page="/css/"/>";
  
  var isMonitorSchedule = false;
 </script>

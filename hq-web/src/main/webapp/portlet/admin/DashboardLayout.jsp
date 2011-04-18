@@ -45,7 +45,7 @@
 <script src="<html:rewrite page="/js/pageLayout.js" />" type="text/javascript"></script>
 
 <script type="text/javascript">
-  var imagePath = "/images/";
+  var imagePath = "<html:rewrite page="/images/"/>";
 
 /*-- start initialize --*/
 <c:set var="array" value="leftArr"/>

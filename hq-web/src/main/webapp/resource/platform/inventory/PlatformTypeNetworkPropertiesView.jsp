@@ -34,11 +34,9 @@
 <tiles:importAttribute name="platform" ignore="true"/>
 <tiles:importAttribute name="agent" ignore="true"/>
 
-<c:url var="editUrl" value="/resource/platform/Inventory.do">
-	<c:param name="mode" value="editType"/>
-	<c:param name="rid" value="${platform.id}"/>
-	<c:param name="type" value="${platform.entityId.type}"/>
-</c:url>
+<c:set var="editUrl" value="/resource/platform/Inventory.do?mode=editType&rid=${platform.id}&type=${platform.entityId.type}"/>
+
+<!--  /  -->
 
 <!--  TYPE AND HOST PROPERTIES CONTENTS -->
 <table width="100%" cellpadding="0" cellspacing="0" border="0" class="BlockBg">

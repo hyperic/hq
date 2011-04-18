@@ -35,9 +35,7 @@
 
 <hq:pageSize var="pageSize"/>
 <c:set var="widgetInstanceName" value="resources"/>
-<c:url var="selfAction" value="/dashboard/Admin.do">
-	<c:param name="mode" value="resourceHealth"/>
-</c:url>
+<c:url var="selfAction" value="/dashboard/Admin.do?mode=resourceHealth"/>
 
 <script  src="<html:rewrite page="/js/prototype.js"/>" type="text/javascript"></script>
 <script  src="<html:rewrite page="/js/scriptaculous.js"/>" type="text/javascript"></script>

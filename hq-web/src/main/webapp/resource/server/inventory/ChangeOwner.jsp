@@ -31,11 +31,7 @@
  --%>
 
 
-<c:url var="selfUrl" value="/resource/server/Inventory.do">
-	<c:param name="mode" value="changeOwner"/>
-   	<c:param name="rid" value="${Resource.id}"/>
-   	<c:param name="type" value="${Resource.entityId.type}"/>
-</c:url>
+<c:set var="selfUrl" value="/resource/server/Inventory.do?mode=changeOwner&rid=${Resource.id}&type=${Resource.entityId.type}"/>
 
 <html:form action="/resource/server/inventory/ChangeOwner">
 

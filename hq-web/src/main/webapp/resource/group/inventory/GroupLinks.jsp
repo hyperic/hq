@@ -35,10 +35,7 @@
 
 <table border="0"><tr><td class="LinkBox">
 
-	<html:link action="/resource/group/Inventory">
-		<html:param name="mode" value="new"/>
-		<fmt:message key="resource.hub.NewGroupLink"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/>
-	</html:link>
+	<html:link page="/resource/group/Inventory.do?mode=new"><fmt:message key="resource.hub.NewGroupLink"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link>
 	<br />
     <tiles:insert definition=".resource.common.quickDelete">
       <tiles:put name="resource" beanName="resource"/>

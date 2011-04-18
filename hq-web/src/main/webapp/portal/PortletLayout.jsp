@@ -41,7 +41,7 @@ djConfig.baseUrl = '/static/js/dojo/1.5/dojo/';
 </script>
 <script src="<html:rewrite page='/static/js/dojo/1.5/dojo/dojo.js'/>" type="text/javascript"></script>
 <script type="text/javascript">
-    var imagePath = "/images/";
+    var imagePath = "<html:rewrite page="/images/"/>";
     hqDojo.require('dojo.date');
 </script>
 <script src="<html:rewrite page='/js/prototype.js'/>" type="text/javascript"></script>
@@ -120,9 +120,7 @@ var onloads = [];
 		refreshPortlets();
 	});
 </script>
-<html:link action="/Resource" linkName="viewResUrl" styleId="viewResUrl" style="display:none;">
-	<html:param name="eid" value=""/>
-</html:link>
+<html:link page="/Resource.do?eid=" linkName="viewResUrl" styleId="viewResUrl" style="display:none;"></html:link>
 
 <tiles:insert beanProperty="url" beanName="portlet" flush="true">
 	<tiles:put name="portlet" beanName="portlet" />

@@ -40,7 +40,7 @@
 </c:choose>
 <c:forEach var="attachment" items="${attachments}">
 	<li>
- 		<a href="<html:rewrite action="/mastheadAttach"><html:param name="typeId" value="${attachment.attachment.id}"/></html:rewrite>">
+ 		<a href="<html:rewrite page="/mastheadAttach.do?typeId=${attachment.attachment.id}"/>">
  			<c:out value="${attachment.HTML}"/>
  	 	</a>
  	</li>

@@ -36,10 +36,7 @@
 <tiles:importAttribute name="selfAction"/>
 <tiles:importAttribute name="isNewScan" ignore="true"/>
 
-<c:url var="scanMethodAction" value="${selfAction}">
-	<c:param name="rid" value="${param.rid}"/>
-	<c:param name="type" value="${param.type}"/>
-</c:url>
+<c:url var="scanMethodAction" value="${selfAction}&rid=${param.rid}&type=${param.type}"/>
 <c:set var="formName" value="PlatformAutoDiscoveryForm"/>
 
 <script src="<html:rewrite page="/js/checkAll.js"/>" type="text/javascript"></script>

@@ -37,14 +37,7 @@
 		<td width="20%" class="BlockLabel"><fmt:message key="resource.server.inventory.type.InstallPath"/></td>
 		<td width="30%" class="BlockContent"><c:out value="${Resource.installPath}"/></td>
 		<td width="20%" class="BlockLabel"><fmt:message key="resource.server.inventory.type.HostPlatform"/></td>
-		<td width="30%" class="BlockContent">
-			<html:link action="/resource/platform/Inventory">
-				<html:param name="mode" value="view"/>
-				<html:param name="type" value="${Resource.platform.entityId.type}"/>
-				<html:param name="rid" value="${Resource.platform.id}"/>
-				${Resource.platform.name}
-			</html:link>
-		</td>
+		<td width="30%" class="BlockContent"><html:link page="/resource/platform/Inventory.do?mode=view&type=${Resource.platform.entityId.type}&rid=${Resource.platform.id}"><c:out value="${Resource.platform.name}"/></html:link></td>
 	</tr>
 	<tr>
       <td colspan="4" class="BlockBottomLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
