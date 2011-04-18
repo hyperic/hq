@@ -8,7 +8,7 @@
 	<artifactId>memcached-plugin</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ Plugin - memcached Plugin</name>
-	<version>4.6.0.BUILD-SNAPSHOT</version>
+	<version>4.6.0.M1</version>
 
 	<dependencies>
 		<dependency>
