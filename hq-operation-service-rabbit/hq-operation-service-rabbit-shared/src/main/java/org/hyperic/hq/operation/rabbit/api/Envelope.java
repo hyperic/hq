@@ -1,7 +1,8 @@
-package org.hyperic.hq.operation;
+package org.hyperic.hq.operation.rabbit.api;
 
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.hyperic.hq.operation.OperationData;
 
 /**
  * @author Helena Edelson
@@ -13,6 +14,11 @@ public final class Envelope implements OperationData {
     private final String content;
 
     private final String correlationId;
+
+    private long _deliveryTag;
+
+    private boolean _redeliver;
+
 
     @JsonCreator
     public Envelope(@JsonProperty("operationName") String operationName, @JsonProperty("context") String content,
@@ -40,6 +46,22 @@ public final class Envelope implements OperationData {
 
     public String getCorrelationId() {
         return correlationId;
+    }
+
+    public long get_deliveryTag() {
+        return _deliveryTag;
+    }
+
+    public void set_deliveryTag(long _deliveryTag) {
+        this._deliveryTag = _deliveryTag;
+    }
+
+    public boolean is_redeliver() {
+        return _redeliver;
+    }
+
+    public void set_redeliver(boolean _redeliver) {
+        this._redeliver = _redeliver;
     }
 
     @Override

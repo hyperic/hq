@@ -28,6 +28,7 @@ package org.hyperic.hq.operation.rabbit.api;
 import org.hyperic.hq.operation.OperationDiscoverer;
 
 /**
+ * Differentiation interface - endpoint, or handler version of discoverer.
  * @author Helena Edelson
  */
 public interface OperationEndpointDiscoverer extends OperationDiscoverer {

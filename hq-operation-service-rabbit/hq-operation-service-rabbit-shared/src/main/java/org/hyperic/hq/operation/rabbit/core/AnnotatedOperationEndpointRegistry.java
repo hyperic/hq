@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ErrorHandler;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -65,6 +66,11 @@ public class AnnotatedOperationEndpointRegistry implements OperationEndpointRegi
         this.errorHandler = errorHandler;
         this.connectionFactory = connectionFactory;
         this.routingRegistry = routingRegistry;
+    }
+
+    @PostConstruct
+    public void initialize() {
+
     }
 
     @PreDestroy

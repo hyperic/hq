@@ -24,9 +24,7 @@
  */
 
 package org.hyperic.hq.operation.rabbit.api;
-
-import org.hyperic.hq.operation.rabbit.api.ChannelCallback;
-
+ 
 /**
  * @author Helena Edelson
  */

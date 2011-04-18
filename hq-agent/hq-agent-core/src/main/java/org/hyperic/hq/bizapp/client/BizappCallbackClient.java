@@ -130,21 +130,26 @@ public class BizappCallbackClient extends AgentCallbackClient {
         return template.execute(new ChannelCallback<RegisterAgentResult>() {
             public RegisterAgentResult doInChannel(Channel channel) throws ChannelException {
                 try {
+
+                    /*channel.exchangeDeclare("to.server", "topic", true, false, null);
+                    String requestQueue = channel.queueDeclare("registerAgentRequest", true, false, false, null).getQueue();
+                    channel.queueBind(requestQueue, "to.server", "request.*");
+*/
                     channel.exchangeDeclare("to.agent", "topic", true, false, null);
                     String responseQueue = channel.queueDeclare("agent", true, false, false, null).getQueue();
                     channel.queueBind("agent", "to.agent", "response.*");
- 
+
+
                     channel.basicPublish("to.server", "request.register", MessageConstants.getBasicProperties(registerAgentRequest), bytes);
-                    //logger.info("\n\n"+this+"agent sent=" + converter.write(registerAgentRequest));
+                    logger.info("\n\n"+this+"agent sent=" + converter.write(registerAgentRequest));
 
                     while (true) {
                         GetResponse response = channel.basicGet(responseQueue, false);
                         if (response != null && response.getBody() != null) {
-                            //channel.basicAck(response.getEnvelope().getDeliveryTag(), false);
                             //if (response.getProps().getCorrelationId().equals(correlationId)) {
                             RegisterAgentResponse resp = (RegisterAgentResponse) converter.read(new String(response.getBody()), RegisterAgentResponse.class);
                             logger.info("\n\n"+this+"agent received=" + resp + " with token=" + resp.getAgentToken());
-
+                            channel.basicAck(response.getEnvelope().getDeliveryTag(), false);
                             return new RegisterAgentResult(resp.getAgentToken());
                             //}
                         }

@@ -1,7 +1,6 @@
-package org.hyperic.hq.operation;
+package org.hyperic.hq.operation.rabbit.api;
 
-/**
- * TODO exeptions
+/** 
  * @author Helena Edelson
  */
 public interface Endpoint {

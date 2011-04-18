@@ -20,6 +20,7 @@ public interface RabbitTemplate {
 
     /**
      * Sends a message and synchronously receives the response
+     * @param queueName the name of the queue to consume the response from
      * @param exchangeName the exchange name to use
      * @param routingKey The routing key to use
      * @param data The data to send
@@ -27,6 +28,6 @@ public interface RabbitTemplate {
      * if an error occurs during the send process.
      * @return the data returned from the response
      */
-    Object sendAndReceive(String exchangeName, String routingKey, String data) throws ChannelException;
+    Object sendAndReceive(String queueName, String exchangeName, String routingKey, String data) throws ChannelException;
     
 }

@@ -35,8 +35,6 @@ import org.hyperic.hq.operation.rabbit.connection.ChannelException;
 import org.hyperic.hq.operation.rabbit.connection.ChannelTemplate;
 import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
 import org.hyperic.hq.operation.rabbit.util.MessageConstants;
-import org.hyperic.hq.operation.rabbit.util.ServerConstants;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -48,7 +46,7 @@ import java.util.Random;
 @Component
 public class SimpleRabbitTemplate implements RabbitTemplate {
 
-    protected final Log logger = LogFactory.getLog(this.getClass());
+    private static final Log logger = LogFactory.getLog(SimpleRabbitTemplate.class);
 
     private final Converter<Object, String> converter;
 
@@ -56,34 +54,13 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
 
     private final Object monitor = new Object();
 
-    protected Channel channel;
-
-    private final String exchangeName;
-
-    protected String serverQueue;
-
-    protected String agentQueue;
-
-    protected QueueingConsumer queueingConsumer;
-
     /**
      * Creates a new instance that creates a connection and sends messages to a specific exchange
-     * @param connectionFactory Used to create a connection to send messages on
+     * @param connectionFactory ConnectionFactory used to create a connection
      */
-    @Autowired
     public SimpleRabbitTemplate(ConnectionFactory connectionFactory) {
-        this(connectionFactory, null);
-    }
-
-    /**
-     * Creates a new instance that creates a connection and sends messages to a specific exchange
-     * @param connectionFactory           ConnectionFactory used to create a connection
-     * @param exchangeName The exchange name to use. if null, uses the AMQP default
-     */
-    public SimpleRabbitTemplate(ConnectionFactory connectionFactory, String exchangeName) {
         this.channelTemplate = new ChannelTemplate(connectionFactory);
         this.converter = new JsonMappingConverter();
-        this.exchangeName = exchangeName; 
     }
 
     /**
@@ -93,7 +70,7 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
      */
     public Boolean send(final String exchangeName, final String routingKey, final String data) throws ChannelException {
         final byte[] bytes = data.getBytes(MessageConstants.CHARSET);
- 
+
         synchronized (this.monitor) {
             return this.channelTemplate.execute(new ChannelCallback<Boolean>() {
                 public Boolean doInChannel(Channel channel) throws ChannelException {
@@ -110,34 +87,42 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
     }
 
     /**
-     * Because autoAck = false call Channel.basicAck to acknowledge receipt
+     * TODO complete method
+     * Sends a message and synchronously receives the response
+     * @param queueName    the name of the queue to consume the response from
      * @param exchangeName the exchange name to use
      * @param routingKey   The routing key to use
      * @param data         The data to send
-     * @return the response object
-     * @throws IOException
+     * @return the data returned from the response
+     * @throws org.hyperic.hq.operation.rabbit.connection.ChannelException
+     *          if an error occurs during the send process.
      */
-    public Object sendAndReceive(String exchangeName, String routingKey, String data) throws ChannelException {
+    public Object sendAndReceive(final String queueName, final String exchangeName, final String routingKey, final String data) throws ChannelException {
         send(exchangeName, routingKey, data);
 
         AMQP.BasicProperties bp = getBasicProperties(data);
-        String correlationId = bp.getCorrelationId();
+        final String correlationId = bp.getCorrelationId();
 
-        synchronized (monitor) {
-            while (true) {
-                try {
-                    GetResponse response = channel.basicGet(agentQueue, false);
-                    if (response != null && response.getProps().getCorrelationId().equals(correlationId)) {
-                        this.logger.debug("received=" + response);
-                        Object received = this.converter.read(new String(response.getBody()), Object.class);
-                        this.channel.basicAck(response.getEnvelope().getDeliveryTag(), false);
-                        return received;
+        synchronized (this.monitor) {
+            return this.channelTemplate.execute(new ChannelCallback<Object>() {
+                public Object doInChannel(Channel channel) throws ChannelException {
+                    while (true) {
+                        try {
+                            GetResponse response = channel.basicGet(queueName, false);
+                            // TODO if (response != null && response.getProps().getCorrelationId().equals(correlationId)) {
+                                logger.debug("received=" + response);
+                                Object received = converter.read(new String(response.getBody()), Object.class);
+                                channel.basicAck(response.getEnvelope().getDeliveryTag(), false);
+                                return received;
+                            //}
+                        } catch (IOException e) {
+                            throw new ChannelException("Could not receive from" + queueName, e);
+                        }
                     }
-                } catch (IOException e) {
-                    throw new ChannelException("Could not receive from" + agentQueue, e);
                 }
-            }
+            });
         }
+
     }
 
     /**
@@ -152,41 +137,8 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
             bp.setCorrelationId(((AbstractOperation) data).getOperationName());
         } else {
             bp.setCorrelationId(new Random().toString());
-        }
+        } 
         return bp;
     }
 
-
-    // TODO remove
-
-    public void timedTest(int append) throws IOException, InterruptedException {
-        String msg = "test-" + append;
-        byte[] bytes = this.converter.write(msg).getBytes(MessageConstants.CHARSET);
-        AMQP.BasicProperties bp = getBasicProperties(msg);
-        String correlationId = bp.getCorrelationId();
-
-        synchronized (monitor) {
-            this.channel.basicPublish(ServerConstants.EXCHANGE_TO_AGENT, "test", bp, bytes);
-            while (true) {
-                GetResponse response = channel.basicGet(agentQueue, false);
-                if (response.getProps().getCorrelationId().equals(correlationId)) {
-                    this.logger.debug("received=" + this.converter.read(new String(response.getBody()), Object.class));
-                    break;
-                }
-            }
-        }
-    }
-
-    /**
-     * TODO automate given agent
-     */
-    public void shutdown() {
-        synchronized (this.monitor) {
-            try {
-                this.channel.close();
-            } catch (IOException e) {
-                throw new ChannelException(e);
-            }
-        }
-    }
 }

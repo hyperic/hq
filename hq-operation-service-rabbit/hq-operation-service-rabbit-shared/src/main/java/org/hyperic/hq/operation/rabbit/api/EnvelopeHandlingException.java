@@ -1,4 +1,4 @@
-package org.hyperic.hq.operation;
+package org.hyperic.hq.operation.rabbit.api;
 
 public class EnvelopeHandlingException extends RuntimeException {
 

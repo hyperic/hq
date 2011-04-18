@@ -36,6 +36,7 @@ import org.hyperic.hq.operation.rabbit.util.MessageConstants;
 import org.hyperic.hq.operation.rabbit.util.OperationToRoutingMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 
 import java.lang.reflect.Method;
 import java.net.InetAddress;
@@ -79,9 +80,13 @@ public class OperationToRoutingKeyRegistry implements RoutingRegistry {
         if (supports(method.getName())) return;
 
         Operation operation = method.getAnnotation(Operation.class);
+
         if (isValid(operation)) {
             String queueName = this.bindingHandler.declareAndBind(method.getName(), operation);
+            Assert.isTrue(queueName.equalsIgnoreCase(method.getName()));
+
             OperationToRoutingMapping map = new OperationToRoutingMapping(operation.exchange(), operation.routingKey(), method.getName(), operationHasReturnType(method));
+            logger.info("added new routing map=" + map);
             this.operationToRoutingMappings.put(method.getName(), map);
         }
     }

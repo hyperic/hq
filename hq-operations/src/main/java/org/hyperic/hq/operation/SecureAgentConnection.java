@@ -23,25 +23,32 @@
  *  USA.
  */
 
-package org.hyperic.hq.operation.rabbit.connection;
+package org.hyperic.hq.operation;
 
-/**
+import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.annotate.JsonProperty;
+
+/** 
  * Server sends this data to a new agent
  * @author Helena Edelson
  */
-public class AgentConnection {
+public class SecureAgentConnection {
 
     private final String hostname;
 
     private final int port;
 
-    private String username;
+    private final String username;
 
-    private String password;
+    private final String password;
 
-    public AgentConnection(String hostname, int port, String username, String password) {
+    @JsonCreator
+    public SecureAgentConnection(@JsonProperty("hostname") String hostname, @JsonProperty("port") int port,
+                           @JsonProperty("username") String username, @JsonProperty("password") String password) {
         this.hostname = hostname;
         this.port = port;
+        this.username = username;
+        this.password = password;
     }
 
     public String getHostname() {

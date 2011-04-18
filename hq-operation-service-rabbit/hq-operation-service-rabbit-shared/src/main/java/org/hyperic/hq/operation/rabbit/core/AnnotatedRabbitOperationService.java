@@ -28,6 +28,7 @@ import com.rabbitmq.client.AMQP;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.operation.*;
+import org.hyperic.hq.operation.rabbit.api.Envelope;
 import org.hyperic.hq.operation.rabbit.api.RabbitTemplate;
 import org.hyperic.hq.operation.rabbit.api.RoutingRegistry;
 import org.hyperic.hq.operation.rabbit.connection.ChannelException;
