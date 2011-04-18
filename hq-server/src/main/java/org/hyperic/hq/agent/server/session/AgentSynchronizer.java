@@ -45,6 +45,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.server.session.AgentPluginSyncRestartThrottle;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
@@ -74,13 +75,16 @@ public class AgentSynchronizer implements DiagnosticObject {
     private final AtomicLong executorNum = new AtomicLong(0);
     private ConcurrentStatsCollector concurrentStatsCollector;
     private AuthzSubject overlord;
+    private AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle;
 
     @Autowired
     public AgentSynchronizer(ConcurrentStatsCollector concurrentStatsCollector,
                              DiagnosticsLogger diagnosticsLogger,
+                             AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle,
                              AuthzSubjectManager authzSubjectManager) {
         this.concurrentStatsCollector = concurrentStatsCollector;
         this.overlord = authzSubjectManager.getOverlordPojo();
+        this.agentPluginSyncRestartThrottle = agentPluginSyncRestartThrottle;
         diagnosticsLogger.addDiagnosticObject(this);
     }
     
@@ -200,7 +204,14 @@ public class AgentSynchronizer implements DiagnosticObject {
                         job.execute();
                     } catch (Throwable e) {
                         job.onFailure();
-                        log.error(e,e);
+                        if (isInRestartState(job.getAgentId())) {
+                            log.warn("received error while trying to communicate with agentId=" +
+                                job.getAgentId() + " while it is restarting.  job=" +
+                                getJobInfo(job) + ": " + e);
+                            log.debug(e,e);
+                        } else {
+                            log.error(e,e);
+                        }
                     }
                     return;
                 }
@@ -229,6 +240,9 @@ public class AgentSynchronizer implements DiagnosticObject {
                     log.warn("Could not ping agent in order to run job " + getJobInfo(job));
                     job.onFailure();
                 }
+            }
+            private boolean isInRestartState(int agentId) {
+                return agentPluginSyncRestartThrottle.getAgentIdsInRestartState().containsKey(agentId);
             }
         };
         thread.start();
