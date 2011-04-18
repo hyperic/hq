@@ -12,7 +12,7 @@
 
 	<properties>
 		<easymock.version>2.4</easymock.version>
-		<hqapi.version>4.1.0</hqapi.version>
+		<hqapi.version>4.3.0.BUILD-SNAPSHOT</hqapi.version>
 		<junit.version>4.6</junit.version>
 	</properties>
 
@@ -216,30 +216,6 @@
 			<id>hyperic-release</id>
 			<name>Hyperic Release Repository</name>
 			<url>http://maven.hyperic.org/release</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>hqapi-snapshot</id>
-			<name>HQApi Snapshot Repository</name>
-			<url>http://maven.hyperic.org/hqapi/snapshot</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>hqapi-release</id>
-			<name>HQApi Release Repository</name>
-			<url>http://maven.hyperic.org/hqapi/release</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>hqapi-milestone</id>
-			<name>HQApi Milestone Repository</name>
-			<url>http://maven.hyperic.org/hqapi/milestone</url>
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
