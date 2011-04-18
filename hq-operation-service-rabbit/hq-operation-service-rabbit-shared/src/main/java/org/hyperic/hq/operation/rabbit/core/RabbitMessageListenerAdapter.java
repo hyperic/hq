@@ -31,9 +31,7 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageListener;
 import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
 
-/**
- * @author Helena Edelson
- */
+ /* testing an idea */
 public class RabbitMessageListenerAdapter implements MessageListener {
 
     private final JsonMappingConverter converter = new JsonMappingConverter();

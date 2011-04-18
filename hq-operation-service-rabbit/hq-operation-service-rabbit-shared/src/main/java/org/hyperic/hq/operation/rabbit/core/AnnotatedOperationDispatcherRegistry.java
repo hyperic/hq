@@ -32,7 +32,6 @@ import org.hyperic.hq.operation.OperationFailedException;
 import org.hyperic.hq.operation.OperationService;
 import org.hyperic.hq.operation.rabbit.api.OperationDispatcherRegistry;
 import org.hyperic.hq.operation.rabbit.api.RoutingRegistry;
-import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -50,16 +49,18 @@ public class AnnotatedOperationDispatcherRegistry implements OperationDispatcher
 
     private final Map<String, MethodInvoker> operationMappings = new ConcurrentHashMap<String, MethodInvoker>();
 
-    private final Converter<Object,String> converter = new JsonMappingConverter();
+    private final Converter<Object,String> converter;
 
     private final OperationService operationService;
 
     protected final RoutingRegistry routingRegistry;
 
     @Autowired
-    public AnnotatedOperationDispatcherRegistry(OperationService operationService, RoutingRegistry routingRegistry) { 
+    public AnnotatedOperationDispatcherRegistry(OperationService operationService,
+        RoutingRegistry routingRegistry, Converter<Object,String> converter) {
         this.operationService = operationService;
         this.routingRegistry = routingRegistry;
+        this.converter = converter;
     }
 
     /**
@@ -72,10 +73,8 @@ public class AnnotatedOperationDispatcherRegistry implements OperationDispatcher
         if (this.operationMappings.containsKey(method.getName())) return;
 
         this.operationMappings.put(method.getName(), new MethodInvoker(method, candidate, this.converter));
-
-        this.routingRegistry.register(method);
-
-        logger.info("**registered dispatcher bean=" + candidate + " and method=" + method.getName());
+        this.routingRegistry.register(method); 
+        logger.info("registered dispatcher bean=" + candidate + " and method=" + method.getName());
     }
  
     /**
@@ -87,25 +86,7 @@ public class AnnotatedOperationDispatcherRegistry implements OperationDispatcher
      * invocation is returned
      * @throws org.hyperic.hq.operation.OperationFailedException
      */
-    public Object dispatch(String operationName, Object data) throws OperationFailedException {
-
+    public Object dispatch(String operationName, Object data) throws OperationFailedException { 
         return this.operationService.perform(operationName, data);
-
-       /* MethodInvoker invoker = this.annotatedOperationEndpointRegistry.map(operationName);
-        Envelope envelope = new Envelope(operationName, this.converter.write(data));
-
-        if (invoker.operationHasReturnType()) {
-            return perform(envelope);
-        } else {
-            perform(envelope);
-            return null;
-        }*/
-    }
- 
-    /*String json = converter.write(response);
-                    byte[] bytes = json.getBytes(MessageConstants.CHARSET);
-                    channel.basicPublish(Constants.TO_AGENT_EXCHANGE, "response.register", MessageConstants.DEFAULT_MESSAGE_PROPERTIES, bytes);*/
-     //@Operation(operationName = Constants.OPERATION_NAME_AGENT_REGISTER_RESPONSE, exchangeName = Constants.TO_AGENT_EXCHANGE, value = "response.register")*/
-
-     
+    }   
 }

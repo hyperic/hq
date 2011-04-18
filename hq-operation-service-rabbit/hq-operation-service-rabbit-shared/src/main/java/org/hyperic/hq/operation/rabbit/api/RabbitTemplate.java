@@ -1,5 +1,6 @@
 package org.hyperic.hq.operation.rabbit.api;
 
+import com.rabbitmq.client.AMQP;
 import org.hyperic.hq.operation.rabbit.connection.ChannelException;
 
 /**
@@ -12,11 +13,11 @@ public interface RabbitTemplate {
      * @param exchangeName the exchange name to use
      * @param routingKey The routing key to use
      * @param data The data to send
+     * @param props AMQP properties containing a correlation id
      * @throws org.hyperic.hq.operation.rabbit.connection.ChannelException
-     * if an error occurs during the send process. 
-     * @return if successful, returns true else returns false
+     * if an error occurs during the send process
      */
-    Boolean send(final String exchangeName, final String routingKey, final String data) throws ChannelException;
+    void send(String exchangeName, String routingKey, Object data, AMQP.BasicProperties props) throws ChannelException;
 
     /**
      * Sends a message and synchronously receives the response
@@ -24,10 +25,11 @@ public interface RabbitTemplate {
      * @param exchangeName the exchange name to use
      * @param routingKey The routing key to use
      * @param data The data to send
+     * @param props AMQP properties containing a correlation id
      * @throws org.hyperic.hq.operation.rabbit.connection.ChannelException
      * if an error occurs during the send process.
      * @return the data returned from the response
      */
-    Object sendAndReceive(String queueName, String exchangeName, String routingKey, String data) throws ChannelException;
+    Object sendAndReceive(String queueName, String exchangeName, String routingKey, Object data, AMQP.BasicProperties props) throws ChannelException;
     
 }

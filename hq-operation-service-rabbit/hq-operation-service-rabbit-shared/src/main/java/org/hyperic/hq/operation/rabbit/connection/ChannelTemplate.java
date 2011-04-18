@@ -57,10 +57,10 @@ public final class ChannelTemplate implements ChannelOperations {
     }
 
     /**
-     * Execute an action while managing a {@link Channel}'s lifecycle: instantiate, configure, and tear down.
+     * Executes an action while managing the Channel lifecycle: instantiate, configure, and tear down.
      * @param action to call the channel
      * @return The return value from the callback
-     * @throws ChannelException
+     * @throws ChannelException if an error occurs
      */
     public <T> T execute(ChannelCallback<T> action) throws ChannelException {
         if (action == null) throw new IllegalArgumentException("Callback object must not be null");
@@ -70,11 +70,9 @@ public final class ChannelTemplate implements ChannelOperations {
         try {
             channel = createChannel();
             return action.doInChannel(channel);
-        }
-        catch (IOException e) {
-            throw new ChannelException("Unable to create channel", e);
-        }
-        finally {
+        } catch (IOException e) {
+            throw translateChannelException("Unable to execute action " + action + " with channel " + channel, e);
+        } finally {
             releaseResources(channel);
         }
     }
@@ -86,36 +84,9 @@ public final class ChannelTemplate implements ChannelOperations {
      */
     public Channel createChannel() throws ChannelException {
         try {
-            return createConnection().createChannel();
+            return this.connectionFactory.newConnection().createChannel();
         } catch (IOException e) {
-            throw new ChannelException("Unable to create channel", e);
-        }
-    }
-
-    /**
-     * Creates a com.rabbitmq.client.Connection
-     * @return com.rabbitmq.client.Connection
-     * @throws ConnectionException if an error occurs during creation of the connection
-     */
-    public Connection createConnection() throws ConnectionException {
-        try {
-            return this.connectionFactory.newConnection();
-        } catch (IOException e) {
-            throw translateConnectionException(e);
-        }
-    }
-
-    public boolean validateConnection() {
-        Connection conn = null;
-        try {
-            conn = createConnection();
-            return conn != null;
-        }
-        catch (Exception e) {
-            throw translateConnectionException(e);
-        }
-        finally {
-            closeConnection(conn);
+            throw translateChannelException("Unable to create channel", e);
         }
     }
 
@@ -143,22 +114,16 @@ public final class ChannelTemplate implements ChannelOperations {
 
         try {
             conn.close();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             logger.debug("Connection is already closed.", e);
         }
     }
 
-    public ChannelException translateChannelException(String context, Channel channel, Throwable t) throws ConnectionException {
-        return new ChannelException(context + ": " + channel, t);
-    }
-
-
-    public ConnectionException translateConnectionException(Throwable t) throws ConnectionException {
-        return new ConnectionException("Unable to connect with username=" + this.connectionFactory.getUsername()
+    public ChannelException translateChannelException(String context, Throwable t) throws ChannelException {
+        return new ChannelException("Unable to connect with username=" + this.connectionFactory.getUsername()
                 + " password=" + this.connectionFactory.getPassword()
                 + " host=" + this.connectionFactory.getHost()
                 + " port=" + this.connectionFactory.getPort(), t);
     }
-
+ 
 }

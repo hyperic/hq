@@ -29,7 +29,7 @@ import com.rabbitmq.client.AMQP;
 import org.hyperic.hq.operation.AbstractOperation;
 
 import java.nio.charset.Charset;
-import java.util.Random;
+import java.util.UUID;
 
 /**
  * @author Helena Edelson
@@ -113,8 +113,8 @@ public final class MessageConstants {
 
         if (data != null && data.getClass().isAssignableFrom(AbstractOperation.class)) {
             bp.setCorrelationId(((AbstractOperation) data).getOperationName());
-        } else {
-            bp.setCorrelationId(new Random().toString());
+        } else { 
+            bp.setCorrelationId(UUID.randomUUID().toString());
         }
         return bp;
     }

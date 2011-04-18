@@ -27,16 +27,20 @@ package org.hyperic.hq.operation.rabbit.core;
 import com.rabbitmq.client.AMQP;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.operation.*;
+import org.hyperic.hq.operation.AbstractOperation;
+import org.hyperic.hq.operation.Converter;
+import org.hyperic.hq.operation.OperationFailedException;
+import org.hyperic.hq.operation.OperationService;
 import org.hyperic.hq.operation.rabbit.api.Envelope;
 import org.hyperic.hq.operation.rabbit.api.RabbitTemplate;
 import org.hyperic.hq.operation.rabbit.api.RoutingRegistry;
 import org.hyperic.hq.operation.rabbit.connection.ChannelException;
-import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
 import org.hyperic.hq.operation.rabbit.util.MessageConstants;
 import org.hyperic.hq.operation.rabbit.util.OperationToRoutingMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Random;
 
 /**
  * @author Helena Edelson
@@ -56,15 +60,17 @@ public class AnnotatedRabbitOperationService implements OperationService {
      * Creates a new instance that sends messages to a Rabbit broker
      * @param rabbitTemplate  The rabbitTemplate to use for dispatch
      * @param routingRegistry The routing cache to query for instructions
+     * @param converter the convert to use for byte[] - object conversion
      */
     @Autowired
-    public AnnotatedRabbitOperationService(RabbitTemplate rabbitTemplate, RoutingRegistry routingRegistry) {
+    public AnnotatedRabbitOperationService(RabbitTemplate rabbitTemplate, RoutingRegistry routingRegistry, Converter<Object, String> converter) {
         this.rabbitTemplate = rabbitTemplate;
         this.routingRegistry = routingRegistry;
-        this.converter = new JsonMappingConverter();
+        this.converter = converter;
     }
 
     /**
+     *  TODO test Envelope envelope = createEnvelope(operationName, data);
      * Performs an operation by operation name
      * Delegates handling to the RabbitTemplate for handling.
      * @param operationName the operation name
@@ -74,11 +80,14 @@ public class AnnotatedRabbitOperationService implements OperationService {
      */
     public Object perform(String operationName, Object data) throws OperationFailedException {
         OperationToRoutingMapping mapping = this.routingRegistry.map(operationName);
-
-        //TODO test Envelope envelope = createEnvelope(operationName, data);
-        
+ 
         try {
-            return mapping.operationRequiresResponse() ? synchronousSend(mapping, data) : asynchronousSend(mapping, data);
+            if (mapping.operationRequiresResponse()) {
+                return synchronousSend(mapping, data);
+            } else {
+                asynchronousSend(mapping, data);
+                return null;
+            }
         } catch (ChannelException e) {
             throw new OperationFailedException(e.getMessage(), e.getCause());
         }
@@ -105,9 +114,8 @@ public class AnnotatedRabbitOperationService implements OperationService {
      * @param mapping the routing data
      * @param data the operation data
      */
-    private Object asynchronousSend(OperationToRoutingMapping mapping, Object data) {
-        this.rabbitTemplate.send(mapping.getExchangeName(), mapping.getRoutingKey(), this.converter.write(data));
-        return null;
+    private void asynchronousSend(OperationToRoutingMapping mapping, Object data) {
+        this.rabbitTemplate.send(mapping.getExchangeName(), mapping.getRoutingKey(), data, getBasicProperties(data)); 
     }
 
     /**
@@ -121,6 +129,23 @@ public class AnnotatedRabbitOperationService implements OperationService {
      * @return returns the Object from the receiver
      */
     private Object synchronousSend(OperationToRoutingMapping mapping, Object data) {
-        return this.rabbitTemplate.sendAndReceive(mapping.getExchangeName(), mapping.getRoutingKey(), this.converter.write(data));
+        return this.rabbitTemplate.sendAndReceive(
+                mapping.getQueueName(), mapping.getExchangeName(), mapping.getRoutingKey(), this.converter.write(data), getBasicProperties(data));
+    }
+
+    /**
+     * Creates the default message properties and sets a correlationId
+     * @param data the object to pull context from
+     * @return BasicProperties with a correlationid
+     */
+    protected AMQP.BasicProperties getBasicProperties(Object data) {
+        AMQP.BasicProperties bp = MessageConstants.DEFAULT_MESSAGE_PROPERTIES;
+
+        if (data.getClass().isAssignableFrom(AbstractOperation.class)) {
+            bp.setCorrelationId(((AbstractOperation) data).getOperationName());
+        } else {
+            bp.setCorrelationId(new Random().toString());
+        }
+        return bp;
     }
 }
