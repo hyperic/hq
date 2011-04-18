@@ -3867,9 +3867,11 @@ hyperic.maintenance_schedule = function(args) {
     	// validate with updated constraints
     	if(that.dialog.validate())
         {
+            var args = that.dialog.getValues();
+
     	    // create unix epoch datetime in GMT timezone
-            var from_datetime = (that.inputs.from_date.getValue().getTime() + that.inputs.from_time.getValue().getTime() - that.inputs.from_time.getValue().getTimezoneOffset() * 60000);
-            var to_datetime = (that.inputs.to_date.getValue().getTime() + that.inputs.to_time.getValue().getTime() - that.inputs.to_time.getValue().getTimezoneOffset() * 60000);
+            from_datetime = (args.from_date.getTime() + args.from_time.getTime() - args.from_time.getTimezoneOffset() * 60000);
+            to_datetime = (args.to_date.getTime() + args.to_time.getTime() - args.to_time.getTimezoneOffset() * 60000);
 
             return hqDojo.xhrPost( {
                 url: baseUrl + "/schedule",
