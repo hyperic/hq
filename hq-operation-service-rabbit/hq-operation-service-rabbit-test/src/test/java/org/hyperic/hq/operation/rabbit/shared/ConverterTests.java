@@ -9,9 +9,7 @@ import org.springframework.amqp.core.MessageProperties;
 
 import static org.junit.Assert.*;
 
-/**
- * @author Helena Edelson
- */
+ 
 public class ConverterTests {
 
     private final JsonMappingConverter converter = new JsonMappingConverter();

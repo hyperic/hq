@@ -6,9 +6,7 @@ import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
 import org.junit.Before;
 import org.junit.Test;
 
-/**
- * @author Helena Edelson
- */
+
 public class SerializationVsJsonBenchmarkTests {
 
     private JsonMappingConverter converter = new JsonMappingConverter();

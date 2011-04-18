@@ -10,9 +10,7 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
-/** 
- * @author Helena Edelson
- */
+ 
 public class RoutingKeyTests {
 
     protected final Log logger = LogFactory.getLog(this.getClass().getName());

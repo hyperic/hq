@@ -14,10 +14,7 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
-/**
- * @author Helena Edelson
- */
-@Ignore
+@Ignore("not working with a mock Connection")
 public class AtomicTests {
 
     private Channel channel;

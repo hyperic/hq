@@ -6,9 +6,7 @@ import org.junit.Ignore;
 
 import java.io.Serializable;
 
-/**
- * @author Helena Edelson
- */
+ 
 @Ignore
 public class TestObject implements Serializable {
 

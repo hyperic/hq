@@ -38,9 +38,7 @@ import org.hyperic.hq.operation.rabbit.util.ServerConstants;
 import org.junit.Ignore;
 import org.junit.Test;
 
-/**
- * @author Helena Edelson
- */
+
 @Ignore("not working with a mock Connection")
 public class AnnotationTests {
 

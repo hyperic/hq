@@ -11,9 +11,7 @@ import java.io.IOException;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Helena Edelson
- */
+ 
 public class ConnectionTests {
 
     private final ConnectionFactory connectionFactory = mock(ConnectionFactory.class);

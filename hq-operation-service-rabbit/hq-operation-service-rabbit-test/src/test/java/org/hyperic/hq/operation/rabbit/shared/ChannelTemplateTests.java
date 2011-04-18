@@ -11,10 +11,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-/**
- * @author Helena Edelson
- */
-@Ignore("have to mock the connection")
+@Ignore("not working with a mock Connection")
 public class ChannelTemplateTests {
 
     private ChannelTemplate channelTemplate = new ChannelTemplate(new ConnectionFactory());
