@@ -205,5 +205,8 @@ public interface ResourceGroupManager
     Collection<ResourceGroup> getGroups(Resource r);
     
     PageList<Resource> getCompatibleGroupsContainingType(int resourceTypeId, PageControl pageControl);
+    
+    Collection<ResourceGroup> getCompatibleResourceGroups(AuthzSubject subject,
+        int resourceTypeId);
  
 }

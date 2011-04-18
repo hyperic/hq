@@ -694,6 +694,31 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         Page<Resource> resources = resourceDao.findByIndexedProperty(GROUP_ENT_RES_TYPE, resourceTypeId,pageInfo,String.class);
         return new PageList<Resource>(resources.getContent(),(int)resources.getTotalElements());
     }
+    
+    @Transactional(readOnly = true)
+    public Collection<ResourceGroup> getCompatibleResourceGroups(AuthzSubject subject,
+                                                                 int resourceTypeId)
+    {
+        // TODO auth
+        //PermissionManager pm = PermissionManagerFactory.getInstance();
+        //List<Integer> groupIds =
+        // TODO: G
+       // pm.findOperationScopeBySubject(subject, AuthzConstants.groupOpViewResourceGroup,
+           // AuthzConstants.groupResourceTypeName);
+        return resourceGroupDao.findByIndexedProperty(GROUP_ENT_RES_TYPE, resourceTypeId);
+        //TODO filter out unviewable
+//        Collection<ResourceGroup> groups = resourceGroupDAO.findCompatible(resProto);
+//        for (Iterator<ResourceGroup> i = groups.iterator(); i.hasNext();) {
+//            ResourceGroup g = (ResourceGroup) i.next();
+//            if (!groupIds.contains(g.getId())) {
+//                i.remove();
+//            }
+//        }
+//
+//        return groups;
+    }
+
+
 
     @Transactional(readOnly=true)
     public ResourceGroup findResourceGroupByName(String name) {
