@@ -28,6 +28,7 @@ package org.hyperic.hq.appdef.server.session;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -93,11 +94,27 @@ implements AgentPluginUpdater, ApplicationContextAware {
                 log.debug("queue plugin remove for agentId=" + agentId +
                           " filenames=" + toRemove);
             }
+            removeDuplicates(plugins, toRemove);
             final PluginSyncJob job = ctx.getBean(PluginSyncJob.class);
             job.setAgentId(agentId);
             job.setPlugins(plugins);
             job.setToRemove(toRemove);
             agentSynchronizer.addAgentJob(job);
+        }
+    }
+
+    private void removeDuplicates(Collection<Plugin> plugins, Collection<String> toRemove) {
+        final Set<String> filenames = new HashSet<String>();
+        for (final Plugin plugin : plugins) {
+            filenames.add(plugin.getPath());
+        }
+        final boolean debug = log.isDebugEnabled();
+        for (final Iterator<String> it=toRemove.iterator(); it.hasNext(); ) {
+            final String file = it.next();
+            if (filenames.contains(file)) {
+                if (debug) log.debug("will not remove " + file + " since it is being transferred");
+                it.remove();
+            }
         }
     }
 

@@ -176,9 +176,10 @@ public class Agent extends AppdefBean {
     public String toString() {
         StringBuffer str = new StringBuffer("{");
 
-        str.append("address=").append(getAddress()).append(" ")
+        str.append("id=").append(getId()).append(" ")
+           .append("address=").append(getAddress()).append(" ")
            .append("port=").append(getPort()).append(" ")
-           .append("authToken=").append(getAuthToken()).append(" ");
+           .append("authToken=").append(getAuthToken()).append("}");
         return(str.toString());
     }
     

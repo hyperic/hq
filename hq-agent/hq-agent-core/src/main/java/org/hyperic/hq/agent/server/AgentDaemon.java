@@ -34,12 +34,12 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
 import java.util.jar.JarFile;
@@ -58,8 +58,6 @@ import org.hyperic.hq.agent.AgentUpgradeManager;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorException;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorInterface;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorSimple;
-import org.hyperic.hq.bizapp.client.AgentCallbackClient;
-import org.hyperic.hq.bizapp.client.AgentCallbackClientException;
 import org.hyperic.hq.bizapp.client.PlugininventoryCallbackClient;
 import org.hyperic.hq.bizapp.client.StorageProviderFetcher;
 import org.hyperic.hq.product.GenericPlugin;
@@ -702,17 +700,13 @@ public class AgentDaemon
                     return p1.name.compareTo(p2.name);
                 }
             });
-            Collection<PluginInfo> plugins = new ArrayList<PluginInfo>();
+            Set<PluginInfo> plugins = new HashSet<PluginInfo>();
             plugins.addAll(this.ppm.registerPlugins(pluginDir, excludes));
             //check .. and higher for hq-plugins
             plugins.addAll(this.ppm.registerCustomPlugins("..", excludes));
             plugins.addAll(excludes);
             Collection<PluginInfo> fromDirs = ppm.getAllPluginInfoDirectFromFileSystem(pluginDir, "..");
-            for (final PluginInfo info : fromDirs) {
-                if (!plugins.contains(info)) {
-                    plugins.add(info);
-                }
-            }
+            plugins = mergeByName(fromDirs, plugins);
             sendPluginStatusToServer(plugins);
             
             logger.info("Product Plugin Manager initalized");
@@ -723,6 +717,21 @@ public class AgentDaemon
             throw new AgentStartException("Unable to initialize plugin " +
                                           "manager: " + e.getMessage());
         }
+    }
+
+    /** merge fromDirs into the plugins Collection keyed by pluginInfo.name and return plugins */
+    private Set<PluginInfo> mergeByName(Collection<PluginInfo> fromDirs,
+                                        Set<PluginInfo> plugins) {
+        final Collection<String> pluginFiles = new HashSet<String>();
+        for (final PluginInfo info : plugins) {
+            pluginFiles.add(info.jar);
+        }
+        for (final PluginInfo info : fromDirs) {
+            if (!pluginFiles.contains(info.jar)) {
+                plugins.add(info);
+            }
+        }
+        return plugins;
     }
 
     private void sendPluginStatusToServer(final Collection<PluginInfo> plugins) {

@@ -166,12 +166,16 @@ public class AgentUpgradeManager {
         String pluginsDir = bootProps.getProperty(AgentConfig.PROP_PDK_PLUGIN_DIR[0]);
         String[] children = new File(tmpDir).list();
         if (children != null) {
+            // we want to remove all plugins, then update
+            // this is just in case there are duplicates
             for (int i=0; i<children.length; i++) {
-                // only update plugins marked for update
+                if (children[i].indexOf(REMOVED_PLUGIN_EXTENSION) > 0) {
+                    removePlugin(children[i], tmpDir, pluginsDir, updatedPlugins);
+                }
+            }
+            for (int i=0; i<children.length; i++) {
                 if (children[i].indexOf(UPDATED_PLUGIN_EXTENSION) > 0) {
                     movePlugin(children[i], tmpDir, pluginsDir, updatedPlugins);
-                } else if (children[i].indexOf(REMOVED_PLUGIN_EXTENSION) > 0) {
-                    removePlugin(children[i], tmpDir, pluginsDir, updatedPlugins);
                 }
             }
         }

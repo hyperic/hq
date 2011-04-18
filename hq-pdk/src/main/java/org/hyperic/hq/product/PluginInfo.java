@@ -94,6 +94,21 @@ public class PluginInfo implements java.io.Serializable {
         return MD5.getMD5Checksum(new File(jar));
     }
 
+    public int hashCode() {
+        return 17 + (7*md5.hashCode() + 7*jar.hashCode());
+    }
+
+    public boolean equals(Object rhs) {
+        if (this == rhs) {
+            return true;
+        }
+        if (rhs instanceof PluginInfo) {
+            final PluginInfo info = (PluginInfo) rhs;
+            return md5.equals(info.md5) && jar.equals(info.jar);
+        }
+        return false;
+    }
+
     //true if plugins are from the same jar
     public boolean matches(PluginInfo info) {
         return

@@ -1363,12 +1363,18 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         final List<String> productNames = stringLists.get(PluginReport_args.PRODUCT_NAME);
         final List<String> md5s = stringLists.get(PluginReport_args.MD5);
         final boolean debug = log.isDebugEnabled();
-        if (debug) log.debug(stringLists);
+        if (debug) log.debug("agent=" + agent + " arg=" + stringLists);
         final long now = System.currentTimeMillis();
         final Set<String> creates = new HashSet<String>();
+        final Set<String> processed = new HashSet<String>();
         for (int i=0; i<md5s.size(); i++) {
-            final String filename = files.get(i);
             final String md5 = md5s.get(i);
+            final String filename = files.get(i);
+            // don't want to process a filename twice
+            if (processed.contains(filename)) {
+                continue;
+            }
+            processed.add(filename);
             AgentPluginStatus status;
             final Plugin currPlugin = pluginDAO.getByFilename(filename);
             if (null == (status = statusByFileName.remove(filename))) {
