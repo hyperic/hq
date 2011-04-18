@@ -11,9 +11,6 @@
 	<p id="instruction"><fmt:message key="${instruction}" /></p>
 	
 	<div id="currentTimeInfo">
-		<span id="pluginCount" style="float:left;"><fmt:message key="admin.managers.plugin.title.note"/> <span id="noPlugins">${info.pluginCount}</span>
-		</span>
-
 		<span style="float:right;" id="refreshTimeInfo"><fmt:message key="admin.managers.Plugin.information.refresh.time"/> <span id="timeNow"></span>
 		</span>
 		<span style="float:right;">&nbsp;&nbsp;</span>
@@ -21,16 +18,12 @@
 	</div>
 
 	<div class="topInfo">
-		<span id="agentInfo" style="float:left">
+		<span id="agentInfo" style="float:right">
 			<fmt:message key="admin.managers.Plugin.information.agent.count"/>:
-		    <span id="agentInfoAllCount">${info.allAgentCount}</span>&nbsp;&nbsp;&nbsp;<br/>
+		    <span id="agentInfoAllCount">${info.allAgentCount}</span><br/>
 		</span>
-
-		<span id="agentSummarySpan" style="float:left">
-	        <fmt:message key="admin.managers.Plugin.information.summary"/>
-	    </span>	
-
-		<span style="float:right">
+		
+		<span style="float:left">
                 <fmt:message key="admin.managers.Plugin.information.legend"/>
                 <img src="<spring:url value="/static/images/icon_available_green.gif"/>"/> 
                         <fmt:message key="admin.managers.Plugin.tip.icon.success"/>
@@ -174,8 +167,8 @@
 	<a href="#" class="cancelLink"><fmt:message key="admin.managers.plugin.button.close" /></a>
 </div>
 
-<script src="<spring:url value="/static/js/html5.js" />" type="text/javascript" djConfig="parseOnLoad: true"></script>
-<script  djConfig="parseOnLoad: true">
+<script src="<spring:url value="/static/js/admin/managers/plugin/pluginMgr.js" />" type="text/javascript"></script> 
+<script>
 	hqDojo.require("dojo.fx");
 	hqDojo.require("dojo.io.iframe");
 	hqDojo.require("dijit.dijit");
@@ -192,50 +185,6 @@
 	hqDojo.ready(function() {
 		var timer = new hqDojox.timing.Timer();
 
-		function resizeContent(){
-			var windowCoords = hqDojo.window.getBox();
-			var footerCoords = hqDojo.position(hqDojo.byId("footer"), true);
-			var headerCoords = hqDojo.position(hqDojo.byId("header"), true);
-			var height = windowCoords.h-footerCoords.h-headerCoords.h-150;
-			if(height>400){
-				var heightString = height+"px";
-				hqDojo.style(hqDojo.byId("pluginList"),"height",heightString);
-			}
-		}
-		
-		function uncheckCheckboxes(){
-			hqDojo.forEach( hqDojo.query("input[type=checkbox]"), function(e){
-					e.checked=false;
-			});	    
-		}
-		
-		function dateFormat(date){
-			return hqDojo.date.locale.format(date,{
-				selector: "date",
-				datePattern: "hh:mm:ss aa"
-			});
-		}
-		
-		function updateTime(){
-			var now = new Date();
-			hqDojo.byId("timeNow").innerHTML=dateFormat(now);
-			var anim = [
-				hqDojo.animateProperty({
-					node:"refreshTimeInfo",
-					properties:{
-						backgroundColor:"yellow"},
-					duration:600
-				}),
-				hqDojo.animateProperty({
-					node:"refreshTimeInfo",
-					properties:{
-						backgroundColor:"#EEEEEE"},
-					duration:600
-				})
-			];
-			hqDojo.fx.chain(anim).play();					
-		}	
-
 		function refreshPage(){
 			hqDojo.style(hqDojo.byId("pluginList"), "color","#AAAAAA");
 			var infoXhrArgs={
@@ -248,7 +197,6 @@
                 },				
 				load: function(response){
 					hqDojo.byId("agentInfoAllCount").innerHTML=response.allAgentCount;
-					hqDojo.byId("noPlugins").innerHTML=response.pluginCount;
 				}
 			};
 			
@@ -271,31 +219,15 @@
 			hqDojo.publish("refreshDataGrid");
 		}
 
-						
-		function checkFileType(filePath){
-			var ext = filePath.substr(filePath.length - 4);			
-			if (ext !== ".jar" && ext !== ".xml") {
-				hqDojo.byId("validationMessage").innerHTML = "<fmt:message key='admin.managers.plugin.message.invalid.file.extension' />";
-				var anim = [hqDojo.fadeIn({
-								node: "validationMessage",
-								duration: 500
-							}),
-							hqDojo.fadeOut({
-								node: "validationMessage",
-								delay: 5000,
-								duration: 500
-							})];
-				hqDojo.fx.chain(anim).play();
-				return false;
-			}
-			return true;
+		function resizePluginMgrContentHeight(){
+			resizeContentHeight(hqDojo.byId("pluginList"),150,400);
 		}
-
-		uncheckCheckboxes();
-		updateTime();
-		resizeContent();
 		
-		hqDojo.connect(window, "onresize", resizeContent);
+		uncheckCheckboxes(hqDojo.query("input[type=checkbox]"));
+		refreshTime(hqDojo.byId("timeNow"),"refreshTimeInfo","#EEEEEE");
+		resizePluginMgrContentHeight()
+		
+		hqDojo.connect(window, "onresize", resizePluginMgrContentHeight);
 		
 		hqDojo.connect(hqDojo.byId("refreshIcon"),"onclick",function(e){
 			refreshPage();
@@ -424,7 +356,7 @@
 				},
 				found: function(node){hqDojo.style(node,"cursor","pointer");}
 			},
-			"#agentSummarySpan":{
+			"#agentInfo":{
 				onclick: function(evt){
 					seeAgentSummary();
 				}
@@ -443,7 +375,6 @@
 		hqDojo.style(showStatusPanel, "visibility", "visible");
 			
 		hqDojo.query("#showStatusPanelDialog .cancelLink").onclick(function(e) {
-			//uncheckCheckboxes();
 			hqDijit.byId("showStatusPanelDialog").hide();
 			hqDojo.empty("agentList");
 			hqDojo.byId("searchText").value="";
@@ -467,14 +398,10 @@
 			hqDojo.empty("agentSummaryList");
 		});
 		
-		
-		
 		if(${!mechanismOn}){
 			hqDojo.attr("deleteForm","class","mechanismOff");
 			hqDojo.addClass(hqDojo.byId("instruction"),"mechanismOffInstruction");
 		}
-
-		
 	
 		if (${mechanismOn}){
 		
@@ -509,19 +436,18 @@
 			hqDojo.style(errorMsgPanel, "visibility", "visible");
 
 			hqDojo.query("#uploadPanelDialog .cancelLink").onclick(function(e) {
-				uncheckCheckboxes();
+				uncheckCheckboxes(hqDojo.query("input[type=checkbox]"));
 				hqDijit.byId("uploadPanelDialog").hide();
 
 			});
 
 			hqDojo.query("#removePanelDialog .cancelLink").onclick(function(e) {
-				uncheckCheckboxes();
+				uncheckCheckboxes(hqDojo.query("input[type=checkbox]"));
 				hqDijit.byId("removePanelDialog").hide();
 			});
 			hqDojo.query("#errorMsgPanelDialog .cancelLink").onclick(function(e) {
 				hqDijit.byId("errorMsgPanelDialog").hide();
 			});
-
 		
 			hqDojo.connect(hqDojo.byId("showUploadFormButton"), "onclick", function(e) {
 				
@@ -574,11 +500,12 @@
 				var fileTypeCorrect=true;
 				var pluginList = hqDojo.query("input[type=file]", hqDojo.byId("hqDijit_FileUploaderForm_0"));
 				var newPluginList = pluginList.slice(0,pluginList.length-1);
-					
+				
+				uncheckCheckboxes(hqDojo.query("input[type=checkbox]"));
 				newPluginList.forEach(function(input) {
 				    //check file type
 					var filePath = input.value;
-					if(!checkFileType(filePath)){
+					if(!checkFileType(filePath,"validationMessage","<fmt:message key='admin.managers.plugin.message.invalid.file.extension' />")){
 					    fileTypeCorrect=false;
 					}
 					//change name, for backend!
@@ -683,7 +610,7 @@
                 },
                 load: function(response, args) {
                 	hqDojo.style(hqDojo.byId("pluginList"), "color","#000000");
-                	updateTime();
+                	refreshTime(hqDojo.byId("timeNow"),"refreshTimeInfo","#EEEEEE");
                 	timer.stop();
                 	timer.start();
                 	hqDojo.empty("pluginList");
