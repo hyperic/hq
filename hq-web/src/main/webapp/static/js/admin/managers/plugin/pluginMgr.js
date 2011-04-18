@@ -79,6 +79,7 @@
 		var ext = filePath.substr(filePath.length - 4);			
 		if (ext !== ".jar" && ext !== ".xml") {
 <<<<<<< HEAD
+<<<<<<< HEAD
 			if(validationMessageNode!==undefined && invalidMessage!==undefined){
 				hqDojo.byId(validationMessageNode).innerHTML = invalidMessage;
 				var anim = [hqDojo.fadeIn({
@@ -95,12 +96,18 @@
 =======
 			showErrorMessage(validationMessageNode,invalidMessage);
 >>>>>>> [HHQ-4731]fix error message not shown issue
+=======
+			showErrorMessage(validationMessageNode,invalidMessage);
+>>>>>>> [HHQ-4731]fix error message not shown issue
 			return false;
 		}
 		return true;
 	}
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> [HHQ-4731]fix error message not shown issue
 	function showErrorMessage(validationMessageNode,invalidMessage){
 		if(validationMessageNode!==undefined && invalidMessage!==undefined){
 			hqDojo.byId(validationMessageNode).innerHTML = invalidMessage;
@@ -116,6 +123,9 @@
 			hqDojo.fx.chain(anim).play();
 		}
 	}
+<<<<<<< HEAD
+>>>>>>> [HHQ-4731]fix error message not shown issue
+=======
 >>>>>>> [HHQ-4731]fix error message not shown issue
 	
 /*-- END pluginMgr.js --*/
