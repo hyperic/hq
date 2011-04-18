@@ -309,12 +309,12 @@
 		max-width:350px;
 		margin-left:0px;
 	}
-	#agentInfo{
+	#agentSummarySpan{
 		float:right;
 		color:#06C;
 		font-weight:bold;
 		cursor:pointer;
 	}
-	#agentInfo:focus, #agentInfo:hover{
+	#agentSummarySpan:focus, #agentSummarySpan:hover{
 		color:#09F;
 	}
