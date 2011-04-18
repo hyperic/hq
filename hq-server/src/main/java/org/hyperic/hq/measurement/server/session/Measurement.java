@@ -201,6 +201,16 @@ public class Measurement implements ContainerManagedTimestampTrackable, Serializ
     protected void setBaselinesBag(Collection<Baseline> baselines) {
         this.baselinesBag = baselines;
     }
+    
+    public void setBaseline(Baseline b) {
+        if (!baselinesBag.isEmpty()) {
+            baselinesBag.clear();
+        }
+        if (b != null) {
+            baselinesBag.add(b);
+        }
+    }
+
 
     public void setDsn(String dsn) {
         this.dsn = dsn;
