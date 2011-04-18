@@ -45,15 +45,6 @@ import org.hyperic.util.config.EncodingException;
 public interface CloningBoss {
 
     /**
-     * @param subj
-     * @param pType platform type
-     * @param nameRegEx regex which matches either the platform fqdn or the
-     *        resource sortname
-     */
-    public List<Platform> findPlatformsByTypeAndName(AuthzSubject subj, Integer pType,
-                                                     String nameRegEx) throws RemoteException;
-
-    /**
      * @param subj Method ensures that the master platform has viewable
      *        permissions and the clone targets have modifiable permissions.
      * @param platformId master platform id

@@ -39,6 +39,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.auth.domain.AuthzSubject;
+import org.hyperic.hq.auth.domain.Operation;
 import org.hyperic.hq.auth.shared.AuthManager;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
@@ -160,7 +161,7 @@ public class AuthzBossImpl implements AuthzBoss {
      * 
      */
     @Transactional(readOnly=true)
-    public List<OperationType> getAllOperations(Integer sessionId, PageControl pc) throws 
+    public List<Operation> getAllOperations(Integer sessionId, PageControl pc) throws 
         PermissionException, SessionTimeoutException, SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return permissionManager.getAllOperations(subject, pc);
@@ -174,7 +175,7 @@ public class AuthzBossImpl implements AuthzBoss {
      * 
      */
     @Transactional(readOnly=true)
-    public List<OperationType> getAllOperations(Integer sessionId) throws  PermissionException,
+    public List<Operation> getAllOperations(Integer sessionId) throws  PermissionException,
         SessionTimeoutException, SessionNotFoundException {
         return getAllOperations(sessionId, null);
     }

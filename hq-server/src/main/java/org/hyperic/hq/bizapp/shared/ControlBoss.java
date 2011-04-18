@@ -285,18 +285,6 @@ public interface ControlBoss {
 			SessionTimeoutException;
 
 	/**
-	 * Accept an array of appdef entity Ids and verify control permission on
-	 * each entity for specified subject. Return an array containing the set or
-	 * subset of entities where subject has control authorization.
-	 * 
-	 * @return List of entities that are control authorized.
-	 */
-	public List<AppdefEntityID> batchCheckControlPermissions(int sessionId,
-			AppdefEntityID[] entities) throws AppdefEntityNotFoundException,
-			PermissionException, SessionNotFoundException,
-			SessionTimeoutException;
-
-	/**
 	 * Find types of all controllable platforms defined in the system.
 	 * 
 	 * @return A map of PlatformType names and AppdefEntityTypeIDs.

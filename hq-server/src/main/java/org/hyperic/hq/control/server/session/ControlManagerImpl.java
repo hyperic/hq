@@ -532,69 +532,7 @@ public class ControlManagerImpl implements ControlManager {
             .getResource(), cLocal.getAction(), cLocal.getScheduled().booleanValue(), cLocal.getDateScheduled(), status);
         event.setMessage(msg);
         messagePublisher.publishMessage(MessagePublisher.EVENTS_TOPIC, event);
-    }
-
-    /**
-     * Accept an array of appdef entity Ids and verify control permission on
-     * each entity for specified subject. Return only the set of entities that
-     * have authorization.
-     * 
-     * @return List of entities subject is authz to control NOTE: Returns an
-     *         empty list when no resources are found.
-     */
-    public List<AppdefEntityID> batchCheckControlPermissions(AuthzSubject caller, AppdefEntityID[] entities)
-        throws AppdefEntityNotFoundException, PermissionException {
-        return doBatchCheckControlPermissions(caller, entities);
-    }
-
-    protected List<AppdefEntityID> doBatchCheckControlPermissions(AuthzSubject caller, AppdefEntityID[] entities)
-        throws AppdefEntityNotFoundException, PermissionException {
-        List<ResourceValue> resList = new ArrayList<ResourceValue>();
-        List<String> opList = new ArrayList<String>();
-        List<AppdefEntityID> retVal = new ArrayList<AppdefEntityID>();
-        ResourceValue[] resArr;
-        String[] opArr;
-
-        // package up the args for verification
-        for (AppdefEntityID entity : entities) {
-
-            // Special case groups. If the group is compatible,
-            // pull the members and check each of them. According
-            // to Moseley, if any member of a group is control unauthz
-            // then the entire group is unauthz.
-            if (entity.isGroup()) {
-                if (isGroupControlEnabled(caller, entity)) {
-                    retVal.add(entity);
-                }
-                continue;
-            }
-            // Build up the arguments -- operation name array correlated
-            // with resource (i.e. type specific operation names)
-            opList.add(getControlPermissionByType(entity));
-            ResourceValue rv = new ResourceValue();
-            rv.setInstanceId(entity.getId());
-            rv.setResourceType(resourceManager.findResourceTypeByName(AppdefUtil.appdefTypeIdToAuthzTypeStr(entity.getType())));
-            
-            
-            resList.add(rv);
-        }
-        if (resList.size() > 0) {
-            opArr = (String[]) opList.toArray(new String[0]);
-            resArr = (ResourceValue[]) resList.toArray(new ResourceValue[0]);
-
-            // fetch authz resources and add to return list
-            try {
-                PermissionManager pm = PermissionManagerFactory.getInstance();
-                Resource[] authz = pm.findOperationScopeBySubjectBatch(caller, resArr, opArr);
-                for (int x = 0; x < authz.length; x++) {
-                    retVal.add(AppdefUtil.newAppdefEntityId(authz[x]));
-                }
-            } catch (ApplicationException e) {
-                // returns empty list as advertised
-            }
-        }
-        return retVal;
-    }
+    } 
 
     // Authz Helper Methods
 

@@ -40,6 +40,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.auth.data.RoleRepository;
 import org.hyperic.hq.auth.domain.AuthzSubject;
+import org.hyperic.hq.auth.domain.Operation;
 import org.hyperic.hq.auth.domain.Role;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
@@ -50,7 +51,6 @@ import org.hyperic.hq.events.shared.MaintenanceEventManager;
 import org.hyperic.hq.inventory.data.ResourceDao;
 import org.hyperic.hq.inventory.data.ResourceGroupDao;
 import org.hyperic.hq.inventory.data.ResourceTypeDao;
-import org.hyperic.hq.inventory.domain.OperationType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.util.StringUtil;
@@ -146,31 +146,6 @@ public class PermissionManagerImpl
         return new ArrayList<Integer>();
     }
 
-    public List<Integer> findOperationScopeBySubject(AuthzSubject subj, Integer opId)
-        throws NotFoundException, PermissionException {
-        if (_log.isDebugEnabled()) {
-            _log.debug("Checking Scope for Operation: " + opId + " subject: " + subj);
-        }
-
-        List<Integer> scope = findScopeBySQL(subj, opId);
-
-        if (_log.isDebugEnabled()) {
-            _log.debug("Scope check returned a size of : " + scope.size() + " items");
-        }
-        return scope;
-    }
-
-    public Resource[] findOperationScopeBySubjectBatch(AuthzSubject whoami, ResourceValue[] resArr,
-                                                       String[] opArr) throws ApplicationException {
-        if (resArr == null) {
-            throw new IllegalArgumentException("At least one resource required");
-        }
-
-        Set resLocArr = toPojos(resArr);
-
-        return (Resource[]) resLocArr.toArray(new Resource[resLocArr.size()]);
-    }
-
     protected RoleRepository getRoleDAO() {
         return Bootstrap.getBean(RoleRepository.class);
     }
@@ -190,7 +165,7 @@ public class PermissionManagerImpl
         RoleRepository roleDao = null;
        
         for (int i = 0; i < vals.length; i++) {
-            if (vals[i] instanceof OperationType) {
+            if (vals[i] instanceof Operation) {
                 ret.add(vals[i]);
             } else if (vals[i] instanceof ResourceValue) {
                 ret.add(lookupResource((ResourceValue) vals[i]));
@@ -364,13 +339,6 @@ public class PermissionManagerImpl
         return operationPager.seek(ops, pc.getPagenum(), pc.getPagesize());
     }
 
-    public Collection<Resource> getGroupResources(Integer subjectId, Integer groupId,
-                                                  Boolean fsystem) {
-        //TODO
-        //return ResourceGroup.findResourceGroup(groupId).findInGroup_orderName(fsystem);
-        return null;
-    }
-
     public Collection<Resource> findServiceResources(AuthzSubject subj, Boolean fsystem) {
         //TODO
         //return Resource.findSvcRes_orderName(fsystem);
@@ -418,10 +386,6 @@ public class PermissionManagerImpl
 
     public boolean hasGuestRole() {
         return false;
-    }
-
-    public String getOperableGroupsHQL(AuthzSubject subject, String alias, String oper) {
-        return "";
     }
 
     public String getSQLWhere(Integer subjectId) {

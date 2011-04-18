@@ -44,6 +44,7 @@ import org.hyperic.hq.auth.data.RoleCalendarRepository;
 import org.hyperic.hq.auth.data.RoleRepository;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.auth.domain.Calendar;
+import org.hyperic.hq.auth.domain.Operation;
 import org.hyperic.hq.auth.domain.Role;
 import org.hyperic.hq.auth.domain.RoleCalendar;
 import org.hyperic.hq.auth.domain.RoleCalendarType;
@@ -61,7 +62,6 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.EntityNotFoundException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.shared.CalendarManager;
-import org.hyperic.hq.inventory.domain.OperationType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.util.pager.PageControl;
@@ -118,7 +118,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
         this.resourceManager = resourceManager;
         this.resourceGroupManager = resourceGroupManager;
     }
-    //TODO pretty much every occurrence of OperationType here should be replaced by Operation
+    //TODO pretty much every occurrence of Operation here should be replaced by Operation
 
     @PostConstruct
     public void afterPropertiesSet() throws Exception {
@@ -250,7 +250,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
      *         covalentAuthzRole ResourceType.
      * 
      */
-    public Integer createOwnedRole(AuthzSubject whoami, String name, String description, boolean system,OperationType[] operations, Integer[] subjectIds,
+    public Integer createOwnedRole(AuthzSubject whoami, String name, String description, boolean system,Operation[] operations, Integer[] subjectIds,
                                    Integer[] groupIds) throws  AuthzDuplicateNameException,
         PermissionException {
 
@@ -378,8 +378,8 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
      *         role.
      * 
      */
-    public void addOperations(AuthzSubject whoami, Role role, OperationType[] operations) throws PermissionException {
-        Set<OperationType> opLocals = toPojos(operations);
+    public void addOperations(AuthzSubject whoami, Role role, Operation[] operations) throws PermissionException {
+        Set<Operation> opLocals = toPojos(operations);
 
         // roleLocal.setWhoami(lookupSubject(whoami));
         //TODO impl
@@ -414,7 +414,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
      *         setOperations on this role.
      * 
      */
-    public void setOperations(AuthzSubject whoami, Integer id, OperationType[] operations) throws PermissionException {
+    public void setOperations(AuthzSubject whoami, Integer id, Operation[] operations) throws PermissionException {
         if (operations != null) {
             Role roleLocal = lookupRole(id);
 
@@ -422,7 +422,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
             //permissionManager.check(whoami.getId(), roleLocal.getResource().getType(), roleLocal.getId(),
               //  AuthzConstants.roleOpModifyRole);
 
-            Set<OperationType> opLocals = toPojos(operations);
+            Set<Operation> opLocals = toPojos(operations);
             //TODO impl
             //roleLocal.setOperations(opLocals);
         }
@@ -658,7 +658,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
      * 
      */
     @Transactional(readOnly=true)
-    public List<OperationType> getRoleOperations(AuthzSubject subject, Integer roleId)
+    public List<Operation> getRoleOperations(AuthzSubject subject, Integer roleId)
         throws PermissionException {
       
         // find the role by id
@@ -668,8 +668,8 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
                 " was not found");
         }
         //TODO impl
-        //return new ArrayList<OperationType>(role.getOperations());
-        return new ArrayList<OperationType>();
+        //return new ArrayList<Operation>(role.getOperations());
+        return new ArrayList<Operation>();
     }
 
     /**
@@ -1500,7 +1500,7 @@ public class RoleManagerImpl implements RoleManager, ApplicationContextAware {
             return ret;
         }
         for (int i = 0; i < vals.length; i++) {
-            if (vals[i] instanceof OperationType) {
+            if (vals[i] instanceof Operation) {
                 ret.add(vals[i]);
             } else if (vals[i] instanceof ResourceValue) {
                 ret.add(lookupResource((ResourceValue) vals[i]));

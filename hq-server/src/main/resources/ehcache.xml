@@ -292,6 +292,9 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="60"
          memoryStoreEvictionPolicy="LRU"/>
+         
+ <cache name="org.hyperic.hq.authz.server.session.Operation" maxElementsInMemory="100" 
+ eternal="true" timeToIdleSeconds="0" timeToLiveSeconds="0" memoryStoreEvictionPolicy="LRU"/>
 
   <!-- Config caches -->
   <cache name="org.hyperic.hq.config.domain.Crispo"

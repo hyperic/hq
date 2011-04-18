@@ -29,13 +29,13 @@ import java.util.Collection;
 import java.util.List;
 
 import org.hyperic.hq.auth.domain.AuthzSubject;
+import org.hyperic.hq.auth.domain.Operation;
 import org.hyperic.hq.auth.domain.Role;
 import org.hyperic.hq.auth.domain.RoleCalendar;
 import org.hyperic.hq.auth.domain.RoleCalendarType;
 import org.hyperic.hq.authz.values.OwnedRoleValue;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
-import org.hyperic.hq.inventory.domain.OperationType;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -62,7 +62,7 @@ public interface RoleManager {
      *         covalentAuthzRole ResourceType.
      */
     public Integer createOwnedRole(AuthzSubject whoami, String name, String description, boolean system,
-                                   OperationType[] operations,
+                                   Operation[] operations,
                                    java.lang.Integer[] subjectIds, java.lang.Integer[] groupIds)
         throws AuthzDuplicateNameException, PermissionException;
 
@@ -102,7 +102,7 @@ public interface RoleManager {
      * @throws PermissionException whoami may not perform addOperation on this
      *         role.
      */
-    public void addOperations(AuthzSubject whoami, Role role, OperationType[] operations)
+    public void addOperations(AuthzSubject whoami, Role role, Operation[] operations)
         throws PermissionException;
 
     /**
@@ -125,7 +125,7 @@ public interface RoleManager {
      *         setOperations on this role.
      */
     public void setOperations(AuthzSubject whoami, Integer id,
-                              OperationType[] operations) throws PermissionException;
+                              Operation[] operations) throws PermissionException;
 
     /**
      * Associate ResourceGroups with this role.
@@ -233,7 +233,7 @@ public interface RoleManager {
      * @return list - values are lists of operation
      * 
      */
-    public List<OperationType> getRoleOperations(AuthzSubject subject, Integer roleId)
+    public List<Operation> getRoleOperations(AuthzSubject subject, Integer roleId)
         throws PermissionException;
 
     public Collection<Role> getAllRoles();
