@@ -31,7 +31,7 @@ import org.hyperic.hq.agent.FileData;
 import org.hyperic.hq.agent.FileDataResult;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.operation.OperationService;
-import org.hyperic.hq.operation.rabbit.util.Constants;
+import org.hyperic.hq.operation.rabbit.util.AgentConstants;
 
 import java.io.InputStream;
 import java.util.Collection;
@@ -91,7 +91,7 @@ public class AmqpCommandOperationService implements AgentCommandsClient {
         try {
             client.die();
         } catch (Exception e) {
-            handleException(e, Constants.ROUTING_KEY_AGENT_DIE);
+            handleException(e, AgentConstants.ROUTING_KEY_AGENT_DIE);
         }
     }
 

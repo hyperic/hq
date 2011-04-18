@@ -27,83 +27,86 @@ package org.hyperic.hq.operation.rabbit.util;
 /**
  * @author Helena Edelson
  */
-public class BindingPatternConstants {
+public class BindingConstants {
 
     /**
      * Use to bind a queue to the appropriate exchange
      */
-    public static final String BINDING_NAME_TO_AGENT = "hq-agents.#";
+    public static final String BINDING_NAME_TO_AGENT = "hq.agent.#";
 
     /**
      * Use to bind a queue to the appropriate exchange
      */
-    public static final String BINDING_NAME_TO_SERVER = "hq-servers.#";
+    public static final String BINDING_NAME_TO_SERVER = "hq.server.#";
 
     /**
      * Use to bind a queue to the appropriate exchange
      */
-    public static final String BINDING_PATTERN_TO_AGENT_OPERATIONS = "hq-agents.*.operations.#";
+    public static final String BINDING_AGENT_OPERATIONS = "hq.agent.#";
 
     /**
      * Use to bind a queue to the appropriate exchange
      */
-    public static final String BINDING_PATTERN__TO_SERVER_OPERATIONS = "hq-servers.*.operations.#";
+    public static final String BINDING_SERVER_OPERATIONS = "hq.server.#";
 
     /**
-     *
+     *  deprecated. TODO remove
      */
     public static final String OPERATION_PREFIX = ".operations.";
 
     /**
      * Metrics report - high load
      */
-    public static final String BINDING_PATTERN_METRICS_REPORT = "*.*.operations.metrics.reports.main";
+    public static final String BINDING_METRICS_REPORT = "*.*.metrics.reports.main";
 
     /**
      * Metrics availability report - high load
      */
-    public static final String BINDING_PATTERN_METRICS_AVAILABILITY_REPORT = "*.*.operations.metrics.reports.availability";
+    public static final String BINDING_METRICS_AVAILABILITY_REPORT = "*.*.metrics.reports.availability";
 
     /**
      * General Metrics (schedule,unschedule,config, excludes reports.*)
      */
-    public static final String BINDING_PATTERN_METRICS_ACTIONS = "*.*.operations.metrics.actions.*"; 
+    public static final String BINDING_METRICS_ACTIONS = "*.*.metrics.actions.*";
 
     /**
      * Runtime Scans - high load
      */
-    public static final String BINDING_PATTERN_SCANS_RUNTIME = "*.*.operations.scans.runtime";
+    public static final String BINDING_SCANS_RUNTIME = "*.*.scans.runtime";
 
     /**
      * Default Scans - high load
      */
-    public static final String BINDING_PATTERN_SCANS_DEFAULT = "*.*.operations.scans.default";
+    public static final String BINDING_SCANS_DEFAULT = "*.*.scans.default";
 
     /**
      * Scan auto-discovery
      */
-    public static final String BINDING_PATTERN_SCANS_AUTO_DISCOVERY= "*.*.operations.scans.autodiscovery.*";
+    public static final String BINDING_SCANS_AUTO_DISCOVERY= "*.*.scans.autodiscovery.*";
  
     /** Auth */
-    public static final String BINDING_PATTERN_AUTHENTICATION = "*.*.operations.authentication.#";
+    public static final String BINDING_AUTHENTICATION = "*.*.authentication.#";
+
+    public static final String BINDING_REGISTER_AGENT = "hq.agent.config.register.request";
+
 
     /**
      * Config
      */
-    public static final String BINDING_PATTERN_CONFIG_REGISTRATION = "*.*.operations.config.*";
+    public static final String BINDING_CONFIG_REGISTRATION = "*.*.config.*";
 
     /**
      * Events
      */
-    public static final String BINDING_PATTERN_EVENTS_ALL = "*.*.operations.events.#";
+    public static final String BINDING_EVENTS_ALL = "*.*.events.#";
 
     /**
      * Control Actions
      */
-    public static final String BINDING_PATTERN_CONTROL_ACTIONS_ALL = "*.*.operations.controlActions.*";
+    public static final String BINDING_CONTROL_ACTIONS_ALL = "*.*.controlActions.*";
 
     /**
      * Plugins
      */
-    public static final String BINDING_PATTERN_PLUGINS_ALL = "*.*.operations.plugins.#";
+    public static final String BINDING_PLUGINS_ALL = "*.*.plugins.#";
 }

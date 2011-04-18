@@ -33,7 +33,6 @@ import java.lang.annotation.*;
  * Indicates that a method is capable of resolving to an exchange name with a
  * routing key or just a routing key with the default exchange.
  * This annotation can be used as meta-data for other annotations.
- * @see SecureOperation
  * @author Helena Edelson
  */
 @Target(ElementType.METHOD)
@@ -41,11 +40,11 @@ import java.lang.annotation.*;
 @Documented
 public @interface Operation {
   
-    String exchangeName() default "";
+    String exchange() default "";
 
     String routingKey() default "";
 
-    String bindingPattern() default "";
+    String binding() default "";
 
     String replyTo() default "";
 

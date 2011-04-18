@@ -26,19 +26,17 @@
 
 package org.hyperic.hq.operation.rabbit.shared;
 
-import com.rabbitmq.client.ConnectionFactory;
 import org.hyperic.hq.operation.rabbit.annotation.Operation;
 import org.hyperic.hq.operation.rabbit.annotation.OperationDispatcher;
 import org.hyperic.hq.operation.rabbit.annotation.OperationEndpoint;
-import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
-import org.hyperic.hq.operation.rabbit.core.AnnotatedRabbitOperationService;
-import org.hyperic.hq.operation.rabbit.core.OperationToRoutingKeyRegistry;
-import org.hyperic.hq.operation.rabbit.util.Constants;
-import org.junit.Before;
+import org.hyperic.hq.operation.rabbit.api.OperationDispatcherRegistry;
+import org.hyperic.hq.operation.rabbit.api.OperationEndpointRegistry;
+import org.hyperic.hq.operation.rabbit.core.AnnotatedOperationDispatcherDiscoverer;
+import org.hyperic.hq.operation.rabbit.core.AnnotatedOperationEndpointDiscoverer;
+import org.hyperic.hq.operation.rabbit.util.AgentConstants;
+import org.hyperic.hq.operation.rabbit.util.ServerConstants;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author Helena Edelson
@@ -46,35 +44,42 @@ import static org.junit.Assert.assertEquals;
 @Ignore("not working with a mock Connection")
 public class AnnotationTests {
 
-    private AnnotatedRabbitOperationService operationService;
- 
+    private AnnotatedOperationDispatcherDiscoverer dispatcherDiscoverer;
+
+    private AnnotatedOperationEndpointDiscoverer endpointDiscoverer;
+
+    private OperationDispatcherRegistry dispatcherRegistry;
+
+    private OperationEndpointRegistry endpointRegistry;
+
+
     @OperationDispatcher
     static class TestDispatcher {
-        @Operation(operationName = Constants.ROUTING_KEY_AGENT_REGISTER_REQUEST, exchangeName = Constants.TO_SERVER_EXCHANGE, value = Constants.ROUTING_KEY_AGENT_REGISTER_REQUEST)
-        void register(Object data) {
-            System.out.println("Invoked method=report with data=" + data);
+        @Operation(exchange = AgentConstants.EXCHANGE_TO_SERVER, routingKey = AgentConstants.ROUTING_KEY_REGISTER_AGENT, binding = "request.*")
+        void request(Object data) {
+            System.out.println("Invoked method=request with data=" + data);
         }
     }
 
     @OperationEndpoint
     static class TestEndpoint {
-        @Operation(operationName = Constants.ROUTING_KEY_AGENT_REGISTER_RESPONSE, exchangeName = Constants.TO_AGENT_EXCHANGE, value = Constants.ROUTING_KEY_AGENT_REGISTER_RESPONSE)
-        void handle(Object data) {
-            System.out.println("Invoked method=handle with data=" + data);
+        @Operation(exchange = ServerConstants.EXCHANGE_TO_AGENT, routingKey = ServerConstants.ROUTING_KEY_REGISTER_AGENT, binding = ServerConstants.BINDING_REGISTER_AGENT)
+        void response(Object data) {
+            System.out.println("Invoked method=response with data=" + data);
         }
     }
- 
-    @Before
+
+   /* @Before
     public void prepare() {
         ConnectionFactory cf = new ConnectionFactory();
-        this.operationService = new AnnotatedRabbitOperationService(cf, new OperationToRoutingKeyRegistry(cf), new JsonMappingConverter());
-    }
+        this.operationService = new AnnotatedRabbitOperationService(new SimpleRabbitTemplate(cf), new OperationToRoutingKeyRegistry(cf));
+    }*/
 
     @Test
     public void discover() {
-        this.operationService.discover(new TestDispatcher(), OperationDispatcher.class);
+        /*this.operationService.perform(new TestDispatcher(), OperationDispatcher.class);
         this.operationService.discover(new TestEndpoint(), OperationEndpoint.class);
-        assertEquals(this.operationService.getMappings().getOperationMappings().size(), 1);
+        assertEquals(this.operationService.getMappings().getOperationMappings().size(), 1);*/
     }
 
 }

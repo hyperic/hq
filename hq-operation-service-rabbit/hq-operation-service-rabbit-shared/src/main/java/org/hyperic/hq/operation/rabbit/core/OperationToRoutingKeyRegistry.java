@@ -32,7 +32,7 @@ import org.hyperic.hq.operation.rabbit.annotation.Operation;
 import org.hyperic.hq.operation.rabbit.api.BindingHandler;
 import org.hyperic.hq.operation.rabbit.api.RoutingRegistry;
 import org.hyperic.hq.operation.rabbit.connection.ChannelException;
-import org.hyperic.hq.operation.rabbit.util.Constants;
+import org.hyperic.hq.operation.rabbit.util.MessageConstants;
 import org.hyperic.hq.operation.rabbit.util.OperationToRoutingMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -40,13 +40,9 @@ import org.springframework.stereotype.Component;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-
-import static org.hyperic.hq.operation.rabbit.util.BindingPatternConstants.OPERATION_PREFIX;
 
 /**
  * Agent does not have Spring
@@ -60,6 +56,10 @@ public class OperationToRoutingKeyRegistry implements RoutingRegistry {
     private final Map<String, OperationToRoutingMapping> operationToRoutingMappings = new ConcurrentHashMap<String, OperationToRoutingMapping>();
 
     private final BindingHandler bindingHandler;
+
+    private static final String SERVER_ROUTING_KEY_PREFIX = "hq.server.";
+     
+    public static final String AGENT_ROUTING_KEY_PREFIX = "hq.agent.";
 
     private final String serverId;
 
@@ -81,18 +81,18 @@ public class OperationToRoutingKeyRegistry implements RoutingRegistry {
         Operation operation = method.getAnnotation(Operation.class);
         if (isValid(operation)) {
             String queueName = this.bindingHandler.declareAndBind(method.getName(), operation);
-            this.operationToRoutingMappings.put(method.getName(),
-                    new OperationToRoutingMapping(operation.exchangeName(), operation.routingKey(), queueName, operationHasReturnType(method)));
-        } 
+            OperationToRoutingMapping map = new OperationToRoutingMapping(operation.exchange(), operation.routingKey(), method.getName(), operationHasReturnType(method));
+            this.operationToRoutingMappings.put(method.getName(), map);
+        }
     }
-        
+
     private boolean operationHasReturnType(Method method) {
         return !void.class.equals(method.getReturnType());
     }
 
-    /* TODO - there is a jira ticket in the backlog */
+    /* TODO - there is a jira ticket in the backlog */ 
     private boolean isAuthenticatedUser(ConnectionFactory connectionFactory) {
-        return !connectionFactory.getUsername().equalsIgnoreCase(Constants.GUEST_USER) && !connectionFactory.getPassword().equalsIgnoreCase(Constants.GUEST_PASS);
+        return !connectionFactory.getUsername().equalsIgnoreCase(MessageConstants.GUEST_USER) && !connectionFactory.getPassword().equalsIgnoreCase(MessageConstants.GUEST_PASS);
     }
 
     /**
@@ -109,30 +109,15 @@ public class OperationToRoutingKeyRegistry implements RoutingRegistry {
     }
 
     private boolean isValid(Operation operation) {
-        return operation.routingKey() != null && operation.exchangeName() != null && operation.bindingPattern() != null;
+        return operation.routingKey() != null && operation.exchange() != null && operation.binding() != null;
     }
 
-    /**
-     * id = 1302212470776-5028906219606536735-6762208433280624914
-     * hq-agents.agent-{id}.operations.config.registration.request
-     * @param agentToken
-     * @return
-     */
-    public List<String> createAgentOperationRoutingKeys(final String agentToken) {
-        List<String> keys = new ArrayList<String>();
-        for (String operation : Constants.AGENT_OPERATIONS) {
-            keys.add(new StringBuilder(Constants.AGENT_ROUTING_KEY_PREFIX).append(agentToken).append(OPERATION_PREFIX).append(operation).toString());
-        }
-        return keys;
-    }
-
-    public List<String> createServerOperationRoutingKeys() {
-        List<String> keys = new ArrayList<String>();
-        for (String operation : Constants.SERVER_OPERATIONS) {
-            keys.add(new StringBuilder(Constants.SERVER_ROUTING_KEY_PREFIX + this.serverId).append(OPERATION_PREFIX).append(operation).toString());
-        }
-        return keys;
-    }
+    /*
+   id = 1302212470776-5028906219606536735-6762208433280624914
+   hq-agents.agent-{id}.operations.config.registration.request
+   new StringBuilder(SERVER_ROUTING_KEY_PREFIX + this.serverId).append(OPERATION_PREFIX).append(operation).toString());
+   new StringBuilder(AGENT_ROUTING_KEY_PREFIX).append(agentToken).append(OPERATION_PREFIX).append(operation).toString());
+   */
 
     /**
      * Returns the IP address as a String. If an error occurs getting
@@ -145,5 +130,5 @@ public class OperationToRoutingKeyRegistry implements RoutingRegistry {
         } catch (UnknownHostException e) {
             return UUID.randomUUID().toString();
         }
-    } 
+    }
 }

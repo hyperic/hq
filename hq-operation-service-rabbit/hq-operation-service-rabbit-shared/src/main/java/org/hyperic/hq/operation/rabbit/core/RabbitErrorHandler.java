@@ -34,8 +34,8 @@ import org.hyperic.hq.operation.RegisterAgentResponse;
 import org.hyperic.hq.operation.rabbit.api.ChannelCallback;
 import org.hyperic.hq.operation.rabbit.connection.ChannelException;
 import org.hyperic.hq.operation.rabbit.connection.ChannelTemplate;
-import org.hyperic.hq.operation.rabbit.util.Constants;
 import org.hyperic.hq.operation.rabbit.util.MessageConstants;
+import org.hyperic.hq.operation.rabbit.util.ServerConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ErrorHandler;
@@ -75,7 +75,7 @@ public class RabbitErrorHandler implements ErrorHandler {
         final String context = t.getCause().toString();
 
         if (context.contains("BadCredentialsException")) {
-            temporarySend(new RegisterAgentResponse("Permission denied"), Constants.TO_AGENT_EXCHANGE, "response.register");
+            temporarySend(new RegisterAgentResponse("Permission denied"), ServerConstants.EXCHANGE_TO_AGENT, "response.register");
         } else if (t instanceof NullPointerException) {
             //problem with the handler/converter
         }

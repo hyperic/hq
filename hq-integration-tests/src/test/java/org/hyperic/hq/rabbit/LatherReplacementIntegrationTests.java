@@ -4,9 +4,11 @@ import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.agent.AgentConfigException;
 import org.hyperic.hq.bizapp.agent.ProviderInfo;
 import org.hyperic.hq.bizapp.client.*;
+import org.hyperic.hq.bizapp.server.operations.RegisterAgentService;
 import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -16,6 +18,8 @@ import static org.junit.Assert.assertTrue;
  */
 //@Ignore("'AGENT_HOME' must be set")
 public class LatherReplacementIntegrationTests extends BaseInfrastructureTest {
+
+    @Autowired private RegisterAgentService registerAgentService;
 
     /**
      * Must configure
@@ -34,6 +38,7 @@ public class LatherReplacementIntegrationTests extends BaseInfrastructureTest {
 
     @Before
     public void prepare() {
+        assertNotNull(registerAgentService);
         System.setProperty("agent.install.home", AGENT_HOME);
         System.setProperty("agent.bundle.home", AGENT_HOME + "/bin");
         ProviderInfo providerInfo = new ProviderInfo(AgentCallbackClient.getDefaultProviderURL(host, port, false), "no-auth");

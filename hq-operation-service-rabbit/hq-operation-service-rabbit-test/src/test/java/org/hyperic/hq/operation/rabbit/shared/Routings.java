@@ -1,6 +1,8 @@
 package org.hyperic.hq.operation.rabbit.shared;
 
-import org.hyperic.hq.operation.rabbit.util.Constants;
+import org.hyperic.hq.operation.rabbit.util.AgentConstants;
+import org.hyperic.hq.operation.rabbit.util.MessageConstants;
+import org.hyperic.hq.operation.rabbit.util.ServerConstants;
 import org.junit.Ignore;
 
 import java.net.InetAddress;
@@ -9,48 +11,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static org.hyperic.hq.operation.rabbit.util.BindingPatternConstants.OPERATION_PREFIX;
+import static org.hyperic.hq.operation.rabbit.util.BindingConstants.OPERATION_PREFIX;
 
 
-@Ignore
+@Ignore("TODO remove - deprecated")
 public final class Routings {
-
- 
-    private final String serverPrefix;
-
-    private final String[] agentOperations;
-
-    private final String[] serverOperations;
-
-    public final String agentRoutingKeyPrefix;
-
-    public final String defaultToAgentBindingKey;
-
-    public final String defaultToServerBindingKey;
-
-    public Routings() {
-        this(getDefaultServerId());
-    }
-
-    /**
-     * Much of this is temporary. There is a ticket to
-     * automate registration of these.
-     * @param serverId
-     */
-    public Routings(String serverId) {
-        this.agentOperations = Constants.AGENT_OPERATIONS;
-        this.serverOperations = Constants.SERVER_OPERATIONS;
-        this.agentRoutingKeyPrefix = Constants.AGENT_ROUTING_KEY_PREFIX;
-        this.serverPrefix = Constants.SERVER_ROUTING_KEY_PREFIX + serverId;
-        this.defaultToAgentBindingKey = agentRoutingKeyPrefix + "";
-        this.defaultToServerBindingKey = agentRoutingKeyPrefix + "";
-    }
 
     public List<String> createAgentOperationRoutingKeys(final String agentToken) {
         List<String> keys = new ArrayList<String>();
 
-        for (String operation : getAgentOperations()) {
-            keys.add(new StringBuilder(getAgentRoutingKeyPrefix()).append(agentToken).append(OPERATION_PREFIX).append(operation).toString());
+        for (String operation : AGENT_OPERATIONS) {
+            keys.add(new StringBuilder(AGENT_ROUTING_KEY_PREFIX).append(agentToken).append(OPERATION_PREFIX).append(operation).toString());
         }
         return keys;
     }
@@ -58,8 +29,8 @@ public final class Routings {
     public List<String> createServerOperationRoutingKeys() {
         List<String> keys = new ArrayList<String>();
 
-        for (String operation : getServerOperations()) {
-            keys.add(new StringBuilder(getServerRoutingKeyPrefix()).append(OPERATION_PREFIX).append(operation).toString());
+        for (String operation : SERVER_OPERATIONS) {
+            keys.add(new StringBuilder(SERVER_ROUTING_KEY_PREFIX).append(OPERATION_PREFIX).append(operation).toString());
         }
         return keys;
     }
@@ -77,32 +48,16 @@ public final class Routings {
         }
     }
 
-    public String[] getAgentOperations() {
-        return agentOperations;
-    }
-
-    public String[] getServerOperations() {
-        return serverOperations;
-    }
-
-    public String getAgentRoutingKeyPrefix() {
-        return agentRoutingKeyPrefix;
-    }
-
-    public String getServerRoutingKeyPrefix() {
-        return serverPrefix;
-    }
-
     public String getSharedExchangeType() {
-        return Constants.SHARED_EXCHANGE_TYPE;
+        return MessageConstants.SHARED_EXCHANGE_TYPE;
     }
 
     public String getOperationRequest() {
-        return Constants.REQUEST;
+        return MessageConstants.REQUEST;
     }
 
     public String getOperationResponse() {
-        return Constants.RESPONSE;
+        return MessageConstants.RESPONSE;
     }
 
     public String getOperationPrefix() {
@@ -110,18 +65,86 @@ public final class Routings {
     }
 
     public String getToServerUnauthenticatedExchange() {
-        return Constants.TO_SERVER_EXCHANGE;
+        return AgentConstants.EXCHANGE_TO_SERVER;
     }
 
     public String getToServerExchange() {
-        return Constants.TO_SERVER_AUTHENTICATED_EXCHANGE;
+        return AgentConstants.EXCHANGE_TO_SERVER_SECURE;
     }
 
     public String getToAgentUnauthenticatedExchange() {
-        return Constants.TO_AGENT_EXCHANGE;
+        return ServerConstants.EXCHANGE_TO_AGENT;
     }
 
     public String getToAgentExchange() {
-        return Constants.TO_AGENT_AUTHENTICATED_EXCHANGE;
-    } 
+        return ServerConstants.EXCHANGE_TO_AGENT_SECURE;
+    }
+
+    public static final String[] AGENT_OPERATIONS = {
+            "metrics.report.request",
+            "metrics.availability.request",
+            "metrics.schedule.response",
+            "metrics.unschedule.response",
+            "metrics.config.response",
+            "scans.runtime.request",
+            "scans.default.request",
+            "scans.autodiscovery.start.response",
+            "scans.autodiscovery.stop.response",
+            "scans.autodiscovery.config.response",
+            "ping.request",
+            "user.authentication.request",
+            "config.authentication.request",
+            "config.registration.request",
+            "config.upgrade.response",
+            "config.bundle.request",
+            "config.restart.response",
+            "config.update.request",
+            "events.track.log.request",
+            "events.track.config.request",
+            "controlActions.results.request",
+            "controlActions.config.response",
+            "controlActions.execute.response",
+            "plugin.metadata.request",
+            "plugin.liveData.request",
+            "plugin.control.add.response",
+            "plugin.track.add.response",
+            "plugin.track.remove.response"
+    };
+    /**
+     * Prefix for agent routings
+     */
+    public static final String AGENT_ROUTING_KEY_PREFIX = "hq.agent.";
+
+     public static final String SERVER_ROUTING_KEY_PREFIX = "hq.server.";
+
+    public static final String[] SERVER_OPERATIONS = {
+            "metrics.report.response",
+            "metrics.availability.response",
+            "metrics.schedule.request",
+            "metrics.unschedule.request",
+            "metrics.config.request",
+            "scans.runtime.response",
+            "scans.default.response",
+            "scans.autodiscovery.start.request",
+            "scans.autodiscovery.stop.request",
+            "scans.autodiscovery.config.request",
+            "ping.response",
+            "user.authentication.response",
+            "config.authentication.response",
+            "config.registration.response",
+            "config.upgrade.request",
+            "config.bundle.response",
+            "config.restart.request",
+            "config.update.response",
+            "events.track.log.response",
+            "events.track.config.response",
+            "controlActions.results.response",
+            "controlActions.config.request",
+            "controlActions.execute.request",
+            "plugin.metadata.response",
+            "plugin.liveData.response",
+            "plugin.control.add.request",
+            "plugin.track.add.request",
+            "plugin.track.remove.request"
+    };
 }

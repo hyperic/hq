@@ -34,8 +34,8 @@ import org.hyperic.hq.operation.rabbit.api.RabbitTemplate;
 import org.hyperic.hq.operation.rabbit.connection.ChannelException;
 import org.hyperic.hq.operation.rabbit.connection.ChannelTemplate;
 import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
-import org.hyperic.hq.operation.rabbit.util.Constants;
 import org.hyperic.hq.operation.rabbit.util.MessageConstants;
+import org.hyperic.hq.operation.rabbit.util.ServerConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -166,7 +166,7 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
         String correlationId = bp.getCorrelationId();
 
         synchronized (monitor) {
-            this.channel.basicPublish(Constants.TO_AGENT_EXCHANGE, "test", bp, bytes);
+            this.channel.basicPublish(ServerConstants.EXCHANGE_TO_AGENT, "test", bp, bytes);
             while (true) {
                 GetResponse response = channel.basicGet(agentQueue, false);
                 if (response.getProps().getCorrelationId().equals(correlationId)) {

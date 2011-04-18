@@ -51,7 +51,6 @@ import org.hyperic.hq.operation.rabbit.api.ChannelCallback;
 import org.hyperic.hq.operation.rabbit.connection.ChannelException;
 import org.hyperic.hq.operation.rabbit.connection.ChannelTemplate;
 import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
-import org.hyperic.hq.operation.rabbit.util.Constants;
 import org.hyperic.hq.operation.rabbit.util.MessageConstants;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.security.SecurityUtil;
@@ -67,9 +66,9 @@ import java.util.List;
 /**
  * @author Helena Edelson
  */
+@OperationEndpoint
 @Service
 @Transactional
-@OperationEndpoint
 public class RegisterAgentServiceImpl implements RegisterAgentService {
 
     private final Log logger = LogFactory.getLog(this.getClass());
@@ -99,13 +98,13 @@ public class RegisterAgentServiceImpl implements RegisterAgentService {
         this.serverOperationServiceValidator = serverOperationServiceValidator;
     }
 
-
-    @Operation(exchangeName = Constants.TO_AGENT_EXCHANGE, routingKey = Constants.ROUTING_KEY_AGENT_REGISTER_RESPONSE, bindingPattern = "response.*")
-    public void registerAgentRequest(Object o) throws AgentConnectionException, PermissionException {
-    
-        /* TODO, put converter in the listener */ 
-        RegisterAgentRequest registerAgent = (RegisterAgentRequest) new JsonMappingConverter().read(new String((byte[]) o), RegisterAgentRequest.class);
-        logger.info("received=" + registerAgent);
+    @Operation(exchange = "to.server", routingKey = "request.register", binding = "request.*")
+    public void registerAgentRequest(Object request) throws AgentConnectionException, PermissionException {
+        logger.info("****************received=" +request);
+        /* TODO, put converter in the listener */
+        JsonMappingConverter converter = new JsonMappingConverter();
+        RegisterAgentRequest registerAgent = (RegisterAgentRequest) converter.read(new String((byte[]) request), RegisterAgentRequest.class);
+        //logger.info("received=" + converter.write(registerAgent));
 
         try {
             checkUserCanManageAgent(registerAgent);
@@ -127,7 +126,7 @@ public class RegisterAgentServiceImpl implements RegisterAgentService {
 
             isOldAgentToken = false;
         }
-
+        logger.info("**********set agentToken="+agentToken);
         /* Check the to see if the agent already exists. Lookup the agent by agent token (if it exists).
         Otherwise, use the agent IP and port */
 
@@ -169,8 +168,8 @@ public class RegisterAgentServiceImpl implements RegisterAgentService {
                 try {
                     String json = new JsonMappingConverter().write(response);
                     byte[] bytes = json.getBytes(MessageConstants.CHARSET);
-                    channel.basicPublish(Constants.TO_AGENT_EXCHANGE, "response.register", MessageConstants.DEFAULT_MESSAGE_PROPERTIES, bytes);
-                    logger.info("returned=" + json);
+                    channel.basicPublish("to.agent", "response.register", null, bytes);
+                    logger.info("*************returned=" + json);
                     return true;
                 } catch (IOException e) {
                     throw new ChannelException("Could not bind queue to exchange", e);

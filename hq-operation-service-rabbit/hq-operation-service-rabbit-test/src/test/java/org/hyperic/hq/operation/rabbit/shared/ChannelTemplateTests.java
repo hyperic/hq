@@ -5,7 +5,7 @@ import com.rabbitmq.client.ConnectionFactory;
 import org.hyperic.hq.operation.rabbit.api.ChannelCallback;
 import org.hyperic.hq.operation.rabbit.connection.ChannelException;
 import org.hyperic.hq.operation.rabbit.connection.ChannelTemplate;
-import org.hyperic.hq.operation.rabbit.util.Constants;
+import org.hyperic.hq.operation.rabbit.util.MessageConstants;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -25,7 +25,7 @@ public class ChannelTemplateTests {
             public Object doInChannel(Channel channel) throws ChannelException {
                 try {
                     String exchange = "test.foo";
-                    channel.exchangeDeclare(exchange, Constants.SHARED_EXCHANGE_TYPE, true, false, null);
+                    channel.exchangeDeclare(exchange, MessageConstants.SHARED_EXCHANGE_TYPE, true, false, null);
                     String queue = channel.queueDeclare("foo", true, true, false, null).getQueue();
                     channel.queueBind(queue, exchange, "ops.foo.*");
                     return true;

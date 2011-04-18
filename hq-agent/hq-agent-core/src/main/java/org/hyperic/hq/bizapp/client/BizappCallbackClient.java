@@ -36,12 +36,10 @@ import org.hyperic.hq.bizapp.shared.lather.*;
 import org.hyperic.hq.operation.OperationService;
 import org.hyperic.hq.operation.RegisterAgentRequest;
 import org.hyperic.hq.operation.RegisterAgentResponse;
-import org.hyperic.hq.operation.rabbit.annotation.Operation;
 import org.hyperic.hq.operation.rabbit.api.ChannelCallback;
 import org.hyperic.hq.operation.rabbit.connection.ChannelException;
 import org.hyperic.hq.operation.rabbit.connection.ChannelTemplate;
 import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
-import org.hyperic.hq.operation.rabbit.util.Constants;
 import org.hyperic.hq.operation.rabbit.util.MessageConstants;
 import org.hyperic.lather.NullLatherValue;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,9 +107,8 @@ public class BizappCallbackClient extends AgentCallbackClient {
      * @param isNewTransportAgent <code>true</code> if the agent is using the new transport layer.
      * @param unidirectional      <code>true</code> if the agent is unidirectional.
      * @return The result containing the new agent token.
-     */
-    //@Operation(operationName = Constants.OPERATION_NAME_AGENT_REGISTER_REQUEST, exchangeName = Constants.TO_SERVER_EXCHANGE, value = Constants.OPERATION_NAME_AGENT_REGISTER_REQUEST)
-    @Operation(exchangeName = Constants.TO_SERVER_EXCHANGE, routingKey = Constants.ROUTING_KEY_AGENT_REGISTER_REQUEST, bindingPattern = "request.*")
+     */                                                                                                              //hq.agent.config.register
+    //@Operation(exchange = AgentConstants.EXCHANGE_TO_SERVER, routingKey = AgentConstants.ROUTING_KEY_REGISTER_AGENT, binding = "request.*")
     public RegisterAgentResult registerAgent(String oldAgentToken, String user, String pword, String authToken, String agentIP, int agentPort,
                                              String version, int cpuCount, boolean isNewTransportAgent, boolean unidirectional) throws AgentCallbackClientException {
 
@@ -127,31 +124,27 @@ public class BizappCallbackClient extends AgentCallbackClient {
         final JsonMappingConverter converter = new JsonMappingConverter();
         final byte[] bytes = converter.write(registerAgentRequest).getBytes(MessageConstants.CHARSET);
 
-        /* TODO convert this to automated framework for agent */
+        /* TODO finish spring on agent to have this handled by the automated framework */
         ChannelTemplate template = new ChannelTemplate(new ConnectionFactory());
 
         return template.execute(new ChannelCallback<RegisterAgentResult>() {
             public RegisterAgentResult doInChannel(Channel channel) throws ChannelException {
                 try {
-                    channel.exchangeDeclare(Constants.TO_SERVER_EXCHANGE, "topic", true, false, null);
-                    String requestQueue = channel.queueDeclare("request", true, false, false, null).getQueue();
-                    channel.queueBind(requestQueue, Constants.TO_SERVER_EXCHANGE, "request.*");
-
-                    channel.exchangeDeclare(Constants.TO_AGENT_EXCHANGE, "topic", true, false, null);
-                    String responseQueue = channel.queueDeclare("response", true, false, false, null).getQueue();
-                    channel.queueBind(responseQueue, Constants.TO_AGENT_EXCHANGE, "response.*");
-
-                    channel.basicPublish(Constants.TO_SERVER_EXCHANGE, "request.register",
-                            MessageConstants.getBasicProperties(registerAgentRequest), bytes);
-                    logger.info("agent sent=" + converter.write(registerAgentRequest));
+                    channel.exchangeDeclare("to.agent", "topic", true, false, null);
+                    String responseQueue = channel.queueDeclare("agent", true, false, false, null).getQueue();
+                    channel.queueBind("agent", "to.agent", "response.*");
+ 
+                    channel.basicPublish("to.server", "request.register", MessageConstants.getBasicProperties(registerAgentRequest), bytes);
+                    //logger.info("\n\n"+this+"agent sent=" + converter.write(registerAgentRequest));
 
                     while (true) {
                         GetResponse response = channel.basicGet(responseQueue, false);
                         if (response != null && response.getBody() != null) {
+                            //channel.basicAck(response.getEnvelope().getDeliveryTag(), false);
                             //if (response.getProps().getCorrelationId().equals(correlationId)) {
                             RegisterAgentResponse resp = (RegisterAgentResponse) converter.read(new String(response.getBody()), RegisterAgentResponse.class);
-                            logger.info("agent received=" + resp + " with token=" + resp.getAgentToken());
-                            channel.basicAck(response.getEnvelope().getDeliveryTag(), false);
+                            logger.info("\n\n"+this+"agent received=" + resp + " with token=" + resp.getAgentToken());
+
                             return new RegisterAgentResult(resp.getAgentToken());
                             //}
                         }
@@ -162,7 +155,7 @@ public class BizappCallbackClient extends AgentCallbackClient {
             }
         });
 
-       /* try {
+        /* try {
             channel.exchangeDeclare(Constants.TO_SERVER_EXCHANGE, "topic", true, false, null);
             String requestQueue = channel.queueDeclare("request", true, false, false, null).getQueue();
             channel.queueBind(requestQueue, Constants.TO_SERVER_EXCHANGE, "request.*");

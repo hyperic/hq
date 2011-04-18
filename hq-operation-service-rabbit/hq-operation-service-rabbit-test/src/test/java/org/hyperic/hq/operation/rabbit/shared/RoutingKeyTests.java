@@ -3,11 +3,9 @@ package org.hyperic.hq.operation.rabbit.shared;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.util.security.SecurityUtil;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
-import java.net.UnknownHostException;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -23,11 +21,6 @@ public class RoutingKeyTests {
 
     protected final int agents = 1000;
  
-    @Before
-    public void prepare() throws UnknownHostException {
-        logger.debug("Created routing keys for " + routings.getAgentOperations().length
-                + " agent and " + routings.getServerOperations().length + " server operations");
-    }
 
     /**
      * I test this with agents = 1000 but for CI builds have lowered it.

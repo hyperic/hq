@@ -79,7 +79,19 @@ public final class MessageConstants {
      * The standard message properties
      */
     public static final AMQP.BasicProperties DEFAULT_MESSAGE_PROPERTIES;
- 
+    public static final String REQUEST = ".request";
+    public static final String RESPONSE = ".response";
+    /**
+     * The exchange type for shared agent-server exchanges
+     */
+    public static final String SHARED_EXCHANGE_TYPE = "topic";
+    /**
+     * The default exchange
+     */
+    public static final String DEFAULT_EXCHANGE = "";
+    public static final String GUEST_USER = "guest";
+    public static final String GUEST_PASS = "guest";
+
     static {
         DEFAULT_MESSAGE_PROPERTIES = new AMQP.BasicProperties();
         DEFAULT_MESSAGE_PROPERTIES.setContentType(JSON_CONTENT_TYPE); // plain for early dev work

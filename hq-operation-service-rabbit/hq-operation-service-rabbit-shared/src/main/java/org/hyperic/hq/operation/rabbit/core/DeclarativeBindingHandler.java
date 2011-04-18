@@ -34,7 +34,7 @@ import org.hyperic.hq.operation.rabbit.api.BindingHandler;
 import org.hyperic.hq.operation.rabbit.api.ChannelCallback;
 import org.hyperic.hq.operation.rabbit.connection.ChannelException;
 import org.hyperic.hq.operation.rabbit.connection.ChannelTemplate;
-import org.hyperic.hq.operation.rabbit.util.Constants;
+import org.hyperic.hq.operation.rabbit.util.MessageConstants;
 
 import java.io.IOException;
 
@@ -48,7 +48,7 @@ public class DeclarativeBindingHandler implements BindingHandler {
     private final ChannelTemplate channelTemplate;
 
     private final Object monitor = new Object();
- 
+
     public DeclarativeBindingHandler(ConnectionFactory connectionFactory) {
         this.channelTemplate = new ChannelTemplate(connectionFactory);
     }
@@ -63,16 +63,26 @@ public class DeclarativeBindingHandler implements BindingHandler {
             public String doInChannel(Channel channel) throws ChannelException {
                 try {
                     synchronized (monitor) {
-                        channel.exchangeDeclare(operation.exchangeName(), Constants.SHARED_EXCHANGE_TYPE, true, false, null);
+                        channel.exchangeDeclare(operation.exchange(), MessageConstants.SHARED_EXCHANGE_TYPE, true, false, null);
                         String queueName = channel.queueDeclare(operationName, true, false, false, null).getQueue();
-                        channel.queueBind(queueName, operation.exchangeName(), operation.bindingPattern());
-                        logger.info("**successfully created and bound queue=" + queueName + " to exchange=" + operation.exchangeName() + " with pattern=" + operation.bindingPattern());
+                        channel.queueBind(queueName, operation.exchange(), operation.binding());
+                        System.out.println("*************************created queue=" + queueName + " bound to exchange=" + operation.exchange() + " with pattern=" + operation.binding());
+
+                        //@Operation(exchange = "to.server", routingKey = "request.register", binding = "request.*")
+                        
+                        /*channel.exchangeDeclare("to.server", "topic", true, false, null);
+                        String requestQueue = channel.queueDeclare("registerAgentRequest", true, false, false, null).getQueue();
+                        channel.queueBind("registerAgentRequest", "to.server", "request.*");
+
+                        channel.exchangeDeclare("to.agent", "topic", true, false, null);
+                        String responseQueue = channel.queueDeclare("agent", true, false, false, null).getQueue();
+                        channel.queueBind("agent", "to.agent", "response.*");*/
                         return queueName;
                     }
                 } catch (IOException e) {
                     throw new ChannelException("Could not bind queue to exchange", e);
                 }
             }
-        }); 
-    } 
+        });
+    }
 }

@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ErrorHandler;
 
+import javax.annotation.PreDestroy;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,8 +46,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class AnnotatedOperationEndpointRegistry implements OperationEndpointRegistry {
 
     private final Log logger = LogFactory.getLog(AnnotatedOperationEndpointRegistry.class);
- 
-    private final Map<String, RabbitMessageListenerContainer> endpointListeners = new ConcurrentHashMap<String, RabbitMessageListenerContainer>();
+
+    private final Map<String, RabbitMessageListenerContainer> handlers = new ConcurrentHashMap<String, RabbitMessageListenerContainer>();
 
     protected final RoutingRegistry routingRegistry;
 
@@ -56,13 +57,22 @@ public class AnnotatedOperationEndpointRegistry implements OperationEndpointRegi
 
     private final ConnectionFactory connectionFactory;
 
+
     @Autowired
     public AnnotatedOperationEndpointRegistry(ConnectionFactory connectionFactory, RoutingRegistry routingRegistry,
-                                           Converter<Object, String> converter, ErrorHandler errorHandler) {
+                                              Converter<Object, String> converter, ErrorHandler errorHandler) {
         this.converter = converter;
         this.errorHandler = errorHandler;
         this.connectionFactory = connectionFactory;
         this.routingRegistry = routingRegistry;
+    }
+
+    @PreDestroy
+    public void destroy() {
+        for (Map.Entry<String, RabbitMessageListenerContainer> entry : this.handlers.entrySet()) {
+            RabbitMessageListenerContainer mlc = entry.getValue();
+            mlc.destroy();
+        }
     }
 
     /**
@@ -72,34 +82,17 @@ public class AnnotatedOperationEndpointRegistry implements OperationEndpointRegi
      * @param candidate the candidate instance
      */
     public void register(Method method, Object candidate) {
-        if (this.endpointListeners.containsKey(method.getName())) return;
+        if (this.handlers.containsKey(method.getName())) return;
 
-        this.endpointListeners.put(method.getName(), new RabbitMessageListenerContainer(
-                connectionFactory, candidate, method.getName(), this.errorHandler));
-        
+        RabbitMessageListenerContainer mlc = new RabbitMessageListenerContainer(
+                connectionFactory, candidate, method.getName(), this.errorHandler);
+        mlc.afterPropertiesSet();
+        mlc.start();
+        System.out.println(this + " created a listener for " + method.getName() + " and " + candidate);
+
+        this.handlers.put(method.getName(), mlc);
         this.routingRegistry.register(method);
-
-        logger.info("**registered dispatcher bean=" + candidate + " and method=" + method.getName());
+        logger.info("**registered endpoint bean=" + candidate + " and method=" + method.getName());
     }
-  
-    /*public void handle(Envelope envelope) throws EnvelopeHandlingException {
-        if (!this.annotatedOperationEndpointRegistry.operationMappings.containsKey(envelope.getOperationName()))
-            throw new OperationNotSupportedException(envelope.getOperationName());
 
-        AnnotatedOperationEndpointRegistry.MethodInvoker invoker = this.annotatedOperationEndpointRegistry.map(envelope.getOperationName());
-
-        try {
-            Object response = invoker.invoke(envelope.getContent());
-            if (response != null) {
-                Envelope responseEnvelope = new Envelope(envelope.getOperationName(), this.converter.write(response));
-                perform(responseEnvelope);
-            }
-        }
-        catch (IllegalAccessException e) {
-            throw new EnvelopeHandlingException("Exception invoking operation handler method", e);
-        }
-        catch (InvocationTargetException e) {
-            throw new EnvelopeHandlingException("Exception invoking operation handler method", e);
-        }
-    }*/
 }

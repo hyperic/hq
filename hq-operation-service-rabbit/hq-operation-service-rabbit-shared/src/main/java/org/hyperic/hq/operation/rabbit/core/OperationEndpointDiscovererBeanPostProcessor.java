@@ -37,18 +37,14 @@ import org.springframework.stereotype.Component;
 public final class OperationEndpointDiscovererBeanPostProcessor implements BeanPostProcessor {
 
     private final OperationEndpointDiscoverer operationEndpointDiscoverer;
- 
+
     @Autowired
     OperationEndpointDiscovererBeanPostProcessor(OperationEndpointDiscoverer operationEndpointDiscoverer) {
         this.operationEndpointDiscoverer = operationEndpointDiscoverer;
     }
 
     public Object postProcessBeforeInitialization(Object bean, String beanName) {
-        return bean;
-    }
-
-    public Object postProcessAfterInitialization(Object bean, String beanName) {
-        try {
+        try{
             this.operationEndpointDiscoverer.discover(bean);
         } catch (Exception e) {
             throw new FatalBeanException("Unable to scan bean for annotations", e);
@@ -56,4 +52,7 @@ public final class OperationEndpointDiscovererBeanPostProcessor implements BeanP
         return bean;
     }
 
+    public Object postProcessAfterInitialization(Object bean, String beanName) {
+        return bean;
+    }
 }

@@ -47,7 +47,7 @@ public class AnnotatedOperationEndpointDiscoverer implements OperationEndpointDi
     private final Log logger = LogFactory.getLog(AnnotatedOperationEndpointDiscoverer.class);
 
     private final OperationRegistry endpointRegistry;
-
+     
     @Autowired
     public AnnotatedOperationEndpointDiscoverer(OperationEndpointRegistry endpointRegistry) {
         this.endpointRegistry = endpointRegistry;
@@ -55,8 +55,8 @@ public class AnnotatedOperationEndpointDiscoverer implements OperationEndpointDi
 
     /**
      * Discovers, evaluates, validates and registers candidates
-     * @param candidate  the dispatcher candidate class
-     * @throws org.hyperic.hq.operation.OperationDiscoveryException
+     * @param candidate the dispatcher candidate class
+     * @throws org.hyperic.hq.operation.OperationDiscoveryException 
      */
     public void discover(Object candidate) throws OperationDiscoveryException {
         Class<?> candidateClass = candidate.getClass();
@@ -64,8 +64,7 @@ public class AnnotatedOperationEndpointDiscoverer implements OperationEndpointDi
             for (Method method : candidateClass.getDeclaredMethods()) {
                 if (method.isAnnotationPresent(Operation.class)) {
                     if (!method.isAccessible()) method.setAccessible(true);
-                    logger.info("discovered " + candidate);
-                    this.endpointRegistry.register(method, candidate); 
+                    this.endpointRegistry.register(method, candidate);
                 }
             }
         }
