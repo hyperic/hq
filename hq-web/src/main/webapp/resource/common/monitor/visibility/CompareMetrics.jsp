@@ -36,7 +36,7 @@
 <link rel=stylesheet href="<html:rewrite page="/css/win.css"/>" type="text/css">
 <%-- end vit: delete this block --%>
 <script type="text/javascript">
-  var imagePath = "<html:rewrite page="/images/"/>";
+  var imagePath = "/images/";
 </script>
 <script type="text/javascript">
 var pageData = new Array();

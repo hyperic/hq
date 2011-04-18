@@ -34,13 +34,14 @@
 
 
 <hq:pageSize var="pageSize"/>
-<c:set var="widgetInstanceName" value="resources"/>
-<c:url var="selfAction" value="/dashboard/Admin.do?mode=criticalAlerts">
-  <c:if test="${not empty param.token}">
-    <c:param name="token" value="${param.token}"/>
-  </c:if>
-</c:url>
 
+<c:set var="widgetInstanceName" value="resources"/>
+<c:url var="selfAction" value="/dashboard/Admin.do">
+	<c:param name="mode" value="criticalAlerts"/>
+  	<c:if test="${not empty param.token}">
+    	<c:param name="token" value="${param.token}"/>
+  	</c:if>
+</c:url>
 
 <script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
 <script type="text/javascript">
@@ -185,10 +186,17 @@ function handleEnter (field, event) {
 
       <c:choose>
         <c:when test="${not empty CriticalAlertsForm.token}">
-          <c:set var="addToListUrl" value="/dashboard/Admin.do?mode=criticalAlertsAddResources&key=.dashContent.criticalalerts.resources${CriticalAlertsForm.token}&token=${CriticalAlertsForm.token}"/> 
+          <c:url var="addToListUrl" value="/dashboard/Admin.do">
+          	<c:param name="mode" value="criticalAlertsAddResources"/>
+          	<c:param name="key" value=".dashContent.criticalalerts.resources${CriticalAlertsForm.token}"/>
+          	<c:param name="token" value="${CriticalAlertsForm.token}"/>
+          </c:url> 
         </c:when>
         <c:otherwise>
-          <c:set var="addToListUrl" value="/dashboard/Admin.do?mode=criticalAlertsAddResources&key=.dashContent.criticalalerts.resources"/> 
+          <c:url var="addToListUrl" value="/dashboard/Admin.do">
+          	<c:param name="mode" value="criticalAlertsAddResources"/>
+          	<c:param name="key" value=".dashContent.criticalalerts.resources"/>
+          </c:url> 
         </c:otherwise>
       </c:choose>
       <c:if test="${sessionScope.modifyDashboard}">

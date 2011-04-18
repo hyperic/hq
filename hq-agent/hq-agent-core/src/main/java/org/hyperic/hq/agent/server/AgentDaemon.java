@@ -707,6 +707,12 @@ public class AgentDaemon
             //check .. and higher for hq-plugins
             plugins.addAll(this.ppm.registerCustomPlugins("..", excludes));
             plugins.addAll(excludes);
+            Collection<PluginInfo> fromDirs = ppm.getAllPluginInfoDirectFromFileSystem(pluginDir, "..");
+            for (final PluginInfo info : fromDirs) {
+                if (!plugins.contains(info)) {
+                    plugins.add(info);
+                }
+            }
             sendPluginStatusToServer(plugins);
             
             logger.info("Product Plugin Manager initalized");

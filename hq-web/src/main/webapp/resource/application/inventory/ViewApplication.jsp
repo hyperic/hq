@@ -38,9 +38,16 @@ var pageData = new Array();
 </script>
 
 <c:set var="entityId" value="${Resource.entityId}"/>
-<c:set var="selfAction" value="/resource/application/Inventory.do?mode=view&rid=${Resource.id}&type=${entityId.type}"/>
-<c:set var="editUrl" value="/resource/application/Inventory.do?mode=editResource&rid=${Resource.id}&type=${entityId.type}"/>
-
+<c:url var="selfAction" value="/resource/application/Inventory.do">
+	<c:param name="mode" value="view"/>
+	<c:param name="rid" value="${Resource.id}"/>
+	<c:param name="type" value="${entityId.type}"/>
+</c:url>
+<c:url var="editUrl" value="/resource/application/Inventory.do">
+	<c:param name="mode" value="editResource"/>
+	<c:param name="rid" value="${Resource.id}"/>
+	<c:param name="type" value="${entityId.type}"/>
+</c:url>
 
 <c:url var="psAction" value="${selfAction}">
   <c:if test="${not empty param.pns}">

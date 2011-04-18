@@ -2758,7 +2758,6 @@ hyperic.dashboard.summaryWidget.prototype = hyperic.dashboard.widget;
 
 hyperic.group_manager = function(args) {
 	var that = this;
-	var baseUrl = args.url;
 	
 	that.dialogs = {};
 	that.message_area = {};
@@ -2863,8 +2862,6 @@ hyperic.group_manager = function(args) {
 		var entityType = eidArray[0].split(":")[0];
 		var myForm = document.AddToExistingGroupForm;
 		
-		myForm.action = "/resource/hub/RemoveResource.do";
-		myForm.method = "POST";
 		myForm.removeChild(myForm.eid);
 				
 		var a = new Array(eidArray.length+2);
@@ -2955,7 +2952,7 @@ hyperic.group_manager = function(args) {
 								'Please wait. Processing your request...');
 
 		hqDojo.xhrPost( {
-            url: baseUrl + "association",
+            url: args.postUrl,
             content: {
 				eid: formArray.eid.split(","),
 				groupId: formArray.group.toString().split(",")
@@ -2981,7 +2978,7 @@ hyperic.group_manager = function(args) {
 	
 	that.getGroupsNotContaining = function(eids) {    
 		hqDojo.xhrPost( {
-            url: baseUrl + "associations",
+            url: args.associationsUrl,
             content: {
 				eid: eids,
 				"_method": "PUT"
