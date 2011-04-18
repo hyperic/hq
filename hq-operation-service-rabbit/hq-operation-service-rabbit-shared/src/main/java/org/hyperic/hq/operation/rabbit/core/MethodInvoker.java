@@ -62,21 +62,21 @@ public final class MethodInvoker {
      *
      */
     public Object invoke(String content) throws IllegalAccessException, InvocationTargetException {
-        Object data = this.converter.read(content, this.method.getParameterTypes()[0]);
-        return this.method.invoke(this.instance, data);
+        Object data = converter.read(content, method.getParameterTypes()[0]);
+        return method.invoke(instance, data);
     }
 
     public Object getReturnType() {
-        return this.method.getReturnType();
+        return method.getReturnType();
     }
 
     public boolean operationHasReturnType() {
-        return !void.class.equals(this.method.getReturnType());
+        return !void.class.equals(method.getReturnType());
     }
 
     @Override
     public String toString() {
-        return new StringBuilder("operationName=").append(this.operationName).append(" method=").append(this.method)
-                .append(" instance=").append(this.instance).append(" converter=").append(this.converter).toString();
+        return new StringBuilder("operationName=").append(operationName).append(" method=").append(method)
+                .append(" instance=").append(instance).append(" converter=").append(converter).toString();
     }
 }

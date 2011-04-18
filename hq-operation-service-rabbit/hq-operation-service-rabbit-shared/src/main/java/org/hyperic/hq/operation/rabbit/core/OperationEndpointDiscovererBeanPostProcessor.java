@@ -45,7 +45,7 @@ public final class OperationEndpointDiscovererBeanPostProcessor implements BeanP
 
     public Object postProcessBeforeInitialization(Object bean, String beanName) {
         try{
-            this.operationEndpointDiscoverer.discover(bean);
+            operationEndpointDiscoverer.discover(bean);
         } catch (Exception e) {
             throw new FatalBeanException("Unable to scan bean for annotations", e);
         }

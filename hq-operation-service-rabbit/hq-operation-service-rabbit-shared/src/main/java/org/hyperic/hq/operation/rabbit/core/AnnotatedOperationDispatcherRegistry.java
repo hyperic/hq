@@ -70,10 +70,10 @@ public class AnnotatedOperationDispatcherRegistry implements OperationDispatcher
      * @param candidate the candidate instance
      */
     public void register(Method method, Object candidate) {
-        if (this.operationMappings.containsKey(method.getName())) return;
+        if (operationMappings.containsKey(method.getName())) return;
 
-        this.operationMappings.put(method.getName(), new MethodInvoker(method, candidate, this.converter));
-        this.routingRegistry.register(method); 
+        operationMappings.put(method.getName(), new MethodInvoker(method, candidate, this.converter));
+        routingRegistry.register(method);
         logger.info("registered dispatcher bean=" + candidate + " and method=" + method.getName());
     }
  
@@ -87,6 +87,6 @@ public class AnnotatedOperationDispatcherRegistry implements OperationDispatcher
      * @throws org.hyperic.hq.operation.OperationFailedException
      */
     public Object dispatch(String operationName, Object data) throws OperationFailedException { 
-        return this.operationService.perform(operationName, data);
+        return operationService.perform(operationName, data);
     }   
 }

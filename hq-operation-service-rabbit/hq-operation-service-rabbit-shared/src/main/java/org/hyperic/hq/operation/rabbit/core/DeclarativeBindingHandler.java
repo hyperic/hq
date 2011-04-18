@@ -59,14 +59,18 @@ public class DeclarativeBindingHandler implements BindingHandler {
      * @param operation the operaton meta-data
      */
     public String declareAndBind(final String operationName, final Operation operation) throws ChannelException {
+        return declareAndBind(operationName, operation.exchange(), operation.binding()); 
+    }
+
+    public String declareAndBind(final String operationName, final String exchangeName, final String bindingPattern) throws ChannelException {
         return this.channelTemplate.execute(new ChannelCallback<String>() {
             public String doInChannel(Channel channel) throws ChannelException {
                 try {
                     synchronized (monitor) {
-                        channel.exchangeDeclare(operation.exchange(), MessageConstants.SHARED_EXCHANGE_TYPE, true, false, null);
+                        channel.exchangeDeclare(operationName, MessageConstants.SHARED_EXCHANGE_TYPE, true, false, null);
                         String queueName = channel.queueDeclare(operationName, true, false, false, null).getQueue();
-                        channel.queueBind(queueName, operation.exchange(), operation.binding());
-                        logger.info("\ncreated queue=" + queueName + " bound to exchange=" + operation.exchange() + " with pattern=" + operation.binding());
+                        channel.queueBind(queueName, exchangeName, bindingPattern);
+                        logger.info("\ncreated queue=" + queueName + " bound to exchange=" + exchangeName + " with pattern=" + bindingPattern);
                         return queueName;
                     }
                 } catch (IOException e) {

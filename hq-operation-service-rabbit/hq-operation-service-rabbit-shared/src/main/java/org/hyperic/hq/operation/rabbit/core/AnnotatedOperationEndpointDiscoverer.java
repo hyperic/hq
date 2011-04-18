@@ -64,7 +64,7 @@ public class AnnotatedOperationEndpointDiscoverer implements OperationEndpointDi
             for (Method method : candidateClass.getDeclaredMethods()) {
                 if (method.isAnnotationPresent(Operation.class)) {
                     if (!method.isAccessible()) method.setAccessible(true);
-                    this.endpointRegistry.register(method, candidate);
+                    endpointRegistry.register(method, candidate);
                 }
             }
         }

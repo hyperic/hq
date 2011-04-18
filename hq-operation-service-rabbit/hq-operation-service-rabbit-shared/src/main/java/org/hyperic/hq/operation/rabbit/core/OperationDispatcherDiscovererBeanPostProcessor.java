@@ -49,7 +49,7 @@ public class OperationDispatcherDiscovererBeanPostProcessor implements BeanPostP
 
     public Object postProcessAfterInitialization(Object bean, String beanName) {
         try {
-            this.operationDispatcherDiscoverer.discover(bean);
+            operationDispatcherDiscoverer.discover(bean);
         } catch (Exception e) {
             throw new FatalBeanException("Unable to scan bean for annotations", e);
         }

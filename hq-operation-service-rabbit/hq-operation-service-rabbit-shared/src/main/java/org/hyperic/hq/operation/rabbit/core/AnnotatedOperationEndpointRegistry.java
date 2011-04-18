@@ -75,7 +75,7 @@ public class AnnotatedOperationEndpointRegistry implements OperationEndpointRegi
 
     @PreDestroy
     public void destroy() {
-        for (Map.Entry<String, RabbitMessageListenerContainer> entry : this.handlers.entrySet()) {
+        for (Map.Entry<String, RabbitMessageListenerContainer> entry : handlers.entrySet()) {
             RabbitMessageListenerContainer mlc = entry.getValue();
             mlc.destroy();
         }
@@ -94,10 +94,9 @@ public class AnnotatedOperationEndpointRegistry implements OperationEndpointRegi
                 connectionFactory, candidate, method.getName(), this.errorHandler);
         mlc.afterPropertiesSet();
         mlc.start();
-        System.out.println(this + " created a listener for " + method.getName() + " and " + candidate);
-
-        this.handlers.put(method.getName(), mlc);
-        this.routingRegistry.register(method);
+     
+        handlers.put(method.getName(), mlc);
+        routingRegistry.register(method);
         logger.info("**registered endpoint bean=" + candidate + " and method=" + method.getName());
     }
 

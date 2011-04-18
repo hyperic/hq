@@ -12,6 +12,7 @@ public interface OperationRegistry {
      * Registers an org.hyperic.hq.operation.Dispatcher or org.hyperic.hq.operation.Endpoint
      * @param method  The method
      * @param candidate The instance to invoke the method on
+     * @throws OperationDiscoveryException if an exception occurs
      */
     void register(Method method, Object candidate) throws OperationDiscoveryException;
 

@@ -33,8 +33,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * A factory for returning Agent Commands clients depending on if the agent uses
- * the legacy or new transport.
- * TODO remove agentProxyFactory
+ * the legacy or new transport. 
  */
 @Component
 public class AgentCommandsClientFactory {

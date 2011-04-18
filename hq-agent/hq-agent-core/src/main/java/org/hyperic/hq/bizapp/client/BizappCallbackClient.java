@@ -25,9 +25,7 @@
 
 package org.hyperic.hq.bizapp.client;
 
-import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.ConnectionFactory;
-import com.rabbitmq.client.GetResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConfig;
@@ -35,17 +33,14 @@ import org.hyperic.hq.bizapp.agent.ProviderInfo;
 import org.hyperic.hq.bizapp.shared.lather.*;
 import org.hyperic.hq.operation.OperationService;
 import org.hyperic.hq.operation.RegisterAgentRequest;
-import org.hyperic.hq.operation.RegisterAgentResponse;
-import org.hyperic.hq.operation.rabbit.api.ChannelCallback;
-import org.hyperic.hq.operation.rabbit.connection.ChannelException;
-import org.hyperic.hq.operation.rabbit.connection.ChannelTemplate;
+import org.hyperic.hq.operation.rabbit.api.BindingHandler;
+import org.hyperic.hq.operation.rabbit.api.RabbitTemplate;
 import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
-import org.hyperic.hq.operation.rabbit.util.MessageConstants;
+import org.hyperic.hq.operation.rabbit.core.DeclarativeBindingHandler;
+import org.hyperic.hq.operation.rabbit.core.SimpleRabbitTemplate;
 import org.hyperic.lather.NullLatherValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.io.IOException;
 
 //@OperationDispatcher 
 
@@ -122,19 +117,36 @@ public class BizappCallbackClient extends AgentCallbackClient {
         final RegisterAgentRequest registerAgentRequest = registerAgent;
 
         final JsonMappingConverter converter = new JsonMappingConverter();
-        final byte[] bytes = converter.write(registerAgentRequest).getBytes(MessageConstants.CHARSET);
 
         /* TODO finish spring on agent to have this handled by the automated framework */
-        ChannelTemplate template = new ChannelTemplate(new ConnectionFactory());
+        ConnectionFactory cf = new ConnectionFactory();
+        BindingHandler bindingHandler = new DeclarativeBindingHandler(cf);
+        bindingHandler.declareAndBind("registerAgent", "to.agent", "response.*");
+
+        RabbitTemplate rabbitTemplate = new SimpleRabbitTemplate(cf, new JsonMappingConverter());
+
+        /*String response =  rabbitTemplate.sendAndReceive("agent", "to.server", "request.register", registerAgentRequest, MessageConstants.getBasicProperties(registerAgentRequest));
+
+        RegisterAgentResponse resp = (RegisterAgentResponse) converter.read(response, RegisterAgentResponse.class);
+                            logger.info("\n\n"+this+"agent received=" + resp + " with token=" + resp.getAgentToken());
+                            channel.basicAck(response.getEnvelope().getDeliveryTag(), false);
+                            return new RegisterAgentResult(resp.getAgentToken());*/
+
+        return null;
+
+
+       /* ChannelTemplate template = new ChannelTemplate(cf);
+
+        final byte[] bytes = converter.write(registerAgentRequest).getBytes(MessageConstants.CHARSET);
 
         return template.execute(new ChannelCallback<RegisterAgentResult>() {
             public RegisterAgentResult doInChannel(Channel channel) throws ChannelException {
                 try {
 
-                    /*channel.exchangeDeclare("to.server", "topic", true, false, null);
+                    *//*channel.exchangeDeclare("to.server", "topic", true, false, null);
                     String requestQueue = channel.queueDeclare("registerAgentRequest", true, false, false, null).getQueue();
                     channel.queueBind(requestQueue, "to.server", "request.*");
-*/
+*//*
                     channel.exchangeDeclare("to.agent", "topic", true, false, null);
                     String responseQueue = channel.queueDeclare("agent", true, false, false, null).getQueue();
                     channel.queueBind("agent", "to.agent", "response.*");
@@ -158,7 +170,7 @@ public class BizappCallbackClient extends AgentCallbackClient {
                     throw new ChannelException("Could not bind queue to exchange", e);
                 }
             }
-        });
+        });*/
 
         /* try {
             channel.exchangeDeclare(Constants.TO_SERVER_EXCHANGE, "topic", true, false, null);

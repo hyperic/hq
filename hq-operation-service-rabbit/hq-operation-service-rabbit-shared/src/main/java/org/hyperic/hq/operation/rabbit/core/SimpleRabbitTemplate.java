@@ -69,7 +69,7 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
      */
     public SimpleRabbitTemplate(ConnectionFactory connectionFactory, Converter<Object, String> converter) {
         this.channelTemplate = new ChannelTemplate(connectionFactory);
-        this.channel = this.channelTemplate.createChannel();
+        this.channel = channelTemplate.createChannel();
         this.converter = converter;
     }
 
@@ -99,20 +99,20 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
         publish(exchangeName, routingKey, data, props);
 
         try {
-            synchronized (this.monitor) {
+            synchronized (monitor) {
                 return consume(queueName, props);
             }
         } catch (IOException e) {
-            throw new ChannelException("Unable to complete consuming from channel " + this.channel + " with queue " + queueName, e);
+            throw new ChannelException("Unable to complete consuming from channel " + channel + " with queue " + queueName, e);
         }
     }
 
     private void publish(final String exchangeName, final String routingKey, final Object data, AMQP.BasicProperties props) {
-        final byte[] bytes = this.converter.write(data).getBytes(MessageConstants.CHARSET);
+        final byte[] bytes = converter.write(data).getBytes(MessageConstants.CHARSET);
 
         try {
-            synchronized (this.monitor) {
-                this.channel.basicPublish(exchangeName, routingKey, props, bytes);
+            synchronized (monitor) {
+                channel.basicPublish(exchangeName, routingKey, props, bytes);
             }
             logger.debug("sent " + data + " to " + exchangeName + " with " + routingKey);
         } catch (IOException e) {
@@ -121,19 +121,19 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
     }
 
     private Object consume(final String queueName, final AMQP.BasicProperties props) throws IOException {
-        QueueingConsumer consumer = new QueueingConsumer(this.channel);
+        QueueingConsumer consumer = new QueueingConsumer(channel);
 
         QueueingConsumer.Delivery delivery = null;
 
-        while (this.read.get()) {
+        while (read.get()) {
             try {
-                this.channel.basicConsume(queueName, false, consumer);
+                channel.basicConsume(queueName, false, consumer);
                 delivery = consumer.nextDelivery();
 
                 if (props.getCorrelationId().equalsIgnoreCase(delivery.getProperties().getCorrelationId())) {
                     logger.debug("received message with " + delivery.getProperties().getCorrelationId());
-                    this.channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
-                    this.read.set(false);
+                    channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+                    read.set(false);
                     return converter.read(new String(delivery.getBody(), MessageConstants.CHARSET), Object.class);
                 }
             }
@@ -148,9 +148,9 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
 
     @PreDestroy
     void close() {
-        synchronized (this.monitor) {
-            this.read.set(false);
-            this.channelTemplate.releaseResources(this.channel);
+        synchronized (monitor) {
+            read.set(false);
+            channelTemplate.releaseResources(channel);
         }
     }
 }

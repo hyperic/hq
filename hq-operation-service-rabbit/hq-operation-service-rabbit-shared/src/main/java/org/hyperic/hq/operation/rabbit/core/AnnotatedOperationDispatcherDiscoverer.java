@@ -65,7 +65,7 @@ public class AnnotatedOperationDispatcherDiscoverer implements OperationDispatch
                 if (method.isAnnotationPresent(Operation.class)) {
                     if (!method.isAccessible()) method.setAccessible(true);
                     logger.info("discovered " + candidate);
-                    this.dispatcherRegistry.register(method, candidate);
+                    dispatcherRegistry.register(method, candidate);
                 }
             }
         }

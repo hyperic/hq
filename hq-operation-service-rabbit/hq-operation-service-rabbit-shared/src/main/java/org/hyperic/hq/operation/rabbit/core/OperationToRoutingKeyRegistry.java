@@ -82,7 +82,7 @@ public class OperationToRoutingKeyRegistry implements RoutingRegistry {
         Operation operation = method.getAnnotation(Operation.class);
 
         if (isValid(operation)) {
-            String queueName = this.bindingHandler.declareAndBind(method.getName(), operation);
+            String queueName = bindingHandler.declareAndBind(method.getName(), operation);
             Assert.isTrue(queueName.equalsIgnoreCase(method.getName()));
 
             OperationToRoutingMapping map = new OperationToRoutingMapping(operation.exchange(), operation.routingKey(), method.getName(), operationHasReturnType(method));
@@ -106,11 +106,11 @@ public class OperationToRoutingKeyRegistry implements RoutingRegistry {
      */
     public OperationToRoutingMapping map(String operationName) {
         if (!supports(operationName)) throw new OperationNotSupportedException(operationName);
-        return this.operationToRoutingMappings.get(operationName);
+        return operationToRoutingMappings.get(operationName);
     }
 
     private boolean supports(String operationName) {
-        return this.operationToRoutingMappings.containsKey(operationName);
+        return operationToRoutingMappings.containsKey(operationName);
     }
 
     private boolean isValid(Operation operation) {

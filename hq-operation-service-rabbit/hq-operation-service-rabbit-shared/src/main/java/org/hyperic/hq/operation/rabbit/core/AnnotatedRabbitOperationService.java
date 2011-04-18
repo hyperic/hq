@@ -106,7 +106,7 @@ public class AnnotatedRabbitOperationService implements OperationService {
      */
     private Envelope createEnvelope(String operationName, Object data) {
         AMQP.BasicProperties bp = MessageConstants.getBasicProperties(data);
-        return new Envelope(operationName, this.converter.write(data), bp.getCorrelationId());
+        return new Envelope(operationName, converter.write(data), bp.getCorrelationId());
     }
 
     /**
@@ -130,7 +130,7 @@ public class AnnotatedRabbitOperationService implements OperationService {
      */
     private Object synchronousSend(OperationToRoutingMapping mapping, Object data) {
         return this.rabbitTemplate.sendAndReceive(
-                mapping.getQueueName(), mapping.getExchangeName(), mapping.getRoutingKey(), this.converter.write(data), getBasicProperties(data));
+                mapping.getQueueName(), mapping.getExchangeName(), mapping.getRoutingKey(), converter.write(data), getBasicProperties(data));
     }
 
     /**

@@ -30,6 +30,7 @@ import com.rabbitmq.client.ConnectionFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.operation.Converter;
+import org.hyperic.hq.operation.OperationService;
 import org.hyperic.hq.operation.RegisterAgentResponse;
 import org.hyperic.hq.operation.rabbit.api.ChannelCallback;
 import org.hyperic.hq.operation.rabbit.connection.ChannelException;
@@ -52,14 +53,17 @@ public class RabbitErrorHandler implements ErrorHandler {
 
     private final Log logger = LogFactory.getLog(RabbitErrorHandler.class);
 
+    private final OperationService operationService;
+
     final Converter<Object, String> converter;
 
     final ChannelTemplate template;
 
     @Autowired
-    public RabbitErrorHandler(ConnectionFactory connectionFactory, final Converter<Object, String> converter) {
+    public RabbitErrorHandler(ConnectionFactory connectionFactory, OperationService operationService, Converter<Object, String> converter) {
         this.converter = converter;
         this.template = new ChannelTemplate(connectionFactory);
+        this.operationService = operationService;
     }
 
     /**
@@ -75,6 +79,7 @@ public class RabbitErrorHandler implements ErrorHandler {
         final String context = t.getCause().toString();
 
         if (context.contains("BadCredentialsException")) {
+            //migrate to operationService.perform();
             temporarySend(new RegisterAgentResponse("Permission denied"), ServerConstants.EXCHANGE_TO_AGENT, "response.register");
         } else if (t instanceof NullPointerException) {
             //problem with the handler/converter
@@ -94,7 +99,7 @@ public class RabbitErrorHandler implements ErrorHandler {
                     String json = converter.write(message);
                     byte[] bytes = json.getBytes(MessageConstants.CHARSET);
                     channel.basicPublish(exchangeName, routingKey, MessageConstants.DEFAULT_MESSAGE_PROPERTIES, bytes);
-                    logger.info(this + " returned=" + json);
+                    logger.info("\nreturned=" + json);
                     return true;
                 } catch (IOException e) {
                     throw new ChannelException("Could not bind queue to exchange", e);
