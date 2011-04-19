@@ -25,16 +25,13 @@
 
 package org.hyperic.hq.operation.rabbit.api;
 
-import org.hyperic.hq.operation.rabbit.annotation.Operation;
 import org.hyperic.hq.operation.rabbit.connection.ChannelException;
 
 /**
  * @author Helena Edelson
  */
 public interface BindingHandler {
-
-    String declareAndBind(String operationName, Operation operation) throws ChannelException;
-
-    String declareAndBind(final String operationName, final String exchangeName, final String bindingPattern) throws ChannelException;
+ 
+    void declareAndBind(final String operationName, final String exchangeName, final String bindingPattern) throws ChannelException;
     
 }

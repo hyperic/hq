@@ -28,7 +28,8 @@ import com.rabbitmq.client.ConnectionFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.operation.OperationNotSupportedException;
-import org.hyperic.hq.operation.rabbit.annotation.Operation;
+import org.hyperic.hq.operation.rabbit.annotation.OperationDispatcher;
+import org.hyperic.hq.operation.rabbit.annotation.OperationEndpoint;
 import org.hyperic.hq.operation.rabbit.api.BindingHandler;
 import org.hyperic.hq.operation.rabbit.api.RoutingRegistry;
 import org.hyperic.hq.operation.rabbit.connection.ChannelException;
@@ -36,8 +37,8 @@ import org.hyperic.hq.operation.rabbit.util.MessageConstants;
 import org.hyperic.hq.operation.rabbit.util.OperationToRoutingMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.Assert;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -52,15 +53,15 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class OperationToRoutingKeyRegistry implements RoutingRegistry {
 
-    private final Log logger = LogFactory.getLog(OperationToRoutingKeyRegistry.class);
+    private final Log logger = LogFactory.getLog(this.getClass());
 
     private final Map<String, OperationToRoutingMapping> operationToRoutingMappings = new ConcurrentHashMap<String, OperationToRoutingMapping>();
 
     private final BindingHandler bindingHandler;
 
-    private static final String SERVER_ROUTING_KEY_PREFIX = "hq.server.";
-     
-    public static final String AGENT_ROUTING_KEY_PREFIX = "hq.agent.";
+    private static final String SERVER_PREFIX = "hq.server.";
+
+    public static final String AGENT_PREFIX = "hq.agent.";
 
     private final String serverId;
 
@@ -71,58 +72,72 @@ public class OperationToRoutingKeyRegistry implements RoutingRegistry {
     }
 
     /**
-     * Delegates to the BindingHandler to declare the exchange and queue
-     * then bind the them with the binding pattern.
-     * Registers the operation by routing mappings
-     * @param method the operation to extract and register
+     * Delegates to the BindingHandler and registers the operation by routing mappings
+     * @param method   the operation to extract and register
+     * @param endpoint the @OperationEndpoint
+     * @throws org.hyperic.hq.operation.rabbit.connection.ChannelException
+     *
      */
-    public void register(Method method) throws ChannelException {
-        if (supports(method.getName())) return;
-
-        Operation operation = method.getAnnotation(Operation.class);
-
-        if (isValid(operation)) {
-            String queueName = bindingHandler.declareAndBind(method.getName(), operation);
-            Assert.isTrue(queueName.equalsIgnoreCase(method.getName()));
-
-            OperationToRoutingMapping map = new OperationToRoutingMapping(operation.exchange(), operation.routingKey(), method.getName(), operationHasReturnType(method));
-            logger.info("added new routing map=" + map);
-            this.operationToRoutingMappings.put(method.getName(), map);
-        }
+    public void register(Method method, OperationEndpoint endpoint) throws ChannelException {
+        if (supports(method.getName(), endpoint.getClass())) return;
+        register(method, endpoint.exchange(), endpoint.routingKey(), endpoint.binding(), endpoint.getClass());
     }
 
-    private boolean operationHasReturnType(Method method) {
-        return !void.class.equals(method.getReturnType());
+    /**
+     * Delegates to the BindingHandler and registers the operation by routing mappings
+     * @param method     the operation to extract and register
+     * @param dispatcher the @OperationDispatcher
+     * @throws org.hyperic.hq.operation.rabbit.connection.ChannelException
+     *
+     */
+    public void register(Method method, OperationDispatcher dispatcher) throws ChannelException {
+        if (supports(method.getName(), dispatcher.getClass())) return;
+        register(method, dispatcher.exchange(), dispatcher.routingKey(), dispatcher.binding(), dispatcher.getClass());
     }
 
-    /* TODO - there is a jira ticket in the backlog */ 
-    private boolean isAuthenticatedUser(ConnectionFactory connectionFactory) {
-        return !connectionFactory.getUsername().equalsIgnoreCase(MessageConstants.GUEST_USER) && !connectionFactory.getPassword().equalsIgnoreCase(MessageConstants.GUEST_PASS);
+
+    private void register(Method method, String exchange, String routingKey, String binding, Class<? extends Annotation> annotation) {
+        bindingHandler.declareAndBind(method.getName(), exchange, binding);
+
+        operationToRoutingMappings.put(method.getName(),
+                new OperationToRoutingMapping(method.getName(), exchange, routingKey, method.getReturnType(), annotation));
     }
+
 
     /**
      * @param operationName The operation's name
      * @return org.hyperic.hq.operation.rabbit.util.OperationToRoutingMapping
      */
-    public OperationToRoutingMapping map(String operationName) {
-        if (!supports(operationName)) throw new OperationNotSupportedException(operationName);
-        return operationToRoutingMappings.get(operationName);
+    public OperationToRoutingMapping map(String operationName, Class<? extends Annotation> annotation) {
+        if (!supports(operationName, annotation)) throw new OperationNotSupportedException(operationName);
+        return operationToRoutingMappings.get(createKey(operationName, annotation));
     }
 
-    private boolean supports(String operationName) {
-        return operationToRoutingMappings.containsKey(operationName);
+    public boolean supports(String operationName, Class<? extends Annotation> annotation) {
+        return operationToRoutingMappings.containsKey(createKey(operationName, annotation));
     }
 
-    private boolean isValid(Operation operation) {
-        return operation.routingKey() != null && operation.exchange() != null && operation.binding() != null;
+    /**
+     * Create the routing registry key name
+     */
+    private String createKey(String operationName, Class<? extends Annotation> annotation) {
+        return operationName + annotation.getSimpleName();
+    }
+
+
+    /* JIRA ticket in the backlog */
+
+    private boolean isAuthenticatedUser(ConnectionFactory connectionFactory) {
+        return !connectionFactory.getUsername().equalsIgnoreCase(MessageConstants.GUEST_USER)
+                && !connectionFactory.getPassword().equalsIgnoreCase(MessageConstants.GUEST_PASS);
     }
 
     /*
-   id = 1302212470776-5028906219606536735-6762208433280624914
-   hq-agents.agent-{id}.operations.config.registration.request
-   new StringBuilder(SERVER_ROUTING_KEY_PREFIX + this.serverId).append(OPERATION_PREFIX).append(operation).toString());
-   new StringBuilder(AGENT_ROUTING_KEY_PREFIX).append(agentToken).append(OPERATION_PREFIX).append(operation).toString());
-   */
+    id = 1302212470776-5028906219606536735-6762208433280624914
+    hq-agents.agent-{id}.operations.config.registration.request
+    new StringBuilder(SERVER_ROUTING_KEY_PREFIX + this.serverId).append(OPERATION_PREFIX).append(operation).toString());
+    new StringBuilder(AGENT_ROUTING_KEY_PREFIX).append(agentToken).append(OPERATION_PREFIX).append(operation).toString());
+    */
 
     /**
      * Returns the IP address as a String. If an error occurs getting

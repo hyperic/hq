@@ -4,7 +4,7 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import org.hyperic.hq.operation.RegisterAgentRequest;
 import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
-import org.hyperic.hq.operation.rabbit.core.AnnotatedRabbitOperationService;
+import org.hyperic.hq.operation.rabbit.core.AnnotatedOperationService;
 import org.junit.Test;
 import org.springframework.core.task.TaskExecutor;
 
@@ -23,7 +23,7 @@ public class OperationServiceTests {
 
     private final Connection connection = mock(Connection.class);
     
-    private AnnotatedRabbitOperationService operationService;
+    private AnnotatedOperationService operationService;
 
     private JsonMappingConverter converter = new JsonMappingConverter();
 

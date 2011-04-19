@@ -29,7 +29,6 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.ConnectionFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.operation.rabbit.annotation.Operation;
 import org.hyperic.hq.operation.rabbit.api.BindingHandler;
 import org.hyperic.hq.operation.rabbit.api.ChannelCallback;
 import org.hyperic.hq.operation.rabbit.connection.ChannelException;
@@ -58,20 +57,16 @@ public class DeclarativeBindingHandler implements BindingHandler {
      * Queues declared are durable, exclusive, non-auto-delete
      * @param operation the operaton meta-data
      */
-    public String declareAndBind(final String operationName, final Operation operation) throws ChannelException {
-        return declareAndBind(operationName, operation.exchange(), operation.binding()); 
-    }
-
-    public String declareAndBind(final String operationName, final String exchangeName, final String bindingPattern) throws ChannelException {
-        return this.channelTemplate.execute(new ChannelCallback<String>() {
+    public void declareAndBind(final String operation, final String exchange, final String bindingPattern) throws ChannelException {
+        channelTemplate.execute(new ChannelCallback<String>() {
             public String doInChannel(Channel channel) throws ChannelException {
                 try {
                     synchronized (monitor) {
-                        channel.exchangeDeclare(operationName, MessageConstants.SHARED_EXCHANGE_TYPE, true, false, null);
-                        String queueName = channel.queueDeclare(operationName, true, false, false, null).getQueue();
-                        channel.queueBind(queueName, exchangeName, bindingPattern);
-                        logger.info("\ncreated queue=" + queueName + " bound to exchange=" + exchangeName + " with pattern=" + bindingPattern);
-                        return queueName;
+                        channel.exchangeDeclare(operation, MessageConstants.SHARED_EXCHANGE_TYPE, true, false, null);
+                        String queueName = channel.queueDeclare(operation, true, false, false, null).getQueue();
+                        channel.queueBind(queueName, exchange, bindingPattern);
+                        logger.info("\ncreated queue=" + queueName + " bound to exchange=" + exchange + " with pattern=" + bindingPattern);
+                        return null;
                     }
                 } catch (IOException e) {
                     throw new ChannelException("Could not bind queue to exchange", e);
@@ -79,4 +74,5 @@ public class DeclarativeBindingHandler implements BindingHandler {
             }
         });
     }
+
 }

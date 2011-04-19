@@ -31,7 +31,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 
 public class RegisterAgentResponse {
 
-   private static final long serialVersionUID = 1876820746657883192L;
+    private static final long serialVersionUID = 1876820746657883192L;
 
     private String agentToken;
 

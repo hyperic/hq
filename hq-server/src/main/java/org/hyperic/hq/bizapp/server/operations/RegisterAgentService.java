@@ -27,12 +27,13 @@ package org.hyperic.hq.bizapp.server.operations;
 
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.operation.RegisterAgentResponse;
 
 /**
  * @author Helena Edelson
  */
 public interface RegisterAgentService {
      
-    void registerAgentRequest(Object registerAgentRequest) throws AgentConnectionException, PermissionException;
+    RegisterAgentResponse registerAgentRequest(Object registerAgentRequest) throws AgentConnectionException, PermissionException;
 
 }

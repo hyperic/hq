@@ -41,7 +41,7 @@ public class SimpleRabbitTemplateTests {
             public RegisterAgentResult doInChannel(Channel channel) throws ChannelException {
                 try {
                     channel.exchangeDeclare("to.server", "topic", true, false, null);
-                    requestQueue = channel.queueDeclare("requestQueue", true, false, false, null).getQueue();
+                    requestQueue = channel.queueDeclare("handlerQueue", true, false, false, null).getQueue();
                     channel.queueBind(requestQueue, "to.server", "request.*");
 
                     channel.exchangeDeclare("to.agent", "topic", true, false, null);

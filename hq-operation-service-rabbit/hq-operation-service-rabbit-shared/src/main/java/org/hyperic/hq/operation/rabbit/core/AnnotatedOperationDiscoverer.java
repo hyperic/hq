@@ -25,14 +25,10 @@
 
 package org.hyperic.hq.operation.rabbit.core;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.operation.OperationDiscoverer;
 import org.hyperic.hq.operation.OperationDiscoveryException;
 import org.hyperic.hq.operation.OperationRegistry;
-import org.hyperic.hq.operation.rabbit.annotation.Operation;
-import org.hyperic.hq.operation.rabbit.annotation.OperationEndpoint;
-import org.hyperic.hq.operation.rabbit.api.OperationEndpointDiscoverer;
-import org.hyperic.hq.operation.rabbit.api.OperationEndpointRegistry;
+import org.hyperic.hq.operation.rabbit.annotation.OperationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -42,31 +38,26 @@ import java.lang.reflect.Method;
  * @author Helena Edelson
  */
 @Component
-public class AnnotatedOperationEndpointDiscoverer implements OperationEndpointDiscoverer {
+public class AnnotatedOperationDiscoverer implements OperationDiscoverer {
 
-    private final Log logger = LogFactory.getLog(AnnotatedOperationEndpointDiscoverer.class);
+    private final OperationRegistry operationRegistry;
 
-    private final OperationRegistry endpointRegistry;
-     
     @Autowired
-    public AnnotatedOperationEndpointDiscoverer(OperationEndpointRegistry endpointRegistry) {
-        this.endpointRegistry = endpointRegistry;
+    public AnnotatedOperationDiscoverer(OperationRegistry operationRegistry) {
+        this.operationRegistry = operationRegistry;
     }
 
     /**
      * Discovers, evaluates, validates and registers candidates
      * @param candidate the dispatcher candidate class
-     * @throws org.hyperic.hq.operation.OperationDiscoveryException 
+     * @throws org.hyperic.hq.operation.OperationDiscoveryException
      */
     public void discover(Object candidate) throws OperationDiscoveryException {
         Class<?> candidateClass = candidate.getClass();
-        if (candidateClass.isAnnotationPresent(OperationEndpoint.class)) {
+        if (candidateClass.isAnnotationPresent(OperationService.class)) {
             for (Method method : candidateClass.getDeclaredMethods()) {
-                if (method.isAnnotationPresent(Operation.class)) {
-                    if (!method.isAccessible()) method.setAccessible(true);
-                    endpointRegistry.register(method, candidate);
-                }
+                operationRegistry.register(method, candidate);
             }
         }
-    }
+    } 
 }

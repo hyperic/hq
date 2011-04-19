@@ -27,10 +27,8 @@ package org.hyperic.hq.operation.rabbit.core;
 import com.rabbitmq.client.AMQP;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.operation.AbstractOperation;
-import org.hyperic.hq.operation.Converter;
-import org.hyperic.hq.operation.OperationFailedException;
-import org.hyperic.hq.operation.OperationService;
+import org.hyperic.hq.operation.*;
+import org.hyperic.hq.operation.rabbit.annotation.OperationDispatcher;
 import org.hyperic.hq.operation.rabbit.api.Envelope;
 import org.hyperic.hq.operation.rabbit.api.RabbitTemplate;
 import org.hyperic.hq.operation.rabbit.api.RoutingRegistry;
@@ -40,15 +38,16 @@ import org.hyperic.hq.operation.rabbit.util.OperationToRoutingMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.lang.annotation.Annotation;
 import java.util.Random;
 
 /**
  * @author Helena Edelson
  */
 @Component
-public class AnnotatedRabbitOperationService implements OperationService {
+public class AnnotatedOperationService implements OperationService {
 
-    private final Log logger = LogFactory.getLog(AnnotatedRabbitOperationService.class);
+    private final Log logger = LogFactory.getLog(this.getClass());
 
     private final RoutingRegistry routingRegistry;
 
@@ -60,36 +59,44 @@ public class AnnotatedRabbitOperationService implements OperationService {
      * Creates a new instance that sends messages to a Rabbit broker
      * @param rabbitTemplate  The rabbitTemplate to use for dispatch
      * @param routingRegistry The routing cache to query for instructions
-     * @param converter the convert to use for byte[] - object conversion
+     * @param converter       the convert to use for byte[] - object conversion
      */
     @Autowired
-    public AnnotatedRabbitOperationService(RabbitTemplate rabbitTemplate, RoutingRegistry routingRegistry, Converter<Object, String> converter) {
+    public AnnotatedOperationService(RabbitTemplate rabbitTemplate, RoutingRegistry routingRegistry,
+        Converter<Object, String> converter) {
         this.rabbitTemplate = rabbitTemplate;
         this.routingRegistry = routingRegistry;
         this.converter = converter;
     }
 
     /**
-     *  TODO test Envelope envelope = createEnvelope(operationName, data);
+     * TODO test Envelope envelope = createEnvelope(operationName, data);
      * Performs an operation by operation name
      * Delegates handling to the RabbitTemplate for handling.
      * @param operationName the operation name
-     * @param data the data to send
+     * @param data          the data to send
      * @return if the method has a return signature, the value after invocation is returned
-     * @throws org.hyperic.hq.operation.OperationFailedException 
+     * @throws org.hyperic.hq.operation.OperationFailedException
+     *
      */
-    public Object perform(String operationName, Object data) throws OperationFailedException {
-        OperationToRoutingMapping mapping = this.routingRegistry.map(operationName);
- 
+    public Object perform(String operationName, Object data, Class<? extends Annotation> annotation) throws OperationFailedException {
+
         try {
-            if (mapping.operationRequiresResponse()) {
-                return synchronousSend(mapping, data);
-            } else {
+            OperationToRoutingMapping mapping = routingRegistry.map(operationName, annotation);
+
+            if (mapping.operationReturnsVoid()) {
                 asynchronousSend(mapping, data);
                 return null;
+            } else {
+                return synchronousSend(mapping, data);
             }
+
         } catch (ChannelException e) {
             throw new OperationFailedException(e.getMessage(), e.getCause());
+        } catch (OperationNotSupportedException e) {
+            /* temporary to handle agent pre-spring test */
+            return synchronousSend(new OperationToRoutingMapping("to.server", "request.register", "agent",
+                    RegisterAgentResponse.class, OperationDispatcher.class), data);
         }
     }
 
@@ -99,9 +106,8 @@ public class AnnotatedRabbitOperationService implements OperationService {
      * request-response operations match. Using JSON so that if in the future,
      * Hyperic wishes to implement a RESTful OperationService, this functionality
      * is compatible. And it was faster than serialization in benchmark testing.
-     *
      * @param operationName the operation name
-     * @param data the data to transform to a JSON string
+     * @param data          the data to transform to a JSON string
      * @return org.hyperic.hq.operation.Envelope
      */
     private Envelope createEnvelope(String operationName, Object data) {
@@ -110,12 +116,16 @@ public class AnnotatedRabbitOperationService implements OperationService {
     }
 
     /**
-     * Sends a message  
+     * Sends a message
      * @param mapping the routing data
-     * @param data the operation data
+     * @param data    the operation data
      */
     private void asynchronousSend(OperationToRoutingMapping mapping, Object data) {
-        this.rabbitTemplate.send(mapping.getExchangeName(), mapping.getRoutingKey(), data, getBasicProperties(data)); 
+        if (data instanceof RegisterAgentResponse) {
+            rabbitTemplate.send("to.agent", "response.register", data, getBasicProperties(data));
+        } else {
+            rabbitTemplate.send(mapping.getExchangeName(), mapping.getRoutingKey(), data, getBasicProperties(data));
+        }
     }
 
     /**
@@ -125,12 +135,12 @@ public class AnnotatedRabbitOperationService implements OperationService {
      * Most of those need to be migrated to async to improve performance,
      * and leverage the new messaging architecture.
      * @param mapping the routing data
-     * @param data the operation data
+     * @param data    the operation data
      * @return returns the Object from the receiver
      */
     private Object synchronousSend(OperationToRoutingMapping mapping, Object data) {
-        return this.rabbitTemplate.sendAndReceive(
-                mapping.getQueueName(), mapping.getExchangeName(), mapping.getRoutingKey(), converter.write(data), getBasicProperties(data));
+        return rabbitTemplate.sendAndReceive(
+                mapping.getQueueName(), mapping.getExchangeName(), mapping.getRoutingKey(), converter.write(data), getBasicProperties(data), mapping.getReturnType());
     }
 
     /**

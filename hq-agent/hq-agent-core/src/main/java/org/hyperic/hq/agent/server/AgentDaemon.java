@@ -37,7 +37,7 @@ import org.hyperic.hq.agent.spring.AgentApplicationContext;
 import org.hyperic.hq.bizapp.client.BizappCallbackClient;
 import org.hyperic.hq.bizapp.client.PlugininventoryCallbackClient;
 import org.hyperic.hq.bizapp.client.StorageProviderFetcher;
-import org.hyperic.hq.operation.rabbit.core.AnnotatedRabbitOperationService;
+import org.hyperic.hq.operation.rabbit.core.AnnotatedOperationService;
 import org.hyperic.hq.product.*;
 import org.hyperic.util.PluginLoader;
 import org.hyperic.util.security.SecurityUtil;
@@ -90,7 +90,7 @@ public class AgentDaemon
     private ProductPluginManager ppm;
 
     private static AgentApplicationContext agentApplicationContext;
-    private static AnnotatedRabbitOperationService operationService;
+    private static AnnotatedOperationService operationService;
     private static BizappCallbackClient bizappCallbackClient;
  
     public static AgentDaemon getMainInstance(){

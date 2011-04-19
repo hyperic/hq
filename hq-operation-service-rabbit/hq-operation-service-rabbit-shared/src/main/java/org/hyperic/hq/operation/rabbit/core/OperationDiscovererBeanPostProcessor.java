@@ -24,7 +24,7 @@
  */
 package org.hyperic.hq.operation.rabbit.core;
 
-import org.hyperic.hq.operation.rabbit.api.OperationEndpointDiscoverer;
+import org.hyperic.hq.operation.OperationDiscoverer;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -34,25 +34,25 @@ import org.springframework.stereotype.Component;
  * @author Helena Edelson
  */
 @Component
-public final class OperationEndpointDiscovererBeanPostProcessor implements BeanPostProcessor {
+public class OperationDiscovererBeanPostProcessor implements BeanPostProcessor {
 
-    private final OperationEndpointDiscoverer operationEndpointDiscoverer;
-
+    private final OperationDiscoverer operationDiscoverer;
+   
     @Autowired
-    OperationEndpointDiscovererBeanPostProcessor(OperationEndpointDiscoverer operationEndpointDiscoverer) {
-        this.operationEndpointDiscoverer = operationEndpointDiscoverer;
+    OperationDiscovererBeanPostProcessor(OperationDiscoverer operationDiscoverer) {
+        this.operationDiscoverer = operationDiscoverer;
     }
-
+ 
     public Object postProcessBeforeInitialization(Object bean, String beanName) {
-        try{
-            operationEndpointDiscoverer.discover(bean);
-        } catch (Exception e) {
-            throw new FatalBeanException("Unable to scan bean for annotations", e);
-        }
         return bean;
     }
 
     public Object postProcessAfterInitialization(Object bean, String beanName) {
+        try {
+            operationDiscoverer.discover(bean);
+        } catch (Exception e) {
+            throw new FatalBeanException("Unable to scan bean for annotations", e);
+        }
         return bean;
     }
 }

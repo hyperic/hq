@@ -49,8 +49,4 @@ public class DiscoveryValidator {
                         candidateMethod, candidate));
         }
     }
-
-    public boolean validArguments(String operationName, String exchangeName, String value) {
-        return operationName == null || exchangeName == null || value == null;
-    }
 }

@@ -24,8 +24,11 @@
  */
 package org.hyperic.hq.operation.rabbit.api;
 
+import org.hyperic.hq.operation.rabbit.annotation.OperationDispatcher;
+import org.hyperic.hq.operation.rabbit.annotation.OperationEndpoint;
 import org.hyperic.hq.operation.rabbit.util.OperationToRoutingMapping;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 /**
@@ -35,15 +38,31 @@ public interface RoutingRegistry {
   
     /**
      * Registers the routing mapping for the given operation
-     * @param method The operation to map  
+     * @param method The operation to map
+     * @param dispatcher the annotation
      */
-    void register(Method method);
+    void register(Method method, OperationDispatcher dispatcher);
+
+    /**
+     * Registers the routing mapping for the given operation
+     * @param method The operation to map
+     * @param endpoint  the annotation
+     */
+    void register(Method method, OperationEndpoint endpoint);
  
     /**
      * Returns the routing data by operation name
      * @param operationName The operation's name
+     * @param annotation the annotation to construct the key
      * @return the specific mapping for a given operation
      */
-    OperationToRoutingMapping map(String operationName);
+    OperationToRoutingMapping map(String operationName, Class<?extends Annotation> annotation);
 
+    /**
+     * @param operationName the operation
+     * @param annotation the annotation to construct the key
+     * @return true if the operation is registered
+     */
+    boolean supports(String operationName, Class<?extends Annotation> annotation);
+ 
 }

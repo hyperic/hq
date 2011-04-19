@@ -40,11 +40,11 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.operation.OperationService;
 import org.hyperic.hq.operation.RegisterAgentRequest;
 import org.hyperic.hq.operation.RegisterAgentResponse;
-import org.hyperic.hq.operation.rabbit.annotation.Operation;
+import org.hyperic.hq.operation.rabbit.annotation.OperationDispatcher;
 import org.hyperic.hq.operation.rabbit.annotation.OperationEndpoint;
+import org.hyperic.hq.operation.rabbit.annotation.OperationService;
 import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.security.SecurityUtil;
@@ -59,14 +59,12 @@ import java.util.List;
 /**
  * @author Helena Edelson
  */
-@OperationEndpoint
+@OperationService
 @Service
 @Transactional
 public class RegisterAgentServiceImpl implements RegisterAgentService {
 
     private final Log logger = LogFactory.getLog(this.getClass());
-
-    private final OperationService operationService;
 
     private AgentManager agentManager;
 
@@ -79,26 +77,25 @@ public class RegisterAgentServiceImpl implements RegisterAgentService {
     private ServerOperationServiceValidator serverOperationServiceValidator;
 
     @Autowired
-    public RegisterAgentServiceImpl(OperationService operationService, ServerOperationServiceValidator serverOperationServiceValidator,
+    public RegisterAgentServiceImpl(ServerOperationServiceValidator serverOperationServiceValidator,
                                     AuthzSubjectManager authzSubjectManager, AgentManager agentManager, PlatformManager platformManager,
                                     ZeventEnqueuer zeventManager) {
 
-        this.operationService = operationService;
         this.agentManager = agentManager;
         this.authzSubjectManager = authzSubjectManager;
         this.platformManager = platformManager;
         this.zeventManager = zeventManager;
         this.serverOperationServiceValidator = serverOperationServiceValidator;
     }
-
-    @Operation(exchange = "to.server", routingKey = "request.register", binding = "request.*")
-    public void registerAgentRequest(Object request) throws AgentConnectionException, PermissionException {
+ 
+    @OperationEndpoint(exchange = "to.server", routingKey = "request.register", binding = "request.*")
+    @OperationDispatcher(exchange = "to.agent", routingKey = "response.register", binding = "response.*", queue = "agent")
+    public RegisterAgentResponse registerAgentRequest(Object request) throws AgentConnectionException, PermissionException {
  
         /* TODO, put converter in the listener */
         JsonMappingConverter converter = new JsonMappingConverter();
         RegisterAgentRequest registerAgent = (RegisterAgentRequest) converter.read(new String((byte[]) request), RegisterAgentRequest.class);
-        //logger.info("received=" + converter.write(registerAgent));
-
+         
         try {
             checkUserCanManageAgent(registerAgent);
         } catch (PermissionException e) {
@@ -150,7 +147,7 @@ public class RegisterAgentServiceImpl implements RegisterAgentService {
             rescheduleMetrics(ids);
         }
 
-         operationService.perform("registerAgentRequest", new RegisterAgentResponse("token:" + agentToken));
+        return new RegisterAgentResponse("token:" + agentToken); 
     }
  
     private void handleTransportAgent(boolean isNewTransportAgent, RegisterAgentRequest registerAgent, String agentToken,

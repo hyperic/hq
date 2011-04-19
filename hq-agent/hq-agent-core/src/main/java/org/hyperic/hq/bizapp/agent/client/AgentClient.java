@@ -41,6 +41,7 @@ import org.hyperic.hq.bizapp.agent.commands.CreateToken_args;
 import org.hyperic.hq.bizapp.agent.commands.CreateToken_result;
 import org.hyperic.hq.bizapp.client.*;
 import org.hyperic.hq.common.shared.ProductProperties;
+import org.hyperic.hq.operation.RegisterAgentResponse;
 import org.hyperic.sigar.*;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.security.SecurityUtil;
@@ -791,20 +792,21 @@ public class AgentClient {
         }
         tokenRes = this.camCommands.createToken(new CreateToken_args());
         
-        SYSTEM_OUT.println("************* Received temporary auth token from agent");
+        SYSTEM_OUT.println("Received temporary auth token from agent");
 
         // Ask server to verify agent
         SYSTEM_OUT.println("- Registering agent with " + PRODUCT);
-        RegisterAgentResult result;
+
+        //RegisterAgentResult result;
         try {
-            result = bizapp.registerAgent(oldAgentToken, 
+            RegisterAgentResponse result = bizapp.registerAgent(oldAgentToken, 
                                           user, pword, 
                                           tokenRes.getToken(), 
                                           agentIP, agentPort,
                                           ProductProperties.getVersion(),
                                           getCpuCount(), isNewTransportAgent, 
                                           unidirectional);
-            response = result.response;
+            response = result.getAgentToken();   //result.response;
 
             if(!response.startsWith("token:")){
                 SYSTEM_ERR.println("- Unable to register agent: " + response);
@@ -814,7 +816,7 @@ public class AgentClient {
             // Else the bizapp responds with the token that the agent needs
             // to use to contact it
             agentToken = response.substring("token:".length());
-            log.info("******************registered a new agent with token="+agentToken);
+            log.info("Registered a new agent with token="+agentToken);
         } catch(Exception exc){
             exc.printStackTrace(SYSTEM_ERR);
             SYSTEM_ERR.println("- Error registering agent: "+exc.getMessage());
@@ -866,7 +868,7 @@ public class AgentClient {
                                     unidirectionalPortString);
             }
         }
-        log.info(".cmdSetup() complete**********");
+
         redirectOutputs(bootP); //win32
     }
     

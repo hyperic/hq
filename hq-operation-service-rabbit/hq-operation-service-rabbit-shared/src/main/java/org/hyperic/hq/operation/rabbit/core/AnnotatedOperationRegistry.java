@@ -27,14 +27,15 @@ package org.hyperic.hq.operation.rabbit.core;
 import com.rabbitmq.client.ConnectionFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.operation.Converter;
-import org.hyperic.hq.operation.rabbit.api.OperationEndpointRegistry;
+import org.hyperic.hq.operation.OperationDiscoveryException;
+import org.hyperic.hq.operation.OperationRegistry;
+import org.hyperic.hq.operation.rabbit.annotation.OperationDispatcher;
+import org.hyperic.hq.operation.rabbit.annotation.OperationEndpoint;
 import org.hyperic.hq.operation.rabbit.api.RoutingRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ErrorHandler;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -44,34 +45,26 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Helena Edelson
  */
 @Component
-public class AnnotatedOperationEndpointRegistry implements OperationEndpointRegistry {
+public class AnnotatedOperationRegistry implements OperationRegistry {
 
-    private final Log logger = LogFactory.getLog(AnnotatedOperationEndpointRegistry.class);
+    private final Log logger = LogFactory.getLog(this.getClass());
 
     private final Map<String, RabbitMessageListenerContainer> handlers = new ConcurrentHashMap<String, RabbitMessageListenerContainer>();
 
-    protected final RoutingRegistry routingRegistry;
-
-    protected final Converter<Object, String> converter;
+    private final RoutingRegistry routingRegistry;
 
     private final ErrorHandler errorHandler;
 
     private final ConnectionFactory connectionFactory;
 
-
     @Autowired
-    public AnnotatedOperationEndpointRegistry(ConnectionFactory connectionFactory, RoutingRegistry routingRegistry,
-                                              Converter<Object, String> converter, ErrorHandler errorHandler) {
-        this.converter = converter;
-        this.errorHandler = errorHandler;
+    public AnnotatedOperationRegistry(ConnectionFactory connectionFactory,
+                                      RoutingRegistry routingRegistry, ErrorHandler errorHandler) {
         this.connectionFactory = connectionFactory;
         this.routingRegistry = routingRegistry;
+        this.errorHandler = errorHandler;
     }
 
-    @PostConstruct
-    public void initialize() {
-
-    }
 
     @PreDestroy
     public void destroy() {
@@ -81,23 +74,23 @@ public class AnnotatedOperationEndpointRegistry implements OperationEndpointRegi
         }
     }
 
-    /**
-     * Registers a method as operation with a Registry for future dispatch.
-     * Registers dispatchers and delegates to RoutingRegistry for further work.
-     * @param method    the method
-     * @param candidate the candidate instance
-     */
-    public void register(Method method, Object candidate) {
-        if (this.handlers.containsKey(method.getName())) return;
-
-        RabbitMessageListenerContainer mlc = new RabbitMessageListenerContainer(
-                connectionFactory, candidate, method.getName(), this.errorHandler);
-        mlc.afterPropertiesSet();
-        mlc.start();
-     
-        handlers.put(method.getName(), mlc);
-        routingRegistry.register(method);
-        logger.info("**registered endpoint bean=" + candidate + " and method=" + method.getName());
+    public void register(Method method, Object candidate) throws OperationDiscoveryException {
+        if (method.isAnnotationPresent(OperationDispatcher.class)) {
+            registerDipatcher(method, candidate);
+        } else if (method.isAnnotationPresent(OperationEndpoint.class)) {
+            registerEndpoint(method, candidate);
+        }
     }
 
+
+    private void registerDipatcher(Method method, Object candidate) {
+        routingRegistry.register(method, method.getAnnotation(OperationDispatcher.class));
+        logger.info("\nregistered bean=" + candidate + " and method=" + method.getName());
+    }
+
+    private void registerEndpoint(Method method, Object candidate) {
+        routingRegistry.register(method, method.getAnnotation(OperationEndpoint.class));
+        handlers.put(method.getName(), new RabbitMessageListenerContainer(connectionFactory, candidate, method.getName(), errorHandler));
+        logger.info("\nregistered bean=" + candidate + " and method=" + method.getName());
+    }
 }

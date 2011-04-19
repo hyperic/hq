@@ -75,52 +75,68 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
 
     /**
      * Sends a message
-     * @param exchangeName the exchange name to use
+     * @param exchange the exchange name to use
      * @param routingKey   The routing key to use
      * @param data         The data to send
      * @param props        AMQP properties containing a correlation id
      * @throws ChannelException
      */
-    public void send(String exchangeName, String routingKey, Object data, AMQP.BasicProperties props) throws ChannelException {
-        publish(exchangeName, routingKey, data, props);
+    public void send(String exchange, String routingKey, Object data, AMQP.BasicProperties props) throws ChannelException {
+        publish(exchange, routingKey, data, props);
     }
 
     /**
      * TODO in progress
-     * @param queueName    the name of the queue to consume the response from
-     * @param exchangeName the exchange name to use
+     * @param responseQueueName    the name of the queue to consume the response from
+     * @param exchange the exchange name to use
      * @param routingKey   The routing key to use
      * @param data         The data to send
      * @param props        AMQP properties containing a correlation id
      * @return the object returned
      * @throws ChannelException
      */
-    public Object sendAndReceive(final String queueName, String exchangeName, String routingKey, Object data, AMQP.BasicProperties props) throws ChannelException {
-        publish(exchangeName, routingKey, data, props);
+    public Object sendAndReceive(final String responseQueueName, String exchange, String routingKey, Object data, AMQP.BasicProperties props, Class<?> responseType) throws ChannelException {
+        publish(exchange, routingKey, data, props);
 
         try {
             synchronized (monitor) {
-                return consume(queueName, props);
+                return consume(responseQueueName, props, responseType);
             }
         } catch (IOException e) {
-            throw new ChannelException("Unable to complete consuming from channel " + channel + " with queue " + queueName, e);
+            throw new ChannelException("Unable to complete consuming from channel " + channel + " with queue " + responseQueueName, e);
         }
     }
 
-    private void publish(final String exchangeName, final String routingKey, final Object data, AMQP.BasicProperties props) {
+    /**
+     * Publishes a message to the broker
+     * @param exchange the exchange name to use
+     * @param routingKey the routing key to use
+     * @param data the data to send
+     * @param props amqp properties
+     */
+    private void publish(final String exchange, final String routingKey, final Object data, AMQP.BasicProperties props) {
         final byte[] bytes = converter.write(data).getBytes(MessageConstants.CHARSET);
 
         try {
             synchronized (monitor) {
-                channel.basicPublish(exchangeName, routingKey, props, bytes);
+                channel.basicPublish(exchange, routingKey, props, bytes);
             }
-            logger.debug("sent " + data + " to " + exchangeName + " with " + routingKey);
+            logger.debug("sent " + data + " to " + exchange + " with " + routingKey);
         } catch (IOException e) {
-            throw new ChannelException("Could not send " + data + " to " + exchangeName + " with " + routingKey, e);
+            throw new ChannelException("Could not send " + data + " to " + exchange + " with " + routingKey, e);
         }
     }
 
-    private Object consume(final String queueName, final AMQP.BasicProperties props) throws IOException {
+    /**
+     * Consumes from the given queue and loops until the message with a matching
+     * correlationId is received.
+     * @param queueName the queue name to consume from
+     * @param props basic properties
+     * @param responseType
+     * @return the converted data to the given Class<?> responseType
+     * @throws IOException
+     */
+    private Object consume(String queueName, AMQP.BasicProperties props, Class<?> responseType) throws IOException {
         QueueingConsumer consumer = new QueueingConsumer(channel);
 
         QueueingConsumer.Delivery delivery = null;
@@ -134,7 +150,7 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
                     logger.debug("received message with " + delivery.getProperties().getCorrelationId());
                     channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
                     read.set(false);
-                    return converter.read(new String(delivery.getBody(), MessageConstants.CHARSET), Object.class);
+                    return converter.read(new String(delivery.getBody(), MessageConstants.CHARSET), responseType.getClass());
                 }
             }
             catch (Exception e) {

@@ -23,13 +23,30 @@
  *  USA.
  */
 
-package org.hyperic.hq.operation.rabbit.api;
+package org.hyperic.hq.operation.rabbit.shared;
 
-import org.hyperic.hq.operation.OperationDiscoverer;
+import org.junit.Test;
 
-/**
- * Differentiation interface - endpoint, or handler version of discoverer.
- * @author Helena Edelson
- */
-public interface OperationEndpointDiscoverer extends OperationDiscoverer {
+import java.util.Map;
+import java.util.concurrent.*;
+
+public class ThreadedTest {
+
+    private final Map<String, Integer> map = new ConcurrentHashMap<String, Integer>();
+
+    @Test
+    public void foo() throws ExecutionException, TimeoutException, InterruptedException {
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        Callable<String> stringCallable = new Callable<String>() {
+            public String call() throws Exception {
+                while (true) {
+                    map.put("one", 1);
+                    Thread.sleep(1000);
+                }
+            }
+        };
+        executor.submit(stringCallable);
+        executor.submit(stringCallable);
+    }
 }

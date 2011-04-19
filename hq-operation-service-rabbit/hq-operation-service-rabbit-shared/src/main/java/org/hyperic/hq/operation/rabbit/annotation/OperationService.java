@@ -22,13 +22,15 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  *  USA.
  */
+package org.hyperic.hq.operation.rabbit.annotation;
 
-package org.hyperic.hq.operation.rabbit.api;
-
-import org.hyperic.hq.operation.OperationRegistry;
+import java.lang.annotation.*;
 
 /**
  * @author Helena Edelson
  */
-public interface OperationEndpointRegistry extends OperationRegistry {
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface OperationService {
 }

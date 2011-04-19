@@ -33,11 +33,15 @@ import org.hyperic.hq.bizapp.agent.ProviderInfo;
 import org.hyperic.hq.bizapp.shared.lather.*;
 import org.hyperic.hq.operation.OperationService;
 import org.hyperic.hq.operation.RegisterAgentRequest;
+import org.hyperic.hq.operation.RegisterAgentResponse;
+import org.hyperic.hq.operation.rabbit.annotation.OperationDispatcher;
+import org.hyperic.hq.operation.rabbit.annotation.OperationEndpoint;
 import org.hyperic.hq.operation.rabbit.api.BindingHandler;
 import org.hyperic.hq.operation.rabbit.api.RabbitTemplate;
 import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
 import org.hyperic.hq.operation.rabbit.core.DeclarativeBindingHandler;
 import org.hyperic.hq.operation.rabbit.core.SimpleRabbitTemplate;
+import org.hyperic.hq.operation.rabbit.util.MessageConstants;
 import org.hyperic.lather.NullLatherValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -46,7 +50,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class BizappCallbackClient extends AgentCallbackClient {
-    private final Log logger = LogFactory.getLog(BizappCallbackClient.class);
+    private final Log logger = LogFactory.getLog(this.getClass());
 
     private OperationService operationService;
 
@@ -102,11 +106,12 @@ public class BizappCallbackClient extends AgentCallbackClient {
      * @param isNewTransportAgent <code>true</code> if the agent is using the new transport layer.
      * @param unidirectional      <code>true</code> if the agent is unidirectional.
      * @return The result containing the new agent token.
-     */                                                                                                              //hq.agent.config.register
-    //@Operation(exchange = AgentConstants.EXCHANGE_TO_SERVER, routingKey = AgentConstants.ROUTING_KEY_REGISTER_AGENT, binding = "request.*")
-    public RegisterAgentResult registerAgent(String oldAgentToken, String user, String pword, String authToken, String agentIP, int agentPort,
+     */  
+    @OperationDispatcher(exchange = "to.server", routingKey = "request.register", binding = "request.*", queue = "registerAgentRequest")
+    @OperationEndpoint(exchange = "to.agent", routingKey = "response.register", binding = "response.*", queue = "agent")
+    public RegisterAgentResponse registerAgent(String oldAgentToken, String user, String pword, String authToken, String agentIP, int agentPort,
                                              String version, int cpuCount, boolean isNewTransportAgent, boolean unidirectional) throws AgentCallbackClientException {
-
+       
         RegisterAgentRequest registerAgent;
         if (oldAgentToken != null) {
             registerAgent = new RegisterAgentRequest(oldAgentToken, authToken, version, cpuCount, agentIP, agentPort, user, pword, unidirectional);
@@ -114,97 +119,22 @@ public class BizappCallbackClient extends AgentCallbackClient {
             registerAgent = new RegisterAgentRequest(null, authToken, version, cpuCount, agentIP, agentPort, user, pword, unidirectional);
         }
 
-        final RegisterAgentRequest registerAgentRequest = registerAgent;
-
-        final JsonMappingConverter converter = new JsonMappingConverter();
-
-        /* TODO finish spring on agent to have this handled by the automated framework */
+        /* Finish spring on agent to have this handled by the automated framework */
         ConnectionFactory cf = new ConnectionFactory();
         BindingHandler bindingHandler = new DeclarativeBindingHandler(cf);
-        bindingHandler.declareAndBind("registerAgent", "to.agent", "response.*");
-
         RabbitTemplate rabbitTemplate = new SimpleRabbitTemplate(cf, new JsonMappingConverter());
 
-        /*String response =  rabbitTemplate.sendAndReceive("agent", "to.server", "request.register", registerAgentRequest, MessageConstants.getBasicProperties(registerAgentRequest));
+        bindingHandler.declareAndBind("registerAgentRequest", "to.server", "request.*");
+        bindingHandler.declareAndBind("agent", "to.agent", "response.*");
 
-        RegisterAgentResponse resp = (RegisterAgentResponse) converter.read(response, RegisterAgentResponse.class);
-                            logger.info("\n\n"+this+"agent received=" + resp + " with token=" + resp.getAgentToken());
-                            channel.basicAck(response.getEnvelope().getDeliveryTag(), false);
-                            return new RegisterAgentResult(resp.getAgentToken());*/
+        RegisterAgentResponse response = (RegisterAgentResponse) rabbitTemplate.sendAndReceive("agent", "to.server", "request.register",
+                registerAgent, MessageConstants.getBasicProperties(registerAgent), RegisterAgentResponse.class);
 
-        return null;
+        logger.info("\nagent received=" + response + " with token=" + response.getAgentToken());
 
-
-       /* ChannelTemplate template = new ChannelTemplate(cf);
-
-        final byte[] bytes = converter.write(registerAgentRequest).getBytes(MessageConstants.CHARSET);
-
-        return template.execute(new ChannelCallback<RegisterAgentResult>() {
-            public RegisterAgentResult doInChannel(Channel channel) throws ChannelException {
-                try {
-
-                    *//*channel.exchangeDeclare("to.server", "topic", true, false, null);
-                    String requestQueue = channel.queueDeclare("registerAgentRequest", true, false, false, null).getQueue();
-                    channel.queueBind(requestQueue, "to.server", "request.*");
-*//*
-                    channel.exchangeDeclare("to.agent", "topic", true, false, null);
-                    String responseQueue = channel.queueDeclare("agent", true, false, false, null).getQueue();
-                    channel.queueBind("agent", "to.agent", "response.*");
-
-
-                    channel.basicPublish("to.server", "request.register", MessageConstants.getBasicProperties(registerAgentRequest), bytes);
-                    logger.info("\n\n"+this+"agent sent=" + converter.write(registerAgentRequest));
-
-                    while (true) {
-                        GetResponse response = channel.basicGet(responseQueue, false);
-                        if (response != null && response.getBody() != null) {
-                            //if (response.getProps().getCorrelationId().equals(correlationId)) {
-                            RegisterAgentResponse resp = (RegisterAgentResponse) converter.read(new String(response.getBody()), RegisterAgentResponse.class);
-                            logger.info("\n\n"+this+"agent received=" + resp + " with token=" + resp.getAgentToken());
-                            channel.basicAck(response.getEnvelope().getDeliveryTag(), false);
-                            return new RegisterAgentResult(resp.getAgentToken());
-                            //}
-                        }
-                    }
-                } catch (IOException e) {
-                    throw new ChannelException("Could not bind queue to exchange", e);
-                }
-            }
-        });*/
-
-        /* try {
-            channel.exchangeDeclare(Constants.TO_SERVER_EXCHANGE, "topic", true, false, null);
-            String requestQueue = channel.queueDeclare("request", true, false, false, null).getQueue();
-            channel.queueBind(requestQueue, Constants.TO_SERVER_EXCHANGE, "request.*");
-
-            channel.exchangeDeclare(Constants.TO_AGENT_EXCHANGE, "topic", true, false, null);
-            String responseQueue = channel.queueDeclare("response", true, false, false, null).getQueue();
-            channel.queueBind(responseQueue, Constants.TO_AGENT_EXCHANGE, "response.*");
-
-            AMQP.BasicProperties bp = MessageConstants.getBasicProperties(registerAgentRequest);
-            String correlationId = bp.getCorrelationId();
-            System.out.println("set correlationId=" + correlationId);
-            channel.basicPublish(Constants.TO_SERVER_EXCHANGE, "request.register", bp, bytes);
-            logger.info("agent sent=" + converter.write(registerAgentRequest));
-
-            while (true) {
-                GetResponse response = channel.basicGet(responseQueue, false);
-                if (response != null && response.getBody() != null) {
-                    //if (response.getProps().getCorrelationId().equals(correlationId)) {
-                    RegisterAgentResponse resp = (RegisterAgentResponse) converter.read(new String(response.getBody()), RegisterAgentResponse.class);
-                    logger.info("agent received=" + resp + " with token=" + resp.getAgentToken());
-                    channel.basicAck(response.getEnvelope().getDeliveryTag(), false);
-                    return new RegisterAgentResult(resp.getAgentToken());
-                    //}
-                }
-            }
-
-        } catch (IOException e) {
-            throw new ChannelException(e.getCause());
-        } finally {
-            template.releaseResources(channel);
-        }*/
+        return response; 
     }
+
 
     public String updateAgent(String agentToken, String user, String pword,
                               String agentIp, int agentPort,

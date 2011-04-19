@@ -26,11 +26,18 @@
 package org.hyperic.hq.operation.rabbit.annotation;
 
 import java.lang.annotation.*;
- 
-@Target({ElementType.TYPE})
+
+@Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-//@Service
+@Operation
 public @interface OperationEndpoint {
-    String value() default "";
+
+    String exchange() default "";
+
+    String routingKey() default "";
+
+    String binding() default "";
+
+    String queue() default "";
 }

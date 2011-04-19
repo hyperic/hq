@@ -24,6 +24,8 @@
  */
 package org.hyperic.hq.operation;
 
+import java.lang.annotation.Annotation;
+
 /**
  * @author Helena Edelson
  */
@@ -34,10 +36,10 @@ public interface OperationService {
      * Delegates handling to the RabbitTemplate for handling.
      * @param operationName the operation name
      * @param data the data to send
-     * @return if the method has a return signature, the value after
-     * invocation is returned
+     * @param annotation @OperationDispatcher or @OperationEndpoint 
+     * @return if the method has a return signature, the value after invocation is returned
      * @throws org.hyperic.hq.operation.OperationFailedException
      */
-    Object perform(String operationName, Object data) throws OperationFailedException;
+    Object perform(String operationName, Object data, Class<? extends Annotation> annotation) throws OperationFailedException;
  
 }

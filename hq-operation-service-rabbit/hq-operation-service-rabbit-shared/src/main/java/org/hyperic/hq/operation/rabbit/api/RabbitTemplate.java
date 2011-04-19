@@ -10,26 +10,27 @@ public interface RabbitTemplate {
 
     /**
      * Sends a message
-     * @param exchangeName the exchange name to use
+     * @param exchange the exchange name to use
      * @param routingKey The routing key to use
      * @param data The data to send
      * @param props AMQP properties containing a correlation id
      * @throws org.hyperic.hq.operation.rabbit.connection.ChannelException
      * if an error occurs during the send process
      */
-    void send(String exchangeName, String routingKey, Object data, AMQP.BasicProperties props) throws ChannelException;
+    void send(String exchange, String routingKey, Object data, AMQP.BasicProperties props) throws ChannelException;
 
     /**
      * Sends a message and synchronously receives the response
-     * @param queueName the name of the queue to consume the response from
-     * @param exchangeName the exchange name to use
+     * @param responseQueue the name of the queue to consume the response from
+     * @param exchange the exchange name to use
      * @param routingKey The routing key to use
      * @param data The data to send
      * @param props AMQP properties containing a correlation id
+     * @param responseType
      * @throws org.hyperic.hq.operation.rabbit.connection.ChannelException
      * if an error occurs during the send process.
      * @return the data returned from the response
      */
-    Object sendAndReceive(String queueName, String exchangeName, String routingKey, Object data, AMQP.BasicProperties props) throws ChannelException;
+    Object sendAndReceive(String responseQueue, String exchange, String routingKey, Object data, AMQP.BasicProperties props, Class<?> responseType) throws ChannelException;
     
 }

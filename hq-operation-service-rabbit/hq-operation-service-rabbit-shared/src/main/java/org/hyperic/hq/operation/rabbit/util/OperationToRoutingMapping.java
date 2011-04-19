@@ -24,7 +24,9 @@
  */
 
 package org.hyperic.hq.operation.rabbit.util;
- 
+
+import java.lang.annotation.Annotation;
+
 /**
  * POJO encapsulating the mapping between an operation and the
  * necessary routing information required by the sender
@@ -32,27 +34,30 @@ package org.hyperic.hq.operation.rabbit.util;
  */
 public class OperationToRoutingMapping {
 
+    private final Class<? extends Annotation> annotation;
+
     private final String exchangeName;
 
     private final String routingKey;
 
-    /* the operation name */
     private final String queueName;
 
-    private final boolean hasReturnType;
+    private final Class<?> returnType;
 
     /**
      * Creates an instance to cache in the registry
      * @param exchangeName the exchange name to use
-     * @param routingKey the routing key to use
-     * @param queueName the method / operation name
-     * @param hasReturnType true if the method returns !void
+     * @param routingKey   the routing key to use
+     * @param queueName    the method and operation name
+     * @param returnType   the method return type
      */
-    public OperationToRoutingMapping(String exchangeName, String routingKey, String queueName, boolean hasReturnType) {
-        this.exchangeName = exchangeName;
-        this.routingKey = routingKey;
+    public OperationToRoutingMapping(String queueName, String exchangeName,
+        String routingKey, Class<?> returnType, Class<? extends Annotation> annotation) {
+        this.annotation = annotation;
         this.queueName = queueName;
-        this.hasReturnType = hasReturnType;
+        this.exchangeName = exchangeName;
+        this.routingKey = routingKey; 
+        this.returnType = returnType;
     }
 
     public String getExchangeName() {
@@ -66,19 +71,23 @@ public class OperationToRoutingMapping {
     public String getQueueName() {
         return queueName;
     }
+ 
+    public boolean operationReturnsVoid() {
+        return void.class.equals(returnType);
+    }
 
-    /**
-     * Is this a request-response pattern
-     * @return true if the endpoint returns data to the dispatcher
-     */
-    public boolean operationRequiresResponse() {
-        return hasReturnType;
+    public Class<?> getReturnType() {
+        return returnType;
+    }
+
+    public Class<? extends Annotation> getAnnotation() {
+        return annotation;
     }
 
     @Override
     public String toString() {
-        return new StringBuilder("exchangeName=").append(this.exchangeName).append(" routingKey=")
-                .append(this.getRoutingKey()).append(" queueName=").append(this.queueName)
-                    .append(" hasReturnType=").append(this.hasReturnType).toString();
+        return new StringBuilder("exchangeName=").append(exchangeName).append(" routingKey=")
+                .append(this.getRoutingKey()).append(" queueName=").append(queueName)
+                .append(" returnType=").append(returnType).toString();
     }
 }

@@ -25,6 +25,8 @@ public class RabbitMessageListenerContainer extends SimpleMessageListenerContain
         setMessageListener(mla);
         setQueueName(operationName);
         setErrorHandler(errorHandler);
+        afterPropertiesSet();
+        start();
         logger.info("created listener for endpoint=" + endpoint + " to invoke handle method=" + operationName);
     }
 

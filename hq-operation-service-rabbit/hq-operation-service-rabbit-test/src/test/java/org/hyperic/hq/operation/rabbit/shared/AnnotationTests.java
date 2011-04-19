@@ -26,12 +26,12 @@
 
 package org.hyperic.hq.operation.rabbit.shared;
 
-import org.hyperic.hq.operation.rabbit.annotation.Operation;
+import org.hyperic.hq.operation.rabbit.annotation.HandleOperation;
 import org.hyperic.hq.operation.rabbit.annotation.OperationDispatcher;
 import org.hyperic.hq.operation.rabbit.annotation.OperationEndpoint;
-import org.hyperic.hq.operation.rabbit.api.OperationDispatcherRegistry;
+import org.hyperic.hq.operation.rabbit.api.RabbitOperationRegistry;
 import org.hyperic.hq.operation.rabbit.api.OperationEndpointRegistry;
-import org.hyperic.hq.operation.rabbit.core.AnnotatedOperationDispatcherDiscoverer;
+import org.hyperic.hq.operation.rabbit.core.AnnotatedOperationDiscoverer;
 import org.hyperic.hq.operation.rabbit.core.AnnotatedOperationEndpointDiscoverer;
 import org.hyperic.hq.operation.rabbit.util.AgentConstants;
 import org.hyperic.hq.operation.rabbit.util.ServerConstants;
@@ -42,18 +42,18 @@ import org.junit.Test;
 @Ignore("not working with a mock Connection")
 public class AnnotationTests {
 
-    private AnnotatedOperationDispatcherDiscoverer dispatcherDiscoverer;
+    private AnnotatedOperationDiscoverer discoverer;
 
     private AnnotatedOperationEndpointDiscoverer endpointDiscoverer;
 
-    private OperationDispatcherRegistry dispatcherRegistry;
+    private RabbitOperationRegistry registryRabbit;
 
     private OperationEndpointRegistry endpointRegistry;
 
 
     @OperationDispatcher
     static class TestDispatcher {
-        @Operation(exchange = AgentConstants.EXCHANGE_TO_SERVER, routingKey = AgentConstants.ROUTING_KEY_REGISTER_AGENT, binding = "request.*")
+        @HandleOperation(exchange = AgentConstants.EXCHANGE_TO_SERVER, routingKey = AgentConstants.ROUTING_KEY_REGISTER_AGENT, binding = "request.*")
         void request(Object data) {
             System.out.println("Invoked method=request with data=" + data);
         }
@@ -61,7 +61,7 @@ public class AnnotationTests {
 
     @OperationEndpoint
     static class TestEndpoint {
-        @Operation(exchange = ServerConstants.EXCHANGE_TO_AGENT, routingKey = ServerConstants.ROUTING_KEY_REGISTER_AGENT, binding = ServerConstants.BINDING_REGISTER_AGENT)
+        @HandleOperation(exchange = ServerConstants.EXCHANGE_TO_AGENT, routingKey = ServerConstants.ROUTING_KEY_REGISTER_AGENT, binding = ServerConstants.BINDING_REGISTER_AGENT)
         void response(Object data) {
             System.out.println("Invoked method=response with data=" + data);
         }
