@@ -14,6 +14,8 @@ public interface MeasurementRepositoryCustom {
     Measurement findAvailabilityMeasurementByResource(Integer resource);
 
     List<Measurement> findAvailabilityMeasurementsByGroupMembers(Set<Integer> groupMembers);
+    
+    List<Measurement> findAvailabilityMeasurementsByTemplatesAndResources(Integer[] templateIds, Integer[] resourceIds);
 
     List<Measurement> findByResources(List<Integer> resources);
 

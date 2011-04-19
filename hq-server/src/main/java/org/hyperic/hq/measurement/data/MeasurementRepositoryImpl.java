@@ -69,6 +69,30 @@ public class MeasurementRepositoryImpl implements MeasurementRepositoryCustom {
             .setHint("org.hibernate.cacheRegion", "Measurement.findAvailMeasurementsForGroup")
             .getResultList();
     }
+    
+    
+
+    public List<Measurement> findAvailabilityMeasurementsByTemplatesAndResources(Integer[] templateIds,
+                                                                                 Integer[] resourceIds) {
+        final List<Integer> iidList = Arrays.asList(resourceIds);
+        final List<Integer> tidList = Arrays.asList(templateIds);
+        final String sql = new StringBuilder(256)
+            .append("select m from Measurement m ").append(
+            "join m.template t ").append("where m.resource in (:iids) AND t.id in (:tids) AND ")
+            .append(ALIAS_CLAUSE).toString();
+        final List<Measurement> rtn = new ArrayList<Measurement>(iidList.size());
+        final int batch = BATCH_SIZE/2;
+        for (int xx=0; xx<iidList.size(); xx+=batch) {
+            final int iidEnd = Math.min(xx+batch, iidList.size());
+            for (int yy=0; yy<tidList.size(); yy+=batch) {
+                final int tidEnd = Math.min(yy+batch, tidList.size());
+                rtn.addAll(entityManager.createQuery(sql,Measurement.class)
+                    .setParameter("iids", iidList.subList(xx, iidEnd))
+                    .setParameter("tids", tidList.subList(yy, tidEnd)).getResultList());
+            }
+        }
+        return rtn;
+    }
 
     public List<Measurement> findByResources(List<Integer> resources) {
         if (resources.isEmpty()) {

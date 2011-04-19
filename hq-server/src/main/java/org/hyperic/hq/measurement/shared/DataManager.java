@@ -170,6 +170,25 @@ public interface DataManager {
     public Map<Integer, double[]> getAggregateDataByMetric(List<Measurement> measurements, long begin, long end,
                                                            boolean useAggressiveRollup);
     
+    
+    /**
+     * Fetch a map of aggregate data values keyed by metrics given a start and
+     * stop time range
+     * 
+     * @param tids The template id's of the Measurement
+     * @param iids The resource id's of the Measurement
+     * @param begin The start of the time range
+     * @param end The end of the time range
+     * @param useAggressiveRollup uses a measurement rollup table to fetch the
+     *        data if the time range spans more than one data table's max
+     *        timerange
+     * @return the Map of data points
+     * 
+     */
+    Map<Integer, double[]> getAggregateDataByMetric(Integer[] tids, Integer[] iids,
+        long begin, long end,
+        boolean useAggressiveRollup);
+    
     /**
      * @return array of {@link MetricValue} representing the raw metric data
      *         collected. Since Availability just keeps state changes this does
