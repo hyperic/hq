@@ -225,6 +225,9 @@ public interface AlertDefinitionManager {
     public List<ResourceAlertDefinition> findAlertDefinitions(AuthzSubject subject,
                                                       org.hyperic.hq.appdef.shared.AppdefEntityID id)
         throws PermissionException;
+    
+    List<ResourceAlertDefinition> findAlertDefinitions(AuthzSubject subject, Integer id)
+        throws PermissionException;
 
     public PageList<AlertDefinitionValue> findAlertDefinitions(AuthzSubject subj,
                                                                org.hyperic.hq.appdef.shared.AppdefEntityID id,

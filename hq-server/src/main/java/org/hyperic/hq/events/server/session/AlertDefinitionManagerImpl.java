@@ -1380,6 +1380,19 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
         alertPermissionManager.canViewAlertDefinition(subject, id);
         return resAlertDefRepository.findByResource(id.getId(),new Sort("name"));
     }
+    
+    /**
+     * Get list of alert definition POJOs for a resource
+     * @throws PermissionException if user cannot manage alerts for resource
+     * 
+     */
+    @Transactional(readOnly=true)
+    public List<ResourceAlertDefinition> findAlertDefinitions(AuthzSubject subject, Integer id)
+        throws PermissionException {
+        // TOD check that user has view permission on alert definitions...
+        //alertPermissionManager.canViewAlertDefinition(subject, id);
+        return resAlertDefRepository.findByResource(id,new Sort("name"));
+    }
 
     /**
      * 
