@@ -47,16 +47,24 @@
 </tiles:insert>
 
 <script type="text/javascript">
-	var baseUrl = "<html:rewrite page="/resource/common/monitor/visibility/IndicatorCharts.do"/>";
-		baseUrl += "?eid=<c:out value="${eid}"/>";
-
+	<c:url var="baseUrl" value="/resource/common/monitor/visibility/IndicatorCharts.do">
+		<c:param name="eid" value="${eid}"/>
+	</c:url>
 	<c:if test="${not empty ctype}">
-		baseUrl += "&ctype=<c:out value="${ctype}"/>";
+		<c:url var="baseUrl" value="${baseUrl}">
+			<c:param name="ctype" value="${ctype}"/>
+		</c:url>
 	</c:if>
-  
+
+	var baseUrl = '${baseUrl}';
+	
 	function addMetric(metric) {
-	    var frameUrl = baseUrl + "&view=<c:out value="${view}"/>";
-	    	frameUrl += "&action=add&addMetric=" + metric;
+		<c:url var="baseUrl" value="${baseUrl}">
+			<c:param name="view" value="${view}"/>
+			<c:param name="action" value="add"/>
+			<c:param name="addMetric" value="{addMetric}"/>
+		</c:url>
+	    var frameUrl = unescape('${baseUrl}').replace("{addMetric}", metric);
 	
 	    window.parent.frames[0].location = frameUrl;
 	}
@@ -95,7 +103,12 @@
 			<td class="ListHeaderInactive" nowrap="true">
 				<fmt:message key="resource.common.monitor.visibility.IndicatorCharts" />&nbsp;
 				<fmt:message key="common.label.Pipe" />&nbsp;
-				<a href='<html:rewrite page="/ResourceCurrentHealth.do"/>?eid=<c:out value="${eid}"/>&view=<c:out value="${view}"/>&alertDefaults=true'>
+				<c:url var="resourceCurrentHealthUrl" value="/ResourceCurrentHealth.do">
+					<c:param name="eid" value="${eid}"/>
+					<c:param name="view" value="${view}"/>
+					<c:param name="alertDefaults" value="true"/>
+				</c:url>
+				<a href='<html:rewrite page=""/>?eid=<c:out value="${eid}"/>&view=<c:out value="${view}"/>&alertDefaults=true'>
 					<fmt:message key="resource.common.monitor.visibility.now" />
 				</a>
 			</td>

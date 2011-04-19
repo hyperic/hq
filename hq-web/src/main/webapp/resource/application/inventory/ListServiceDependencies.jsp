@@ -45,8 +45,12 @@ var pageData = new Array();
 initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 widgetPropertiesListServices = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 </script>
-<c:url var="selfAction"    value="/resource/application/Inventory.do?mode=listServiceDependencies&appSvcId=${appSvcCurrent.id}&type=${Resource.entityId.type}&rid=${Resource.id}" />
-
+<c:url var="selfAction" value="/resource/application/Inventory.do">
+	<c:param name="mode" value="listServiceDependencies"/>
+	<c:param name="appSvcId" value="${appSvcCurrent.id}"/>
+	<c:param name="type" value="${Resource.entityId.type}"/>
+	<c:param name="rid" value="${Resource.id}" />
+</c:url>
 <tiles:insert definition=".page.title.resource.application">
   <tiles:put name="titleKey" value="common.title.Edit"/>
   <tiles:put name="titleName" beanName="Resource" beanProperty="name"/>
@@ -119,7 +123,12 @@ widgetPropertiesListServices = getWidgetProperties('<c:out value="${widgetInstan
 </display:table>
 </c:otherwise>
 </c:choose>
-<c:set var="addToListUrl" value="/resource/application/Inventory.do?mode=addDependencies&appSvcId=${appSvcCurrent.id}&rid=${Resource.id}&type=${Resource.entityId.type}" />
+<c:url var="addToListUrl" value="/resource/application/Inventory.do">
+	<c:param name="mode" value="addDependencies"/>
+	<c:param name="appSvcId" value="${appSvcCurrent.id}"/>
+	<c:param name="rid" value="${Resource.id}"/>
+	<c:param name="type" value="${Resource.entityId.type}"/>
+</c:url>
 <c:set var="widgetInstanceName" value="listServices"/>
 
 <tiles:insert definition=".toolbar.addToList">
@@ -182,9 +191,9 @@ widgetPropertiesListServices = getWidgetProperties('<c:out value="${widgetInstan
     &nbsp;<br>
 
 <c:url var="returnUrl" value="/resource/application/Inventory.do">
-<c:param name="mode" value="view" />
-<c:param name="rid" value="${Resource.id}" />
-<c:param name="type" value="${Resource.entityId.type}" />
+	<c:param name="mode" value="view" />
+	<c:param name="rid" value="${Resource.id}" />
+	<c:param name="type" value="${Resource.entityId.type}" />
 </c:url>
 <html:link href="${returnUrl}"><fmt:message key="resource.application.inventory.services.ReturnLink" /></html:link>
 

@@ -427,7 +427,8 @@ function showViewEscResponse() {
         				<span id="noescalations" style="display: none;"><fmt:message key="common.label.None"/></span>
       				</th>
       				<th align="right">
-         				<c:url var="adminUrl" value="/admin/config/Config.do?mode=escalate">
+         				<c:url var="adminUrl" value="/admin/config/Config.do">
+         					<c:param name="mode" value="escalate"/>
            					<c:param name="aname" value="${alertDef.name}"/>
            					<c:choose>
              					<c:when test="${gad}">

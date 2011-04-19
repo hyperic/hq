@@ -60,7 +60,7 @@
 
 <script src="<html:rewrite page='/static/js/dojo/1.5/dojo/dojo.js'/>" type="text/javascript"></script>
 <script type="text/javascript">
-    var imagePath = "<html:rewrite page="/images/"/>";
+    var imagePath = "/images/";
     hqDojo.require('dojo.date');
 </script>
 <script src="<html:rewrite page='/js/prototype.js'/>" type="text/javascript"></script>
