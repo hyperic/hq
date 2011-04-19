@@ -456,6 +456,17 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     public Measurement getMeasurement(Integer mid) {
         return measurementRepository.findOne(mid);
     }
+    
+  
+    @Transactional(readOnly = true)
+    public Measurement getMeasurement(AuthzSubject s, Integer resource, String alias)
+        throws MeasurementNotFoundException {
+        Measurement m = measurementRepository.findByTemplateAliasAndResource(alias, resource);
+        if (m == null) {
+            throw new MeasurementNotFoundException(alias + " for " + resource + " not found");
+        }
+        return m;
+    }
 
     /**
      * Get the live measurement values for a given resource.

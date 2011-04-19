@@ -46,6 +46,8 @@ public interface MeasurementRepository extends JpaRepository<Measurement, Intege
     List<Measurement> findByTemplate(Integer templateId);
 
     List<Measurement> findByTemplate(MeasurementTemplate template);
+    
+    Measurement findByTemplateAliasAndResource(String alias, Integer resource);
 
     @Transactional(readOnly = true)
     @Query("select distinct m from Measurement m " + "join m.template t "

@@ -330,6 +330,26 @@ public class MeasurementRepositoryIntegrationTest {
         expected.add(measurement);
         assertEquals(expected, measurementRepository.findByTemplate(template));
     }
+    
+    @Test
+    public void testFindByTemplateAliasAndResource() {
+        MeasurementTemplate template2 = new MeasurementTemplate("Queue Size", "queueSize",
+            "messages", MeasurementConstants.COLL_TYPE_DYNAMIC, true, 1234, true,
+            "service:queueSize", type, category, "tomcat");
+        entityManager.persist(template2);
+        Measurement measurement = new Measurement(resource, template, 1234);
+        measurement.setDsn("queueSize");
+        measurementRepository.save(measurement);
+        Measurement measurement2 = new Measurement(resource, template2, 1234);
+        measurement2.setDsn("queueErrors");
+        measurementRepository.save(measurement2);
+        assertEquals(measurement2, measurementRepository.findByTemplateAliasAndResource("queueSize",resource));
+    }
+    
+    @Test
+    public void testFindByTemplateAliasAndResourceNone() {
+        assertNull( measurementRepository.findByTemplateAliasAndResource("Availability",resource));
+    }
 
     @Test
     public void testFindByTemplateAndResource() {
