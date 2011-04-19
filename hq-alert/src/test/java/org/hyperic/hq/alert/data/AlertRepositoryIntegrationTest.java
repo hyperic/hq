@@ -450,6 +450,37 @@ public class AlertRepositoryIntegrationTest {
         alert2.setFixed(true);
         assertEquals(alert2, alertRepository.findLastByDefinition(alertdef2, true));
     }
+    
+    @Test
+    public void testFindByFixedOrderByCtimeAsco() {
+        long timestamp = System.currentTimeMillis();
+        alert.setCtime(timestamp);
+        alert2.setCtime(timestamp - 5000);
+        Alert alert3 = new Alert();
+        alert3.setAlertDefinition(alertdef2);
+        alert3.setCtime(timestamp - 10000);
+        alert3.setFixed(true);
+        List<Alert> expected = new ArrayList<Alert>();
+        expected.add(alert2);
+        expected.add(alert);
+        assertEquals(expected,alertRepository.findByFixedOrderByCtimeAsc(false));
+    }
+    
+    @Test
+    public void testFindByResourcesAndFixedOrderByCtimeAsc() {
+        long timestamp = System.currentTimeMillis();
+        alert.setCtime(timestamp);
+        alert2.setCtime(timestamp - 5000);
+        Alert alert3 = new Alert();
+        alert3.setAlertDefinition(alertdef2);
+        alert3.setCtime(timestamp - 10000);
+        alert3.setFixed(true);
+        List<Alert> expected = new ArrayList<Alert>();
+        expected.add(alert2);
+        expected.add(alert);
+        assertEquals(expected,alertRepository.findByResourcesAndFixedOrderByCtimeAsc(Collections.singletonList(resource2),false));
+    }
+
 
     @Test
     public void testGetOldestUnfixedAlertTime() {

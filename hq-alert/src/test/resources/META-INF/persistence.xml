@@ -17,6 +17,7 @@
 		<class>org.hyperic.hq.escalation.server.session.Escalation</class>
 		<class>org.hyperic.hq.escalation.server.session.EscalationState</class>
 		<class>org.hyperic.hq.auth.domain.AuthzSubject</class>
+		<class>org.hyperic.hq.auth.domain.Operation</class>
 		<class>org.hyperic.hq.auth.domain.Role</class>
 		<class>org.hyperic.hq.auth.domain.RoleCalendar</class>
 		<class>org.hyperic.hq.config.domain.Crispo</class>
