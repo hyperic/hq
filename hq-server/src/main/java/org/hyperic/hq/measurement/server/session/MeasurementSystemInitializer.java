@@ -33,7 +33,7 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.application.Scheduler;
-import org.hyperic.hq.common.ProductProperties;
+import org.hyperic.hq.measurement.DataPurgeJob;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.galerts.MetricAuxLogProvider;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
@@ -51,17 +51,17 @@ public class MeasurementSystemInitializer {
 
     private SRNManager srnManager;
     private static Scheduler scheduler;
+    private DataPurgeJob dataPurgeJob;
 
     @Autowired
     public MeasurementSystemInitializer(MeasurementManager measurementManager,
-
-    SRNManager srnManager, ReportStatsCollector reportStatsCollector, Scheduler scheduler) {
+                                        SRNManager srnManager, 
+                                        ReportStatsCollector reportStatsCollector, 
+                                        Scheduler scheduler, DataPurgeJob dataPurgeJob) {
         this.measurementManager = measurementManager;
-
         this.srnManager = srnManager;
-
         MeasurementSystemInitializer.scheduler = scheduler;
-
+        this.dataPurgeJob = dataPurgeJob;
     }
 
     @PostConstruct
@@ -103,13 +103,6 @@ public class MeasurementSystemInitializer {
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
         final long initialDelay = cal.getTimeInMillis() - now();
-        _log.info("Starting Data Purge Worker");
-        Runnable dataPurgeJob = (Runnable) ProductProperties
-            .getPropertyInstance("hyperic.hq.dataPurge");
-        if (dataPurgeJob == null) {
-            _log.fatal("Could not start DataPurgeWorker");
-            return;
-        }
         _dataPurgeFuture = scheduler.scheduleAtFixedRate(dataPurgeJob, initialDelay,
             MeasurementConstants.HOUR);
     }

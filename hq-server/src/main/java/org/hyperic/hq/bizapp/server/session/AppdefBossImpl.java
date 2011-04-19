@@ -209,6 +209,8 @@ public class AppdefBossImpl implements AppdefBoss {
     private AppdefManager appdefManager;
 
     private ZeventEnqueuer zEventManager;
+    
+    private ConfigValidator configValidator;
 
     protected Log log = LogFactory.getLog(AppdefBossImpl.class.getName());
     protected boolean debug = log.isDebugEnabled();
@@ -228,7 +230,8 @@ public class AppdefBossImpl implements AppdefBoss {
                           AIBoss aiBoss, ResourceGroupManager resourceGroupManager,
                           ResourceManager resourceManager, ServerManager serverManager,
                           ServiceManager serviceManager, TrackerManager trackerManager,
-                          AppdefManager appdefManager, ZeventEnqueuer zEventManager) {
+                          AppdefManager appdefManager, ZeventEnqueuer zEventManager,
+                          ConfigValidator configValidator) {
         this.sessionManager = sessionManager;
         this.agentManager = agentManager;
         this.aiQueueManager = aiQueueManager;
@@ -249,6 +252,7 @@ public class AppdefBossImpl implements AppdefBoss {
         this.trackerManager = trackerManager;
         this.appdefManager = appdefManager;
         this.zEventManager = zEventManager;
+        this.configValidator = configValidator;
     }
 
     /**
@@ -2782,9 +2786,6 @@ public class AppdefBossImpl implements AppdefBoss {
                 if (allConfigs.shouldConfigControl()) {
                     validationTypes.add(ProductPlugin.TYPE_CONTROL);
                 }
-
-                ConfigValidator configValidator = (ConfigValidator) ProductProperties
-                    .getPropertyInstance(ConfigValidator.PDT_PROP);
 
                 // See if we can validate
                 if (configValidator != null) {
