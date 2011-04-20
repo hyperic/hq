@@ -1455,13 +1455,19 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         final Integer typeId = proto.getResourceType().getId();
         if (typeId.equals(AuthzConstants.authzPlatformProto)) {
             final PlatformType platformType = platformTypeDAO.get(proto.getInstanceId());
-            platformTypeDAO.remove(platformType);
+            if (platformType != null) {
+                platformTypeDAO.remove(platformType);
+            }
         } else if (typeId.equals(AuthzConstants.authzServerProto)) {
             final ServerType serverType = serverTypeDAO.get(proto.getInstanceId());
-            serverTypeDAO.remove(serverType);
+            if (serverType != null) {
+                serverTypeDAO.remove(serverType);
+            }
         } else if (typeId.equals(AuthzConstants.authzServiceProto)) {
             final ServiceType serviceType = serviceTypeDAO.get(proto.getInstanceId());
-            serviceTypeDAO.remove(serviceType);
+            if (serviceType != null) {
+                serviceTypeDAO.remove(serviceType);
+            }
         }
     }
 
