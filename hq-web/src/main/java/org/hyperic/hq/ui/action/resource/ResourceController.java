@@ -112,7 +112,6 @@ public abstract class ResourceController
         if (null == entityId || entityId instanceof AppdefEntityTypeID) {
             // this can happen if we're an auto-group of platforms
             request.setAttribute(Constants.CONTROL_ENABLED_ATTR, Boolean.FALSE);
-            request.setAttribute(Constants.PERFORMANCE_SUPPORTED_ATTR, Boolean.FALSE);
             try {
                 if (entityId != null) {
                     aetid = (AppdefEntityTypeID) entityId;
