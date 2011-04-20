@@ -69,7 +69,7 @@ public class PluginDAO extends HibernateDAO<Plugin> {
         if (pluginFileNames.isEmpty()) {
             return Collections.emptyList();
         }
-        String hql = "from Plugin where path = (:filenames)";
+        String hql = "from Plugin where path in (:filenames)";
         return getSession().createQuery(hql).setParameterList("filenames", pluginFileNames).list();
     }
 
