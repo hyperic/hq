@@ -41,7 +41,6 @@ import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.ResourceAlertDefinition;
 import org.hyperic.hq.events.server.session.ResourceTypeAlertDefinition;
 import org.hyperic.hq.inventory.domain.Resource;
-import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.util.pager.PageList;
 
@@ -64,6 +63,12 @@ public interface AlertDefinitionManager {
     throws AlertDefinitionCreateException, PermissionException;
     
     List<AlertDefinitionValue> findResourceAlertDefinitions(Integer typeAlertDefId);
+    
+    SortedMap<String, Integer> findResourceAlertDefinitionNames(AuthzSubject subj, AppdefEntityID id)
+    throws PermissionException;
+    
+    SortedMap<String, Integer> findResourceTypeAlertDefinitionNames(AuthzSubject subj, 
+        Integer resourceType) throws PermissionException;
     /**
      * Update just the basics
      * @throws PermissionException
