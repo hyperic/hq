@@ -1291,13 +1291,26 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     public void updateAgentPluginStatus(PluginReport_args arg) {
         @SuppressWarnings("unchecked")
         final Map<String, String> stringVals = arg.getStringVals();
+        final boolean debug = log.isDebugEnabled();
+        Agent agent = null;
         try {
             final String agentToken = stringVals.get(PluginReport_args.AGENT_TOKEN);
-            if (log.isDebugEnabled()) log.debug(stringVals);
-            final Agent agent = getAgent(agentToken);
+            if (debug) log.debug(stringVals);
+            agent = getAgent(agentToken);
             if (agent == null) {
                 return;
             }
+            if (ignoreAgent(agent, arg.getStringLists().toString())) {
+                if (debug) log.debug("agent=" + agent + " has no updates and plugins haven't " +
+                                     "been modified since the last checkin, ignoring");
+                return;
+            }
+            // check-in to the throttle mechanism after we do the ignoreAgent() check.
+            // If an agent restarts with the same plugin inventory then there should be zero plugins
+            // that were transferred over to the agent.  If the SAPS mechanism actually transferred
+            // plugins and restarted the agent then something went wrong, and therefore we need the
+            // AgentPluginStatus "IN_PROGRESS" objs to be marked as failure by not calling
+            // checkinAfterRestart()
             agentPluginSyncRestartThrottle.checkinAfterRestart(agent.getId());
             final Map<String, AgentPluginStatus> statusByFileName =
                 agentPluginStatusDAO.getPluginStatusByAgent(agent);
@@ -1316,7 +1329,30 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
             agentPluginUpdater.queuePluginTransfer(updateMap, removeMap);
         } catch (AgentNotFoundException e) {
             log.error(e,e);
+        } finally {
+            if (agent != null) {
+                agent.setLastPluginInventoryCheckin(System.currentTimeMillis());
+            }
         }
+    }
+
+    private boolean ignoreAgent(Agent agent, String stringLists) {
+        final String pluginInventoryChecksum = MD5.getMD5Checksum(stringLists.toString());
+        if (agent.getPluginInventoryChecksum() == null) {
+            agent.setPluginInventoryChecksum(pluginInventoryChecksum);
+            return false;
+        }
+        final long lastCheckin = agent.getLastPluginInventoryCheckin();
+        final long maxModTime = pluginDAO.getMaxModTime();
+        if (agent.getPluginInventoryChecksum().equals(pluginInventoryChecksum)) {
+            // this means plugins haven't changed since the agent last checked in its plugin
+            // inventory.  therefore, just ignore the agent since nothing appears to have changed
+            if (maxModTime < lastCheckin) {
+                return true;
+            }
+        }
+        agent.setPluginInventoryChecksum(pluginInventoryChecksum);
+        return false;
     }
 
     private void processPluginsNotOnAgent(Agent agent, Map<Integer, Collection<Plugin>> updateMap,

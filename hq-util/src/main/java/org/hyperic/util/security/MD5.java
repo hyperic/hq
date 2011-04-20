@@ -25,6 +25,7 @@
 
 package org.hyperic.util.security;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -33,12 +34,16 @@ import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.util.encoding.Base64;
 
 /**
  * MD5 helper methods. 
  */
 public class MD5 {
+    
+    private static final Log log = LogFactory.getLog(MD5.class);
 
     private MessageDigest md;
 
@@ -135,9 +140,23 @@ public class MD5 {
         }
     }
 
+    public static String getMD5Checksum(String buf) {
+        ByteArrayInputStream stream = new ByteArrayInputStream(buf.getBytes());
+        return getMD5Checksum(stream);
+    }
+
     public static String getMD5Checksum(File file) {
         try {
-            final InputStream fin = new FileInputStream(file);
+            InputStream fin = new FileInputStream(file);
+            return getMD5Checksum(fin);
+        } catch (FileNotFoundException e) {
+            log.error(e,e);
+            return null;
+        }
+    }
+
+    private static String getMD5Checksum(InputStream fin) {
+        try {
             final MessageDigest md5er = MessageDigest.getInstance("MD5");
             final byte[] buffer = new byte[1024];
             int read;
@@ -159,6 +178,7 @@ public class MD5 {
             }
             return strDigest.toString();
         } catch (Exception e) {
+            log.error(e,e);
             return null;
         }
     }

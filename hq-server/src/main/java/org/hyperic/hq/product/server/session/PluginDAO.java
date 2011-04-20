@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.hibernate.SessionFactory;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.product.Plugin;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,5 +71,15 @@ public class PluginDAO extends HibernateDAO<Plugin> {
         }
         String hql = "from Plugin where path = (:filenames)";
         return getSession().createQuery(hql).setParameterList("filenames", pluginFileNames).list();
+    }
+
+    public long getMaxModTime() {
+        final String hql = "select max(modifiedTime) from Plugin";
+        final Number num = (Number) getSession().createQuery(hql).uniqueResult();
+        if (num == null) {
+            // this is a big problem, throw SystemException
+            throw new SystemException("cannot fetch max(modifiedTime) from the Plugin table");
+        }
+        return num.longValue();
     }
 }

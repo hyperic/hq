@@ -11630,6 +11630,18 @@ has already been defined.
     </schema-directSQL>
  </schemaSpec>
 
+ <schemaSpec version="3.205">
+    <schema-addColumn table="EAM_AGENT"
+                      column="LAST_PLUGIN_INVENTORY_CHECKIN"
+                      nullable="NOT NULL"
+                      default="0"
+                      columnType="LONG" />
+    <schema-addColumn table="EAM_AGENT"
+                      column="PLUGIN_INVENTORY_CHECKSUM"
+                      precision="128"
+                      columnType="VARCHAR2" />
+ </schemaSpec>
+
 </dbupgrade>
 </target>
 </project>
