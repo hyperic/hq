@@ -375,10 +375,6 @@
         <param-name>org.hyperic.lather.maxConns</param-name>
         <param-value>3000</param-value>
     </init-param>
-    <init-param>
-        <param-name>org.hyperic.lather.execTimeout</param-name>
-        <param-value>300000</param-value>
-    </init-param>
     <load-on-startup>1</load-on-startup>
   </servlet>
   
