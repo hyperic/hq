@@ -25,9 +25,7 @@
 
 package org.hyperic.hq.ui.action.resource;
 
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
@@ -43,17 +41,12 @@ import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.auth.domain.AuthzSubject;
-import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
-import org.hyperic.hq.bizapp.shared.ProductBoss;
-import org.hyperic.hq.common.ProductProperties;
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.hqu.AttachmentDescriptor;
-import org.hyperic.hq.hqu.server.session.AttachType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
@@ -158,9 +151,8 @@ public abstract class ResourceController
                 }
              
                 // Set additional flags
-                UIUtils utils = (UIUtils) ProductProperties.getPropertyInstance("hyperic.hq.ui.utils");
-                
-                utils.setResourceFlags(resource, config, request, getServlet().getServletContext());
+                UIUtils uiUtils = Bootstrap.getBean(UIUtils.class);
+                uiUtils.setResourceFlags(resource, config, request, getServlet().getServletContext());
                 
 
                 // Get the custom properties
