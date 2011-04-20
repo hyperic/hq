@@ -263,12 +263,12 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
             if (rtn != null && rtn.exists()) {
                 rtn.delete();
             }
-            throw new PluginDeployException("plugin.manager.file.xml.wellformed.error", filename);
+            throw new PluginDeployException("plugin.manager.file.xml.wellformed.error", e, filename);
         } catch (IOException e) {
             if (rtn != null && rtn.exists()) {
                 rtn.delete();
             }
-            throw new PluginDeployException("plugin.manager.file.ioexception", filename);
+            throw new PluginDeployException("plugin.manager.file.ioexception", e, filename);
         } finally {
             close(writer);
         }
@@ -348,13 +348,13 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
             if (toRemove != null && toRemove.exists()) {
                 toRemove.delete();
             }
-            throw new PluginDeployException("plugin.manager.file.ioexception", filename);
+            throw new PluginDeployException("plugin.manager.file.ioexception", e, filename);
         } catch (JDOMException e) {
             final File toRemove = new File(file);
             if (toRemove != null && toRemove.exists()) {
                 toRemove.delete();
             }
-            throw new PluginDeployException("plugin.manager.file.xml.wellformed.error", currXml);
+            throw new PluginDeployException("plugin.manager.file.xml.wellformed.error", e, currXml);
         } finally {
             close(jis);
             close(fos);
