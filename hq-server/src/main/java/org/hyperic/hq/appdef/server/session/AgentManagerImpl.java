@@ -1336,12 +1336,19 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     private void processRemainingStatuses(Map<String, AgentPluginStatus> statusByFileName,
                                           Map<Integer, Collection<Plugin>> updateMap, Agent agent) {
         final Map<String, Long> map = agentPluginStatusDAO.getFileNameCounts();
+        final boolean debug = log.isDebugEnabled();
         for (final Entry<String, AgentPluginStatus> entry: statusByFileName.entrySet()) {
             final String filename = entry.getKey();
             final AgentPluginStatus status = entry.getValue();
             final Plugin plugin = pluginDAO.getByFilename(filename);
             if (plugin == null || plugin.isDeleted()) {
+                if (debug) log.debug("plugin filename=" + filename +
+                                     " has been deleted, removing AgentPluginStatus objects" +
+                                     " for agent=" + agent);
                 agentPluginStatusDAO.remove(status);
+                if (plugin == null) {
+                    continue;
+                }
                 // if no more agents have this plugin then remove it
                 final Long num = map.get(filename);
                 if (num == null || num <= 1) {
