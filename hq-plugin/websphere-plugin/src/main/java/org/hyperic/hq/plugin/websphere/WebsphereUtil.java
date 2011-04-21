@@ -152,6 +152,7 @@ public class WebsphereUtil {
     }
 
     public static Properties getAdminProperties(Properties cfg) {
+        log.debug("[getAdminProperties] cfg="+cfg);
         String host =
             cfg.getProperty(WebsphereProductPlugin.PROP_ADMIN_HOST,
                             "localhost");
@@ -193,6 +194,7 @@ public class WebsphereUtil {
             }
         }
 
+        log.debug("[getAdminProperties] props="+props);
         return props;
     }
 
