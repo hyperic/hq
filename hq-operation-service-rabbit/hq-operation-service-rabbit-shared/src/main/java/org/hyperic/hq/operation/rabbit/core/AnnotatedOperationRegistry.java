@@ -29,13 +29,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.operation.OperationDiscoveryException;
 import org.hyperic.hq.operation.OperationRegistry;
-import org.hyperic.hq.operation.rabbit.annotation.OperationDispatcher;
 import org.hyperic.hq.operation.rabbit.annotation.OperationEndpoint;
 import org.hyperic.hq.operation.rabbit.api.RoutingRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ErrorHandler;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -65,32 +65,31 @@ public class AnnotatedOperationRegistry implements OperationRegistry {
         this.errorHandler = errorHandler;
     }
 
+    /**
+     * Registers an candidate and its annotated operation methods
+     * @param method  The method
+     * @param candidate The instance to invoke the method on
+     * @throws OperationDiscoveryException if an exception occurs
+     */
+    public void register(Method method, Object candidate) throws OperationDiscoveryException {
+        routingRegistry.register(method);
+
+        if (method.isAnnotationPresent(OperationEndpoint.class)) {
+            handlers.put(method.getName(), new RabbitMessageListenerContainer(connectionFactory, candidate, method, errorHandler));
+        }
+    }
+
+    @PostConstruct
+    public void initialize() {
+        for (Map.Entry<String,RabbitMessageListenerContainer> entry: handlers.entrySet()) {
+            entry.getValue().initialize();
+        }
+    }
 
     @PreDestroy
-    public void destroy() {
+    public void destroy() throws Exception {
         for (Map.Entry<String, RabbitMessageListenerContainer> entry : handlers.entrySet()) {
-            RabbitMessageListenerContainer mlc = entry.getValue();
-            mlc.destroy();
+            entry.getValue().destroy();
         }
-    }
-
-    public void register(Method method, Object candidate) throws OperationDiscoveryException {
-        if (method.isAnnotationPresent(OperationDispatcher.class)) {
-            registerDipatcher(method, candidate);
-        } else if (method.isAnnotationPresent(OperationEndpoint.class)) {
-            registerEndpoint(method, candidate);
-        }
-    }
-
-
-    private void registerDipatcher(Method method, Object candidate) {
-        routingRegistry.register(method, method.getAnnotation(OperationDispatcher.class));
-        logger.info("\nregistered bean=" + candidate + " and method=" + method.getName());
-    }
-
-    private void registerEndpoint(Method method, Object candidate) {
-        routingRegistry.register(method, method.getAnnotation(OperationEndpoint.class));
-        handlers.put(method.getName(), new RabbitMessageListenerContainer(connectionFactory, candidate, method.getName(), errorHandler));
-        logger.info("\nregistered bean=" + candidate + " and method=" + method.getName());
     }
 }
