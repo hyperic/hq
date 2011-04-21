@@ -44,15 +44,15 @@ public class OperationDiscovererBeanPostProcessor implements BeanPostProcessor {
     }
  
     public Object postProcessBeforeInitialization(Object bean, String beanName) {
-        return bean;
-    }
-
-    public Object postProcessAfterInitialization(Object bean, String beanName) {
         try {
             operationDiscoverer.discover(bean);
         } catch (Exception e) {
             throw new FatalBeanException("Unable to scan bean for annotations", e);
         }
+        return bean;
+    }
+
+    public Object postProcessAfterInitialization(Object bean, String beanName) {
         return bean;
     }
 }
