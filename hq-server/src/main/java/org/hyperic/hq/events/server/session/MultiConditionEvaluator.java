@@ -1,15 +1,15 @@
 /**
- * NOTE: This copyright does *not* cover user programs that use HQ
+ * NOTE: This copyright does *not* cover user programs that use Hyperic
  * program services by normal system calls through the application
  * program interfaces provided as part of the Hyperic Plug-in Development
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  *  "derived work".
  *
- *  Copyright (C) [2009-2010], VMware, Inc.
- *  This file is part of HQ.
+ *  Copyright (C) [2009-2011], VMware, Inc.
+ *  This file is part of Hyperic.
  *
- *  HQ is free software; you can redistribute it and/or modify
+ *  Hyperic is free software; you can redistribute it and/or modify
  *  it under the terms version 2 of the GNU General Public License as
  *  published by the Free Software Foundation. This program is distributed
  *  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
@@ -40,9 +40,11 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.TriggerNotFiredEvent;
+import org.hyperic.hq.measurement.ext.MeasurementEvent;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
 
 
@@ -63,7 +65,7 @@ public class MultiConditionEvaluator implements AlertConditionEvaluator {
 
     private final Object monitor = new Object();
 
-    private final Map events;
+    private final Map<Integer, AbstractEvent> events;
 
     /**
      * IDs of the triggers that must be fired for alert conditions to be
@@ -103,7 +105,7 @@ public class MultiConditionEvaluator implements AlertConditionEvaluator {
         this.alertDefinitionId = alertDefinitionId;
         this.timeRange = timeRange;
         this.executionStrategy = executionStrategy;
-        this.events = new LinkedHashMap();
+        this.events = new LinkedHashMap<Integer, AbstractEvent>();
         initializeWatchedTriggers(alertConditions);
     }
 
@@ -124,7 +126,7 @@ public class MultiConditionEvaluator implements AlertConditionEvaluator {
                                    Collection alertConditions,
                                    long timeRange,
                                    ExecutionStrategy executionStrategy,
-                                   Map events)
+                                   Map<Integer, AbstractEvent> events)
     {
         this.alertDefinitionId = alertDefinitionId;
         this.timeRange = timeRange;
@@ -133,22 +135,96 @@ public class MultiConditionEvaluator implements AlertConditionEvaluator {
         initializeWatchedTriggers(alertConditions);
     }
 
-    private void ejectExpiredEvents() {
+    private void evictExpiredEvents() {
         if (timeRange > 0) {
-            for (Iterator iter = events.entrySet().iterator(); iter.hasNext();) {
-                // event timestamp + timeRange = expiration date. Remove if less
-                // than System.currentTimeMillis
-                Map.Entry entry = (Map.Entry) iter.next();
-                if (isExpired((AbstractEvent) entry.getValue())) {
-                    iter.remove();
-                }
+        	synchronized (events) {
+	            for (Iterator<AbstractEvent> eventIter = events.values().iterator(); eventIter.hasNext();) {
+	                // event timestamp + timeRange = expiration date. Remove if less
+	                // than System.currentTimeMillis
+	                if (isExpired(eventIter.next())) {
+	                	eventIter.remove();
+	                }
+	            }
+        	}
+        }
+    }
+    
+    /**
+     * If there are multiple TriggerFiredEvents for the same metric, make sure
+     * all of the TriggerFiredEvents were fired from the same measurement event
+     */
+    private void evictStaleEvents() {
+    	Map<Integer, MeasurementEvent> measMap = getLatestMeasurementEvents();
+
+    	if (!measMap.isEmpty()) {
+	    	synchronized (events) {
+		        for (Iterator<AbstractEvent> iter = events.values().iterator(); iter.hasNext();) {
+		        	AbstractEvent savedEvent = iter.next();
+		        	if (savedEvent instanceof TriggerFiredEvent) {
+		        		TriggerFiredEvent tfe = (TriggerFiredEvent) savedEvent;
+		        		if (isStale(tfe, measMap)) {
+		    				if (log.isDebugEnabled()) {
+		    					log.debug("evicting stale event: " + savedEvent);
+		    				}
+		        			iter.remove();
+		        		}
+		            }
+		        }
+	    	}
+    	}
+    }
+    
+    private boolean isStale(TriggerFiredEvent tfe, Map<Integer, MeasurementEvent> measMap) {
+    	boolean stale = false;
+		AbstractEvent[] triggeredEvents = tfe.getEvents();
+		
+		for (int i=0; i<triggeredEvents.length; i++) {
+    		if (triggeredEvents[i] instanceof MeasurementEvent) {
+    			MeasurementEvent me = (MeasurementEvent) triggeredEvents[i];
+    			Integer measurementId = me.getInstanceId();
+    			MeasurementEvent latestMe = measMap.get(measurementId);
+    			if (latestMe != null && me.getTimestamp() < latestMe.getTimestamp()) {
+    				stale = true;
+    				break;
+    			}
+    		}
+    	}
+		
+    	return stale;
+    }
+    
+    private Map<Integer, MeasurementEvent> getLatestMeasurementEvents() {
+    	Map<Integer, MeasurementEvent> measMap = new HashMap<Integer, MeasurementEvent>();
+
+    	for (AbstractEvent savedEvent : events.values()) {
+        	if (savedEvent instanceof TriggerFiredEvent) {
+        		TriggerFiredEvent tfe = (TriggerFiredEvent) savedEvent;
+        		AbstractEvent[] triggeredEvents = tfe.getEvents();
+        		
+        		for (int i=0; i<triggeredEvents.length; i++) {
+            		if (triggeredEvents[i] instanceof MeasurementEvent) {
+            			MeasurementEvent me = (MeasurementEvent) triggeredEvents[i];
+            			Integer measurementId = me.getInstanceId();
+            			MeasurementEvent savedMe = measMap.get(measurementId);
+            			if (savedMe == null) {
+            				measMap.put(measurementId, me);
+            			} else {
+            				if (me.getTimestamp() > savedMe.getTimestamp()) {
+            					// replace with the latest measurement event
+            					measMap.put(measurementId, me);
+            				}
+            			}
+            		}
+            	}
             }
         }
+    	
+    	return measMap;
     }
 
     protected Collection evaluate(AbstractEvent event) {
-        if (log.isDebugEnabled()) {
-            log.debug("evaluate event " + event);
+    	if (log.isDebugEnabled()) {
+            log.debug("evaluate event: " + event);
         }
         Integer triggerId = event.getInstanceId();
         AbstractEvent previous = (AbstractEvent) events.get(triggerId);
@@ -175,7 +251,8 @@ public class MultiConditionEvaluator implements AlertConditionEvaluator {
     }
 
     protected Collection getFulfillingConditions() {
-        ejectExpiredEvents();
+        evictExpiredEvents();
+        evictStaleEvents();
         List fulfilled = new ArrayList();
         for (Iterator iter = events.values().iterator(); iter.hasNext();) {
             AbstractEvent savedEvent = (AbstractEvent) iter.next();
