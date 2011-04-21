@@ -42,7 +42,6 @@ import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -155,7 +154,7 @@ public class OperationToRoutingKeyRegistry implements RoutingRegistry {
         try {
             return InetAddress.getLocalHost().getHostAddress();
         } catch (UnknownHostException e) {
-            return UUID.randomUUID().toString();
+            return Thread.currentThread().getName(); // TODO
         }
     }
 }
