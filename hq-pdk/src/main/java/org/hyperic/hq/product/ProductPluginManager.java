@@ -56,8 +56,6 @@ import org.hyperic.util.PluginLoaderException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.security.MD5;
 
-import edu.emory.mathcs.backport.java.util.Collections;
-
 /**
  * This class is a manager for ProductPlugin implementations and is also a
  * manager of plugin managers.
@@ -715,25 +713,6 @@ public class ProductPluginManager
         }
     }
 
-    public Collection<PluginInfo> registerCustomPlugins(String startDir, Collection<PluginInfo> excludes) {
-        // check startDir and higher for hq-plugins
-        File customDir = getCustomDir(startDir);
-        return customDir != null ?
-            registerPlugins(customDir.toString(), excludes) : Collections.emptyList();
-    }
-    
-    private File getCustomDir(String startDir) {
-        File dir = new File(startDir).getAbsoluteFile();
-        while (dir != null) {
-            File customPluginDir = new File(dir, "hq-plugins");
-            if (customPluginDir.exists()) {
-                return customPluginDir;
-            }
-            dir = dir.getParentFile();
-        }
-        return null;
-    }
-
     private File[] listPlugins(File dir) {
         File[] plugins = dir.listFiles();
         return plugins;
@@ -755,13 +734,9 @@ public class ProductPluginManager
         }
     }
     
-    public Collection<PluginInfo> getAllPluginInfoDirectFromFileSystem(String path, String customPath) {
+    public Collection<PluginInfo> getAllPluginInfoDirectFromFileSystem(String path) {
         final Collection<PluginInfo> rtn = new ArrayList<PluginInfo>();
         final List<String> dirs = StringUtil.explode(path, File.pathSeparator);
-        File customDir = getCustomDir(customPath);
-        if (customDir != null) {
-            dirs.add(customDir.getAbsolutePath());
-        }
         for (final String d : dirs) {
             final File dir = new File(d);
             if (!dir.exists() || !dir.isDirectory()) {
