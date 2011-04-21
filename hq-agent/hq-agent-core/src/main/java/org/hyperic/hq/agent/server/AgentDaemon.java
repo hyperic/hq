@@ -702,10 +702,9 @@ public class AgentDaemon
             });
             Set<PluginInfo> plugins = new HashSet<PluginInfo>();
             plugins.addAll(this.ppm.registerPlugins(pluginDir, excludes));
-            //check .. and higher for hq-plugins
-            plugins.addAll(this.ppm.registerCustomPlugins("..", excludes));
             plugins.addAll(excludes);
-            Collection<PluginInfo> fromDirs = ppm.getAllPluginInfoDirectFromFileSystem(pluginDir, "..");
+            scanLegacyCustomDir("..");
+            Collection<PluginInfo> fromDirs = ppm.getAllPluginInfoDirectFromFileSystem(pluginDir);
             plugins = mergeByName(fromDirs, plugins);
             sendPluginStatusToServer(plugins);
             
@@ -716,6 +715,26 @@ public class AgentDaemon
             logger.error("Error initializing plugins ", e);
             throw new AgentStartException("Unable to initialize plugin " +
                                           "manager: " + e.getMessage());
+        }
+    }
+
+    private void scanLegacyCustomDir(String startDir) {
+        File dir = new File(startDir).getAbsoluteFile();
+        while (dir != null) {
+            File customDir = new File(dir, "hq-plugins");
+            if (customDir.exists() && customDir.isDirectory()) {
+                File[] files = customDir.listFiles();
+                for (File file : files) {
+                    String name = file.getName();
+                    if (name.endsWith("-plugin.jar") || name.endsWith("-plugin.xml")) {
+                        logger.warn("WARNING - custom plugins on the agent are no longer supported.  " +
+                                    "Will not load plugin - " + name + ", instead add this plugin " +
+                                    "to the HQ Server via the Plugin Manager UI.");
+                    }
+                }
+                return;
+            }
+            dir = dir.getParentFile();
         }
     }
 
