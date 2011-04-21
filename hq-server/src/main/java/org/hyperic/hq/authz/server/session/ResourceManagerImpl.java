@@ -82,6 +82,7 @@ import org.hyperic.hq.measurement.server.session.MeasurementTemplateDAO;
 import org.hyperic.hq.measurement.server.session.MonitorableType;
 import org.hyperic.hq.measurement.server.session.MonitorableTypeDAO;
 import org.hyperic.hq.product.PlatformDetector;
+import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -190,11 +191,12 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         if (log.isDebugEnabled())
             log.debug("Removing authz resource: " + aeid);
 
+        Zevent zevent = new ResourceDeletedZevent(subject, aeid);
         AuthzSubject s = authzSubjectManager.findSubjectById(subject.getId());
+        
         removeResource(s, r);
 
         // Send resource delete event
-        ResourceDeletedZevent zevent = new ResourceDeletedZevent(subject, aeid);
         zeventManager.enqueueEventAfterCommit(zevent);
     }
 

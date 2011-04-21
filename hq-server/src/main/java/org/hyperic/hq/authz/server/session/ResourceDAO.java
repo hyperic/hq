@@ -396,6 +396,16 @@ public class ResourceDAO
     }
 
     @SuppressWarnings("unchecked")
+	public List<Resource> getPlatformsMinusVsphereVmPlatforms() {
+        String sql = "select r from Resource r " + "where r.resourceType.id = :platProto "
+                     + "and r.prototype.name != :vspherevm";
+        return getSession().createQuery(sql)
+        	.setInteger("platProto", AuthzConstants.authzPlatform.intValue())
+        	.setString("vspherevm", AuthzConstants.platformPrototypeVmwareVsphereVm)
+        	.list();
+    }
+
+    @SuppressWarnings("unchecked")
     public Collection<Resource> getUnconfiguredResources() {
         String hql = "from Resource r " +
                      "where resourceType.id in (:platformType, :serverType, :serviceType) " +
