@@ -38,7 +38,7 @@ import java.io.IOException;
 
 /**
  * @author Helena Edelson
- */ 
+ */
 public final class ChannelTemplate implements ChannelOperations {
 
     private final Log logger = LogFactory.getLog(getClass());
@@ -51,9 +51,9 @@ public final class ChannelTemplate implements ChannelOperations {
     /**
      * Creates a new instance
      * @param connectionFactory {@link com.rabbitmq.client.ConnectionFactory}
-     */ 
+     */
     public ChannelTemplate(ConnectionFactory connectionFactory) {
-        this.connectionFactory = connectionFactory; 
+        this.connectionFactory = connectionFactory;
     }
 
     /**
@@ -90,20 +90,28 @@ public final class ChannelTemplate implements ChannelOperations {
         }
     }
 
+    public Connection createConnection() throws ConnectionException {
+        try {
+            return this.connectionFactory.newConnection();
+        } catch (IOException e) {
+            throw translateChannelException("Unable to create connection", e);
+        }
+    }
+
+
     /**
      * Close the given Channel and Connection.
      * @param channel Channel to close (may be <code>null</code>)
      */
     public void releaseResources(Channel channel) {
-        if (channel == null) return;
+        if (channel == null || !channel.isOpen()) return;
+ 
+        try { 
+            channel.close();
+            closeConnection(channel.getConnection());
 
-        try {
-            if (channel.isOpen()) {
-                channel.close();
-                closeConnection(channel.getConnection());
-            }  
         } catch (AlreadyClosedException e) {
-           logger.debug("Connection is already closed.", e);
+            logger.debug("Connection is already closed.", e);
         } catch (IOException e) {
             logger.debug("Connection is already closed.", e);
         }
@@ -125,5 +133,5 @@ public final class ChannelTemplate implements ChannelOperations {
                 + " host=" + this.connectionFactory.getHost()
                 + " port=" + this.connectionFactory.getPort(), t);
     }
- 
+
 }
