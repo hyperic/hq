@@ -27,7 +27,6 @@ package org.hyperic.hq.bizapp.server.operations;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.auth.shared.AuthManager;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -35,8 +34,6 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.operation.OperationService;
-import org.hyperic.hq.operation.rabbit.util.ServerConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,8 +44,6 @@ public class ServerOperationServiceValidator {
 
     private final Log logger = LogFactory.getLog(this.getClass());
 
-    private OperationService operationService;
-
     private AuthManager authManager;
 
     private AuthzSubjectManager authzSubjectManager;
@@ -56,9 +51,8 @@ public class ServerOperationServiceValidator {
     private PermissionManager permissionManager;
 
     @Autowired
-    public ServerOperationServiceValidator(OperationService operationService, AuthManager authManager,
-        AuthzSubjectManager authzSubjectManager, PermissionManager permissionManager) {
-        this.operationService = operationService;
+    public ServerOperationServiceValidator(AuthManager authManager, AuthzSubjectManager authzSubjectManager,
+                                           PermissionManager permissionManager) { 
         this.authzSubjectManager = authzSubjectManager;
         this.authManager = authManager;
         this.permissionManager = permissionManager;
@@ -84,13 +78,4 @@ public class ServerOperationServiceValidator {
         }
     }
 
-    /* really this type of operation is no longer needed. */
-   //@Operation(operationName = Constants.OPERATION_NAME_SERVER_TO_AGENT_PING, exchangeName = Constants.TO_AGENT_AUTHENTICATED_EXCHANGE)
-   void testAgentConn(String agentIP, int agentPort, String authToken, boolean isNewTransportAgent, boolean unidirectional) throws AgentConnectionException {
-       try {
-           this.operationService.perform(ServerConstants.ROUTING_KEY_PING_REQUEST, authToken);
-       } catch (RuntimeException e) {
-           throw new AgentConnectionException(e.getMessage());
-       }
-   }
 }

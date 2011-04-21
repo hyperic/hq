@@ -42,10 +42,8 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.operation.RegisterAgentRequest;
 import org.hyperic.hq.operation.RegisterAgentResponse;
-import org.hyperic.hq.operation.rabbit.annotation.OperationDispatcher;
 import org.hyperic.hq.operation.rabbit.annotation.OperationEndpoint;
 import org.hyperic.hq.operation.rabbit.annotation.OperationService;
-import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.security.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,15 +85,14 @@ public class RegisterAgentServiceImpl implements RegisterAgentService {
         this.zeventManager = zeventManager;
         this.serverOperationServiceValidator = serverOperationServiceValidator;
     }
- 
-    @OperationEndpoint(exchange = "to.server", routingKey = "request.register", binding = "request.*")
-    @OperationDispatcher(exchange = "to.agent", routingKey = "response.register", binding = "response.*", queue = "agent")
-    public RegisterAgentResponse registerAgentRequest(Object request) throws AgentConnectionException, PermissionException {
- 
-        /* TODO, put converter in the listener */
-        JsonMappingConverter converter = new JsonMappingConverter();
-        RegisterAgentRequest registerAgent = (RegisterAgentRequest) converter.read(new String((byte[]) request), RegisterAgentRequest.class);
-         
+    
+    /* this is still being developed and simplified */
+    @OperationEndpoint(exchange = "to.server", routingKey = "request.register", binding = "request.*",
+            responseExchange = "to.agent", responseRoutingKey = "response.register", responseQueue = "testAgent"
+    )
+    public RegisterAgentResponse registerAgentRequest(RegisterAgentRequest registerAgent) throws AgentConnectionException, PermissionException {
+        logger.debug("received " + registerAgent);
+
         try {
             checkUserCanManageAgent(registerAgent);
         } catch (PermissionException e) {
@@ -108,7 +105,7 @@ public class RegisterAgentServiceImpl implements RegisterAgentService {
         boolean isOldAgentToken = true;
         String agentToken = registerAgent.getAgentToken();
 
-        if (agentToken == null || agentToken.length() == 0) {
+        if (agentToken == null || agentToken.length() < 1) {
             agentToken = SecurityUtil.generateRandomToken();
             while (!agentManager.isAgentTokenUnique(agentToken)) {
                 agentToken = SecurityUtil.generateRandomToken();
@@ -116,7 +113,7 @@ public class RegisterAgentServiceImpl implements RegisterAgentService {
 
             isOldAgentToken = false;
         }
-        logger.debug("\nset agentToken="+agentToken);
+
         /* Check the to see if the agent already exists. Lookup the agent by agent token (if it exists).
         Otherwise, use the agent IP and port */
 
