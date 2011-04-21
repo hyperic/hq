@@ -5,8 +5,10 @@ import org.hyperic.hq.agent.AgentConfigException;
 import org.hyperic.hq.bizapp.agent.ProviderInfo;
 import org.hyperic.hq.bizapp.client.*;
 import org.hyperic.hq.bizapp.server.operations.RegisterAgentService;
+import org.hyperic.hq.operation.RegisterAgentResponse;
 import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -16,7 +18,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Helena Edelson
  */
-//@Ignore("'AGENT_HOME' must be set")
+@Ignore("'AGENT_HOME' must be set")
 public class LatherReplacementIntegrationTests extends BaseInfrastructureTest {
 
     @Autowired private RegisterAgentService registerAgentService;
@@ -24,7 +26,7 @@ public class LatherReplacementIntegrationTests extends BaseInfrastructureTest {
     /**
      * Must configure
      */
-    private final static String AGENT_HOME = "/Users/hedelson/tools/hyperic/agent-4.6.0.BUILD-SNAPSHOT";
+    private final static String AGENT_HOME = "/path/to/agent-4.6.0.BUILD-SNAPSHOT";
 
     private BizappCallbackClient bizappClient;
 
@@ -48,16 +50,17 @@ public class LatherReplacementIntegrationTests extends BaseInfrastructureTest {
 
     @Test
     public void bizappRegisterAgentSuccess() throws AgentCallbackClientException, InterruptedException {
-        RegisterAgentResult result = this.bizappClient.registerAgent(null, user, pass, "fooAuthToken", host, port, "", 1, false, false);
-        assertNotNull(result.response);
-        assertTrue(result.response.startsWith("token:"));
+        /* passed in from AgentClient.java */
+        RegisterAgentResponse response = this.bizappClient.registerAgent(null, user, pass, "fooAuthToken", host, port, "", 1, false, false);
+        assertNotNull(response);
+        assertTrue(response.getAgentToken().startsWith("token:"));
     }
 
     @Test
     public void bizappRegisterAgentFail() throws AgentCallbackClientException, InterruptedException {
-        RegisterAgentResult error = this.bizappClient.registerAgent(null, "invalid", pass, "fooAuthToken", host, port, "", 1, false, false);
-        assertNotNull(error.response);
-        assertTrue(error.response.contains("Permission denied"));
+        RegisterAgentResponse error = this.bizappClient.registerAgent(null, "invalid", pass, "fooAuthToken", host, port, "", 1, false, false);
+        assertNotNull(error);
+        assertTrue(error.getAgentToken().contains("Permission denied"));
     }
 
 
