@@ -42,7 +42,7 @@ import java.io.IOException;
  */
 public class DeclarativeBindingHandler implements BindingHandler {
 
-    private final Log logger = LogFactory.getLog(DeclarativeBindingHandler.class);
+    private final Log logger = LogFactory.getLog(this.getClass());
 
     private final ChannelTemplate channelTemplate;
 
@@ -65,11 +65,11 @@ public class DeclarativeBindingHandler implements BindingHandler {
                         channel.exchangeDeclare(operation, MessageConstants.SHARED_EXCHANGE_TYPE, true, false, null);
                         String queueName = channel.queueDeclare(operation, true, false, false, null).getQueue();
                         channel.queueBind(queueName, exchange, bindingPattern);
-                        logger.info("\ncreated queue=" + queueName + " bound to exchange=" + exchange + " with pattern=" + bindingPattern);
+                        logger.debug("created queue=" + queueName + " bound to exchange=" + exchange + " with pattern=" + bindingPattern);
                         return null;
                     }
                 } catch (IOException e) {
-                    throw new ChannelException("Could not bind queue to exchange", e);
+                    throw new ChannelException("Could not bind " + operation + " queue to " + exchange + " exchange: " + e.getCause());
                 }
             }
         });
