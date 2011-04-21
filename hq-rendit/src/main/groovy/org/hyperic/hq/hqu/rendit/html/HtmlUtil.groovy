@@ -67,17 +67,17 @@ class HtmlUtil {
         def qparams = [:]
                        
         if (opts.absolute) {
-            res = "${opts.absolute}/"
+            res = "${opts.absolute}"
         }
         opts.remove('absolute')
         
         if (opts.asset) {
-            res += "public/${opts['asset']}"
+            res += "/public/${opts['asset']}"
             opts.remove('asset')
         }
         
         if (opts['action']) {
-        	res += opts['action'] + '.hqu'
+        	res += '/' + opts['action'] + '.hqu'
         	opts.remove('action')
         }
         
@@ -96,7 +96,7 @@ class HtmlUtil {
                 resourceContext = opts.resourceContext
                 opts.remove('resourceContext')
             }
-            res += opts['resource'].urlFor(resourceContext)
+            res += '/' + opts['resource'].urlFor(resourceContext)
             opts.remove('resource')
         }
         
@@ -105,7 +105,9 @@ class HtmlUtil {
         for (o in qparams) {
             if (!addedParam)
                 res += '?'
-            res += "${o.key}=${escapeHtml(o.value)}&"
+			else
+				res += '&'
+            res += "${o.key}=${escapeHtml(o.value)}"
             addedParam = true
         }
         res

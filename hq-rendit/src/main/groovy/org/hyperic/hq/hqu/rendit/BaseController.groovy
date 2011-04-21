@@ -359,6 +359,8 @@ abstract class BaseController {
     public String urlFor(opts) {
         def req = invokeArgs.request
         def path = [invokeArgs.contextPath]
+		def encode = false
+		
         if (!opts.resource && !opts.asset) {
             path += invokeArgs.servletPath.split('/') as List
             // Trim off the last element
@@ -370,11 +372,21 @@ abstract class BaseController {
                 path = path[0..-3]
         }
         
+		if (opts['encodeUrl'] != null) {
+			encode = opts['encodeUrl']
+			
+			opts.remove('encodeUrl')	
+		}
+		
         path = path.findAll{it}.join('/')
 		
-		def url = HtmlUtil.urlFor(opts + [absolute:path])
+		if (opts['absolute'] == null) {
+			opts += [absolute:path]
+		}
 		
-		if (opts.encodeUrl) {
+		def url = HtmlUtil.urlFor(opts)
+		
+		if (encode) {
 			url = invokeArgs.response.encodeURL(url)
 		}
 		

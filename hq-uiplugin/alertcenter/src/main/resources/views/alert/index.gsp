@@ -127,7 +127,7 @@ hqDojo.ready( function(){
 				</td>
 				<td width="80%" valign="top">
 	        		<div id="alertsTable" style="display:none;">
-	          			<form id="Alerts_FixForm" name="Alerts_FixForm" method="POST" action="/alerts/RemoveAlerts.do">
+	          			<form id="Alerts_FixForm" name="Alerts_FixForm" method="POST" action="<%= urlFor(absolute:"/alerts/RemoveAlerts.do", encodeUrl:true) %>">
 	          				<div id="Alerts_DataDiv" style="height: 400px;overflow-x: hidden; overflow-y: auto;">
 	          					<%= dojoTable(id:'Alerts', title:l.ClassicAlertsTable,
 	                        			refresh:60, url:urlFor(action:'data'),
@@ -151,7 +151,7 @@ hqDojo.ready( function(){
 	          			</form>
 	        		</div>
 	        		<div id="groupAlertsTable" style="display:none;">
-	          			<form id="GroupAlerts_FixForm" name="GroupAlerts_FixForm" method="POST" action="/alerts/RemoveAlerts.do">
+	          			<form id="GroupAlerts_FixForm" name="GroupAlerts_FixForm" method="POST" action="<%= urlFor(absolute:"/alerts/RemoveAlerts.do", encodeUrl:true) %>">
 	          				<div id="GroupAlerts_DataDiv" style="height: 400px;overflow-x: hidden; overflow-y: auto;">
 	          					<%= dojoTable(id:'GroupAlerts', title:l.GroupAlertsTable,
 	                        			refresh:60, url:urlFor(action:'groupData'),
