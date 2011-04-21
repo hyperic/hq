@@ -42,6 +42,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.config.ConfigResponse;
@@ -114,6 +115,9 @@ public interface AuthzBoss {
     public PageList<AuthzSubject> getSubjectsByName(Integer sessionId, String name, PageControl pc)
         throws PermissionException, SessionTimeoutException, SessionNotFoundException;
 
+    PageList<ResourceGroup> getResourceGroupsById(Integer sessionId, Integer[] ids, PageControl pc)
+        throws  PermissionException, SessionTimeoutException, SessionNotFoundException;
+    
     public Map<AppdefEntityID, Resource> findResourcesByIds(Integer sessionId, AppdefEntityID[] entities)
         throws SessionNotFoundException, SessionTimeoutException;
 

@@ -60,6 +60,7 @@ import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.inventory.domain.OperationType;
 import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.ConfigPropertyException;
@@ -220,6 +221,22 @@ public class AuthzBossImpl implements AuthzBoss {
         sessionManager.getSubject(sessionId);
         return authzSubjectManager.findMatchingName(name, pc);
     }
+    
+    /**
+     * Return a sorted, paged <code>List</code> of
+     * <code>ResourceGroupValue</code> objects corresponding to the specified id
+     * values.
+     * 
+     * 
+     */
+    @Transactional(readOnly=true)
+    public PageList<ResourceGroup> getResourceGroupsById(Integer sessionId, Integer[] ids, PageControl pc)
+        throws  PermissionException, SessionTimeoutException, SessionNotFoundException {
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
+        return resourceGroupManager.getResourceGroupsById(subject, ids, pc);
+    }
+
+
 
     /**
      * 
