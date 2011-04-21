@@ -254,7 +254,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
                 continue;
                 }
 
-                log.debug("Classpath += " + dir + jars[j]);
+                log.debug("- Classpath += " + dir + jars[j]);
                 path.add(dir + jars[j]);
             }
         }
@@ -351,31 +351,33 @@ public class WebsphereProductPlugin extends ProductPlugin {
             "runtimes"
         };
 
-        for (int i=0; i<dirs.length; i++) {
+        for (int i = 0; i < dirs.length; i++) {
             File dir = new File(installDir, dirs[i]);
             String[] jars = dir.list();
-            if (jars == null) {
-                continue;
-            }
-            for (int j=0; j<jars.length; j++) {
-                File jar = new File(dir, jars[j]);
-                if (jar.isDirectory() || !jars[j].endsWith(".jar")) {
-                    continue;
+            if (jars != null) {
+                for (int j = 0; j < jars.length; j++) {
+                    File jar = new File(dir, jars[j]);
+                    if (isValidJar(jar)) {
+                        log.debug("classpath += " + jar);
+                        if (jar.getName().startsWith("com.ibm.ws.runtime_")) {
+                            jar = runtimeJarHack(jar);
+                        }
+                        URL url = sun.net.www.ParseUtil.fileToEncodedURL(jar);
+                        addURL.invoke(loader, new Object[]{url});
+                    } else {
+                        log.debug("jar '" + jars[j] + "' skipped");
+                        continue;
+                    }
                 }
-
-                if (jars[j].startsWith("com.ibm.ws.webservices.thinclient")) {
-                    // skip
-                    continue;
-                }
-
-                log.debug("classpath += " + jar);
-                if (jars[j].startsWith("com.ibm.ws.runtime_")) {
-                    jar = runtimeJarHack(jar);
-                }
-                URL url = sun.net.www.ParseUtil.fileToEncodedURL(jar);
-                addURL.invoke(loader, new Object[] { url });
             }
         }
+    }
+
+    private boolean isValidJar(File jar) {
+        return  jar.getName().startsWith("com.ibm")
+                && jar.getName().endsWith(".jar")
+                && !jar.getName().contains("thinclient")
+                && jar.isFile();
     }
 
     private String[] getClassPathOSGi(String installDir) {
@@ -440,7 +442,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
         OperatingSystem os = OperatingSystem.getInstance();
         boolean testIBMJDK = (os.getName().equals(OperatingSystem.NAME_LINUX)
                 || os.getName().equals(OperatingSystem.NAME_WIN32));
-        assert testIBMJDK : os.getName();
+        //assert testIBMJDK : os.getName();
         if (testIBMJDK) {
             VALID_JVM = System.getProperty("java.vm.vendor").toUpperCase().indexOf("IBM") != -1;
             if (!VALID_JVM) {
