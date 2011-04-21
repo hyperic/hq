@@ -514,11 +514,6 @@ public class WeblogicRuntimeDiscoverer implements RuntimeDiscoverer, PrivilegedA
 			aiservice.setProductConfig(productConfig.encode());
 			aiservice.setMeasurementConfig(metricConfig.encode());
 			aiservice.setCustomProperties(cprops.encode());
-
-			if (service.hasResponseTime()) {
-				ConfigResponse rtConfig = new ConfigResponse(service.getResponseTimeConfig());
-				aiservice.setResponseTimeConfig(rtConfig.encode());
-			}
 		}
 		catch (EncodingException e) {
 			throw new PluginException("Error generating config", e);

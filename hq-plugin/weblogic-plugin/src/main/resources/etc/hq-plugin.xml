@@ -864,47 +864,7 @@
   ]]>
   </help>
 
-  <help name="webapp-rt">
-  <![CDATA[
-    <p><h4>Enable Webapp Response Time</h4></p>
-
-    <ul>
-    <li>Edit ${webapp.dir}${FILE.sep}WEB-INF${FILE.sep}web.xml, adding:</li>
-    </ul>
-
-<pre>
-  &lt;filter&gt;
-    &lt;filter-name&gt;CovalentJMXFilter&lt;/filter-name&gt;
- 
-    &lt;filter-class&gt;org.hyperic.hq.plugin.servlet.filter.JMXFilter&lt;/filter-class&gt;
-    &lt;init-param&gt;
-      &lt;param-name&gt;responseTimeLogDir&lt;/param-name&gt;
- 
-      &lt;param-value&gt;${installpath}&lt;/param-value&gt;
-    &lt;/init-param&gt;
-  &lt;/filter&gt;
   
-  &lt;filter-mapping&gt;
-    &lt;filter-name&gt;CovalentJMXFilter&lt;/filter-name&gt;
-    &lt;url-pattern&gt;/*&lt;/url-pattern&gt;
-  &lt;/filter-mapping&gt;
-</pre>
-    
-    <ul>
-    <li>Add the filter jar:</li>
-    </ul>
-
-<pre>
-  ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.sep}servlet${FILE.sep}libs${FILE.sep}hq-filter.jar \
-    ${webapp.dir}${FILE.sep}WEB-INF${FILE.sep}lib
-</pre>
-   
-    <ul>
-    <li>Redeploy the webapp or restart the WebLogic server.</li>
-    </ul>
-
-  ]]>
-  </help>
 
   <config name="admin-server">
     <option name="admin.url"
@@ -1102,13 +1062,10 @@
 
       <metrics include="webapp"/>
 
-      <help include="webapp-rt"/>
-
       <plugin type="control"
               class="WeblogicWebappControl"/>
 
-      <plugin type="responsetime"
-              class="WeblogicRtPlugin"/>
+   
 
       <properties>
         <property name="ContextRoot"

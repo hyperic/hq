@@ -807,7 +807,7 @@ public class ProductPluginManager
      * Load a product plugin jar. Registers the product plugin, as defined by
      * the Main-Class jar manifest attribute which must be a class which
      * implements the ProductPlugin interface. Registers plugins supported for
-     * each plugin type (control, measurement, responsetime) as returned by the
+     * each plugin type (control, measurement) as returned by the
      * ProductPlugin.getPlugin method.
      * @param jarName The name of the jar file on disk.
      * @param resourceLoader ClassLoader used to find jar resources.

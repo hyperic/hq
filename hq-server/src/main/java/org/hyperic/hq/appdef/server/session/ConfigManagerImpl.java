@@ -210,13 +210,10 @@ public class ConfigManagerImpl implements ConfigManager {
             responseList[responseIdx++] = data;
 
             if (!isProductType) {
-                if (productType.equals(ProductPlugin.TYPE_RESPONSE_TIME)) {
-                    // Skip merging of response time configuration
-                    // since platforms don't have it.
-                } else {
+               
                     data = getConfigForType(productType, platformId, platformConfigRequired);
                     responseList[responseIdx++] = data;
-                }
+                
             }
         }
 
@@ -230,14 +227,9 @@ public class ConfigManagerImpl implements ConfigManager {
 
             if (!isProductType) {
                 required = id.isServer() && origReq; // Reset the required flag
-
-                if (productType.equals(ProductPlugin.TYPE_RESPONSE_TIME)) {
-                    // Skip merging of response time configuration
-                    // since servers don't have it.
-                } else {
-                    data = getConfigForType(productType, serverId, required);
-                    responseList[responseIdx++] = data;
-                }
+                data = getConfigForType(productType, serverId, required);
+                responseList[responseIdx++] = data;
+                
             }
         }
 

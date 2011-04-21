@@ -219,9 +219,6 @@ class ConfigTag extends BaseTag implements XmlEndAttrHandler {
         else if (type.equals(ProductPlugin.TYPE_CONTROL)) {
             idx = ProductPlugin.CFGTYPE_IDX_CONTROL;
         }
-        else if (type.equals(ProductPlugin.TYPE_RESPONSE_TIME)) {
-            idx = ProductPlugin.CFGTYPE_IDX_RESPONSE_TIME;
-        }
         else {
             throw new XmlTagException("Unsupported config type: " + type);
         }

@@ -25,13 +25,10 @@
 
 package org.hyperic.hq.plugin.websphere.jmx;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.Properties;
 
-import org.hyperic.hq.product.RtPlugin;
 import org.hyperic.hq.plugin.websphere.WebsphereProductPlugin;
-import org.hyperic.util.config.ConfigResponse;
 
 public class WebModuleQuery extends ModuleQuery {
     
@@ -68,37 +65,5 @@ public class WebModuleQuery extends ModuleQuery {
         }
         return ctxName;
     }
-    
-    /**
-     * Get the response time configuration 
-     * @return
-     */
-    public ConfigResponse getRtConfigResponse() {
-        if (!WebsphereProductPlugin.autoRT()) {
-            return null;
-        }
-    	// stubbed
-        return RtPlugin.getConfig(getContextName(),
-                                  getRtLogDir());
-    }
-    
-    /**
-     * Get the value of the responseTimeLogDir init-parameter
-     * as defined in this modules web.xml descriptor
-     * @return a path, or null if the parameter is not found
-     */
-    private String getRtLogDir() {
-        String webXml;
-        try {
-            webXml = (String)(this.getMBeanServer().invoke(this.getObjectName(), 
-                                                           "getDeploymentDescriptor", 
-                                                           new Object[] {},
-                                                           new String[] {}));
-            return RtPlugin.getWebAppLogDir(new ByteArrayInputStream(webXml.getBytes()));
-        } catch (Exception e) {
-            // e.printStackTrace();
-            return null;
-        }
-        // return "d:\\Program Files\\WebSphere\\AppServer\\Log";
-    }
+   
 }

@@ -129,7 +129,6 @@ public class AICompare {
                 if (configsEqual(s1.getProductConfig(),      s2.getProductConfig()) &&
                     configsEqual(s1.getControlConfig(),      s2.getControlConfig()) &&
                     configsEqual(s1.getMeasurementConfig(),  s2.getMeasurementConfig()) &&
-                    configsEqual(s1.getResponseTimeConfig(), s2.getResponseTimeConfig()) &&
                     configsEqual(s1.getCustomProperties(),   s2.getCustomProperties()) &&
                     compare(s1.getName(), s2.getName()) &&
                     compare(s1.getServerTypeName(),s2.getServerTypeName()) &&
@@ -195,7 +194,6 @@ public class AICompare {
                     configsEqual(s1.getProductConfig(),      s2.getProductConfig()) &&
                     configsEqual(s1.getControlConfig(),      s2.getControlConfig()) &&
                     configsEqual(s1.getMeasurementConfig(),  s2.getMeasurementConfig()) &&
-                    configsEqual(s1.getResponseTimeConfig(), s2.getResponseTimeConfig()) &&
                     configsEqual(s1.getCustomProperties(),   s2.getCustomProperties()) &&
                     compare(s1.getName(),                    s2.getName()) &&
                     compare(s1.getDescription(),             s2.getDescription())) {

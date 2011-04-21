@@ -2683,7 +2683,7 @@ public class AppdefBossImpl implements AppdefBoss {
 
     /**
      * A method to set ALL the configs of a resource. This includes the
-     * resourceConfig, metricConfig, rtConfig and controlConfig.This also
+     * resourceConfig, metricConfig and controlConfig.This also
      * includes the enabling/disabling of rtMetrics for both service and
      * enduser. NOTE: This method should ONLY be called when a user manually
      * configures a resource.
@@ -2758,30 +2758,14 @@ public class AppdefBossImpl implements AppdefBoss {
 
                 if (allConfigs.shouldConfigProduct()) {
                     validationTypes.add(ProductPlugin.TYPE_CONTROL);
-                    validationTypes.add(ProductPlugin.TYPE_RESPONSE_TIME);
-                    validationTypes.add(ProductPlugin.TYPE_MEASUREMENT);
+                  
                 }
 
                 if (allConfigs.shouldConfigMetric()) {
                     validationTypes.add(ProductPlugin.TYPE_MEASUREMENT);
                 }
 
-                // Need to set the flags on the service so that they
-                // can be looked up immediately and RtEnabler to work
-                if (svc != null) {
-                    // These flags
-                    if (allConfigs.getEnableServiceRT() != svc.isServiceRt() ||
-                        allConfigs.getEnableEuRT() != svc.isEndUserRt()) {
-                        allConfigs.setShouldConfig(ProductPlugin.CFGTYPE_IDX_RESPONSE_TIME, true);
-                        svc.setServiceRt(allConfigs.getEnableServiceRT());
-                        svc.setEndUserRt(allConfigs.getEnableEuRT());
-                        serviceManager.updateService(subject, svc.getServiceValue());
-                    }
-                }
-
-                if (allConfigs.shouldConfigRt()) {
-                    validationTypes.add(ProductPlugin.TYPE_RESPONSE_TIME);
-                }
+               
 
                 if (allConfigs.shouldConfigControl()) {
                     validationTypes.add(ProductPlugin.TYPE_CONTROL);
@@ -2811,10 +2795,6 @@ public class AppdefBossImpl implements AppdefBoss {
                     }
                 }
             }
-
-            // if should configure RT
-            if (allConfigs.shouldConfigRt())
-                ids.add(entityId);
 
             if (ids.size() > 0) { // Actually updated
                 List<ResourceUpdatedZevent> events = new ArrayList<ResourceUpdatedZevent>(

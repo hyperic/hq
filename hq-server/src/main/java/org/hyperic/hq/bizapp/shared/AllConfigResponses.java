@@ -48,8 +48,7 @@ public class AllConfigResponses implements Serializable {
         = new boolean[ProductPlugin.CONFIGURABLE_TYPES.length];
 
     private boolean _enableRuntimeAIScan;
-    private boolean _enableEuRT;
-    private boolean _enableServiceRT;
+   
 
     public AllConfigResponses () {}
 
@@ -93,22 +92,6 @@ public class AllConfigResponses implements Serializable {
         return _enableRuntimeAIScan;
     }
 
-    public void setEnableEuRT (boolean eurt) {
-        _enableEuRT = eurt;
-    }
-
-    public boolean getEnableEuRT() {
-        return _enableEuRT;
-    }
-
-    public void setEnableServiceRT(boolean serviceRt) {
-        _enableServiceRT = serviceRt;
-    }
-
-    public boolean getEnableServiceRT() {
-        return _enableServiceRT;
-    }
-
     // Convenience methods
     public ConfigResponse getProductConfig() {
         return getConfig(ProductPlugin.CFGTYPE_IDX_PRODUCT);
@@ -122,10 +105,7 @@ public class AllConfigResponses implements Serializable {
         return getConfig(ProductPlugin.CFGTYPE_IDX_CONTROL);
     }
 
-    public ConfigResponse getRtConfig() {
-        return getConfig(ProductPlugin.CFGTYPE_IDX_RESPONSE_TIME);
-    }
-
+    
     public boolean supportsProductConfig() {
         return getSupports(ProductPlugin.CFGTYPE_IDX_PRODUCT);
     }
@@ -138,9 +118,6 @@ public class AllConfigResponses implements Serializable {
         return getSupports(ProductPlugin.CFGTYPE_IDX_CONTROL);
     }
 
-    public boolean supportsRtConfig() {
-        return getSupports(ProductPlugin.CFGTYPE_IDX_RESPONSE_TIME);
-    }
 
     public boolean shouldConfigProduct() {
         return getShouldConfig(ProductPlugin.CFGTYPE_IDX_PRODUCT);
@@ -154,17 +131,12 @@ public class AllConfigResponses implements Serializable {
         return getShouldConfig(ProductPlugin.CFGTYPE_IDX_CONTROL);
     }
 
-    public boolean shouldConfigRt() {
-        return getShouldConfig(ProductPlugin.CFGTYPE_IDX_RESPONSE_TIME);
-    }
-
     public String toString () {
         return "[AllConfigResponses resource=" + _resource
             + " configs=" + StringUtil.arrayToString(_configs)
             + " supports=" + StringUtil.arrayToString(_supports)
             + " shouldConfig=" + StringUtil.arrayToString(_shouldConfig)
             + " enableRuntimeAI=" + _enableRuntimeAIScan
-            + " enableEuRT=" + _enableEuRT
-            + " enableServiceRT=" + _enableServiceRT + "]";
+            + "]";
     }
 }

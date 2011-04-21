@@ -242,13 +242,6 @@ public class ServletProductPlugin
             // Tomcat 4.0, ServletExec 4.2, JRun 4.x
             return new ServletMeasurementPlugin(NAME);
         }
-        // Response Time Plugins.  Only support Servers and Webapps
-        else if (type.equals(ProductPlugin.TYPE_RESPONSE_TIME)) {
-            if (info.isService(WEBAPP_NAME) ||
-                info.getType() == TypeInfo.TYPE_SERVER) {
-                return new ServletRtPlugin();
-            }
-        }
         // Autoinventory Plugins.  XXX: TODO, combine all of these
         else if (type.equals(ProductPlugin.TYPE_AUTOINVENTORY)) {
             if (info.getType() == TypeInfo.TYPE_SERVER) {

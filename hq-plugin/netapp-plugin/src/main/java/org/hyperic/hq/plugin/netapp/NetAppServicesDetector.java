@@ -88,7 +88,6 @@ public class NetAppServicesDetector extends PlatformServiceDetector {
         s_cifs.setServiceName("CIFS Server");
         s_cifs.setProductConfig();
         s_cifs.setMeasurementConfig();
-        s_cifs.setResponseTimeConfig(new ConfigResponse());
         extServices.add(s_cifs);
 
         ServiceResource s_nfs_v3 = new ServiceResource();
@@ -96,7 +95,6 @@ public class NetAppServicesDetector extends PlatformServiceDetector {
         s_nfs_v3.setServiceName("NFS server v3");
         s_nfs_v3.setProductConfig();
         s_nfs_v3.setMeasurementConfig();
-        s_nfs_v3.setResponseTimeConfig(new ConfigResponse());
         extServices.add(s_nfs_v3);
 
         ServiceResource s_nfs_v2 = new ServiceResource();
@@ -104,7 +102,6 @@ public class NetAppServicesDetector extends PlatformServiceDetector {
         s_nfs_v2.setServiceName("NFS server v2");
         s_nfs_v2.setProductConfig();
         s_nfs_v2.setMeasurementConfig();
-        s_nfs_v2.setResponseTimeConfig(new ConfigResponse());
         extServices.add(s_nfs_v2);
 
         log.debug("[discoverServices] netapp:'" + config.getValue("snmpIp") + "' -> " + extServices.size() + " services");
