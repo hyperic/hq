@@ -26,7 +26,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 
-import org.hibernate.annotations.Index;
 import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
@@ -67,7 +66,6 @@ abstract public class AlertDefinition implements AlertDefinitionInterface, Perfo
 
     @ManyToOne
     @JoinColumn(name = "ESCALATION_ID")
-    @Index(name = "ALERT_DEF_ESC_ID_IDX")
     private Escalation escalation;
 
     @Column(name = "FREQUENCY_TYPE", nullable = false)
@@ -83,7 +81,6 @@ abstract public class AlertDefinition implements AlertDefinitionInterface, Perfo
     private boolean notifyFiltered;
 
     @Column(name = "PRIORITY", nullable = false)
-    @Index(name = "ALERT_DEF_CHILD_IDX")
     private int priority; // XXX -- Needs to default to 1
 
     @Column(name = "TRANGE")
