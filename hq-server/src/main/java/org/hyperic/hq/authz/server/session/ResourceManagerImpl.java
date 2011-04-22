@@ -29,15 +29,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
-import org.hyperic.hq.auth.data.AuthzSubjectRepository;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -321,19 +318,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     public Resource findResourceByName(String name) {
        return resourceDao.findByName(name);
     }
-    
-    @PostConstruct
-    public void initializeResourceTypes() {
-        //TODO Is this the place for this?
-        if(resourceTypeDao.findRoot() == null) {
-            ResourceType system= new ResourceType("System");
-            resourceTypeDao.persist(system);
-            Resource root = new Resource("Root", system);
-            resourceDao.persistRoot(root);
-        }     
-    }
-    
-    
+  
     public Set<ResourceType> findResourceTypesWithResources() {
         final Set<ResourceType> typesWithResources = new HashSet<ResourceType>();
         Collection<ResourceType> resTypes = resourceTypeDao.findAll();
@@ -347,7 +332,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     
     public PageList<Resource> getResourcesOfType(ResourceType resourceType, PageControl pc) {
         PageRequest pageInfo = new PageRequest(pc.getPagenum(),pc.getPagesize(),
-            new Sort(pc.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"name"));
+            new Sort(pc.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"sortName"));
         Page<Resource> resources = resourceDao.findByIndexedProperty("type", resourceType.getId(),pageInfo,String.class);
         return new PageList<Resource>(resources.getContent(),(int)resources.getTotalElements());
     }

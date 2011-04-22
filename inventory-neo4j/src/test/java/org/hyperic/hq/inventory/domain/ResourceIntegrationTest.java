@@ -427,4 +427,11 @@ public class ResourceIntegrationTest {
     public void testGetConfigInvalidType() {
         assertNull(traderJoes.getConfig("Measurement"));
     }
+    
+    @Test
+    public void testSetSortName() {
+        Resource res = new Resource("Trader Joe!!!:;s", store);
+        resourceDao.persist(res);
+        assertEquals("TRADERJOES",res.getSortName());
+    }
 }

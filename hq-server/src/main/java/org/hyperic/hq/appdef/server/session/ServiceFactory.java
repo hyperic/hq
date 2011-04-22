@@ -55,7 +55,7 @@ public class ServiceFactory {
             service.setParent(platformFactory.createPlatform(parent));
         }
         service.setServiceType(createServiceType(resource.getType()));
-        service.setSortName((String) resource.getProperty(AppdefResource.SORT_NAME));
+        service.setSortName(resource.getSortName());
         return service;
     }
 

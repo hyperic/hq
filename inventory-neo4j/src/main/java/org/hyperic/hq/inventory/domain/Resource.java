@@ -69,6 +69,11 @@ public class Resource {
     @Indexed
     private String owner;
 
+    @NotNull
+    @Indexed
+    @GraphProperty
+    private String sortName;
+    
     @RelatedTo(type = RelationshipTypes.IS_A, direction = Direction.OUTGOING, elementClass = ResourceType.class)
     private ResourceType type;
 
@@ -81,7 +86,7 @@ public class Resource {
      * @param type The resource type
      */
     public Resource(String name, ResourceType type) {
-        this.name = name;
+        setName(name);
         this.type = type;
     }
 
@@ -271,7 +276,8 @@ public class Resource {
             // name
             if (!(key.equals("location")) && !(key.equals("name")) &&
                 !(key.equals("description")) && !(key.equals("modifiedBy")) &&
-                !(key.equals("owner")) && !(key.equals("id")) && !(key.equals("privateGroup"))) {
+                !(key.equals("owner")) && !(key.equals("id")) && !(key.equals("privateGroup"))
+                && !(key.equals("sortName"))) {
                 // try {
                 properties.put(key, getProperty(key));
                 // } catch (IllegalArgumentException e) {
@@ -441,6 +447,10 @@ public class Resource {
             throw new NotUniqueException();
         }
         return resources.iterator().next();
+    }
+
+    public String getSortName() {
+        return sortName;
     }
 
     /**
@@ -621,7 +631,11 @@ public class Resource {
     @Transactional("neoTxManager")
     public void setName(String name) {
         this.name = name;
-    }
+        if(this.sortName == null) {
+            //Strip out all special chars b/c Lucene can't sort tokenized Strings
+            this.sortName = name.toUpperCase().replaceAll("\\W", "");
+        }
+    } 
 
     /**
      * 
@@ -676,6 +690,11 @@ public class Resource {
         CPropChangeEvent event = new CPropChangeEvent(getId(), key, oldValue, value);
         messagePublisher.publishMessage(MessagePublisher.EVENTS_TOPIC, event);
         return oldValue;
+    }
+
+    @Transactional("neoTxManager")
+    public void setSortName(String sortName) {
+        this.sortName = sortName;
     }
 
     public String toString() {

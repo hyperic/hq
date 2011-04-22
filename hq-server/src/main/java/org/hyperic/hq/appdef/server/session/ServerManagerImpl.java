@@ -322,10 +322,9 @@ public class ServerManagerImpl implements ServerManager {
         s.setProperty(ServerFactory.RUNTIME_AUTODISCOVERY,sv.getRuntimeAutodiscovery());
         s.setProperty(ServerFactory.WAS_AUTODISCOVERED,sv.getWasAutodiscovered());
         s.setProperty(ServerFactory.AUTODISCOVERY_ZOMBIE,false);
-        //TODO abstract creationTime, modifiedTime, and sortName?
+        //TODO abstract creationTime, modifiedTime
         s.setProperty(ServerFactory.CREATION_TIME, System.currentTimeMillis());
         s.setProperty(ServerFactory.MODIFIED_TIME,System.currentTimeMillis());
-        s.setProperty(AppdefResource.SORT_NAME, sv.getName().toUpperCase());
         Agent agent = managedResourceRepository.findAgentByResource(p.getId());
         ManagedResource managedResource = new ManagedResource(s.getId(),agent);
         managedResourceRepository.save(managedResource);
@@ -475,7 +474,7 @@ public class ServerManagerImpl implements ServerManager {
     @Transactional(readOnly=true)
     public PageList<Resource> getAllServerResources(AuthzSubject subject, PageControl pc) {
         PageRequest pageInfo = new PageRequest(pc.getPagenum(),pc.getPagesize(),
-            new Sort(pc.getSortorder() == PageControl.SORT_ASC? Direction.ASC : Direction.DESC,"name"));
+            new Sort(pc.getSortorder() == PageControl.SORT_ASC? Direction.ASC : Direction.DESC,"sortName"));
         Page<Resource> resources = resourceDao.findByIndexedProperty(AppdefResourceType.APPDEF_TYPE_ID, 
             AppdefEntityConstants.APPDEF_TYPE_SERVER,pageInfo,String.class);
         return new PageList<Resource>(resources.getContent(),(int)resources.getTotalElements());
@@ -1158,7 +1157,6 @@ public class ServerManagerImpl implements ServerManager {
         propertyTypes.add(createServerPropertyType(ServerFactory.AUTODISCOVERY_ZOMBIE,Boolean.class));
         propertyTypes.add(createServerPropertyType(ServerFactory.CREATION_TIME,Long.class));
         propertyTypes.add(createServerPropertyType(ServerFactory.MODIFIED_TIME,Long.class));
-        propertyTypes.add(createServerPropertyType(AppdefResource.SORT_NAME,String.class));
         propertyTypes.add(createServerPropertyType(ServerFactory.INSTALL_PATH,String.class));
         propertyTypes.add(createServerPropertyType(ServerFactory.SERVICES_AUTO_MANAGED,Boolean.class));
         propertyTypes.add(createServerPropertyType(ServerFactory.RUNTIME_AUTODISCOVERY,Boolean.class));

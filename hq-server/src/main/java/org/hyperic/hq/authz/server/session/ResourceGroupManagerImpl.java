@@ -129,28 +129,9 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     @PostConstruct
     public void initialize() {
         this.defaultPager = Pager.getDefaultPager();
-        //TODO move init logic?
-        int[] groupTypes = AppdefEntityConstants.getAppdefGroupTypes();
-        for(int i=0;i< groupTypes.length;i++) {
-            if(resourceTypeDao.findByName(AppdefEntityConstants.getAppdefGroupTypeName(groupTypes[i])) == null) {
-                ResourceType groupType = new ResourceType(AppdefEntityConstants.getAppdefGroupTypeName(groupTypes[i]));
-                resourceTypeDao.persist(groupType);
-                Set<PropertyType> propTypes = new HashSet<PropertyType>();
-                propTypes.add(createPropertyType("groupEntType",Integer.class,false));
-                propTypes.add(createPropertyType("groupEntResType",Integer.class,true));
-                propTypes.add(createPropertyType("mixed",Boolean.class,true));
-                groupType.addPropertyTypes(propTypes);
-            }
-        }
     }
     
-    private PropertyType createPropertyType(String propTypeName, Class<?> type,boolean indexed) {
-        PropertyType propType = new PropertyType(propTypeName,type);
-        propType.setDescription(propTypeName);
-        propType.setHidden(true);
-        propType.setIndexed(indexed);
-        return propType;
-    }
+  
     
     /**
      * Create a resource group. Currently no permission checking.
@@ -719,21 +700,21 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     
     public PageList<Resource> getCompatibleGroups(PageControl pageControl) {
         PageRequest pageInfo = new PageRequest(pageControl.getPagenum(),pageControl.getPagesize(),
-            new Sort(pageControl.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"name"));
+            new Sort(pageControl.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"sortName"));
         Page<Resource> resources = resourceDao.findByIndexedProperty(MIXED, false,pageInfo,String.class);
         return new PageList<Resource>(resources.getContent(),(int)resources.getTotalElements());
     }
 
     public PageList<Resource> getMixedGroups(PageControl pageControl) {
         PageRequest pageInfo = new PageRequest(pageControl.getPagenum(),pageControl.getPagesize(),
-            new Sort(pageControl.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"name"));
+            new Sort(pageControl.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"sortName"));
         Page<Resource> resources = resourceDao.findByIndexedProperty(MIXED, true,pageInfo,String.class);
         return new PageList<Resource>(resources.getContent(),(int)resources.getTotalElements());
     }
     
     public PageList<Resource> getCompatibleGroupsContainingType(int resourceTypeId, PageControl pageControl) {
         PageRequest pageInfo = new PageRequest(pageControl.getPagenum(),pageControl.getPagesize(),
-            new Sort(pageControl.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"name"));
+            new Sort(pageControl.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"sortName"));
         Page<Resource> resources = resourceDao.findByIndexedProperty(GROUP_ENT_RES_TYPE, resourceTypeId,pageInfo,String.class);
         return new PageList<Resource>(resources.getContent(),(int)resources.getTotalElements());
     }

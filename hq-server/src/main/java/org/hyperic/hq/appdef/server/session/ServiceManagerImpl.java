@@ -144,7 +144,6 @@ public class ServiceManagerImpl implements ServiceManager {
         s.setProperty(ServiceFactory.AUTO_DISCOVERY_ZOMBIE,false);
         s.setProperty(ServiceFactory.CREATION_TIME, System.currentTimeMillis());
         s.setProperty(ServiceFactory.MODIFIED_TIME,System.currentTimeMillis());
-        s.setProperty(AppdefResource.SORT_NAME, name.toUpperCase());
         s.setProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_SERVICE);
         Agent agent = managedResourceRepository.findAgentByResource(parent.getId());
         ManagedResource managedResource = new ManagedResource(s.getId(),agent);
@@ -319,7 +318,7 @@ public class ServiceManagerImpl implements ServiceManager {
     @Transactional(readOnly=true)
     public PageList<Resource> getAllServiceResources(AuthzSubject subject, PageControl pc) {
         PageRequest pageInfo = new PageRequest(pc.getPagenum(),pc.getPagesize(),
-            new Sort(pc.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"name"));
+            new Sort(pc.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"sortName"));
         Page<Resource> resources = resourceDao.findByIndexedProperty(AppdefResourceType.APPDEF_TYPE_ID, 
             AppdefEntityConstants.APPDEF_TYPE_SERVICE,pageInfo,String.class);
         return new PageList<Resource>(resources.getContent(),(int)resources.getTotalElements());
@@ -959,7 +958,6 @@ public class ServiceManagerImpl implements ServiceManager {
         propertyTypes.add(createServicePropertyType(ServiceFactory.AUTO_INVENTORY_IDENTIFIER,String.class));
         propertyTypes.add(createServicePropertyType(ServiceFactory.CREATION_TIME,Long.class));
         propertyTypes.add(createServicePropertyType(ServiceFactory.MODIFIED_TIME,Long.class));
-        propertyTypes.add(createServicePropertyType(AppdefResource.SORT_NAME,String.class));
         propertyTypes.add(createServicePropertyType(ServiceFactory.AUTO_DISCOVERY_ZOMBIE,Boolean.class));
         PropertyType appdefType = createServicePropertyType(AppdefResourceType.APPDEF_TYPE_ID, Integer.class);
         appdefType.setIndexed(true);
