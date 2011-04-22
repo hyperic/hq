@@ -10,7 +10,7 @@
 
 	<bean id="graphDatabaseService" class="org.neo4j.kernel.EmbeddedGraphDatabase"
 		destroy-method="shutdown">
-		<constructor-arg value="${neo4j.location}" />
+		<constructor-arg ref="neo4jStoreFactory" />
 	</bean>
 
 	<bean id="graphDatabaseContext"

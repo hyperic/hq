@@ -34,9 +34,8 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
-import org.springframework.stereotype.Component;
 
-@Component
+
 public class Messenger implements MessagePublisher {
     private static Log _log = LogFactory.getLog(Messenger.class);
 

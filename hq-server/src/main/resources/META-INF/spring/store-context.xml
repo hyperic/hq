@@ -25,18 +25,8 @@
 		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
-	
-
-   	<context:spring-configured />
-
-	<tx:annotation-driven mode="aspectj"/>
-
-	<bean id="performanceMonitorAspect" class="org.hyperic.hq.monitor.aop.aspects.PerformanceMonitor"
-		factory-method="aspectOf">
-		<description>Monitors duration of execution on transactional methods
-			in the service layer.</description>
-		<property name="maximumDuration" value="${hq.methodWarn.time}" />
-		<property name="warningMessage" value="Method exceeded acceptable duration: " />
-	</bean>
+		
+		
+		<bean id="neo4jStoreFactory" class="org.hyperic.hq.store.NeoStoreLocationFactory"/>
 
 </beans>

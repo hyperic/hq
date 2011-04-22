@@ -105,7 +105,10 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = "classpath*:META-INF/spring/*-context.xml", loader = IntegrationTestContextLoader.class)
+@ContextConfiguration(locations = {"classpath*:META-INF/spring/app*-context.xml","classpath:META-INF/spring/neo4j-context.xml",
+                                   "classpath:org/hyperic/hq/test/integration-test-context.xml","classpath:META-INF/spring/security-context.xml",
+                                   "classpath:META-INF/spring/mail-context.xml"}, 
+                                   loader = IntegrationTestContextLoader.class)
 abstract public class BaseInfrastructureTest {
 
     protected Log logger = LogFactory.getLog(this.getClass());
@@ -207,7 +210,6 @@ abstract public class BaseInfrastructureTest {
 
     @AfterClass
     public static void tearDown() {
-        
     }
 
     /**

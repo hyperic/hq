@@ -10,4 +10,17 @@
 			<property name="hibernate.archive.autodetection" value="class"/>
         </properties>
     </persistence-unit>
+    
+    <persistence-unit name="integration-test" transaction-type="RESOURCE_LOCAL">
+		<provider>org.hibernate.ejb.HibernatePersistence</provider>
+		<shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
+		<properties>
+			<property name="hibernate.hbm2ddl.auto" value="create" />
+			<property name="hibernate.dialect" value="org.hyperic.hq.test.HSQLDialect" />
+			<property name="hibernate.cache.provider_class"
+				value="net.sf.ehcache.hibernate.SingletonEhCacheProvider" />
+		    <property name="hibernate.archive.autodetection" value="class"/>
+		    <property name="hibernate.ejb.interceptor" value="org.hyperic.hibernate.HypericInterceptor" />
+		</properties>
+	</persistence-unit>
 </persistence>

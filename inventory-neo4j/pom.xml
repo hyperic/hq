@@ -229,6 +229,12 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.hyperic.hq</groupId>
+			<artifactId>hq-messaging</artifactId> 
+			<version>${project.version}</version>
+			<classifier>tests</classifier>
+		</dependency>
+		<dependency>
 			<groupId>org.easymock</groupId>
 			<artifactId>easymock</artifactId>
 		</dependency>

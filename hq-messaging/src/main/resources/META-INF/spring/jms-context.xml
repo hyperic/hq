@@ -52,6 +52,8 @@
 	<bean id="connectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory">
 		<property name="connectionFactory" ref="jmsFactory" />
 	</bean>
+	
+	<bean id="messagePublisher" class="org.hyperic.hq.messaging.Messenger"/>
 
 	<bean id="eventsJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
 		<property name="connectionFactory" ref="connectionFactory" />

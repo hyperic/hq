@@ -61,6 +61,12 @@
 			<classifier>tests</classifier>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq</groupId>
+			<artifactId>hq-messaging</artifactId> 
+			<version>${project.version}</version>
+			<classifier>tests</classifier>
+		</dependency>
 		<!--  We use a version of dbunit that we patched -->
 		<dependency>
 			<groupId>org.hyperic</groupId>

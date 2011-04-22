@@ -51,6 +51,7 @@
 	<bean
 		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
 		id="entityManagerFactory" depends-on="neo4jNodeBacking,neo4jRelationshipBacking">
+		<property name="persistenceUnitName" value="persistenceUnit" />
 		<property name="dataSource" ref="dataSource" />
 		<!-- HibernateJpaDialect necessary for RequiresNew txs created by our id 
 			generator, HQMultipleHiLoPerTableGenerator -->
@@ -68,28 +69,20 @@
 	
 	<bean id="persistenceProvider" class="org.hyperic.hibernate.HibernateConfigHolder" />
 
-	<bean class="org.springframework.orm.hibernate3.HibernateTemplate">
-		<constructor-arg ref="sessionFactory" />
-	</bean>
-
 	<bean class="org.springframework.orm.jpa.JpaTemplate">
 		<constructor-arg ref="entityManagerFactory" />
 	</bean>
 
-	<bean id="sessionFactory"
-		class="org.hyperic.hibernate.CacheInitializingLocalSessionFactoryBean">
-		<constructor-arg ref="preloadCaches" />
-	</bean>
-
 	<jpa:repositories base-package="org.hyperic.hq.**.data" />
-
-	<util:list id="preloadCaches">
-		<value>org.hyperic.hq.agent.mgmt.domain.AgentType</value>
-		<value>org.hyperic.hq.agent.mgmt.domain.Agent</value>
-		<value>org.hyperic.hq.agent.mgmt.domain.ManagedResource</value>
-		<value>org.hyperic.hq.measurement.server.session.Category</value>
-		<value>org.hyperic.hq.measurement.server.session.MonitorableType
-		</value>
-		<value>org.hyperic.hq.plugin.mgmt.domain.Plugin</value>
-	</util:list>
+	
+	<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter"
+		lazy-init="false">
+		<property name="beans">
+			<map>
+				<entry key="hyperic.jmx:type=DataSource,name=tomcat.jdbc"
+					value-ref="tomcatDataSource" />
+			</map>
+		</property>
+	</bean>
+	
 </beans>
