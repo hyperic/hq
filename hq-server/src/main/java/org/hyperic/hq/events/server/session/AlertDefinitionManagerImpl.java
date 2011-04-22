@@ -1505,7 +1505,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
         }
         //TODO Impl
         //return alertDefDao.findAvailAlertDefs();
-        return null;
+        return new ArrayList<AlertDefinition>();
     }
     
     /**
