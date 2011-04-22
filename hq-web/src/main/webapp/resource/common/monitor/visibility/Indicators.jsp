@@ -186,8 +186,8 @@
 												<c:set var="timelineIndicatorColor" value="timelineUnknown" />
 											</c:otherwise>
 										</c:choose>
-									<div class="<c:out value="${timelineIndicatorColor}" />"
-									     onmousedown="overlay.moveOverlay(this);overlay.showTimePopupTopMetricChart(<c:out value="${status.count - 1}"/>, event)" />
+									<div class="${timelineIndicatorColor}"
+									     onmousedown="overlay.moveOverlay(this);overlay.showTimePopupTopMetricChart(<c:out value="${status.count - 1}"/>, event)"></div>
 								</td>
 							</c:forEach>
 							<td width="10" align="left">
