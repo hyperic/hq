@@ -151,12 +151,14 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
 
     private void removePluginsAndAssociatedResources(AuthzSubject subj,
                                                      Collection<Plugin> plugins) {
+        final long now = System.currentTimeMillis();
         for (final Plugin plugin : plugins) {
             if (plugin != null) {
                 final Map<String, MonitorableType> map =
                     monitorableTypeDAO.findByPluginName(plugin.getName());
                 resourceManager.removeResourcesAndTypes(subj, map.values());
                 plugin.setDeleted(true);
+                plugin.setModifiedTime(now);
             }
         }
     }
@@ -404,12 +406,14 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
     
     @Transactional(readOnly=false)
     public void markDisabled(Collection<Integer> pluginIds) {
+        final long now = System.currentTimeMillis();
         for (final Integer pluginId : pluginIds) {
             final Plugin plugin = pluginDAO.get(pluginId);
-            if (plugin == null || plugin.isDeleted()) {
+            if (plugin == null || plugin.isDeleted() || plugin.isDisabled()) {
                 continue;
             }
             plugin.setDisabled(true);
+            plugin.setModifiedTime(now);
         }
     }
 
@@ -612,7 +616,10 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         if (plugin == null || plugin.isDeleted()) {
             return;
         }
-        plugin.setDisabled(true);
+        if (!plugin.isDisabled()) {
+            plugin.setDisabled(true);
+            plugin.setModifiedTime(System.currentTimeMillis());
+        }
     }
 
     public void setApplicationContext(ApplicationContext ctx) throws BeansException {
@@ -625,7 +632,10 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         if (plugin == null || plugin.isDeleted()) {
             return;
         }
-        plugin.setDisabled(false);
+        if (plugin.isDisabled()) {
+            plugin.setDisabled(false);
+            plugin.setModifiedTime(System.currentTimeMillis());
+        }
     }
 
 }

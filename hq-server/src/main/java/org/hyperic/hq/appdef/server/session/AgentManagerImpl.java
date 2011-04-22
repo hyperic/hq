@@ -1300,17 +1300,12 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
             if (agent == null) {
                 return;
             }
-            if (ignoreAgent(agent, arg.getStringLists().toString())) {
+            boolean restartAgent = false;
+            if (restartAgent(agent, arg.getStringLists().toString())) {
                 if (debug) log.debug("agent=" + agent + " has no updates and plugins haven't " +
                                      "been modified since the last checkin, ignoring");
-                return;
+                restartAgent = true;
             }
-            // check-in to the throttle mechanism after we do the ignoreAgent() check.
-            // If an agent restarts with the same plugin inventory then there should be zero plugins
-            // that were transferred over to the agent.  If the SAPS mechanism actually transferred
-            // plugins and restarted the agent then something went wrong, and therefore we need the
-            // AgentPluginStatus "IN_PROGRESS" objs to be marked as failure by not calling
-            // checkinAfterRestart()
             agentPluginSyncRestartThrottle.checkinAfterRestart(agent.getId());
             final Map<String, AgentPluginStatus> statusByFileName =
                 agentPluginStatusDAO.getPluginStatusByAgent(agent);
@@ -1326,7 +1321,13 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
             // want to ignore the plugins that were just checked in by the agent
             // contained in creates
             processPluginsNotOnAgent(agent, updateMap, creates);
-            agentPluginUpdater.queuePluginTransfer(updateMap, removeMap);
+            if (restartAgent) {
+                agentPluginUpdater.queuePluginTransfer(updateMap, removeMap);
+            } else if (!updateMap.isEmpty() || !removeMap.isEmpty()) {
+                log.warn("agent=" + agent + " checked in the same plugin report twice in a row " +
+                         " and plugins have not been updated on the server but it's inventory " +
+                         " should be sync'd. updateMap=" + updateMap + ", removeMap=" + removeMap);
+            }
         } catch (AgentNotFoundException e) {
             log.error(e,e);
         } finally {
@@ -1336,23 +1337,23 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         }
     }
 
-    private boolean ignoreAgent(Agent agent, String stringLists) {
+    private boolean restartAgent(Agent agent, String stringLists) {
         final String pluginInventoryChecksum = MD5.getMD5Checksum(stringLists.toString());
         if (agent.getPluginInventoryChecksum() == null) {
             agent.setPluginInventoryChecksum(pluginInventoryChecksum);
-            return false;
+            return true;
         }
         final long lastCheckin = agent.getLastPluginInventoryCheckin();
         final long maxModTime = pluginDAO.getMaxModTime();
         if (agent.getPluginInventoryChecksum().equals(pluginInventoryChecksum)) {
             // this means plugins haven't changed since the agent last checked in its plugin
-            // inventory.  therefore, just ignore the agent since nothing appears to have changed
-            if (maxModTime < lastCheckin) {
-                return true;
+            // inventory.  therefore don't restart the agent since nothing appears to have changed
+            if (lastCheckin > maxModTime) {
+                return false;
             }
         }
         agent.setPluginInventoryChecksum(pluginInventoryChecksum);
-        return false;
+        return true;
     }
 
     private void processPluginsNotOnAgent(Agent agent, Map<Integer, Collection<Plugin>> updateMap,

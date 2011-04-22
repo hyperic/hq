@@ -47,6 +47,7 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AgentManager;
+import org.hyperic.hq.common.shared.TransactionRetry;
 import org.hyperic.hq.hqu.RenditServer;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginInfo;
@@ -94,13 +95,17 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
 
     private PluginManager pluginManager;
 
+    private TransactionRetry transactionRetry;
+
     @Autowired
     public ProductPluginDeployer(RenditServer renditServer, ProductManager productManager,
-                                 AgentManager agentManager, PluginManager pluginManager) {
+                                 AgentManager agentManager, PluginManager pluginManager,
+                                 TransactionRetry transactionRetry) {
         this.renditServer = renditServer;
         this.productManager = productManager;
         this.agentManager = agentManager;
         this.pluginManager = pluginManager;
+        this.transactionRetry = transactionRetry;
     }
 
     private void initializePlugins(Collection<File> pluginDirs) {
@@ -120,7 +125,12 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
             existing.remove(pluginName);
             deployPlugin(pluginName, plugins.get(pluginName));
         }
-        pluginManager.markDisabled(existing.values());
+        final Runnable runner = new Runnable() {
+            public void run() {
+                pluginManager.markDisabled(existing.values());
+            }
+        };
+        transactionRetry.runTransaction(runner, 3, 1000);
     }
 
     /**
@@ -252,10 +262,15 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
         }
     }
 
-    private void deployPlugin(String pluginName, File dir) {
+    private void deployPlugin(final String pluginName, File dir) {
         try {
             productManager.deploymentNotify(pluginName, dir);
-            pluginManager.markEnabled(pluginName);
+            final Runnable runner = new Runnable() {
+                public void run() {
+                    pluginManager.markEnabled(pluginName);
+                }
+            };
+            transactionRetry.runTransaction(runner, 3, 1000);
         } catch (Exception e) {
             log.error("Unable to deploy plugin '" + pluginName + "'", e);
         }
@@ -364,7 +379,7 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
         return rtn;
     }
 
-    private boolean undeployPlugin(File pluginFile, boolean force) throws Exception {
+    private boolean undeployPlugin(final File pluginFile, boolean force) throws Exception {
         if (!force && !isDeployable(pluginFile)) {
             log.info("cannot undeploy " + pluginFile + " since it is over-written in " +
                      getCustomPluginDir() + " (this is ok)");
@@ -372,7 +387,12 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
         }
         log.info("Undeploying plugin: " + pluginFile);
         productPluginManager.removePluginJar(pluginFile.toString());
-        pluginManager.markDisabled(pluginFile.getName());
+        final Runnable runner = new Runnable() {
+            public void run() {
+                pluginManager.markDisabled(pluginFile.getName());
+            }
+        };
+        transactionRetry.runTransaction(runner, 3, 1000);
         return true;
     }
 

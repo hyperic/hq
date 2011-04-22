@@ -347,6 +347,10 @@ public class ApacheServerDetector
             server.setCustomProperties(cprops);
         }
 
+        getLog().debug("[configureServer] snmpConfigExists=" + snmpConfigExists
+                + " this.discoverModSnmp=" + this.discoverModSnmp
+                + "this.discoverModStatus="+this.discoverModStatus);
+        
         if (snmpConfigExists || this.discoverModSnmp) {
             if (!snmpConfigExists) {
                 log.debug(snmpConfig +

@@ -353,22 +353,16 @@ public class AIQueueManagerImpl implements AIQueueManager {
     }
 
     /**
-     * Get an AIServerValue by Id.
+     * Get an AIServer by Id.
      * 
      * 
      * 
-     * @return The AIServerValue with the given id, or null if that server id
+     * @return The AIServer with the given id, or null if that server id
      *         does not exist in the queue.
      */
     @Transactional(readOnly = true)
-    public AIServerValue findAIServerById(AuthzSubject subject, int serverID) {
-        AIServer aiserver = aIServerDAO.get(new Integer(serverID));
-
-        if (aiserver == null) {
-            return null;
-        }
-
-        return aiserver.getAIServerValue();
+    public AIServer findAIServerById(AuthzSubject subject, int serverID) {
+        return aIServerDAO.get(new Integer(serverID));
     }
 
     /**

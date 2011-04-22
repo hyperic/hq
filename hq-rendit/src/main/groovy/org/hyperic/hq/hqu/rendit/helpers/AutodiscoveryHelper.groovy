@@ -32,8 +32,8 @@ import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.appdef.shared.AIQApprovalException
 import org.hyperic.hq.appdef.shared.AIQueueConstants
 import org.hyperic.hq.appdef.shared.AIQueueManager;
-import org.hyperic.hq.appdef.shared.AIServerValue
 import org.hyperic.hq.authz.server.session.AuthzSubject
+import org.hyperic.hq.autoinventory.AIServer
 import org.hyperic.util.pager.PageControl
 
 /**
@@ -77,12 +77,12 @@ class AutodiscoveryHelper extends BaseHelper {
     }
 
     /**
-     * Find an AIServerValue by id.
+     * Find an AIServer by id.
      * @param id The id to look up.
      * @return A {@link AIServerValue} with the given id or null if a
      * queued server with the given id does not exist.
      */
-    public AIServerValue findServerById(int id) {
+    public AIServer findServerById(int id) {
     	aiqMan.findAIServerById(user, id)
     }
     
@@ -115,16 +115,19 @@ class AutodiscoveryHelper extends BaseHelper {
      * @return A List of {@link org.hyperic.hq.appdef.server.session.AppdefResource}s
      * that were created as a result of processing the queue.
      */
-    public List approve(AIServerValue server) throws AIQApprovalException {
+    public List approve(AIServer server) throws AIQApprovalException {
         // Only approve servers that are not marked ignored
         if (server.ignored) {
         	throw new AIQApprovalException("Cannot approve an ignored server")
         }
         
+        List platformIds = []
         List serverIds = []
+        
         serverIds.add(server.id)
+        platformIds.add(server.getAIPlatform().id)
 
-        aiqMan.processQueue(user, null, serverIds, null,
+        aiqMan.processQueue(user, platformIds, serverIds, null,
                             AIQueueConstants.Q_DECISION_APPROVE)
     }
 }
