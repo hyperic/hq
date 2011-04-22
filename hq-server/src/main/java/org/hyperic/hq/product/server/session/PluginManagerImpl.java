@@ -409,7 +409,7 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         final long now = System.currentTimeMillis();
         for (final Integer pluginId : pluginIds) {
             final Plugin plugin = pluginDAO.get(pluginId);
-            if (plugin == null || plugin.isDeleted()) {
+            if (plugin == null || plugin.isDeleted() || plugin.isDisabled()) {
                 continue;
             }
             plugin.setDisabled(true);
@@ -616,8 +616,10 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         if (plugin == null || plugin.isDeleted()) {
             return;
         }
-        plugin.setDisabled(true);
-        plugin.setModifiedTime(System.currentTimeMillis());
+        if (!plugin.isDisabled()) {
+            plugin.setDisabled(true);
+            plugin.setModifiedTime(System.currentTimeMillis());
+        }
     }
 
     public void setApplicationContext(ApplicationContext ctx) throws BeansException {
@@ -630,8 +632,10 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         if (plugin == null || plugin.isDeleted()) {
             return;
         }
-        plugin.setDisabled(false);
-        plugin.setModifiedTime(System.currentTimeMillis());
+        if (plugin.isDisabled()) {
+            plugin.setDisabled(false);
+            plugin.setModifiedTime(System.currentTimeMillis());
+        }
     }
 
 }
