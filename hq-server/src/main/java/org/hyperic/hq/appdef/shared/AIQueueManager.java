@@ -32,6 +32,7 @@ import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.AIPlatform;
+import org.hyperic.hq.autoinventory.AIServer;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -82,11 +83,11 @@ public interface AIQueueManager {
     public AIPlatformValue findAIPlatformByFqdn(AuthzSubject subject, String fqdn);
 
     /**
-     * Get an AIServerValue by Id.
+     * Get an AIServer by Id.
      * @return The AIServerValue with the given id, or null if that server id
      *         does not exist in the queue.
      */
-    public AIServerValue findAIServerById(AuthzSubject subject, int serverID);
+    public AIServer findAIServerById(AuthzSubject subject, int serverID);
 
     public void removeAssociatedAIPlatform(Platform platform) throws VetoException;
 
