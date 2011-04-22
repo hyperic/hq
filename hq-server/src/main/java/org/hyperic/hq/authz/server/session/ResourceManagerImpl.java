@@ -74,6 +74,7 @@ import org.hyperic.hq.authz.shared.ResourceEdgeCreateException;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.server.session.AppdefBossImpl;
 import org.hyperic.hq.common.NotFoundException;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.ResourceAuditFactory;
 import org.hyperic.hq.context.Bootstrap;
@@ -339,9 +340,11 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         return resourceDAO.findRootResource();
     }
 
-    /**
-     * 
-     */
+    @Transactional(readOnly = true)
+    public Resource getResourceById(Integer id) {
+        return resourceDAO.get(id);
+    }
+
     @Transactional(readOnly = true)
     public Resource findResourceById(Integer id) {
         return resourceDAO.findById(id);
@@ -1440,7 +1443,12 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
             // proto = null here means that no resources are configured with that particular type
             if (proto != null) {
                 removeAppdefType(proto);
-                resourceDAO.remove(proto);
+                AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
+                try {
+                    removeResource(overlord, proto);
+                } catch (VetoException e) {
+                    throw new SystemException(e);
+                }
             }
         }
     }

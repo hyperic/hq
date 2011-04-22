@@ -120,6 +120,13 @@ public interface ResourceManager {
      */
     public Resource findRootResource();
 
+    /**
+     * When using this method make sure that you know the Resource exists or else it will throw
+     * a {@link ObjectNotFoundException} when calling resource.getSomeProperty()
+     * If you are unsure, then use getResourceById()
+     * @return {@link Resource} proxy
+     * @see #getResourceById(Integer)
+     */
     public Resource findResourceById(Integer id);
 
     /**
@@ -311,9 +318,22 @@ public interface ResourceManager {
 
     ResourceType getResourceTypeById(Integer resourceTypeId);
 
-// XXX javadoc!
+    /**
+     * Fetches all types defined by values and deletes the associated {@link Resource}s and
+     * types via the asynchronous delete mechanism
+     * @param subj {@link AuthzSubject}
+     * @param values {@link Collection} of {@link MonitorableType}s
+     */
     public void removeResourcesAndTypes(AuthzSubject subj, Collection<MonitorableType> values);
 
-// XXX javadoc!
+    /**
+     * Deletes the ResourceTypes where the type names are defined by typeNames
+     * @param typeNames
+     */
     public void removeResourceTypes(Collection<String> typeNames);
+
+    /**
+     * @return {@link Resource} or null if it doesn't exist
+     */
+    public Resource getResourceById(Integer id);
 }

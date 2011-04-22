@@ -52,6 +52,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
+import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -73,6 +74,11 @@ import org.hyperic.hq.measurement.server.session.MonitorableTypeDAO;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.product.shared.PluginDeployException;
 import org.hyperic.hq.product.shared.PluginManager;
+import org.hyperic.hq.zevents.Zevent;
+import org.hyperic.hq.zevents.ZeventListener;
+import org.hyperic.hq.zevents.ZeventManager;
+import org.hyperic.hq.zevents.ZeventPayload;
+import org.hyperic.hq.zevents.ZeventSourceId;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 import org.springframework.beans.BeansException;
@@ -125,6 +131,19 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         this.resourceManager = resourceManager;
     }
     
+    @PostConstruct
+    public void postConstruct() {
+        ZeventManager.getInstance().addBufferedListener(PluginFileRemoveZevent.class,
+            new ZeventListener<PluginFileRemoveZevent>() {
+                public void processEvents(List<PluginFileRemoveZevent> events) {
+                    for (final PluginFileRemoveZevent event : events) {
+                        deletePluginFiles(event.getPluginFileNames());
+                    }
+                }
+            }
+        );
+    }
+    
     public Plugin getByJarName(String jarName) {
         return pluginDAO.getByFilename(jarName);
     }
@@ -146,7 +165,8 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
             toRemove.put(agent.getId(), pluginFileNames);
         }
         agentPluginUpdater.queuePluginRemoval(toRemove);
-        deletePluginFiles(pluginFileNames);
+        checkCanDeletePluginFiles(pluginFileNames);
+        ZeventManager.getInstance().enqueueEventAfterCommit(new PluginFileRemoveZevent(pluginFileNames));
     }
 
     private void removePluginsAndAssociatedResources(AuthzSubject subj,
@@ -176,7 +196,7 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         }
     }
     
-    private void deletePluginFiles(Collection<String> pluginFileNames)
+    private void checkCanDeletePluginFiles(Collection<String> pluginFileNames)
     throws PluginDeployException {
         final File serverPluginDir = getServerPluginDir();
         final File customPluginDir = getCustomPluginDir();
@@ -196,6 +216,11 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
                     msg, filename, customPlugin.getAbsolutePath(), serverPlugin.getAbsolutePath());
             }
         }
+    }
+
+    private void deletePluginFiles(Collection<String> pluginFileNames) {
+        final File serverPluginDir = getServerPluginDir();
+        final File customPluginDir = getCustomPluginDir();
         for (final String filename : pluginFileNames) {
             final File customPlugin = new File(customPluginDir.getAbsolutePath() + "/" + filename);
             final File serverPlugin = new File(serverPluginDir.getAbsolutePath() + "/" + filename);
@@ -635,6 +660,26 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         if (plugin.isDisabled()) {
             plugin.setDisabled(false);
             plugin.setModifiedTime(System.currentTimeMillis());
+        }
+    }
+    
+    private class PluginFileRemoveZevent extends Zevent {
+        @SuppressWarnings("serial")
+        private PluginFileRemoveZevent(Collection<String> pluginFileNames) {
+            super(new ZeventSourceId() {}, new PluginFileRemovePayload(pluginFileNames));
+        }
+        private Collection<String> getPluginFileNames() {
+            return ((PluginFileRemovePayload) getPayload()).getPluginFileNames();
+        }
+    }
+
+    private class PluginFileRemovePayload implements ZeventPayload {
+        private final Collection<String> pluginFileNames;
+        private PluginFileRemovePayload(Collection<String> pluginFileNames) {
+            this.pluginFileNames = pluginFileNames;
+        }
+        private Collection<String> getPluginFileNames() {
+            return pluginFileNames;
         }
     }
 
