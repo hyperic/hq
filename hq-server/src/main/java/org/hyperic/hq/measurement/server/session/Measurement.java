@@ -28,6 +28,7 @@ package org.hyperic.hq.measurement.server.session;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -63,7 +64,7 @@ public class Measurement implements ContainerManagedTimestampTrackable, Serializ
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "measurement")
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private Collection<Baseline> baselinesBag;
+    private Collection<Baseline> baselinesBag = new HashSet<Baseline>();
 
     @Column(name = "DSN", nullable = false, length = 2048)
     private String dsn;
