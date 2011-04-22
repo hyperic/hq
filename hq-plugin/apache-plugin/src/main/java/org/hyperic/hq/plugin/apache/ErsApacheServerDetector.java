@@ -62,6 +62,7 @@ public class ErsApacheServerDetector
     public List getServerList(String installpath)
         throws PluginException {
 
+        getLog().debug("[getServerList] installpath="+installpath);
         File serversDir = new File(installpath, "servers");
         File[] serverList = serversDir.listFiles();
         List servers;
@@ -79,12 +80,14 @@ public class ErsApacheServerDetector
                 continue;
             }
             String serverRoot = serverList[i].getAbsolutePath();
-            String serverName = serverList[i].getName();
-            if (!new File(serverRoot, getDefaultPidFile()).exists()) {
+            File pidFile=new File(serverRoot, getDefaultPidFile());
+            if (!pidFile.exists()) {
                 //filters non-apache servers (i.e. tomcat) and
                 //unused servers, such as "default1.3"
+                getLog().debug("[getServerList] pidFile ("+pidFile+") not found.");
                 continue;
             }
+            String serverName = serverList[i].getName();
             
             ServerResource server = createServerResource(serverRoot);
             String name = server.getName();
@@ -96,7 +99,10 @@ public class ErsApacheServerDetector
             server.setIdentifier(getAIID(serverRoot));
 
             if (configureServer(server, null)) {
+                getLog().debug("[getServerList] serverRoot="+serverRoot+" serverName="+serverName+" OK");
                 servers.add(server);
+            }else{
+                getLog().debug("[getServerList] serverRoot="+serverRoot+" serverName="+serverName+" no configured");
             }
         }
 
