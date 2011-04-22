@@ -307,15 +307,6 @@ public class WeblogicQuery {
         return NOOP_PROPERTIES;
     }
 
-    public boolean hasResponseTime() {
-        Properties config = getResponseTimeConfig();
-        return config != NOOP_PROPERTIES;
-    }
-
-    public Properties getResponseTimeConfig() {
-        return NOOP_PROPERTIES;
-    }
-
     public Properties getResourceConfig() {
         Properties props = new Properties();
 

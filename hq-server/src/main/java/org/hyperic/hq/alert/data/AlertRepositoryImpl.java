@@ -38,12 +38,13 @@ public class AlertRepositoryImpl implements AlertRepositoryCustom {
     }
 
     public long countByCreateTimeAndPriority(long begin, long end, int priority, boolean inEsc,
-                                             boolean notFixed, Set<Integer> groupMembers, Integer alertDefId) {
-        if(groupMembers != null && groupMembers.isEmpty()) {
+                                             boolean notFixed, Set<Integer> groupMembers,
+                                             Integer alertDefId) {
+        if (groupMembers != null && groupMembers.isEmpty()) {
             return 0l;
         }
-        Query query = getAlertQuery(begin, end, priority, inEsc, notFixed, groupMembers, alertDefId,
-            true, null);
+        Query query = getAlertQuery(begin, end, priority, inEsc, notFixed, groupMembers,
+            alertDefId, true, null);
         return (Long) query.getSingleResult();
     }
 
@@ -96,14 +97,14 @@ public class AlertRepositoryImpl implements AlertRepositoryCustom {
                                                    boolean inEsc, boolean notFixed,
                                                    Set<Integer> groupMembers, Integer alertDefId,
                                                    Pageable pageable) {
-        long total = countByCreateTimeAndPriority(begin, end, priority, inEsc, notFixed, groupMembers,
-            alertDefId);
+        long total = countByCreateTimeAndPriority(begin, end, priority, inEsc, notFixed,
+            groupMembers, alertDefId);
         if (total == 0) {
             return new PageImpl<Alert>(new ArrayList<Alert>(0), pageable, 0);
         }
 
-        Query query = getAlertQuery(begin, end, priority, inEsc, notFixed, groupMembers, alertDefId,
-            false, pageable.getSort());
+        Query query = getAlertQuery(begin, end, priority, inEsc, notFixed, groupMembers,
+            alertDefId, false, pageable.getSort());
         // TODO there used to be a subject ID in AlertDAO and perms were checked
         query.setFirstResult(pageable.getOffset());
         query.setMaxResults(pageable.getPageSize());
@@ -113,14 +114,15 @@ public class AlertRepositoryImpl implements AlertRepositoryCustom {
     @SuppressWarnings("unchecked")
     public List<Alert> findByCreateTimeAndPriority(long begin, long end, int priority,
                                                    boolean inEsc, boolean notFixed,
-                                                   Set<Integer> groupMembers, Integer alertDefId, Sort sort) {
-        long total = countByCreateTimeAndPriority(begin, end, priority, inEsc, notFixed, groupMembers,
-            alertDefId);
+                                                   Set<Integer> groupMembers, Integer alertDefId,
+                                                   Sort sort) {
+        long total = countByCreateTimeAndPriority(begin, end, priority, inEsc, notFixed,
+            groupMembers, alertDefId);
         if (total == 0) {
             return new ArrayList<Alert>(0);
         }
-        Query query = getAlertQuery(begin, end, priority, inEsc, notFixed, groupMembers, alertDefId,
-            false, sort);
+        Query query = getAlertQuery(begin, end, priority, inEsc, notFixed, groupMembers,
+            alertDefId, false, sort);
         // TODO there used to be a subject ID in AlertDAO and perms were checked
         return query.getResultList();
 
@@ -151,7 +153,7 @@ public class AlertRepositoryImpl implements AlertRepositoryCustom {
     private Query getAlertQuery(long begin, long end, int priority, boolean inEsc,
                                 boolean notFixed, Set<Integer> groupMembers, Integer alertDefId,
                                 boolean count, Sort sort) {
-       
+
         String ql = "select " + (count ? "count(a)" : "a") + " from " +
                     (inEsc ? "EscalationState es, " : "") + "Alert a " +
                     "join a.alertDefinition d where " +
@@ -177,8 +179,8 @@ public class AlertRepositoryImpl implements AlertRepositoryCustom {
     }
 
     public long getOldestUnfixedAlertTime() {
-        Long minTime = entityManager.createQuery("select min(a.ctime) from Alert a where a.fixed = false",
-            Long.class).getSingleResult();
+        Long minTime = entityManager.createQuery(
+            "select min(a.ctime) from Alert a where a.fixed = false", Long.class).getSingleResult();
         if (minTime == null) {
             return 0;
         }

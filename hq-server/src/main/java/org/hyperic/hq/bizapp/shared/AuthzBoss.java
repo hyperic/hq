@@ -33,6 +33,7 @@ import javax.security.auth.login.LoginException;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.auth.domain.AuthzSubject;
+import org.hyperic.hq.auth.domain.Operation;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
@@ -40,8 +41,8 @@ import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
-import org.hyperic.hq.inventory.domain.OperationType;
 import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.config.ConfigResponse;
@@ -80,7 +81,7 @@ public interface AuthzBoss {
      * objects representing every resource type in the system that the user is
      * allowed to view.
      */
-    public List<OperationType> getAllOperations(Integer sessionId, PageControl pc) throws 
+    public List<Operation> getAllOperations(Integer sessionId, PageControl pc) throws 
         PermissionException, SessionTimeoutException, SessionNotFoundException;
 
     /**
@@ -88,7 +89,7 @@ public interface AuthzBoss {
      * representing every resource type in the system that the user is allowed
      * to view.
      */
-    public List<OperationType> getAllOperations(Integer sessionId) throws  PermissionException,
+    public List<Operation> getAllOperations(Integer sessionId) throws  PermissionException,
         SessionTimeoutException, SessionNotFoundException;
 
     /**
@@ -114,6 +115,9 @@ public interface AuthzBoss {
     public PageList<AuthzSubject> getSubjectsByName(Integer sessionId, String name, PageControl pc)
         throws PermissionException, SessionTimeoutException, SessionNotFoundException;
 
+    PageList<ResourceGroup> getResourceGroupsById(Integer sessionId, Integer[] ids, PageControl pc)
+        throws  PermissionException, SessionTimeoutException, SessionNotFoundException;
+    
     public Map<AppdefEntityID, Resource> findResourcesByIds(Integer sessionId, AppdefEntityID[] entities)
         throws SessionNotFoundException, SessionTimeoutException;
 

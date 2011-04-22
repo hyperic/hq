@@ -744,6 +744,28 @@ public class EventsBossImpl implements EventsBoss {
 
         return alert;
     }
+    
+    /**
+     * Find all alert definition names for a resource
+     * @return Map of AlertDefinition names and IDs
+     * 
+     */
+    @Transactional(readOnly = true)
+    public Map<String, Integer> findResourceAlertDefinitionNames(int sessionID, AppdefEntityID id)
+        throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException,
+        PermissionException {
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
+        return alertDefinitionManager.findResourceAlertDefinitionNames(subject, id);
+    }
+    
+    @Transactional(readOnly = true)
+    public Map<String, Integer> findResourceTypeAlertDefinitionNames(int sessionID, Integer resourceType)
+        throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException,
+        PermissionException {
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
+        return alertDefinitionManager.findResourceTypeAlertDefinitionNames(subject, resourceType);
+    }
+
 
     /**
      * Get a list of all alert definitions

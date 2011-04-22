@@ -55,7 +55,6 @@ import org.hyperic.hq.appdef.shared.DependencyTree;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.auth.domain.AuthzSubject;
-import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
@@ -66,9 +65,7 @@ import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.inventory.data.ResourceDao;
 import org.hyperic.hq.inventory.data.ResourceGroupDao;
-import org.hyperic.hq.inventory.data.ResourceTypeDao;
 import org.hyperic.hq.inventory.domain.OperationType;
-import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.RelationshipTypes;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
@@ -112,8 +109,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
     
     private ResourceDao resourceDao;
     
-    private ResourceTypeDao resourceTypeDao;
-    
     public static final String MODIFIED_TIME = "ModifiedTime";
 
     public static final String CREATION_TIME = "CreationTime";
@@ -148,8 +143,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                                   PermissionManager permissionManager,
                                   ZeventEnqueuer zeventManager,
                                   ResourceGroupManager resourceGroupManager, ServiceFactory serviceFactory,
-                                  ResourceGroupDao resourceGroupDao, ResourceDao resourceDao,
-                                  ResourceTypeDao resourceTypeDao) {
+                                  ResourceGroupDao resourceGroupDao, ResourceDao resourceDao) {
         this.resourceManager = resourceManager;
         this.permissionManager = permissionManager;
         this.zeventManager = zeventManager;
@@ -157,7 +151,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
         this.serviceFactory = serviceFactory;
         this.resourceGroupDao = resourceGroupDao;
         this.resourceDao = resourceDao;
-        this.resourceTypeDao = resourceTypeDao;
     }
 
     /**
@@ -243,7 +236,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         application.setModifiedTime((Long)resourceGroup.getProperty(MODIFIED_TIME));
         application.setName(resourceGroup.getName());
         application.setResource(resourceGroup);
-        application.setSortName((String) resourceGroup.getProperty(AppdefResource.SORT_NAME));
+        application.setSortName(resourceGroup.getSortName());
         application.setBusinessContact((String)resourceGroup.getProperty(BUSINESS_CONTACT));
         application.setEngContact((String)resourceGroup.getProperty(ENG_CONTACT));
         application.setOpsContact((String)resourceGroup.getProperty(OPS_CONTACT));
@@ -265,7 +258,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
     
     private void updateApplication(ResourceGroup app, ApplicationValue appV) {
-        app.setProperty(AppdefResource.SORT_NAME,appV.getName().toUpperCase());
         app.setModifiedBy(appV.getModifiedBy());
         app.setLocation(appV.getLocation());
         app.setDescription(appV.getDescription());
@@ -854,37 +846,16 @@ public class ApplicationManagerImpl implements ApplicationManager {
     public PageList<Resource> getAllApplicationResources(AuthzSubject subject, PageControl pc) {
         int appGroupTypeId = resourceManager.findResourceTypeByName(AppdefEntityConstants.APPDEF_NAME_APPLICATION).getId();
         PageRequest pageInfo = new PageRequest(pc.getPagenum(),pc.getPagesize(),
-            new Sort(pc.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"name"));
+            new Sort(pc.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"sortName"));
         Page<Resource> resources = resourceDao.findByIndexedProperty("type", appGroupTypeId,pageInfo,String.class);
         return new PageList<Resource>(resources.getContent(),(int)resources.getTotalElements());
     }
 
     @PostConstruct
     public void afterPropertiesSet() throws Exception {
-        valuePager = Pager.getPager(VALUE_PROCESSOR);
-        //TODO move init logic?
-        if(resourceTypeDao.findByName(AppdefEntityConstants.APPDEF_NAME_APPLICATION) == null) {
-            ResourceType groupType = new ResourceType(AppdefEntityConstants.APPDEF_NAME_APPLICATION);
-            resourceTypeDao.persist(groupType);
-            Set<PropertyType> propTypes = new HashSet<PropertyType>();
-            propTypes.add(createPropertyType(AppdefResource.SORT_NAME,String.class));
-            propTypes.add(createPropertyType(ApplicationManagerImpl.BUSINESS_CONTACT,String.class));
-            propTypes.add(createPropertyType(ApplicationManagerImpl.CREATION_TIME,Long.class));
-            propTypes.add(createPropertyType(ApplicationManagerImpl.ENG_CONTACT,String.class));
-            propTypes.add(createPropertyType(ApplicationManagerImpl.MODIFIED_TIME,Long.class));
-            propTypes.add(createPropertyType(ApplicationManagerImpl.OPS_CONTACT,String.class));
-            groupType.addPropertyTypes(propTypes);
-        }
-       
+        valuePager = Pager.getPager(VALUE_PROCESSOR); 
     }
         
-    private PropertyType createPropertyType(String propTypeName, Class<?> type) {
-        PropertyType propType = new PropertyType(propTypeName,type);
-        propType.setDescription(propTypeName);
-        propType.setHidden(true);
-        return propType;
-    }
-
     private void trimStrings(ApplicationValue app) {
         if (app.getBusinessContact() != null)
             app.setBusinessContact(app.getBusinessContact().trim());

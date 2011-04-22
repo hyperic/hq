@@ -90,7 +90,7 @@ public class PerformanceMonitor {
         long duration = timer.getTotalTimeMillis();
     
 
-        if (duration > maximumDuration) { 
+        if (maximumDuration > 0 && duration > maximumDuration) { 
             logger.warn(new StringBuilder(warningMessage)
                 .append(pjp.getSignature()).append(" executed in ").
                 append(timer.getTotalTimeMillis()).append(":ms").toString());

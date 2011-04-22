@@ -448,58 +448,9 @@
     <property name="websphere5-webinf-lib"
             value="${installpath}${FILE.sep}installedApps${FILE.sep}${server.node}${FILE.sep}${app}.ear${FILE.sep}${webapp}${FILE.sep}WEB-INF${FILE.sep}lib"/>
 
-    <help name="websphere-rt-postamble">
-  <![CDATA[
-   <p>
-   Add the following snippet of XML just after the last
-   <b>&lt;context-param&gt;</b> tag, and before the first
-   <b>&lt;servlet&gt;</b> tag.
-   </p>
+  
 
-    <pre>
-&lt;!-- HYPERIC HQ RESPONSE TIME FILTER --&gt;
-&lt;filter&gt;
-	&lt;filter-name&gt;JMXFilter&lt;/filter-name&gt;
-	&lt;filter-class&gt;org.hyperic.hq.product.servlet.filter.JMXFilter&lt;/filter-class&gt;
-	&lt;init-param&gt;
-		&lt;param-name&gt;responseTimeLogDir&lt;/param-name&gt;
-		&lt;param-value&gt;${installpath}${FILE.sep}logs&lt;/param-value&gt;
-	&lt;/init-param&gt;
-&lt;/filter&gt;
-&lt;filter-mapping&gt;
-	&lt;filter-name&gt;JMXFilter&lt;/filter-name&gt;
-	&lt;url-pattern&gt;/*&lt;/url-pattern&gt;
-&lt;/filter-mapping&gt;
-&lt;!-- END HYPERIC RESPONSE TIME FILTER --&gt;
-    </pre>
-
-    <ul>
-    <li>Add the filter jar</li>
-    </ul>
-
-    <pre>
-${CMD.prompt} mkdir ${websphere5-webinf-lib}
-${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.sep}servlet${FILE.sep}libs${FILE.sep}hq-filter.jar \
-      ${websphere5-webinf-lib}
-    </pre>
-
-    <ul>
-    <li>Restart the WebSphere server. </li>
-    </ul>
-  ]]>
-    </help>
-
-    <help name="WebSphere 6.0 Webapp" append="websphere-rt-postamble">
-  <![CDATA[
-    <p>
-    <h4>Enable Webapp Response Time</h4>
-    </p>
-
-    <ul>
-    <li>Edit ${websphere5-webinf}web.xml</li>
-    </ul>
-  ]]>
-    </help>
+  
 
     <config name="connector">
         <option name="admin.port"
@@ -662,8 +613,7 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
             <plugin type="collector"
               class="WebappCollector"/>
 
-            <plugin type="responsetime"
-              class="WebsphereRtPlugin"/>
+          
 
             <config>
                 <option name="app"

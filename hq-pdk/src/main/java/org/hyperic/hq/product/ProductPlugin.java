@@ -44,7 +44,6 @@ public abstract class ProductPlugin extends GenericPlugin {
     public static final String TYPE_CONTROL       = "control";
     public static final String TYPE_MEASUREMENT   = "measurement";
     public static final String TYPE_PRODUCT       = "product";
-    public static final String TYPE_RESPONSE_TIME = "responsetime";
     public static final String TYPE_LOG_TRACK     = "log_track";
     public static final String TYPE_CONFIG_TRACK  = "config_track";
     public static final String TYPE_LIVE_DATA     = "livedata";
@@ -73,7 +72,6 @@ public abstract class ProductPlugin extends GenericPlugin {
         TYPE_CONTROL,
         TYPE_MEASUREMENT,
         TYPE_PRODUCT,
-        TYPE_RESPONSE_TIME,
         TYPE_LOG_TRACK,
         TYPE_CONFIG_TRACK,
         TYPE_LIVE_DATA
@@ -82,13 +80,11 @@ public abstract class ProductPlugin extends GenericPlugin {
     public static final String[] CONFIGURABLE_TYPES = {
         TYPE_PRODUCT,
         TYPE_MEASUREMENT,
-        TYPE_CONTROL,
-        TYPE_RESPONSE_TIME,
+        TYPE_CONTROL
     };
     public static final int CFGTYPE_IDX_PRODUCT       = 0;
     public static final int CFGTYPE_IDX_MEASUREMENT   = 1;
     public static final int CFGTYPE_IDX_CONTROL       = 2;
-    public static final int CFGTYPE_IDX_RESPONSE_TIME = 3;
 
     protected ProductPluginManager manager;
 

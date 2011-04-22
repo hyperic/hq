@@ -36,6 +36,7 @@ public interface AlertRepositoryCustom {
     @Transactional(readOnly = true)
     List<Alert> findByResourceInRange(Integer res, long begin, long end, boolean nameSort,
                                       boolean asc);
+   
 
     @Transactional(readOnly = true)
     Alert findLastByDefinition(AlertDefinition def, boolean fixed);

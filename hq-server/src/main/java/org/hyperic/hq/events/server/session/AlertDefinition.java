@@ -37,6 +37,7 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertValue;
+import org.hyperic.hq.measurement.MeasurementConstants;
 
 
 @MappedSuperclass
@@ -263,6 +264,69 @@ abstract public class AlertDefinition implements AlertDefinitionInterface, Perfo
         return active;
     }
 
+    /**
+     * Check if an alert definition is configured for only availability.
+     * 
+     * @param up Indicates where the availability condition is up (true) or down
+     *        (false)
+     * @return <code>true</code> if the alert definition has an availability
+     *         condition.
+     */
+    public boolean isAvailability(boolean up) {
+        boolean isAvail = false;
+
+        // ignore multi-conditional alert definitions
+        if (getConditions().size() == 1) {
+            for ( AlertCondition cond : getConditions()) {
+                if (cond != null
+                    && MeasurementConstants.CAT_AVAILABILITY.equalsIgnoreCase(cond.getName())) {
+                    if ("=".equals(cond.getComparator())) {
+                        if (up) {
+                            if (cond.getThreshold() == MeasurementConstants.AVAIL_UP) {
+                                isAvail = true;
+                                break;
+                            }
+                        } else {
+                            if (cond.getThreshold() == MeasurementConstants.AVAIL_DOWN) {
+                                isAvail = true;
+                                break;
+                            }
+                        }
+                    } else if ("!=".equals(cond.getComparator())) {
+                        if (up) {
+                            if (cond.getThreshold() == MeasurementConstants.AVAIL_DOWN) {
+                                isAvail = true;
+                                break;
+                            }
+                        } else {
+                            if (cond.getThreshold() == MeasurementConstants.AVAIL_UP) {
+                                isAvail = true;
+                                break;
+                            }
+                        }
+                    } else if ("<".equals(cond.getComparator())) {
+                        if (!up) {
+                            if (cond.getThreshold() <= MeasurementConstants.AVAIL_UP
+                                && cond.getThreshold() > MeasurementConstants.AVAIL_DOWN) {
+                                isAvail = true;
+                                break;
+                            }
+                        }
+                    } else if (">".equals(cond.getComparator())) {
+                        if (up) {
+                            if (cond.getThreshold() >= MeasurementConstants.AVAIL_DOWN
+                                && cond.getThreshold() < MeasurementConstants.AVAIL_UP) {
+                                isAvail = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return isAvail;
+    }
+
     public boolean isControlFiltered() {
         return controlFiltered;
     }
@@ -414,9 +478,10 @@ abstract public class AlertDefinition implements AlertDefinitionInterface, Perfo
     public String toString() {
         return "alertDef [" + this.getName() + "]";
     }
-
+    
     public boolean willRecover() {
         return willRecover;
     }
+
 
 }

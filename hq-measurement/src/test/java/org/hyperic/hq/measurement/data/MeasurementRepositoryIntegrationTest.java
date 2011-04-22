@@ -132,6 +132,31 @@ public class MeasurementRepositoryIntegrationTest {
     }
     
     @Test
+    public void testFindAvailabilityMeasurementsByTemplatesAndResources() {
+        int resource2 = 43;
+        Category category2 = new Category("Performance");
+        entityManager.persist(category2);
+        MeasurementTemplate template2 = new MeasurementTemplate("Queue Size", "queueSize",
+            "messages", MeasurementConstants.COLL_TYPE_DYNAMIC, true, 1234, true,
+            "service:queueSize", type, category2, "tomcat");
+        entityManager.persist(template2);
+        Measurement measurement = new Measurement(resource, template, 1234);
+        measurement.setDsn("queueSize");
+        measurementRepository.save(measurement);
+        Measurement measurement2 = new Measurement(resource, template2, 1234);
+        measurement2.setDsn("queueErrors");
+        measurementRepository.save(measurement2);
+        Measurement measurement3 = new Measurement(resource2, template, 1234);
+        measurement3.setDsn("throughput");
+        measurement3.setEnabled(false);
+        measurementRepository.save(measurement3);
+        List<Measurement> expected = new ArrayList<Measurement>();
+        expected.add(measurement);
+        assertEquals(expected,measurementRepository.findAvailabilityMeasurementsByTemplatesAndResources(new Integer[] {template.getId()}, 
+            new Integer[] {resource}));
+    }
+    
+    @Test
     public void testFindAvailabilityMeasurementsGroupMembers() {
         int resource2 = 43;
         Category category2 = new Category("Performance");
@@ -329,6 +354,26 @@ public class MeasurementRepositoryIntegrationTest {
         List<Measurement> expected = new ArrayList<Measurement>();
         expected.add(measurement);
         assertEquals(expected, measurementRepository.findByTemplate(template));
+    }
+    
+    @Test
+    public void testFindByTemplateAliasAndResource() {
+        MeasurementTemplate template2 = new MeasurementTemplate("Queue Size", "queueSize",
+            "messages", MeasurementConstants.COLL_TYPE_DYNAMIC, true, 1234, true,
+            "service:queueSize", type, category, "tomcat");
+        entityManager.persist(template2);
+        Measurement measurement = new Measurement(resource, template, 1234);
+        measurement.setDsn("queueSize");
+        measurementRepository.save(measurement);
+        Measurement measurement2 = new Measurement(resource, template2, 1234);
+        measurement2.setDsn("queueErrors");
+        measurementRepository.save(measurement2);
+        assertEquals(measurement2, measurementRepository.findByTemplateAliasAndResource("queueSize",resource));
+    }
+    
+    @Test
+    public void testFindByTemplateAliasAndResourceNone() {
+        assertNull( measurementRepository.findByTemplateAliasAndResource("Availability",resource));
     }
 
     @Test

@@ -116,7 +116,6 @@ public class ProductPluginManager
     private MeasurementPluginManager mpm;
     private ControlPluginManager cpm;
     private AutoinventoryPluginManager apm;
-    private RtPluginManager rpm;
     private LogTrackPluginManager ltpm;
     private ConfigTrackPluginManager ctpm;
     private LiveDataPluginManager ldpm;
@@ -377,12 +376,11 @@ public class ProductPluginManager
         this.mpm = new MeasurementPluginManager(props);
         this.cpm = new ControlPluginManager(props);
         this.apm = new AutoinventoryPluginManager(props);
-        this.rpm = new RtPluginManager(props);
         this.ltpm = new LogTrackPluginManager(props);
         this.ctpm = new ConfigTrackPluginManager(props);
         this.ldpm = new LiveDataPluginManager(props);
 
-        PluginManager[] mgrs = { this.mpm, this.cpm, this.apm, this.rpm, this.ltpm, this.ctpm, this.ldpm, this // note
+        PluginManager[] mgrs = { this.mpm, this.cpm, this.apm, this.ltpm, this.ctpm, this.ldpm, this // note
                                                                                                                // to
                                                                                                                // self
         };
@@ -443,10 +441,6 @@ public class ProductPluginManager
         return this.apm;
     }
 
-    public RtPluginManager getRtPluginManager() {
-        return this.rpm;
-    }
-
     public LogTrackPluginManager getLogTrackPluginManager() {
         return this.ltpm;
     }
@@ -482,15 +476,6 @@ public class ProductPluginManager
             return (ServerDetector) this.apm.getPlugin(name);
         } catch (PluginNotFoundException e) {
             log.debug("No AutoinventoryPlugin found for: " + name);
-            return null;
-        }
-    }
-
-    public RtPlugin getRtPlugin(String name) {
-        try {
-            return (RtPlugin) this.rpm.getPlugin(name);
-        } catch (PluginNotFoundException e) {
-            log.debug("No RtPlugin found for: " + name);
             return null;
         }
     }
@@ -822,7 +807,7 @@ public class ProductPluginManager
      * Load a product plugin jar. Registers the product plugin, as defined by
      * the Main-Class jar manifest attribute which must be a class which
      * implements the ProductPlugin interface. Registers plugins supported for
-     * each plugin type (control, measurement, responsetime) as returned by the
+     * each plugin type (control, measurement) as returned by the
      * ProductPlugin.getPlugin method.
      * @param jarName The name of the jar file on disk.
      * @param resourceLoader ClassLoader used to find jar resources.

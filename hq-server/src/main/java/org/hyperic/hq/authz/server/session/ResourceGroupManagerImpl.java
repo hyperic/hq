@@ -28,11 +28,13 @@ package org.hyperic.hq.authz.server.session;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -58,6 +60,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
+import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
@@ -126,28 +129,9 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     @PostConstruct
     public void initialize() {
         this.defaultPager = Pager.getDefaultPager();
-        //TODO move init logic?
-        int[] groupTypes = AppdefEntityConstants.getAppdefGroupTypes();
-        for(int i=0;i< groupTypes.length;i++) {
-            if(resourceTypeDao.findByName(AppdefEntityConstants.getAppdefGroupTypeName(groupTypes[i])) == null) {
-                ResourceType groupType = new ResourceType(AppdefEntityConstants.getAppdefGroupTypeName(groupTypes[i]));
-                resourceTypeDao.persist(groupType);
-                Set<PropertyType> propTypes = new HashSet<PropertyType>();
-                propTypes.add(createPropertyType("groupEntType",Integer.class,false));
-                propTypes.add(createPropertyType("groupEntResType",Integer.class,true));
-                propTypes.add(createPropertyType("mixed",Boolean.class,true));
-                groupType.addPropertyTypes(propTypes);
-            }
-        }
     }
     
-    private PropertyType createPropertyType(String propTypeName, Class<?> type,boolean indexed) {
-        PropertyType propType = new PropertyType(propTypeName,type);
-        propType.setDescription(propTypeName);
-        propType.setHidden(true);
-        propType.setIndexed(indexed);
-        return propType;
-    }
+  
     
     /**
      * Create a resource group. Currently no permission checking.
@@ -647,6 +631,46 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         Collection<ResourceGroup> groups = getAllResourceGroups();
         return groups;
     }
+    
+    /**
+     * Get the resource groups with the specified ids
+     * @param ids the resource group ids
+     * @param pc Paging information for the request
+     * 
+     */
+    @Transactional(readOnly = true)
+    public PageList<ResourceGroup> getResourceGroupsById(AuthzSubject whoami, Integer[] ids,
+                                                              PageControl pc)
+        throws PermissionException {
+        if (ids.length == 0)
+            return new PageList<ResourceGroup>();
+
+        PageControl allPc = new PageControl();
+        // get all roles, sorted but not paged
+        allPc.setSortattribute(pc.getSortattribute());
+        allPc.setSortorder(pc.getSortorder());
+        Collection<ResourceGroup> all = getAllResourceGroups(whoami);
+
+        // build an index of ids
+        HashSet<Integer> index = new HashSet<Integer>();
+        index.addAll(Arrays.asList(ids));
+        int numToFind = index.size();
+
+        // find the requested roles
+        List<ResourceGroup> groups = new ArrayList<ResourceGroup>(numToFind);
+        Iterator<ResourceGroup> i = all.iterator();
+        while (i.hasNext() && groups.size() < numToFind) {
+            ResourceGroup g = (ResourceGroup) i.next();
+            if (index.contains(g.getId()))
+                groups.add(g);
+        }
+
+        // TODO: G
+        PageList<ResourceGroup> plist = new PageList(groups,groups.size());
+        return plist;
+    }
+
+
 
     private Collection<ResourceGroup> getAllResourceGroups() {
         return resourceGroupDao.findAll();
@@ -676,24 +700,49 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     
     public PageList<Resource> getCompatibleGroups(PageControl pageControl) {
         PageRequest pageInfo = new PageRequest(pageControl.getPagenum(),pageControl.getPagesize(),
-            new Sort(pageControl.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"name"));
+            new Sort(pageControl.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"sortName"));
         Page<Resource> resources = resourceDao.findByIndexedProperty(MIXED, false,pageInfo,String.class);
         return new PageList<Resource>(resources.getContent(),(int)resources.getTotalElements());
     }
 
     public PageList<Resource> getMixedGroups(PageControl pageControl) {
         PageRequest pageInfo = new PageRequest(pageControl.getPagenum(),pageControl.getPagesize(),
-            new Sort(pageControl.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"name"));
+            new Sort(pageControl.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"sortName"));
         Page<Resource> resources = resourceDao.findByIndexedProperty(MIXED, true,pageInfo,String.class);
         return new PageList<Resource>(resources.getContent(),(int)resources.getTotalElements());
     }
     
     public PageList<Resource> getCompatibleGroupsContainingType(int resourceTypeId, PageControl pageControl) {
         PageRequest pageInfo = new PageRequest(pageControl.getPagenum(),pageControl.getPagesize(),
-            new Sort(pageControl.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"name"));
+            new Sort(pageControl.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"sortName"));
         Page<Resource> resources = resourceDao.findByIndexedProperty(GROUP_ENT_RES_TYPE, resourceTypeId,pageInfo,String.class);
         return new PageList<Resource>(resources.getContent(),(int)resources.getTotalElements());
     }
+    
+    @Transactional(readOnly = true)
+    public Collection<ResourceGroup> getCompatibleResourceGroups(AuthzSubject subject,
+                                                                 int resourceTypeId)
+    {
+        // TODO auth
+        //PermissionManager pm = PermissionManagerFactory.getInstance();
+        //List<Integer> groupIds =
+        // TODO: G
+       // pm.findOperationScopeBySubject(subject, AuthzConstants.groupOpViewResourceGroup,
+           // AuthzConstants.groupResourceTypeName);
+        return resourceGroupDao.findByIndexedProperty(GROUP_ENT_RES_TYPE, resourceTypeId);
+        //TODO filter out unviewable
+//        Collection<ResourceGroup> groups = resourceGroupDAO.findCompatible(resProto);
+//        for (Iterator<ResourceGroup> i = groups.iterator(); i.hasNext();) {
+//            ResourceGroup g = (ResourceGroup) i.next();
+//            if (!groupIds.contains(g.getId())) {
+//                i.remove();
+//            }
+//        }
+//
+//        return groups;
+    }
+
+
 
     @Transactional(readOnly=true)
     public ResourceGroup findResourceGroupByName(String name) {

@@ -42,7 +42,7 @@ import org.hyperic.util.config.EncodingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-@Service("configValidator")
+@Service
 public class ConfigValidatorImpl implements ConfigValidator {
     protected MeasurementManager measurementManager;
     protected TrackerManager trackerManager;

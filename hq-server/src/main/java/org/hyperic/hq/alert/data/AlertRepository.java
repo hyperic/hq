@@ -20,4 +20,12 @@ public interface AlertRepository extends JpaRepository<Alert, Integer>, AlertRep
     @Query("delete Alert a where a.id in (:ids)")
     void deleteByIds(@Param("ids") List<Integer> ids);
 
+    List<Alert> findByFixedOrderByCtimeAsc(boolean fixed);
+
+    @Transactional(readOnly = true)
+    @Query("select a from Alert a where a.fixed = :fixed and "
+           + "a.alertDefinition.resource in (:resources) order by a.ctime")
+    List<Alert> findByResourcesAndFixedOrderByCtimeAsc(@Param("resources") List<Integer> resources,
+                                                       @Param("fixed") boolean fixed);
+
 }

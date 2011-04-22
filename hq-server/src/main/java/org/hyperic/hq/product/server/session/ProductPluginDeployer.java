@@ -43,6 +43,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.server.session.AppdefDataPopulator;
 import org.hyperic.hq.hqu.RenditServer;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginInfo;
@@ -55,6 +56,10 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.core.OrderComparator;
+import org.springframework.core.Ordered;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedMetric;
 import org.springframework.jmx.export.annotation.ManagedOperation;
@@ -71,7 +76,7 @@ import org.springframework.stereotype.Service;
  */
 @ManagedResource("hyperic.jmx:type=Service,name=ProductPluginDeployer")
 @Service
-public class ProductPluginDeployer implements Comparator<String>, ApplicationContextAware {
+public class ProductPluginDeployer implements Comparator<String>, ApplicationContextAware, ApplicationListener<ContextRefreshedEvent>, Ordered {
 
     private final Log log = LogFactory.getLog(ProductPluginDeployer.class);
 
@@ -80,16 +85,18 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
 
     private RenditServer renditServer;
     private ProductManager productManager;
-
+    private ApplicationContext applicationContext;
     private ProductPluginManager productPluginManager;
+    private AppdefDataPopulator appdefDataPopulator;
 
     private List<File> pluginDirs = new ArrayList<File>(2);
     private File hquDir;
 
     @Autowired
-    public ProductPluginDeployer(RenditServer renditServer, ProductManager productManager) {
+    public ProductPluginDeployer(RenditServer renditServer, ProductManager productManager,AppdefDataPopulator appdefDataPopulator) {
         this.renditServer = renditServer;
         this.productManager = productManager;
+        this.appdefDataPopulator = appdefDataPopulator;
     }
 
     private void initializePlugins(File pluginDir) {
@@ -107,6 +114,14 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
         for (String pluginName : plugins) {
             deployPlugin(pluginName);
         }
+    }
+    
+    /**
+     * Ensure product plugins deploy before UI plugins so packaged UI plugins can be unpacked
+     * @return The order of ApplicationListener receipt of events
+     */
+    public int getOrder() {
+        return Ordered.HIGHEST_PRECEDENCE;
     }
 
     /**
@@ -247,7 +262,7 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
     }
 
     @PostConstruct
-    public void start() throws Exception {
+    public void init() throws Exception {
         File propFile = ProductPluginManager.PLUGIN_PROPERTIES_FILE;
         productPluginManager = new ProductPluginManager(propFile);
         productPluginManager.setRegisterTypes(true);
@@ -260,16 +275,18 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
             ProductPluginManager.setPdkPluginsDir(pluginDirs.get(0).getAbsolutePath());
         }
         productPluginManager.init();
-        //TODO re-enable after resolving weird behavior in perf env
-        //FileWatcher fileWatcher = new FileWatcher();
-        //fileWatcher.addFileEventListener(new ProductPluginFileEventListener());
+    }
+   
+    public void start() {
+        FileWatcher fileWatcher = new FileWatcher();
+        fileWatcher.addFileEventListener(new ProductPluginFileEventListener());
         for(File pluginDir: this.pluginDirs) {
             initializePlugins(pluginDir);
-            //fileWatcher.addDir(pluginDir.toString(), false);
+            fileWatcher.addDir(pluginDir.toString(), false);
         }
-//        if(!(pluginDirs.isEmpty())) {
-//            fileWatcher.start();
-//        }
+        if(!(pluginDirs.isEmpty())) {
+            fileWatcher.start();
+        }
     }
 
     private void unpackJar(URL url, File destDir, String prefix) throws Exception {
@@ -351,8 +368,16 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
             deployPlugin(pluginName);
         }
     }
+    
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().equals(applicationContext)) {
+            appdefDataPopulator.populateData();
+            start();
+        }
+    }
 
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
         try {
             this.hquDir = applicationContext.getResource(HQU).getFile();
         } catch (IOException e) {
@@ -371,7 +396,7 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
                 pluginDirs.add(customPluginDir);
          }  
     }
-
+ 
     private class ProductPluginFileEventListener implements FileEventListener {
 
         public void onFileEvent(FileEvent fileEvent) {
@@ -380,13 +405,11 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
                 if (FileOperation.CREATED.equals(fileEvent.getOperation())) {
                     loadAndDeployPlugin(fileEvent.getFileDetails().getFile());
                 } else if (FileOperation.DELETED.equals(fileEvent.getOperation())) {
-                    //TODO re-enable
-                    //undeployPlugin(fileEvent.getFileDetails().getFile());
+                    undeployPlugin(fileEvent.getFileDetails().getFile());
                 } else if (FileOperation.UPDATED.equals(fileEvent.getOperation()) &&
                            !(pluginDirs.contains(fileEvent.getFileDetails().getFile()))) {
-                    //TODO re-enable
-                    //undeployPlugin(fileEvent.getFileDetails().getFile());
-                   // loadAndDeployPlugin(fileEvent.getFileDetails().getFile());
+                    undeployPlugin(fileEvent.getFileDetails().getFile());
+                    loadAndDeployPlugin(fileEvent.getFileDetails().getFile());
                 }
             } catch (Exception e) {
                 log.error("Error responding to plugin file event " + fileEvent + ".  Cause: " +
@@ -394,5 +417,7 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
             }
         }
     }
+    
+    
 
 }

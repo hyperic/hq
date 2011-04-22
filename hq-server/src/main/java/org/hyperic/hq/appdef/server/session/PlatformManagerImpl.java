@@ -59,6 +59,7 @@ import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.IpValue;
@@ -421,10 +422,9 @@ public class PlatformManagerImpl implements PlatformManager {
         p.setDescription(aip.getDescription());
         p.setLocation("");
         
-        //TODO abstract creationTime, modifiedTime, and sortName?
+        //TODO abstract creationTime, modifiedTime?
         p.setProperty(PlatformFactory.CREATION_TIME, System.currentTimeMillis());
         p.setProperty(PlatformFactory.MODIFIED_TIME,System.currentTimeMillis());
-        p.setProperty(AppdefResource.SORT_NAME, aip.getName().toUpperCase());
         p.setProperty(PlatformFactory.CERT_DN,aip.getCertdn());
         p.setProperty(PlatformFactory.FQDN,aip.getFqdn());
         p.setProperty(PlatformFactory.COMMENT_TEXT,"");
@@ -452,10 +452,9 @@ public class PlatformManagerImpl implements PlatformManager {
         p.setProperty(PlatformFactory.COMMENT_TEXT,pv.getCommentText());
         p.setProperty(PlatformFactory.CPU_COUNT,pv.getCpuCount());
         p.setProperty(PlatformFactory.FQDN,pv.getFqdn());
-        //TODO abstract creationTime, modifiedTime, and sortName?
+        //TODO abstract creationTime, modifiedTime
         p.setProperty(PlatformFactory.CREATION_TIME, System.currentTimeMillis());
         p.setProperty(PlatformFactory.MODIFIED_TIME,System.currentTimeMillis());
-        p.setProperty(AppdefResource.SORT_NAME, pv.getName().toUpperCase());
         ManagedResource managedResource =  new ManagedResource(p.getId(), agent);
         managedResourceRepository.save(managedResource);
         for (IpValue ipv : pv.getAddedIpValues()) {
@@ -607,7 +606,7 @@ public class PlatformManagerImpl implements PlatformManager {
     
     public PageList<Resource> getAllPlatformResources(AuthzSubject subject, PageControl pc) {
         PageRequest pageInfo = new PageRequest(pc.getPagenum(),pc.getPagesize(),
-            new Sort(pc.getSortorder() == PageControl.SORT_ASC? Direction.ASC : Direction.DESC,"name"));
+            new Sort(pc.getSortorder() == PageControl.SORT_ASC? Direction.ASC : Direction.DESC,"sortName"));
         Page<Resource> resources = resourceDao.findByIndexedProperty(AppdefResourceType.APPDEF_TYPE_ID, 
             AppdefEntityConstants.APPDEF_TYPE_PLATFORM,pageInfo,String.class);
         return new PageList<Resource>(resources.getContent(),(int)resources.getTotalElements());
@@ -680,6 +679,18 @@ public class PlatformManagerImpl implements PlatformManager {
         //TODO perm check
         //permissionManager.checkViewPermission(subject, platform.getId());
         return platform;
+    }
+    
+    public Set<Platform> getPlatformsByAgent(Agent agent) {
+        Set<Platform> platforms = new HashSet<Platform>();
+        List<ManagedResource> managedResources = managedResourceRepository.findByAgent(agent);
+        for(ManagedResource managedResource: managedResources) {
+            Resource resource = resourceManager.findResourceById(managedResource.getResourceId());
+            if(AppdefUtil.newAppdefEntityId(resource).isPlatform()) {
+                platforms.add(toPlatform(resource));
+            }
+        }
+        return platforms;
     }
 
     /**
@@ -1065,7 +1076,7 @@ public class PlatformManagerImpl implements PlatformManager {
         }
         Collections.sort(platforms, new Comparator<Resource>() {
             public int compare(Resource o1, Resource o2) {
-                return ((String)o1.getProperty(AppdefResource.SORT_NAME)).compareTo((String)o2.getProperty(AppdefResource.SORT_NAME));
+                return o1.getSortName().compareTo(o2.getSortName());
             }
         });
         return platforms;
@@ -1606,7 +1617,6 @@ public class PlatformManagerImpl implements PlatformManager {
         propertyTypes.add(createPropertyType(PlatformFactory.CPU_COUNT,Integer.class));
         propertyTypes.add(createPropertyType(PlatformFactory.CREATION_TIME,Long.class));
         propertyTypes.add(createPropertyType(PlatformFactory.MODIFIED_TIME,Long.class));
-        propertyTypes.add(createPropertyType(AppdefResource.SORT_NAME,String.class));
         PropertyType appdefType = createPropertyType(AppdefResourceType.APPDEF_TYPE_ID, Integer.class);
         appdefType.setIndexed(true);
         propertyTypes.add(appdefType);
@@ -2009,20 +2019,6 @@ public class PlatformManagerImpl implements PlatformManager {
     @PostConstruct
     public void afterPropertiesSet() throws Exception {
         valuePager = Pager.getPager(VALUE_PROCESSOR);
-        //TODO preload some other way?
-        if(resourceManager.findResourceTypeByName(IP_RESOURCE_TYPE_NAME) == null) {
-            ResourceType ipType = new ResourceType(IP_RESOURCE_TYPE_NAME);
-            resourceTypeDao.persist(ipType);
-            //TODO ipType isn't really getting a plugin here.  
-            //Maybe give it System plugin or consider making it a first class citizen in new model?
-            Set<PropertyType> ipPropTypes = new HashSet<PropertyType>();
-            ipPropTypes.add(createPropertyType(PlatformFactory.IP_ADDRESS,String.class));
-            ipPropTypes.add(createPropertyType(PlatformFactory.NETMASK,String.class));
-            ipPropTypes.add(createPropertyType(PlatformFactory.MAC_ADDRESS,String.class));
-            ipPropTypes.add(createPropertyType(PlatformFactory.CREATION_TIME,Long.class));
-            ipPropTypes.add(createPropertyType(PlatformFactory.MODIFIED_TIME,Long.class));
-            ipType.addPropertyTypes(ipPropTypes);
-        }
     }
 
 }

@@ -138,17 +138,6 @@ public class ServiceResource {
             throw encodeException();
         }
     }
-
-    public void setResponseTimeConfig(ConfigResponse config) {
-        if (config == null) {
-            return;
-        }
-        try {
-            this.resource.setResponseTimeConfig(config.encode());
-        } catch (EncodingException e) {
-            throw encodeException();
-        }
-    }
     
     public void setProductConfig() {
         this.resource.setProductConfig(ConfigResponse.EMPTY_CONFIG);

@@ -30,6 +30,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import javax.annotation.PostConstruct;
 
@@ -1320,6 +1322,34 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
 
         return def == null ? null : def.getId();
     }
+ 
+    @Transactional(readOnly=true)
+    public SortedMap<String, Integer> findResourceAlertDefinitionNames(AuthzSubject subj, AppdefEntityID id)
+        throws PermissionException {
+        // ...check that user has view permission on alert definitions...
+        alertPermissionManager.canViewAlertDefinition(subj, id);
+        TreeMap<String, Integer> ret = new TreeMap<String, Integer>();
+        List<ResourceAlertDefinition> adefs = findAlertDefinitions(subj, id);
+        // Use name as key so that map is sorted
+        for (ResourceAlertDefinition adLocal : adefs) {
+            ret.put(adLocal.getName(), adLocal.getId());
+        }
+        return ret;
+    }
+    
+    @Transactional(readOnly=true)
+    public SortedMap<String, Integer> findResourceTypeAlertDefinitionNames(AuthzSubject subj, 
+        Integer resourceType)
+        throws PermissionException {
+        TreeMap<String, Integer> ret = new TreeMap<String, Integer>();
+        List<ResourceTypeAlertDefinition> adefs = findAlertDefinitionsByType(subj, resourceType);
+        // Use name as key so that map is sorted
+        for (ResourceTypeAlertDefinition adLocal : adefs) {
+            ret.put(adLocal.getName(), adLocal.getId());
+        }
+        return ret;
+    }
+
 
     /**
      * Find alert definitions passing the criteria.
@@ -1379,6 +1409,19 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
         // ...check that user has view permission on alert definitions...
         alertPermissionManager.canViewAlertDefinition(subject, id);
         return resAlertDefRepository.findByResource(id.getId(),new Sort("name"));
+    }
+    
+    /**
+     * Get list of alert definition POJOs for a resource
+     * @throws PermissionException if user cannot manage alerts for resource
+     * 
+     */
+    @Transactional(readOnly=true)
+    public List<ResourceAlertDefinition> findAlertDefinitions(AuthzSubject subject, Integer id)
+        throws PermissionException {
+        // TOD check that user has view permission on alert definitions...
+        //alertPermissionManager.canViewAlertDefinition(subject, id);
+        return resAlertDefRepository.findByResource(id,new Sort("name"));
     }
 
     /**
@@ -1462,7 +1505,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
         }
         //TODO Impl
         //return alertDefDao.findAvailAlertDefs();
-        return null;
+        return new ArrayList<AlertDefinition>();
     }
     
     /**

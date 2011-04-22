@@ -888,9 +888,6 @@ ExtendedStatus On
                 description="Apache ServerName"/>
       </config>
 
-      <plugin type="responsetime"
-              class="ApacheRtPlugin"/>
-
       <plugin type="log_track"
               class="ApacheErrorLogPlugin"/>
 

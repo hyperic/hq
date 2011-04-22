@@ -8,6 +8,8 @@ import javax.annotation.PostConstruct;
 import org.hyperic.hq.inventory.NotUniqueException;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.index.IndexHits;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.graph.neo4j.finder.FinderFactory;
 import org.springframework.data.graph.neo4j.finder.NodeFinder;
@@ -75,6 +77,20 @@ public class Neo4jResourceGroupDao implements ResourceGroupDao {
             group.persist();
         }
         return group;
+    }
+    
+    @Transactional(value="neoTxManager",readOnly = true)
+    public List<ResourceGroup> findByIndexedProperty(String propertyName, Object propertyValue) {
+        List<ResourceGroup> groups = new ArrayList<ResourceGroup>();
+        IndexHits<Node> indexHits = graphDatabaseContext.getIndex(Resource.class, null).query(
+            propertyName,propertyValue);
+        if (indexHits == null) {
+            return groups;
+        }
+        for (Node node : indexHits) {
+            groups.add(graphDatabaseContext.createEntityFromState(node, ResourceGroup.class));
+        }
+        return groups;
     }
 
     @Transactional(value="neoTxManager",readOnly = true)

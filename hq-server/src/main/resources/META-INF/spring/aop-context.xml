@@ -25,12 +25,7 @@
 		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
-
-	<!-- TODO Both of these need to happen first to give AnnotationTransationAspect 
-		and PerfMonitor their required dependencies before any auto-scanned services are
-		initialized. Currently the only thing enforcing that these get created first is 
-		that app context files happen to be processed in alpha order -->
-		
+	
 
    	<context:spring-configured />
 

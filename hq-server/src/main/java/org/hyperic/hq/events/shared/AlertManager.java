@@ -26,6 +26,7 @@
 package org.hyperic.hq.events.shared;
 
 import java.util.List;
+import java.util.Map;
 
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -35,6 +36,7 @@ import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertDefinition;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -80,11 +82,26 @@ public interface AlertManager {
     public Alert findAlertById(Integer id);
 
     /**
+     * Find all last unfixed alerts
+     * 
+     * 
+     */
+    Map<Integer, Alert> findAllLastUnfixed();
+
+    /**
+     * Find the last alerts for the given resource
+     * 
+     * 
+     */
+    Map<Integer, Alert> findLastByResource(AuthzSubject subj, Resource r,
+                                           boolean includeDescendants, boolean fixed);
+
+    /**
      * Find the last alert by definition ID
      * @throws PermissionException
      */
     public Alert findLastUnfixedByDefinition(AuthzSubject subj, Integer id);
-    
+
     /**
      * Find the last alert by definition ID
      * @throws PermissionException
@@ -121,10 +138,9 @@ public interface AlertManager {
     public List<Alert> findAlerts(Integer subj, int priority, long timeRange, long endTime,
                                   boolean inEsc, boolean notFixed, Integer groupId,
                                   PageInfo pageInfo) throws PermissionException;
-    
-    List<Alert> findAlerts(Integer subj, int priority, long timeRange, long endTime,
-        boolean inEsc, boolean notFixed, Integer groupId,
-        Sort sort) throws PermissionException;
+
+    List<Alert> findAlerts(Integer subj, int priority, long timeRange, long endTime, boolean inEsc,
+                           boolean notFixed, Integer groupId, Sort sort) throws PermissionException;
 
     /**
      * A more optimized look up which includes the permission checking
@@ -133,10 +149,10 @@ public interface AlertManager {
     public List<Alert> findAlerts(Integer subj, int priority, long timeRange, long endTime,
                                   boolean inEsc, boolean notFixed, Integer groupId,
                                   Integer alertDefId, PageInfo pageInfo) throws PermissionException;
-    
-    List<Alert> findAlerts(Integer subj, int priority, long timeRange, long endTime,
-        boolean inEsc, boolean notFixed, Integer groupId,
-        Integer alertDefId, Sort sort) throws PermissionException;
+
+    List<Alert> findAlerts(Integer subj, int priority, long timeRange, long endTime, boolean inEsc,
+                           boolean notFixed, Integer groupId, Integer alertDefId, Sort sort)
+        throws PermissionException;
 
     /**
      * Search alerts given a set of criteria
@@ -179,9 +195,9 @@ public interface AlertManager {
     public void handleSubjectRemoval(AuthzSubject subject);
 
     /**
-     * Remove alerts before the specified create time (ctime) that do not have an associated
-     * escalation
-     * The max number of records to delete is specified by maxDeletes
+     * Remove alerts before the specified create time (ctime) that do not have
+     * an associated escalation The max number of records to delete is specified
+     * by maxDeletes
      */
     public int deleteAlerts(long before, int maxDeletes);
 

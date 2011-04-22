@@ -15,7 +15,8 @@ import org.springframework.data.domain.Pageable;
  */
 public interface ResourceDao extends GenericDao<Resource> {
     /**
-     * 
+     * NOTE: Sorting on a field that contains tokenized values (for example "127.0.0.1") is
+     * NOT SUPPORTED
      * @param propertyName The name of the property. The property must be
      *        indexed for lookup to succeed (set indexed to true on
      *        PropertyType)

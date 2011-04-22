@@ -25,20 +25,20 @@
 
 package org.hyperic.hq.plugin.servlet;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIServerExtValue;
 import org.hyperic.hq.appdef.shared.AIServiceValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.hq.product.RtPlugin;
 import org.hyperic.hq.product.RuntimeDiscoverer;
 import org.hyperic.hq.product.RuntimeResourceReport;
 import org.hyperic.hq.product.servlet.client.JMXRemote;
@@ -46,9 +46,6 @@ import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.config.InvalidOptionValueException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public abstract class ServletDiscoveryPlugin 
     implements RuntimeDiscoverer {
@@ -147,7 +144,7 @@ public abstract class ServletDiscoveryPlugin
                 ConfigResponse productConfig = new ConfigResponse();
                 ConfigResponse metricConfig = new ConfigResponse();
                 ConfigResponse controlConfig = new ConfigResponse();
-                ConfigResponse rtConfig = null;
+               
 
                 try {
                     metricConfig.setValue(JMXRemote.PROP_HOST, host);
@@ -173,21 +170,7 @@ public abstract class ServletDiscoveryPlugin
                     }
                     controlConfig.setValue("docBase", "file:" + base);
 
-                    String rtLogDir = atts.getValue("responseTimeLogDir");
-                    if (rtLogDir == null) {
-                        this.log.debug("ResponseTimeLogDir property not " +
-                                       "found. Skipping response time " +
-                                       "auto configuration.");
-                    } else {
-                        // Response Time AutoConfiguration 
-                        // unfortunately, the name is prefixed with a \ or / 
-                        // depending on the host OS
-                        String rtFileName = name.substring(
-                                                (name.indexOf(File.separator) + 1));
-                        rtConfig = RtPlugin.getConfig(rtFileName, rtLogDir);
-                        service.setResponseTimeConfig(rtConfig.encode());
-                    }
-
+                 
                     service.setProductConfig(productConfig.encode());
                     service.setControlConfig(controlConfig.encode());
                     service.setMeasurementConfig(metricConfig.encode());

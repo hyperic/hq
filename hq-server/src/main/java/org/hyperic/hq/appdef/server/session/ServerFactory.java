@@ -53,7 +53,7 @@ public class ServerFactory {
         server.setServicesAutomanaged((Boolean)serverResource.getProperty(SERVICES_AUTO_MANAGED));
         server.setWasAutodiscovered((Boolean)serverResource.getProperty(WAS_AUTODISCOVERED));
         server.setAutodiscoveryZombie((Boolean)serverResource.getProperty(AUTODISCOVERY_ZOMBIE));
-        server.setSortName((String) serverResource.getProperty(AppdefResource.SORT_NAME));
+        server.setSortName(serverResource.getSortName());
         server.setOwnerName(serverResource.getOwner());
         Resource platform = serverResource.getResourceTo(RelationshipTypes.SERVER);
         if(platform != null) {

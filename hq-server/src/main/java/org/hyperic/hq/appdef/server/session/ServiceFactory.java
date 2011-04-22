@@ -11,11 +11,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ServiceFactory {
 
-    static final String SERVICE_RT = "ServiceRt";
-
     static final String MODIFIED_TIME = "ModifiedTime";
-
-    static final String END_USER_RT = "EndUserRt";
 
     static final String CREATION_TIME = "CreationTime";
 
@@ -45,7 +41,6 @@ public class ServiceFactory {
             .setAutoinventoryIdentifier((String) resource.getProperty(AUTO_INVENTORY_IDENTIFIER));
         service.setCreationTime((Long) resource.getProperty(CREATION_TIME));
         service.setDescription(resource.getDescription());
-        service.setEndUserRt((Boolean) resource.getProperty(END_USER_RT));
         service.setId(resource.getId());
         service.setLocation(resource.getLocation());
         service.setModifiedBy(resource.getModifiedBy());
@@ -59,9 +54,8 @@ public class ServiceFactory {
         }else {
             service.setParent(platformFactory.createPlatform(parent));
         }
-        service.setServiceRt((Boolean) resource.getProperty(SERVICE_RT));
         service.setServiceType(createServiceType(resource.getType()));
-        service.setSortName((String) resource.getProperty(AppdefResource.SORT_NAME));
+        service.setSortName(resource.getSortName());
         return service;
     }
 

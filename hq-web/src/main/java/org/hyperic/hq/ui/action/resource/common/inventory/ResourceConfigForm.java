@@ -41,7 +41,6 @@ public class ResourceConfigForm
     private List resourceConfigOptions = new ArrayList();
     private List monitorConfigOptions = new ArrayList();
     private List controlConfigOptions = new ArrayList();
-    private List rtConfigOptions = new ArrayList();
     private boolean serverBasedAutoInventory;
     protected boolean validationErrors;
     private boolean serviceRTEnabled;
@@ -80,16 +79,6 @@ public class ResourceConfigForm
         if (validationErrors)
             return;
         this.monitorConfigOptions = monitorConfigOptions;
-    }
-
-    public Collection getRtConfigOptions() {
-        return rtConfigOptions;
-    }
-
-    public void setRtConfigOptions(List rtConfigOptions) {
-        if (validationErrors)
-            return;
-        this.rtConfigOptions = rtConfigOptions;
     }
 
     public boolean getServerBasedAutoInventory() {

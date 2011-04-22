@@ -711,7 +711,7 @@ public interface AppdefBoss {
 
     /**
      * A method to set ALL the configs of a resource. This includes the
-     * resourceConfig, metricConfig, rtConfig and controlCThis also includes the
+     * resourceConfig, metricConfig and controlCThis also includes the
      * enabling/disabling of rtMetrics for both service and enduser. NOTE: This
      * method should ONLY be called when a user manually configures a resource.
      * @param allConfigs The full configuation information.

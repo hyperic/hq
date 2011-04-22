@@ -28,8 +28,10 @@ package org.hyperic.hq.events.server.session;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -73,6 +75,7 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
+import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.data.domain.PageRequest;
@@ -271,6 +274,39 @@ public class AlertManagerImpl implements AlertManager,
         }
         return alert;
     }
+    
+    @Transactional(readOnly=true)
+    public Map<Integer,Alert> findLastByResource(AuthzSubject subj, 
+                                      Resource r,
+                                      boolean includeDescendants,
+                                      boolean fixed) {
+            StopWatch watch = new StopWatch();
+            Map<Integer,Alert> unfixedAlerts = new HashMap<Integer,Alert>();
+            try {
+                //TODO alertDAO.findLastByResource did perm check
+                List<Integer> resourceIds = new ArrayList<Integer>();
+                resourceIds.add(r.getId());
+                if(includeDescendants) {
+                    resourceIds.addAll(r.getChildrenIds(true));
+                }
+                List<Alert> unfixed=
+                    alertRepository.findByResourcesAndFixedOrderByCtimeAsc(resourceIds, fixed);
+                for (Alert a  : unfixed ) {
+                    // since it is ordered by ctime in ascending order, the
+                    // last alert will eventually be put into the map
+                    unfixedAlerts.put(a.getAlertDefinition().getId(), a);
+                }
+            } catch (Exception e) {
+                log.error("Error finding the last alerts for resource id="  + r.getId(), e);
+            } finally {
+                if (log.isDebugEnabled()) {
+                    log.debug("findLastByResource: "  + watch);
+                }
+            }
+            return unfixedAlerts;
+    }
+
+
 
     /**
      * Find the last unfixed alert by definition ID
@@ -290,6 +326,30 @@ public class AlertManagerImpl implements AlertManager,
             return null;
         }
     }
+    
+    @Transactional(readOnly=true)
+    public Map<Integer,Alert> findAllLastUnfixed() {        
+        StopWatch watch = new StopWatch();
+        Map<Integer,Alert> unfixedAlerts =  new HashMap<Integer,Alert>();
+        try {
+            List<Alert> unfixed = 
+                alertRepository.findByFixedOrderByCtimeAsc(false);
+            for (Alert a : unfixed ) {
+                // since it is ordered by ctime in ascending order, the
+                // last alert will eventually be put into the map
+                unfixedAlerts.put(a.getAlertDefinition().getId(), a);
+            }
+
+        } catch (Exception e) {
+            log.error("Error finding all last unfixed alerts", e);
+        } finally {
+            if (log.isDebugEnabled()) {
+                log.debug("findAllLastUnfixed: " + watch);
+            }
+        }
+        return unfixedAlerts;
+    }
+
     
     /**
      * Find the last alert by definition ID

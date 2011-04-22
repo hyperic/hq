@@ -41,7 +41,6 @@
 <tiles:importAttribute name="productConfigOptionsCount" ignore="true" />
 <tiles:importAttribute name="monitorConfigOptions" ignore="true"/>
 <tiles:importAttribute name="monitorConfigOptionsCount" ignore="true" />
-<tiles:importAttribute name="rtConfigOptions" ignore="true"/>
 <tiles:importAttribute name="controlConfigOptions" ignore="true"/>
 <tiles:importAttribute name="controlConfigOptionsCount" ignore="true" />
 
@@ -112,60 +111,6 @@
     </c:when>
     </c:choose>
 </logic:iterate>
-<c:if test="${resourceType == SERVICE && rtSupported}">
-</tr><tr>
-<td colspan="4" class="BlockBottomLine"><html:img page="images/spacer.gif" width="1" height="1" border="0"/></td>
-<td></td>
-</tr><tr>
-<c:if test="${rtSupported}">
-<td width="25%" class="BlockLabel">
-<fmt:message key="resource.common.inventory.configProps.serviceResponseTime"/>
-</td>
-<td width="25%" class="BlockContent">
-<c:choose>
-<c:when test="${serviceRT}">
-<fmt:message key="Yes"/>
-</c:when>
-<c:otherwise>
-<fmt:message key="No"/>
-</c:otherwise>
-</c:choose>
-</td>
-</tr>
-<c:if test="${euRtSupported}">
-<tr>
-<td width="25%" class="BlockLabel">
-<fmt:message key="resource.common.inventory.configProps.euResponseTime"/>
-</td>
-<td width="25%" class="BlockContent">
-<c:choose>
-<c:when test="${euRT == true}">
-<fmt:message key="Yes"/>
-</c:when>
-<c:otherwise>
-<fmt:message key="No"/>
-</c:otherwise>
-</c:choose>
-</td>
-</tr>
-</c:if>
-<c:if test="${not empty rtConfigOptions}">
-<tr>
-<logic:iterate id="rtConfigOption" indexId="ctr" name="org.hyperic.hq.ui.beans.ConfigValues"
-    collection="${rtConfigOptions}" >
-		<td width="25%" class="BlockLabel"><c:out value="${rtConfigOption.option}"/></td>
-		<td width="25%" class="BlockContent"><c:out value='${rtConfigOption.value}'/></td>
-    <c:choose> 
-    <c:when test="${(ctr+1) % 2 ==0}">
-    </tr>
-    <tr>
-    </c:when>
-    </c:choose>
-</logic:iterate>
-</tr>
-</c:if>
-</c:if>
-</c:if>
 <c:if test="${serverBasedAutoInventory == 1  && resourceType == SERVER}">
 <c:if test="${resource.wasAutodiscovered == false}">
 <tr>

@@ -89,8 +89,6 @@ public class AuthzSubjectManagerImpl implements AuthzSubjectManager, Application
     @PostConstruct
     public void afterPropertiesSet() throws Exception {
         subjectPager = Pager.getPager(SUBJECT_PAGER);
-        //TODO better way to pre-populate nodes.  Problem with multiple login threads trying to create Neo4j node for guest user
-        getSubjectById(AuthzConstants.guestId);
     }
 
     /**

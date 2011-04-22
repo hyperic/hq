@@ -347,17 +347,7 @@ public class PluginDiscoverer implements ScanListener {
         }
     }
 
-    private void dumpConfig(ConfigResponse config,
-                            ConfigResponse metricConfig,
-                            ConfigResponse controlConfig,
-                            ConfigResponse cprops,
-                            ConfigResponse rtConfig, 
-                            String indent) {
-
-        dumpConfig(config, metricConfig, controlConfig, cprops, indent);
-        System.out.println(indent + "rt......." + rtConfig);
-    }
-
+  
     private void dumpProperties(Properties props, String type, String name) {
         if (this.fetchMetrics) {
             TypeInfo info =
@@ -443,13 +433,11 @@ public class PluginDiscoverer implements ScanListener {
             decodeConfig(service.getMeasurementConfig());
         ConfigResponse controlConfig =
             decodeConfig(service.getControlConfig());
-        ConfigResponse rtConfig =
-            decodeConfig(service.getResponseTimeConfig());
         ConfigResponse cprops =
             decodeConfig(service.getCustomProperties());
 
         dumpConfig(config, metricConfig,
-                   controlConfig, cprops, rtConfig, indent + " ");
+                   controlConfig, cprops, indent + " ");
 
         if (this.dumpProps) {
             Properties props = new Properties();
