@@ -107,7 +107,7 @@ public class ServiceManagerImpl implements ServiceManager {
     private ZeventEnqueuer zeventEnqueuer;
     private ResourceDao resourceDao;
     private ResourceTypeDao resourceTypeDao;
-    private ManagedResourceRepository managedResourceRepository;
+  
 
     @Autowired
     public ServiceManagerImpl(PermissionManager permissionManager,
@@ -115,7 +115,7 @@ public class ServiceManagerImpl implements ServiceManager {
                               AuthzSubjectManager authzSubjectManager, PluginResourceTypeRepository pluginResourceTypeRepository,
                               ServiceFactory serviceFactory,
                               ResourceGroupManager resourceGroupManager, ZeventEnqueuer zeventEnqueuer,
-                              ResourceDao resourceDao, ResourceTypeDao resourceTypeDao, ManagedResourceRepository managedResourceRepository) {
+                              ResourceDao resourceDao, ResourceTypeDao resourceTypeDao) {
         this.permissionManager = permissionManager;
         this.resourceManager = resourceManager;
         this.authzSubjectManager = authzSubjectManager;
@@ -125,7 +125,6 @@ public class ServiceManagerImpl implements ServiceManager {
         this.zeventEnqueuer = zeventEnqueuer;
         this.resourceDao = resourceDao;
         this.resourceTypeDao = resourceTypeDao;
-        this.managedResourceRepository = managedResourceRepository;
     }
     
     private Resource create(AuthzSubject subject,ResourceType type, Resource parent, String name, String desc,
@@ -145,9 +144,6 @@ public class ServiceManagerImpl implements ServiceManager {
         s.setProperty(ServiceFactory.CREATION_TIME, System.currentTimeMillis());
         s.setProperty(ServiceFactory.MODIFIED_TIME,System.currentTimeMillis());
         s.setProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_SERVICE);
-        Agent agent = managedResourceRepository.findAgentByResource(parent.getId());
-        ManagedResource managedResource = new ManagedResource(s.getId(),agent);
-        managedResourceRepository.save(managedResource);
         parent.relateTo(s, RelationshipTypes.SERVICE);
         parent.relateTo(s, RelationshipTypes.CONTAINS);
         return s;

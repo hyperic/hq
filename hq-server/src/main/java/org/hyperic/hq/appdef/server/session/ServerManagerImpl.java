@@ -40,9 +40,6 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.agent.mgmt.data.ManagedResourceRepository;
-import org.hyperic.hq.agent.mgmt.domain.Agent;
-import org.hyperic.hq.agent.mgmt.domain.ManagedResource;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -121,7 +118,6 @@ public class ServerManagerImpl implements ServerManager {
     private ServiceFactory serviceFactory;
     private ResourceDao resourceDao;
     private ResourceTypeDao resourceTypeDao;
-    private ManagedResourceRepository managedResourceRepository;
     private ConfigManager configManager;
 
     @Autowired
@@ -131,7 +127,7 @@ public class ServerManagerImpl implements ServerManager {
                              ZeventEnqueuer zeventManager, ResourceAuditFactory resourceAuditFactory,
                              PluginResourceTypeRepository pluginResourceTypeRepository, ServerFactory serverFactory,
                              ServiceManager serviceManager, ServiceFactory serviceFactory, ResourceDao resourceDao,
-                             ResourceTypeDao resourceTypeDao, ManagedResourceRepository managedResourceRepository,
+                             ResourceTypeDao resourceTypeDao,
                              ConfigManager configManager) {
         this.permissionManager = permissionManager;
         this.resourceManager = resourceManager;
@@ -146,7 +142,6 @@ public class ServerManagerImpl implements ServerManager {
         this.serviceFactory = serviceFactory;
         this.resourceDao =resourceDao;
         this.resourceTypeDao = resourceTypeDao;
-        this.managedResourceRepository = managedResourceRepository;
         this.configManager = configManager;
     }
     
@@ -325,9 +320,6 @@ public class ServerManagerImpl implements ServerManager {
         //TODO abstract creationTime, modifiedTime
         s.setProperty(ServerFactory.CREATION_TIME, System.currentTimeMillis());
         s.setProperty(ServerFactory.MODIFIED_TIME,System.currentTimeMillis());
-        Agent agent = managedResourceRepository.findAgentByResource(p.getId());
-        ManagedResource managedResource = new ManagedResource(s.getId(),agent);
-        managedResourceRepository.save(managedResource);
         return s;
    }
     

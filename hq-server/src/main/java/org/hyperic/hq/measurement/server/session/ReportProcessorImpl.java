@@ -201,6 +201,7 @@ public class ReportProcessorImpl implements ReportProcessor {
                 continue;
             }
             final Resource res = resourceManager.findResourceById(resId);
+            
             if (debug) watch.markTimeBegin("resMatchesAgent");
             // TODO reosurceMatchesAgent() and the call to getAgent() can be
             // consolidated, the agent match can be checked by getting the agent
@@ -284,7 +285,13 @@ public class ReportProcessorImpl implements ReportProcessor {
         if (resource == null || resource.isInAsyncDeleteState()) {
             return false;
         }
-        return agentManager.getAgent(resource).getAgentToken().equals(agentToken);  
+        try {
+            return agentManager.getAgent(AppdefUtil.newAppdefEntityId(resource)).
+                getAgentToken().equals(agentToken);
+        } catch (AgentNotFoundException e) {
+            log.warn("Agent not found for Id=" + resource.getId());
+        }
+        return false;
     }
 
     /**

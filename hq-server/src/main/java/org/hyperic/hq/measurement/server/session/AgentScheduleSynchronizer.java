@@ -140,20 +140,19 @@ public class AgentScheduleSynchronizer {
                             log.debug("Unschduling eids=[" + event.getEntityIds() + "]");
                     }
                 }
-
+                final Map<Integer, Collection<AppdefEntityID>> agentAppdefIds = agentManager
+                .getAgentMap(toSchedule);
                 synchronized (scheduleAeids) {
-                    for (AppdefEntityID id : toSchedule) {
+                    for (final Map.Entry<Integer, Collection<AppdefEntityID>> entry : agentAppdefIds
+                        .entrySet()) {
+                        final Integer agentId = entry.getKey();
+                        final Collection<AppdefEntityID> eids = entry.getValue();
                         Collection<AppdefEntityID> tmp;
-                        Agent agent =  managedResourceRepository.findAgentByResource(id.getId());
-                        if(agent == null) {
-                            log.warn("Could not find agent for entity: " + id);
-                        } else {
-                            if (null == (tmp = scheduleAeids.get(agent.getId()))) {
-                                tmp = new HashSet<AppdefEntityID>();
-                                scheduleAeids.put(agent.getId(), tmp);
-                            }
-                            tmp.add(id);
+                        if (null == (tmp = scheduleAeids.get(agentId))) {
+                            tmp = new HashSet<AppdefEntityID>(eids.size());
+                            scheduleAeids.put(agentId, tmp);
                         }
+                        tmp.addAll(eids);
                     }
                 }
                 synchronized (unscheduleAeids) {

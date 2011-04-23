@@ -57,6 +57,7 @@ import org.hyperic.hq.appdef.shared.AgentCreateException;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AgentUnauthorizedException;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -98,6 +99,9 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     private ApplicationContext applicationContext;
     private ResourceDao resourceDao;
     private ManagedResourceRepository managedResourceRepository;
+    private ServerFactory serverFactory;
+    private PlatformFactory platformFactory;
+    private ServiceFactory serviceFactory;
 
     @Autowired
     public AgentManagerImpl(AgentTypeRepository agentTypeRepository,
@@ -105,7 +109,9 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                             PermissionManager permissionManager, 
                             ServerConfigManager serverConfigManager,
                             AgentCommandsClientFactory agentCommandsClientFactory,
-                            ResourceDao resourceDao, ManagedResourceRepository managedResourceRepository) {
+                            ResourceDao resourceDao, ManagedResourceRepository managedResourceRepository,
+                            PlatformFactory platformFactory,ServerFactory serverFactory,
+                            ServiceFactory serviceFactory) {
         this.agentTypeRepository = agentTypeRepository;
         this.agentDao = agentDao;
         this.permissionManager = permissionManager;
@@ -113,6 +119,9 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         this.agentCommandsClientFactory = agentCommandsClientFactory;
         this.resourceDao = resourceDao;
         this.managedResourceRepository = managedResourceRepository;
+        this.platformFactory = platformFactory;
+        this.serverFactory = serverFactory;
+        this.serviceFactory = serviceFactory;
     }
 
     /**
@@ -495,18 +504,39 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      */
     @Transactional(readOnly = true)
     public Agent getAgent(AppdefEntityID aID) throws AgentNotFoundException {
-       Agent agent = getAgent(resourceDao.findById(aID.getId()));
-       if(agent == null) {
-           throw new AgentNotFoundException("No agent found for Resource: " +  aID);
-       }
-       return agent;
+            Platform platform = null;
+            switch (aID.getType()) {
+                case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                    Service service = serviceFactory.createService(resourceDao.findById(aID.getId()));
+                    AppdefResource parent = service.getParent();
+                    // server may be null due to async delete
+                    if (parent == null) {
+                        break;
+                    }
+                    if(parent instanceof Platform) {
+                        platform = (Platform)parent;
+                    }else {
+                        platform = ((Server)parent).getPlatform();
+                    }
+                    break;
+                case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                    Server server = serverFactory.createServer(resourceDao.findById(aID.getId()));
+                    platform = server.getPlatform();
+                    break;
+                case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                    platform = platformFactory.createPlatform(resourceDao.findById(aID.getId()));
+                    break;
+                default:
+                    throw new AgentNotFoundException("Request for agent from an "
+                                                     + "entity which can return "
+                                                     + "multiple agents");
+            }
+            if (platform == null) {
+                throw new AgentNotFoundException("No agent found for " + aID);
+            }
+            return platform.getAgent();
     }
     
-    @Transactional(readOnly = true)
-    public Agent getAgent(Resource resource)  {
-        return managedResourceRepository.findAgentByResource(resource.getId());
-    }
-
     /**
      * Return the bundle that is currently running on a give agent. The returned
      * bundle name may be parsed to retrieve the current agent version.

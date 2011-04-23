@@ -1103,8 +1103,15 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
         removeMeasurementsFromCache(mids);
         enqueueZeventsForMeasScheduleCollectionDisabled(mids);
-        ZeventManager.getInstance().enqueueEventAfterCommit(new AgentUnscheduleZevent(Collections.singletonList(aeid), 
-            agentManager.getAgent(res).getAgentToken()));
+        // Unscheduling of all metrics for a resource could indicate that
+        // the resource is getting removed. Send the unschedule synchronously
+        // so that all the necessary plumbing is in place.
+        try {
+            getMeasurementProcessor().unschedule(Collections.singletonList(aeid));
+        } catch (MeasurementUnscheduleException e) {
+            log.error("Unable to disable measurements", e);
+        }
+
     }
 
     /**
