@@ -40,10 +40,10 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
@@ -119,6 +119,7 @@ public class ServerManagerImpl implements ServerManager {
     private ResourceDao resourceDao;
     private ResourceTypeDao resourceTypeDao;
     private ConfigManager configManager;
+    private AppdefConverter appdefConverter;
 
     @Autowired
     public ServerManagerImpl(PermissionManager permissionManager,  ResourceManager resourceManager,
@@ -128,7 +129,7 @@ public class ServerManagerImpl implements ServerManager {
                              PluginResourceTypeRepository pluginResourceTypeRepository, ServerFactory serverFactory,
                              ServiceManager serviceManager, ServiceFactory serviceFactory, ResourceDao resourceDao,
                              ResourceTypeDao resourceTypeDao,
-                             ConfigManager configManager) {
+                             ConfigManager configManager, AppdefConverter appdefConverter) {
         this.permissionManager = permissionManager;
         this.resourceManager = resourceManager;
         this.auditManager = auditManager;
@@ -143,6 +144,7 @@ public class ServerManagerImpl implements ServerManager {
         this.resourceDao =resourceDao;
         this.resourceTypeDao = resourceTypeDao;
         this.configManager = configManager;
+        this.appdefConverter = appdefConverter;
     }
     
     private Server toServer(Resource resource) {
@@ -224,7 +226,7 @@ public class ServerManagerImpl implements ServerManager {
                 targetPlatform.getPlatformType().getName());
         }
         
-        AppdefEntityID newServerId = AppdefUtil.newAppdefEntityId(server);
+        AppdefEntityID newServerId = appdefConverter.newAppdefEntityId(server);
         
         byte[] productConfig = configManager.toConfigResponse(serverToClone.getResource().
             getConfig(ProductPlugin.TYPE_PRODUCT));

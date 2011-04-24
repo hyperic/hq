@@ -29,8 +29,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
@@ -80,6 +80,7 @@ public class GalertBossImpl implements GalertBoss {
     private ResourceGroupManager resourceGroupManager;
     private EscalationManager escalationManager;
     private GalertLogRepository galertLogRepository;
+    private AppdefConverter appdefConverter;
 
     @Autowired
     public GalertBossImpl(GalertManager galertManager,
@@ -87,7 +88,8 @@ public class GalertBossImpl implements GalertBoss {
                           AlertPermissionManager alertPermissionManager,
                           SessionManager sessionManager,
                           ResourceGroupManager resourceGroupManager,
-                          EscalationManager escalationManager, GalertLogRepository galertLogRepository) {
+                          EscalationManager escalationManager, GalertLogRepository galertLogRepository,
+                          AppdefConverter appdefConverter) {
         this.galertManager = galertManager;
         this.gtriggerManager = gtriggerManager;
         this.alertPermissionManager = alertPermissionManager;
@@ -95,6 +97,7 @@ public class GalertBossImpl implements GalertBoss {
         this.resourceGroupManager = resourceGroupManager;
         this.escalationManager = escalationManager;
         this.galertLogRepository = galertLogRepository;
+        this.appdefConverter = appdefConverter;
     }
 
     /**
@@ -182,7 +185,7 @@ public class GalertBossImpl implements GalertBoss {
         PageList<GalertDef> defList = null;
         try {
             // ...check that user can view alert definitions...
-            alertPermissionManager.canViewAlertDefinition(subj, AppdefUtil.newAppdefEntityId(g));
+            alertPermissionManager.canViewAlertDefinition(subj, appdefConverter.newAppdefEntityId(g));
             defList = galertManager.findAlertDefs(g, pc);
         } catch (PermissionException e) {
             // user does not have sufficient permissions, so display no
@@ -232,7 +235,7 @@ public class GalertBossImpl implements GalertBoss {
 
         // HQ-1295: Does user have sufficient permissions?
         // ...check that users can view alerts...
-        alertPermissionManager.canViewAlertDefinition(subject, AppdefUtil.newAppdefEntityId(resource));
+        alertPermissionManager.canViewAlertDefinition(subject, appdefConverter.newAppdefEntityId(resource));
 
         return esc;
     }
@@ -279,7 +282,7 @@ public class GalertBossImpl implements GalertBoss {
             AuthzSubject subj = sessionManager.getSubject(sessionId);
             ResourceGroup g = resourceGroupManager.findResourceGroupById(subj, gid);
             // ...check that user can view alert definitions...
-            alertPermissionManager.canViewAlertDefinition(subj, AppdefUtil.newAppdefEntityId(g));
+            alertPermissionManager.canViewAlertDefinition(subj, appdefConverter.newAppdefEntityId(g));
 
             // Don't need to have any results
             PageControl pc = new PageControl();
@@ -315,7 +318,7 @@ public class GalertBossImpl implements GalertBoss {
         JSONArray jarr = new JSONArray();
 
         try {
-            AppdefEntityID entityId = AppdefUtil.newAppdefEntityId(g);
+            AppdefEntityID entityId = appdefConverter.newAppdefEntityId(g);
             // ...check that user can view alert definitions...
             alertPermissionManager.canViewAlertDefinition(subj, entityId);
             alertLogs =

@@ -43,6 +43,7 @@ import org.hyperic.hq.alert.data.AlertActionLogRepository;
 import org.hyperic.hq.alert.data.AlertConditionRepository;
 import org.hyperic.hq.alert.data.AlertRepository;
 import org.hyperic.hq.alert.data.ResourceAlertDefinitionRepository;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
@@ -122,6 +123,7 @@ public class AlertManagerImpl implements AlertManager,
 
     private AlertRegulator alertRegulator;
     private ConcurrentStatsCollector concurrentStatsCollector;
+    private AppdefConverter appdefConverter;
     
     @Autowired
     public AlertManagerImpl(AlertPermissionManager alertPermissionManager,
@@ -133,7 +135,7 @@ public class AlertManagerImpl implements AlertManager,
                             AuthzSubjectManager authzSubjectManager,
                             EscalationManager escalationManager, MessagePublisher messagePublisher,
                             AlertRegulator alertRegulator, ConcurrentStatsCollector concurrentStatsCollector,
-                            ResourceGroupManager resourceGroupManager) {
+                            ResourceGroupManager resourceGroupManager, AppdefConverter appdefConverter) {
         this.alertPermissionManager = alertPermissionManager;
         this.resAlertDefRepository = resAlertDefRepository;
         this.alertActionLogRepository = alertActionLogRepository;
@@ -148,6 +150,7 @@ public class AlertManagerImpl implements AlertManager,
         this.messagePublisher = messagePublisher;
         this.concurrentStatsCollector = concurrentStatsCollector;
         this.resourceGroupManager = resourceGroupManager;
+        this.appdefConverter = appdefConverter;
     }
 
     @PostConstruct
@@ -579,7 +582,7 @@ public class AlertManagerImpl implements AlertManager,
                     // Filter by appdef entity
                     //TODO resources of type
                     if(alertdef instanceof ResourceAlertDefinition) {
-                        AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(((ResourceAlertDefinition)alertdef).getResource());
+                        AppdefEntityID aeid = appdefConverter.newAppdefEntityId(((ResourceAlertDefinition)alertdef).getResource());
                         if (!inclSet.contains(aeid)) {
                             continue;
                         }
@@ -672,7 +675,7 @@ public class AlertManagerImpl implements AlertManager,
         if (r == null || r.isInAsyncDeleteState()) {
             return "alertid=" + alert.getId() + " is associated with an invalid or deleted resource";
         }
-        AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(r);
+        AppdefEntityID aeid = appdefConverter.newAppdefEntityId(r);
         AppdefEntityValue aev = new AppdefEntityValue(aeid, authzSubjectManager.getOverlordPojo());
 
         String name = "";

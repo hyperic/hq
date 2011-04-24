@@ -34,9 +34,9 @@ import javax.security.auth.login.LoginException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.auth.domain.Operation;
@@ -58,7 +58,6 @@ import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.inventory.domain.OperationType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
@@ -99,12 +98,15 @@ public class AuthzBossImpl implements AuthzBoss {
     private PermissionManager permissionManager;
     
     private ZeventEnqueuer zEventEnqueuer;
+    
+    private AppdefConverter appdefConverter;
 
     @Autowired
     public AuthzBossImpl(SessionManager sessionManager, AppdefBoss appdefBoss, AuthBoss authBoss, AuthManager authManager,
                          AuthzSubjectManager authzSubjectManager, ResourceGroupManager resourceGroupManager,
                          ResourceManager resourceManager, 
-                         PermissionManager permissionManager, ZeventEnqueuer zeventEnqueuer) {
+                         PermissionManager permissionManager, ZeventEnqueuer zeventEnqueuer,
+                         AppdefConverter appdefConverter) {
         this.sessionManager = sessionManager;
         this.appdefBoss = appdefBoss;
         this.authManager = authManager;
@@ -114,6 +116,7 @@ public class AuthzBossImpl implements AuthzBoss {
         this.resourceManager = resourceManager;
         this.permissionManager = permissionManager;
         this.zEventEnqueuer = zeventEnqueuer;
+        this.appdefConverter = appdefConverter;
     }
 
     /**
@@ -254,7 +257,7 @@ public class AuthzBossImpl implements AuthzBoss {
             Resource res = resourceManager.findResource(entities[i]);
             if (res != null && !res.isInAsyncDeleteState()) {
                 try {
-                    appdefMap.put(AppdefUtil.newAppdefEntityId(res), res);
+                    appdefMap.put(appdefConverter.newAppdefEntityId(res), res);
                 } catch (IllegalArgumentException e) {
                     // Not a valid appdef resource, continue
                 }

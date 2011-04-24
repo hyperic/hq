@@ -10,9 +10,9 @@ import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceType;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.control.shared.ControlManager;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.test.BaseInfrastructureTest;
@@ -25,6 +25,9 @@ import org.springframework.test.annotation.DirtiesContext;
 public class ControlManagerTest
     extends BaseInfrastructureTest {
 
+    @Autowired
+    private AppdefConverter appdefConverter;
+    
     @Autowired
     private ControlManager controlManager;
 
@@ -70,7 +73,7 @@ public class ControlManagerTest
         assertEquals(
             expected,
             new HashSet<String>(controlManager.getActions(authzSubjectManager.getOverlordPojo(),
-                AppdefUtil.newAppdefEntityId(group))));
+                appdefConverter.newAppdefEntityId(group))));
 
     }
     

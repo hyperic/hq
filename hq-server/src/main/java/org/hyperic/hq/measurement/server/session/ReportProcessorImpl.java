@@ -38,8 +38,8 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.mgmt.domain.Agent;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.inventory.domain.Resource;
@@ -72,12 +72,14 @@ public class ReportProcessorImpl implements ReportProcessor {
     private AgentManager agentManager;
     private ZeventEnqueuer zEventManager;
     private ResourceManager resourceManager;
+    private AppdefConverter appdefConverter;
 
     @Autowired
     public ReportProcessorImpl(MeasurementManager measurementManager,
                                ResourceManager resourceManager, SRNManager srnManager,
                                ReportStatsCollector reportStatsCollector, MeasurementInserterHolder measurementInserterManager,
-                               AgentManager agentManager, ZeventEnqueuer zEventManager) {
+                               AgentManager agentManager, ZeventEnqueuer zEventManager,
+                               AppdefConverter appdefConverter) {
         this.measurementManager = measurementManager;
         this.resourceManager = resourceManager;
         this.srnManager = srnManager;
@@ -85,6 +87,7 @@ public class ReportProcessorImpl implements ReportProcessor {
         this.measurementInserterManager = measurementInserterManager;
         this.agentManager = agentManager;
         this.zEventManager = zEventManager;
+        this.appdefConverter = appdefConverter;
     }
 
     private void addPoint(List<DataPoint> points, List<DataPoint> priorityPts, Measurement m, MetricValue[] vals) {
@@ -226,7 +229,7 @@ public class ReportProcessorImpl implements ReportProcessor {
                           res.getName() + ") is not associated " +
                           " with that agent.  Dropping measurement.");
                 if (debug) watch.markTimeEnd("resMatchesAgent");
-                toUnschedule.add(AppdefUtil.newAppdefEntityId(res));
+                toUnschedule.add(appdefConverter.newAppdefEntityId(res));
                 continue;
             }
             if (debug) watch.markTimeEnd("resMatchesAgent");
@@ -286,7 +289,7 @@ public class ReportProcessorImpl implements ReportProcessor {
             return false;
         }
         try {
-            return agentManager.getAgent(AppdefUtil.newAppdefEntityId(resource)).
+            return agentManager.getAgent(appdefConverter.newAppdefEntityId(resource)).
                 getAgentToken().equals(agentToken);
         } catch (AgentNotFoundException e) {
             log.warn("Agent not found for Id=" + resource.getId());

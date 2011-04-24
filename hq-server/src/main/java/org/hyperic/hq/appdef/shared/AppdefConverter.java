@@ -9,5 +9,9 @@ public interface AppdefConverter {
     
     int getAppdefType(ResourceType type);
     
+    AppdefEntityID newAppdefEntityId(Integer resourceId);
+    
+    AppdefEntityID newAppdefEntityId(ResourceType resourceType);
+    
     
 }

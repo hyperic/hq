@@ -37,8 +37,8 @@ import java.util.Map;
 
 import javax.persistence.EntityNotFoundException;
 
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
@@ -75,13 +75,15 @@ public class TemplateManagerImpl implements TemplateManager {
     private SRNManager srnManager;
     private SRNCache srnCache;
     private CategoryRepository categoryRepository;
+    private AppdefConverter appdefConverter;
 
     @Autowired
     public TemplateManagerImpl(MeasurementRepository measurementRepository,
                                MeasurementTemplateRepository measurementTemplateRepository,
                                MonitorableTypeRepository monitorableTypeRepository,
                                ScheduleRevNumRepository scheduleRevNumRepository, SRNManager srnManager,
-                               SRNCache srnCache, CategoryRepository categoryRepository) {
+                               SRNCache srnCache, CategoryRepository categoryRepository,
+                               AppdefConverter appdefConverter) {
         this.measurementRepository = measurementRepository;
         this.measurementTemplateRepository = measurementTemplateRepository;
         this.monitorableTypeRepository = monitorableTypeRepository;
@@ -89,6 +91,7 @@ public class TemplateManagerImpl implements TemplateManager {
         this.srnManager = srnManager;
         this.srnCache = srnCache;
         this.categoryRepository = categoryRepository;
+        this.appdefConverter = appdefConverter;
     }
 
     /**
@@ -331,7 +334,7 @@ public class TemplateManagerImpl implements TemplateManager {
             List<Integer> resources = measurementRepository.findMeasurementResourcesByTemplate(template.getId());
             List<AppdefEntityID> appdefEntityIds = new ArrayList<AppdefEntityID>();
             for(Integer resource: resources) {
-                appdefEntityIds.add(AppdefUtil.newAppdefEntityId(resource));
+                appdefEntityIds.add(appdefConverter.newAppdefEntityId(resource));
             }
             toReschedule.addAll(appdefEntityIds);
         }
@@ -379,7 +382,7 @@ public class TemplateManagerImpl implements TemplateManager {
                     dm.setInterval(template.getDefaultInterval());
                 }
 
-                final AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(dm
+                final AppdefEntityID aeid = appdefConverter.newAppdefEntityId(dm
                     .getResource());
 
                 Long min = new Long(dm.getInterval());

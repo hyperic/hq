@@ -36,10 +36,10 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
@@ -104,17 +104,20 @@ public class ControlScheduleManagerImpl
     private ControlScheduleRepository controlScheduleRepository; 
     private PermissionManager permissionManager;
     private ResourceManager resourceManager;
+    private AppdefConverter appdefConverter;
   
 
     @Autowired
     public ControlScheduleManagerImpl(Scheduler scheduler, DBUtil dbUtil, ControlHistoryRepository controlHistoryRepository,
                                       ControlScheduleRepository controlScheduleRepository, 
-                                      PermissionManager permissionManager, ResourceManager resourceManager) {
+                                      PermissionManager permissionManager, ResourceManager resourceManager,
+                                      AppdefConverter appdefConverter) {
         super(scheduler, dbUtil);
         this.controlHistoryRepository = controlHistoryRepository;
         this.controlScheduleRepository = controlScheduleRepository;
         this.permissionManager = permissionManager;
         this.resourceManager = resourceManager;
+        this.appdefConverter = appdefConverter;
     }
 
     protected String getHistoryPagerClass() {
@@ -174,7 +177,7 @@ public class ControlScheduleManagerImpl
             int count = 0;
             for (Iterator<ControlHistory> i = recent.iterator(); i.hasNext();) {
                 ControlHistory cLocal = i.next();
-                AppdefEntityID entity = AppdefUtil.newAppdefEntityId(cLocal.getResource());
+                AppdefEntityID entity = appdefConverter.newAppdefEntityId(cLocal.getResource());
                 try {
                     checkControlPermission(subject, entity);
 
@@ -217,7 +220,7 @@ public class ControlScheduleManagerImpl
             int count = 0;
             for (Iterator<ControlSchedule> i = pending.iterator(); i.hasNext();) {
                 ControlSchedule sLocal = i.next();
-                AppdefEntityID entity = AppdefUtil.newAppdefEntityId(sLocal.getResource());
+                AppdefEntityID entity = appdefConverter.newAppdefEntityId(sLocal.getResource());
                 try {
                     checkControlPermission(subject, entity);
                     if (++count > rows)
@@ -257,7 +260,7 @@ public class ControlScheduleManagerImpl
         try {
               List<ControlFrequency> frequencies = controlHistoryRepository.getControlFrequencies(numToReturn);
               for(ControlFrequency frequency: frequencies) {
-                 AppdefEntityID resourceId = AppdefUtil.newAppdefEntityId(resourceManager.findResourceById(frequency.getId()));
+                 AppdefEntityID resourceId = appdefConverter.newAppdefEntityId(resourceManager.findResourceById(frequency.getId()));
                  try {
                      checkControlPermission(subject, resourceId);
                  } catch (PermissionException e) {

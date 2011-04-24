@@ -40,12 +40,12 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.AppService;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -87,6 +87,8 @@ public class AppdefStatDAO {
     private static final int APPDEF_TYPE_GROUP = AppdefEntityConstants.APPDEF_TYPE_GROUP;
 
     protected JdbcTemplate jdbcTemplate;
+    
+    protected AppdefConverter appdefConverter;
 
     protected final Log log = LogFactory.getLog(AppdefStatDAO.class);
     
@@ -95,8 +97,9 @@ public class AppdefStatDAO {
     }
 
     @Autowired
-    public AppdefStatDAO(JdbcTemplate jdbcTemplate) {
+    public AppdefStatDAO(JdbcTemplate jdbcTemplate, AppdefConverter appdefConverter) {
         this.jdbcTemplate = jdbcTemplate;
+        this.appdefConverter = appdefConverter;
     }
 
     public Map<String, Integer> getPlatformCountsByTypeMap(AuthzSubject subject)
@@ -500,7 +503,7 @@ public class AppdefStatDAO {
 
         Set<ResourceTreeNode> entitySet = new HashSet<ResourceTreeNode>(group.getMembers().size());
         for (Resource member: group.getMembers()) {
-            AppdefEntityID resourceId = AppdefUtil.newAppdefEntityId(member);
+            AppdefEntityID resourceId = appdefConverter.newAppdefEntityId(member);
             entitySet
                 .add(new ResourceTreeNode(member.getName(),
                     getAppdefTypeLabel(resourceId.getType(), groupVo.getAppdefResourceTypeValue()

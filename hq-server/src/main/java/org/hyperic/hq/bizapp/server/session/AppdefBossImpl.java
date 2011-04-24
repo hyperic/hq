@@ -62,6 +62,7 @@ import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIQueueManager;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateFQDNException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -132,7 +133,6 @@ import org.hyperic.hq.bizapp.shared.uibeans.ResourceTreeNode;
 import org.hyperic.hq.bizapp.shared.uibeans.SearchResult;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
-import org.hyperic.hq.common.ProductProperties;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.events.MaintenanceEvent;
@@ -211,6 +211,8 @@ public class AppdefBossImpl implements AppdefBoss {
     private ZeventEnqueuer zEventManager;
     
     private ConfigValidator configValidator;
+    
+    private AppdefConverter appdefConverter;
 
     protected Log log = LogFactory.getLog(AppdefBossImpl.class.getName());
     protected boolean debug = log.isDebugEnabled();
@@ -231,7 +233,7 @@ public class AppdefBossImpl implements AppdefBoss {
                           ResourceManager resourceManager, ServerManager serverManager,
                           ServiceManager serviceManager, TrackerManager trackerManager,
                           AppdefManager appdefManager, ZeventEnqueuer zEventManager,
-                          ConfigValidator configValidator) {
+                          ConfigValidator configValidator, AppdefConverter appdefConverter) {
         this.sessionManager = sessionManager;
         this.agentManager = agentManager;
         this.aiQueueManager = aiQueueManager;
@@ -253,6 +255,7 @@ public class AppdefBossImpl implements AppdefBoss {
         this.appdefManager = appdefManager;
         this.zEventManager = zEventManager;
         this.configValidator = configValidator;
+        this.appdefConverter = appdefConverter;
     }
 
     /**
@@ -777,7 +780,7 @@ public class AppdefBossImpl implements AppdefBoss {
             List<AppdefResourceValue> appdefResources = new ArrayList<AppdefResourceValue>();
             for (Resource res : pl) {
                 try {
-                    appdefResources.add(findById(subject, AppdefUtil.newAppdefEntityId(res)));
+                    appdefResources.add(findById(subject, appdefConverter.newAppdefEntityId(res)));
                 } catch (AppdefEntityNotFoundException e) {
                     log.error("Resource not found in Appdef: " + res.getId());
                 }
@@ -2271,7 +2274,7 @@ public class AppdefBossImpl implements AppdefBoss {
         res.setTotalSize(children.getTotalSize());
         for (Resource child : children) {
             try {
-                AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(child);
+                AppdefEntityID aeid = appdefConverter.newAppdefEntityId(child);
                 AppdefEntityValue arv = new AppdefEntityValue(aeid, subject);
                 if (aeid.isGroup()) {
                     res.add(arv.getAppdefGroupValue());
@@ -2339,7 +2342,7 @@ public class AppdefBossImpl implements AppdefBoss {
 
         List<SearchResult> searchResults = new ArrayList<SearchResult>(resources.size());
         for (Resource res : resources) {
-            AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(res);
+            AppdefEntityID aeid = appdefConverter.newAppdefEntityId(res);
             searchResults.add(new SearchResult(res.getName(), AppdefEntityConstants
                 .typeToString(aeid.getType()), aeid.getAppdefKey()));
         }
@@ -2415,7 +2418,7 @@ public class AppdefBossImpl implements AppdefBoss {
 
         List<AppdefEntityID> toBePaged = new ArrayList<AppdefEntityID>(authzResources.size());
         for (Resource r : authzResources) {
-            toBePaged.add(AppdefUtil.newAppdefEntityId(r));
+            toBePaged.add(appdefConverter.newAppdefEntityId(r));
         }
 
         // Page it, then convert to AppdefResourceValue
@@ -2502,7 +2505,7 @@ public class AppdefBossImpl implements AppdefBoss {
         Collection<Resource> resources = resourceManager.findResourceByOwner(currentOwner);
         AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
         for (Resource aRes : resources) {
-            AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(aRes);
+            AppdefEntityID aeid = appdefConverter.newAppdefEntityId(aRes);
 
             if (aeid.isGroup()) {
                 ResourceGroup g = resourceGroupManager

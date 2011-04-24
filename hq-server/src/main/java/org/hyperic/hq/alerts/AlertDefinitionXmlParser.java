@@ -37,6 +37,7 @@ import java.util.Set;
 import javax.xml.bind.JAXBException;
 
 import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
@@ -85,17 +86,20 @@ public class AlertDefinitionXmlParser {
     private final TemplateManager templateManager;
     private final AuthzSubjectManager authzSubjectManager;
     private final AlertDefinitionManager alertDefinitionManager;
+    private AppdefConverter appdefConverter;
 
     @Autowired
     public AlertDefinitionXmlParser(ResourceManager resourceManager,
                                     TemplateManager templateManager,
                                     AuthzSubjectManager authzSubjectManager,
-                                    AlertDefinitionManager alertDefinitionManager)
+                                    AlertDefinitionManager alertDefinitionManager,
+                                    AppdefConverter appdefConverter)
     {
         this.resourceManager = resourceManager;
         this.templateManager = templateManager;
         this.authzSubjectManager = authzSubjectManager;
         this.alertDefinitionManager = alertDefinitionManager;
+        this.appdefConverter = appdefConverter;
     }
 
     private MeasurementTemplate find(List templates, String metricName, Resource resource) {
@@ -110,7 +114,7 @@ public class AlertDefinitionXmlParser {
     }
 
     private int getAppdefType(Resource resource) {
-        AppdefEntityID id = AppdefUtil.newAppdefEntityId(resource);
+        AppdefEntityID id = appdefConverter.newAppdefEntityId(resource);
         if (id.isPlatform()) {
             return AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
         } else if (id.isServer()) {

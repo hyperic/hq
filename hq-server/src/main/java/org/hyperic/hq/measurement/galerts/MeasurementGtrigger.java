@@ -38,9 +38,9 @@ import java.util.TreeSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.galerts.ResourceAuxLog;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
@@ -703,7 +703,7 @@ public class MeasurementGtrigger
                 continue;
             }
             
-            entId  = AppdefUtil.newAppdefEntityId(metric.getResource());
+            entId  = Bootstrap.getBean(AppdefConverter.class).newAppdefEntityId(metric.getResource());
                                        
             entVal = new AppdefEntityValue(entId, overlord);
             

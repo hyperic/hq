@@ -26,8 +26,9 @@
 
 package org.hyperic.hq.appdef.galerts;
 
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.AlertAuxLogProvider;
 import org.hyperic.hq.events.SimpleAlertAuxLog;
 import org.hyperic.hq.galerts.server.session.GalertAuxLog;
@@ -45,7 +46,7 @@ public class ResourceAuxLog
     
     ResourceAuxLog(GalertAuxLog gAuxLog, Resource resource) {
         this(gAuxLog.getDescription(), gAuxLog.getTimestamp(),
-             AppdefUtil.newAppdefEntityId(resource));
+            Bootstrap.getBean(AppdefConverter.class).newAppdefEntityId(resource));
     }
 
     public AppdefEntityID getEntity() {

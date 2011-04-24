@@ -36,8 +36,8 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
@@ -68,14 +68,17 @@ public class ViewAction
     private ControlBoss controlBoss;
     private AppdefBoss appdefBoss;
     private DashboardManager dashboardManager;
+    private AppdefConverter appdefConverter;
 
     @Autowired
-    public ViewAction(AuthzBoss authzBoss, ControlBoss controlBoss, AppdefBoss appdefBoss, DashboardManager dashboardManager) {
+    public ViewAction(AuthzBoss authzBoss, ControlBoss controlBoss, AppdefBoss appdefBoss, 
+                      DashboardManager dashboardManager, AppdefConverter appdefConverter) {
         super();
         this.authzBoss = authzBoss;
         this.controlBoss = controlBoss;
         this.appdefBoss = appdefBoss;
         this.dashboardManager = dashboardManager;
+        this.appdefConverter = appdefConverter;
     }
 
     public ActionForward execute(ComponentContext context, ActionMapping mapping, ActionForm form,
@@ -122,7 +125,7 @@ public class ViewAction
 
                 DashboardControlBean bean = new DashboardControlBean();
                 try {
-                    AppdefEntityID entity = AppdefUtil.newAppdefEntityId(control.getResource());
+                    AppdefEntityID entity = appdefConverter.newAppdefEntityId(control.getResource());
                     bean.setResource(appdefBoss.findById(sessionId, entity));
                     bean.setControl(control);
                     pendingList.add(bean);
