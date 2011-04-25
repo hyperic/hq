@@ -26,23 +26,20 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
         resourceTypeFinder = finderFactory.createGraphRepository(ResourceType.class);
     }
 
-    @Transactional(value="neoTxManager",readOnly = true)
     public Long count() {
         return resourceTypeFinder.count();
     }
 
-    @Transactional(value="neoTxManager",readOnly = true)
     public List<ResourceType> find(Integer firstResult, Integer maxResults) {
         List<ResourceType> resourceTypes = new ArrayList<ResourceType>();
         Iterable<ResourceType> result = resourceTypeFinder.findAll();
         int currentPosition = 0;
         int endIndex = firstResult + maxResults;
-        for (ResourceType resourceType: result) {
+        for (ResourceType resourceType : result) {
             if (currentPosition > endIndex) {
                 break;
             }
             if (currentPosition >= firstResult) {
-                resourceType.persist();
                 resourceTypes.add(resourceType);
             }
             currentPosition++;
@@ -50,38 +47,28 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
         return resourceTypes;
     }
 
-    @Transactional(value="neoTxManager",readOnly = true)
     public List<ResourceType> findAll() {
         List<ResourceType> resourceTypes = new ArrayList<ResourceType>();
         Iterable<ResourceType> result = resourceTypeFinder.findAll();
         for (ResourceType resourceType : result) {
-            resourceType.persist();
             resourceTypes.add(resourceType);
         }
 
         return resourceTypes;
     }
 
-    @Transactional(value="neoTxManager",readOnly = true)
     public ResourceType findById(Integer id) {
-        //TODO once id becomes a String, look up by indexed property.  Using id index doesn't work for some reason.
+        // TODO once id becomes a String, look up by indexed property. Using id
+        // index doesn't work for some reason.
         ResourceType type = resourceTypeFinder.findOne(id.longValue());
-        if (type != null) {
-            type.persist();
-        }
         return type;
     }
 
-    @Transactional(value="neoTxManager",readOnly = true)
     public ResourceType findByName(String name) {
         ResourceType type = resourceTypeFinder.findByPropertyValue("name", name);
-        if (type != null) {
-            type.persist();
-        }
         return type;
     }
 
-    @Transactional(value="neoTxManager",readOnly = true)
     public ResourceType findRoot() {
         return findById(1);
     }
@@ -93,7 +80,7 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
                                          " already exists");
         }
         resourceType.persist();
-        //TODO meaningful id
+        // TODO meaningful id
         resourceType.setId(resourceType.getNodeId().intValue());
     }
 }

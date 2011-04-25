@@ -40,12 +40,10 @@ public class Neo4jResourceDao implements ResourceDao {
         resourceFinder = finderFactory.createGraphRepository(Resource.class);
     }
 
-    @Transactional(value="neoTxManager",readOnly = true)
     public Long count() {
         return resourceFinder.count();
     }
 
-    @Transactional(value="neoTxManager",readOnly = true)
     public List<Resource> find(Integer firstResult, Integer maxResults) {
         // TODO the root resource is not filtered out from DAO. Find a way to do
         // so?
@@ -53,12 +51,11 @@ public class Neo4jResourceDao implements ResourceDao {
         Iterable<Resource> result = resourceFinder.findAll();
         int currentPosition = 0;
         int endIndex = firstResult + maxResults;
-        for (Resource resource: result) {
+        for (Resource resource : result) {
             if (currentPosition > endIndex) {
                 break;
             }
             if (currentPosition >= firstResult) {
-                resource.persist();
                 resources.add(resource);
             }
             currentPosition++;
@@ -66,30 +63,24 @@ public class Neo4jResourceDao implements ResourceDao {
         return resources;
     }
 
-    @Transactional(value="neoTxManager",readOnly = true)
     public List<Resource> findAll() {
         // TODO the root resource is not filtered out from DAO. Find a way to do
         // so?
         List<Resource> resources = new ArrayList<Resource>();
         Iterable<Resource> result = resourceFinder.findAll();
         for (Resource resource : result) {
-            resource.persist();
             resources.add(resource);
         }
         return resources;
     }
 
-    @Transactional(value="neoTxManager",readOnly = true)
     public Resource findById(Integer id) {
-        //TODO once id becomes a String, look up by indexed property.  Using id index doesn't work for some reason.
+        // TODO once id becomes a String, look up by indexed property. Using id
+        // index doesn't work for some reason.
         Resource resource = resourceFinder.findOne(id.longValue());
-        if (resource != null) {
-            resource.persist();
-        }
         return resource;
     }
 
-    @Transactional(value="neoTxManager",readOnly = true)
     public Page<Resource> findByIndexedProperty(String propertyName, Object propertyValue,
                                                 Pageable pageInfo, Class<?> sortAttributeType) {
         QueryContext queryContext = new QueryContext(propertyValue);
@@ -124,21 +115,15 @@ public class Neo4jResourceDao implements ResourceDao {
     }
 
     // TODO Get rid of assumption that name is unique and use identifier
-    @Transactional(value="neoTxManager",readOnly = true)
     public Resource findByName(String name) {
-        Resource resource = resourceFinder.findByPropertyValue( "name", name);
-        if (resource != null) {
-            resource.persist();
-        }
+        Resource resource = resourceFinder.findByPropertyValue("name", name);
 
         return resource;
     }
 
-    @Transactional(value="neoTxManager",readOnly = true)
     public Set<Resource> findByOwner(String owner) {
         Set<Resource> ownedResources = new HashSet<Resource>();
-        Iterable<Resource> resourceIterator = resourceFinder.findAllByPropertyValue( "owner",
-            owner);
+        Iterable<Resource> resourceIterator = resourceFinder.findAllByPropertyValue("owner", owner);
         // Walk the lazy iterator to return all results
         for (Resource resource : resourceIterator) {
             ownedResources.add(resource);
@@ -146,9 +131,8 @@ public class Neo4jResourceDao implements ResourceDao {
         return ownedResources;
     }
 
-    @Transactional(value="neoTxManager",readOnly = true)
     public Resource findRoot() {
-       return resourceFinder.findByPropertyValue("root", true);
+        return resourceFinder.findByPropertyValue("root", true);
     }
 
     private int getSortFieldType(Class<?> type) {
@@ -172,18 +156,20 @@ public class Neo4jResourceDao implements ResourceDao {
         }
         throw new IllegalArgumentException("Sort field type " + type + " is not allowed");
     }
-    
+
     @Transactional("neoTxManager")
     public void persistRoot(Resource resource) {
         persist(resource);
-        //add an index for lookup later.  Property name/value can be anything here, the unique index name is important
-        graphDatabaseContext.getIndex(Resource.class, null).add(resource.getPersistentState(), "root", true);
+        // add an index for lookup later. Property name/value can be anything
+        // here, the unique index name is important
+        graphDatabaseContext.getIndex(Resource.class, null).add(resource.getPersistentState(),
+            "root", true);
     }
 
     @Transactional("neoTxManager")
     public void persist(Resource resource) {
         resource.persist();
-        //TODO meaningful id
+        // TODO meaningful id
         resource.setId(resource.getNodeId().intValue());
         // Set the type index here b/c Resource needs an ID before we can access
         // the underlying node

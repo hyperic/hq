@@ -28,28 +28,28 @@ public class Neo4jResourceGroupDao implements ResourceGroupDao {
 
     private GraphRepository<ResourceGroup> groupFinder;
 
+    private GraphRepository<Resource> resourceFinder;
+
     @PostConstruct
     public void initFinder() {
         groupFinder = finderFactory.createGraphRepository(ResourceGroup.class);
+        resourceFinder = finderFactory.createGraphRepository(Resource.class);
     }
 
-    @Transactional(value="neoTxManager",readOnly = true)
     public Long count() {
         return groupFinder.count();
     }
 
-    @Transactional(value="neoTxManager",readOnly = true)
     public List<ResourceGroup> find(Integer firstResult, Integer maxResults) {
         List<ResourceGroup> groups = new ArrayList<ResourceGroup>();
         Iterable<ResourceGroup> result = groupFinder.findAll();
         int currentPosition = 0;
         int endIndex = firstResult + maxResults;
-        for (ResourceGroup group: result) {
+        for (ResourceGroup group : result) {
             if (currentPosition > endIndex) {
                 break;
             }
             if (currentPosition >= firstResult) {
-                group.persist();
                 groups.add(group);
             }
             currentPosition++;
@@ -57,33 +57,26 @@ public class Neo4jResourceGroupDao implements ResourceGroupDao {
         return groups;
     }
 
-    @Transactional(value="neoTxManager",readOnly = true)
     public List<ResourceGroup> findAll() {
         List<ResourceGroup> groups = new ArrayList<ResourceGroup>();
         Iterable<ResourceGroup> result = groupFinder.findAll();
         for (ResourceGroup resourceGroup : result) {
-            resourceGroup.persist();
             groups.add(resourceGroup);
         }
         return groups;
     }
 
-    @Transactional(value="neoTxManager",readOnly = true)
     public ResourceGroup findById(Integer id) {
-        //TODO once id becomes a String, look up by indexed property.  Using id index doesn't work for some reason.
-        ResourceGroup group = (ResourceGroup) finderFactory.createGraphRepository(Resource.class)
-            .findOne(id.longValue());
-        if (group != null) {
-            group.persist();
-        }
+        // TODO once id becomes a String, look up by indexed property. Using id
+        // index doesn't work for some reason.
+        ResourceGroup group = (ResourceGroup) resourceFinder.findOne(id.longValue());
         return group;
     }
-    
-    @Transactional(value="neoTxManager",readOnly = true)
+
     public List<ResourceGroup> findByIndexedProperty(String propertyName, Object propertyValue) {
         List<ResourceGroup> groups = new ArrayList<ResourceGroup>();
         IndexHits<Node> indexHits = graphDatabaseContext.getIndex(Resource.class, null).query(
-            propertyName,propertyValue);
+            propertyName, propertyValue);
         if (indexHits == null) {
             return groups;
         }
@@ -93,17 +86,11 @@ public class Neo4jResourceGroupDao implements ResourceGroupDao {
         return groups;
     }
 
-    @Transactional(value="neoTxManager",readOnly = true)
     public ResourceGroup findByName(String name) {
-        ResourceGroup group = (ResourceGroup) finderFactory.createGraphRepository(Resource.class)
-            .findByPropertyValue("name", name);
-        if (group != null) {
-            group.persist();
-        }
+        ResourceGroup group = (ResourceGroup) resourceFinder.findByPropertyValue("name", name);
         return group;
     }
 
-  
     @Transactional("neoTxManager")
     public void persist(ResourceGroup resourceGroup) {
         if (findByName(resourceGroup.getName()) != null) {
@@ -111,7 +98,7 @@ public class Neo4jResourceGroupDao implements ResourceGroupDao {
                                          " already exists");
         }
         resourceGroup.persist();
-        //TODO meaningful id
+        // TODO meaningful id
         resourceGroup.setId(resourceGroup.getNodeId().intValue());
         // Set the type index here b/c ResourceGroup needs an ID before we can
         // access the underlying node
