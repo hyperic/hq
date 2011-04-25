@@ -51,11 +51,12 @@ public class CharacterEncodingFilterTest extends TestCase {
     
     public void testMultipleExcludePathsWithWildcards() {  
     	
-    	String excludePaths = "/images/*, /ServerInvokerServlet*";
+    	String excludePaths = "/images/*, /ServerInvokerServlet*,/transport/*";
     	URIMatcher uriMatcher = new URIMatcher();
     	uriMatcher.setPatterns(excludePaths);
     	
     	assertTrue(uriMatcher.matches("/ServerInvokerServlet"));  
+    	assertTrue(uriMatcher.matches("/transport/ServerInvokerServlet"));  
     	assertTrue(uriMatcher.matches("/images/fake.gif"));  	
     	assertFalse(uriMatcher.matches("/js/fake.js"));
     }

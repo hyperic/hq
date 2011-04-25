@@ -469,7 +469,7 @@
                                         <File Id="ant_apache_log4j.jar" Name="ant-apache-log4j.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="ant_apache_bsf.jar" Name="ant-apache-bsf.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="ant_apache_bcel.jar" Name="ant-apache-bcel.jar" Vital="no" Compressed="yes" DiskId="1" />
-                                        <File Id="aspectjrt_1.6.5.jar" Name="aspectjrt-1.6.5.jar" Vital="no" Compressed="yes" DiskId="1" />
+                                        <File Id="aspectjrt_1.6.8.jar" Name="aspectjrt-1.6.8.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="ant_antlr.jar" Name="ant-antlr.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="xalan_2.7.1.jar" Name="xalan-2.7.1.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="geronimo_jms_1.1_spec_1.1.1." Name="geronimo-jms_1.1_spec-1.1.1.jar" Vital="no" Compressed="yes" DiskId="1" />
@@ -485,7 +485,7 @@
                                         <File Id="libsigar_amd64_linux.so" Name="libsigar-amd64-linux.so" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="serializer_2.7.1.jar" Name="serializer-2.7.1.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="commons_validator_1.3.1.jar" Name="commons-validator-1.3.1.jar" Vital="no" Compressed="yes" DiskId="1" />
-                                        <File Id="aspectjweaver_1.6.5.jar" Name="aspectjweaver-1.6.5.jar" Vital="no" Compressed="yes" DiskId="1" />
+                                        <File Id="aspectjweaver_1.6.8.jar" Name="aspectjweaver-1.6.8.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="hq_util_4.5.0.build_snapshot" Name="hq-util-$(var.HQ_full_ver).jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="sigar_1.6.4.jar" Name="sigar-1.6.4.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="json_20090211.jar" Name="json-20090211.jar" Vital="no" Compressed="yes" DiskId="1" />
@@ -524,20 +524,20 @@
                                         <File Id="freemarker_2.3.4.jar" Name="freemarker-2.3.4.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="tomcat_juli_6.0.20.jar" Name="tomcat-juli-6.0.20.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="tomcat_jdbc_1.0.8.5.jar" Name="tomcat-jdbc-1.0.8.5.jar" Vital="no" Compressed="yes" DiskId="1" />
-                                        <File Id="spring_security_core_3.0.0.r" Name="spring-security-core-3.0.0.RELEASE.jar" Vital="no" Compressed="yes" DiskId="1" />
-                                        <File Id="spring_jms_3.0.1.release.jar" Name="spring-jms-3.0.1.RELEASE.jar" Vital="no" Compressed="yes" DiskId="1" />
+                                        <File Id="spring_security_core_3.0.5.r" Name="spring-security-core-3.0.5.RELEASE.jar" Vital="no" Compressed="yes" DiskId="1" />
+                                        <File Id="spring_jms_3.0.5.release.jar" Name="spring-jms-3.0.5.RELEASE.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="xercesimpl.jar" Name="xercesImpl.jar" Vital="no" Compressed="yes" DiskId="1" />
-                                        <File Id="spring_tx_3.0.1.release.jar" Name="spring-tx-3.0.1.RELEASE.jar" Vital="no" Compressed="yes" DiskId="1" />
-                                        <File Id="spring_security_config_3.0.0" Name="spring-security-config-3.0.0.RELEASE.jar" Vital="no" Compressed="yes" DiskId="1" />
-                                        <File Id="spring_orm_3.0.1.release.jar" Name="spring-orm-3.0.1.RELEASE.jar" Vital="no" Compressed="yes" DiskId="1" />
-                                        <File Id="spring_jdbc_3.0.1.release.ja" Name="spring-jdbc-3.0.1.RELEASE.jar" Vital="no" Compressed="yes" DiskId="1" />
-                                        <File Id="spring_expression_3.0.1.rele" Name="spring-expression-3.0.1.RELEASE.jar" Vital="no" Compressed="yes" DiskId="1" />
-                                        <File Id="spring_core_3.0.1.release.ja" Name="spring-core-3.0.1.RELEASE.jar" Vital="no" Compressed="yes" DiskId="1" />
-                                        <File Id="spring_beans_3.0.1.release.j" Name="spring-beans-3.0.1.RELEASE.jar" Vital="no" Compressed="yes" DiskId="1" />
-                                        <File Id="spring_asm_3.0.1.release.jar" Name="spring-asm-3.0.1.RELEASE.jar" Vital="no" Compressed="yes" DiskId="1" />
-                                        <File Id="spring_context_support_3.0.1" Name="spring-context-support-3.0.1.RELEASE.jar" Vital="no" Compressed="yes" DiskId="1" />
-                                        <File Id="spring_context_3.0.1.release" Name="spring-context-3.0.1.RELEASE.jar" Vital="no" Compressed="yes" DiskId="1" />
-                                        <File Id="spring_aop_3.0.1.release.jar" Name="spring-aop-3.0.1.RELEASE.jar" Vital="no" Compressed="yes" DiskId="1" />
+                                        <File Id="spring_tx_3.0.5.release.jar" Name="spring-tx-3.0.5.RELEASE.jar" Vital="no" Compressed="yes" DiskId="1" />
+                                        <File Id="spring_security_config_3.0.5" Name="spring-security-config-3.0.5.RELEASE.jar" Vital="no" Compressed="yes" DiskId="1" />
+                                        <File Id="spring_orm_3.0.5.release.jar" Name="spring-orm-3.0.5.RELEASE.jar" Vital="no" Compressed="yes" DiskId="1" />
+                                        <File Id="spring_jdbc_3.0.5.release.ja" Name="spring-jdbc-3.0.5.RELEASE.jar" Vital="no" Compressed="yes" DiskId="1" />
+                                        <File Id="spring_expression_3.0.5.rele" Name="spring-expression-3.0.5.RELEASE.jar" Vital="no" Compressed="yes" DiskId="1" />
+                                        <File Id="spring_core_3.0.5.release.ja" Name="spring-core-3.0.5.RELEASE.jar" Vital="no" Compressed="yes" DiskId="1" />
+                                        <File Id="spring_beans_3.0.5.release.j" Name="spring-beans-3.0.5.RELEASE.jar" Vital="no" Compressed="yes" DiskId="1" />
+                                        <File Id="spring_asm_3.0.5.release.jar" Name="spring-asm-3.0.5.RELEASE.jar" Vital="no" Compressed="yes" DiskId="1" />
+                                        <File Id="spring_context_support_3.0.5" Name="spring-context-support-3.0.5.RELEASE.jar" Vital="no" Compressed="yes" DiskId="1" />
+                                        <File Id="spring_context_3.0.5.release" Name="spring-context-3.0.5.RELEASE.jar" Vital="no" Compressed="yes" DiskId="1" />
+                                        <File Id="spring_aop_3.0.5.release.jar" Name="spring-aop-3.0.5.RELEASE.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="mail_1.4.jar" Name="mail-1.4.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="commons_net_2.0.jar" Name="commons-net-2.0.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="cglib_2.1_3.jar" Name="cglib-2.1_3.jar" Vital="no" Compressed="yes" DiskId="1" />
