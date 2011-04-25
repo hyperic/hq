@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2010], VMware, Inc.
+ * Copyright (C) [2004-2011], VMware, Inc.
  * This file is part of Hyperic.
  *
  * Hyperic is free software; you can redistribute it and/or modify
@@ -584,7 +584,7 @@ public class MeasurementDAO
         Collections.sort(sortedResourceIds);
 
         final HQDialect dialect = getHQDialect();
-        final int max = (dialect.getMaxExpressions() <= 0) ? Integer.MAX_VALUE : dialect
+        final int max = (dialect.getMaxExpressions() <= 0) ? BATCH_SIZE : dialect
             .getMaxExpressions();
         final List rtn = new ArrayList(sortedResourceIds.size());
         for (int i = 0; i < sortedResourceIds.size(); i += max) {
@@ -625,7 +625,7 @@ public class MeasurementDAO
 
         final List rtn = new ArrayList(sortedResourceIds.size());
         final HQDialect dialect = getHQDialect();
-        final int max = (dialect.getMaxExpressions() <= 0) ? Integer.MAX_VALUE : dialect
+        final int max = (dialect.getMaxExpressions() <= 0) ? BATCH_SIZE : dialect
             .getMaxExpressions();
 
         for (int i = 0; i < sortedResourceIds.size(); i += max) {
