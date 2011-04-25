@@ -19,13 +19,14 @@ import org.neo4j.graphdb.StopEvaluator;
 import org.neo4j.graphdb.TraversalPosition;
 import org.neo4j.graphdb.Traverser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.annotation.Indexed;
+import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.data.graph.annotation.GraphProperty;
 import org.springframework.data.graph.annotation.NodeEntity;
 import org.springframework.data.graph.annotation.RelatedTo;
 import org.springframework.data.graph.core.Direction;
+import org.springframework.data.graph.neo4j.annotation.Indexed;
 import org.springframework.data.graph.neo4j.support.GraphDatabaseContext;
-import org.springframework.data.graph.neo4j.support.SubReferenceNodeTypeStrategy;
+import org.springframework.data.graph.neo4j.support.typerepresentation.SubReferenceNodeTypeRepresentationStrategy;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -36,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 
 @NodeEntity
+@Configurable
 public class Resource {
 
     @RelatedTo(type = RelationshipTypes.HAS_CONFIG, direction = Direction.OUTGOING, elementClass = Config.class)
@@ -113,9 +115,9 @@ public class Resource {
         Set<ResourceRelationship> relations = new HashSet<ResourceRelationship>();
         for (org.neo4j.graphdb.Relationship relationship : relationships) {
             // Don't include Neo4J relationship b/w Node and its Java type
-            if (!relationship.isType(SubReferenceNodeTypeStrategy.INSTANCE_OF_RELATIONSHIP_TYPE)) {
+            if (!relationship.isType(SubReferenceNodeTypeRepresentationStrategy.INSTANCE_OF_RELATIONSHIP_TYPE)) {
                 Node node = relationship.getOtherNode(getPersistentState());
-                Class<?> otherEndType = graphDatabaseContext.getJavaType(node);
+                Class<?> otherEndType = graphDatabaseContext.getNodeTypeRepresentationStrategy().getJavaType(node);
                 if (Resource.class.isAssignableFrom(otherEndType)) {
                     if (entity == null || node.equals(entity.getPersistentState())) {
                         relations.add(graphDatabaseContext.createEntityFromState(relationship,
@@ -277,7 +279,7 @@ public class Resource {
             if (!(key.equals("location")) && !(key.equals("name")) &&
                 !(key.equals("description")) && !(key.equals("modifiedBy")) &&
                 !(key.equals("owner")) && !(key.equals("id")) && !(key.equals("privateGroup"))
-                && !(key.equals("sortName"))) {
+                && !(key.equals("sortName")) && !(key.equals("__type__"))) {
                 // try {
                 properties.put(key, getProperty(key));
                 // } catch (IllegalArgumentException e) {

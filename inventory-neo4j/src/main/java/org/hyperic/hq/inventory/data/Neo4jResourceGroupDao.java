@@ -11,8 +11,8 @@ import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.IndexHits;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.graph.neo4j.finder.FinderFactory;
-import org.springframework.data.graph.neo4j.finder.NodeFinder;
+import org.springframework.data.graph.neo4j.repository.DirectGraphRepositoryFactory;
+import org.springframework.data.graph.neo4j.repository.GraphRepository;
 import org.springframework.data.graph.neo4j.support.GraphDatabaseContext;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,16 +21,16 @@ import org.springframework.transaction.annotation.Transactional;
 public class Neo4jResourceGroupDao implements ResourceGroupDao {
 
     @Autowired
-    private FinderFactory finderFactory;
+    private DirectGraphRepositoryFactory finderFactory;
 
     @Autowired
     private GraphDatabaseContext graphDatabaseContext;
 
-    private NodeFinder<ResourceGroup> groupFinder;
+    private GraphRepository<ResourceGroup> groupFinder;
 
     @PostConstruct
     public void initFinder() {
-        groupFinder = finderFactory.createNodeEntityFinder(ResourceGroup.class);
+        groupFinder = finderFactory.createGraphRepository(ResourceGroup.class);
     }
 
     @Transactional(value="neoTxManager",readOnly = true)
@@ -71,8 +71,8 @@ public class Neo4jResourceGroupDao implements ResourceGroupDao {
     @Transactional(value="neoTxManager",readOnly = true)
     public ResourceGroup findById(Integer id) {
         //TODO once id becomes a String, look up by indexed property.  Using id index doesn't work for some reason.
-        ResourceGroup group = (ResourceGroup) finderFactory.createNodeEntityFinder(Resource.class)
-            .findById(id);
+        ResourceGroup group = (ResourceGroup) finderFactory.createGraphRepository(Resource.class)
+            .findOne(id.longValue());
         if (group != null) {
             group.persist();
         }
@@ -95,8 +95,8 @@ public class Neo4jResourceGroupDao implements ResourceGroupDao {
 
     @Transactional(value="neoTxManager",readOnly = true)
     public ResourceGroup findByName(String name) {
-        ResourceGroup group = (ResourceGroup) finderFactory.createNodeEntityFinder(Resource.class)
-            .findByPropertyValue(null, "name", name);
+        ResourceGroup group = (ResourceGroup) finderFactory.createGraphRepository(Resource.class)
+            .findByPropertyValue("name", name);
         if (group != null) {
             group.persist();
         }

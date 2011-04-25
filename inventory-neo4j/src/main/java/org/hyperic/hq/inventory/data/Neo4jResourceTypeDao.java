@@ -8,8 +8,8 @@ import javax.annotation.PostConstruct;
 import org.hyperic.hq.inventory.NotUniqueException;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.graph.neo4j.finder.FinderFactory;
-import org.springframework.data.graph.neo4j.finder.NodeFinder;
+import org.springframework.data.graph.neo4j.repository.DirectGraphRepositoryFactory;
+import org.springframework.data.graph.neo4j.repository.GraphRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,13 +17,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class Neo4jResourceTypeDao implements ResourceTypeDao {
 
     @Autowired
-    private FinderFactory finderFactory;
+    private DirectGraphRepositoryFactory finderFactory;
 
-    private NodeFinder<ResourceType> resourceTypeFinder;
+    private GraphRepository<ResourceType> resourceTypeFinder;
 
     @PostConstruct
     public void initFinder() {
-        resourceTypeFinder = finderFactory.createNodeEntityFinder(ResourceType.class);
+        resourceTypeFinder = finderFactory.createGraphRepository(ResourceType.class);
     }
 
     @Transactional(value="neoTxManager",readOnly = true)
@@ -65,7 +65,7 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
     @Transactional(value="neoTxManager",readOnly = true)
     public ResourceType findById(Integer id) {
         //TODO once id becomes a String, look up by indexed property.  Using id index doesn't work for some reason.
-        ResourceType type = resourceTypeFinder.findById(id);
+        ResourceType type = resourceTypeFinder.findOne(id.longValue());
         if (type != null) {
             type.persist();
         }
@@ -74,7 +74,7 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
 
     @Transactional(value="neoTxManager",readOnly = true)
     public ResourceType findByName(String name) {
-        ResourceType type = resourceTypeFinder.findByPropertyValue(null, "name", name);
+        ResourceType type = resourceTypeFinder.findByPropertyValue("name", name);
         if (type != null) {
             type.persist();
         }

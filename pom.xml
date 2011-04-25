@@ -11,7 +11,7 @@
 	<properties>
 		<activemq.version>5.3.0</activemq.version>
 		<ajp.version>1.3</ajp.version>
-		<aspectj.version>1.6.11.M2</aspectj.version>
+		<aspectj.version>1.6.11.RELEASE</aspectj.version>
 		<ant.version>1.7.1</ant.version>
 		<ant-contrib.version>1.0b2</ant-contrib.version>
 		<antlr.version>2.7.6</antlr.version>
@@ -53,7 +53,7 @@
 		<mail.version>1.4</mail.version>
 		<mx4j.version>3.0.1</mx4j.version>
 		<mysql.connector.version>5.1.10</mysql.connector.version>
-		<neo4j.version>1.3.M04</neo4j.version>
+		<neo4j.version>1.3</neo4j.version>
 		<oro.version>2.0.8</oro.version>
 		<poi.version>3.0.1-FINAL</poi.version>
 		<postgresql.agent.driver.version>7.4.3</postgresql.agent.driver.version>
@@ -64,7 +64,7 @@
 		<sigar.version>1.6.4</sigar.version>
 		<slf4j.version>1.6.1</slf4j.version>
 		<snmp.version>1.11</snmp.version>
-		<spring-datastore-graph.version>1.0.0.M4</spring-datastore-graph.version>
+		<spring-datastore-graph.version>1.0.0.RELEASE</spring-datastore-graph.version>
 		<spring-data-jpa.version>1.0.0.M2</spring-data-jpa.version>
 		<spring-framework.version>3.0.5.RELEASE</spring-framework.version>
 		<spring-security.version>3.0.0.RELEASE</spring-security.version>

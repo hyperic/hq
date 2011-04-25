@@ -16,28 +16,35 @@
 	<bean id="graphDatabaseContext"
 		class="org.springframework.data.graph.neo4j.support.GraphDatabaseContext">
 		<property name="graphDatabaseService" ref="graphDatabaseService" />
-		<property name="relationshipEntityInstantiator">
-			<bean
-				class="org.springframework.data.graph.neo4j.support.relationship.ConstructorBypassingGraphRelationshipInstantiator" />
-		</property>
-		<property name="graphEntityInstantiator">
-			<bean
-				class="org.springframework.data.graph.neo4j.support.node.Neo4jConstructorGraphEntityInstantiator" />
-		</property>
 		<property name="conversionService">
 			<bean
 				class="org.springframework.data.graph.neo4j.fieldaccess.Neo4jConversionServiceFactoryBean" />
 		</property>
-		<property name="nodeTypeStrategy" ref="nodeTypeStrategy" />
+		<property name="nodeTypeRepresentationStrategy">
+			<bean factory-bean="typeRepStrategyFactory" factory-method="getNodeTypeRepresentationStrategy" />
+		</property>
+		<property name="relationshipTypeRepresentationStrategy">
+			<bean factory-bean="typeRepStrategyFactory" factory-method="getRelationshipTypeRepresentationStrategy" />
+		</property>
 	</bean>
 
-	<bean id="nodeTypeStrategy"
-		class="org.springframework.data.graph.neo4j.support.SubReferenceNodeTypeStrategy">
-		<constructor-arg ref="graphDatabaseContext" />
+
+	<bean id="graphEntityInstantiator"
+		class="org.springframework.data.graph.neo4j.support.node.NodeEntityInstantiator" />
+
+	<bean id="relationshipEntityInstantiator"
+		class="org.springframework.data.graph.neo4j.support.relationship.RelationshipEntityInstantiator" />
+
+
+	<bean id="typeRepStrategyFactory"
+		class="org.springframework.data.graph.neo4j.support.typerepresentation.TypeRepresentationStrategyFactory">
+		<constructor-arg ref="graphDatabaseService" />
+		<constructor-arg ref="graphEntityInstantiator" />
+		<constructor-arg ref="relationshipEntityInstantiator" />
 	</bean>
 
-	<bean id="finderFactory"
-		class="org.springframework.data.graph.neo4j.finder.FinderFactory">
+	<bean id="repositoryFactory"
+		class="org.springframework.data.graph.neo4j.repository.DirectGraphRepositoryFactory">
 		<constructor-arg ref="graphDatabaseContext" />
 	</bean>
 
@@ -47,14 +54,12 @@
 		<property name="graphDatabaseContext" ref="graphDatabaseContext" />
 		<property name="nodeEntityStateFactory">
 			<bean
-				class="org.springframework.data.graph.neo4j.fieldaccess.NodeEntityStateFactory">
+				class="org.springframework.data.graph.neo4j.support.node.NodeEntityStateFactory">
 				<property name="graphDatabaseContext" ref="graphDatabaseContext" />
-				<property name="finderFactory" ref="finderFactory" />
 				<property name="nodeDelegatingFieldAccessorFactory">
 					<bean
 						class="org.springframework.data.graph.neo4j.fieldaccess.NodeDelegatingFieldAccessorFactory">
 						<constructor-arg ref="graphDatabaseContext" />
-						<constructor-arg ref="finderFactory" />
 					</bean>
 				</property>
 			</bean>
@@ -67,14 +72,14 @@
 		<property name="graphDatabaseContext" ref="graphDatabaseContext" />
 		<property name="relationshipEntityStateFactory">
 			<bean
-				class="org.springframework.data.graph.neo4j.fieldaccess.RelationshipEntityStateFactory">
+				class="org.springframework.data.graph.neo4j.support.relationship.RelationshipEntityStateFactory">
 				<property name="graphDatabaseContext" ref="graphDatabaseContext" />
-				<property name="finderFactory" ref="finderFactory" />
 			</bean>
 		</property>
 	</bean>
 
-	<bean id="neoTxManager" class="org.springframework.transaction.jta.JtaTransactionManager">
+	<bean id="neoTxManager"
+		class="org.springframework.transaction.jta.JtaTransactionManager">
 		<property name="transactionManager">
 			<bean class="org.neo4j.kernel.impl.transaction.SpringTransactionManager">
 				<constructor-arg ref="graphDatabaseService" />
@@ -87,4 +92,12 @@
 		</property>
 		<qualifier value="neoTxManager" />
 	</bean>
+	
+	<bean class="org.springframework.data.graph.neo4j.config.ConfigurationCheck">
+		<constructor-arg ref="graphDatabaseContext"/>
+		<constructor-arg ref="neoTxManager"/>
+	</bean>
+	
+	<bean class="org.springframework.data.graph.neo4j.template.Neo4jExceptionTranslator"/>
+	
 </beans>

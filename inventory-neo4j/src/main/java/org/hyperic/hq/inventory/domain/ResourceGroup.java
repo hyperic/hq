@@ -3,6 +3,7 @@ package org.hyperic.hq.inventory.domain;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.data.graph.annotation.GraphProperty;
 import org.springframework.data.graph.annotation.NodeEntity;
 import org.springframework.data.graph.annotation.RelatedTo;
@@ -16,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author dcrutchfield
  * 
  */
-
+@Configurable
 @NodeEntity
 public class ResourceGroup
     extends Resource {
