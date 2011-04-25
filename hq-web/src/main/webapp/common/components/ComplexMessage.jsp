@@ -53,7 +53,7 @@
 
         <c:otherwise>
           <%-- no url, has mouseover --%>
-          <html:link href="." onclick="return false;" styleClass="ListCellPopup1">
+          <html:link href="#" onclick="return false;" styleClass="ListCellPopup1">
             <fmt:message key="${elt.text}">
               <c:forEach items="${elt.params}" var="p">
                 <fmt:param value="${p}"/>

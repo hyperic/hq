@@ -35,14 +35,18 @@
 
 <c:choose>
   	<c:when test="${not hasMultipleDashboard && isFavorite}">
-    	<html:link page="/resource/common/QuickFavorites.do?eid=${resource.entityId.appdefKey}&mode=remove">
+    	<html:link action="/resource/common/QuickFavorites">
+    		<html:param name="eid" value="${resource.entityId.appdefKey}"/>
+    		<html:param name="mode" value="remove"/>
     		<fmt:message key="resource.common.quickFavorites.remove"/><html:img width="11" height="9" border="0" page="/images/title_arrow.gif"/>
     	</html:link>
   	</c:when> 
   	<c:otherwise>
   		<c:choose>
   			<c:when test="${not hasMultipleDashboard}">
-  				<html:link page="/resource/common/QuickFavorites.do?eid=${resource.entityId.appdefKey}&mode=add">
+  				<html:link action="/resource/common/QuickFavorites">
+  					<html:param name="eid" value="${resource.entityId.appdefKey}"/>
+  					<html:param name="mode" value="add"/>
     				<fmt:message key="resource.common.quickFavorites.add"/><html:img width="11" height="9" border="0" page="/images/title_arrow.gif"/>
     			</html:link>
     		</c:when>
@@ -89,7 +93,7 @@
 		  						       value="<fmt:message key='common.label.Cancel' />" class="CompactButton" />
 		  					</span>
 		  					<span id="AddToFavorites_Progress" style="display:none">
-		  						<img src="/images/4.0/icons/ajax-loader-gray.gif" align="absMiddle" />
+		  						<img src="<html:rewrite page="/images/4.0/icons/ajax-loader-gray.gif" />" align="absMiddle" />
 		  					</span>
 		  					<span id="AddToFavorites_SuccessMsg" style="display:none;" class="successDialogMsg">
 		  						<fmt:message key="resource.common.DashboardUpdatedMessage" />
@@ -100,7 +104,7 @@
 						</div>
 					</div>
 				</div>
-				<script src="/js/addtodashboard.js"></script>
+				<script src="<html:rewrite page="/js/addtodashboard.js" />"></script>
 				<script type="text/javascript">
 				    dojo.addOnLoad(function() {
 					    var config = {

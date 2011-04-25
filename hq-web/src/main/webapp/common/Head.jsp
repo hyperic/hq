@@ -68,7 +68,7 @@ djConfig.modulePaths = {
 
 <script src="<html:rewrite page='/js/dojo/1.1.2/dojo/dojo.js'/>" type="text/javascript"></script>
 <script type="text/javascript">
-    var imagePath = "<html:rewrite page="/images/"/>";
+    var imagePath = "/images/";
     dojo11.require('dojo.date');
     dojo.require('dojo.event.*');
 	dojo.require('dojo.widget.*');

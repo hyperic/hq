@@ -34,9 +34,11 @@
 
 <hq:pageSize var="pageSize"/>
 <c:set var="widgetInstanceName" value="savedQueriesList"/>
-<c:url var="selfAction" value="/dashboard/Admin.do?mode=savedQueries"/>
+<c:url var="selfAction" value="/dashboard/Admin.do">
+	<c:param name="mode" value="savedQueries"/>
+</c:url>
 
-<script  src="<html:rewrite page="/js/"/>dashboard_SummaryCounts.js" type="text/javascript"></script>
+<script  src="<html:rewrite page="/js/dashboard_SummaryCounts.js" />" type="text/javascript"></script>
 <script type="text/javascript">
   var help = '<hq:help/>';
 </script>
@@ -56,7 +58,7 @@
   </tr>
   <tr valign="top"> 
     <td colspan='2'>
-    <html:form action="/dashboard/ModifySummaryCounts.do">
+    <html:form action="/dashboard/ModifySummaryCounts">
 <div id="narrowlist_false">
     <!-- Content Block Title: Display Settings -->
     <tiles:insert definition=".header.tab">

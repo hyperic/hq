@@ -65,7 +65,11 @@
 </table>
 
 <!-- EDIT TOOLBAR -->
-<c:set var="editUrl" value="/resource/group/monitor/Config.do?mode=edit&rid=${Resource.id}&type=${Resource.entityId.type}"/>
+<c:url var="editUrl" value="/resource/group/monitor/Config.do">
+	<c:param name="mode" value="edit"/>
+	<c:param name="rid" value="${Resource.id}"/>
+	<c:param name="type" value="${Resource.entityId.type}"/>
+</c:url>
 <tiles:insert definition=".toolbar.edit">
   <tiles:put name="editUrl" beanName="editUrl"/>
 </tiles:insert>

@@ -64,7 +64,7 @@ public class VisibilityPortalAction
 
     public ActionForward currentHealth(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                        HttpServletResponse response) throws Exception {
-        setResource(request);
+        setResource(request, response);
 
         super.currentHealth(mapping, form, request, response);
 
@@ -75,7 +75,7 @@ public class VisibilityPortalAction
 
     public ActionForward resourceMetrics(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                          HttpServletResponse response) throws Exception {
-        setResource(request);
+        setResource(request, response);
 
         super.resourceMetrics(mapping, form, request, response);
 
@@ -87,7 +87,7 @@ public class VisibilityPortalAction
     public ActionForward performance(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                      HttpServletResponse response) throws Exception {
 
-        setResource(request);
+        setResource(request, response);
 
         Portal portal = Portal.createPortal(TITLE_PERFORMANCE, PORTLET_PERFORMANCE);
         request.setAttribute(Constants.PORTAL_KEY, portal);

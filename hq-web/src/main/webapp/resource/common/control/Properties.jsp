@@ -30,7 +30,7 @@
   USA.
  --%>
 
-<script src="<html:rewrite page="/js/"/>control_ControlActionProperties.js" type="text/javascript"></script>
+<script src="<html:rewrite page="/js/control_ControlActionProperties.js"/>" type="text/javascript"></script>
 
 <!--  GENERAL PROPERTIES TITLE -->
 <tiles:insert definition=".header.tab">

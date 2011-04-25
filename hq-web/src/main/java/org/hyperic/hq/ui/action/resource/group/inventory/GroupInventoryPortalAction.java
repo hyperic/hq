@@ -101,7 +101,7 @@ public class GroupInventoryPortalAction
     public ActionForward editResourceGeneral(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                              HttpServletResponse response) throws Exception {
 
-        findAndSetResource(request);
+        findAndSetResource(request, response);
 
         Portal portal = Portal.createPortal("resource.group.inventory.EditGeneralProperties",
             ".resource.group.inventory.EditGeneralProperties");
@@ -114,7 +114,7 @@ public class GroupInventoryPortalAction
     public ActionForward editResourceTypeHost(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                               HttpServletResponse response) throws Exception {
 
-        findAndSetResource(request);
+        findAndSetResource(request, response);
 
         Portal portal = Portal.createPortal("resource.group.inventory.EditTypeAndHostProperties",
             ".resource.group.inventory.EditTypeAndHostProperties");
@@ -127,7 +127,7 @@ public class GroupInventoryPortalAction
     public ActionForward addResources(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                       HttpServletResponse response) throws Exception {
 
-        findAndSetResource(request);
+        findAndSetResource(request, response);
 
         Portal portal = Portal.createPortal("resource.group.inventory.AddResources",
             ".resource.group.inventory.AddResources");
@@ -140,7 +140,7 @@ public class GroupInventoryPortalAction
     public ActionForward changeOwner(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                      HttpServletResponse response) throws Exception {
 
-        findAndSetResource(request);
+        findAndSetResource(request, response);
 
         Portal portal = Portal.createPortal(Constants.CHANGE_OWNER_TITLE, ".resource.group.inventory.changeOwner");
         portal.setDialog(true);
@@ -152,7 +152,7 @@ public class GroupInventoryPortalAction
     public ActionForward viewResource(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                       HttpServletResponse response) throws Exception {
 
-        findAndSetResource(request);
+        findAndSetResource(request, response);
 
         // clean out the return path
         SessionUtils.resetReturnPath(request.getSession());
@@ -173,7 +173,7 @@ public class GroupInventoryPortalAction
 
     public ActionForward addRoles(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                   HttpServletResponse response) throws Exception {
-        findAndSetResource(request);
+        findAndSetResource(request, response);
 
         Portal portal = Portal.createPortal("resource.group.inventory.AddRoles", ".resource.group.inventory.AddRoles");
         portal.setDialog(true);
@@ -182,8 +182,8 @@ public class GroupInventoryPortalAction
         return null;
     }
 
-    protected void findAndSetResource(HttpServletRequest request) throws Exception {
-        AppdefEntityID aeid = setResource(request);
+    protected void findAndSetResource(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        AppdefEntityID aeid = setResource(request, response);
 
         // If this is a cluster, then it's possible that it's also part of an
         // application

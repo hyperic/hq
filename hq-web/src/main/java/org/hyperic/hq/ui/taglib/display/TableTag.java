@@ -575,21 +575,23 @@ public class TableTag extends TablePropertyTag {
 							separator = "&";
 						}
 						// if value has been chopped, add leftover as title
+						String url = res.encodeURL(href + separator + paramId + "=" + paramVal);
+						
 						if (chopped) {
-							value = "<a href=\"" + href + separator + paramId
-									+ "=" + paramVal + "\" title=\"" + leftover
+							value = "<a href=\"" + url + "\" title=\"" + leftover
 									+ "\">" + value + "</a>";
 						} else {
-							value = "<a href=\"" + href + separator + paramId
-									+ "=" + paramVal + "\">" + value + "</a>";
+							value = "<a href=\"" + url + "\">" + value + "</a>";
 						}
 					} else /* tag.getParamId() == null */{
 						// if value has been chopped, add leftover as title
+						String url = res.encodeURL(href);
+						
 						if (chopped) {
-							value = "<a href=\"" + href + "\" title=\""
+							value = "<a href=\"" + url + "\" title=\""
 									+ leftover + "\">" + value + "</a>";
 						} else {
-							value = "<a href=\"" + href + "\">" + value
+							value = "<a href=\"" + url + "\">" + value
 									+ "</a>";
 						}
 					}
@@ -655,7 +657,7 @@ public class TableTag extends TablePropertyTag {
 	}
 
 	private String spacerImg() {
-		return req.getContextPath() + "/images/spacer.gif";
+		return res.encodeURL(req.getContextPath() + "/images/spacer.gif");
 	}
 
 	private String makeUrl(boolean qs) throws JspException {
@@ -907,7 +909,7 @@ public class TableTag extends TablePropertyTag {
 			String formats = "";
 			if (prop.getProperty("export.csv") != null
 					&& prop.getProperty("export.csv").equals("true")) {
-				formats += "<a href=\"" + url + "exportType=1\">"
+				formats += "<a href=\"" + res.encodeURL(url + "exportType=1") + "\">"
 						+ prop.getProperty("export.csv.label") + "</a>\n";
 			}
 
@@ -915,7 +917,7 @@ public class TableTag extends TablePropertyTag {
 					&& prop.getProperty("export.excel").equals("true")) {
 				if (!formats.equals(""))
 					formats += prop.getProperty("export.banner.sepchar");
-				formats += "<a href=\"" + url + "exportType=2\">"
+				formats += "<a href=\"" + res.encodeURL(url + "exportType=2") + "\">"
 						+ prop.getProperty("export.excel.label") + "</a>\n";
 			}
 
@@ -923,7 +925,7 @@ public class TableTag extends TablePropertyTag {
 					&& prop.getProperty("export.xml").equals("true")) {
 				if (!formats.equals(""))
 					formats += prop.getProperty("export.banner.sepchar");
-				formats += "<a href=\"" + url + "exportType=3\">"
+				formats += "<a href=\"" + res.encodeURL(url + "exportType=3") + "\">"
 						+ prop.getProperty("export.xml.label") + "</a>\n";
 			}
 

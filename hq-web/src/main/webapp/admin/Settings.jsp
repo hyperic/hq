@@ -41,12 +41,20 @@
 <c:if test="${useroperations['administerCAM']}">
 	<tr>
 		<td width="20%" class="BlockLabel"><fmt:message key="admin.home.Settings"/></td>
-		<td class="BlockContent"><html:link page="/admin/config/Config.do?mode=edit"><fmt:message key="admin.home.ServerConfig"/></html:link> <span class="italicInfo"><fmt:message key="inform.config.admin.HQServerConfig"/></span></td>
+		<td class="BlockContent">
+			<html:link action="/admin/config/Config">
+				<html:param name="mode" value="edit"/>
+				<fmt:message key="admin.home.ServerConfig"/>
+			</html:link> <span class="italicInfo"><fmt:message key="inform.config.admin.HQServerConfig"/></span></td>
 	</tr>
 </c:if>
 	<tr>
 		<td  width="20%" class="BlockLabel"></td>
-		<td class="BlockContent"><html:link page="/admin/config/Config.do?mode=monitor"><fmt:message key="admin.home.ResourceTemplates"/></html:link>
+		<td class="BlockContent">
+			<html:link action="/admin/config/Config">
+				<html:param name="mode" value="monitor"/>
+				<fmt:message key="admin.home.ResourceTemplates"/>
+			</html:link>
             <tiles:importAttribute name="defaultMsg" ignore="true"/>
             <span class="italicInfo">
             <c:choose>
@@ -62,7 +70,11 @@
 	</tr>
     <tr>
 		<td class="BlockLabel"></td>
-		<td class="BlockContent"><html:link page="/admin/config/Config.do?mode=escalate"><fmt:message key="admin.home.EscalationSchemes"/></html:link> <span class="italicInfo"><fmt:message key="inform.config.admin.EscalationScheme"/></span></td>
+		<td class="BlockContent">
+			<html:link action="/admin/config/Config">
+				<html:param name="mode" value="escalate"/>
+				<fmt:message key="admin.home.EscalationSchemes"/>
+			</html:link> <span class="italicInfo"><fmt:message key="inform.config.admin.EscalationScheme"/></span></td>
 	</tr>
 </table>
 <!--  /  -->

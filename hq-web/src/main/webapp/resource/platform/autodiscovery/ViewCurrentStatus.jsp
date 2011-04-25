@@ -51,8 +51,12 @@
 <!--  /  -->
 
 <c:set var="entityId" value="${Resource.entityId}"/>
-<c:url var="viewAutoInventoryResults" 
-    value="/resource/platform/AutoDiscovery.do?mode=viewResults&rid=${Resource.id}&type=${entityId.type}&aiPid=${AIPlatform.id}"/>
+<c:url var="viewAutoInventoryResults" value="/resource/platform/AutoDiscovery.do">
+	<c:param name="mode" value="viewResults"/>
+	<c:param name="rid" value="${Resource.id}"/>
+	<c:param name="type" value="${entityId.type}"/>
+	<c:param name="aiPid" value="${AIPlatform.id}"/>
+</c:url>
 
 <html:form action="/resource/platform/autodiscovery/ScanControl"> 
 <html:hidden property="rid"/>

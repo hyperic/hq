@@ -32,27 +32,25 @@
   USA.
  --%>
 
-
-<hq:pageSize var="pageSize"/>
+<hq:pageSize var="pageSize" />
 
 <!--  PAGE TITLE -->
 <c:set var="pagetmpname" value="${User.firstName} ${User.lastName}" />
 <tiles:insert definition=".page.title.admin.user.view">
- <tiles:put name="titleName"  beanName="pagetmpname" />
+ 	<tiles:put name="titleName"  beanName="pagetmpname" />
 </tiles:insert>
-<!--  /  -->
 
 <!-- USER PROPERTIES -->
+<tiles:insert definition=".portlet.confirm" flush="true" />
+<tiles:insert definition=".portlet.error" flush="true" />
+<tiles:insert definition=".admin.user.ViewProperties" />
 
-<tiles:insert definition=".portlet.confirm" flush="true"/>
-<tiles:insert definition=".portlet.error" flush="true"/>
-<tiles:insert definition=".admin.user.ViewProperties"/>
+<c:url var="listAction" value="/admin/user/UserAdmin.do">
+	<c:param name="mode" value="list" />
+</c:url>
 
 <tiles:insert definition=".page.return">
-  <tiles:put name="returnUrl" value="/admin/user/UserAdmin.do?mode=list"/>
-  <tiles:put name="returnKey" value="admin.user.ReturnToUsers"/>
+  	<tiles:put name="returnUrl" beanName="listAction" />
+  	<tiles:put name="returnKey" value="admin.user.ReturnToUsers" />
 </tiles:insert>
-
-<!--  Page footer -->
-<tiles:insert definition=".page.footer"/>
-<!--  /Page footer -->
+<tiles:insert definition=".page.footer" />

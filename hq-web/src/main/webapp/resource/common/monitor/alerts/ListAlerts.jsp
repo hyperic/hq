@@ -309,7 +309,7 @@
 			<td><a href="javascript:nextDay()"><html:img page="/images/schedule_right.gif" border="0"/></a></td>
 			<td><html:link href="javascript:popupCal()"><html:img page="/images/schedule_iconCal.gif" width="19" height="17" alt="" border="0"/></html:link></td>
 			<td class="ButtonCaptionText" width="100%" style="text-align: right; font-style: italic;">
-    			<c:url var="path" value="/"/>
+    			<c:url var="path" value="/images/icon_ack.gif"/>
     			<fmt:message key="dash.settings.criticalAlerts.ack.instruction">
       				<fmt:param value="${path}"/>
     			</fmt:message>

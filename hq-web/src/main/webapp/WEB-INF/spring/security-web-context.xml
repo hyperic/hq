@@ -37,6 +37,7 @@
 			<sec:filter-chain pattern="/lather/**" filters="none" />
 			<sec:filter-chain pattern="/jboss-lather/**" filters="none" />
 			<sec:filter-chain pattern="/*.ico" filters="none" />
+			<sec:filter-chain pattern="/rss/**" filters="none" />
 			<sec:filter-chain pattern="/css/**" filters="none" />
 			<sec:filter-chain pattern="/js/**" filters="none" />
 			<sec:filter-chain pattern="/images/**" filters="none" />
