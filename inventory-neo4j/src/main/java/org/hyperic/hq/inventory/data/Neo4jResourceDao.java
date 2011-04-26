@@ -20,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.graph.neo4j.repository.DirectGraphRepositoryFactory;
 import org.springframework.data.graph.neo4j.repository.GraphRepository;
+import org.springframework.data.graph.neo4j.repository.NamedIndexRepository;
 import org.springframework.data.graph.neo4j.support.GraphDatabaseContext;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -132,7 +133,7 @@ public class Neo4jResourceDao implements ResourceDao {
     }
 
     public Resource findRoot() {
-        return resourceFinder.findByPropertyValue("root", true);
+        return ((NamedIndexRepository<Resource>)resourceFinder).findByPropertyValue("root", "root", true);
     }
 
     private int getSortFieldType(Class<?> type) {
@@ -162,7 +163,7 @@ public class Neo4jResourceDao implements ResourceDao {
         persist(resource);
         // add an index for lookup later. Property name/value can be anything
         // here, the unique index name is important
-        graphDatabaseContext.getIndex(Resource.class, null).add(resource.getPersistentState(),
+        graphDatabaseContext.getIndex(Resource.class, "root").add(resource.getPersistentState(),
             "root", true);
     }
 
