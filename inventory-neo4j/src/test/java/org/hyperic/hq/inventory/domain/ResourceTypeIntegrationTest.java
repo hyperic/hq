@@ -1,5 +1,6 @@
 package org.hyperic.hq.inventory.domain;
 
+import static org.junit.Assert.fail;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -305,9 +306,21 @@ public class ResourceTypeIntegrationTest {
         Config securityConfig = new Config();
         securityConfig.setType(security);
         safeway.addConfig(securityConfig);
+        long storeId = store.getId();
+        long safewayId = safeway.getId();
         store.remove();
-        assertEquals(Long.valueOf(1),resourceTypeDao.count());
-        assertEquals(Long.valueOf(0),resourceDao.count());
+        try {
+            resourceTypeDao.findById((int)storeId);
+            fail("Exception should be thrown accessing a deleted node");
+        }catch(IllegalStateException e) {
+            //expected b/c we are deleting and accessing in same tx
+        }
+        try {
+            resourceDao.findById((int)safewayId);
+            fail("Exception should be thrown accessing a deleted node");
+        }catch(IllegalStateException e) {
+            //expected b/c we are deleting and accessing in same tx
+        }
         assertTrue(store.getRelationships().isEmpty());
     }
     

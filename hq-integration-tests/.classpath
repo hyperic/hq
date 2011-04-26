@@ -16,8 +16,8 @@
 	<classpathentry kind="var" path="M2_REPO/aopalliance/aopalliance/1.0/aopalliance-1.0.jar" sourcepath="M2_REPO/aopalliance/aopalliance/1.0/aopalliance-1.0-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/asm/asm/1.5.3/asm-1.5.3.jar"/>
 	<classpathentry kind="var" path="M2_REPO/asm/asm-attrs/1.5.3/asm-attrs-1.5.3.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/aspectj/aspectjrt/1.6.11.M2/aspectjrt-1.6.11.M2.jar" sourcepath="M2_REPO/org/aspectj/aspectjrt/1.6.11.M2/aspectjrt-1.6.11.M2-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/aspectj/aspectjweaver/1.6.11.M2/aspectjweaver-1.6.11.M2.jar" sourcepath="M2_REPO/org/aspectj/aspectjweaver/1.6.11.M2/aspectjweaver-1.6.11.M2-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/aspectj/aspectjrt/1.6.11.RELEASE/aspectjrt-1.6.11.RELEASE.jar" sourcepath="M2_REPO/org/aspectj/aspectjrt/1.6.11.RELEASE/aspectjrt-1.6.11.RELEASE-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/aspectj/aspectjweaver/1.6.11.RELEASE/aspectjweaver-1.6.11.RELEASE.jar" sourcepath="M2_REPO/org/aspectj/aspectjweaver/1.6.11.RELEASE/aspectjweaver-1.6.11.RELEASE-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/backport-util-concurrent/backport-util-concurrent/3.1/backport-util-concurrent-3.1.jar" sourcepath="M2_REPO/backport-util-concurrent/backport-util-concurrent/3.1/backport-util-concurrent-3.1-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/cglib/cglib/2.1_3/cglib-2.1_3.jar" sourcepath="M2_REPO/cglib/cglib/2.1_3/cglib-2.1_3-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/commons-beanutils/commons-beanutils/1.7.0/commons-beanutils-1.7.0.jar" sourcepath="M2_REPO/commons-beanutils/commons-beanutils/1.7.0/commons-beanutils-1.7.0-sources.jar"/>
@@ -103,9 +103,9 @@
 	</classpathentry>
 	<classpathentry kind="var" path="M2_REPO/org/hibernate/javax/persistence/hibernate-jpa-2.0-api/1.0.0.Final/hibernate-jpa-2.0-api-1.0.0.Final.jar" sourcepath="M2_REPO/org/hibernate/javax/persistence/hibernate-jpa-2.0-api/1.0.0.Final/hibernate-jpa-2.0-api-1.0.0.Final-sources.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/inventory-neo4j"/>
-	<classpathentry kind="var" path="M2_REPO/org/springframework/data/spring-data-neo4j/1.0.0.M4/spring-data-neo4j-1.0.0.M4.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/springframework/data/spring-data-neo4j/1.0.0.RELEASE/spring-data-neo4j-1.0.0.RELEASE.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/hq-messaging"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/data/spring-data-jpa/1.0.0.M2/spring-data-jpa-1.0.0.M2.jar" sourcepath="M2_REPO/org/springframework/data/spring-data-jpa/1.0.0.M1/spring-data-jpa-1.0.0.M2-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/springframework/data/spring-data-commons-core/1.0.0.M4/spring-data-commons-core-1.0.0.M4.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/springframework/data/spring-data-commons-core/1.0.0.M5/spring-data-commons-core-1.0.0.M5.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

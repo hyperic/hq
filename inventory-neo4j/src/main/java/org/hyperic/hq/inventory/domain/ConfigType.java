@@ -7,6 +7,7 @@ import java.util.Set;
 import javax.validation.constraints.NotNull;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.data.graph.annotation.GraphProperty;
 import org.springframework.data.graph.annotation.NodeEntity;
 import org.springframework.data.graph.annotation.RelatedTo;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 
 @NodeEntity
+@Configurable
 public class ConfigType {
 
     @Autowired

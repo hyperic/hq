@@ -147,7 +147,7 @@ public class ServiceMergerImpl implements ServiceMerger {
             } else {
                 update = true;
                 // UPDATE SERVICE
-                log.info("Updating service: " + service.getName());
+               
                 final String aiSvcName = aiservice.getName();
                 final String svcName = service.getName();
                 final String aiid = service.getAutoinventoryIdentifier();
@@ -164,6 +164,7 @@ public class ServiceMergerImpl implements ServiceMerger {
                     modified=true;
                 }
                 if(modified) {
+                    log.info("Updating service: " + service.getName());
                     serviceManager.updateService( subj,service.getServiceValue());
                 }
             }
@@ -176,7 +177,7 @@ public class ServiceMergerImpl implements ServiceMerger {
             } else {
                 // make sure the service's schedule is up to date on the agent
                 // side
-                toSchedule.add(appdefConverter.newAppdefEntityId(service.getResource()));
+                toSchedule.add(service.getEntityId());
             }
 
             // SET CUSTOM PROPERTIES FOR SERVICE

@@ -305,16 +305,17 @@ public class ResourceIntegrationTest {
         produce.relateTo(traderJoes, "ManagedBy");
     }
 
-    @Test
+    @Test(expected=IllegalStateException.class)
     public void testRemove() {
         Config product = new Config();
         product.setType(store.getConfigType("Product"));
         product.setValue("user", "bob");
         traderJoes.addConfig(product);
+        int traderJoesId = traderJoes.getId();
         traderJoes.remove();
         // verify relationship removed
         assertEquals(1, produce.getRelationships().size());
-        assertEquals(Long.valueOf(2),resourceDao.count());
+        resourceDao.findById(traderJoesId);
     }
 
     @Test

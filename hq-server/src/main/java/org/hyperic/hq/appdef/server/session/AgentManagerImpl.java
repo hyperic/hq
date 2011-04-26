@@ -67,6 +67,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.inventory.data.ResourceDao;
+import org.hyperic.hq.inventory.domain.RelationshipTypes;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.ConfigPropertyException;
@@ -99,9 +100,6 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     private ApplicationContext applicationContext;
     private ResourceDao resourceDao;
     private ManagedResourceRepository managedResourceRepository;
-    private ServerFactory serverFactory;
-    private PlatformFactory platformFactory;
-    private ServiceFactory serviceFactory;
 
     @Autowired
     public AgentManagerImpl(AgentTypeRepository agentTypeRepository,
@@ -109,9 +107,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                             PermissionManager permissionManager, 
                             ServerConfigManager serverConfigManager,
                             AgentCommandsClientFactory agentCommandsClientFactory,
-                            ResourceDao resourceDao, ManagedResourceRepository managedResourceRepository,
-                            PlatformFactory platformFactory,ServerFactory serverFactory,
-                            ServiceFactory serviceFactory) {
+                            ResourceDao resourceDao, ManagedResourceRepository managedResourceRepository) {
         this.agentTypeRepository = agentTypeRepository;
         this.agentDao = agentDao;
         this.permissionManager = permissionManager;
@@ -119,9 +115,6 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         this.agentCommandsClientFactory = agentCommandsClientFactory;
         this.resourceDao = resourceDao;
         this.managedResourceRepository = managedResourceRepository;
-        this.platformFactory = platformFactory;
-        this.serverFactory = serverFactory;
-        this.serviceFactory = serviceFactory;
     }
 
     /**
@@ -504,27 +497,24 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
      */
     @Transactional(readOnly = true)
     public Agent getAgent(AppdefEntityID aID) throws AgentNotFoundException {
-            Platform platform = null;
+            Resource platform = null;
             switch (aID.getType()) {
                 case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                    Service service = serviceFactory.createService(resourceDao.findById(aID.getId()));
-                    AppdefResource parent = service.getParent();
-                    // server may be null due to async delete
-                    if (parent == null) {
-                        break;
-                    }
-                    if(parent instanceof Platform) {
-                        platform = (Platform)parent;
+                    Resource service = resourceDao.findById(aID.getId());
+                    Resource parent = service.getResourceTo(RelationshipTypes.SERVICE);
+                    if(parent.getProperty(AppdefResourceType.APPDEF_TYPE_ID).equals(AppdefEntityConstants.APPDEF_TYPE_SERVER)) {
+                        platform = parent.getResourceTo(RelationshipTypes.SERVER);
                     }else {
-                        platform = ((Server)parent).getPlatform();
+                        platform = parent;
                     }
+                   
                     break;
                 case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                    Server server = serverFactory.createServer(resourceDao.findById(aID.getId()));
-                    platform = server.getPlatform();
+                    Resource server = resourceDao.findById(aID.getId());
+                    platform = server.getResourceTo(RelationshipTypes.SERVER);
                     break;
                 case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                    platform = platformFactory.createPlatform(resourceDao.findById(aID.getId()));
+                    platform = resourceDao.findById(aID.getId());
                     break;
                 default:
                     throw new AgentNotFoundException("Request for agent from an "
@@ -534,7 +524,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
             if (platform == null) {
                 throw new AgentNotFoundException("No agent found for " + aID);
             }
-            return platform.getAgent();
+            return managedResourceRepository.findAgentByResource(platform.getId());
     }
     
     /**
