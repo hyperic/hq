@@ -72,7 +72,7 @@ public class PerformanceMonitor {
      * @see org.hyperic.hq.monitor.aop.MonitorArchitecture
      * @param pjp
      */
-    @Around("org.hyperic.hq.monitor.aop.MonitorArchitecture.serviceLayerOperationDuration()")
+    @Around("org.hyperic.hq.monitor.aop.MonitorArchitecture.serviceOrInventoryOperation()")
     public Object monitorServiceMethod(ProceedingJoinPoint pjp) throws Throwable {
 
         Object invocation = null;

@@ -65,5 +65,10 @@ public class MonitorArchitecture {
 	@Pointcut("execution(* (@org.springframework.stereotype.Service *).*(..))")
 	public void serviceOperation() {
 	}
+	
+	@Pointcut("serviceLayerOperationDuration() || execution(* org.hyperic.hq.inventory..*.*(..))")
+    public void serviceOrInventoryOperation() {
+    }
+	
 	///CLOVER:ON
 }
