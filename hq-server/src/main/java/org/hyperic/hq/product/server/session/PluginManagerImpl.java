@@ -32,7 +32,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.StringReader;
 import java.io.Writer;
 import java.net.JarURLConnection;
 import java.net.URL;
@@ -52,6 +51,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
+
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
@@ -280,10 +280,10 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         File rtn = null;
         try {
             rtn = new File(TMP_DIR + File.separator + filename);
-            final String str = new String(bytes);
-            final StringReader buf = new StringReader(str);
-            new SAXBuilder().build(buf);
+            final ByteArrayInputStream is = new ByteArrayInputStream(bytes);
+            validatePluginXml(is);
             writer = new FileWriter(rtn);
+            final String str = new String(bytes);
             writer.write(str);
             return rtn;
         } catch (JDOMException e) {
@@ -347,23 +347,7 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
                     }
                     currXml = entry.getName();
                     is = jarFile.getInputStream(entry);
-                    SAXBuilder builder = new SAXBuilder();
-                    builder.setEntityResolver(new EntityResolver() {
-                        // systemId = file:///pdk/plugins/process-metrics.xml
-                        public InputSource resolveEntity(String publicId, String systemId)
-                        throws SAXException, IOException {
-                            final File entity = new File(systemId);
-                            final String filename = entity.getName().replaceAll(AGENT_PLUGIN_DIR, "");
-                            File file = new File(getCustomPluginDir(), filename);
-                            if (!file.exists()) {
-                                file = new File(getServerPluginDir(), filename);
-                            }
-                            return (file.exists()) ?
-                                new InputSource("file://" + file.getAbsolutePath()) :
-                                new InputSource(systemId);
-                        }
-                    });
-                    builder.build(is);
+                    validatePluginXml(is);
                     currXml = null;
                 } finally {
                     close(is);
@@ -386,6 +370,26 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
             close(jis);
             close(fos);
         }
+    }
+    
+    private void validatePluginXml(InputStream is) throws JDOMException, IOException {
+        SAXBuilder builder = new SAXBuilder();
+        builder.setEntityResolver(new EntityResolver() {
+            // systemId = file:///pdk/plugins/process-metrics.xml
+            public InputSource resolveEntity(String publicId, String systemId)
+            throws SAXException, IOException {
+                final File entity = new File(systemId);
+                final String filename = entity.getName().replaceAll(AGENT_PLUGIN_DIR, "");
+                File file = new File(getCustomPluginDir(), filename);
+                if (!file.exists()) {
+                    file = new File(getServerPluginDir(), filename);
+                }
+                return (file.exists()) ?
+                    new InputSource("file://" + file.getAbsolutePath()) :
+                    new InputSource(systemId);
+            }
+        });
+        builder.build(is);
     }
 
     public Map<Integer, Map<AgentPluginStatusEnum, Integer>> getPluginRollupStatus() {
