@@ -30,6 +30,7 @@ import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.product.shared.PluginDeployException;
 import org.hyperic.hq.product.shared.PluginManager;
 import org.hyperic.hq.product.shared.ProductManager;
+import org.hyperic.hq.ui.KeyConstants;
 import org.hyperic.hq.web.BaseController;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +51,7 @@ public class PluginManagerController extends BaseController implements Applicati
     private static final Log log = LogFactory.getLog(PluginManagerController.class);
     private ApplicationContext applicationContext;
     private ProductManager productManager;
+    private static final String HELP_PAGE_MAIN = "Administration.Plugin.Manager";
     private PluginManager pluginManager;
     private AgentManager agentManager;
     private AuthzBoss authzBoss;
@@ -66,7 +68,7 @@ public class PluginManagerController extends BaseController implements Applicati
     }
     
     @RequestMapping(method = RequestMethod.GET)
-    public String index(Model model) {
+    public String index(Model model,HttpServletRequest request) {
         model.addAttribute("pluginSummaries", getPluginSummaries());
         model.addAttribute("info",getAgentInfo());
         model.addAttribute("mechanismOn", pluginManager.isPluginSyncEnabled());
@@ -75,6 +77,7 @@ public class PluginManagerController extends BaseController implements Applicati
         }else{
             model.addAttribute("instruction", "admin.managers.plugin.mechanism.off");
         }
+        request.setAttribute(KeyConstants.PAGE_TITLE_KEY, HELP_PAGE_MAIN);
         return "admin/managers/plugin";
     }
     

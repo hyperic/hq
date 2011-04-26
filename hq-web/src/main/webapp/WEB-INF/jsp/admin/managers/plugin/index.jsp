@@ -3,6 +3,7 @@
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+<%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 
 <link rel="stylesheet" type="text/css" href="<spring:url value="/static/css/admin/managers/plugin/pluginMgr.css"/>" />
 
@@ -18,13 +19,17 @@
 	</div>
 
 	<div class="topInfo">
+		<c:if test="${info.agentErrorCount>0}">
+		    <span id="agentFailure" style="float:right">
+		      (${info.agentErrorCount} <img src="<spring:url value="/static/images/icon_available_red.gif"/>"/>)
+		    </span>
+		</c:if>
 		<span id="agentInfo" style="float:right">
 			<fmt:message key="admin.managers.Plugin.information.agent.count"/>:
-		    <span id="agentInfoAllCount">${info.allAgentCount}</span><br/>
+		    <span id="agentInfoAllCount">${info.allAgentCount}</span>&nbsp;&nbsp;
 		</span>
-		
+
 		<span style="float:left">
-                <fmt:message key="admin.managers.Plugin.information.legend"/>
                 <img src="<spring:url value="/static/images/icon_available_green.gif"/>"/> 
                         <fmt:message key="admin.managers.Plugin.tip.icon.success"/>
                 <img src="<spring:url value="/static/images/alert.png"/>"/> 
@@ -153,17 +158,17 @@
 	<ul id="agentList"></ul>
 	
 	<div id="statusButtonBar">
-	    <span style="float:left">&nbsp;&nbsp; <fmt:message key="admin.managers.Plugin.information.legend"/>
+	    <span style="float:left">&nbsp;&nbsp;
 	    						  &nbsp;<img src="<spring:url value="/static/images/alert.png"/>" alt="in progress"/> <fmt:message key="admin.managers.Plugin.tip.icon.in.progress"/>
 	   							  &nbsp;<img src="<spring:url value="/static/images/icon_available_red.gif"/>" alt="failure"/> <fmt:message key="admin.managers.Plugin.tip.icon.error"/>
 	    </span>
 		<a href="#" class="cancelLink"><fmt:message key="admin.managers.plugin.button.close" /></a>
 	</div>
 </div>
-
 <div id="agentSummaryPanel" style="visibility:hidden;">
-	<span><fmt:message key="admin.managers.Plugin.summary.message" /></span>
+	<div>
 	<ul id="agentSummaryList"></ul>
+	</div>
 	<a href="#" class="cancelLink"><fmt:message key="admin.managers.plugin.button.close" /></a>
 </div>
 
@@ -225,7 +230,7 @@
 		
 		uncheckCheckboxes(hqDojo.query("input[type=checkbox]"));
 		refreshTime(hqDojo.byId("timeNow"),"refreshTimeInfo","#EEEEEE");
-		resizePluginMgrContentHeight()
+		resizePluginMgrContentHeight();
 		
 		hqDojo.connect(window, "onresize", resizePluginMgrContentHeight);
 		
@@ -317,21 +322,16 @@
 		
 		function seeAgentSummary(){
 			hqDijit.byId("agentSummaryPanelDialog").show();
+		
 			var agentUl = hqDojo.byId("agentSummaryList");
 			var xhrArgs = {
 					preventCache:true,
 					url: "<spring:url value='/app/admin/managers/plugin/agent/summary'/>",
 					load: function(response) {
-						hqDojo.forEach(response, function(agent){
+						hqDojo.forEach(response, function(agentName){
 							var li = hqDojo.create("li",{
-								"innerHTML":agent.agentName +":&nbsp;&nbsp;"
-							});
-							if(agent.errorCount>0){
-								li.innerHTML += "<img src='<spring:url value="/static/images/icon_available_red.gif"/>' alt='failure'/> " +agent.errorCount+" " ;
-							}
-							if(agent.inProgressCount>0){
-								li.innerHTML += "<img src='<spring:url value="/static/images/alert.png"/>' alt='in progress'/> " +agent.inProgressCount+" " ;
-							}
+								"innerHTML":agentName
+							});			
 							agentUl.appendChild(li);
 						});
 					},
@@ -344,26 +344,7 @@
 			hqDojo.xhrGet(xhrArgs);
 		}
 
-		hqDojo.behavior.add({
-			".agentStatusSpan":{
-				onclick: function(evt){
-					var anchor = evt.target.id.indexOf("_");
-					var pluginId = evt.target.id.substr(anchor+1,evt.target.id.length);
-					var pluginName = evt.target.id.substr(0,anchor);
-					hqDojo.byId("pluginName").value=pluginName;
-					hqDojo.byId("pluginId").value=pluginId;
-					seeStatusDetail(pluginId);
-				},
-				found: function(node){hqDojo.style(node,"cursor","pointer");}
-			},
-			"#agentInfo":{
-				onclick: function(evt){
-					seeAgentSummary();
-				}
-			}
-		});
-		
-		hqDojo.behavior.apply();
+
 		
 		var showStatusDialog = new hqDijit.Dialog({
 			id: "showStatusPanelDialog"
@@ -373,12 +354,12 @@
 		hqDojo.style(showStatusDialog.closeButtonNode,"visibility", "hidden" );
 		showStatusDialog.setContent(showStatusPanel);
 		hqDojo.style(showStatusPanel, "visibility", "visible");
-			
-		hqDojo.query("#showStatusPanelDialog .cancelLink").onclick(function(e) {
-			hqDijit.byId("showStatusPanelDialog").hide();
-			hqDojo.empty("agentList");
-			hqDojo.byId("searchText").value="";
-		});
+        var showStatusPanelContent = hqDojo.query("#showStatusPanelDialog .dijitDialogPaneContent")[0];
+        hqDojo.create("span",{
+		                     "class":"helpLink",
+		                     "id":"agentStatusHelp",
+			                 "innerHTML":"<fmt:message key="header.Help"/>"
+			             },showStatusPanelContent);	
 		 
 		hqDojo.connect(hqDojo.byId("searchText"),"onkeyup",function(e){
 			var pluginId = hqDojo.byId("pluginId").value;
@@ -392,11 +373,60 @@
 		var agentSummaryPanel = hqDojo.byId("agentSummaryPanel");
 		hqDojo.style(agentSummaryDialog.closeButtonNode,"visibility","hidden");
 		agentSummaryDialog.setContent(agentSummaryPanel);
+		
+		var summaryContent = hqDojo.query("#agentSummaryPanelDialog .dijitDialogPaneContent")[0];
+        hqDojo.create("span",{
+		                     "class":"helpLink",
+		                     "id":"agentSummaryHelp",
+			                 "innerHTML":"<fmt:message key="header.Help"/>"
+			             },summaryContent);	
+		
 		hqDojo.style(agentSummaryPanel,"visibility","visible");
 		hqDojo.query("#agentSummaryPanelDialog .cancelLink").onclick(function(e){
 			hqDijit.byId("agentSummaryPanelDialog").hide();
 			hqDojo.empty("agentSummaryList");
 		});
+
+		hqDojo.behavior.add({
+			".agentStatusSpan":{
+				onclick: function(evt){
+					var anchor = evt.target.id.indexOf("_");
+					var pluginId = evt.target.id.substr(anchor+1,evt.target.id.length);
+					var pluginName = evt.target.id.substr(0,anchor);
+					hqDojo.byId("pluginName").value=pluginName;
+					hqDojo.byId("pluginId").value=pluginId;
+					seeStatusDetail(pluginId);
+				}
+			},
+			"#agentFailure":{
+				onclick: function(evt){
+					seeAgentSummary();
+				}
+			},
+			"#agentStatusHelp":{
+			    onclick: function(e){
+		             var helpHref = "<hq:help/>";//TODO Annie
+			         var helpWin=window.open(helpHref,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');
+                     helpWin.focus();
+		        }
+			},
+			"#agentSummaryHelp":{
+			    onclick: function(e){
+		    		var helpHref = "<hq:help/>";//TODO Annie
+					var helpWin=window.open(helpHref,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');
+            		helpWin.focus();
+	            }
+			},
+			"#showStatusPanelDialog .cancelLink":{
+			    onclick: function(e){
+			        hqDijit.byId("showStatusPanelDialog").hide();
+			        hqDojo.empty("agentList");
+			        hqDojo.byId("searchText").value="";
+			    }
+			}
+		});
+
+		hqDojo.behavior.apply();
 		
 		if(${!mechanismOn}){
 			hqDojo.attr("deleteForm","class","mechanismOff");

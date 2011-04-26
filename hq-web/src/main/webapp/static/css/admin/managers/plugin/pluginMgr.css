@@ -176,14 +176,32 @@
 		color:#777777;
 		font-weight: bold;
 	}
-	.agentStatusSpan{
+	.agentStatusSpan,
+	#agentFailure,
+	.helpLink{
 		color: #0066CC;
 		font-weight: bold;
-		height:50px;
+		height:9px;
 	}
 	.agentStatusSpan:focus,
-	.agentStatusSpan:hover{
-		color: #0066FF;
+	.agentStatusSpan:hover,
+	#agentFailure:focus,
+	#agentFailure:hover,
+	.helpLink:focus,
+	.helpLink:hover{
+		cursor: pointer;
+		color: #0099FF;
+	}
+	.helpLink{
+	    margin-top:0;
+	    margin-right:0;
+	    position:absolute;
+	    top:4px;
+	    right:10px;
+	    float:right;
+	}
+	#agentSummaryPanel{
+		margin-top:0;
 	}
 	.errorAgentTip{
 		overflow:auto;
@@ -192,7 +210,9 @@
 		font-weight: bold;
 		height:8px;
 	}
-	.topInfo, #currentTimeInfo{
+	.topInfo, 
+	#currentTimeInfo, 
+	#agentInfo{
 		font-weight: bold;
 		height: 20px;
 		color: #777777;
@@ -309,12 +329,4 @@
 		max-width:350px;
 		margin-left:0px;
 	}
-	#agentInfo{
-		float:right;
-		color:#06C;
-		font-weight:bold;
-		cursor:pointer;
-	}
-	#agentInfo:focus, #agentInfo:hover{
-		color:#09F;
-	}
+	
