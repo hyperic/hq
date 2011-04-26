@@ -35,7 +35,9 @@
 
 <hq:pageSize var="pageSize"/>
 <c:set var="widgetInstanceName" value="resources"/>
-<c:url var="selfAction" value="/dashboard/Admin.do?mode=escalationSummary"/>
+<c:url var="selfAction" value="/dashboard/Admin.do">
+	<c:param name="mode" value="escalationSummary"/>
+</c:url>
 
 <script  src="<html:rewrite page="/js/prototype.js"/>" type="text/javascript"></script>
 <script  src="<html:rewrite page="/js/scriptaculous.js"/>" type="text/javascript"></script>
@@ -61,7 +63,7 @@ var help = '<hq:help/>';
   </tr>
   <tr valign="top"> 
     <td colspan="2">
-      <html:form action="/dashboard/ModifyEscalation.do" onsubmit="ResourceHealthForm.order.value=Sortable.serialize('resOrd')">
+      <html:form action="/dashboard/ModifyEscalation" onsubmit="ResourceHealthForm.order.value=Sortable.serialize('resOrd')">
 <div id="narrowlist_false">
       <tiles:insert definition=".header.tab">
         <tiles:put name="tabKey" value="dash.settings.SelectedResources"/>
@@ -95,8 +97,12 @@ var help = '<hq:help/>';
       -->
       </script>
 
+	  <c:url var="addToListAction" value="/dashboard/Admin.do">
+	  	<c:param name="mode" value="resourceHealthAddResources"/>
+	  	<c:param name="key" value=".dashContent.resourcehealth.resources"/>
+	  </c:url>
       <tiles:insert definition=".toolbar.addToList">
-        <tiles:put name="addToListUrl" value="/dashboard/Admin.do?mode=resourceHealthAddResources&key=.dashContent.resourcehealth.resources"/>  
+        <tiles:put name="addToListUrl" beanName="addToListAction"/>  
         <tiles:put name="listItems" beanName="resourceHealthList"/>
         <tiles:put name="listSize" beanName="resourceHealthList" beanProperty="totalSize"/>
         <tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>  

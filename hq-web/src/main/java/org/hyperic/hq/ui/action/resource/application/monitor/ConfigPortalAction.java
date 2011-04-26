@@ -77,7 +77,7 @@ public class ConfigPortalAction
     public ActionForward configMetrics(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                        HttpServletResponse response) throws Exception {
 
-        setResource(request);
+        setResource(request, response);
         super.configMetrics(mapping, form, request, response);
 
         Portal portal = Portal.createPortal(CONFIG_METRICS_TITLE, CONFIG_METRICS_PORTAL);
@@ -90,7 +90,7 @@ public class ConfigPortalAction
     public ActionForward addMetrics(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                     HttpServletResponse response) throws Exception {
 
-        setResource(request);
+        setResource(request, response);
         Portal portal = Portal.createPortal(ADD_METRICS_TITLE, ADD_METRICS_PORTAL);
         portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);

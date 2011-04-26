@@ -383,14 +383,17 @@ function showViewEscResponse(originalRequest) {
             dojo11.byId('pauseTimeText').innerHTML = 'Allow user to pause escalation: ' + allowPause + "<br>";
         }
     
-        <c:if test="${useroperations['modifyEscalation']}">
-        Sortable.create('viewEscalationUL', {containment:'viewEscalationUL',
-            onUpdate: function() {
-                var pars = "&id=" + id;
-                var url = '<html:rewrite action="/escalation/updateEscalationOrder"/>?' + Sortable.serialize("viewEscalationUL") + pars;
-                new Ajax.Request(url, {method: 'post', onFailure :reportError});
-            },
-            constraint: 'vertical'});
+		<c:if test="${useroperations['modifyEscalation']}">
+		    Sortable.create('viewEscalationUL', {
+		      	containment:'viewEscalationUL',
+		        onUpdate: function() {
+		            var pars = "&id=" + id;
+		            var url = '<html:rewrite action="/escalation/updateEscalationOrder"/>';
+		                
+		            new Ajax.Request(url, {method: 'post', parameters: Sortable.serialize("viewEscalationUL") + pars, onFailure :reportError});
+		        },
+		        constraint: 'vertical'
+		  	});
         </c:if>
     }
 }
@@ -934,10 +937,10 @@ function showResponseRemoved() {
 }
 
 function removeAction(id) {
-    var url = '<html:rewrite action="/escalation/removeAction.do"/>';
+    var url = '<html:rewrite action="/escalation/removeAction"/>';
     var pars = "id=" + id;
     pars += "&EscId=" + dojo11.byId('id').value;
-
+	
     new Ajax.Request(url, {method: 'post', parameters: pars, onComplete: showResponseRemoved, onFailure :reportError});
 }
 

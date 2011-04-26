@@ -80,7 +80,7 @@ public class ConfigPortalAction
     public ActionForward configMetrics(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                        HttpServletResponse response) throws Exception {
 
-        setResource(request);
+        setResource(request, response);
 
         super.configMetrics(mapping, form, request, response);
 
@@ -94,7 +94,7 @@ public class ConfigPortalAction
     public ActionForward addMetrics(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                     HttpServletResponse response) throws Exception {
 
-        setResource(request);
+        setResource(request, response);
         Portal portal = Portal.createPortal(ADD_METRICS_TITLE, ADD_METRICS_PORTAL);
         portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
@@ -106,7 +106,7 @@ public class ConfigPortalAction
     public ActionForward editAvailability(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                           HttpServletResponse response) throws Exception {
 
-        setResource(request);
+        setResource(request, response);
         Portal portal = Portal.createPortal(EDIT_AVAILABILITY_TITLE, EDIT_AVAILABILITY_PORTAL);
         portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);

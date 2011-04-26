@@ -67,8 +67,18 @@
       <c:choose>
         <c:when test="${application}">      
           <tr>
-            <td class="FormLabel"><html:link page="/ResourceHub.do?ff=4"><fmt:message key="dash.home.DisplayCategory.AppTotal"/></html:link></td>
-            <td class="FormLabelRight"><html:link page="/ResourceHub.do?ff=4"><c:out value="${summary.applicationCount}"/></html:link></td>
+            <td class="FormLabel">
+            	<html:link action="/ResourceHub">
+            		<html:param name="ff" value="4"/>
+            		<fmt:message key="dash.home.DisplayCategory.AppTotal"/>
+            	</html:link>
+            </td>
+            <td class="FormLabelRight">
+            	<html:link action="/ResourceHub">
+            		<html:param name="ff" value="4"/>
+            		${summary.applicationCount}
+            	</html:link>
+            </td>
           </tr>
           <c:forEach var="type" items="${applicationTypes}">
             <c:if test="${not empty summary.appTypeMap[type]}">
@@ -84,7 +94,12 @@
             <td colspan="2">&nbsp;</td>
           </tr>
             <tr>
-              <td class="FormLabel" colspan="2"><html:link page="/ResourceHub.do?ff=4"><fmt:message key="dash.home.DisplayCategory.AppTotal"/></html:link></td>
+              <td class="FormLabel" colspan="2">
+              	<html:link action="/ResourceHub">
+              		<html:param name="ff" value="4"/>
+              		<fmt:message key="dash.home.DisplayCategory.AppTotal"/>
+              	</html:link>
+              </td>
             </tr>
           <c:forEach var="type" items="${applicationTypes}">        
             <c:if test="${not empty summary.appTypeMap[type]}">
@@ -103,8 +118,18 @@
             <td colspan="2">&nbsp;</td>
           </tr>
           <tr>
-            <td class="FormLabel"><html:link page="/ResourceHub.do?ff=1"><fmt:message key="dash.home.DisplayCategory.PlatformTotal"/></html:link></td>
-            <td class="FormLabelRight"><html:link page="/ResourceHub.do?ff=1"><c:out value="${summary.platformCount}"/></html:link></td>
+            <td class="FormLabel">
+            	<html:link action="/ResourceHub">
+            		<html:param name="ff" value="1" />
+            		<fmt:message key="dash.home.DisplayCategory.PlatformTotal"/>
+            	</html:link>
+            </td>
+            <td class="FormLabelRight">
+            	<html:link action="/ResourceHub">
+            		<html:param name="ff" value="1"/>
+            		${summary.platformCount}
+            	</html:link>
+            </td>
           </tr>
           <c:forEach var="type" items="${platformTypes}">        
             <c:if test="${not empty summary.platformTypeMap[type]}">
@@ -120,7 +145,12 @@
             <td colspan="2">&nbsp;</td>
           </tr>
           <tr>
-            <td class="FormLabel"><html:link page="/ResourceHub.do?ff=1"><fmt:message key="dash.home.DisplayCategory.PlatformTotal"/></html:link></td>
+            <td class="FormLabel">
+            	<html:link action="/ResourceHub">
+            		<html:param name="ff" value="1"/>
+            		<fmt:message key="dash.home.DisplayCategory.PlatformTotal"/>
+            	</html:link>
+            </td>
             <td>&nbsp;</td>
           </tr>
           <c:forEach var="type" items="${platformTypes}">        
@@ -140,8 +170,18 @@
             <td colspan="2">&nbsp;</td>
           </tr>
           <tr>
-            <td class="FormLabel"><html:link page="/ResourceHub.do?ff=2"><fmt:message key="dash.home.DisplayCategory.ServerTotal"/></html:link></td>
-            <td class="FormLabelRight"><html:link page="/ResourceHub.do?ff=2"><c:out value="${summary.serverCount}"/></html:link></td>
+            <td class="FormLabel">
+            	<html:link action="/ResourceHub">
+            		<html:param name="ff" value="2"/>
+            		<fmt:message key="dash.home.DisplayCategory.ServerTotal"/>
+            	</html:link>
+            </td>
+            <td class="FormLabelRight">
+            	<html:link action="/ResourceHub">
+            		<html:param name="ff" value="2"/>
+            		${summary.serverCount}
+            	</html:link>
+            </td>
           </tr>
           <c:forEach var="type" items="${serverTypes}">        
             <c:if test="${not empty summary.serverTypeMap[type]}">
@@ -157,7 +197,12 @@
             <td colspan="2">&nbsp;</td>
           </tr>
           <tr>
-            <td class="FormLabel"><html:link page="/ResourceHub.do?ff=2"><fmt:message key="dash.home.DisplayCategory.ServerTotal"/></html:link></td>
+            <td class="FormLabel">
+            	<html:link action="/ResourceHub">
+            		<html:param name="ff" value="2"/>
+            		<fmt:message key="dash.home.DisplayCategory.ServerTotal"/>
+            	</html:link>
+            </td>
             <td>&nbsp;</td>
           </tr>
           <c:forEach var="type" items="${serverTypes}">        
@@ -177,8 +222,18 @@
             <td colspan="2">&nbsp;</td>
           </tr>
           <tr>
-            <td class="FormLabel"><html:link page="/ResourceHub.do?ff=3"><fmt:message key="dash.home.DisplayCategory.ServiceTotal"/></html:link></td>
-            <td class="FormLabelRight"><html:link page="/ResourceHub.do?ff=3"><c:out value="${summary.serviceCount}"/></html:link></td>
+            <td class="FormLabel">
+            	<html:link action="/ResourceHub">
+            		<html:param name="ff" value="3"/>
+            		<fmt:message key="dash.home.DisplayCategory.ServiceTotal"/>
+            	</html:link>
+            </td>
+            <td class="FormLabelRight">
+            	<html:link action="/ResourceHub">
+            		<html:param name="ff" value="3"/>
+            		${summary.serviceCount}
+            	</html:link>
+            </td>
           </tr>
           <c:forEach var="type" items="${serviceTypes}">        
             <c:if test="${not empty summary.serviceTypeMap[type]}">
@@ -194,7 +249,12 @@
             <td colspan="2">&nbsp;</td>
           </tr>
           <tr>
-            <td class="FormLabel"><html:link page="/ResourceHub.do?ff=3"><fmt:message key="dash.home.DisplayCategory.ServiceTotal"/></html:link></td>
+            <td class="FormLabel">
+            	<html:link action="/ResourceHub">
+            		<html:param name="ff" value="3"/>
+            		<fmt:message key="dash.home.DisplayCategory.ServiceTotal"/>
+            	</html:link>
+            </td>
             <td>&nbsp;</td>
           </tr>
           <c:forEach var="type" items="${serviceTypes}">        
@@ -213,8 +273,20 @@
           <td colspan="2">&nbsp;</td>
         </tr>
         <tr>
-          <td class="FormLabel"><html:link page="/ResourceHub.do?ff=5&g=1"><fmt:message key="dash.home.DisplayCategory.group.ClusterTotal"/></html:link></td>
-          <td class="FormLabelRight"><html:link page="/ResourceHub.do?ff=5&g=1"><c:out value="${summary.compatGroupCount}"/></html:link></td>
+          <td class="FormLabel">
+          	<html:link action="/ResourceHub">
+          		<html:param name="ff" value="5"/>
+          		<html:param name="g" value="1"/>
+          		<fmt:message key="dash.home.DisplayCategory.group.ClusterTotal"/>
+          	</html:link>
+          </td>
+          <td class="FormLabelRight">
+          	<html:link action="/ResourceHub">
+          		<html:param name="ff" value="5"/>
+          		<html:param name="g" value="1"/>
+          		${summary.compatGroupCount}
+          	</html:link>
+          </td>
         </tr>
       </c:if>
 
@@ -225,8 +297,21 @@
             <td colspan="2">&nbsp;</td>
           </tr>
           <tr>
-            <td class="FormLabel"><html:link page="/ResourceHub.do?ff=5&g=2"><fmt:message key="dash.home.DisplayCategory.group.mixedTotal"/></html:link></td>
-            <td class="FormLabelRight"><html:link page="/ResourceHub.do?ff=5&g=2"><c:out value="${summary.groupCountAdhocGroup + summary.groupCountAdhocPSS + summary.groupCountAdhocApp}"/></html:link></td>
+            <td class="FormLabel">
+            	<html:link action="/ResourceHub">
+            		<html:param name="ff" value="5"/>
+            		<html:param name="g" value="2"/>
+            		<fmt:message key="dash.home.DisplayCategory.group.mixedTotal"/>
+            	</html:link>
+            </td>
+            <td class="FormLabelRight">
+            	<html:link action="/ResourceHub">
+            		<html:param name="ff" value="5"/>
+            		<html:param name="g" value="2"/>
+            		${summary.groupCountAdhocGroup + summary.groupCountAdhocPSS + summary.groupCountAdhocApp}
+            	</html:link>
+            </td>
+            		
           </tr>
           <c:if test="${groupGroups}">
             <tr>

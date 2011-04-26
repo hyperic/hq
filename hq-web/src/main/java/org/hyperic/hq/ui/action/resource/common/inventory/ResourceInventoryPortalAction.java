@@ -56,8 +56,8 @@ public abstract class ResourceInventoryPortalAction
         return null;
     }
 
-    protected void editConfig(HttpServletRequest request, Portal portal) throws Exception {
-        setResource(request, true);
+    protected void editConfig(HttpServletRequest request, HttpServletResponse response, Portal portal) throws Exception {
+        setResource(request, response, true);
         portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
     }

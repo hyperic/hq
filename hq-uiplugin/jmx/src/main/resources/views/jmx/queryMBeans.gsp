@@ -3,20 +3,24 @@
 <script type="text/javascript">
 
 function invoke(id, name, op) {
-    var params = "?op=" + op + "&name=" + name + "&id=" + id
+    var params = {
+    	  "op": op,
+    	  "name": name,
+    	  "id": id
+    };
     var argsid = name + "." + op + ".args"
     var rsltid = name + ".invokeResult"
     var args = dojo.byId(argsid)
     if (args) {
-        params += "&args=" + args.value
+        params["args"] = args.value;
     }
-    dojo.io.bind({
-      url:  '/<%= urlFor(action:"invoke") %>' + params,
-      method: "post",
-      mimetype:  "text/json-comment-filtered",
-      load:  function(type, data, evt) {
-        dojo.byId(rsltid).innerHTML = data.html;
-      },
+    dojo11.xhrPost({
+      	url:  '/<%= urlFor(action:"invoke", encodeUrl:true) %>',
+      	handleAs: "json-comment-filtered",
+      	content: params,
+      	load:  function(response, args) {
+        	dojo11.byId(rsltid).innerHTML = response.html;
+      	},
     });
   }
 
@@ -150,7 +154,7 @@ input[type=text] {
                 <% if (op.signature.length > 0 && bean.ops.size > 1) { %>
                    <br/>
                 <% } %>
-                <a class="buttonGreen" onclick="invoke(${bean.resId}, '${bean.name}', '${op.name}')" href="javascript:void(0)"><span>${op.name}</span></a>
+                <a class="buttonGreen" onclick="invoke(${bean.resId}, '${bean.name}', '${op.name}')" href="#"><span>${op.name}</span></a>
                 <% for (def i=0; i<op.signature.length; i++) { %>
                    <input style="width:75px" type="text" id="${bean.name}.${op.name}.args"/>
                 <% } %>

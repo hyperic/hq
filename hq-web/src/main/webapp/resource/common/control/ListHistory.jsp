@@ -49,7 +49,11 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 </script>
 
 <hq:pageSize var="pageSize"/>
-<c:set var="selfAction" value="/resource/${section}/Control.do?mode=history&rid=${Resource.id}&type=${Resource.entityId.type}"/>
+<c:url var="selfAction" value="/resource/${section}/Control.do">
+	<c:param name="mode" value="history"/>
+	<c:param name="rid" value="${Resource.id}"/>
+	<c:param name="type" value="${Resource.entityId.type}"/>
+</c:url>
 
 <c:url var="psAction" value="${selfAction}">
   <c:if test="${not empty param.pn}">

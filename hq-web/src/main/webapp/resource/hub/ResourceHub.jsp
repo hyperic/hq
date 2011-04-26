@@ -40,7 +40,7 @@
 var pageData = new Array();
 var FOO = "chart";
 var LIST  = "list"; 
-var imagePath = "<html:rewrite page="/images/"/>";
+var imagePath = "/images/";
 
 initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
@@ -96,7 +96,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   </c:when>
 </c:choose>
 
-<html:form action="/resource/hub/RemoveResource.do">
+<html:form action="/resource/hub/RemoveResource">
 
 <tiles:insert definition=".page.title.resource.hub">
   <tiles:put name="titleName"><span id="browseFilters"><c:out value="${navHierarchy}" escapeXml="false" /></span></tiles:put>
@@ -286,23 +286,23 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 
 <!--  RESOURCE HUB CONTENTS -->
 <c:url var="sAction" value="/ResourceHub.do">
-  <c:if test="${not empty param.keywords}">
-    <c:param name="keywords" value="${param.keywords}"/>
-  </c:if>
-  <c:if test="${not empty param.ps}">
-    <c:param name="ps" value="${param.ps}"/>
-  </c:if>
-  <c:if test="${not empty param.pn}">
-    <c:param name="pn" value="${param.pn}"/>
-  </c:if>
-  <c:if test="${not empty param.ft}">
-    <c:param name="ft" value="${param.ft}"/>
-  </c:if>
-  <c:if test="${not empty param.g}">
-    <c:param name="g" value="${param.g}"/>
-  </c:if>
-  <c:param name="ff" value="${ResourceHubForm.ff}"/>
-  <c:param name="view" value="${ResourceHubForm.view}"/>
+  	<c:if test="${not empty param.keywords}">
+    	<c:param name="keywords" value="${param.keywords}"/>
+  	</c:if>
+  	<c:if test="${not empty param.ps}">
+    	<c:param name="ps" value="${param.ps}"/>
+  	</c:if>
+  	<c:if test="${not empty param.pn}">
+    	<c:param name="pn" value="${param.pn}"/>
+  	</c:if>
+  	<c:if test="${not empty param.ft}">
+    	<c:param name="ft" value="${param.ft}"/>
+  	</c:if>
+  	<c:if test="${not empty param.g}">
+    	<c:param name="g" value="${param.g}"/>
+  	</c:if>
+  	<c:param name="ff" value="${ResourceHubForm.ff}"/>
+  	<c:param name="view" value="${ResourceHubForm.view}"/>
 </c:url>
 
 <c:choose>
@@ -355,31 +355,48 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
     <th width="1%" class="ListHeaderCheckbox"><input type="checkbox" onclick="ToggleAll(this, widgetProperties)" name="listToggleAll"></th>
     <th width="5%" class="tableRowInactive">&nbsp;</th>
     <th width="30%" class="tableRowSorted">
-    <c:choose>
-    <c:when test="${param.so == 'dec'}">
-    <a href="<c:out value="${sAction}&so=asc"/>"><c:out value="${entityTypeTH}"/><html:img border="0" page="/images/tb_sortdown.gif"/></a>
-    </c:when>
-    <c:otherwise>
-    <a href="<c:out value="${sAction}&so=dec"/>"><c:out value="${entityTypeTH}"/><html:img border="0" page="/images/tb_sortup.gif"/></a>
-    </c:otherwise>
-    </c:choose>
+    	<c:choose>
+    		<c:when test="${param.so == 'dec'}">
+    			<c:url var="sortedAction" value="${sAction}">
+    				<c:param name="so" value="asc" />
+    			</c:url>
+    			<a href="${sortedAction}">${entityTypeTH}<html:img border="0" page="/images/tb_sortdown.gif"/></a>
+    		</c:when>
+    		<c:otherwise>
+    			<c:url var="sortedAction" value="${sAction}">
+    				<c:param name="so" value="dec" />
+    			</c:url>
+    			<a href="${sortedAction}">${entityTypeTH}<html:img border="0" page="/images/tb_sortup.gif"/></a>
+    		</c:otherwise>
+    	</c:choose>
     </th>
-    <c:forEach items="${Indicators}" var="indicator">
-      <th class="ListHeaderCheckbox"><c:out value="${indicator.name}"/></th>
-    </c:forEach>
-      <th class="ListHeaderCheckbox"><fmt:message key="resource.common.monitor.visibility.AvailabilityTH"/></th>
+	    <c:forEach items="${Indicators}" var="indicator">
+	      	<th class="ListHeaderCheckbox">${indicator.name}</th>
+	    </c:forEach>
+	  	<th class="ListHeaderCheckbox"><fmt:message key="resource.common.monitor.visibility.AvailabilityTH"/></th>
     </tr>
     <c:forEach items="${AllResources}" var="resource">
     <tr class="tableRowOdd">
     <td class="ListCellCheckbox" align="left" valign="top"><input type="checkbox" onclick="ToggleSelection(this, widgetProperties)" class="listMember" name="resources" value="<c:out value="${resource.entityId}"/>"></td>
     <td class="tableCell" align="left" nowrap valign="top">
-    <html:link page="/resource/${section}/monitor/Visibility.do?mode=currentHealth" paramId="eid" paramName="resource" paramProperty="entityId"><html:img page="/images/icon_hub_m.gif" width="11" height="11" alt="" border="0"/></html:link>
-    <html:link page="/resource/${section}/Inventory.do?mode=view" paramId="eid" paramName="resource" paramProperty="entityId"><html:img page="/images/icon_hub_i.gif" width="11" height="11" alt="" border="0"/></html:link>
+    <html:link action="/resource/${section}/monitor/Visibility" paramId="eid" paramName="resource" paramProperty="entityId">
+    	<html:param name="mode" value="currentHealth" />
+    	<html:img page="/images/icon_hub_m.gif" width="11" height="11" alt="" border="0"/>
+    </html:link>
+    <html:link action="/resource/${section}/Inventory" paramId="eid" paramName="resource" paramProperty="entityId">
+    	<html:param name="mode" value="view"/>
+    	<html:img page="/images/icon_hub_i.gif" width="11" height="11" alt="" border="0"/>
+    </html:link>
     <c:if test="${resource.entityId.type == 1 || resource.entityId.type == 2 || resource.entityId.type == 3}">
-    <html:link page="/alerts/Config.do?mode=list" paramId="eid" paramName="resource" paramProperty="entityId"><html:img page="/images/icon_hub_a.gif" width="11" height="11" alt="" border="0"/></html:link>
+    	<html:link action="/alerts/Config" paramId="eid" paramName="resource" paramProperty="entityId">
+    		<html:param name="mode" value="list"/>
+    		<html:img page="/images/icon_hub_a.gif" width="11" height="11" alt="" border="0"/>
+    	</html:link>
     </c:if>
     </td>
-      <td class="tableCell" align="left" valign="top"><span class="SpanPopup1"><html:link page="/Resource.do" paramId="eid" paramName="resource" paramProperty="entityId"><c:out value="${resource.name}"/></html:link><c:if test="${not empty resource.description}"><span><c:out value="${resource.description}" /></span></c:if></span></td>
+      <td class="tableCell" align="left" valign="top">
+      	<span class="SpanPopup1">
+      		<html:link action="/Resource" paramId="eid" paramName="resource" paramProperty="entityId">${resource.name}</html:link><c:if test="${not empty resource.description}"><span><c:out value="${resource.description}" /></span></c:if></span></td>
       <!-- Insert metrics tile here -->
       <c:forEach items="${indicatorsMap[resource.entityId]}" var="metric">
         <td class="tableCell" align="middle" valign="top">
@@ -472,8 +489,12 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   <c:param name="view" value="${ResourceHubForm.view}"/>
 </c:url>
 
+<c:url var="listNewUrl" value="/resource/platform/Inventory.do">
+	<c:param name="mode" value="new"/>
+</c:url>
+
 <tiles:insert definition=".toolbar.list">
-  <tiles:put name="listNewUrl" value="/resource/platform/Inventory.do?mode=new"/>
+  <tiles:put name="listNewUrl" beanName="listNewUrl"/>
   <tiles:put name="deleteOnly" value="true"/>
   <tiles:put name="includeGroup" value="true"/>
   <tiles:put name="listItems" beanName="AllResources"/>

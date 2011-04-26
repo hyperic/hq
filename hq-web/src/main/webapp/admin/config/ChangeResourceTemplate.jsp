@@ -62,7 +62,13 @@
         <c:set var="even" value="true"/>
       </c:otherwise>
     </c:choose>
-      <td class="tableCell"><html:link page="/ResourceHub.do?ff=1&ft=1:${entry.id}"><c:out value="${entry.name}"/></html:link></td>
+      <td class="tableCell">
+      	<html:link action="/ResourceHub">
+      		<html:param name="ff" value="1" />
+      		<html:param name="ft" value="1:${entry.id}" />
+      		${entry.name}
+      	</html:link>
+      </td>
       <tiles:insert definition=".admin.config.DefaultsAction">
         <tiles:put name="typeName" value="platform"/>
         <tiles:put name="aetid">1:<c:out value="${entry.id}"/></tiles:put>
@@ -88,7 +94,14 @@
         <c:set var="even" value="true"/>
       </c:otherwise>
     </c:choose>
-      <td class="tableCell"><html:img page="/images/icon_indent_arrow.gif" width="16" height="16" border="0"/><html:link page="/ResourceHub.do?ff=3&ft=3:${platSvc.id}"><c:out value="${platSvc.name}"/></html:link></td>
+      <td class="tableCell">
+      	<html:img page="/images/icon_indent_arrow.gif" width="16" height="16" border="0"/>
+      	<html:link action="/ResourceHub">
+      		<html:param name="ff" value="3" />
+      		<html:param name="ft" value="3:${platSvc.id}" />
+      		${platSvc.name}
+      	</html:link>
+      </td>
       <tiles:insert definition=".admin.config.DefaultsAction">
         <tiles:put name="typeName" value="service"/>
         <tiles:put name="aetid">3:<c:out value="${platSvc.id}"/></tiles:put>
@@ -106,7 +119,14 @@
         <c:set var="even" value="true"/>
       </c:otherwise>
     </c:choose>
-      <td class="ListCellPrimary"><html:img page="/images/icon_indent_arrow.gif" width="16" height="16" border="0"/><html:link page="/ResourceHub.do?ff=3&ft=3:${winSvc.id}"><c:out value="${winSvc.name}"/></html:link></td>
+      <td class="ListCellPrimary">
+      	<html:img page="/images/icon_indent_arrow.gif" width="16" height="16" border="0"/>
+      	<html:link action="/ResourceHub">
+      		<html:param name="ff" value="3" />
+      		<html:param name="ft" value="3:${winSvc.id}" />
+      		${winSvc.name}
+      	</html:link>
+      </td>
       <tiles:insert definition=".admin.config.DefaultsAction">
         <tiles:put name="typeName" value="service"/>
         <tiles:put name="aetid">3:<c:out value="${winSvc.id}"/></tiles:put>
@@ -135,7 +155,13 @@
         <c:set var="even" value="true"/>
       </c:otherwise>
     </c:choose>
-      <td class="ListCellPrimary"><html:link page="/ResourceHub.do?ff=2&ft=2:${server.id}"><c:out value="${server.name}"/></html:link></td>
+      <td class="ListCellPrimary">
+      	<html:link action="/ResourceHub">
+      		<html:param name="ff" value="2" />
+      		<html:param name="ft" value="2:${server.id}" />
+      		${server.name}
+      	</html:link>
+      </td>
       <tiles:insert definition=".admin.config.DefaultsAction">
         <tiles:put name="typeName" value="server"/>
         <tiles:put name="aetid">2:<c:out value="${server.id}"/></tiles:put>
@@ -154,7 +180,11 @@
       </c:otherwise>
     </c:choose>
             <td class="ListCellPrimary"><html:img page="/images/icon_indent_arrow.gif" width="16" height="16" border="0"/>
-            <html:link page="/ResourceHub.do?ff=3&ft=3:${serviceType.id}"><c:out value="${serviceType.name}"/></html:link>
+	            <html:link action="/ResourceHub">
+	            	<html:param name="ff" value="3" />
+	            	<html:param name="ft" value="3:${serviceType.id}" />
+	            	${serviceType.name}
+	            </html:link>
             </td>
       <tiles:insert definition=".admin.config.DefaultsAction">
         <tiles:put name="typeName" value="service"/>

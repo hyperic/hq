@@ -43,7 +43,7 @@
     <tr>
         <td width="20%" class="BlockLabel">&nbsp;</td>
         <td class="BlockContent">
-        <a href="<html:rewrite page='/mastheadAttach.do?typeId=${attachment.attachment.id}'/>"><c:out value="${attachment.HTML}"/></a>
+        	<a href="<html:rewrite action="/mastheadAttach"><html:param name="typeId" value="${attachment.attachment.id}"/></html:rewrite>">${attachment.HTML}</a>
         </td>
     </tr>
 </c:forEach>
@@ -51,8 +51,7 @@
 <c:otherwise>
     <tr>
         <td width="20%" class="BlockLabel">&nbsp;</td>
-        <td class="BlockContent"><fmt:message key="admin.plugins.NoPluginsAvailable"></fmt:message>
-        </td>
+        <td class="BlockContent"><fmt:message key="admin.plugins.NoPluginsAvailable" /></td>
     </tr>
 </c:otherwise>
 </c:choose>
