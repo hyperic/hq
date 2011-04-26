@@ -1300,13 +1300,16 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
             if (agent == null) {
                 return;
             }
-            boolean restartAgent = false;
+            boolean canRestartAgent = false;
             if (restartAgent(agent, arg.getStringLists().toString())) {
+                canRestartAgent = true;
+                // only check in if plugins from the last run to this run have changed on the
+                // agent side.
+                agentPluginSyncRestartThrottle.checkinAfterRestart(agent.getId());
+            } else {
                 if (debug) log.debug("agent=" + agent + " has no updates and plugins haven't " +
                                      "been modified since the last checkin, ignoring");
-                restartAgent = true;
             }
-            agentPluginSyncRestartThrottle.checkinAfterRestart(agent.getId());
             final Map<String, AgentPluginStatus> statusByFileName =
                 agentPluginStatusDAO.getPluginStatusByAgent(agent);
             final Map<Integer, Collection<Plugin>> updateMap = new HashMap<Integer, Collection<Plugin>>();
@@ -1321,12 +1324,14 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
             // want to ignore the plugins that were just checked in by the agent
             // contained in creates
             processPluginsNotOnAgent(agent, updateMap, creates);
-            if (restartAgent) {
+            if (canRestartAgent) {
                 agentPluginUpdater.queuePluginTransfer(updateMap, removeMap);
             } else if (!updateMap.isEmpty() || !removeMap.isEmpty()) {
                 log.warn("agent=" + agent + " checked in the same plugin report twice in a row " +
                          " and plugins have not been updated on the server but it's inventory " +
                          " should be sync'd. updateMap=" + updateMap + ", removeMap=" + removeMap);
+                pluginManager.updateAgentPluginSyncStatus(
+                    AgentPluginStatusEnum.SYNC_FAILURE, updateMap, removeMap);
             }
         } catch (AgentNotFoundException e) {
             log.error(e,e);

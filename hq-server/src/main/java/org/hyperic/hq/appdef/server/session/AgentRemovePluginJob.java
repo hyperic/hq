@@ -29,7 +29,10 @@ package org.hyperic.hq.appdef.server.session;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Map.Entry;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.server.session.AgentDataTransferJob;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentPluginUpdater;
@@ -45,6 +48,7 @@ import org.springframework.stereotype.Component;
 @Scope("prototype")
 public class AgentRemovePluginJob implements AgentDataTransferJob {
     
+    private static final Log log = LogFactory.getLog(AgentRemovePluginJob.class);
     private static final String AGENT_PLUGIN_REMOVE = AgentPluginUpdater.AGENT_PLUGIN_REMOVE;
     private Integer agentId;
     private Collection<String> pluginFileNames;
@@ -75,16 +79,22 @@ public class AgentRemovePluginJob implements AgentDataTransferJob {
     public void execute() {
         try {
             final Map<String, Boolean> result =
-                agentManager.agentRemovePlugins(overlord, getAgentId(), getPluginFileNames());
-            // only reboot the agent if we actually removed a plugin
-            for (Boolean res : result.values()) {
-                if (res.booleanValue()) {
-                    agentPluginSyncRestartThrottle.restartAgent(getAgentId());
+                agentManager.agentRemovePlugins(overlord, agentId, pluginFileNames);
+            for (final Entry<String, Boolean> entry : result.entrySet()) {
+                final String file = entry.getKey();
+                final Boolean res = entry.getValue();
+                // even though the removal may have failed, just log and restart.  Don't interrupt
+                // the full process of sync'ing the agent.
+                if (!res.booleanValue()) {
+                    log.error("error removing plugin file=" + file + " from agentId=" + agentId);
                 }
             }
+            if (!pluginFileNames.isEmpty()) {
+                agentPluginSyncRestartThrottle.restartAgent(agentId);
+            }
         } catch (Exception e) {
-            throw new SystemException("error removing pluginFiles=" + getPluginFileNames() +
-                                      " from agentId=" + getAgentId(), e);
+            throw new SystemException("error removing pluginFiles=" + pluginFileNames +
+                                      " from agentId=" + agentId, e);
         }
     }
 

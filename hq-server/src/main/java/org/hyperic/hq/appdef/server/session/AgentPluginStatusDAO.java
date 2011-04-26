@@ -141,6 +141,7 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
             .append("    from EAM_PLUGIN p ")
             .append("    join EAM_AGENT_PLUGIN_STATUS st on p.md5 = st.md5 ")
             .append("    where st.agent_id = s.agent_id and s.md5 = st.md5 ")
+            .append("    and p.deleted = '0' ")
             .append(")")
             .toString();
         final SQLQuery query = getSession().createSQLQuery(sql);
@@ -162,7 +163,7 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
 			.append("WHERE not exists ( ")
 			.append("    SELECT 1 FROM EAM_AGENT_PLUGIN_STATUS s ")
 			.append("    WHERE a.id = s.agent_id and s.plugin_name = p.name ")
-			.append(")")
+			.append(") and p.deleted = '0'")
 			.toString();
         return getSession().createSQLQuery(sql)
                            .addScalar("id", Hibernate.INTEGER)
@@ -178,7 +179,7 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
 			.append("where not exists (")
 			.append("    select 1 from EAM_AGENT_PLUGIN_STATUS ")
 			.append("    where agent_id = :agentId and plugin_name = p.name")
-			.append(")")
+			.append(") and p.deleted = '0'")
             .toString();
         return getSession().createSQLQuery(sql)
                            .addScalar("id", Hibernate.INTEGER)
@@ -285,7 +286,8 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
     public Map<Agent, Collection<AgentPluginStatus>> getPluginsToRemoveFromAgents() {
         final String hql = new StringBuilder(64)
             .append("select s.id FROM EAM_AGENT_PLUGIN_STATUS s ")
-            .append("where not exists (select 1 from EAM_PLUGIN p where p.name = s.plugin_name)")
+            .append("where not exists (")
+            .append("select 1 from EAM_PLUGIN p where p.name = s.plugin_name and p.deleted = '0')")
             .toString();
         @SuppressWarnings("unchecked")
         final List<Integer> list =

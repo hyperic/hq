@@ -90,7 +90,7 @@ public class PluginSyncJob implements AgentDataTransferJob {
                 removeResult = agentManager.agentRemovePlugins(overlord, getAgentId(), toRemove);
             }
             logDebugs(transferResult, removeResult);
-            restartAgentIfFilesUpdated(transferResult, removeResult, agentManager);
+            restartAgentAndLogErrors(transferResult, removeResult, agentManager);
         } catch (Exception e) {
             pluginManager.updateAgentPluginSyncStatusInNewTran(
                 AgentPluginStatusEnum.SYNC_FAILURE, getAgentId(), plugins);
@@ -130,23 +130,24 @@ public class PluginSyncJob implements AgentDataTransferJob {
         return rtn;
     }
 
-    private void restartAgentIfFilesUpdated(FileDataResult[] transferResult,
+    private void restartAgentAndLogErrors(FileDataResult[] transferResult,
                                             Map<String, Boolean> removeResult,
                                             AgentManager agentManager) {
-// XXX need to rework this, if data transfer fails, what should I do??        
         if (removeResult != null && !removeResult.isEmpty()) {
-            for (final Boolean removed : removeResult.values()) {
-                if (removed) {
-                    agentPluginSyncRestartThrottle.restartAgent(getAgentId());
-                    return;
+            for (final Entry<String, Boolean> entry : removeResult.entrySet()) {
+                final String file = entry.getKey();
+                final Boolean removed = entry.getValue();
+                if (!removed) {
+                    log.error("error removing plugin file=" + file + " from agentId=" + agentId);
                 }
             }
-        } else {
-            for (final FileDataResult res : transferResult) {
-                if (res.getSendBytes() > 0) {
-                    agentPluginSyncRestartThrottle.restartAgent(getAgentId());
-                    return;
-                }
+            agentPluginSyncRestartThrottle.restartAgent(getAgentId());
+            return;
+        }
+        for (final FileDataResult res : transferResult) {
+            if (res.getSendBytes() > 0) {
+                agentPluginSyncRestartThrottle.restartAgent(agentId);
+                return;
             }
         }
     }

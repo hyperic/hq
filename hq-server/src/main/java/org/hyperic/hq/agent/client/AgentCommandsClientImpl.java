@@ -280,10 +280,13 @@ public class AgentCommandsClientImpl
         AgentCommandsClient proxy = null;
         try {
             proxy = (AgentCommandsClient)getAsynchronousProxy(AgentCommandsClient.class, false);
-            final Map<String, Boolean> rtn = proxy.agentRemoveFile(files);
+            Map<String, Boolean> rtn = proxy.agentRemoveFile(files);
             if (rtn == null) {
                 _log.error("error removing files from agent=" + getAgent() + " files=" + files);
-                return Collections.emptyMap();
+                rtn = new HashMap<String, Boolean>(files.size());
+                for (String file : files) {
+                    rtn.put(file, false);
+                }
             }
             return rtn;
         } finally {

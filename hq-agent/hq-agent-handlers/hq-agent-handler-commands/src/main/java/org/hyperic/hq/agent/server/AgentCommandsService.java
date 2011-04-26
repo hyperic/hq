@@ -519,9 +519,9 @@ public class AgentCommandsService implements AgentCommandsClient {
             }
             try {
                 final File file = new File(resolveAgentBundleHomePath(filename));
-                boolean created = file.createNewFile();
+                file.createNewFile();
                 if (debug) _log.debug("removing file=" + file.getAbsolutePath());
-                rtn.put(filename, created);
+                rtn.put(filename, file.exists());
             } catch (Exception e) {
                 _log.warn("could not remove file " + filename + ": " + e);
                 _log.debug(e,e);
