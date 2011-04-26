@@ -716,6 +716,7 @@
 					<module>hq-bootstrap</module>
 					<module>hq-web</module>
 					<module>hq-integration-tests</module>
+                			<module>hq-maven</module>
 			</modules>
 		</profile>
 		<profile>
@@ -736,6 +737,7 @@
 					<module>hq-installer</module>
 					<module>hq-bootstrap</module>
 					<module>hq-web</module>
+                			<module>hq-maven</module>
 	    			<module>dist</module>
 			</modules>
 		</profile>
@@ -755,6 +757,7 @@
 					<module>hq-bootstrap</module>
 					<module>hq-web</module>
 					<module>dist/agent</module>
+                			<module>hq-maven</module>
 			</modules>
 		</profile>
         <profile>
