@@ -21,12 +21,15 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.UserInfo;
 import java.io.BufferedReader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -90,7 +93,7 @@ public class RunPlugin extends AbstractMojo implements UserInfo, StreamConsumer 
         String pluginArgs = props.getProperty("plugin.args", "");
         pluginArgs = pluginArgs.replaceAll("([^\\s]*=)", "-D$1");
         boolean debug = props.getProperty("debug", "false").equalsIgnoreCase("true");
-
+        boolean pause = props.getProperty("pause", "false").equalsIgnoreCase("true");
         String agentV = new File(agentBundle).getName().substring("agent-".length());
 
         String pdkJar = "hq-pdk-" + agentV + ".jar";
@@ -103,6 +106,7 @@ public class RunPlugin extends AbstractMojo implements UserInfo, StreamConsumer 
                 + (debug ? " -Xdebug -Xrunjdwp:transport=dt_socket,address=8998,server=y,suspend=y" : "")
                 + " -ea -jar " + agentBundle + "/pdk/lib/" + pdkJar
                 + " -p " + plugin
+                + " -Dpause-on-error=" + pause
                 + " -Dplugins.include=" + plugin
                 + " -Dlog=" + logL
                 + " -m " + method
@@ -117,7 +121,6 @@ public class RunPlugin extends AbstractMojo implements UserInfo, StreamConsumer 
         boolean remote = props.getProperty("remote", "false").equalsIgnoreCase("true");
         boolean copy = props.getProperty("copy", "false").equalsIgnoreCase("true");
 
-
         File jarAgentDest = new File(new File(agentBundle), "/pdk/plugins/" + plugin + "-plugin.jar");
         File jarServerDest = null;
         if (server != null) {
@@ -130,9 +133,36 @@ public class RunPlugin extends AbstractMojo implements UserInfo, StreamConsumer 
         log.info("jarServerDest   => '" + jarServerDest + "'");
         log.info("copy            => '" + copy + "'");
         log.info("debug           => '" + debug + "'");
+        log.info("pause           => '" + pause + "'");
         log.info("cmd             => '" + cmd + "'");
-        log.info("remote          => '" + remote + "'");
 
+        boolean copyPdk = props.getProperty("copy-pdk", "false").equalsIgnoreCase("true");
+        File pdkOrg = null;
+        File pdkDest = null;
+        if (copyPdk && !remote) {
+            try {
+                File pdkLib = new File(new File(agentBundle), "/pdk/lib/");
+                String names[] = pdkLib.list(new FilenameFilter() {
+
+                    public boolean accept(File file, String name) {
+                        return name.startsWith("hq-pdk") && name.endsWith(".jar");
+                    }
+                });
+                if (names.length != 1) {
+                    throw new MojoExecutionException("hq-pdk*.jar not found");
+                }
+
+                pdkOrg = new File(dir, "../../hq-pdk/target/hq-pdk-" + version + ".jar");
+                pdkDest = new File(pdkLib, names[0]);
+                log.info("pdkOrg          => '" + pdkOrg.getCanonicalPath() + "' (" + pdkOrg.exists() + ")");
+                log.info("pdkDest         => '" + pdkDest.getCanonicalPath() + "' (" + pdkDest.exists() + ")");
+                copy(pdkOrg, pdkDest);
+            } catch (IOException ex) {
+                throw new MojoExecutionException("error", ex);
+            }
+        }
+
+        log.info("remote          => '" + remote + "'");
         if (remote) {
             String remoteUser = props.getProperty("remote.user");
             remotePass = props.getProperty("remote.pass");
@@ -182,13 +212,7 @@ public class RunPlugin extends AbstractMojo implements UserInfo, StreamConsumer 
             session.connect();
             channel = session.openChannel("exec");
             ((ChannelExec) channel).setCommand(cmd);
-            channel.setInputStream(new InputStream() {
-
-                public int read() throws IOException {
-                    return '\n';
-                }
-            });
-
+            channel.setInputStream(System.in);
             InputStream in = channel.getInputStream();
             channel.connect();
 
