@@ -30,10 +30,10 @@
 
 
 	<bean id="graphEntityInstantiator"
-		class="org.springframework.data.graph.neo4j.support.node.NodeEntityInstantiator" />
+		class="org.hyperic.hq.inventory.support.InventoryNodeEntityInstantiator" />
 
 	<bean id="relationshipEntityInstantiator"
-		class="org.springframework.data.graph.neo4j.support.relationship.RelationshipEntityInstantiator" />
+		class="org.hyperic.hq.inventory.support.InventoryRelationshipEntityInstantiator" />
 
 
 	<bean id="typeRepStrategyFactory"
