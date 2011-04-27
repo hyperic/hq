@@ -21,7 +21,7 @@
 	<div class="topInfo">
 		<c:if test="${info.agentErrorCount>0}">
 		    <span id="agentFailure" style="float:right">
-		      (${info.agentErrorCount} <img src="<spring:url value="/static/images/icon_available_red.gif"/>"/>)
+		      (<span id="agentErrorCount">${info.agentErrorCount}</span> <img src="<spring:url value="/static/images/icon_available_red.gif"/>"/>)
 		    </span>
 		</c:if>
 		<span id="agentInfo" style="float:right">
@@ -202,19 +202,12 @@
                 },				
 				load: function(response){
 					hqDojo.byId("agentInfoAllCount").innerHTML=response.allAgentCount;
+					hqDojo.byId("agentErrorCount").innerHTML=response.agentErrorCount;
 				}
 			};
 			
-		    var deleteIdsString = "";
-			hqDojo.query("input[type=checkbox]:checked").forEach(function(entry){
-					deleteIdsString+=entry.value+",";
-			});
-			if(deleteIdsString.length>1){
-				deleteIdsString = deleteIdsString.substr(0,deleteIdsString.length-1);
-			}else{
-				deleteIdsString="";
-			}
-			
+		    var deleteIdsString = getIdList(hqDojo.query("input[type=checkbox]:checked"));
+
 			var hashObj = {
 				deleteIds: deleteIdsString
 			};
@@ -344,8 +337,6 @@
 			hqDojo.xhrGet(xhrArgs);
 		}
 
-
-		
 		var showStatusDialog = new hqDijit.Dialog({
 			id: "showStatusPanelDialog"
 		});
@@ -405,14 +396,14 @@
 			},
 			"#agentStatusHelp":{
 			    onclick: function(e){
-		             var helpHref = "<hq:help/>";//TODO Annie
+		             var helpHref = "<hq:help/>.Status";
 			         var helpWin=window.open(helpHref,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');
                      helpWin.focus();
 		        }
 			},
 			"#agentSummaryHelp":{
 			    onclick: function(e){
-		    		var helpHref = "<hq:help/>";//TODO Annie
+		    		var helpHref = "<hq:help/>.Status";
 					var helpWin=window.open(helpHref,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');
             		helpWin.focus();
 	            }

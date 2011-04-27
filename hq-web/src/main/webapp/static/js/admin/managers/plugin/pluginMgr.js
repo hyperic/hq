@@ -98,5 +98,17 @@
 			hqDojo.fx.chain(anim).play();
 		}
 	}
+	function getIdList(items){
+		var deleteIdsString="";
+		hqDojo.forEach(items, function(entry){
+				deleteIdsString+=entry.value+",";
+		});
+		if(deleteIdsString.length>1){
+			deleteIdsString = deleteIdsString.substr(0,deleteIdsString.length-1);
+		}else{
+			deleteIdsString="";
+		}
+		return deleteIdsString;	
+	}
 	
 /*-- END pluginMgr.js --*/
