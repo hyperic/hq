@@ -25,22 +25,43 @@
 
 package org.hyperic.hq.agent.spring;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.context.SmartLifecycle;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.AbstractApplicationContext;
 
-/**  todo: exceptions, logging
+/**
+ * todo: exceptions, logging
  * @author Helena Edelson
  */
-public final class AgentApplicationContext {
+public final class AgentApplicationContext implements SmartLifecycle {
+
+    private static final Log logger = LogFactory.getLog(AgentApplicationContext.class);
 
     private static AbstractApplicationContext applicationContext;
 
-    public AgentApplicationContext(Class<?>... annotatedClasses) {
-        if (applicationContext == null) {
-            applicationContext = create(annotatedClasses);
+    /*  "org.hyperic.hq.bizapp.client", "org.hyperic.hq.operation" */
+    public static AbstractApplicationContext create(String[] basePackages, Class<?>... annotatedClasses) {
+        if (applicationContext != null) return applicationContext;
+
+        AnnotationConfigApplicationContext ctx = null;
+
+        try {
+            ctx = new AnnotationConfigApplicationContext(annotatedClasses);
+            ctx.registerShutdownHook();
+            ctx.scan(basePackages);
         }
+        catch (BeansException e) {
+            shutdown();
+        } catch (IllegalStateException e) {
+            //TODO
+            logger.error(e.getCause() + " " + e.getMessage());
+        }
+         
+        return ctx;
     }
 
     public static <T> T getBean(Class<T> requiredType) throws RuntimeException {
@@ -51,36 +72,36 @@ public final class AgentApplicationContext {
         }
     }
 
-    public static AbstractApplicationContext create(Class<?>... annotatedClasses) {
-        if (applicationContext != null) return applicationContext;
-
-        AnnotationConfigApplicationContext ctx = null;
-
-        try {
-            ctx = new AnnotationConfigApplicationContext(annotatedClasses);
-            //ctx.registerShutdownHook();
-            ctx.scan("org.hyperic.hq.bizapp.client", "org.hyperic.hq.operation");
-        }
-        catch (BeansException e) {
-            shutdown();
-        } catch (IllegalStateException e) {
-            System.out.println(e.getCause() + " " + e.getMessage());
-        }
-        for (Object bean: ctx.getBeanDefinitionNames()) {
-            System.out.println(bean);
-        }
-        return ctx;
-    }
-
-
-    public static AbstractApplicationContext getApplicationContext() {
-        return applicationContext;
-    }
-
     /**
      * Do graceful shutdown and close on demand if needed.
      */
     public static void shutdown() {
-        if (applicationContext != null) applicationContext.close();
+        if (applicationContext != null) {
+            applicationContext.destroy();
+        }
+    }
+
+    public boolean isAutoStartup() {
+        return true;
+    }
+
+    public void stop(Runnable callback) {
+       stop();
+    }
+
+    public void start() {
+
+    }
+
+    public void stop() {
+        shutdown();
+    }
+
+    public boolean isRunning() {
+        return false;
+    }
+
+    public int getPhase() {
+        return 0;
     }
 }
