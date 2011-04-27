@@ -59,7 +59,7 @@
                     	<input type="checkbox" value="${pluginSummary.id}_${pluginSummary.jarName} (${pluginSummary.name})" name="deleteId"/>&nbsp; 
 					</c:if>
 				</span>
-				<span class="column span-small">${pluginSummary.name}
+				<span class="column span-small" id="row_${pluginSummary.id}">${pluginSummary.name}
 					<c:if test="${pluginSummary.deleted}">
 						<br/><span class="deleting"><fmt:message key="admin.managers.Plugin.column.plugin.deleting"/></span>
 					</c:if>				
@@ -192,7 +192,7 @@
 	
 	hqDojo.ready(function() {
 		var timer = new hqDojox.timing.Timer();
-		function refreshPage(){
+		function refreshPage(focusElement){
 			hqDojo.style(hqDojo.byId("pluginList"), "color","#AAAAAA");
 			var infoXhrArgs={
 				preventCache:true,
@@ -220,7 +220,11 @@
 			hqDojo.hash(hqDojo.objectToQuery(hashObj));
 			
 			hqDojo.xhrGet(infoXhrArgs);
-			hqDojo.publish("refreshDataGrid");
+			if(focusElement!==undefined && typeof(focusElement)!=="number"){
+				refreshDataGrid(focusElement);
+			}else{
+				refreshDataGrid();
+			}
 		}
 
 		function resizePluginMgrContentHeight(){
@@ -602,13 +606,13 @@
 										duration: 500
 									})];
 						}
-						refreshPage();
+						refreshPage("row_"+ checkedPlugins[0].value);
 						hqDijit.byId("removePanelDialog").hide();
 	
-  						hqDojo.style("deletLoadingIcon","visibility","hidden");
+						hqDojo.style("deletLoadingIcon","visibility","hidden");
 						hqDojo.style("removeButton","visibility","visible");
 						hqDojo.style("removeCancel","visibility","visible");
-						hqDojo.fx.chain(anim).play();						
+						hqDojo.fx.chain(anim).play();
 					}
 				};
 				hqDojo.xhrPost(xhrArgs);
@@ -618,7 +622,7 @@
 			});
 		}
 		
-		hqDojo.subscribe("refreshDataGrid", function() {			
+		function refreshDataGrid(focusElement) {
 			hqDojo.xhrGet({
 				preventCache:true,
 				url: "<spring:url value='/app/admin/managers/plugin/list' />",
@@ -658,7 +662,8 @@
                 		}
                 		var pluginName = hqDojo.create("span", {
                 			"class": "column span-small",
-                			"innerHTML": summary.name
+                			"innerHTML": summary.name,
+                			"id": "row_"+summary.id
                 		}, li);
                 		if(summary.deleted){
                 			span = hqDojo.create("span",{
@@ -748,7 +753,9 @@
 							}
 						});
 					}
-
+					if(focusElement!==undefined){
+						hqDijit.scrollIntoView(focusElement);
+					}
 					hqDojo.behavior.apply();
 					hqDojo.query(".notFound").forEach(function(e){
 						new hqDijit.Tooltip({
@@ -780,7 +787,7 @@
                 	
                 }
 			});
-		});
+		}
 		timer.setInterval(120000);
 		timer.onTick = refreshPage;
 		timer.start();
