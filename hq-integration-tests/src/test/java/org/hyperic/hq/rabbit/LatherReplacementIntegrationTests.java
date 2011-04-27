@@ -8,6 +8,7 @@ import org.hyperic.hq.bizapp.server.operations.RegisterAgentService;
 import org.hyperic.hq.operation.RegisterAgentResponse;
 import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -15,7 +16,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 
-//@Ignore("'AGENT_HOME' must be set")
+@Ignore("'AGENT_HOME' must be set")
 public class LatherReplacementIntegrationTests extends BaseInfrastructureTest {
 
     @Autowired private RegisterAgentService registerAgentService;
@@ -23,7 +24,7 @@ public class LatherReplacementIntegrationTests extends BaseInfrastructureTest {
     /**
      * Must configure
      */
-    private final static String AGENT_HOME = "/Users/hedelson/tools/hyperic/agent-4.6.0.BUILD-SNAPSHOT";
+    private final static String AGENT_HOME = "/path/to/agent-4.6.0.BUILD-SNAPSHOT";
 
     private BizappCallbackClient bizappClient;
 
@@ -49,7 +50,6 @@ public class LatherReplacementIntegrationTests extends BaseInfrastructureTest {
     public void bizappRegisterAgentSuccess() throws AgentCallbackClientException, InterruptedException {
         /* passed in from AgentClient.java */
         RegisterAgentResponse response = this.bizappClient.registerAgent(null, user, pass, "fooAuthToken", host, port, "", 1, false, false);
-        System.out.println("test result="+response);
         assertNotNull(response);
         assertTrue(response.getAgentToken().startsWith("token:"));
     }
