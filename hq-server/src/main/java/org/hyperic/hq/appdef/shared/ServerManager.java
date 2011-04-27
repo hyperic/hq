@@ -266,9 +266,6 @@ public interface ServerManager {
     public void updateServerTypes(Plugin plugin, org.hyperic.hq.product.ServerTypeInfo[] infos) throws 
           VetoException, NotFoundException;
 
-
-    public void setAutodiscoveryZombie(Server server, boolean zombie);
-
     /**
      * @return A Map of server type to the # of servers of that type in the
      * inventory.

@@ -163,6 +163,8 @@ public class PlatformManagerImpl implements PlatformManager {
     private ResourceDao resourceDao;
     
     private ResourceTypeDao resourceTypeDao;
+    
+    private ServiceFactory serviceFactory;
    
 
     @Autowired
@@ -176,7 +178,7 @@ public class PlatformManagerImpl implements PlatformManager {
                                ServerManager serverManager, PlatformFactory platformFactory,
                                ServiceManager serviceManager, ServerFactory serverFactory,
                                ResourceDao resourceDao, ResourceTypeDao resourceTypeDao, 
-                               ManagedResourceRepository managedResourceRepository) {
+                               ManagedResourceRepository managedResourceRepository, ServiceFactory serviceFactory) {
         this.permissionManager = permissionManager;
         this.agentDAO = agentDAO;
         this.resourceManager = resourceManager;
@@ -193,6 +195,7 @@ public class PlatformManagerImpl implements PlatformManager {
         this.resourceDao = resourceDao;
         this.resourceTypeDao  = resourceTypeDao;
         this.managedResourceRepository = managedResourceRepository;
+        this.serviceFactory = serviceFactory;
     }
     
     private Platform toPlatform(Resource resource) {
@@ -200,6 +203,10 @@ public class PlatformManagerImpl implements PlatformManager {
         Set<Resource> servers = resource.getResourcesFrom(RelationshipTypes.SERVER);
         for(Resource server: servers) {
             platform.addServer(serverFactory.createServer(server));
+        }
+        Set<Resource> services = resource.getResourcesFrom(RelationshipTypes.SERVICE);
+        for(Resource service: services) {
+            platform.addService(serviceFactory.createService(service));
         }
         return platform;
     }

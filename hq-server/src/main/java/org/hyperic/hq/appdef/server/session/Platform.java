@@ -28,6 +28,8 @@ public class Platform
     private Collection<Ip> ips = new HashSet<Ip>();
 
     private Collection<Server> servers = new HashSet<Server>();
+    
+    private Collection<Service> services = new HashSet<Service>();
 
     public Integer getCpuCount() {
         return cpuCount;
@@ -59,6 +61,14 @@ public class Platform
     
     public void addServer(Server server) {
         servers.add(server);
+    }
+    
+    public Collection<Service> getServices() {
+        return services;
+    }
+    
+    public void addService(Service service) {
+        services.add(service);
     }
 
     public PlatformType getPlatformType() {

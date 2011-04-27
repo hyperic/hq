@@ -13,7 +13,6 @@ public class Service
 
     private String autoinventoryIdentifier;
 
-    private boolean autodiscoveryZombie;
 
     public String getAutoinventoryIdentifier() {
         return autoinventoryIdentifier;
@@ -21,14 +20,6 @@ public class Service
 
     public void setAutoinventoryIdentifier(String autoinventoryIdentifier) {
         this.autoinventoryIdentifier = autoinventoryIdentifier;
-    }
-
-    public boolean isAutodiscoveryZombie() {
-        return autodiscoveryZombie;
-    }
-
-    public void setAutodiscoveryZombie(boolean autodiscoveryZombie) {
-        this.autodiscoveryZombie = autodiscoveryZombie;
     }
 
     public AppdefResource getParent() {
@@ -68,7 +59,6 @@ public class Service
     public ServiceValue getServiceValue() {
         ServiceValue _serviceValue = new ServiceValue();
         _serviceValue.setSortName(getSortName());
-        _serviceValue.setAutodiscoveryZombie(isAutodiscoveryZombie());
         _serviceValue.setAutoinventoryIdentifier(getAutoinventoryIdentifier());
         _serviceValue.setModifiedBy(getModifiedBy());
         _serviceValue.setOwner(getOwnerName());

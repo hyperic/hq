@@ -318,7 +318,6 @@ public class ServerManagerImpl implements ServerManager {
         s.setProperty(ServerFactory.SERVICES_AUTO_MANAGED,sv.getServicesAutomanaged());
         s.setProperty(ServerFactory.RUNTIME_AUTODISCOVERY,sv.getRuntimeAutodiscovery());
         s.setProperty(ServerFactory.WAS_AUTODISCOVERED,sv.getWasAutodiscovered());
-        s.setProperty(ServerFactory.AUTODISCOVERY_ZOMBIE,false);
         //TODO abstract creationTime, modifiedTime
         s.setProperty(ServerFactory.CREATION_TIME, System.currentTimeMillis());
         s.setProperty(ServerFactory.MODIFIED_TIME,System.currentTimeMillis());
@@ -991,7 +990,6 @@ public class ServerManagerImpl implements ServerManager {
         server.setDescription( existing.getDescription() );
         server.setProperty(ServerFactory.RUNTIME_AUTODISCOVERY, existing.getRuntimeAutodiscovery() );
         server.setProperty(ServerFactory.WAS_AUTODISCOVERED,existing.getWasAutodiscovered() );
-        server.setProperty(ServerFactory.AUTODISCOVERY_ZOMBIE,existing.getAutodiscoveryZombie() );
         server.setModifiedBy( existing.getModifiedBy() );
         server.setLocation( existing.getLocation() );
         server.setName( existing.getName() );
@@ -1148,7 +1146,6 @@ public class ServerManagerImpl implements ServerManager {
         Set<PropertyType> propertyTypes = new HashSet<PropertyType>();
         propertyTypes.add(createServerPropertyType(ServerFactory.WAS_AUTODISCOVERED,Boolean.class));
         propertyTypes.add(createServerPropertyType(ServerFactory.AUTO_INVENTORY_IDENTIFIER,String.class));
-        propertyTypes.add(createServerPropertyType(ServerFactory.AUTODISCOVERY_ZOMBIE,Boolean.class));
         propertyTypes.add(createServerPropertyType(ServerFactory.CREATION_TIME,Long.class));
         propertyTypes.add(createServerPropertyType(ServerFactory.MODIFIED_TIME,Long.class));
         propertyTypes.add(createServerPropertyType(ServerFactory.INSTALL_PATH,String.class));
@@ -1220,12 +1217,7 @@ public class ServerManagerImpl implements ServerManager {
         serverType.remove();
     }
 
-    /**
-     * 
-     */
-    public void setAutodiscoveryZombie(Server server, boolean zombie) {
-        resourceManager.findResourceById(server.getId()).setProperty(ServerFactory.AUTODISCOVERY_ZOMBIE,zombie);
-    }
+   
 
     /**
      * Get a Set of PlatformTypeLocal objects which map to the names as given by

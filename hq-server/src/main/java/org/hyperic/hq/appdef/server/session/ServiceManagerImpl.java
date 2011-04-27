@@ -140,7 +140,6 @@ public class ServiceManagerImpl implements ServiceManager {
         s.setOwner(subject.getName());
         resourceDao.persist(s);
         s.setProperty(ServiceFactory.AUTO_INVENTORY_IDENTIFIER,name);
-        s.setProperty(ServiceFactory.AUTO_DISCOVERY_ZOMBIE,false);
         s.setProperty(ServiceFactory.CREATION_TIME, System.currentTimeMillis());
         s.setProperty(ServiceFactory.MODIFIED_TIME,System.currentTimeMillis());
         s.setProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_SERVICE);
@@ -761,20 +760,10 @@ public class ServiceManagerImpl implements ServiceManager {
         return appServiceCollection;
     }
 
-   
-    public void updateServiceZombieStatus(AuthzSubject subject, Service svc, boolean zombieStatus)
-        throws PermissionException {
-        //TODO perm checks
-        //permissionManager.checkModifyPermission(subject, svc.getEntityId());
-        Resource resource = resourceManager.findResourceById(svc.getId());
-        resource.setModifiedBy(subject.getName());
-        resource.setProperty(ServiceFactory.AUTO_DISCOVERY_ZOMBIE,zombieStatus);
-    }
     
     private void updateService(ServiceValue valueHolder, Resource service) {
         service.setProperty(ServiceFactory.AUTO_INVENTORY_IDENTIFIER,valueHolder.getAutoinventoryIdentifier());
         service.setDescription( valueHolder.getDescription() );
-        service.setProperty(ServiceFactory.AUTO_DISCOVERY_ZOMBIE, valueHolder.getAutodiscoveryZombie() );
         service.setModifiedBy( valueHolder.getModifiedBy() );
         service.setLocation( valueHolder.getLocation() );
         service.setName( valueHolder.getName() );
@@ -954,7 +943,6 @@ public class ServiceManagerImpl implements ServiceManager {
         propertyTypes.add(createServicePropertyType(ServiceFactory.AUTO_INVENTORY_IDENTIFIER,String.class));
         propertyTypes.add(createServicePropertyType(ServiceFactory.CREATION_TIME,Long.class));
         propertyTypes.add(createServicePropertyType(ServiceFactory.MODIFIED_TIME,Long.class));
-        propertyTypes.add(createServicePropertyType(ServiceFactory.AUTO_DISCOVERY_ZOMBIE,Boolean.class));
         PropertyType appdefType = createServicePropertyType(AppdefResourceType.APPDEF_TYPE_ID, Integer.class);
         appdefType.setIndexed(true);
         propertyTypes.add(appdefType);

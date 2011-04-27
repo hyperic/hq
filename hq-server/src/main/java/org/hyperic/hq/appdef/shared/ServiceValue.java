@@ -40,8 +40,6 @@ public class ServiceValue extends AppdefResourceValue
 {
     private String sortName;
     private boolean sortNameHasBeenSet = false;
-    private boolean autodiscoveryZombie;
-    private boolean autodiscoveryZombieHasBeenSet = false;
     private boolean serviceRt;
     private boolean serviceRtHasBeenSet = false;
     private boolean endUserRt;
@@ -76,12 +74,10 @@ public class ServiceValue extends AppdefResourceValue
     {
     }
 
-    public ServiceValue( String sortName,boolean autodiscoveryZombie,boolean serviceRt,boolean endUserRt,String modifiedBy,String owner,String location,Integer configResponseId,Integer parentId,String name,String description,Integer id,Long mTime,Long cTime )
+    public ServiceValue( String sortName,boolean serviceRt,boolean endUserRt,String modifiedBy,String owner,String location,Integer configResponseId,Integer parentId,String name,String description,Integer id,Long mTime,Long cTime )
     {
         this.sortName = sortName;
         sortNameHasBeenSet = true;
-        this.autodiscoveryZombie = autodiscoveryZombie;
-        autodiscoveryZombieHasBeenSet = true;
         this.serviceRt = serviceRt;
         serviceRtHasBeenSet = true;
         this.endUserRt = endUserRt;
@@ -111,8 +107,6 @@ public class ServiceValue extends AppdefResourceValue
     {
         this.sortName = otherValue.sortName;
         sortNameHasBeenSet = true;
-        this.autodiscoveryZombie = otherValue.autodiscoveryZombie;
-        autodiscoveryZombieHasBeenSet = true;
         this.serviceRt = otherValue.serviceRt;
         serviceRtHasBeenSet = true;
         this.endUserRt = otherValue.endUserRt;
@@ -160,21 +154,7 @@ public class ServiceValue extends AppdefResourceValue
     public boolean sortNameHasBeenSet(){
         return sortNameHasBeenSet;
     }
-    public boolean getAutodiscoveryZombie()
-    {
-        return this.autodiscoveryZombie;
-    }
-
-    public void setAutodiscoveryZombie( boolean autodiscoveryZombie )
-    {
-        this.autodiscoveryZombie = autodiscoveryZombie;
-        autodiscoveryZombieHasBeenSet = true;
-
-    }
-
-    public boolean autodiscoveryZombieHasBeenSet(){
-        return autodiscoveryZombieHasBeenSet;
-    }
+ 
     public boolean getServiceRt()
     {
         return this.serviceRt;
@@ -385,8 +365,7 @@ public class ServiceValue extends AppdefResourceValue
     {
         StringBuffer str = new StringBuffer("{");
 
-        str.append("sortName=" + getSortName() + " autodiscoveryZombie="
-                + getAutodiscoveryZombie() + " serviceRt=" + getServiceRt()
+        str.append("sortName=" + getSortName() + " serviceRt=" + getServiceRt()
                 + " endUserRt=" + getEndUserRt() + " modifiedBy="
                 + getModifiedBy() + " owner=" + getOwner() + " location="
                 + getLocation() + " configResponseId=" + getConfigResponseId()
@@ -453,7 +432,7 @@ public class ServiceValue extends AppdefResourceValue
             {
                 lEquals = lEquals && this.sortName.equals( that.sortName );
             }
-            lEquals = lEquals && this.autodiscoveryZombie == that.autodiscoveryZombie;
+        
             lEquals = lEquals && this.serviceRt == that.serviceRt;
             lEquals = lEquals && this.endUserRt == that.endUserRt;
             if( this.modifiedBy == null )
@@ -548,8 +527,6 @@ public class ServiceValue extends AppdefResourceValue
     public int hashCode(){
         int result = 17;
         result = 37*result + ((this.sortName != null) ? this.sortName.hashCode() : 0);
-
-        result = 37*result + (autodiscoveryZombie ? 0 : 1);
 
         result = 37*result + (serviceRt ? 0 : 1);
 

@@ -162,9 +162,6 @@ public interface ServiceManager {
     PageList<ServiceValue> getServicesByApplication(AuthzSubject subject, Integer appId, Integer serviceTypeId, PageControl pc) throws PermissionException,
     org.hyperic.hq.appdef.shared.ApplicationNotFoundException, ServiceNotFoundException;
 
-    public void updateServiceZombieStatus(AuthzSubject subject, Service svc, boolean zombieStatus)
-        throws PermissionException;
-
     public Service updateService(AuthzSubject subject, ServiceValue existing) throws PermissionException,
         ServiceNotFoundException;
     

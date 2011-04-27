@@ -17,8 +17,6 @@ public class ServiceFactory {
 
     static final String AUTO_INVENTORY_IDENTIFIER = "AutoInventoryIdentifier";
 
-    static final String AUTO_DISCOVERY_ZOMBIE = "autoDiscoveryZombie";
-
     private ServerFactory serverFactory;
 
     private PlatformFactory platformFactory;
@@ -36,7 +34,6 @@ public class ServiceFactory {
 
     public Service createService(Resource resource) {
         Service service = new Service();
-        service.setAutodiscoveryZombie((Boolean) resource.getProperty(AUTO_DISCOVERY_ZOMBIE));
         service
             .setAutoinventoryIdentifier((String) resource.getProperty(AUTO_INVENTORY_IDENTIFIER));
         service.setCreationTime((Long) resource.getProperty(CREATION_TIME));

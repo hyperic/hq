@@ -367,14 +367,10 @@ public class RuntimeReportProcessor {
             }
         }
 
-        // any servers that we haven't handled, we should mark them
-        // as AI-zombies.
+       
         List rtn = new ArrayList(appdefServers.size());
         for (Iterator it = appdefServers.iterator(); it.hasNext();) {
             Server server = (Server) it.next();
-            if (server.isWasAutodiscovered()) {
-                serverManager.setAutodiscoveryZombie(server, true);
-            }
             Resource r = server.getResource();
             if (r == null || r.isInAsyncDeleteState()) {
                 continue;
@@ -563,6 +559,8 @@ public class RuntimeReportProcessor {
             List appdefServices; 
             try {
                 if(server.getServerType().isVirtual()) {
+                    //TODO this isn't the most efficient since we are checking all platform services for each virtual server, but no 
+                    //way to tie the service back.  Won't be a problem once plugins stop using deprected virtual servers
                     appdefServices = serviceManager.getPlatformServices(subject, platform.getId(),PageControl.PAGE_ALL);
                 }else{ 
                     // ServerValue.getServiceValues not working here for some reason,
@@ -583,7 +581,7 @@ public class RuntimeReportProcessor {
 
             String fqdn = aiplatform.getName() == null ? aiplatform.getFqdn() : aiplatform.getName();
 
-            // Filter out and mark zombie services
+           
             for (Iterator i = appdefServices.iterator(); i.hasNext();) {
                 ServiceValue tmp = (ServiceValue) i.next();
                 final Service service = serviceManager.getServiceById(tmp.getId());
@@ -632,10 +630,7 @@ public class RuntimeReportProcessor {
                                 aiSvc.getName() + " will be ignored.");
                         } 
                     }
-                } else {
-                    log.info("Service id=" + service.getId() + " name=" + service.getName() + " has become a zombie");
-                    serviceManager.updateServiceZombieStatus(_overlord, service, true);
-                }
+                } 
             }
 
             for (Iterator i = aiServices.iterator(); i.hasNext();) {

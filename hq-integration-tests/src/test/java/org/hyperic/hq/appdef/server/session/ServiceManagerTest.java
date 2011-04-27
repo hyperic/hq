@@ -161,7 +161,6 @@ public class ServiceManagerTest
         assertEquals(service.getLocation(), "my computer");
         assertFalse(service.getServiceValue().getServiceRt());
         assertFalse(service.getServiceValue().getEndUserRt());
-        assertFalse(service.isAutodiscoveryZombie());
         assertNotNull(service.getResource());
         assertEquals(service.getResource().getName(), "Test Service Name");
     }
@@ -525,25 +524,6 @@ public class ServiceManagerTest
 
     /**
      * Test method for
-     * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#updateServiceZombieStatus(org.hyperic.hq.authz.server.session.AuthzSubject, org.hyperic.hq.appdef.server.session.Service, boolean)}
-     * .
-     */
-    @Test
-    public void testUpdateServiceZombieStatus() throws ApplicationException, NotFoundException {
-        ServiceTypeInfo sinfo = new ServiceTypeInfo();
-        sinfo.setDescription("Test ServiceType Desc");
-        sinfo.setName("Test ServiceType Name");
-        ServiceType serviceType = serviceManager.createServiceType(sinfo, testPlugin, serverResType);
-        Service service = serviceManager.createService(subject, testServers.get(0).getId(),
-            serviceType.getId(), "Test Service Name", "Test Service From Server", "my computer");
-        assertFalse(service.isAutodiscoveryZombie());
-        serviceManager.updateServiceZombieStatus(subject, service, true);
-        Service updatedService = serviceManager.findServiceById(service.getId());
-        assertTrue(updatedService.isAutodiscoveryZombie());
-    }
-
-    /**
-     * Test method for
      * {@link org.hyperic.hq.appdef.server.session.ServiceManagerImpl#updateService(org.hyperic.hq.authz.server.session.AuthzSubject, org.hyperic.hq.appdef.shared.ServiceValue)}
      * .
      */
@@ -559,7 +539,6 @@ public class ServiceManagerTest
         sValue.setName("Changed Name");
         sValue.setDescription("Changed Description");
         sValue.setLocation("Changed Location");
-        sValue.setAutodiscoveryZombie(true);
         sValue.setServiceRt(true);
         sValue.setEndUserRt(true);
         sValue.setId(service.getId());
@@ -572,7 +551,6 @@ public class ServiceManagerTest
         assertEquals(updatedService.getLocation(), "Changed Location");
         assertTrue(updatedService.getServiceValue().getServiceRt());
         assertTrue(updatedService.getServiceValue().getEndUserRt());
-        assertTrue(updatedService.isAutodiscoveryZombie());
     }
 
     /**
