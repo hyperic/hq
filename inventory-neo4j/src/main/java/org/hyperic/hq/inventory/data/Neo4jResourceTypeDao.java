@@ -10,6 +10,8 @@ import org.hyperic.hq.inventory.domain.ResourceType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.graph.neo4j.repository.DirectGraphRepositoryFactory;
 import org.springframework.data.graph.neo4j.repository.GraphRepository;
+import org.springframework.data.graph.neo4j.repository.NamedIndexRepository;
+import org.springframework.data.graph.neo4j.support.GraphDatabaseContext;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,12 +21,10 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
     @Autowired
     private DirectGraphRepositoryFactory finderFactory;
 
+    @Autowired
+    private GraphDatabaseContext graphDatabaseContext;
+    
     private GraphRepository<ResourceType> resourceTypeFinder;
-
-    @PostConstruct
-    public void initFinder() {
-        resourceTypeFinder = finderFactory.createGraphRepository(ResourceType.class);
-    }
 
     public Long count() {
         return resourceTypeFinder.count();
@@ -69,10 +69,16 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
         return type;
     }
 
+    @SuppressWarnings("unchecked")
     public ResourceType findRoot() {
-        return findById(1);
+        return ((NamedIndexRepository<ResourceType>)resourceTypeFinder).findByPropertyValue("rootType", "rootType", true);
     }
 
+    @PostConstruct
+    public void initFinder() {
+        resourceTypeFinder = finderFactory.createGraphRepository(ResourceType.class);
+    }
+    
     @Transactional("neoTxManager")
     public void persist(ResourceType resourceType) {
         if (findByName(resourceType.getName()) != null) {
@@ -82,5 +88,12 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
         resourceType.persist();
         // TODO meaningful id
         resourceType.setId(resourceType.getNodeId().intValue());
+    }
+
+    @Transactional("neoTxManager")
+    public void persistRoot(ResourceType root) {
+        persist(root);
+        graphDatabaseContext.getIndex(ResourceType.class, "rootType").add(root.getPersistentState(),
+            "rootType", true);
     }
 }

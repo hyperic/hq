@@ -36,11 +36,6 @@ public class Neo4jResourceDao implements ResourceDao {
 
     private GraphRepository<Resource> resourceFinder;
 
-    @PostConstruct
-    public void initFinder() {
-        resourceFinder = finderFactory.createGraphRepository(Resource.class);
-    }
-
     public Long count() {
         return resourceFinder.count();
     }
@@ -132,6 +127,7 @@ public class Neo4jResourceDao implements ResourceDao {
         return ownedResources;
     }
 
+    @SuppressWarnings("unchecked")
     public Resource findRoot() {
         return ((NamedIndexRepository<Resource>)resourceFinder).findByPropertyValue("root", "root", true);
     }
@@ -158,13 +154,9 @@ public class Neo4jResourceDao implements ResourceDao {
         throw new IllegalArgumentException("Sort field type " + type + " is not allowed");
     }
 
-    @Transactional("neoTxManager")
-    public void persistRoot(Resource resource) {
-        persist(resource);
-        // add an index for lookup later. Property name/value can be anything
-        // here, the unique index name is important
-        graphDatabaseContext.getIndex(Resource.class, "root").add(resource.getPersistentState(),
-            "root", true);
+    @PostConstruct
+    public void initFinder() {
+        resourceFinder = finderFactory.createGraphRepository(Resource.class);
     }
 
     @Transactional("neoTxManager")
@@ -176,5 +168,14 @@ public class Neo4jResourceDao implements ResourceDao {
         // the underlying node
         graphDatabaseContext.getIndex(Resource.class, null).add(resource.getPersistentState(),
             "type", resource.getType().getId());
+    }
+
+    @Transactional("neoTxManager")
+    public void persistRoot(Resource resource) {
+        persist(resource);
+        // add an index for lookup later. Property name/value can be anything
+        // here, the unique index name is important
+        graphDatabaseContext.getIndex(Resource.class, "root").add(resource.getPersistentState(),
+            "root", true);
     }
 }
