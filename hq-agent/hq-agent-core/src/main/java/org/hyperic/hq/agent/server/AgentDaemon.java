@@ -71,7 +71,7 @@ public class AgentDaemon
     private static final String AGENT_COMMANDS_SERVER_JAR_NAME = "hq-agent-handler-commands";
 
     private static AgentDaemon mainInstance;
-    private static Object      mainInstanceLock = new Object();
+    private static final Object      mainInstanceLock = new Object();
 
     private double               startTime;
     private final static Log                  logger = LogFactory.getLog(AgentDaemon.class);
