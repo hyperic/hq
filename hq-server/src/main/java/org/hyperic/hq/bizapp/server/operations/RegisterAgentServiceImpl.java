@@ -89,7 +89,6 @@ public class RegisterAgentServiceImpl implements RegisterAgentService {
  
     @OperationEndpoint(exchange = "to.server", routingKey = "request.register", binding = "request.*", responseExchange = "to.agent", responseRoutingKey = "response.register")
     public RegisterAgentResponse registerAgentRequest(RegisterAgentRequest registerAgent) throws AgentConnectionException, PermissionException {
-        logger.info("\n***************received " + registerAgent);
 
         try {
             checkUserCanManageAgent(registerAgent);
@@ -140,8 +139,6 @@ public class RegisterAgentServiceImpl implements RegisterAgentService {
         if (ids != null) {
             rescheduleMetrics(ids); 
         }
-
-        logger.info("\n***************returning " + agentToken);
 
         return new RegisterAgentResponse("token:" + agentToken); 
     }

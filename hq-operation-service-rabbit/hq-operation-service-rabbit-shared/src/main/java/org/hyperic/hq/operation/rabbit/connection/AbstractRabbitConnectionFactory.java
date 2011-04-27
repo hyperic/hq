@@ -75,7 +75,7 @@ abstract class AbstractRabbitConnectionFactory extends ConnectionFactory {
                 try {
                     connection.close();
                 } catch (Exception e) {
-                    this.logger.error(e.getMessage());
+                    logger.error(e.getMessage());
                 }
             }
         }
@@ -94,9 +94,9 @@ abstract class AbstractRabbitConnectionFactory extends ConnectionFactory {
             Connection connection = this.connections.get(addressList);
 
             if (connection == null) {
-                this.logger.debug("Creating a new connection.");
+                logger.debug("Creating a new connection.");
                 connection = createConnection(addrs);
-                this.connections.put(addressList, connection);
+                connections.put(addressList, connection);
             }
             return connection;
         }
