@@ -42,7 +42,6 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.agent.mgmt.data.ManagedResourceRepository;
 import org.hyperic.hq.agent.mgmt.domain.Agent;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
@@ -68,8 +67,6 @@ public class AgentScheduleSynchronizer {
     private ZeventEnqueuer zEventManager;
 
     private AgentManager agentManager;
-    
-    private ManagedResourceRepository managedResourceRepository;
 
     private final Map<Integer, Collection<AppdefEntityID>> scheduleAeids = new HashMap<Integer, Collection<AppdefEntityID>>();
 
@@ -86,13 +83,11 @@ public class AgentScheduleSynchronizer {
     @Autowired
     public AgentScheduleSynchronizer(ZeventEnqueuer zEventManager, AgentManager agentManager,
                                      MeasurementProcessor measurementProcessor,
-                                     ConcurrentStatsCollector concurrentStatsCollector,
-                                     ManagedResourceRepository managedResourceRepository) {
+                                     ConcurrentStatsCollector concurrentStatsCollector) {
         this.zEventManager = zEventManager;
         this.agentManager = agentManager;
         this.measurementProcessor = measurementProcessor;
         this.concurrentStatsCollector = concurrentStatsCollector;
-        this.managedResourceRepository = managedResourceRepository;
     }
 
     @PostConstruct

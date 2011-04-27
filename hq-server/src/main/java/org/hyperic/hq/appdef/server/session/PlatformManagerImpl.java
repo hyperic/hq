@@ -1977,9 +1977,7 @@ public class PlatformManagerImpl implements PlatformManager {
         Collection<Resource> resources = getAllPlatforms();
         for(Resource resource: resources) {
             Agent resourceAgent = managedResourceRepository.findAgentByResource(resource.getId());
-            if(resourceAgent == null) {
-                log.warn("No agent for resource " + resource);
-            }else if(resourceAgent.equals(agt)) {
+            if(resourceAgent.equals(agt)) {
                 plats.add(toPlatform(resource));
             }
         }
