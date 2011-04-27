@@ -1,13 +1,11 @@
 package org.hyperic.hq.operation;
 
 import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 
 public class RegisterAgentRequest extends AbstractAgentOperation {
- 
-    //@JsonIgnore
+
     private String authToken;
 
     private String version;
@@ -42,16 +40,5 @@ public class RegisterAgentRequest extends AbstractAgentOperation {
     @Override
     public String toString() {
         return new StringBuilder(authToken).append(version).append(cpuCount).append(super.toString()).toString();
-    }
-
-    /**
-     * TODO better port test
-     * @throws IllegalStateException
-     */
-    @JsonIgnore
-    public void validate() throws IllegalStateException {
-        if (this.authToken != null && this.version != null && this.cpuCount > 0) {
-            throw new IllegalStateException(this + " is not properly initialized: " + this.toString());
-        }
-    }
+    } 
 }

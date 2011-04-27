@@ -42,4 +42,8 @@ public class RegisterAgentResponse extends AbstractOperation {
         return agentToken;
     }
 
+    @Override
+    public String toString() {
+        return agentToken;
+    }
 }
