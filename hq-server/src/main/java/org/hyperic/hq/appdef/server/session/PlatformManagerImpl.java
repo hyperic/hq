@@ -435,7 +435,7 @@ public class PlatformManagerImpl implements PlatformManager {
         p.setProperty(PlatformFactory.FQDN,aip.getFqdn());
         p.setProperty(PlatformFactory.COMMENT_TEXT,"");
         p.setProperty(PlatformFactory.CPU_COUNT,aip.getCpuCount());
-        p.setProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_PLATFORM);
+        p.setProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_PLATFORM,true);
         p.setModifiedBy(initialOwner);
         ManagedResource managedResource =  new ManagedResource(p.getId(), agent);
         managedResourceRepository.save(managedResource);
@@ -1621,9 +1621,7 @@ public class PlatformManagerImpl implements PlatformManager {
         propertyTypes.add(createPropertyType(PlatformFactory.CPU_COUNT,Integer.class));
         propertyTypes.add(createPropertyType(PlatformFactory.CREATION_TIME,Long.class));
         propertyTypes.add(createPropertyType(PlatformFactory.MODIFIED_TIME,Long.class));
-        PropertyType appdefType = createPropertyType(AppdefResourceType.APPDEF_TYPE_ID, Integer.class);
-        appdefType.setIndexed(true);
-        propertyTypes.add(appdefType);
+        propertyTypes.add(createPropertyType(AppdefResourceType.APPDEF_TYPE_ID, Integer.class));
         pt.addPropertyTypes(propertyTypes);
         resourceManager.findRootResourceType().relateTo(pt, RelationshipTypes.PLATFORM);
         pt.relateTo(resourceManager.findResourceTypeByName(IP_RESOURCE_TYPE_NAME),RelationshipTypes.IP);

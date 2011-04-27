@@ -142,7 +142,7 @@ public class ServiceManagerImpl implements ServiceManager {
         s.setProperty(ServiceFactory.AUTO_INVENTORY_IDENTIFIER,name);
         s.setProperty(ServiceFactory.CREATION_TIME, System.currentTimeMillis());
         s.setProperty(ServiceFactory.MODIFIED_TIME,System.currentTimeMillis());
-        s.setProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_SERVICE);
+        s.setProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_SERVICE,true);
         parent.relateTo(s, RelationshipTypes.SERVICE);
         parent.relateTo(s, RelationshipTypes.CONTAINS);
         return s;
@@ -943,9 +943,7 @@ public class ServiceManagerImpl implements ServiceManager {
         propertyTypes.add(createServicePropertyType(ServiceFactory.AUTO_INVENTORY_IDENTIFIER,String.class));
         propertyTypes.add(createServicePropertyType(ServiceFactory.CREATION_TIME,Long.class));
         propertyTypes.add(createServicePropertyType(ServiceFactory.MODIFIED_TIME,Long.class));
-        PropertyType appdefType = createServicePropertyType(AppdefResourceType.APPDEF_TYPE_ID, Integer.class);
-        appdefType.setIndexed(true);
-        propertyTypes.add(appdefType);
+        propertyTypes.add(createServicePropertyType(AppdefResourceType.APPDEF_TYPE_ID, Integer.class));
         serviceType.addPropertyTypes(propertyTypes);
         return serviceType;
     }

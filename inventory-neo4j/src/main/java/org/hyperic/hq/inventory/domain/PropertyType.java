@@ -32,9 +32,6 @@ public class PropertyType {
     private boolean hidden;
 
     @GraphProperty
-    private boolean indexed;
-
-    @GraphProperty
     @NotNull
     private String name;
 
@@ -98,14 +95,6 @@ public class PropertyType {
 
     /**
      * 
-     * @return true if the property should be indexed for lookup when set
-     */
-    public boolean isIndexed() {
-        return indexed;
-    }
-
-    /**
-     * 
      * @return true if value should be obscured (like a password)
      */
     public boolean isSecret() {
@@ -143,14 +132,6 @@ public class PropertyType {
      */
     public void setHidden(boolean hidden) {
         this.hidden = hidden;
-    }
-
-    /**
-     * 
-     * @param indexed true if the property should be indexed for lookup when set
-     */
-    public void setIndexed(boolean indexed) {
-        this.indexed = indexed;
     }
 
     /**

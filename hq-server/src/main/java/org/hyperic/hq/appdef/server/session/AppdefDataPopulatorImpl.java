@@ -51,9 +51,9 @@ public class AppdefDataPopulatorImpl implements AppdefDataPopulator {
                     AppdefEntityConstants.getAppdefGroupTypeName(groupTypes[i]));
                 resourceTypeDao.persist(groupType);
                 Set<PropertyType> propTypes = new HashSet<PropertyType>();
-                propTypes.add(createPropertyType("groupEntType", Integer.class, false));
-                propTypes.add(createPropertyType("groupEntResType", Integer.class, true));
-                propTypes.add(createPropertyType("mixed", Boolean.class, true));
+                propTypes.add(createPropertyType("groupEntType", Integer.class));
+                propTypes.add(createPropertyType("groupEntResType", Integer.class));
+                propTypes.add(createPropertyType("mixed", Boolean.class));
                 groupType.addPropertyTypes(propTypes);
             }
         }
@@ -77,14 +77,9 @@ public class AppdefDataPopulatorImpl implements AppdefDataPopulator {
     }
 
     private PropertyType createPropertyType(String propTypeName, Class<?> type) {
-        return createPropertyType(propTypeName, type, false);
-    }
-
-    private PropertyType createPropertyType(String propTypeName, Class<?> type, boolean indexed) {
         PropertyType propType = new PropertyType(propTypeName, type);
         propType.setDescription(propTypeName);
         propType.setHidden(true);
-        propType.setIndexed(indexed);
         return propType;
     }
 

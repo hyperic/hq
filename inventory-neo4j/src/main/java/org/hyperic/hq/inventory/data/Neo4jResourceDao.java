@@ -9,6 +9,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
+import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.IndexHits;
@@ -168,6 +169,13 @@ public class Neo4jResourceDao implements ResourceDao {
         // the underlying node
         graphDatabaseContext.getIndex(Resource.class, null).add(resource.getPersistentState(),
             "type", resource.getType().getId());
+        //Populate default prop values
+        Set<PropertyType> propertyTypes = resource.getType().getPropertyTypes();
+        for(PropertyType propertyType: propertyTypes) {
+            if(propertyType.getDefaultValue() != null) {
+                resource.setProperty(propertyType.getName(), propertyType.getDefaultValue());
+            }
+        }
     }
 
     @Transactional("neoTxManager")

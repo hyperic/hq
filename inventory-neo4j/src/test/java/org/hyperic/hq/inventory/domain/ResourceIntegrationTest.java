@@ -142,20 +142,9 @@ public class ResourceIntegrationTest {
         assertEquals("123 My Street", traderJoes.getProperty("Address"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testGetPropertyNotDefined() {
-        traderJoes.getProperty("Hours");
-    }
-
     @Test
     public void testGetPropertyNotSet() {
         assertNull(traderJoes.getProperty("Address"));
-    }
-
-    @Test
-    public void testGetPropertyNotSetDefaultValue() {
-        store.getPropertyType("Address").setDefaultValue("Jones St");
-        assertEquals("Jones St", traderJoes.getProperty("Address"));
     }
 
     @Test
@@ -387,11 +376,6 @@ public class ResourceIntegrationTest {
         assertEquals("123 Some Other Street", actual.getNewValue());
         assertEquals("123 My Street", actual.getOldValue());
         assertEquals(traderJoes.getId(), actual.getInstanceId());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testSetPropertyNotDefined() {
-        traderJoes.setProperty("Hours", "9-5");
     }
 
     @Test(expected = IllegalArgumentException.class)

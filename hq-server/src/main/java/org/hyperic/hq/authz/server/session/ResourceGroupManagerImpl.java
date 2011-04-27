@@ -162,11 +162,11 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         res.setOwner(whoami.getName());
         if(cInfo.getGroupTypeId() == AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS || 
             cInfo.getGroupTypeId() == AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC) {
-            res.setProperty(MIXED,false);
+            res.setProperty(MIXED,false,true);
         }else {
-            res.setProperty(MIXED,true);
+            res.setProperty(MIXED,true, true);
         }
-        res.setProperty(GROUP_ENT_RES_TYPE, cInfo.getGroupEntResType());
+        res.setProperty(GROUP_ENT_RES_TYPE, cInfo.getGroupEntResType(),true);
         res.setProperty(GROUP_ENT_TYPE, cInfo.getGroupEntType());
         return res;
     }

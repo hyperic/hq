@@ -75,7 +75,7 @@ public class Resource {
     @Indexed
     @GraphProperty
     private String sortName;
-    
+
     @RelatedTo(type = RelationshipTypes.IS_A, direction = Direction.OUTGOING, elementClass = ResourceType.class)
     private ResourceType type;
 
@@ -115,9 +115,11 @@ public class Resource {
         Set<ResourceRelationship> relations = new HashSet<ResourceRelationship>();
         for (org.neo4j.graphdb.Relationship relationship : relationships) {
             // Don't include Neo4J relationship b/w Node and its Java type
-            if (!relationship.isType(SubReferenceNodeTypeRepresentationStrategy.INSTANCE_OF_RELATIONSHIP_TYPE)) {
+            if (!relationship
+                .isType(SubReferenceNodeTypeRepresentationStrategy.INSTANCE_OF_RELATIONSHIP_TYPE)) {
                 Node node = relationship.getOtherNode(getPersistentState());
-                Class<?> otherEndType = graphDatabaseContext.getNodeTypeRepresentationStrategy().getJavaType(node);
+                Class<?> otherEndType = graphDatabaseContext.getNodeTypeRepresentationStrategy()
+                    .getJavaType(node);
                 if (Resource.class.isAssignableFrom(otherEndType)) {
                     if (entity == null || node.equals(entity.getPersistentState())) {
                         relations.add(graphDatabaseContext.createEntityFromState(relationship,
@@ -266,26 +268,20 @@ public class Resource {
      */
     public Map<String, Object> getProperties(boolean includeHidden) {
         Map<String, Object> properties = new HashMap<String, Object>();
-        // TODO perf tradeoff of hidden properties
         for (String key : getPersistentState().getPropertyKeys()) {
             if (!(includeHidden)) {
-                // PropertyType propType = type.getPropertyType(key);
-                // if (propType != null && propType.isHidden()) {
-                // continue;
-                // }
+                PropertyType propType = type.getPropertyType(key);
+                if (propType != null && propType.isHidden()) {
+                    continue;
+                }
             }
-            // filter out the properties we've defined at class-level, like
-            // name
+            // filter out the properties we've defined at class-level
+            // Not checking against PropertyType for performance optimization
             if (!(key.equals("location")) && !(key.equals("name")) &&
                 !(key.equals("description")) && !(key.equals("modifiedBy")) &&
-                !(key.equals("owner")) && !(key.equals("id")) && !(key.equals("privateGroup"))
-                && !(key.equals("sortName")) && !(key.equals("__type__"))) {
-                // try {
+                !(key.equals("owner")) && !(key.equals("id")) && !(key.equals("privateGroup")) &&
+                !(key.equals("sortName")) && !(key.equals("__type__"))) {
                 properties.put(key, getProperty(key));
-                // } catch (IllegalArgumentException e) {
-                // filter out the properties we've defined at class-level, like
-                // name
-                // }
             }
         }
         return properties;
@@ -294,24 +290,13 @@ public class Resource {
     /**
      * 
      * @param key The property key
-     * @return The property value
-     * @throws IllegalArgumentException If the property is not defined on the
-     *         {@link ResourceType}
+     * @return The property value or null if value not found
      */
     public Object getProperty(String key) {
-        // TODO set default values when Resource created
-        // PropertyType propertyType = type.getPropertyType(key);
-        // if (propertyType == null) {
-        // throw new IllegalArgumentException("Property " + key +
-        // " is not defined for resource of type " +
-        // type.getName());
-        // }
-
         try {
             return getPersistentState().getProperty(key);
         } catch (NotFoundException e) {
-            return "";
-            // return propertyType.getDefaultValue();
+            return null;
         }
     }
 
@@ -633,11 +618,12 @@ public class Resource {
     @Transactional("neoTxManager")
     public void setName(String name) {
         this.name = name;
-        if(this.sortName == null) {
-            //Strip out all special chars b/c Lucene can't sort tokenized Strings
+        if (this.sortName == null) {
+            // Strip out all special chars b/c Lucene can't sort tokenized
+            // Strings
             this.sortName = name.toUpperCase().replaceAll("\\W", "");
         }
-    } 
+    }
 
     /**
      * 
@@ -653,29 +639,10 @@ public class Resource {
      * @param key The property name
      * @param value The property value
      * @return The previous property value
-     * @throws IllegalArgumentException If the property is not defined for the
-     *         {@link ResourceType}
      */
     @Transactional("neoTxManager")
-    public Object setProperty(String key, Object value) {
-        if (value == null) {
-            // You can't set null property values in Neo4j, so we won't know if
-            // a missing property means explicit set to null or to return
-            // default value
-            throw new IllegalArgumentException("Null property values are not allowed");
-        }
-        // TODO maybe set properties and indexes up front and validate that way.
-        // This call is very expensive in initial import
-        // PropertyType propertyType = type.getPropertyType(key);
-        // if (propertyType == null) {
-        // throw new IllegalArgumentException("Property " + key +
-        // " is not defined for resource of type " +
-        // type.getName());
-        // }
-        // if (propertyType.getPropertyValidator() != null) {
+    public Object setProperty(String key, Object value, boolean index) {
         // TODO validation
-        // propertyType.getPropertyValidator().validate()
-        // }
         Object oldValue = null;
         try {
             oldValue = getPersistentState().getProperty(key);
@@ -683,15 +650,18 @@ public class Resource {
             // could be first time
         }
         getPersistentState().setProperty(key, value);
-        // if (propertyType.isIndexed()) {
-        if (key.equals("AppdefTypeId") || key.equals("mixed") || key.equals("groupEntResType")) {
+        if (index) {
             graphDatabaseContext.getIndex(Resource.class, null).add(getPersistentState(), key,
                 value);
         }
-
         CPropChangeEvent event = new CPropChangeEvent(getId(), key, oldValue, value);
         messagePublisher.publishMessage(MessagePublisher.EVENTS_TOPIC, event);
         return oldValue;
+    }
+    
+    @Transactional("neoTxManager")
+    public Object setProperty(String key, Object value) {
+        return setProperty(key,value,false);
     }
 
     @Transactional("neoTxManager")

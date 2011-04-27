@@ -401,7 +401,7 @@ public class ServerManagerImpl implements ServerManager {
                 throw new ValidationException("Servers of type '" + serverType.getName() + "' cannot be created on platforms of type '" +
                     platform.getType().getName());
             }
-            server.setProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_SERVER);
+            server.setProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_SERVER,true);
             
             //TODO abstract to ResourceManager when we can send events w/out AppdefEntityIDs
             Server serv = toServer(server);
@@ -1122,7 +1122,6 @@ public class ServerManagerImpl implements ServerManager {
         log.debug("Creating new ServerType: " + sinfo.getName());
         ResourceType stype = createServerResourceType(sinfo, plugin);
         PropertyType appdefType = createServerPropertyType(AppdefResourceType.APPDEF_TYPE_ID, Integer.class);
-        appdefType.setIndexed(true);
         stype.addPropertyType(appdefType);
         String newPlats[] = sinfo.getValidPlatformTypes();
         findAndSetPlatformType(newPlats, stype);
