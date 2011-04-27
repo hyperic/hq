@@ -130,13 +130,15 @@
 			</div>
 	</div>
 	<div id="confirmationPanel" style="visibility:hidden;">
+		<span id="deletLoadingIcon" style="visibility:hidden;"><img src="<spring:url value="/static/images/ajax-loader-blue.gif"/>"/></span>
+
 		<p><fmt:message key="admin.managers.plugin.confirmation.title" /></p>
 		<ul id="removeList">
 		</ul>
 		<p><fmt:message key="admin.managers.plugin.confirmation.message" /></p>
 		<div>
 			<input id="removeButton" type="button" name="remove" value="<fmt:message key="admin.managers.plugin.button.remove" />" />
-			<a href="#" class="cancelLink"><fmt:message key="admin.managers.plugin.button.cancel" /></a>
+			<a href="#" id="removeCancel" class="cancelLink"><fmt:message key="admin.managers.plugin.button.cancel" /></a>
 		</div>
 	</div>
 	<div id="errorMsgPanel" style="visibility:hidden;">
@@ -189,7 +191,6 @@
 
 	hqDojo.ready(function() {
 		var timer = new hqDojox.timing.Timer();
-
 		function refreshPage(){
 			hqDojo.style(hqDojo.byId("pluginList"), "color","#AAAAAA");
 			var infoXhrArgs={
@@ -569,7 +570,7 @@
 					preventCache:true,
 					form: hqDojo.byId("deleteForm"),
 					url: "<spring:url value='/app/admin/managers/plugin/delete' />",
-					load: function(response) {
+					handle: function(response) {
 					    var anim;
 						if (response==="success") {
 							hqDojo.attr("progressMessage", "class", "information");
@@ -580,7 +581,7 @@
 									}),
 									hqDojo.fadeOut({
 										node: "progressMessage",
-										delay: 1000,
+										delay: 5000,
 										duration: 500
 									})];	
 						}else{
@@ -596,27 +597,19 @@
 										duration: 500
 									})];
 						}
-						hqDojo.fx.chain(anim).play();	
 						refreshPage();
-					},
-					error: function(response,arg){
-						hqDojo.attr("progressMessage", "class", "error");
-						hqDojo.byId("progressMessage").innerHTML = '<fmt:message key="admin.managers.Plugin.remove.error.dialog.failure" />';
-						var anim = [hqDojo.fadeIn({
-									node: "progressMessage",
-									duration: 500
-									}),
-									hqDojo.fadeOut({
-										node: "progressMessage",
-										delay: 10000,
-										duration: 500
-									})];
-						hqDojo.fx.chain(anim).play();
-						refreshPage();
+						hqDijit.byId("removePanelDialog").hide();
+	
+  						hqDojo.style("deletLoadingIcon","visibility","hidden");
+						hqDojo.style("removeButton","visibility","visible");
+						hqDojo.style("removeCancel","visibility","visible");
+						hqDojo.fx.chain(anim).play();						
 					}
 				};
 				hqDojo.xhrPost(xhrArgs);
-				hqDijit.byId("removePanelDialog").hide(); 
+				hqDojo.style("deletLoadingIcon","visibility","visible");
+				hqDojo.style("removeButton","visibility","hidden");
+				hqDojo.style("removeCancel","visibility","hidden");
 			});
 		}
 		
@@ -745,7 +738,7 @@
 					if(hashObj.deleteIds!==""){
 						hqDojo.forEach(hashObj.deleteIds.split(","),function(pluginId){
 							var checkbox = hqDojo.query("input[value='"+pluginId+"']");
-							if(checkbox[0]!==null){
+							if(checkbox[0]!==undefined){
 								checkbox[0].checked="true";
 							}
 						});
