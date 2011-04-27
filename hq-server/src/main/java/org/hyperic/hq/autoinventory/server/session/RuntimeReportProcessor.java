@@ -250,12 +250,15 @@ public class RuntimeReportProcessor {
 
                         aiplatforms[j].setAgentToken(_agentToken);
                     }
-                    Set tmp = (Set)platformToServers.get(aiplatforms[j].getFqdn());
-                    if (tmp == null) {
-                        tmp = new HashSet();
-                        platformToServers.put(aiplatforms[j].getFqdn(), tmp);
+                    boolean merged = mergePlatformIntoInventory(subject, aiplatforms[j], appdefServer);
+                    if(! merged) {
+                        Set tmp = (Set)platformToServers.get(aiplatforms[j].getFqdn());
+                        if (tmp == null) {
+                            tmp = new HashSet();
+                            platformToServers.put(aiplatforms[j].getFqdn(), tmp);
+                        }
+                        tmp.add(appdefServer);
                     }
-                    tmp.addAll(mergePlatformIntoInventory(subject, aiplatforms[j], appdefServer));
                     //flushing any repository will flush the current entity manager
                     authzSubjectRepository.flush();
                 } else {
@@ -323,7 +326,7 @@ public class RuntimeReportProcessor {
         measurementProcessor.scheduleHierarchyAfterCommit(toSchedule);
     }
 
-    private List mergePlatformIntoInventory(AuthzSubject subject, AIPlatformValue aiplatform, Server reportingServer)
+    private boolean mergePlatformIntoInventory(AuthzSubject subject, AIPlatformValue aiplatform, Server reportingServer)
         throws PermissionException, ValidationException, ApplicationException {
 
         AIServerValue[] aiservers = aiplatform.getAIServerValues();
@@ -347,7 +350,7 @@ public class RuntimeReportProcessor {
         // Else platform already exists, don't update it, only update servers
         // that are within it.
         if (aiservers == null) {
-            return new ArrayList();
+            return true;
         }
 
         List<Server> appdefServers = new ArrayList<Server>(appdefPlatform.getServers());
@@ -356,30 +359,23 @@ public class RuntimeReportProcessor {
             appdefServers.add(serverManager.findServerById(virtualServerResource.getId()));
         }
 
+        boolean foundAppdefServer = false;
         for (int i = 0; i < aiservers.length; i++) {
             if (aiservers[i] != null) {
-                mergeServerIntoInventory(subject, appdefPlatform, aiplatform, aiservers[i], appdefServers,
+                boolean merged = mergeServerIntoInventory(subject, appdefPlatform, aiplatform, aiservers[i], appdefServers,
                     reportingServer);
+                //If at any point a match was found for reportingServer, we'll return true
+                if(merged == true) {
+                    foundAppdefServer = true;
+                }
                 //flushing any repository will flush the current entity manager
                 authzSubjectRepository.flush();
             } else {
                 log.error("Platform: " + appdefPlatform.getName() + " reported null aiServer. Skipping.");
             }
         }
-
-       
-        List rtn = new ArrayList(appdefServers.size());
-        for (Iterator it = appdefServers.iterator(); it.hasNext();) {
-            Server server = (Server) it.next();
-            Resource r = server.getResource();
-            if (r == null || r.isInAsyncDeleteState()) {
-                continue;
-            }
-            rtn.add(r);
-        }
-
         log.info("Completed Merging platform into appdef: " + aiplatform.getFqdn());
-        return rtn;
+        return foundAppdefServer;
     }
 
     private void updateServiceTypes(AIServerExtValue server, Server foundAppdefServer) {
@@ -399,12 +395,10 @@ public class RuntimeReportProcessor {
      * @param platform the platform that the server is on
      * @param aiplatform the AIPlatform that is parent to the AI Server
      * @param aiserver the server we're going to merge into inventory
-     * @param appdefServers the existing servers on the platform. this method is
-     *        expected to remove a server from this collection if the aiserver
-     *        is found amongs the appdefServers.
+     * @param appdefServers the existing servers on the platform
      * @param reportingServer The server that reported the aiserver.
      */
-    private void mergeServerIntoInventory(AuthzSubject subject, Platform platform, AIPlatformValue aiplatform,
+    private boolean mergeServerIntoInventory(AuthzSubject subject, Platform platform, AIPlatformValue aiplatform,
                                           AIServerValue aiserver, List<Server> appdefServers, Server reportingServer)
         throws PermissionException, ValidationException {
         Integer serverTypePK;
@@ -425,7 +419,7 @@ public class RuntimeReportProcessor {
                  "," + " name=" + aiserver.getName() + "," + " AIIdentifier=" + aiserver.getAutoinventoryIdentifier());
 
         Server server = null;
-      
+        boolean matchedAppdefServer = false;
         for (int i = 0; i < appdefServers.size(); i++) {
             Server appdefServer = appdefServers.get(i);
 
@@ -443,6 +437,7 @@ public class RuntimeReportProcessor {
                     log.info("Setting AIID to existing=" + appdefServerAIID);
                     aiserver.setAutoinventoryIdentifier(appdefServerAIID);
                 }
+                matchedAppdefServer = true;
                 appdefServers.remove(i);
                 break;
             }
@@ -464,7 +459,7 @@ public class RuntimeReportProcessor {
                 if (isPlaceholder) {
                     log.error("Placeholder serverId=" + aiserver.getId() + " not found for platformId=" +
                               platform.getId() + ", fqdn=" + platform.getFqdn());
-                    return;
+                    return matchedAppdefServer;
                 }
                 // CREATE the server
                 // replace %serverName% in aisever's name.
@@ -490,11 +485,11 @@ public class RuntimeReportProcessor {
         } catch (ApplicationException e) {
             log.error("Failed to merge server: " + aiserver, e);
             log.info("Server: " + aiserver + " will be skipped.");
-            return;
+            return matchedAppdefServer;
         } catch (NotFoundException e) {
             log.error("Failed to merge server: " + aiserver, e);
             log.info("Server: " + aiserver + " will be skipped.");
-            return;
+            return matchedAppdefServer;
         }
 
         // Only update the server and its config if it is not
@@ -649,6 +644,7 @@ public class RuntimeReportProcessor {
             zEventManager.enqueueEventAfterCommit(new AgentScheduleSyncZevent(toSchedule));
         }
         log.info("Completed merging server: " + reportingServer.getName() + " into inventory");
+        return matchedAppdefServer;
     }
 
     public static class ServiceMergeInfo {
