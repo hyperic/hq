@@ -159,8 +159,6 @@ public class ServiceManagerTest
         assertEquals(service.getDescription(), "Test Service Desc");
         assertEquals(service.getServiceType(), serviceType);
         assertEquals(service.getLocation(), "my computer");
-        assertFalse(service.getServiceValue().getServiceRt());
-        assertFalse(service.getServiceValue().getEndUserRt());
         assertNotNull(service.getResource());
         assertEquals(service.getResource().getName(), "Test Service Name");
     }
@@ -539,8 +537,6 @@ public class ServiceManagerTest
         sValue.setName("Changed Name");
         sValue.setDescription("Changed Description");
         sValue.setLocation("Changed Location");
-        sValue.setServiceRt(true);
-        sValue.setEndUserRt(true);
         sValue.setId(service.getId());
         sValue.setAutoinventoryIdentifier("Test Service Name");
         serviceManager.updateService(subject, sValue);
@@ -549,8 +545,6 @@ public class ServiceManagerTest
         assertEquals(updatedService.getDescription(), "Changed Description");
         assertEquals(updatedService.getServiceType(), serviceType);
         assertEquals(updatedService.getLocation(), "Changed Location");
-        assertTrue(updatedService.getServiceValue().getServiceRt());
-        assertTrue(updatedService.getServiceValue().getEndUserRt());
     }
 
     /**

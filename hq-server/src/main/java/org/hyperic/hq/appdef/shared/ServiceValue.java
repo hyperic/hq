@@ -29,7 +29,6 @@
  */
 package org.hyperic.hq.appdef.shared;
 
-import org.hyperic.hq.authz.shared.ResourceGroupValue;
 
 /**
  * Value object for Service.
@@ -40,10 +39,6 @@ public class ServiceValue extends AppdefResourceValue
 {
     private String sortName;
     private boolean sortNameHasBeenSet = false;
-    private boolean serviceRt;
-    private boolean serviceRtHasBeenSet = false;
-    private boolean endUserRt;
-    private boolean endUserRtHasBeenSet = false;
     private String modifiedBy;
     private boolean modifiedByHasBeenSet = false;
     private String owner;
@@ -74,14 +69,10 @@ public class ServiceValue extends AppdefResourceValue
     {
     }
 
-    public ServiceValue( String sortName,boolean serviceRt,boolean endUserRt,String modifiedBy,String owner,String location,Integer configResponseId,Integer parentId,String name,String description,Integer id,Long mTime,Long cTime )
+    public ServiceValue( String sortName,String modifiedBy,String owner,String location,Integer configResponseId,Integer parentId,String name,String description,Integer id,Long mTime,Long cTime )
     {
         this.sortName = sortName;
         sortNameHasBeenSet = true;
-        this.serviceRt = serviceRt;
-        serviceRtHasBeenSet = true;
-        this.endUserRt = endUserRt;
-        endUserRtHasBeenSet = true;
         this.modifiedBy = modifiedBy;
         modifiedByHasBeenSet = true;
         this.owner = owner;
@@ -107,10 +98,6 @@ public class ServiceValue extends AppdefResourceValue
     {
         this.sortName = otherValue.sortName;
         sortNameHasBeenSet = true;
-        this.serviceRt = otherValue.serviceRt;
-        serviceRtHasBeenSet = true;
-        this.endUserRt = otherValue.endUserRt;
-        endUserRtHasBeenSet = true;
         this.modifiedBy = otherValue.modifiedBy;
         modifiedByHasBeenSet = true;
         this.owner = otherValue.owner;
@@ -155,36 +142,7 @@ public class ServiceValue extends AppdefResourceValue
         return sortNameHasBeenSet;
     }
  
-    public boolean getServiceRt()
-    {
-        return this.serviceRt;
-    }
-
-    public void setServiceRt( boolean serviceRt )
-    {
-        this.serviceRt = serviceRt;
-        serviceRtHasBeenSet = true;
-
-    }
-
-    public boolean serviceRtHasBeenSet(){
-        return serviceRtHasBeenSet;
-    }
-    public boolean getEndUserRt()
-    {
-        return this.endUserRt;
-    }
-
-    public void setEndUserRt( boolean endUserRt )
-    {
-        this.endUserRt = endUserRt;
-        endUserRtHasBeenSet = true;
-
-    }
-
-    public boolean endUserRtHasBeenSet(){
-        return endUserRtHasBeenSet;
-    }
+  
     public String getModifiedBy()
     {
         return this.modifiedBy;
@@ -365,8 +323,7 @@ public class ServiceValue extends AppdefResourceValue
     {
         StringBuffer str = new StringBuffer("{");
 
-        str.append("sortName=" + getSortName() + " serviceRt=" + getServiceRt()
-                + " endUserRt=" + getEndUserRt() + " modifiedBy="
+        str.append("sortName=" + getSortName() + " modifiedBy="
                 + getModifiedBy() + " owner=" + getOwner() + " location="
                 + getLocation() + " configResponseId=" + getConfigResponseId()
                 + " name=" + getName()
@@ -433,8 +390,6 @@ public class ServiceValue extends AppdefResourceValue
                 lEquals = lEquals && this.sortName.equals( that.sortName );
             }
         
-            lEquals = lEquals && this.serviceRt == that.serviceRt;
-            lEquals = lEquals && this.endUserRt == that.endUserRt;
             if( this.modifiedBy == null )
             {
                 lEquals = lEquals && ( that.modifiedBy == null );
@@ -527,10 +482,6 @@ public class ServiceValue extends AppdefResourceValue
     public int hashCode(){
         int result = 17;
         result = 37*result + ((this.sortName != null) ? this.sortName.hashCode() : 0);
-
-        result = 37*result + (serviceRt ? 0 : 1);
-
-        result = 37*result + (endUserRt ? 0 : 1);
 
         result = 37*result + ((this.modifiedBy != null) ? this.modifiedBy.hashCode() : 0);
 
