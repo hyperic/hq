@@ -116,7 +116,7 @@ public class GalertLogRepositoryImpl implements GalertLogRepositoryCustom {
         // TODO this query used to do perm checking with a passed-in subject ID
         return "select " + (count ? "count(a)" : "a") + " from " +
                (inEscalation ? "EscalationState es, " : "") + "GalertLog a " + "join a.def d " +
-               "where " + (groupId != null ? " d.group.id = " + groupId + " and " : "") +
+               "where " + (groupId != null ? " d.group = " + groupId + " and " : "") +
                "a.timestamp between :begin and :end " + (notFixed ? " and a.fixed = false " : "") +
                (galertDefId == null ? "" : "and d.id = " + galertDefId + " ") +
                "and d.severity >= :priority " +
