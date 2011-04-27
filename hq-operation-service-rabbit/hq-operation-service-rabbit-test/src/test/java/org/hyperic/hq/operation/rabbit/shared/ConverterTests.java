@@ -4,8 +4,6 @@ import org.hyperic.hq.operation.RegisterAgentRequest;
 import org.hyperic.hq.operation.RegisterAgentResponse;
 import org.hyperic.hq.operation.rabbit.convert.JsonObjectMappingConverter;
 import org.junit.Test;
-import org.springframework.amqp.core.Message;
-import org.springframework.amqp.core.MessageProperties;
 
 import static org.junit.Assert.*;
 
@@ -20,13 +18,6 @@ public class ConverterTests {
     private final String agentIp = "localhost";
 
     private final int agentPort = 7071;
-
-    @Test
-    public void testConverterForListener() {
-        Message message = this.converter.toMessage(registerAgentRequest, new MessageProperties());
-        RegisterAgentRequest marshalled = (RegisterAgentRequest) this.converter.fromMessage(message);
-        assertEquals(registerAgentRequest, marshalled);
-    }
 
     @Test
     public void write() {
