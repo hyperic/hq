@@ -5,10 +5,8 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 
-public class AbstractAgentOperation extends AbstractOperation {
-
-    private static final long serialVersionUID = -7404476740286545689L;
-
+public class  AbstractAgentOperation {
+ 
     private String agentToken;
      
     private String username;
@@ -30,9 +28,7 @@ public class AbstractAgentOperation extends AbstractOperation {
                          @JsonProperty("password") String password, @JsonProperty("agentIp") String agentIp,
                          @JsonProperty("agentPort") int agentPort, @JsonProperty("unidirectional") boolean unidirectional,
                          @JsonProperty("newTransportAgent") boolean newTransportAgent) {
-        super(true);
        // if (agentToken == null) throw new IllegalArgumentException("'agentToken' must not be null.");
-        
         this.agentToken = agentToken;
         this.username = username;
         this.password = password;

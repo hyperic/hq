@@ -86,20 +86,17 @@ public class RegisterAgentServiceImpl implements RegisterAgentService {
         this.serverOperationServiceValidator = serverOperationServiceValidator;
     }
     
-    /* this is still being developed and simplified */
-    @OperationEndpoint(exchange = "to.server", routingKey = "request.register", binding = "request.*",
-            responseExchange = "to.agent", responseRoutingKey = "response.register", responseQueue = "testAgent"
-    )
+ 
+    @OperationEndpoint(exchange = "to.server", routingKey = "request.register", binding = "request.*", responseExchange = "to.agent", responseRoutingKey = "response.register")
     public RegisterAgentResponse registerAgentRequest(RegisterAgentRequest registerAgent) throws AgentConnectionException, PermissionException {
-        logger.debug("received " + registerAgent);
+        logger.info("\n***************received " + registerAgent);
 
         try {
             checkUserCanManageAgent(registerAgent);
         } catch (PermissionException e) {
             throw new PermissionException();
         }
-        
-
+         
         boolean isNewTransportAgent = registerAgent.isNewTransportAgent();
         boolean unidirectional = registerAgent.isUnidirectional();
         boolean isOldAgentToken = true;
@@ -141,8 +138,10 @@ public class RegisterAgentServiceImpl implements RegisterAgentService {
         }
 
         if (ids != null) {
-            rescheduleMetrics(ids);
+            rescheduleMetrics(ids); 
         }
+
+        logger.info("\n***************returning " + agentToken);
 
         return new RegisterAgentResponse("token:" + agentToken); 
     }

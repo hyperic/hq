@@ -2,14 +2,14 @@ package org.hyperic.hq.operation.rabbit.shared;
 
 import org.hyperic.hq.operation.AbstractOperation;
 import org.hyperic.hq.operation.RegisterAgentRequest;
-import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
+import org.hyperic.hq.operation.rabbit.convert.JsonObjectMappingConverter;
 import org.junit.Before;
 import org.junit.Test;
 
 
 public class SerializationVsJsonBenchmarkTests {
 
-    private JsonMappingConverter converter = new JsonMappingConverter();
+    private JsonObjectMappingConverter converter = new JsonObjectMappingConverter();
 
     private AbstractOperation data;
 

@@ -26,10 +26,8 @@
 package org.hyperic.hq.operation.rabbit.util;
 
 import com.rabbitmq.client.AMQP;
-import org.hyperic.hq.operation.AbstractOperation;
 
 import java.nio.charset.Charset;
-import java.util.UUID;
 
 /**
  * @author Helena Edelson
@@ -55,30 +53,35 @@ public final class MessageConstants {
      * The {@link Charset} that maps to the encoding
      */
     public static final Charset CHARSET = Charset.forName(ENCODING);
- 
+
     /**
      * The content type of the message
      */
     public static final String JSON_CONTENT_TYPE = "application/json";
 
-    public static final String TEXT_CONTENT_TYPE = "text/plain";
+    /**
+     * The object type to convert a request to
+     */
+    public static final String REQUEST_CONVERSION_TYPE = "requestConversionType";
+
+    /**
+     * The object type to convert a response to
+     */
+    public static final String RESPONSE_CONVERSION_TYPE = "responseConversionType";
+
 
     /**
      * The delivery mode of the message
      */
-    public static final Integer DELIVERY_MODE_NON_PERSISTENT = 1;
+    public static final int DELIVERY_MODE_NON_PERSISTENT = 1;
 
-    public static final Integer DELIVERY_MODE_PERSISTENT = 2;
+    public static final int DELIVERY_MODE_PERSISTENT = 2;
 
     /**
      * The priority of the message
      */
     public static final Integer PRIORITY = 0;
 
-    /**
-     * The standard message properties
-     */
-    public static final AMQP.BasicProperties DEFAULT_MESSAGE_PROPERTIES;
     public static final String REQUEST = ".request";
     public static final String RESPONSE = ".response";
     /**
@@ -89,34 +92,9 @@ public final class MessageConstants {
      * The default exchange
      */
     public static final String DEFAULT_EXCHANGE = "";
+
     public static final String GUEST_USER = "guest";
+
     public static final String GUEST_PASS = "guest";
-
-    static {
-        DEFAULT_MESSAGE_PROPERTIES = new AMQP.BasicProperties();
-        DEFAULT_MESSAGE_PROPERTIES.setContentType(JSON_CONTENT_TYPE); // plain for early dev work
-        DEFAULT_MESSAGE_PROPERTIES.setContentEncoding(ENCODING);
-        DEFAULT_MESSAGE_PROPERTIES.setDeliveryMode(DELIVERY_MODE_NON_PERSISTENT);
-        DEFAULT_MESSAGE_PROPERTIES.setPriority(PRIORITY);
-    }
-
-    private MessageConstants() {
-    }
-
-    /**
-     * Refactor this to a service
-     * @param data
-     * @return
-     */
-    public static AMQP.BasicProperties getBasicProperties(Object data) {
-        AMQP.BasicProperties bp = MessageConstants.DEFAULT_MESSAGE_PROPERTIES;
-
-        if (data != null && data.getClass().isAssignableFrom(AbstractOperation.class)) {
-            bp.setCorrelationId(((AbstractOperation) data).getOperationName());
-        } else { 
-            bp.setCorrelationId(UUID.randomUUID().toString());
-        }
-        return bp;
-    }
 
 }

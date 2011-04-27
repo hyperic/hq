@@ -31,8 +31,6 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.operation.rabbit.api.ChannelCallback;
-import org.hyperic.hq.operation.rabbit.api.ChannelOperations;
 
 import java.io.IOException;
 

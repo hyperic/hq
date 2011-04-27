@@ -29,32 +29,24 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.hyperic.hq.operation.ConversionException;
 import org.hyperic.hq.operation.Converter;
-import org.springframework.amqp.core.Message;
-import org.springframework.amqp.core.MessageProperties;
-import org.springframework.amqp.support.converter.JsonMessageConverter;
-import org.springframework.amqp.support.converter.MessageConversionException;
-import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-/** 
+/**
  * This class is in transition.
  * @author Helena Edelson
  */
 @Component
-public class JsonMappingConverter implements Converter<Object, String>, MessageConverter {
+public class JsonObjectMappingConverter implements Converter<Object, String> {
 
     private final ObjectMapper objectMapper;
-
-    private JsonMessageConverter jsonMessageConverter;
-
+ 
     /**
      * Creates a new instance of the converter
      */
-    public JsonMappingConverter() {
+    public JsonObjectMappingConverter() {
         this.objectMapper = new ObjectMapper();
-        this.jsonMessageConverter = new JsonMessageConverter();
         this.objectMapper.configure(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS, false);
     }
 
@@ -72,13 +64,6 @@ public class JsonMappingConverter implements Converter<Object, String>, MessageC
         } catch (IOException e) {
             throw new ConversionException(e);
         }
-    }
-
-    public Message toMessage(Object object, MessageProperties messageProperties) throws MessageConversionException {
-        return this.jsonMessageConverter.toMessage(object, messageProperties);
-    }
-
-    public Object fromMessage(Message message) throws MessageConversionException {
-        return this.jsonMessageConverter.fromMessage(message);
-    }
+    } 
 }
+

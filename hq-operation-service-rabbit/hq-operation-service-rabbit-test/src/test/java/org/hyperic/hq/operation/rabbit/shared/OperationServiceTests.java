@@ -3,7 +3,7 @@ package org.hyperic.hq.operation.rabbit.shared;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import org.hyperic.hq.operation.RegisterAgentRequest;
-import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
+import org.hyperic.hq.operation.rabbit.convert.JsonObjectMappingConverter;
 import org.hyperic.hq.operation.rabbit.core.AnnotatedOperationService;
 import org.junit.Test;
 import org.springframework.core.task.TaskExecutor;
@@ -25,7 +25,7 @@ public class OperationServiceTests {
     
     private AnnotatedOperationService operationService;
 
-    private JsonMappingConverter converter = new JsonMappingConverter();
+    private JsonObjectMappingConverter converter = new JsonObjectMappingConverter();
 
     private RegisterAgentRequest registerAgentRequest = new RegisterAgentRequest(null,"testAuth", "5.0", 1, "localhost", 0, "hqadmin", "hqadmin", false);
 

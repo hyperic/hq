@@ -30,12 +30,10 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.operation.OperationDiscoveryException;
 import org.hyperic.hq.operation.OperationRegistry;
 import org.hyperic.hq.operation.rabbit.annotation.OperationEndpoint;
-import org.hyperic.hq.operation.rabbit.api.RoutingRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ErrorHandler;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -74,18 +72,11 @@ public class AnnotatedOperationRegistry implements OperationRegistry {
     public void register(Method method, Object candidate) throws OperationDiscoveryException {
         routingRegistry.register(method);
 
-        if (method.isAnnotationPresent(OperationEndpoint.class)) {
+        if (method.isAnnotationPresent(OperationEndpoint.class)) { 
             handlers.put(method.getName(), new RabbitMessageListenerContainer(connectionFactory, candidate, method, errorHandler));
         }
     }
-
-    @PostConstruct
-    public void initialize() {
-        for (Map.Entry<String,RabbitMessageListenerContainer> entry: handlers.entrySet()) {
-            entry.getValue().initialize();
-        }
-    }
-
+ 
     @PreDestroy
     public void destroy() throws Exception {
         for (Map.Entry<String, RabbitMessageListenerContainer> entry : handlers.entrySet()) {

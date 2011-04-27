@@ -30,8 +30,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.operation.OperationNotSupportedException;
 import org.hyperic.hq.operation.rabbit.annotation.OperationDispatcher;
 import org.hyperic.hq.operation.rabbit.annotation.OperationEndpoint;
-import org.hyperic.hq.operation.rabbit.api.BindingHandler;
-import org.hyperic.hq.operation.rabbit.api.RoutingRegistry;
 import org.hyperic.hq.operation.rabbit.util.MessageConstants;
 import org.hyperic.hq.operation.rabbit.util.OperationToRoutingMapping;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,7 +100,7 @@ public class OperationToRoutingKeyRegistry implements RoutingRegistry {
         operationToRoutingMappings.put(method.getName(), new OperationToRoutingMapping(
             queue, exchange, routingKey, method.getReturnType(), annotation));
 
-        logger.debug("registered method + " + method.getName() + " on bean type=" + method.getDeclaringClass());
+        logger.debug("registered method " + method.getName() + " on bean " + method.getDeclaringClass());
     }
  
     public String extractQueueName(Method method) {

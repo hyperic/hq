@@ -183,7 +183,7 @@ CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}/hq-lather-${project.version}.
 CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}/hq-operations-${project.version}.jar"
 CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}/hq-operation-service-${project.version}.jar"
 CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}/hq-operation-service-rabbit-shared-${project.version}.jar"
-CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}/amqp-client-2.3.1.jar"
+CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}/amqp-client-2.4.1.jar"
 CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}/commons-io-1.3.2.jar"
 
 CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}/spring-amqp-1.0.0.M2.jar"

@@ -24,17 +24,14 @@
  */
 package org.hyperic.hq.operation.rabbit.core;
 
-import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.ConnectionFactory;
-import com.rabbitmq.client.QueueingConsumer;
+import com.rabbitmq.client.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.operation.Converter;
-import org.hyperic.hq.operation.rabbit.api.RabbitTemplate;
 import org.hyperic.hq.operation.rabbit.connection.ChannelException;
 import org.hyperic.hq.operation.rabbit.connection.ChannelTemplate;
 import org.hyperic.hq.operation.rabbit.util.MessageConstants;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
@@ -62,102 +59,124 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
 
     protected final AtomicLong timeout = new AtomicLong(6000);
 
+    private Class<?> convertTo;
+
     /**
      * Creates a new instance that creates a connection and sends messages to a specific exchange
      * @param connectionFactory ConnectionFactory used to create a connection
      * @param converter         the converter to use
      */
+    @Autowired
     public SimpleRabbitTemplate(ConnectionFactory connectionFactory, Converter<Object, String> converter) {
         this.channelTemplate = new ChannelTemplate(connectionFactory);
         this.channel = channelTemplate.createChannel();
         this.converter = converter;
     }
 
-    /**
-     * Sends a message
-     * @param exchange the exchange name to use
-     * @param routingKey   The routing key to use
-     * @param data         The data to send
-     * @param props        AMQP properties containing a correlation id
-     * @throws ChannelException
-     */
-    public void send(String exchange, String routingKey, Object data, AMQP.BasicProperties props) throws ChannelException {
-        publish(exchange, routingKey, data, props);
-    }
-
-    /**
-     * TODO in progress
-     * @param responseQueueName    the name of the queue to consume the response from
-     * @param exchange the exchange name to use
-     * @param routingKey   The routing key to use
-     * @param data         The data to send
-     * @param props        AMQP properties containing a correlation id
-     * @return the object returned
-     * @throws ChannelException
-     */
-    public Object sendAndReceive(final String responseQueueName, String exchange, String routingKey, Object data, AMQP.BasicProperties props, Class<?> responseType) throws ChannelException {
-        publish(exchange, routingKey, data, props);
-
-        try {
-            synchronized (monitor) {
-                return consume(responseQueueName, props, responseType);
-            }
-        } catch (IOException e) {
-            throw new ChannelException("Unable to complete consuming from channel " + channel + " with queue " + responseQueueName, e);
-        }
+    public SimpleRabbitTemplate(ConnectionFactory connectionFactory, Converter<Object, String> converter,
+                                Class<?> convertTo) {
+        this.channelTemplate = new ChannelTemplate(connectionFactory);
+        this.channel = channelTemplate.createChannel();
+        this.converter = converter;
+        this.convertTo = convertTo;
     }
 
     /**
      * Publishes a message to the broker
-     * @param exchange the exchange name to use
+     * @param exchange   the exchange name to use
      * @param routingKey the routing key to use
-     * @param data the data to send
-     * @param props amqp properties
+     * @param data       the data to send
      */
-    private void publish(final String exchange, final String routingKey, final Object data, AMQP.BasicProperties props) {
+    /*public void publish(String exchange, String routingKey, Object data) {
+        AMQP.BasicProperties props = propertiesConverter.buildDefaultProperties(data, null);
+
+        publish(channel, exchange, routingKey, new Envelope(data.getClass().getSimpleName(), converter.write(data),
+            props.getCorrelationId(), props.getReplyTo()), props);
+    }*/
+
+    /**
+     * Publishes a message with the given channel
+     * //@param channelToUse the container's channel
+     * //@param exchange     the exchange name to use
+     * @param routingKey The routing key to use
+     *                   //@param envelope     The data to send
+     */
+    public void publish(String exchange, String routingKey, Object data, AMQP.BasicProperties props) {
+        publish(channel, exchange, routingKey, data, props);
+    }
+
+    public void publish(Channel channelToUse, String exchange, String routingKey, Object data, AMQP.BasicProperties props) {
         final byte[] bytes = converter.write(data).getBytes(MessageConstants.CHARSET);
 
         try {
             synchronized (monitor) {
-                channel.basicPublish(exchange, routingKey, props, bytes);
+                channelToUse.basicPublish(exchange, routingKey, true, true, props, bytes);
             }
-            logger.debug("sent " + data + " to " + exchange + " with " + routingKey);
         } catch (IOException e) {
             throw new ChannelException("Could not send " + data + " to " + exchange + " with " + routingKey, e);
         }
     }
 
+
+    /**
+     * @param responseQueue the name of the queue to consume the response from
+     * @param exchange      the exchange name to use
+     * @param routingKey    The routing key to use
+     * @param data          The data to send
+     * @param props         AMQP properties containing a correlation id
+     * @return the object returned
+     * @throws ChannelException
+     */
+    public Object publishAndReceive(String responseQueue, String exchange, String routingKey, Object data, AMQP.BasicProperties props) throws ChannelException {
+        publish(exchange, routingKey, data, props);
+
+        try {
+            synchronized (monitor) {
+                return consume(responseQueue, props);
+            }
+        } catch (IOException e) {
+            throw new ChannelException("Unable to complete consuming from channel " + channel + " with queue " + responseQueue, e);
+        }
+    }
+
+
     /**
      * Consumes from the given queue and loops until the message with a matching
      * correlationId is received.
      * @param queueName the queue name to consume from
-     * @param props basic properties
-     * @param responseType
+     * @param props     basic properties
      * @return the converted data to the given Class<?> responseType
      * @throws IOException
      */
-    private Object consume(String queueName, AMQP.BasicProperties props, Class<?> responseType) throws IOException {
+    private Object consume(String queueName, AMQP.BasicProperties props) throws IOException {
+        logger.debug("consuming from queueName=" + queueName);
+
         QueueingConsumer consumer = new QueueingConsumer(channel);
 
         QueueingConsumer.Delivery delivery = null;
 
         while (read.get()) {
             try {
+
                 channel.basicConsume(queueName, false, consumer);
                 delivery = consumer.nextDelivery();
 
-                if (props.getCorrelationId().equalsIgnoreCase(delivery.getProperties().getCorrelationId())) {
-                    logger.debug("received message with " + delivery.getProperties().getCorrelationId());
+                if (delivery != null && delivery.getBody().length > 0) {
+                    //TODO if (props.getCorrelationId().equalsIgnoreCase(delivery.getProperties().getCorrelationId())) {
+                    Envelope envelope = delivery.getEnvelope();
+                    logger.debug("received correlationId " + delivery.getProperties().getCorrelationId() +
+                            " from " + envelope.getExchange() + " with " + envelope.getRoutingKey());
+
                     channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
                     read.set(false);
-                    return converter.read(new String(delivery.getBody(), MessageConstants.CHARSET), responseType.getClass());
+
+                    return converter.read(new String(delivery.getBody(), MessageConstants.CHARSET), convertTo);
                 }
             }
             catch (Exception e) {
                 if (delivery != null) channel.basicReject(delivery.getEnvelope().getDeliveryTag(), true);
                 logger.error("Unable to handle message", e);
             }
-
         }
         return null;   // if timeout exceeded
     }

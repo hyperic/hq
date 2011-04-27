@@ -22,10 +22,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-package org.hyperic.hq.operation.rabbit.api;
+package org.hyperic.hq.operation.rabbit.core;
 
-import org.hyperic.hq.operation.rabbit.annotation.OperationDispatcher;
-import org.hyperic.hq.operation.rabbit.annotation.OperationEndpoint;
 import org.hyperic.hq.operation.rabbit.util.OperationToRoutingMapping;
 
 import java.lang.annotation.Annotation;
@@ -38,18 +36,10 @@ public interface RoutingRegistry {
   
     /**
      * Registers the routing mapping for the given operation
-     * @param method The operation to map
-     * @param dispatcher the annotation
+     * @param method The operation to map 
      */
-    void register(Method method, OperationDispatcher dispatcher);
+    void register(Method method);
 
-    /**
-     * Registers the routing mapping for the given operation
-     * @param method The operation to map
-     * @param endpoint  the annotation
-     */
-    void register(Method method, OperationEndpoint endpoint);
- 
     /**
      * Returns the routing data by operation name
      * @param operationName The operation's name

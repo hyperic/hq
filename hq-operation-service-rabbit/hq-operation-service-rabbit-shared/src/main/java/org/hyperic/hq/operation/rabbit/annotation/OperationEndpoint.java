@@ -40,4 +40,10 @@ public @interface OperationEndpoint {
     String binding() default "";
 
     String queue() default "";
+
+    String responseExchange() default "";
+
+    String responseRoutingKey() default "";
+
+    String responseQueue() default "";
 }

@@ -4,12 +4,10 @@ import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
- 
+
 public class RegisterAgentRequest extends AbstractAgentOperation {
-
-    private static final long serialVersionUID = 1876820746657883192L;
-
-    @JsonIgnore
+ 
+    //@JsonIgnore
     private String authToken;
 
     private String version;
@@ -21,11 +19,12 @@ public class RegisterAgentRequest extends AbstractAgentOperation {
                          @JsonProperty("cpuCount") int cpuCount, @JsonProperty("agentIp") String agentIp,
                          @JsonProperty("agentPort") int agentPort, @JsonProperty("username") String username,
                          @JsonProperty("password") String password, @JsonProperty("unidirectional") boolean unidirectional) {
-
+     
         super(agentToken, username, password, agentIp, agentPort, unidirectional, false);
         this.authToken = authToken;
         this.version = version;
         this.cpuCount = cpuCount;
+
     }
  
     public String getAuthToken() {
@@ -42,7 +41,7 @@ public class RegisterAgentRequest extends AbstractAgentOperation {
 
     @Override
     public String toString() {
-        return new StringBuilder(this.authToken).append(this.version).append(this.cpuCount).append(super.toString()).toString();
+        return new StringBuilder(authToken).append(version).append(cpuCount).append(super.toString()).toString();
     }
 
     /**

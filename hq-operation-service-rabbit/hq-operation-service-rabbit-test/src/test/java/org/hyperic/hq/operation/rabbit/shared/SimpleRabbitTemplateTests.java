@@ -1,16 +1,14 @@
 package org.hyperic.hq.operation.rabbit.shared;
 
-import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.ConnectionFactory;
 import org.hyperic.hq.bizapp.client.RegisterAgentResult;
 import org.hyperic.hq.operation.RegisterAgentRequest;
-import org.hyperic.hq.operation.rabbit.api.ChannelCallback;
+import org.hyperic.hq.operation.rabbit.connection.ChannelCallback;
 import org.hyperic.hq.operation.rabbit.connection.ChannelException;
 import org.hyperic.hq.operation.rabbit.connection.ChannelTemplate;
-import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
+import org.hyperic.hq.operation.rabbit.convert.JsonObjectMappingConverter;
 import org.hyperic.hq.operation.rabbit.core.SimpleRabbitTemplate;
-import org.hyperic.hq.operation.rabbit.util.MessageConstants;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -34,7 +32,7 @@ public class SimpleRabbitTemplateTests {
     @Before
     public void prepare() {
         ConnectionFactory cf = new ConnectionFactory();
-        this.rabbitTemplate = new SimpleRabbitTemplate(cf, new JsonMappingConverter());
+        this.rabbitTemplate = new SimpleRabbitTemplate(cf, new JsonObjectMappingConverter());
         ChannelTemplate channelTemplate = new ChannelTemplate(cf);
 
         channelTemplate.execute(new ChannelCallback<Object>() {
@@ -59,19 +57,17 @@ public class SimpleRabbitTemplateTests {
 
     @Test
     public void send() {
-        AMQP.BasicProperties bp = MessageConstants.getBasicProperties(this.data); 
-        this.rabbitTemplate.send("to.server", "request.register", data, bp);
+        this.rabbitTemplate.publish("to.server", "request.register", data);
     }
 
     @Test
     public void sendAndReceive() throws ExecutionException, TimeoutException, InterruptedException {
         final String message = "message";
-        final AMQP.BasicProperties bp = MessageConstants.getBasicProperties(message);
-
+        
         ExecutorService executor = Executors.newFixedThreadPool(1);
 		Future<Object> received = executor.submit(new Callable<Object>() {
 			public Object call() throws Exception {
-                return rabbitTemplate.sendAndReceive(requestQueue, "to.server", "request.register", message, bp);
+                return rabbitTemplate.publishAndReceive(requestQueue, "to.server", "request.register", message, null);
 			}
 		});
         assertEquals(message, received.get(1000, TimeUnit.MILLISECONDS));

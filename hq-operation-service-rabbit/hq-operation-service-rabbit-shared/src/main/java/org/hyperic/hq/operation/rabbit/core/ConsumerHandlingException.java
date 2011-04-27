@@ -1,12 +1,12 @@
-package org.hyperic.hq.operation.rabbit.api;
+package org.hyperic.hq.operation.rabbit.core;
 
-public class EnvelopeHandlingException extends RuntimeException {
+public class ConsumerHandlingException extends RuntimeException {
 
     /**
      * Creates a chaining-aware instance
      * @param cause The java.lang.Throwable cause
      */
-    public EnvelopeHandlingException(Throwable cause) {
+    public ConsumerHandlingException(Throwable cause) {
         super(cause);
     }
 
@@ -14,7 +14,7 @@ public class EnvelopeHandlingException extends RuntimeException {
      * Creates an instance with a message
      * @param context The exception message
      */
-    public EnvelopeHandlingException(String context) {
+    public ConsumerHandlingException(String context) {
         super(context);
     }
 
@@ -23,7 +23,7 @@ public class EnvelopeHandlingException extends RuntimeException {
      * @param message The exception message
      * @param cause The parent exception
      */
-    public EnvelopeHandlingException(String message, Throwable cause) {
+    public ConsumerHandlingException(String message, Throwable cause) {
         super(message, cause);
     }
 }

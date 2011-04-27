@@ -36,11 +36,9 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertNotNull;
 
-/**
- * @author Helena Edelson
- */
+
 public class SpringAgentTest extends BaseInfrastructureTest {
-    private final String agent_home = "/Users/hedelson/tools/hyperic/agent-4.6.0.BUILD-SNAPSHOT";
+    private final String agent_home = "/agent-4.6.0.BUILD-SNAPSHOT";
 
     private final String host = "localhost";
 

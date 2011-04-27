@@ -27,7 +27,6 @@ package org.hyperic.hq.operation.rabbit.core;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
@@ -56,22 +55,20 @@ public class AnnotatedDispatcherAspect {
         this.operationService = operationService;
     }
 
-    @Pointcut("execution(* (@org.hyperic.hq.operation.rabbit.annotation.OperationDispatcher *).*(..))")
+    @Pointcut("execution(* *.hyperic.hq..*.*(..)) @annotation(dispatcher)")
     public void operationDispatcherMethod() {
     }
 
-    /**
+    /**   
      * Dispatches data to the messaging system by operation name
      * and data payload. Delegates handling to the OperationService.
      * @param dispatcher the operation dispatch meta-data
      * @param object   the data to send
      * @throws org.hyperic.hq.operation.OperationFailedException if an error occurs in execution
      */
-    @AfterReturning(pointcut = "operationDispatcherMethod() && @annotation(dispatcher)", returning = "object", argNames = "object,dispatcher,pjp")
-    public void dispatch(Object object, OperationDispatcher dispatcher, ProceedingJoinPoint pjp) throws OperationFailedException {
-        System.out.println("object=" + object + " @DispatchOperation=" + dispatcher
-                + " pjp.getSignature().getName()=" + pjp.getSignature().getName()
-                + " pjp.getKind()=" + pjp.getKind() + " pjp.getArgs()=" + pjp.getArgs());
+    @AfterReturning(pointcut = "@annotation(dispatcher)", returning = "object", argNames = "object,dispatcher") //,pjp
+    public void dispatch(Object object, OperationDispatcher dispatcher) throws OperationFailedException {
+       // not using but not ready to delete
     }
   
     private boolean operationHasReturnType(Method method) {
@@ -79,6 +76,6 @@ public class AnnotatedDispatcherAspect {
     }
 
     public Object dispatch(String operationName, Object data) throws OperationFailedException {
-        return operationService.perform(operationName, data);
+        return operationService.perform(operationName, data, OperationDispatcher.class);
     }
 }

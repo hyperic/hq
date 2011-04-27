@@ -34,27 +34,24 @@ import org.hyperic.hq.bizapp.shared.lather.*;
 import org.hyperic.hq.operation.OperationService;
 import org.hyperic.hq.operation.RegisterAgentRequest;
 import org.hyperic.hq.operation.RegisterAgentResponse;
-import org.hyperic.hq.operation.rabbit.annotation.OperationDispatcher;
-import org.hyperic.hq.operation.rabbit.annotation.OperationEndpoint;
-import org.hyperic.hq.operation.rabbit.api.BindingHandler;
-import org.hyperic.hq.operation.rabbit.api.RabbitTemplate;
-import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
+import org.hyperic.hq.operation.rabbit.core.BindingHandler;
+import org.hyperic.hq.operation.rabbit.core.RabbitTemplate;
+import org.hyperic.hq.operation.rabbit.convert.JsonObjectMappingConverter;
 import org.hyperic.hq.operation.rabbit.core.DeclarativeBindingHandler;
 import org.hyperic.hq.operation.rabbit.core.SimpleRabbitTemplate;
-import org.hyperic.hq.operation.rabbit.util.MessageConstants;
 import org.hyperic.lather.NullLatherValue;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-//@OperationDispatcher 
+//@OperationService
 
-@Component
+//@Component
+
 public class BizappCallbackClient extends AgentCallbackClient {
     private final Log logger = LogFactory.getLog(this.getClass());
 
     private OperationService operationService;
 
-    @Autowired
+    //  @Autowired
+
     public BizappCallbackClient(OperationService operationService) {
         this.operationService = operationService;
     }
@@ -106,12 +103,12 @@ public class BizappCallbackClient extends AgentCallbackClient {
      * @param isNewTransportAgent <code>true</code> if the agent is using the new transport layer.
      * @param unidirectional      <code>true</code> if the agent is unidirectional.
      * @return The result containing the new agent token.
-     */  
-    @OperationDispatcher(exchange = "to.server", routingKey = "request.register", binding = "request.*", queue = "registerAgentRequest")
-    @OperationEndpoint(exchange = "to.agent", routingKey = "response.register", binding = "response.*", queue = "agent")
+     */
+    //@OperationDispatcher(exchange = "to.server", routingKey = "request.register", binding = "request.*", queue = "registerAgentRequest")
+    //@OperationEndpoint(exchange = "to.agent", routingKey = "response.register", binding = "response.*", queue = "agent")
     public RegisterAgentResponse registerAgent(String oldAgentToken, String user, String pword, String authToken, String agentIP, int agentPort,
-                                             String version, int cpuCount, boolean isNewTransportAgent, boolean unidirectional) throws AgentCallbackClientException {
-       
+                                               String version, int cpuCount, boolean isNewTransportAgent, boolean unidirectional) throws AgentCallbackClientException {
+
         RegisterAgentRequest registerAgent;
         if (oldAgentToken != null) {
             registerAgent = new RegisterAgentRequest(oldAgentToken, authToken, version, cpuCount, agentIP, agentPort, user, pword, unidirectional);
@@ -119,20 +116,20 @@ public class BizappCallbackClient extends AgentCallbackClient {
             registerAgent = new RegisterAgentRequest(null, authToken, version, cpuCount, agentIP, agentPort, user, pword, unidirectional);
         }
 
+
         /* Finish spring on agent to have this handled by the automated framework */
         ConnectionFactory cf = new ConnectionFactory();
         BindingHandler bindingHandler = new DeclarativeBindingHandler(cf);
-        RabbitTemplate rabbitTemplate = new SimpleRabbitTemplate(cf, new JsonMappingConverter());
+        RabbitTemplate rabbitTemplate = new SimpleRabbitTemplate(cf, new JsonObjectMappingConverter(), RegisterAgentResponse.class);
 
         bindingHandler.declareAndBind("registerAgentRequest", "to.server", "request.*");
-        bindingHandler.declareAndBind("agent", "to.agent", "response.*");
-
-        RegisterAgentResponse response = (RegisterAgentResponse) rabbitTemplate.sendAndReceive("agent", "to.server", "request.register",
-                registerAgent, MessageConstants.getBasicProperties(registerAgent), RegisterAgentResponse.class);
+        bindingHandler.declareAndBind("testAgent", "to.agent", "response.*");
+   
+        RegisterAgentResponse response = (RegisterAgentResponse) rabbitTemplate.publishAndReceive("testAgent", "to.server", "request.register", registerAgent, null);
 
         logger.info("\nagent received=" + response + " with token=" + response.getAgentToken());
 
-        return response; 
+        return response;
     }
 
 

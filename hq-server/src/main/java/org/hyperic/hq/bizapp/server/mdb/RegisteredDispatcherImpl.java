@@ -100,7 +100,7 @@ public class RegisteredDispatcherImpl implements MessageListener {
     }
 
     /**
-     * The onMessage method
+     * The handleMessage method
      * 
      */
     @SuppressWarnings("unchecked")

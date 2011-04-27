@@ -5,22 +5,19 @@ import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.junit.Ignore;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.AbstractApplicationContext;
 
-/**
- * @author Helena Edelson
- */
+
 @Ignore
 public class AmqpAgentServerIntegrationTests extends BaseInfrastructureTest {
 
-    @Autowired
+    //@Autowired
     private AgentCommandsClientFactory agentCommandsClientFactory;
 
-    @Autowired
+    //@Autowired
     private RabbitTemplate rabbitTemplate;
 
-    @Autowired
+    //@Autowired
     private RabbitTemplate adminTemplate;
 
     private AbstractApplicationContext agentContext;

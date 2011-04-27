@@ -34,10 +34,10 @@
 
     <aop:aspectj-autoproxy/> 
 
-    <bean id="dispatcherAspect" class="org.hyperic.hq.operation.rabbit.core.AnnotatedDispatcherAspect">
+    <!--<bean id="dispatcherAspect" class="org.hyperic.hq.operation.rabbit.core.AnnotatedDispatcherAspect">
         <description>Executes an operation.perform after method completion if the bean is
         registered as @OperationDispatcher and the method as @DispatchOperation</description>
         <property name="warningMessage" value="Method exceeded acceptable duration: "/>
-    </bean>    
+    </bean>    -->
   
 </beans>

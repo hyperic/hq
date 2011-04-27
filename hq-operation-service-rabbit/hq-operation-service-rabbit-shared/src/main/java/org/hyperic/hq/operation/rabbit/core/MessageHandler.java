@@ -23,23 +23,16 @@
  *  USA.
  */
 
-package org.hyperic.hq.operation;
+package org.hyperic.hq.operation.rabbit.core;
 
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.QueueingConsumer;
 
+/**
+ * @author Helena Edelson
+ */
+public interface MessageHandler {
 
-public class RegisterAgentResponse extends AbstractOperation {
-
-    private String agentToken;
-
-    @JsonCreator
-    public RegisterAgentResponse(@JsonProperty("agentToken") String agentToken) {
-        this.agentToken = agentToken; 
-    }
-
-    public String getAgentToken() {
-        return agentToken;
-    }
-
+    void handle(QueueingConsumer.Delivery delivery, Channel channel) throws Exception;
+    
 }

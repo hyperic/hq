@@ -2,7 +2,7 @@ package org.hyperic.hq.operation.rabbit.shared;
 
 import org.hyperic.hq.operation.RegisterAgentRequest;
 import org.hyperic.hq.operation.RegisterAgentResponse;
-import org.hyperic.hq.operation.rabbit.convert.JsonMappingConverter;
+import org.hyperic.hq.operation.rabbit.convert.JsonObjectMappingConverter;
 import org.junit.Test;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
@@ -12,7 +12,7 @@ import static org.junit.Assert.*;
  
 public class ConverterTests {
 
-    private final JsonMappingConverter converter = new JsonMappingConverter();
+    private final JsonObjectMappingConverter converter = new JsonObjectMappingConverter();
 
     private final RegisterAgentRequest registerAgentRequest =
             new RegisterAgentRequest(null, "authTokenValue", "5.0", 1, this.agentIp, this.agentPort, "hqadmin", "hqadmin", false);

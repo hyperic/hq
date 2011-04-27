@@ -26,13 +26,11 @@
 
 package org.hyperic.hq.operation.rabbit.shared;
 
-import org.hyperic.hq.operation.rabbit.annotation.HandleOperation;
 import org.hyperic.hq.operation.rabbit.annotation.OperationDispatcher;
 import org.hyperic.hq.operation.rabbit.annotation.OperationEndpoint;
-import org.hyperic.hq.operation.rabbit.api.RabbitOperationRegistry;
-import org.hyperic.hq.operation.rabbit.api.OperationEndpointRegistry;
+import org.hyperic.hq.operation.rabbit.annotation.OperationService;
 import org.hyperic.hq.operation.rabbit.core.AnnotatedOperationDiscoverer;
-import org.hyperic.hq.operation.rabbit.core.AnnotatedOperationEndpointDiscoverer;
+import org.hyperic.hq.operation.rabbit.core.AnnotatedOperationRegistry;
 import org.hyperic.hq.operation.rabbit.util.AgentConstants;
 import org.hyperic.hq.operation.rabbit.util.ServerConstants;
 import org.junit.Ignore;
@@ -44,24 +42,19 @@ public class AnnotationTests {
 
     private AnnotatedOperationDiscoverer discoverer;
 
-    private AnnotatedOperationEndpointDiscoverer endpointDiscoverer;
+    private AnnotatedOperationRegistry registry;
 
-    private RabbitOperationRegistry registryRabbit;
-
-    private OperationEndpointRegistry endpointRegistry;
-
-
-    @OperationDispatcher
+    @OperationService
     static class TestDispatcher {
-        @HandleOperation(exchange = AgentConstants.EXCHANGE_TO_SERVER, routingKey = AgentConstants.ROUTING_KEY_REGISTER_AGENT, binding = "request.*")
+        @OperationDispatcher(exchange = AgentConstants.EXCHANGE_TO_SERVER, routingKey = AgentConstants.ROUTING_KEY_REGISTER_AGENT, binding = "request.*")
         void request(Object data) {
             System.out.println("Invoked method=request with data=" + data);
         }
     }
 
-    @OperationEndpoint
+    @OperationService
     static class TestEndpoint {
-        @HandleOperation(exchange = ServerConstants.EXCHANGE_TO_AGENT, routingKey = ServerConstants.ROUTING_KEY_REGISTER_AGENT, binding = ServerConstants.BINDING_REGISTER_AGENT)
+        @OperationEndpoint(exchange = ServerConstants.EXCHANGE_TO_AGENT, routingKey = ServerConstants.ROUTING_KEY_REGISTER_AGENT, binding = ServerConstants.BINDING_REGISTER_AGENT)
         void response(Object data) {
             System.out.println("Invoked method=response with data=" + data);
         }

@@ -59,7 +59,7 @@
         <postgresql.agent.driver.version>7.4.3</postgresql.agent.driver.version>
         <postgresql.server.driver.version>8.2-511-A.jdbc3</postgresql.server.driver.version>
         <quartz.version>1.7.2</quartz.version>
-        <rabbitmq.version>2.3.1</rabbitmq.version>
+        <rabbitmq.version>2.4.1</rabbitmq.version>
         <roo.version>1.0.2.RELEASE</roo.version>
         <servlet-api.version>2.4</servlet-api.version>
         <sigar.version>1.6.4</sigar.version>

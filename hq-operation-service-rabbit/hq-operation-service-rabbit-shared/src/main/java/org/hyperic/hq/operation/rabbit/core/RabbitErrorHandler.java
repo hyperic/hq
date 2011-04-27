@@ -25,23 +25,13 @@
 
 package org.hyperic.hq.operation.rabbit.core;
 
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.ConnectionFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.operation.Converter;
-import org.hyperic.hq.operation.OperationService;
 import org.hyperic.hq.operation.RegisterAgentResponse;
-import org.hyperic.hq.operation.rabbit.api.ChannelCallback;
-import org.hyperic.hq.operation.rabbit.connection.ChannelException;
-import org.hyperic.hq.operation.rabbit.connection.ChannelTemplate;
-import org.hyperic.hq.operation.rabbit.util.MessageConstants;
 import org.hyperic.hq.operation.rabbit.util.ServerConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ErrorHandler;
-
-import java.io.IOException;
 
 /**
  * Handles thrown exceptions in an OperationEndpoint
@@ -53,17 +43,11 @@ public class RabbitErrorHandler implements ErrorHandler {
 
     private final Log logger = LogFactory.getLog(RabbitErrorHandler.class);
 
-    private final OperationService operationService;
-
-    final Converter<Object, String> converter;
-
-    final ChannelTemplate template;
-
+    private final RabbitTemplate rabbitTemplate;
+ 
     @Autowired
-    public RabbitErrorHandler(ConnectionFactory connectionFactory, OperationService operationService, Converter<Object, String> converter) {
-        this.converter = converter;
-        this.template = new ChannelTemplate(connectionFactory);
-        this.operationService = operationService;
+    public RabbitErrorHandler(RabbitTemplate rabbitTemplate) {
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     /**
@@ -73,38 +57,12 @@ public class RabbitErrorHandler implements ErrorHandler {
      * 3. Much of this already exists, just needs  an error context addition.
      * @param t the Throwable cause
      */
-    public void handleError(Throwable t) {
-        logger.error("Error handler received=" + t.getCause());
-
+    public void handleError(Throwable t) { 
         final String context = t.getCause().toString();
 
         if (context.contains("BadCredentialsException")) {
-            //migrate to operationService.perform();
-            temporarySend(new RegisterAgentResponse("Permission denied"), ServerConstants.EXCHANGE_TO_AGENT, "response.register");
-        } else if (t instanceof NullPointerException) {
-            //problem with the handler/converter
+            rabbitTemplate.publish(ServerConstants.EXCHANGE_TO_AGENT, "response.register",
+                    new RegisterAgentResponse("Permission denied"), null);
         }
-    }
-
-    /**
-     * TODO route these to the operation service and remove this method.
-     * @param message
-     * @param exchangeName
-     * @param routingKey
-     */
-    private void temporarySend(final Object message, final String exchangeName, final String routingKey) {
-        this.template.execute(new ChannelCallback<Object>() {
-            public Object doInChannel(Channel channel) throws ChannelException {
-                try {
-                    String json = converter.write(message);
-                    byte[] bytes = json.getBytes(MessageConstants.CHARSET);
-                    channel.basicPublish(exchangeName, routingKey, MessageConstants.DEFAULT_MESSAGE_PROPERTIES, bytes);
-                    logger.info("\nreturned=" + json);
-                    return true;
-                } catch (IOException e) {
-                    throw new ChannelException("Could not bind queue to exchange", e);
-                }
-            }
-        });
     }
 }

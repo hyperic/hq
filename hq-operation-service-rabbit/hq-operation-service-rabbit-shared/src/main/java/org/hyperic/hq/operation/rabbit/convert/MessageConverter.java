@@ -23,23 +23,19 @@
  *  USA.
  */
 
-package org.hyperic.hq.operation;
+package org.hyperic.hq.operation.rabbit.convert;
 
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.rabbitmq.client.QueueingConsumer;
+import org.hyperic.hq.operation.ConversionException;
 
+/**
+ * In progress.
+ * @author Helena Edelson
+ */
+public interface MessageConverter {
 
-public class RegisterAgentResponse extends AbstractOperation {
+    Object buildResponse(Object object, QueueingConsumer.Delivery delivery) throws ConversionException;
 
-    private String agentToken;
-
-    @JsonCreator
-    public RegisterAgentResponse(@JsonProperty("agentToken") String agentToken) {
-        this.agentToken = agentToken; 
-    }
-
-    public String getAgentToken() {
-        return agentToken;
-    }
-
+    Object extractRequest(QueueingConsumer.Delivery delivery) throws ConversionException;
+    
 }

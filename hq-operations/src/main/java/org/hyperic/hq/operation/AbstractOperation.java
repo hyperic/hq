@@ -1,19 +1,7 @@
 package org.hyperic.hq.operation;
 
-import java.io.Serializable;
-
-
-public abstract class AbstractOperation implements OperationData, Serializable {
-
-    private static final long serialVersionUID = 6991306796752066389L;
- 
-    private String operationName = this.getClass().getSimpleName();
- 
-    @Override
-    public String toString() {
-        return operationName;
-    }
-
+public abstract class AbstractOperation  {
+/* TODO remove
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -35,10 +23,6 @@ public abstract class AbstractOperation implements OperationData, Serializable {
             }
         }
         return false;
-    }
+    }*/
 
-    public String getOperationName() {
-        return operationName;
-    }
- 
 }

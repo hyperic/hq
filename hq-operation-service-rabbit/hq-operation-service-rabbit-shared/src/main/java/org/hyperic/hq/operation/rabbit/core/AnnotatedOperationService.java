@@ -24,22 +24,18 @@
  */
 package org.hyperic.hq.operation.rabbit.core;
 
-import com.rabbitmq.client.AMQP;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.operation.*;
-import org.hyperic.hq.operation.rabbit.annotation.OperationDispatcher;
-import org.hyperic.hq.operation.rabbit.api.Envelope;
-import org.hyperic.hq.operation.rabbit.api.RabbitTemplate;
-import org.hyperic.hq.operation.rabbit.api.RoutingRegistry;
+import org.hyperic.hq.operation.Converter;
+import org.hyperic.hq.operation.OperationFailedException;
+import org.hyperic.hq.operation.OperationService;
 import org.hyperic.hq.operation.rabbit.connection.ChannelException;
-import org.hyperic.hq.operation.rabbit.util.MessageConstants;
+import org.hyperic.hq.operation.rabbit.convert.PropertiesConverter;
 import org.hyperic.hq.operation.rabbit.util.OperationToRoutingMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.lang.annotation.Annotation;
-import java.util.Random;
 
 /**
  * @author Helena Edelson
@@ -55,6 +51,8 @@ public class AnnotatedOperationService implements OperationService {
 
     private final Converter<Object, String> converter;
 
+    private final PropertiesConverter propertiesConverter;
+
     /**
      * Creates a new instance that sends messages to a Rabbit broker
      * @param rabbitTemplate  The rabbitTemplate to use for dispatch
@@ -67,6 +65,7 @@ public class AnnotatedOperationService implements OperationService {
         this.rabbitTemplate = rabbitTemplate;
         this.routingRegistry = routingRegistry;
         this.converter = converter;
+        this.propertiesConverter = new PropertiesConverter(null);
     }
 
     /**
@@ -93,26 +92,11 @@ public class AnnotatedOperationService implements OperationService {
 
         } catch (ChannelException e) {
             throw new OperationFailedException(e.getMessage(), e.getCause());
-        } catch (OperationNotSupportedException e) {
-            /* temporary to handle agent pre-spring test */
+        } /*catch (OperationNotSupportedException e) {
+            *//* temporary to handle agent pre-spring test
             return synchronousSend(new OperationToRoutingMapping("to.server", "request.register", "agent",
-                    RegisterAgentResponse.class, OperationDispatcher.class), data);
-        }
-    }
-
-    /**
-     * Creates the wrapper for the data to send by converting the data payload to
-     * a JSON string, and setting an auto-generated correlation ID to assert
-     * request-response operations match. Using JSON so that if in the future,
-     * Hyperic wishes to implement a RESTful OperationService, this functionality
-     * is compatible. And it was faster than serialization in benchmark testing.
-     * @param operationName the operation name
-     * @param data          the data to transform to a JSON string
-     * @return org.hyperic.hq.operation.Envelope
-     */
-    private Envelope createEnvelope(String operationName, Object data) {
-        AMQP.BasicProperties bp = MessageConstants.getBasicProperties(data);
-        return new Envelope(operationName, converter.write(data), bp.getCorrelationId());
+                    RegisterAgentResponse.class, OperationDispatcher.class), data);*//*
+        }*/
     }
 
     /**
@@ -121,11 +105,7 @@ public class AnnotatedOperationService implements OperationService {
      * @param data    the operation data
      */
     private void asynchronousSend(OperationToRoutingMapping mapping, Object data) {
-        if (data instanceof RegisterAgentResponse) {
-            rabbitTemplate.send("to.agent", "response.register", data, getBasicProperties(data));
-        } else {
-            rabbitTemplate.send(mapping.getExchangeName(), mapping.getRoutingKey(), data, getBasicProperties(data));
-        }
+        rabbitTemplate.publish(mapping.getExchangeName(), mapping.getRoutingKey(), data, null);
     }
 
     /**
@@ -139,23 +119,8 @@ public class AnnotatedOperationService implements OperationService {
      * @return returns the Object from the receiver
      */
     private Object synchronousSend(OperationToRoutingMapping mapping, Object data) {
-        return rabbitTemplate.sendAndReceive(
-                mapping.getQueueName(), mapping.getExchangeName(), mapping.getRoutingKey(), converter.write(data), getBasicProperties(data), mapping.getReturnType());
+        return rabbitTemplate.publishAndReceive(
+                mapping.getQueueName(), mapping.getExchangeName(), mapping.getRoutingKey(), data, null);
     }
 
-    /**
-     * Creates the default message properties and sets a correlationId
-     * @param data the object to pull context from
-     * @return BasicProperties with a correlationid
-     */
-    protected AMQP.BasicProperties getBasicProperties(Object data) {
-        AMQP.BasicProperties bp = MessageConstants.DEFAULT_MESSAGE_PROPERTIES;
-
-        if (data.getClass().isAssignableFrom(AbstractOperation.class)) {
-            bp.setCorrelationId(((AbstractOperation) data).getOperationName());
-        } else {
-            bp.setCorrelationId(new Random().toString());
-        }
-        return bp;
-    }
 }
