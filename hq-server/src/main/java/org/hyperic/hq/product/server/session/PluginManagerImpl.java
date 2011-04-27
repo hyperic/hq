@@ -115,6 +115,8 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
 
     private ApplicationContext ctx;
 
+    private File customPluginDir;
+
     @Autowired
     public PluginManagerImpl(PluginDAO pluginDAO, AgentPluginStatusDAO agentPluginStatusDAO,
                              MonitorableTypeDAO monitorableTypeDAO,
@@ -183,9 +185,31 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         }
     }
 
+    @Value(value="${server.custom.plugin.dir}")
+    public void setCustomPluginDir(String customPluginDir) {
+        if (this.customPluginDir != null) {
+            return;
+        }
+        final File file = new File(customPluginDir);
+        if (!file.exists()) {
+            final boolean success = file.mkdirs();
+            if (!success) {
+                throw new SystemException("cannot create custom plugin dir, " + customPluginDir +
+                                          ", as defined in hq-server.conf");
+            }
+        } else if (!file.isDirectory()) {
+            throw new SystemException("custom plugin dir, " + customPluginDir +
+                                      ", defined in hq-server.conf is not a directory");
+        }
+        this.customPluginDir = file;
+    }
+
     public File getCustomPluginDir() {
-        File wdParent = new File(System.getProperty("user.dir")).getParentFile();
-        return new File(wdParent, PLUGIN_DIR);
+        if (customPluginDir == null) {
+            File wdParent = new File(System.getProperty("user.dir")).getParentFile();
+            return new File(wdParent, PLUGIN_DIR);
+        }
+        return customPluginDir;
     }
 
     public File getServerPluginDir() {
