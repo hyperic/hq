@@ -39,9 +39,9 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ActionRedirect;
 import org.apache.struts.util.MessageResources;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
@@ -75,14 +75,17 @@ public class ViewAction
     private EventsBoss eventsBoss;
     private DashboardManager dashboardManager;
     private AlertPermissionManager alertPermissionManager;
+    private AppdefConverter appdefConverter;
 
     @Autowired
-    public ViewAction(AuthzBoss authzBoss, EventsBoss eventsBoss, DashboardManager dashboardManager, AlertPermissionManager alertPermissionManager) {
+    public ViewAction(AuthzBoss authzBoss, EventsBoss eventsBoss, DashboardManager dashboardManager, 
+                      AlertPermissionManager alertPermissionManager, AppdefConverter appdefConverter) {
         super();
         this.authzBoss = authzBoss;
         this.eventsBoss = eventsBoss;
         this.dashboardManager = dashboardManager;
         this.alertPermissionManager = alertPermissionManager;
+        this.appdefConverter = appdefConverter;
     }
 
     public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
@@ -162,7 +165,7 @@ public class ViewAction
             if (escalation != null && escalation.isPauseAllowed()) {
                 maxPauseTime = escalation.getMaxPauseTime();
             }
-            eid = AppdefUtil.newAppdefEntityId(def.getResource());
+            eid = appdefConverter.newAppdefEntityId(def.getResource());
             aVal = new AppdefEntityValue(eid, subject);
             
             boolean canTakeAction = false;

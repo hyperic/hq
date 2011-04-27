@@ -23,4 +23,11 @@ public interface ResourceTypeDao extends GenericDao<ResourceType> {
      * @param resourceType The new resource type
      */
     void persist(ResourceType resourceType);
+
+    /**
+     * Persists a new ResourceType to use as the Root ResourceType for traversal
+     * of rootless objects
+     * @param resource The new root ResourceType
+     */
+    void persistRoot(ResourceType resourceType);
 }

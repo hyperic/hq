@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.neo4j.graphdb.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.data.graph.annotation.NodeEntity;
 import org.springframework.data.graph.annotation.RelatedTo;
 import org.springframework.data.graph.core.Direction;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author dcrutchfield
  */
 @NodeEntity
+@Configurable
 public class Config {
 
     @Autowired

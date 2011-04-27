@@ -108,6 +108,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
     private AIQResourceVisitorFactory aiqResourceVisitorFactory;
     protected final Log log = LogFactory.getLog(AIQueueManagerImpl.class.getName());
     private AgentRepository agentDAO;
+    private ServerFactory serverFactory;
 
     @Autowired
     public AIQueueManagerImpl(AIServerRepository aiServerRepository, AIIpRepository aiIpRepository,
@@ -116,7 +117,8 @@ public class AIQueueManagerImpl implements AIQueueManager {
                               AuditManager auditManager, AuthzSubjectManager authzSubjectManager,
                               AgentCommandsClientFactory agentCommandsClientFactory,
                               AgentManager agentManager, AIAuditFactory aiAuditFactory,
-                              AIQResourceVisitorFactory aiqResourceVisitorFactory, AgentRepository agentDAO) {
+                              AIQResourceVisitorFactory aiqResourceVisitorFactory, AgentRepository agentDAO,
+                              ServerFactory serverFactory) {
 
         this.aiServerRepository = aiServerRepository;
         this.aiIpRepository = aiIpRepository;
@@ -131,6 +133,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
         this.aiAuditFactory = aiAuditFactory;
         this.aiqResourceVisitorFactory = aiqResourceVisitorFactory;
         this.agentDAO = agentDAO;
+        this.serverFactory = serverFactory;
     }
 
     /**
@@ -149,7 +152,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
         // First, calculate queuestatus and diff with respect to
         // existing appdef data.
         AIPlatformValue revisedAIplatform = appdefDiffProcessor.diffAgainstAppdef(subject,
-            platformManager, configManager, aiplatform);
+            platformManager, configManager, aiplatform, serverFactory);
 
         // A null return from diffAgainstAppdef means that
         // the platform no longer exists in appdef, AND that the aiplatform

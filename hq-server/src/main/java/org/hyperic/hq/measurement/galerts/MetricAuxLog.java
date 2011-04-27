@@ -26,12 +26,13 @@
 
 package org.hyperic.hq.measurement.galerts;
 
-import org.hyperic.hq.appdef.shared.AppdefUtil;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.AlertAuxLogProvider;
 import org.hyperic.hq.events.SimpleAlertAuxLog;
 import org.hyperic.hq.galerts.server.session.GalertAuxLog;
-import org.hyperic.hq.measurement.server.session.MetricAuxLogPojo;
 import org.hyperic.hq.measurement.server.session.Measurement;
+import org.hyperic.hq.measurement.server.session.MetricAuxLogPojo;
 
 /**
  * Used to create {@link MetricAuxLog} objects
@@ -60,7 +61,8 @@ public class MetricAuxLog
     public String getURL() {
         return "/resource/common/monitor/Visibility.do?m=" +
                _measurement.getTemplate().getId() +
-               "&eid=" + AppdefUtil.newAppdefEntityId(_measurement.getResource()).toString() +
+               "&eid=" + Bootstrap.getBean(AppdefConverter.class)
+                   .newAppdefEntityId(_measurement.getResource()).toString() +
                "&mode=chartSingleMetricSingleResource";
     }
 

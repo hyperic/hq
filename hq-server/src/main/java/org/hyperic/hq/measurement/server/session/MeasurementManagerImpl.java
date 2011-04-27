@@ -49,11 +49,11 @@ import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ApplicationManager;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
@@ -125,6 +125,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     private AgentMonitor agentMonitor;
     private ApplicationManager applicationManager;
     private ApplicationContext applicationContext;
+    private AppdefConverter appdefConverter;
 
     @Autowired
     public MeasurementManagerImpl(ResourceManager resourceManager,
@@ -135,7 +136,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                                   MeasurementRepository measurementRepository,
                                   MeasurementTemplateRepository measurementTemplateRepository,
                                   AgentManager agentManager, AgentMonitor agentMonitor, 
-                                  ApplicationManager applicationManager) {
+                                  ApplicationManager applicationManager, AppdefConverter appdefConverter) {
         this.resourceManager = resourceManager;
         this.resourceGroupManager = resourceGroupManager;
         this.permissionManager = permissionManager;
@@ -147,6 +148,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         this.agentManager = agentManager;
         this.agentMonitor = agentMonitor;
         this.applicationManager = applicationManager;
+        this.appdefConverter = appdefConverter;
     }
 
     // TODO: Resolve circular dependency
@@ -783,7 +785,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         }
         List<Measurement> list = measurementRepository.findDesignatedByResourcesAndCategory(resources, cat);
         for (Measurement m:list) {
-            midMap.put(AppdefUtil.newAppdefEntityId(m.getResource()), m);
+            midMap.put(appdefConverter.newAppdefEntityId(m.getResource()), m);
         }
         return midMap;
     }
@@ -1018,7 +1020,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
             if (!meas.isEnabled()) {
                 Integer resource = meas.getResource();
-                appId = AppdefUtil.newAppdefEntityId(resource);
+                appId = appdefConverter.newAppdefEntityId(resource);
 
                 permissionManager.checkModifyPermission(subject.getId(), appId);
                 appIdList.add(appId);
@@ -1049,7 +1051,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             return;
         }
         Integer resource = meas.getResource();
-        AppdefEntityID appId = AppdefUtil.newAppdefEntityId(resource);
+        AppdefEntityID appId = appdefConverter.newAppdefEntityId(resource);
         permissionManager.checkModifyPermission(subject.getId(), appId);
       
         for (Integer mid : mids) {
@@ -1075,7 +1077,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         meas.setEnabled((interval != 0));
         meas.setInterval(interval);
         Integer resource = meas.getResource();
-        AppdefEntityID appId = AppdefUtil.newAppdefEntityId(resource);
+        AppdefEntityID appId = appdefConverter.newAppdefEntityId(resource);
         permissionManager.checkModifyPermission(subject.getId(), appId);
         enqueueZeventForMeasScheduleChange(meas, interval);
     }
@@ -1094,7 +1096,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
         Integer[] mids = new Integer[mcol.size()];
         Iterator<Measurement> it = mcol.iterator();
-        AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(res);
+        AppdefEntityID aeid = appdefConverter.newAppdefEntityId(res);
         for (int i = 0; it.hasNext(); i++) {
             Measurement dm = it.next();
             dm.setEnabled(false);
@@ -1103,8 +1105,15 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
         removeMeasurementsFromCache(mids);
         enqueueZeventsForMeasScheduleCollectionDisabled(mids);
-        ZeventManager.getInstance().enqueueEventAfterCommit(new AgentUnscheduleZevent(Collections.singletonList(aeid), 
-            agentManager.getAgent(res).getAgentToken()));
+        // Unscheduling of all metrics for a resource could indicate that
+        // the resource is getting removed. Send the unschedule synchronously
+        // so that all the necessary plumbing is in place.
+        try {
+            getMeasurementProcessor().unschedule(Collections.singletonList(aeid));
+        } catch (MeasurementUnscheduleException e) {
+            log.error("Unable to disable measurements", e);
+        }
+
     }
 
     /**

@@ -1,12 +1,17 @@
 package org.hyperic.hq.appdef.shared;
 
+import org.hyperic.hq.inventory.data.ResourceDao;
 import org.hyperic.hq.inventory.domain.RelationshipTypes;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class AppdefConverterImpl implements AppdefConverter {
+    
+    @Autowired
+    private ResourceDao resourceDao;
 
     public AppdefEntityID newAppdefEntityId(Resource rv) {   
         ResourceType resType = rv.getType();
@@ -41,4 +46,14 @@ public class AppdefConverterImpl implements AppdefConverter {
         throw new IllegalArgumentException(rv.getName() + 
             " is not a valid Appdef Resource Type");
     }
+
+    public AppdefEntityID newAppdefEntityId(Integer resourceId) {
+       return newAppdefEntityId(resourceDao.findById(resourceId));
+    }
+
+    public AppdefEntityID newAppdefEntityId(ResourceType resourceType) {
+        return new AppdefEntityID(getAppdefType(resourceType), resourceType.getId());
+    }
+    
+    
 }

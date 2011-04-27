@@ -37,9 +37,9 @@ import javax.servlet.jsp.tagext.TagSupport;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
@@ -144,7 +144,7 @@ public class RecentAlertsTag extends TagSupport {
                 AlertDefinitionInterface defInfo = 
                     alert.getDefinition().getDefinitionInfo();
                 AppdefEntityID adeId = 
-                    AppdefUtil.newAppdefEntityId(defInfo.getResource());
+                    Bootstrap.getBean(AppdefConverter.class).newAppdefEntityId(defInfo.getResource());
                 AppdefEntityValue aVal = new AppdefEntityValue(adeId, subject); 
 
                 alertArr.add(

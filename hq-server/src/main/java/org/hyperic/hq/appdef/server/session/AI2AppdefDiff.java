@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,6 +48,7 @@ import org.hyperic.hq.autoinventory.AICompare;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.inventory.data.ResourceDao;
+import org.hyperic.hq.inventory.domain.RelationshipTypes;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.StringUtil;
@@ -72,7 +74,8 @@ public class AI2AppdefDiff {
     public AIPlatformValue diffAgainstAppdef(AuthzSubject subject,
                                              PlatformManager pmLH,
                                              ConfigManager cmLocal,
-                                             AIPlatformValue aiplatform)
+                                             AIPlatformValue aiplatform,
+                                             ServerFactory serverFactory)
     {
         AIPlatformValue revisedAIplatform;
 
@@ -153,7 +156,7 @@ public class AI2AppdefDiff {
         
         // Compare servers
         doServerDiffs(appdefPlatform, cmLocal,
-                      aiplatform, revisedAIplatform);
+                      aiplatform, revisedAIplatform,serverFactory);
 
         // Compare platform attributes
         doPlatformAttrDiff(appdefPlatform, revisedAIplatform);
@@ -326,7 +329,7 @@ public class AI2AppdefDiff {
     private void doServerDiffs(Platform appdefPlatform,
                                ConfigManager cmLocal,
                                AIPlatformValue aiPlatform,
-                               AIPlatformValue revisedAIplatform) {
+                               AIPlatformValue revisedAIplatform, ServerFactory serverFactory) {
 
         // Compare servers between appdef and AI data.
         // We iterate over the servers in the AI data, removing them from
@@ -335,6 +338,10 @@ public class AI2AppdefDiff {
         // removed from the platform.
         List appdefServers  = new ArrayList();
         appdefServers.addAll(appdefPlatform.getServers());
+        Set<Resource>virtualServers = appdefPlatform.getResource().getResourcesFrom(RelationshipTypes.VIRTUAL);
+        for(Resource virtualServer: virtualServers) {
+            appdefServers.add(serverFactory.createServer(virtualServer));
+        }
         List scannedServers = new ArrayList();
         scannedServers.addAll(Arrays.asList(aiPlatform.getAIServerValues()));
         if (_log.isDebugEnabled())

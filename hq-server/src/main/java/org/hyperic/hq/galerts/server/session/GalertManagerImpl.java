@@ -39,8 +39,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.ApplicationEvent;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.server.session.GroupDeleteRequestedEvent;
 import org.hyperic.hq.authz.server.session.GroupMembersChangedEvent;
@@ -69,14 +69,12 @@ import org.hyperic.hq.galert.data.GtriggerInfoRepository;
 import org.hyperic.hq.galerts.processor.GalertProcessor;
 import org.hyperic.hq.galerts.processor.Gtrigger;
 import org.hyperic.hq.galerts.shared.GalertManager;
-import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.context.ApplicationListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -104,6 +102,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
     private ResourceGroupManager resourceGroupManager;
     private ExecutionStrategyInfoRepository executionStrategyInfoRepository;
     private GtriggerInfoRepository gtriggerInfoRepository;
+    private AppdefConverter appdefConverter;
 
     @Autowired
     public GalertManagerImpl(ExecutionStrategyTypeInfoRepository executionStrategyTypeInfoRepository, GalertDefRepository galertDefRepository,
@@ -112,7 +111,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
                              EscalationManager escalationManager,
                              ResourceGroupManager resourceGroupManager, GalertProcessor gAlertProcessor,
                              ExecutionStrategyInfoRepository executionStrategyInfoRepository,
-                             GtriggerInfoRepository gtriggerInfoRepository) {
+                             GtriggerInfoRepository gtriggerInfoRepository, AppdefConverter appdefConverter) {
         this.executionStrategyTypeInfoRepository = executionStrategyTypeInfoRepository;
         this.galertDefRepository = galertDefRepository;
         this.auxLogRepository = auxLogRepository;
@@ -124,6 +123,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
         this.galertProcessor = gAlertProcessor;
         this.executionStrategyInfoRepository = executionStrategyInfoRepository;
         this.gtriggerInfoRepository = gtriggerInfoRepository;
+        this.appdefConverter = appdefConverter;
     }
 
     /**
@@ -481,7 +481,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
             GalertDef def = l.getAlertDef();
 
             // Filter by appdef entity
-            AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(def.getResource());
+            AppdefEntityID aeid = appdefConverter.newAppdefEntityId(def.getResource());
             if (includes != null && !includes.contains(aeid))
                 continue;
 

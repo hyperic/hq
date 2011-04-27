@@ -91,7 +91,7 @@ public class AppdefDataPopulatorImpl implements AppdefDataPopulator {
     private void createRootResourceAndType() {
         if (resourceTypeDao.findRoot() == null) {
             ResourceType system = new ResourceType("System");
-            resourceTypeDao.persist(system);
+            resourceTypeDao.persistRoot(system);
             Resource root = new Resource("Root", system);
             resourceDao.persistRoot(root);
         }

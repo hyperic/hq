@@ -3,6 +3,7 @@ package org.hyperic.hq.inventory.domain;
 import javax.validation.constraints.NotNull;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.data.graph.annotation.GraphProperty;
 import org.springframework.data.graph.annotation.NodeEntity;
 import org.springframework.data.graph.neo4j.support.GraphDatabaseContext;
@@ -18,6 +19,7 @@ import org.springframework.validation.Validator;
  * 
  */
 @NodeEntity
+@Configurable
 public class ConfigOptionType {
 
     @GraphProperty

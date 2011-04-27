@@ -8,8 +8,10 @@ import javax.annotation.PostConstruct;
 import org.hyperic.hq.inventory.NotUniqueException;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.graph.neo4j.finder.FinderFactory;
-import org.springframework.data.graph.neo4j.finder.NodeFinder;
+import org.springframework.data.graph.neo4j.repository.DirectGraphRepositoryFactory;
+import org.springframework.data.graph.neo4j.repository.GraphRepository;
+import org.springframework.data.graph.neo4j.repository.NamedIndexRepository;
+import org.springframework.data.graph.neo4j.support.GraphDatabaseContext;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,32 +19,27 @@ import org.springframework.transaction.annotation.Transactional;
 public class Neo4jResourceTypeDao implements ResourceTypeDao {
 
     @Autowired
-    private FinderFactory finderFactory;
+    private DirectGraphRepositoryFactory finderFactory;
 
-    private NodeFinder<ResourceType> resourceTypeFinder;
+    @Autowired
+    private GraphDatabaseContext graphDatabaseContext;
+    
+    private GraphRepository<ResourceType> resourceTypeFinder;
 
-    @PostConstruct
-    public void initFinder() {
-        resourceTypeFinder = finderFactory.createNodeEntityFinder(ResourceType.class);
-    }
-
-    @Transactional(value="neoTxManager",readOnly = true)
     public Long count() {
         return resourceTypeFinder.count();
     }
 
-    @Transactional(value="neoTxManager",readOnly = true)
     public List<ResourceType> find(Integer firstResult, Integer maxResults) {
         List<ResourceType> resourceTypes = new ArrayList<ResourceType>();
         Iterable<ResourceType> result = resourceTypeFinder.findAll();
         int currentPosition = 0;
         int endIndex = firstResult + maxResults;
-        for (ResourceType resourceType: result) {
+        for (ResourceType resourceType : result) {
             if (currentPosition > endIndex) {
                 break;
             }
             if (currentPosition >= firstResult) {
-                resourceType.persist();
                 resourceTypes.add(resourceType);
             }
             currentPosition++;
@@ -50,42 +47,38 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
         return resourceTypes;
     }
 
-    @Transactional(value="neoTxManager",readOnly = true)
     public List<ResourceType> findAll() {
         List<ResourceType> resourceTypes = new ArrayList<ResourceType>();
         Iterable<ResourceType> result = resourceTypeFinder.findAll();
         for (ResourceType resourceType : result) {
-            resourceType.persist();
             resourceTypes.add(resourceType);
         }
 
         return resourceTypes;
     }
 
-    @Transactional(value="neoTxManager",readOnly = true)
     public ResourceType findById(Integer id) {
-        //TODO once id becomes a String, look up by indexed property.  Using id index doesn't work for some reason.
-        ResourceType type = resourceTypeFinder.findById(id);
-        if (type != null) {
-            type.persist();
-        }
+        // TODO once id becomes a String, look up by indexed property. Using id
+        // index doesn't work for some reason.
+        ResourceType type = resourceTypeFinder.findOne(id.longValue());
         return type;
     }
 
-    @Transactional(value="neoTxManager",readOnly = true)
     public ResourceType findByName(String name) {
-        ResourceType type = resourceTypeFinder.findByPropertyValue(null, "name", name);
-        if (type != null) {
-            type.persist();
-        }
+        ResourceType type = resourceTypeFinder.findByPropertyValue("name", name);
         return type;
     }
 
-    @Transactional(value="neoTxManager",readOnly = true)
+    @SuppressWarnings("unchecked")
     public ResourceType findRoot() {
-        return findById(1);
+        return ((NamedIndexRepository<ResourceType>)resourceTypeFinder).findByPropertyValue("rootType", "rootType", true);
     }
 
+    @PostConstruct
+    public void initFinder() {
+        resourceTypeFinder = finderFactory.createGraphRepository(ResourceType.class);
+    }
+    
     @Transactional("neoTxManager")
     public void persist(ResourceType resourceType) {
         if (findByName(resourceType.getName()) != null) {
@@ -93,7 +86,14 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
                                          " already exists");
         }
         resourceType.persist();
-        //TODO meaningful id
+        // TODO meaningful id
         resourceType.setId(resourceType.getNodeId().intValue());
+    }
+
+    @Transactional("neoTxManager")
+    public void persistRoot(ResourceType root) {
+        persist(root);
+        graphDatabaseContext.getIndex(ResourceType.class, "rootType").add(root.getPersistentState(),
+            "rootType", true);
     }
 }

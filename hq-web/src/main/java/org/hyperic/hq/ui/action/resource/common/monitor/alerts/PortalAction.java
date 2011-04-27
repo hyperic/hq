@@ -38,6 +38,7 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.util.MessageResources;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.auth.domain.AuthzSubject;
@@ -75,14 +76,17 @@ public class PortalAction
     private GalertBoss galertBoss;
     private EventsBoss eventsBoss;
     private AlertPermissionManager alertPermissionManager;
+    private AppdefConverter appdefConverter;
 
     @Autowired
     public PortalAction(AppdefBoss appdefBoss, AuthzBoss authzBoss, ControlBoss controlBoss, GalertBoss galertBoss,
-                        EventsBoss eventsBoss, AlertPermissionManager alertPermissionManager) {
+                        EventsBoss eventsBoss, AlertPermissionManager alertPermissionManager,
+                        AppdefConverter appdefConverter) {
         super(appdefBoss, authzBoss, controlBoss);
         this.galertBoss = galertBoss;
         this.eventsBoss = eventsBoss;
         this.alertPermissionManager = alertPermissionManager;
+        this.appdefConverter = appdefConverter;
     }
 
     protected Properties getKeyMethodMap() {
@@ -194,7 +198,7 @@ public class PortalAction
                 if (aeid == null) {
                     //TODO better way?
                     aeid = setResource(request, 
-                        AppdefUtil.newAppdefEntityId(((ResourceAlertDefinition)alertDefinition).getResource()), false);
+                        appdefConverter.newAppdefEntityId(((ResourceAlertDefinition)alertDefinition).getResource()), false);
                 }
 
                 portal.addPortlet(new Portlet(".events.alert.view"), 1);

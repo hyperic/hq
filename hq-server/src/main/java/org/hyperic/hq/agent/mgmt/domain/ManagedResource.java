@@ -12,6 +12,7 @@ import javax.persistence.UniqueConstraint;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Index;
 
 @Entity
 @Table(name = "MANAGED_RESOURCES", uniqueConstraints = { @UniqueConstraint(columnNames = { "AGENT_ID",
@@ -30,6 +31,7 @@ public class ManagedResource {
     private Integer id;
 
     @Column(name = "RESOURCE_ID", nullable = false)
+    @Index(name = "MANAGED_RES_ID_IDX")
     private Integer resourceId;
 
     public ManagedResource() {

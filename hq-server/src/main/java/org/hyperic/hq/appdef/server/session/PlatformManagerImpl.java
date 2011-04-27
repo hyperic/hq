@@ -59,7 +59,6 @@ import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.IpValue;
@@ -164,6 +163,8 @@ public class PlatformManagerImpl implements PlatformManager {
     private ResourceDao resourceDao;
     
     private ResourceTypeDao resourceTypeDao;
+    
+    private ServiceFactory serviceFactory;
    
 
     @Autowired
@@ -177,7 +178,7 @@ public class PlatformManagerImpl implements PlatformManager {
                                ServerManager serverManager, PlatformFactory platformFactory,
                                ServiceManager serviceManager, ServerFactory serverFactory,
                                ResourceDao resourceDao, ResourceTypeDao resourceTypeDao, 
-                               ManagedResourceRepository managedResourceRepository) {
+                               ManagedResourceRepository managedResourceRepository, ServiceFactory serviceFactory) {
         this.permissionManager = permissionManager;
         this.agentDAO = agentDAO;
         this.resourceManager = resourceManager;
@@ -194,6 +195,7 @@ public class PlatformManagerImpl implements PlatformManager {
         this.resourceDao = resourceDao;
         this.resourceTypeDao  = resourceTypeDao;
         this.managedResourceRepository = managedResourceRepository;
+        this.serviceFactory = serviceFactory;
     }
     
     private Platform toPlatform(Resource resource) {
@@ -201,6 +203,10 @@ public class PlatformManagerImpl implements PlatformManager {
         Set<Resource> servers = resource.getResourcesFrom(RelationshipTypes.SERVER);
         for(Resource server: servers) {
             platform.addServer(serverFactory.createServer(server));
+        }
+        Set<Resource> services = resource.getResourcesFrom(RelationshipTypes.SERVICE);
+        for(Resource service: services) {
+            platform.addService(serviceFactory.createService(service));
         }
         return platform;
     }
@@ -686,9 +692,7 @@ public class PlatformManagerImpl implements PlatformManager {
         List<ManagedResource> managedResources = managedResourceRepository.findByAgent(agent);
         for(ManagedResource managedResource: managedResources) {
             Resource resource = resourceManager.findResourceById(managedResource.getResourceId());
-            if(AppdefUtil.newAppdefEntityId(resource).isPlatform()) {
-                platforms.add(toPlatform(resource));
-            }
+            platforms.add(toPlatform(resource));
         }
         return platforms;
     }
@@ -1980,9 +1984,7 @@ public class PlatformManagerImpl implements PlatformManager {
         Collection<Resource> resources = getAllPlatforms();
         for(Resource resource: resources) {
             Agent resourceAgent = managedResourceRepository.findAgentByResource(resource.getId());
-            if(resourceAgent == null) {
-                log.warn("No agent for resource " + resource);
-            }else if(resourceAgent.equals(agt)) {
+            if(resourceAgent.equals(agt)) {
                 plats.add(toPlatform(resource));
             }
         }

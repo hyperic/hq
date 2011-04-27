@@ -34,8 +34,8 @@ import javax.persistence.EntityNotFoundException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
@@ -68,17 +68,19 @@ public class SRNManagerImpl implements SRNManager {
     private SRNCache srnCache;
     private ResourceManager resourceManager;
     private MeasurementRepository measurementRepository;
+    private AppdefConverter appdefConverter;
 
     @Autowired
     public SRNManagerImpl(AuthzSubjectManager authzSubjectManager, MeasurementManager measurementManager,
                           ScheduleRevNumRepository scheduleRevNumRepository, SRNCache srnCache, ResourceManager resourceManager, 
-                          MeasurementRepository measurementRepository) {
+                          MeasurementRepository measurementRepository, AppdefConverter appdefConverter) {
         this.authzSubjectManager = authzSubjectManager;
         this.measurementManager = measurementManager;
         this.scheduleRevNumRepository = scheduleRevNumRepository;
         this.srnCache = srnCache;
         this.resourceManager = resourceManager;
         this.measurementRepository = measurementRepository;
+        this.appdefConverter = appdefConverter;
     }
 
     /**
@@ -105,7 +107,7 @@ public class SRNManagerImpl implements SRNManager {
             final boolean debug = log.isDebugEnabled();
             for (Object[] ent : entities) {
                 Resource resource = resourceManager.findResourceById((Integer)ent[0]);
-                AppdefEntityID entityId = AppdefUtil.newAppdefEntityId(resource);
+                AppdefEntityID entityId = appdefConverter.newAppdefEntityId(resource);
                 SrnId id = new SrnId(entityId.getID());
                 ScheduleRevNum srn = srnCache.get(id);
                 if (srn == null) {
@@ -275,7 +277,7 @@ public class SRNManagerImpl implements SRNManager {
 
         for (ScheduleRevNum srn : srns) {
             Resource resource = resourceManager.findResourceById(srn.getId().getInstanceId());
-            AppdefEntityID eid = AppdefUtil.newAppdefEntityId(resource);
+            AppdefEntityID eid = appdefConverter.newAppdefEntityId(resource);
             // TODO: Generic disagree with comments
             toReschedule.add(eid);
         }

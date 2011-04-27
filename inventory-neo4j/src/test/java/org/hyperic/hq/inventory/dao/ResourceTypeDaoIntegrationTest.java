@@ -94,4 +94,17 @@ public class ResourceTypeDaoIntegrationTest {
     public void testFindByNameNonExistent() {
         assertNull(resourceTypeDao.findByName("Fake Type"));
     }
+    
+    
+    @Test
+    public void testPersistRoot() {
+        ResourceType resourceType1 = new ResourceType("Some Type");
+        resourceTypeDao.persistRoot(resourceType1);
+        assertEquals(resourceType1,resourceTypeDao.findRoot());
+    }
+    
+    @Test
+    public void testFindRootNoRoot() {
+        assertNull(resourceTypeDao.findRoot());
+    }
 }

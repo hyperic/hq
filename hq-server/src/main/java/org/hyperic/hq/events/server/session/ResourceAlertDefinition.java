@@ -25,8 +25,9 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 
 @Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
@@ -112,7 +113,7 @@ public class ResourceAlertDefinition
 
     public AlertDefinitionValue getAlertDefinitionValue() {
         AlertDefinitionValue value = super.getAlertDefinitionValue();
-        AppdefEntityID appdefId = AppdefUtil.newAppdefEntityId(resource);
+        AppdefEntityID appdefId = Bootstrap.getBean(AppdefConverter.class).newAppdefEntityId(resource);
         value.setAppdefId(appdefId.getId());
         value.setAppdefType(appdefId.getType());
         value.removeAllTriggers();

@@ -42,14 +42,11 @@ import javax.security.auth.login.LoginException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hibernate.PageInfo;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
-import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.ServerManager;
@@ -86,16 +83,13 @@ import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.AlertInterface;
 import org.hyperic.hq.events.AlertNotFoundException;
 import org.hyperic.hq.events.AlertSeverity;
-import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.events.TriggerCreateException;
 import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertDefinition;
-import org.hyperic.hq.events.server.session.AlertSortField;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
-import org.hyperic.hq.events.server.session.ResourceAlertDefinition;
 import org.hyperic.hq.events.server.session.ResourceTypeAlertDefinition;
 import org.hyperic.hq.events.server.session.TriggersCreatedZevent;
 import org.hyperic.hq.events.shared.ActionManager;
@@ -109,7 +103,6 @@ import org.hyperic.hq.events.shared.RegisteredTriggerManager;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
-import org.hyperic.hq.galerts.server.session.GalertLogSortField;
 import org.hyperic.hq.galerts.shared.GalertManager;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
@@ -175,7 +168,7 @@ public class EventsBossImpl implements EventsBoss {
 
     private AuthzSubjectManager authzSubjectManager;
 
-   
+    private AppdefConverter appdefConverter;
 
     @Autowired
     public EventsBossImpl(SessionManager sessionManager, ActionManager actionManager,
@@ -186,7 +179,7 @@ public class EventsBossImpl implements EventsBoss {
                           ResourceManager resourceManager, ServerManager serverManager,
                           ServiceManager serviceManager, PermissionManager permissionManager,
                           GalertManager galertManager, ResourceGroupManager resourceGroupManager,
-                          AuthzSubjectManager authzSubjectManager) {
+                          AuthzSubjectManager authzSubjectManager, AppdefConverter appdefConverter) {
         this.sessionManager = sessionManager;
         this.actionManager = actionManager;
         this.alertDefinitionManager = alertDefinitionManager;
@@ -203,6 +196,7 @@ public class EventsBossImpl implements EventsBoss {
         this.galertManager = galertManager;
         this.resourceGroupManager = resourceGroupManager;
         this.authzSubjectManager = authzSubjectManager;
+        this.appdefConverter = appdefConverter;
     }
 
     /**
@@ -365,7 +359,7 @@ public class EventsBossImpl implements EventsBoss {
 
             // Scrub the triggers just in case
             adval.removeAllTriggers();
-            AppdefEntityID childId = AppdefUtil.newAppdefEntityId(child);
+            AppdefEntityID childId = appdefConverter.newAppdefEntityId(child);
             try {
                 boolean succeeded = alertDefinitionManager.cloneParentConditions(subject, childId,
                     adval, parent.getConditions(), true, true);
@@ -897,7 +891,7 @@ public class EventsBossImpl implements EventsBoss {
             //TODO I have no idea what this was for
 //            AppdefEntityID aeid;
 //
-//            aeid = AppdefUtil.newAppdefEntityId(defInfo.getResource());
+//            aeid = appdefConverter.newAppdefEntityId(defInfo.getResource());
 //
 //            if (badIds.contains(aeid))
 //                continue;

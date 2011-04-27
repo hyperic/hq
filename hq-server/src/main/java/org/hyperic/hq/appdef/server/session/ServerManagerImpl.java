@@ -40,13 +40,10 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.agent.mgmt.data.ManagedResourceRepository;
-import org.hyperic.hq.agent.mgmt.domain.Agent;
-import org.hyperic.hq.agent.mgmt.domain.ManagedResource;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
@@ -121,8 +118,8 @@ public class ServerManagerImpl implements ServerManager {
     private ServiceFactory serviceFactory;
     private ResourceDao resourceDao;
     private ResourceTypeDao resourceTypeDao;
-    private ManagedResourceRepository managedResourceRepository;
     private ConfigManager configManager;
+    private AppdefConverter appdefConverter;
 
     @Autowired
     public ServerManagerImpl(PermissionManager permissionManager,  ResourceManager resourceManager,
@@ -131,8 +128,8 @@ public class ServerManagerImpl implements ServerManager {
                              ZeventEnqueuer zeventManager, ResourceAuditFactory resourceAuditFactory,
                              PluginResourceTypeRepository pluginResourceTypeRepository, ServerFactory serverFactory,
                              ServiceManager serviceManager, ServiceFactory serviceFactory, ResourceDao resourceDao,
-                             ResourceTypeDao resourceTypeDao, ManagedResourceRepository managedResourceRepository,
-                             ConfigManager configManager) {
+                             ResourceTypeDao resourceTypeDao,
+                             ConfigManager configManager, AppdefConverter appdefConverter) {
         this.permissionManager = permissionManager;
         this.resourceManager = resourceManager;
         this.auditManager = auditManager;
@@ -146,8 +143,8 @@ public class ServerManagerImpl implements ServerManager {
         this.serviceFactory = serviceFactory;
         this.resourceDao =resourceDao;
         this.resourceTypeDao = resourceTypeDao;
-        this.managedResourceRepository = managedResourceRepository;
         this.configManager = configManager;
+        this.appdefConverter = appdefConverter;
     }
     
     private Server toServer(Resource resource) {
@@ -229,7 +226,7 @@ public class ServerManagerImpl implements ServerManager {
                 targetPlatform.getPlatformType().getName());
         }
         
-        AppdefEntityID newServerId = AppdefUtil.newAppdefEntityId(server);
+        AppdefEntityID newServerId = appdefConverter.newAppdefEntityId(server);
         
         byte[] productConfig = configManager.toConfigResponse(serverToClone.getResource().
             getConfig(ProductPlugin.TYPE_PRODUCT));
@@ -321,13 +318,9 @@ public class ServerManagerImpl implements ServerManager {
         s.setProperty(ServerFactory.SERVICES_AUTO_MANAGED,sv.getServicesAutomanaged());
         s.setProperty(ServerFactory.RUNTIME_AUTODISCOVERY,sv.getRuntimeAutodiscovery());
         s.setProperty(ServerFactory.WAS_AUTODISCOVERED,sv.getWasAutodiscovered());
-        s.setProperty(ServerFactory.AUTODISCOVERY_ZOMBIE,false);
         //TODO abstract creationTime, modifiedTime
         s.setProperty(ServerFactory.CREATION_TIME, System.currentTimeMillis());
         s.setProperty(ServerFactory.MODIFIED_TIME,System.currentTimeMillis());
-        Agent agent = managedResourceRepository.findAgentByResource(p.getId());
-        ManagedResource managedResource = new ManagedResource(s.getId(),agent);
-        managedResourceRepository.save(managedResource);
         return s;
    }
     
@@ -997,7 +990,6 @@ public class ServerManagerImpl implements ServerManager {
         server.setDescription( existing.getDescription() );
         server.setProperty(ServerFactory.RUNTIME_AUTODISCOVERY, existing.getRuntimeAutodiscovery() );
         server.setProperty(ServerFactory.WAS_AUTODISCOVERED,existing.getWasAutodiscovered() );
-        server.setProperty(ServerFactory.AUTODISCOVERY_ZOMBIE,existing.getAutodiscoveryZombie() );
         server.setModifiedBy( existing.getModifiedBy() );
         server.setLocation( existing.getLocation() );
         server.setName( existing.getName() );
@@ -1154,7 +1146,6 @@ public class ServerManagerImpl implements ServerManager {
         Set<PropertyType> propertyTypes = new HashSet<PropertyType>();
         propertyTypes.add(createServerPropertyType(ServerFactory.WAS_AUTODISCOVERED,Boolean.class));
         propertyTypes.add(createServerPropertyType(ServerFactory.AUTO_INVENTORY_IDENTIFIER,String.class));
-        propertyTypes.add(createServerPropertyType(ServerFactory.AUTODISCOVERY_ZOMBIE,Boolean.class));
         propertyTypes.add(createServerPropertyType(ServerFactory.CREATION_TIME,Long.class));
         propertyTypes.add(createServerPropertyType(ServerFactory.MODIFIED_TIME,Long.class));
         propertyTypes.add(createServerPropertyType(ServerFactory.INSTALL_PATH,String.class));
@@ -1226,12 +1217,7 @@ public class ServerManagerImpl implements ServerManager {
         serverType.remove();
     }
 
-    /**
-     * 
-     */
-    public void setAutodiscoveryZombie(Server server, boolean zombie) {
-        resourceManager.findResourceById(server.getId()).setProperty(ServerFactory.AUTODISCOVERY_ZOMBIE,zombie);
-    }
+   
 
     /**
      * Get a Set of PlatformTypeLocal objects which map to the names as given by

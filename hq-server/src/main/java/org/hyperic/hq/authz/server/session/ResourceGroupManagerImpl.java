@@ -40,17 +40,13 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.GroupTypeValue;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.auth.domain.Role;
@@ -60,7 +56,6 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
-import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
@@ -71,14 +66,12 @@ import org.hyperic.hq.grouping.shared.GroupEntry;
 import org.hyperic.hq.inventory.data.ResourceDao;
 import org.hyperic.hq.inventory.data.ResourceGroupDao;
 import org.hyperic.hq.inventory.data.ResourceTypeDao;
-import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
-import org.hyperic.util.pager.Pager;
 import org.quartz.SchedulerException;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,28 +103,23 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
    
    
     private EventLogManager eventLogManager;
-    private final Log log = LogFactory.getLog(ResourceGroupManagerImpl.class);
     private ApplicationContext applicationContext;
     private ResourceGroupDao resourceGroupDao;
     private ResourceDao resourceDao;
     private ResourceTypeDao resourceTypeDao;
-    private Pager defaultPager;
+    private AppdefConverter appdefConverter;
 
     @Autowired
     public ResourceGroupManagerImpl(EventLogManager eventLogManager, ResourceGroupDao resourceGroupDao,
-                                    ResourceDao resourceDao, ResourceTypeDao resourceTypeDao) {
+                                    ResourceDao resourceDao, ResourceTypeDao resourceTypeDao,
+                                    AppdefConverter appdefConverter) {
         this.eventLogManager = eventLogManager;
         this.resourceGroupDao = resourceGroupDao;
         this.resourceDao = resourceDao;
         this.resourceTypeDao = resourceTypeDao;
+        this.appdefConverter = appdefConverter;
     }
     
-    @PostConstruct
-    public void initialize() {
-        this.defaultPager = Pager.getDefaultPager();
-    }
-    
-  
     
     /**
      * Create a resource group. Currently no permission checking.
@@ -295,7 +283,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         // TODO scottmf, this should be invoking a pre-transaction callback
         eventLogManager.deleteLogs(group);
         applicationContext.publishEvent(new GroupDeleteRequestedEvent(group));
-        AppdefEntityID groupId = AppdefUtil.newAppdefEntityId(group);
+        AppdefEntityID groupId = appdefConverter.newAppdefEntityId(group);
         group.remove();
         // Send resource delete event
         ResourceDeletedZevent zevent = new ResourceDeletedZevent(whoami, groupId);
@@ -457,7 +445,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
 
         // Add the group members
         for (Resource r : members) {
-           GroupEntry ge = new GroupEntry(r.getId(), AppdefUtil.newAppdefEntityId(r).getAuthzTypeName());
+           GroupEntry ge = new GroupEntry(r.getId(), appdefConverter.newAppdefEntityId(r).getAuthzTypeName());
            retVal.addEntry(ge); 
         }
         

@@ -14,6 +14,10 @@
 	<packaging>jar</packaging>
 	<name>Hyperic HQ - Inventory - Neo4j</name>
 
+	<properties>
+		<spring-datastore-graph.version>1.0.0.RELEASE</spring-datastore-graph.version>
+		<neo4j.version>1.3</neo4j.version>
+	</properties>
 
 	<dependencies>
 		<dependency>
@@ -65,10 +69,24 @@
 		<dependency>
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-neo4j</artifactId>
+			<version>${spring-datastore-graph.version}</version>
+			<!-- Spring Data JPA 1.0 M2 still requires Commons 1.0 M5 -->
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.data</groupId>
+					<artifactId>spring-data-commons-core</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-commons-core</artifactId>
+			<version>1.0.0.M5</version>
 		</dependency>
 		<dependency>
 			<groupId>org.neo4j</groupId>
 			<artifactId>neo4j</artifactId>
+			<version>${neo4j.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -92,6 +110,11 @@
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-messaging</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq</groupId>
+			<artifactId>hq-diagnostics</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -317,6 +340,10 @@
 						<aspectLibrary>
 							<groupId>org.springframework.data</groupId>
 							<artifactId>spring-data-neo4j</artifactId>
+						</aspectLibrary>
+						<aspectLibrary>
+							<groupId>org.hyperic.hq</groupId>
+							<artifactId>hq-diagnostics</artifactId>
 						</aspectLibrary>
 					</aspectLibraries>
 					<source>1.5</source>

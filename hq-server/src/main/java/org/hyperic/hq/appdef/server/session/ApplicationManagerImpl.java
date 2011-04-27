@@ -40,6 +40,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.shared.AppServiceValue;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -47,7 +48,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ApplicationManager;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
@@ -109,6 +109,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
     
     private ResourceDao resourceDao;
     
+    private AppdefConverter appdefConverter;
+    
     public static final String MODIFIED_TIME = "ModifiedTime";
 
     public static final String CREATION_TIME = "CreationTime";
@@ -143,7 +145,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
                                   PermissionManager permissionManager,
                                   ZeventEnqueuer zeventManager,
                                   ResourceGroupManager resourceGroupManager, ServiceFactory serviceFactory,
-                                  ResourceGroupDao resourceGroupDao, ResourceDao resourceDao) {
+                                  ResourceGroupDao resourceGroupDao, ResourceDao resourceDao,
+                                  AppdefConverter appdefConverter) {
         this.resourceManager = resourceManager;
         this.permissionManager = permissionManager;
         this.zeventManager = zeventManager;
@@ -151,6 +154,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         this.serviceFactory = serviceFactory;
         this.resourceGroupDao = resourceGroupDao;
         this.resourceDao = resourceDao;
+        this.appdefConverter = appdefConverter;
     }
 
     /**
@@ -326,7 +330,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         ResourceGroup app = resourceGroupManager.findResourceGroupById(id);
         //TODO perm check
         //permissionManager.checkRemovePermission(subject, app.getEntityId());
-        AppdefEntityID appId = AppdefUtil.newAppdefEntityId(app);
+        AppdefEntityID appId = appdefConverter.newAppdefEntityId(app);
         app.remove();
         // Send resource delete event
         ResourceDeletedZevent zevent = new ResourceDeletedZevent(subject, appId);

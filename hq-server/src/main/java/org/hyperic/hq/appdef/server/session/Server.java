@@ -23,8 +23,6 @@ public class Server
     private boolean wasAutodiscovered;
 
     private boolean servicesAutomanaged;
-    
-    private boolean autodiscoveryZombie;
 
     private Collection<Service> services = new HashSet<Service>();
 
@@ -100,13 +98,7 @@ public class Server
         services.add(service);
     }
     
-    public boolean isAutodiscoveryZombie() {
-        return autodiscoveryZombie;
-    }
-
-    public void setAutodiscoveryZombie(boolean autodiscoveryZombie) {
-        this.autodiscoveryZombie = autodiscoveryZombie;
-    }
+  
 
     @Override
     public AppdefResourceType getAppdefResourceType() {
@@ -128,7 +120,6 @@ public class Server
         serverValue.setSortName(getSortName());
         serverValue.setRuntimeAutodiscovery(isRuntimeAutodiscovery());
         serverValue.setWasAutodiscovered(isWasAutodiscovered());
-        serverValue.setAutodiscoveryZombie(isAutodiscoveryZombie());
         serverValue.setModifiedBy(getModifiedBy());
         serverValue.setOwner(getOwnerName());
         serverValue.setLocation(getLocation());

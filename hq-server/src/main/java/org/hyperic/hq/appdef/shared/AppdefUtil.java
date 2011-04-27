@@ -109,23 +109,7 @@ public class AppdefUtil {
                    ( server.isWasAutodiscovered() &&
                      !server.isServicesAutomanaged()) ));
     }
-    
-    public static AppdefEntityID newAppdefEntityId(Resource rv) {   
-       return Bootstrap.getBean(AppdefConverter.class).newAppdefEntityId(rv);
-    }
-    
-    public static AppdefEntityID newAppdefEntityId(Integer resourceId) {
-        return newAppdefEntityId(Bootstrap.getBean(ResourceManager.class).findResourceById(resourceId));
-    }
-    
-    public static int getAppdefType(ResourceType rv) {
-       return Bootstrap.getBean(AppdefConverter.class).getAppdefType(rv);
-    }
-    
-    public static AppdefEntityID newAppdefEntityId(ResourceType resourceType) {
-        return new AppdefEntityID(getAppdefType(resourceType), resourceType.getId());
-    }
-    
+      
     public static Map groupByAppdefType(AppdefEntityID[] ids) {
         HashMap m = new HashMap();
         for (int i = 0; i < ids.length; i++) {

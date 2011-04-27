@@ -38,9 +38,9 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.util.MessageResources;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
@@ -52,11 +52,11 @@ import org.hyperic.hq.ui.action.portlet.BaseRSSAction;
 import org.hyperic.hq.ui.action.portlet.RSSFeed;
 import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.units.DateFormatter.DateSpecifics;
 import org.hyperic.util.units.FormattedNumber;
 import org.hyperic.util.units.UnitNumber;
 import org.hyperic.util.units.UnitsConstants;
 import org.hyperic.util.units.UnitsFormat;
-import org.hyperic.util.units.DateFormatter.DateSpecifics;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -73,13 +73,16 @@ public class RSSAction
     private EventsBoss eventsBoss;
 
     private AuthzBoss authzBoss;
+    
+    private AppdefConverter appdefConverter;
 
     @Autowired
     public RSSAction(DashboardManager dashboardManager, ConfigBoss configBoss, EventsBoss eventsBoss,
-                     AuthzBoss authzBoss) {
+                     AuthzBoss authzBoss, AppdefConverter appdefConverter) {
         super(dashboardManager, configBoss);
         this.eventsBoss = eventsBoss;
         this.authzBoss = authzBoss;
+        this.appdefConverter = appdefConverter;
     }
 
     public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
@@ -111,7 +114,7 @@ public class RSSAction
 
         for (Escalatable alert : list) {
             AlertDefinitionInterface defInfo = alert.getDefinition().getDefinitionInfo();
-            AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(defInfo.getResource());
+            AppdefEntityID aeid = appdefConverter.newAppdefEntityId(defInfo.getResource());
 
             DateSpecifics specs = new DateSpecifics();
             specs

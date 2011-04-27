@@ -20,8 +20,6 @@ public class ServerFactory {
 
     static final String SERVICES_AUTO_MANAGED = "servicesAutoManaged";
 
-    static final String AUTODISCOVERY_ZOMBIE = "autodiscoveryZombie";
-
     static final String AUTO_INVENTORY_IDENTIFIER = "autoInventoryIdentifier";
 
     static final String INSTALL_PATH = "installPath";
@@ -52,7 +50,6 @@ public class ServerFactory {
         server.setServerType(createServerType(serverResource.getType()));
         server.setServicesAutomanaged((Boolean)serverResource.getProperty(SERVICES_AUTO_MANAGED));
         server.setWasAutodiscovered((Boolean)serverResource.getProperty(WAS_AUTODISCOVERED));
-        server.setAutodiscoveryZombie((Boolean)serverResource.getProperty(AUTODISCOVERY_ZOMBIE));
         server.setSortName(serverResource.getSortName());
         server.setOwnerName(serverResource.getOwner());
         Resource platform = serverResource.getResourceTo(RelationshipTypes.SERVER);

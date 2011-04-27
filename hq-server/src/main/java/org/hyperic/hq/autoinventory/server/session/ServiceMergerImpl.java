@@ -37,8 +37,8 @@ import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.AIServiceValue;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServiceManager;
@@ -77,20 +77,22 @@ public class ServiceMergerImpl implements ServiceMerger {
     private ResourceManager resourceManager;
     private ZeventEnqueuer zEventManager;
     private AuthzSubjectManager authzSubjectManager;
-
+    private AppdefConverter appdefConverter;
    
 
     @Autowired
     public ServiceMergerImpl(ServiceManager serviceManager,
                              ServerManager serverManager, ConfigManager configManager,
                              ResourceManager resourceManager,
-                             ZeventEnqueuer zEventManager, AuthzSubjectManager authzSubjectManager) {
+                             ZeventEnqueuer zEventManager, AuthzSubjectManager authzSubjectManager,
+                             AppdefConverter appdefConverter) {
         this.serviceManager = serviceManager;
         this.serverManager = serverManager;
         this.configManager = configManager;
         this.resourceManager = resourceManager;
         this.zEventManager = zEventManager;
         this.authzSubjectManager = authzSubjectManager;
+        this.appdefConverter = appdefConverter;
     }
 
     @Transactional
@@ -145,7 +147,7 @@ public class ServiceMergerImpl implements ServiceMerger {
             } else {
                 update = true;
                 // UPDATE SERVICE
-                log.info("Updating service: " + service.getName());
+               
                 final String aiSvcName = aiservice.getName();
                 final String svcName = service.getName();
                 final String aiid = service.getAutoinventoryIdentifier();
@@ -162,6 +164,7 @@ public class ServiceMergerImpl implements ServiceMerger {
                     modified=true;
                 }
                 if(modified) {
+                    log.info("Updating service: " + service.getName());
                     serviceManager.updateService( subj,service.getServiceValue());
                 }
             }
@@ -174,7 +177,7 @@ public class ServiceMergerImpl implements ServiceMerger {
             } else {
                 // make sure the service's schedule is up to date on the agent
                 // side
-                toSchedule.add(AppdefUtil.newAppdefEntityId(service.getResource()));
+                toSchedule.add(service.getEntityId());
             }
 
             // SET CUSTOM PROPERTIES FOR SERVICE
