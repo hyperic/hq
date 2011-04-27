@@ -26,13 +26,15 @@ public class SimpleRabbitTemplateTests {
 
     private String responseQueue;
 
-    private final RegisterAgentRequest data =
-            new RegisterAgentRequest(null, "authTokenValue", "5.0", 1, "localhost", 7071, "hqadmin", "hqadmin", false);
+    private RegisterAgentRequest data;
 
     @Before
     public void prepare() {
+        this.data = new RegisterAgentRequest(null, "authTokenValue", "5.0", 1, "localhost", 7071, "hqadmin", "hqadmin", false);
+
         ConnectionFactory cf = new ConnectionFactory();
         this.rabbitTemplate = new SimpleRabbitTemplate(cf, new JsonObjectMappingConverter());
+
         ChannelTemplate channelTemplate = new ChannelTemplate(cf);
 
         channelTemplate.execute(new ChannelCallback<Object>() {
@@ -44,10 +46,9 @@ public class SimpleRabbitTemplateTests {
 
                     channel.exchangeDeclare("to.agent", "topic", true, false, null);
                     responseQueue = channel.queueDeclare("responseQueue", true, false, false, null).getQueue();
-                    channel.queueBind(requestQueue, "to.agent", "request.*");
+                    channel.queueBind(responseQueue, "to.agent", "request.*");
 
-                } catch (Exception e) {
-
+                } catch (Exception e) { //
                 }
                 return null;
             }
@@ -56,12 +57,12 @@ public class SimpleRabbitTemplateTests {
     }
 
     @Test
-    public void send() {
-        this.rabbitTemplate.publish("to.server", "request.register", data);
+    public void publish() {
+        this.rabbitTemplate.publish("to.server", "request.register", data, null);
     }
 
     @Test
-    public void sendAndReceive() throws ExecutionException, TimeoutException, InterruptedException {
+    public void publishAndReceive() throws ExecutionException, TimeoutException, InterruptedException {
         final String message = "message";
         
         ExecutorService executor = Executors.newFixedThreadPool(1);

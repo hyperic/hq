@@ -29,35 +29,30 @@ public class AtomicSAMQPTests extends AbstractSamqpTest {
         String result = (String) responseTemplate.receiveAndConvert(requestQueue.getName());
         responseTemplate.convertAndSend("agent:ping-response");
         result = (String) requestTemplate.receiveAndConvert(responseQueue.getName());
-        System.out.println("received=" + result); 
         assertEquals("agent:ping-response", result);
     }
 
     @Test
 	public void atomicSendAndReceive() throws Exception {
 		ExecutorService executor = Executors.newFixedThreadPool(1);
-		// Set up a consumer to respond to out producer
-		Future<String> received = executor.submit(new Callable<String>() {
 
+		Future<String> received = executor.submit(new Callable<String>() {
 			public String call() throws Exception {
 				Message message = null;
 				for (int i = 0; i < 10; i++) {
 					message = responseTemplate.receive(requestQueue.getName());
-					if (message != null) {
-                        System.out.println("call, responseTemplate received=" + new String(message.getBody()));
+					if (message != null) { 
                         responseTemplate.send(message);
 						break;
 					}
-					Thread.sleep(100L);
+					TimeUnit.MILLISECONDS.sleep(1000);
 				}
 				assertNotNull("No message received", message);
                 responseTemplate.send(message);
                 return (String) requestTemplate.getMessageConverter().fromMessage(message);
 			}
-
 		});
 		String result = (String) requestTemplate.convertSendAndReceive(requestExchange.getName(), routingKey, "message");
-        System.out.println("requestTemplate received=" + result);
 		assertEquals("message", received.get(1000, TimeUnit.MILLISECONDS));
 		assertEquals("message", result);
 		// Message was consumed so nothing left on queue

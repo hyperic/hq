@@ -32,17 +32,18 @@ import java.util.concurrent.*;
 
 public class ThreadedTest {
 
-    private final Map<String, Integer> map = new ConcurrentHashMap<String, Integer>();
-
+     
     @Test
     public void foo() throws ExecutionException, TimeoutException, InterruptedException {
+        final Map<String, Long> map = new ConcurrentHashMap<String, Long>();
+
         ExecutorService executor = Executors.newFixedThreadPool(2);
 
         Callable<String> stringCallable = new Callable<String>() {
             public String call() throws Exception {
                 while (true) {
-                    map.put("one", 1);
-                    Thread.sleep(1000);
+                    map.put(Thread.currentThread().getName(), Thread.currentThread().getId());
+                    TimeUnit.MILLISECONDS.sleep(1000);
                 }
             }
         };

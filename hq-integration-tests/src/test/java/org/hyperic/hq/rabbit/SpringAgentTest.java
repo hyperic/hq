@@ -34,10 +34,15 @@ import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.concurrent.*;
+
 import static org.junit.Assert.assertNotNull;
 
 
 public class SpringAgentTest extends BaseInfrastructureTest {
+
+    private ExecutorService executor = Executors.newSingleThreadExecutor();
+
     private final String agent_home = "/agent-4.6.0.BUILD-SNAPSHOT";
 
     private final String host = "localhost";
@@ -52,49 +57,36 @@ public class SpringAgentTest extends BaseInfrastructureTest {
 
     @Test
     public void daemonSpringAgentTest() throws InterruptedException {
-        new Thread(new Runnable() {
-            public void run() {
-                try {
-                    AgentClient.main(new String[]{"start"});
-                    AgentConfig config = AgentConfig.newInstance();
+        executor.submit(new Callable<Boolean>() {
+            public Boolean call() throws Exception {
+                AgentClient.main(new String[]{"start"});
+                AgentConfig config = AgentConfig.newInstance();
 
-                    /*AgentDaemon agentDaemon = AgentDaemon.newInstance(config);
-                                            agentDaemon.configure(config);
-                    */
-                    AgentDaemon.RunnableAgent agentDaemon = new AgentDaemon.RunnableAgent(config);
-                    agentDaemon.run();
-                    Thread.sleep(1000);
-
-                } catch (InterruptedException e) {
-                    logger.debug("", e);
-                }
+                /*AgentDaemon agentDaemon = AgentDaemon.newInstance(config);
+                  agentDaemon.configure(config);
+                */
+                AgentDaemon.RunnableAgent agentDaemon = new AgentDaemon.RunnableAgent(config);
+                agentDaemon.run();
+                TimeUnit.MILLISECONDS.sleep(5000);
+                return true;
             }
-        }).start();
-
-        Thread.sleep(5000);
-        System.exit(0);
+        });
+        executor.shutdown();
     }
 
     @Test
     public void veryBasicSpringAgentTest() throws InterruptedException {
-        new Thread(new Runnable() {
-            public void run() {
-
-                try {
-                    AgentClient.main(new String[]{"start"});
-                    ProviderInfo providerInfo = new ProviderInfo(AgentCallbackClient.getDefaultProviderURL(host, port, false), "no-auth");
-                    assertNotNull(providerInfo);
-                    //AgentClient.main(new String[]{"setup"});
-                    AgentClient.main(new String[]{"status"});
-                    AgentClient.main(new String[]{"die"});
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    logger.error("", e);
-                }
+        executor.submit(new Callable<Boolean>() {
+            public Boolean call() throws Exception {
+                AgentClient.main(new String[]{"start"});
+                ProviderInfo providerInfo = new ProviderInfo(AgentCallbackClient.getDefaultProviderURL(host, port, false), "no-auth");
+                assertNotNull(providerInfo);
+                AgentClient.main(new String[]{"status"});
+                AgentClient.main(new String[]{"die"});
+                TimeUnit.MILLISECONDS.sleep(5000);
+                return true;
             }
-        }).start();
-
-        Thread.sleep(5000);
-        System.exit(0);
+        });
+        executor.shutdown();
     }
 }

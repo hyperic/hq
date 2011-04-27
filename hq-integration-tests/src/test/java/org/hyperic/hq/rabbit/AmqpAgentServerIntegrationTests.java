@@ -45,7 +45,7 @@ public class AmqpAgentServerIntegrationTests extends BaseInfrastructureTest {
 
     @After
     public void shutdown() throws InterruptedException {
-        Thread.sleep(20000);
+        TimeUnit.MILLISECONDS.sleep(20000); 
         agentContext.close();
         serverContext.close();
     }
