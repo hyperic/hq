@@ -512,6 +512,9 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                 case AppdefEntityConstants.APPDEF_TYPE_SERVER:
                     Resource server = resourceDao.findById(aID.getId());
                     platform = server.getResourceTo(RelationshipTypes.SERVER);
+                    if(platform == null) {
+                        platform = server.getResourceTo(RelationshipTypes.VIRTUAL);
+                    }
                     break;
                 case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
                     platform = resourceDao.findById(aID.getId());
