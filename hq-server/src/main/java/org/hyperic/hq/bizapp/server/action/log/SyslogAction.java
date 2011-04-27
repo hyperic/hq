@@ -35,8 +35,8 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.action.SyslogActionConfig;
 import org.hyperic.hq.context.Bootstrap;
@@ -95,7 +95,7 @@ public class SyslogAction extends SyslogActionConfig
     {
         AlertDefinitionInterface alertDef =
             alert.getAlertDefinitionInterface();
-        AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(alertDef.getResource());
+        AppdefEntityID aeid = Bootstrap.getBean(AppdefConverter.class).newAppdefEntityId(alertDef.getResource());
         String resName =Bootstrap.getBean(ResourceManager.class).findResource(aeid).getName();
         resName = hackDBString(resName);
 

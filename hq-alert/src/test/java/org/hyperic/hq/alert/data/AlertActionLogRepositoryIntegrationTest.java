@@ -2,6 +2,7 @@ package org.hyperic.hq.alert.data;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+
 import java.util.Collections;
 
 import javax.persistence.EntityManager;
@@ -12,7 +13,6 @@ import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertActionLog;
 import org.hyperic.hq.events.server.session.ResourceAlertDefinition;
-import org.hyperic.hq.inventory.domain.Resource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,9 +44,7 @@ public class AlertActionLogRepositoryIntegrationTest {
 
     @Before
     public void setUp() {
-        Resource resource2 = new Resource();
-        resource2.setName("Resource 2");
-        entityManager.persist(resource2);
+        int resource2 = 555;
         ResourceAlertDefinition alertdef2 = new ResourceAlertDefinition();
         alertdef2.setName("High Heap");
         alertdef2.setResource(resource2);

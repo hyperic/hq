@@ -228,15 +228,4 @@ public interface ControlManager {
      */
     public void sendCommandResult(int id, int result, long startTime, long endTime, String message);
 
-    /**
-     * Accept an array of appdef entity Ids and verify control permission on
-     * each entity for specified subject. Return only the set of entities that
-     * have authorization.
-     * @return List of entities subject is authz to control NOTE: Returns an
-     *         empty list when no resources are found.
-     */
-    public List<AppdefEntityID> batchCheckControlPermissions(AuthzSubject caller,
-                                                             AppdefEntityID[] entities)
-        throws AppdefEntityNotFoundException, PermissionException;
-
 }

@@ -28,8 +28,10 @@ package org.hyperic.hq.events.server.session;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -41,6 +43,7 @@ import org.hyperic.hq.alert.data.AlertActionLogRepository;
 import org.hyperic.hq.alert.data.AlertConditionRepository;
 import org.hyperic.hq.alert.data.AlertRepository;
 import org.hyperic.hq.alert.data.ResourceAlertDefinitionRepository;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
@@ -50,6 +53,7 @@ import org.hyperic.hq.authz.server.session.SubjectDeleteRequestedEvent;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.EntityNotFoundException;
 import org.hyperic.hq.escalation.server.session.Escalatable;
@@ -72,6 +76,7 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
+import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.data.domain.PageRequest;
@@ -105,6 +110,8 @@ public class AlertManagerImpl implements AlertManager,
     private MeasurementRepository measurementRepository;
 
     private ResourceManager resourceManager;
+    
+    private ResourceGroupManager resourceGroupManager;
 
     private AlertDefinitionManager alertDefinitionManager;
 
@@ -116,6 +123,7 @@ public class AlertManagerImpl implements AlertManager,
 
     private AlertRegulator alertRegulator;
     private ConcurrentStatsCollector concurrentStatsCollector;
+    private AppdefConverter appdefConverter;
     
     @Autowired
     public AlertManagerImpl(AlertPermissionManager alertPermissionManager,
@@ -126,7 +134,8 @@ public class AlertManagerImpl implements AlertManager,
                             AlertDefinitionManager alertDefinitionManager,
                             AuthzSubjectManager authzSubjectManager,
                             EscalationManager escalationManager, MessagePublisher messagePublisher,
-                            AlertRegulator alertRegulator, ConcurrentStatsCollector concurrentStatsCollector) {
+                            AlertRegulator alertRegulator, ConcurrentStatsCollector concurrentStatsCollector,
+                            ResourceGroupManager resourceGroupManager, AppdefConverter appdefConverter) {
         this.alertPermissionManager = alertPermissionManager;
         this.resAlertDefRepository = resAlertDefRepository;
         this.alertActionLogRepository = alertActionLogRepository;
@@ -140,6 +149,8 @@ public class AlertManagerImpl implements AlertManager,
         this.alertRegulator = alertRegulator;
         this.messagePublisher = messagePublisher;
         this.concurrentStatsCollector = concurrentStatsCollector;
+        this.resourceGroupManager = resourceGroupManager;
+        this.appdefConverter = appdefConverter;
     }
 
     @PostConstruct
@@ -266,6 +277,39 @@ public class AlertManagerImpl implements AlertManager,
         }
         return alert;
     }
+    
+    @Transactional(readOnly=true)
+    public Map<Integer,Alert> findLastByResource(AuthzSubject subj, 
+                                      Resource r,
+                                      boolean includeDescendants,
+                                      boolean fixed) {
+            StopWatch watch = new StopWatch();
+            Map<Integer,Alert> unfixedAlerts = new HashMap<Integer,Alert>();
+            try {
+                //TODO alertDAO.findLastByResource did perm check
+                List<Integer> resourceIds = new ArrayList<Integer>();
+                resourceIds.add(r.getId());
+                if(includeDescendants) {
+                    resourceIds.addAll(r.getChildrenIds(true));
+                }
+                List<Alert> unfixed=
+                    alertRepository.findByResourcesAndFixedOrderByCtimeAsc(resourceIds, fixed);
+                for (Alert a  : unfixed ) {
+                    // since it is ordered by ctime in ascending order, the
+                    // last alert will eventually be put into the map
+                    unfixedAlerts.put(a.getAlertDefinition().getId(), a);
+                }
+            } catch (Exception e) {
+                log.error("Error finding the last alerts for resource id="  + r.getId(), e);
+            } finally {
+                if (log.isDebugEnabled()) {
+                    log.debug("findLastByResource: "  + watch);
+                }
+            }
+            return unfixedAlerts;
+    }
+
+
 
     /**
      * Find the last unfixed alert by definition ID
@@ -285,6 +329,30 @@ public class AlertManagerImpl implements AlertManager,
             return null;
         }
     }
+    
+    @Transactional(readOnly=true)
+    public Map<Integer,Alert> findAllLastUnfixed() {        
+        StopWatch watch = new StopWatch();
+        Map<Integer,Alert> unfixedAlerts =  new HashMap<Integer,Alert>();
+        try {
+            List<Alert> unfixed = 
+                alertRepository.findByFixedOrderByCtimeAsc(false);
+            for (Alert a : unfixed ) {
+                // since it is ordered by ctime in ascending order, the
+                // last alert will eventually be put into the map
+                unfixedAlerts.put(a.getAlertDefinition().getId(), a);
+            }
+
+        } catch (Exception e) {
+            log.error("Error finding all last unfixed alerts", e);
+        } finally {
+            if (log.isDebugEnabled()) {
+                log.debug("findAllLastUnfixed: " + watch);
+            }
+        }
+        return unfixedAlerts;
+    }
+
     
     /**
      * Find the last alert by definition ID
@@ -320,7 +388,7 @@ public class AlertManagerImpl implements AlertManager,
         int[] counts = new int[ids.length];
         for (int i = 0; i < ids.length; i++) {
             if (ids[i].isPlatform() || ids[i].isServer() || ids[i].isService()) {
-                counts[i] = (int) alertRepository.countByResource(resourceManager.findResource(ids[i]));
+                counts[i] = (int) alertRepository.countByResource(ids[i].getId());
             }
         }
         return counts;
@@ -364,11 +432,11 @@ public class AlertManagerImpl implements AlertManager,
 
             EscalatableCreator creator = new ClassicEscalatableCreator(alertDef, event,
                 messagePublisher, this);
-            Resource res = creator.getAlertDefinition().getResource();
-            if (res == null || res.isInAsyncDeleteState()) {
+            Integer resId = creator.getAlertDefinition().getResource();
+            if (resId == null) {
                 return;
             }
-
+           
             // Now start escalation
             if (alertDef.getEscalation() != null) {
                 escalationManager.startEscalation(alertDef, creator);
@@ -401,7 +469,7 @@ public class AlertManagerImpl implements AlertManager,
                                       PageControl pc) throws PermissionException {
         // ...check that user has view permission on alert definition's resource...
         alertPermissionManager.canViewAlertDefinition(subj, id);
-        List<Alert> alerts = alertRepository.findByResourceInRange(resourceManager.findResource(id),
+        List<Alert> alerts = alertRepository.findByResourceInRange(id.getId(),
             begin, end, pc.getSortattribute() == SortAttribute.NAME, pc.isAscending());
 
         return pojoPager.seek(alerts, pc);
@@ -431,8 +499,12 @@ public class AlertManagerImpl implements AlertManager,
             // be able to use cached results.
             endTime = TimingVoodoo.roundUpTime(endTime, 60000);
         }
+        Set<Integer> groupMembers = null;
+        if(groupId != null) {
+            groupMembers = resourceGroupManager.findResourceGroupById(groupId).getMemberIds();
+        }
         return alertRepository.findByCreateTimeAndPriority(endTime - timeRange, endTime, priority,
-            inEsc, notFixed, groupId, alertDefId, sort);
+            inEsc, notFixed, groupMembers, alertDefId, sort);
     }
 
     @Transactional(readOnly = true)
@@ -460,9 +532,12 @@ public class AlertManagerImpl implements AlertManager,
         AlertSortField sortField = (AlertSortField) pageInfo.getSort();
         Sort sort = new Sort(pageInfo.isAscending()? Direction.ASC: Direction.DESC,sortField.getSortString("a", "d", "r"));
         PageRequest pageRequest = new PageRequest(pageInfo.getPageNum(), pageInfo.getPageSize(), sort);
-        
+        Set<Integer> groupMembers = null;
+        if(groupId != null) {
+            groupMembers = resourceGroupManager.findResourceGroupById(groupId).getMemberIds();
+        }
         return alertRepository.findByCreateTimeAndPriority(endTime - timeRange, endTime, priority,
-            inEsc, notFixed, groupId, alertDefId, pageRequest).getContent();
+            inEsc, notFixed, groupMembers, alertDefId, pageRequest).getContent();
     }
     
     
@@ -507,7 +582,7 @@ public class AlertManagerImpl implements AlertManager,
                     // Filter by appdef entity
                     //TODO resources of type
                     if(alertdef instanceof ResourceAlertDefinition) {
-                        AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(((ResourceAlertDefinition)alertdef).getResource());
+                        AppdefEntityID aeid = appdefConverter.newAppdefEntityId(((ResourceAlertDefinition)alertdef).getResource());
                         if (!inclSet.contains(aeid)) {
                             continue;
                         }
@@ -555,8 +630,12 @@ public class AlertManagerImpl implements AlertManager,
         // Time voodoo the end time to the nearest minute so that we might
         // be able to use cached results
         endTime = TimingVoodoo.roundUpTime(endTime, 60000);
+        Set<Integer> groupMembers = null;
+        if(groupId != null) {
+            groupMembers = resourceGroupManager.findResourceGroupById(groupId).getMemberIds();
+        }
         Number count = alertRepository.countByCreateTimeAndPriority(endTime - timeRange, endTime, 0,
-            false, true, groupId, null);
+            false, true, groupMembers, null);
         if (count != null)
             return count.intValue();
 
@@ -570,7 +649,8 @@ public class AlertManagerImpl implements AlertManager,
             // due to async deletes this could be null. just ignore and continue
             //TODO anyting with type alerts?
             if (a.getAlertDefinition() instanceof ResourceAlertDefinition && 
-                    ((ResourceAlertDefinition)a.getAlertDefinition()).getResource().isInAsyncDeleteState()) {
+                    resourceManager.findResourceById(((ResourceAlertDefinition)a.getAlertDefinition()).getResource()).
+                    isInAsyncDeleteState()) {
                 continue;
             }
             Escalatable e = ClassicEscalatableCreator.createEscalatable(a, getShortReason(a),
@@ -587,11 +667,15 @@ public class AlertManagerImpl implements AlertManager,
     @Transactional(readOnly = true)
     public String getShortReason(Alert alert) {
         AlertDefinition def = alert.getAlertDefinition();
-        Resource r = def.getResource();
+        Integer resId = def.getResource();
+        if (resId == null) {
+            return "alertid=" + alert.getId() + " is associated with an invalid or deleted resource";
+        }
+        Resource r = resourceManager.findResourceById(resId);
         if (r == null || r.isInAsyncDeleteState()) {
             return "alertid=" + alert.getId() + " is associated with an invalid or deleted resource";
         }
-        AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(r);
+        AppdefEntityID aeid = appdefConverter.newAppdefEntityId(r);
         AppdefEntityValue aev = new AppdefEntityValue(aeid, authzSubjectManager.getOverlordPojo());
 
         String name = "";

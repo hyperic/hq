@@ -82,5 +82,9 @@ public class HSQLDialect
         // TODO Auto-generated method stub
         return null;
     }
+    
+    public boolean requiresCast() {
+        return true;
+    }
 
 }

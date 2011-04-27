@@ -40,12 +40,12 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.auth.domain.AuthzSubject;
+import org.hyperic.hq.auth.domain.Operation;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.inventory.domain.OperationType;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
@@ -141,10 +141,10 @@ public class RegisterAction extends BaseAction {
         if (debug) log.debug("getting all operations");
         
         Map<String, Boolean> userOpsMap = new HashMap<String, Boolean>();
-        List<OperationType> userOps = authzBoss.getAllOperations(sessionId);
+        List<Operation> userOps = authzBoss.getAllOperations(sessionId);
         
         // TODO come back to this and see why this is done...
-        for (OperationType op : userOps) {
+        for (Operation op : userOps) {
             userOpsMap.put(op.getName(), Boolean.TRUE);
         }
 

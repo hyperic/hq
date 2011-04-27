@@ -40,11 +40,12 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.agent.mgmt.data.AgentRepository;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
+import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
@@ -74,10 +75,14 @@ import org.hyperic.hq.inventory.domain.RelationshipTypes;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
-import org.hyperic.hq.plugin.mgmt.data.PluginRepository;
+import org.hyperic.hq.plugin.mgmt.data.PluginResourceTypeRepository;
+import org.hyperic.hq.plugin.mgmt.domain.Plugin;
+import org.hyperic.hq.plugin.mgmt.domain.PluginResourceType;
+import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.ArrayUtil;
+import org.hyperic.util.StringUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -100,8 +105,7 @@ public class ServerManagerImpl implements ServerManager {
 
     private static final String VALUE_PROCESSOR = "org.hyperic.hq.appdef.server.session.PagerProcessor_server";
     private Pager valuePager;
-    private PluginRepository pluginRepository;
-    private AgentRepository agentRepository;
+    private PluginResourceTypeRepository pluginResourceTypeRepository;
     private PermissionManager permissionManager;
     private ResourceManager resourceManager;
     private AuditManager auditManager;
@@ -114,15 +118,18 @@ public class ServerManagerImpl implements ServerManager {
     private ServiceFactory serviceFactory;
     private ResourceDao resourceDao;
     private ResourceTypeDao resourceTypeDao;
+    private ConfigManager configManager;
+    private AppdefConverter appdefConverter;
 
     @Autowired
     public ServerManagerImpl(PermissionManager permissionManager,  ResourceManager resourceManager,
                               AuditManager auditManager,
                              AuthzSubjectManager authzSubjectManager, ResourceGroupManager resourceGroupManager,
                              ZeventEnqueuer zeventManager, ResourceAuditFactory resourceAuditFactory,
-                             PluginRepository pluginRepository, ServerFactory serverFactory,
+                             PluginResourceTypeRepository pluginResourceTypeRepository, ServerFactory serverFactory,
                              ServiceManager serviceManager, ServiceFactory serviceFactory, ResourceDao resourceDao,
-                             ResourceTypeDao resourceTypeDao, AgentRepository agentRepository) {
+                             ResourceTypeDao resourceTypeDao,
+                             ConfigManager configManager, AppdefConverter appdefConverter) {
         this.permissionManager = permissionManager;
         this.resourceManager = resourceManager;
         this.auditManager = auditManager;
@@ -130,13 +137,14 @@ public class ServerManagerImpl implements ServerManager {
         this.resourceGroupManager = resourceGroupManager;
         this.zeventManager = zeventManager;
         this.resourceAuditFactory = resourceAuditFactory;
-        this.pluginRepository = pluginRepository;
+        this.pluginResourceTypeRepository = pluginResourceTypeRepository;
         this.serverFactory = serverFactory;
         this.serviceManager = serviceManager;
         this.serviceFactory = serviceFactory;
         this.resourceDao =resourceDao;
         this.resourceTypeDao = resourceTypeDao;
-        this.agentRepository = agentRepository;
+        this.configManager = configManager;
+        this.appdefConverter = appdefConverter;
     }
     
     private Server toServer(Resource resource) {
@@ -187,6 +195,70 @@ public class ServerManagerImpl implements ServerManager {
            throw new ValidationException("This server is not new, it has ID:" + sv.getId());
         }
     }
+    
+    /**
+     * Clone a Server to a target Platform
+     * 
+     */
+    public Server cloneServer(AuthzSubject subject, Platform targetPlatform, Server serverToClone)
+        throws ValidationException, PermissionException, VetoException, NotFoundException {
+        for (Server server : targetPlatform.getServers()) {
+            if (server.getServerType().equals(serverToClone.getServerType())) {
+                // Do nothing if it's a Network server
+                if (server.getServerType().getName().equals("NetworkServer")) {
+                    return null;
+                }                
+            }
+        }
+        //TODO perm check
+        //AppdefEntityID platId = server.getPlatform().getEntityId();
+        //permissionManager
+        //  .checkPermission(subject, resourceManager.findResourceTypeByName(AuthzConstants.platformResType), platId
+        //    .getId(), AuthzConstants.platformOpAddServer);    
+        ServerValue serverToCloneValue = serverToClone.getServerValue();
+        serverToCloneValue.setName(getTargetServerName(targetPlatform, serverToClone));
+        Resource server = create(subject,serverToCloneValue,targetPlatform.getResource());
+        try {
+            targetPlatform.getResource().relateTo(server,RelationshipTypes.SERVER);
+            targetPlatform.getResource().relateTo(server,RelationshipTypes.CONTAINS);
+        }catch(InvalidRelationshipException e) {
+            throw new ValidationException("Servers of type '" + server.getType().getName() + "' cannot be created on platforms of type '" +
+                targetPlatform.getPlatformType().getName());
+        }
+        
+        AppdefEntityID newServerId = appdefConverter.newAppdefEntityId(server);
+        
+        byte[] productConfig = configManager.toConfigResponse(serverToClone.getResource().
+            getConfig(ProductPlugin.TYPE_PRODUCT));
+        byte[] measurementConfig = configManager.toConfigResponse(serverToClone.getResource().
+            getConfig(ProductPlugin.TYPE_MEASUREMENT));
+        byte[] controlConfig = configManager.toConfigResponse(serverToClone.getResource().
+            getConfig(ProductPlugin.TYPE_CONTROL));
+        configManager.configureResponse(subject, newServerId, productConfig, measurementConfig, 
+            controlConfig);
+                
+        // Send resource create event
+        ResourceCreatedZevent zevent = new ResourceCreatedZevent(subject, newServerId);
+        zeventManager.enqueueEventAfterCommit(zevent);
+        return toServer(server);
+    }
+    
+    private String getTargetServerName(Platform targetPlatform, Server serverToClone) {
+        String prefix = serverToClone.getPlatform().getName();
+        String oldServerName = serverToClone.getName();
+        String newServerName = StringUtil.removePrefix(oldServerName, prefix);
+        if (newServerName.equals(oldServerName)) {
+            // old server name may not contain the canonical host name
+            // of the platform. try to get just the host name
+            int dotIndex = prefix.indexOf(".");
+            if (dotIndex > 0) {
+                prefix = prefix.substring(0, dotIndex);
+                newServerName = StringUtil.removePrefix(oldServerName, prefix);
+            }
+        }
+        newServerName = targetPlatform.getName() + " " + newServerName;
+        return newServerName;
+    }
 
     /**
      * Get the scope of viewable servers for a given user
@@ -227,10 +299,11 @@ public class ServerManagerImpl implements ServerManager {
     private Resource create(AuthzSubject owner, ServerValue sv, Resource p)  {
         ResourceType st = resourceManager.findResourceTypeById(sv.getServerType().getId());
         Resource s = new Resource(sv.getName(), st);
-        resourceDao.persist(s);
         s.setDescription(sv.getDescription());
         s.setLocation(sv.getLocation());
         s.setModifiedBy(sv.getModifiedBy());
+        s.setOwner(owner.getName());
+        resourceDao.persist(s);
         s.setProperty(ServerFactory.INSTALL_PATH,sv.getInstallPath());
         String aiid = sv.getAutoinventoryIdentifier();
         if (aiid != null) {
@@ -245,13 +318,9 @@ public class ServerManagerImpl implements ServerManager {
         s.setProperty(ServerFactory.SERVICES_AUTO_MANAGED,sv.getServicesAutomanaged());
         s.setProperty(ServerFactory.RUNTIME_AUTODISCOVERY,sv.getRuntimeAutodiscovery());
         s.setProperty(ServerFactory.WAS_AUTODISCOVERED,sv.getWasAutodiscovered());
-        s.setProperty(ServerFactory.AUTODISCOVERY_ZOMBIE,false);
-        //TODO abstract creationTime, modifiedTime, and sortName?
+        //TODO abstract creationTime, modifiedTime
         s.setProperty(ServerFactory.CREATION_TIME, System.currentTimeMillis());
         s.setProperty(ServerFactory.MODIFIED_TIME,System.currentTimeMillis());
-        s.setProperty(AppdefResource.SORT_NAME, sv.getName().toUpperCase());
-        s.setOwner(owner.getName());
-        agentRepository.findByManagedResource(p).addManagedResource(s);
         return s;
    }
     
@@ -332,7 +401,7 @@ public class ServerManagerImpl implements ServerManager {
                 throw new ValidationException("Servers of type '" + serverType.getName() + "' cannot be created on platforms of type '" +
                     platform.getType().getName());
             }
-            server.setProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_SERVER);
+            server.setProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_SERVER,true);
             
             //TODO abstract to ResourceManager when we can send events w/out AppdefEntityIDs
             Server serv = toServer(server);
@@ -398,7 +467,7 @@ public class ServerManagerImpl implements ServerManager {
     @Transactional(readOnly=true)
     public PageList<Resource> getAllServerResources(AuthzSubject subject, PageControl pc) {
         PageRequest pageInfo = new PageRequest(pc.getPagenum(),pc.getPagesize(),
-            new Sort(pc.getSortorder() == PageControl.SORT_ASC? Direction.ASC : Direction.DESC,"name"));
+            new Sort(pc.getSortorder() == PageControl.SORT_ASC? Direction.ASC : Direction.DESC,"sortName"));
         Page<Resource> resources = resourceDao.findByIndexedProperty(AppdefResourceType.APPDEF_TYPE_ID, 
             AppdefEntityConstants.APPDEF_TYPE_SERVER,pageInfo,String.class);
         return new PageList<Resource>(resources.getContent(),(int)resources.getTotalElements());
@@ -921,14 +990,12 @@ public class ServerManagerImpl implements ServerManager {
         server.setDescription( existing.getDescription() );
         server.setProperty(ServerFactory.RUNTIME_AUTODISCOVERY, existing.getRuntimeAutodiscovery() );
         server.setProperty(ServerFactory.WAS_AUTODISCOVERED,existing.getWasAutodiscovered() );
-        server.setProperty(ServerFactory.AUTODISCOVERY_ZOMBIE,existing.getAutodiscoveryZombie() );
         server.setModifiedBy( existing.getModifiedBy() );
         server.setLocation( existing.getLocation() );
         server.setName( existing.getName() );
         server.setProperty(ServerFactory.AUTO_INVENTORY_IDENTIFIER, existing.getAutoinventoryIdentifier() );
         server.setProperty(ServerFactory.INSTALL_PATH, existing.getInstallPath() );
         server.setProperty(ServerFactory.SERVICES_AUTO_MANAGED, existing.getServicesAutomanaged() );
-        resourceDao.merge(server);
     }
 
     /**
@@ -965,7 +1032,7 @@ public class ServerManagerImpl implements ServerManager {
      * Update server types
      * 
      */
-    public void updateServerTypes(String plugin, ServerTypeInfo[] infos) throws VetoException, NotFoundException {
+    public void updateServerTypes(Plugin plugin, ServerTypeInfo[] infos) throws VetoException, NotFoundException {
         // First, put all of the infos into a Hash
         HashMap<String, ServerTypeInfo> infoMap = new HashMap<String, ServerTypeInfo>();
         for (int i = 0; i < infos.length; i++) {
@@ -989,7 +1056,7 @@ public class ServerManagerImpl implements ServerManager {
         Collection<ResourceType> serverTypes = getAllServerResourceTypes();
         Set<ResourceType> curServers = new HashSet<ResourceType>();
         for(ResourceType curResourceType: serverTypes) {
-            if(pluginRepository.findByResourceType(curResourceType).getName().equals(plugin)) {
+            if(pluginResourceTypeRepository.findNameByResourceType(curResourceType.getId()).equals(plugin)) {
                 curServers.add(curResourceType);
             }
         }
@@ -1051,18 +1118,17 @@ public class ServerManagerImpl implements ServerManager {
         }
     }
     
-    public ServerType createServerType(ServerTypeInfo sinfo, String plugin) throws NotFoundException {
+    public ServerType createServerType(ServerTypeInfo sinfo, Plugin plugin) throws NotFoundException {
         log.debug("Creating new ServerType: " + sinfo.getName());
         ResourceType stype = createServerResourceType(sinfo, plugin);
         PropertyType appdefType = createServerPropertyType(AppdefResourceType.APPDEF_TYPE_ID, Integer.class);
-        appdefType.setIndexed(true);
         stype.addPropertyType(appdefType);
         String newPlats[] = sinfo.getValidPlatformTypes();
         findAndSetPlatformType(newPlats, stype);
         return serverFactory.createServerType(stype);
     }
     
-    public ServerType createVirtualServerType(ServerTypeInfo sinfo, String plugin) throws NotFoundException {
+    public ServerType createVirtualServerType(ServerTypeInfo sinfo, Plugin plugin) throws NotFoundException {
         log.debug("Creating new Virtual ServerType: " + sinfo.getName());
         ResourceType stype = createServerResourceType(sinfo, plugin);
         String newPlats[] = sinfo.getValidPlatformTypes();
@@ -1070,21 +1136,21 @@ public class ServerManagerImpl implements ServerManager {
         return serverFactory.createServerType(stype);
     }
     
-    private ResourceType createServerResourceType(ServerTypeInfo sinfo, String plugin)  {
+    private ResourceType createServerResourceType(ServerTypeInfo sinfo, Plugin plugin)  {
         ResourceType stype = new ResourceType(sinfo.getName());
-        resourceTypeDao.persist(stype);
-        pluginRepository.findByName(plugin).addResourceType(stype);
         stype.setDescription(sinfo.getDescription());
-       
-        stype.addPropertyType(createServerPropertyType(ServerFactory.WAS_AUTODISCOVERED,Boolean.class));
-        stype.addPropertyType(createServerPropertyType(ServerFactory.AUTO_INVENTORY_IDENTIFIER,String.class));
-        stype.addPropertyType(createServerPropertyType(ServerFactory.AUTODISCOVERY_ZOMBIE,Boolean.class));
-        stype.addPropertyType(createServerPropertyType(ServerFactory.CREATION_TIME,Long.class));
-        stype.addPropertyType(createServerPropertyType(ServerFactory.MODIFIED_TIME,Long.class));
-        stype.addPropertyType(createServerPropertyType(AppdefResource.SORT_NAME,String.class));
-        stype.addPropertyType(createServerPropertyType(ServerFactory.INSTALL_PATH,String.class));
-        stype.addPropertyType(createServerPropertyType(ServerFactory.SERVICES_AUTO_MANAGED,Boolean.class));
-        stype.addPropertyType(createServerPropertyType(ServerFactory.RUNTIME_AUTODISCOVERY,Boolean.class));
+        resourceTypeDao.persist(stype);
+        PluginResourceType pluginResType = new PluginResourceType(plugin.getName(), stype.getId());
+        pluginResourceTypeRepository.save(pluginResType);
+        Set<PropertyType> propertyTypes = new HashSet<PropertyType>();
+        propertyTypes.add(createServerPropertyType(ServerFactory.WAS_AUTODISCOVERED,Boolean.class));
+        propertyTypes.add(createServerPropertyType(ServerFactory.AUTO_INVENTORY_IDENTIFIER,String.class));
+        propertyTypes.add(createServerPropertyType(ServerFactory.CREATION_TIME,Long.class));
+        propertyTypes.add(createServerPropertyType(ServerFactory.MODIFIED_TIME,Long.class));
+        propertyTypes.add(createServerPropertyType(ServerFactory.INSTALL_PATH,String.class));
+        propertyTypes.add(createServerPropertyType(ServerFactory.SERVICES_AUTO_MANAGED,Boolean.class));
+        propertyTypes.add(createServerPropertyType(ServerFactory.RUNTIME_AUTODISCOVERY,Boolean.class));
+        stype.addPropertyTypes(propertyTypes);
         return stype;
     }
     
@@ -1150,12 +1216,7 @@ public class ServerManagerImpl implements ServerManager {
         serverType.remove();
     }
 
-    /**
-     * 
-     */
-    public void setAutodiscoveryZombie(Server server, boolean zombie) {
-        resourceManager.findResourceById(server.getId()).setProperty(ServerFactory.AUTODISCOVERY_ZOMBIE,zombie);
-    }
+   
 
     /**
      * Get a Set of PlatformTypeLocal objects which map to the names as given by

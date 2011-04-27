@@ -103,6 +103,12 @@ public interface MeasurementManager {
      * Get a Measurement by Id.
      */
     public Measurement getMeasurement(Integer mid);
+    
+    /**
+     * Look up a Measurement for a Resource and Measurement alias
+     * @return a The Measurement for the Resource of the given alias.
+     */
+    Measurement getMeasurement(AuthzSubject s, Integer resource, String alias) throws MeasurementNotFoundException;
 
     /**
      * Get the live measurement values for a given resource.
@@ -168,7 +174,7 @@ public interface MeasurementManager {
     public List<Measurement> findMeasurements(AuthzSubject subject, AppdefEntityID id, String cat,
                                               PageControl pc);
 
-    Map<Integer,List<Measurement>> getEnabledMeasurements(List<Resource> resources);
+    Map<Integer,List<Measurement>> getEnabledMeasurements(List<Integer> resources);
     /**
      * Look up a list of enabled Measurements for a category
      * @return a list of {@link Measurement}

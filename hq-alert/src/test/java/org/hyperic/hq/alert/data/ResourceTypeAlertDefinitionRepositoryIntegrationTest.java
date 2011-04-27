@@ -1,14 +1,11 @@
 package org.hyperic.hq.alert.data;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import static org.junit.Assert.assertEquals;
 import org.hyperic.hq.events.server.session.ResourceTypeAlertDefinition;
-import org.hyperic.hq.inventory.domain.ResourceType;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,23 +21,12 @@ import org.springframework.transaction.annotation.Transactional;
 @ContextConfiguration(locations = { "classpath:org/hyperic/hq/alert/data/jpa-integration-test-context.xml" })
 public class ResourceTypeAlertDefinitionRepositoryIntegrationTest {
 
-    @PersistenceContext
-    private EntityManager entityManager;
+    private Integer resourceType1 = 9654;
 
-    private ResourceType resourceType1;
-
-    private ResourceType resourceType2;
+    private Integer resourceType2 = 23483;
 
     @Autowired
     private ResourceTypeAlertDefinitionRepository resourceTypeAlertDefinitionRepository;
-
-    @Before
-    public void setUp() {
-        resourceType1 = new ResourceType("Tomcat");
-        entityManager.persist(resourceType1);
-        resourceType2 = new ResourceType("JBoss");
-        entityManager.persist(resourceType2);
-    }
 
     @Test
     public void testFindByEnabled() {

@@ -26,7 +26,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 
-import org.hibernate.annotations.Index;
 import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
@@ -37,6 +36,7 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertValue;
+import org.hyperic.hq.measurement.MeasurementConstants;
 
 
 @MappedSuperclass
@@ -66,7 +66,6 @@ abstract public class AlertDefinition implements AlertDefinitionInterface, Perfo
 
     @ManyToOne
     @JoinColumn(name = "ESCALATION_ID")
-    @Index(name = "ALERT_DEF_ESC_ID_IDX")
     private Escalation escalation;
 
     @Column(name = "FREQUENCY_TYPE", nullable = false)
@@ -82,7 +81,6 @@ abstract public class AlertDefinition implements AlertDefinitionInterface, Perfo
     private boolean notifyFiltered;
 
     @Column(name = "PRIORITY", nullable = false)
-    @Index(name = "ALERT_DEF_CHILD_IDX")
     private int priority; // XXX -- Needs to default to 1
 
     @Column(name = "TRANGE")
@@ -263,6 +261,69 @@ abstract public class AlertDefinition implements AlertDefinitionInterface, Perfo
         return active;
     }
 
+    /**
+     * Check if an alert definition is configured for only availability.
+     * 
+     * @param up Indicates where the availability condition is up (true) or down
+     *        (false)
+     * @return <code>true</code> if the alert definition has an availability
+     *         condition.
+     */
+    public boolean isAvailability(boolean up) {
+        boolean isAvail = false;
+
+        // ignore multi-conditional alert definitions
+        if (getConditions().size() == 1) {
+            for ( AlertCondition cond : getConditions()) {
+                if (cond != null
+                    && MeasurementConstants.CAT_AVAILABILITY.equalsIgnoreCase(cond.getName())) {
+                    if ("=".equals(cond.getComparator())) {
+                        if (up) {
+                            if (cond.getThreshold() == MeasurementConstants.AVAIL_UP) {
+                                isAvail = true;
+                                break;
+                            }
+                        } else {
+                            if (cond.getThreshold() == MeasurementConstants.AVAIL_DOWN) {
+                                isAvail = true;
+                                break;
+                            }
+                        }
+                    } else if ("!=".equals(cond.getComparator())) {
+                        if (up) {
+                            if (cond.getThreshold() == MeasurementConstants.AVAIL_DOWN) {
+                                isAvail = true;
+                                break;
+                            }
+                        } else {
+                            if (cond.getThreshold() == MeasurementConstants.AVAIL_UP) {
+                                isAvail = true;
+                                break;
+                            }
+                        }
+                    } else if ("<".equals(cond.getComparator())) {
+                        if (!up) {
+                            if (cond.getThreshold() <= MeasurementConstants.AVAIL_UP
+                                && cond.getThreshold() > MeasurementConstants.AVAIL_DOWN) {
+                                isAvail = true;
+                                break;
+                            }
+                        }
+                    } else if (">".equals(cond.getComparator())) {
+                        if (up) {
+                            if (cond.getThreshold() >= MeasurementConstants.AVAIL_DOWN
+                                && cond.getThreshold() < MeasurementConstants.AVAIL_UP) {
+                                isAvail = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return isAvail;
+    }
+
     public boolean isControlFiltered() {
         return controlFiltered;
     }
@@ -414,9 +475,10 @@ abstract public class AlertDefinition implements AlertDefinitionInterface, Perfo
     public String toString() {
         return "alertDef [" + this.getName() + "]";
     }
-
+    
     public boolean willRecover() {
         return willRecover;
     }
+
 
 }

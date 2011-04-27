@@ -106,12 +106,11 @@ public class EventLogManagerImpl implements EventLogManager {
             }
         }
 
-        Resource r = null;
+        Integer r = null;
         if (event instanceof ResourceEventInterface) {
-            Integer id = ((ResourceEventInterface) event).getResource();
-            r = resourceManager.findResourceById(id);
-            if (r == null || r.isInAsyncDeleteState()) {
-                final String m = id + " has already been deleted";
+            r = ((ResourceEventInterface) event).getResource();
+            if (r == null) {
+                final String m = r + " has already been deleted";
                 throw new ResourceDeletedException(m);
             }
         }
@@ -170,9 +169,6 @@ public class EventLogManagerImpl implements EventLogManager {
                 if (alertId == null) {
                     continue;
                 }
-                if (log.getResource().isInAsyncDeleteState()) {
-                    continue;
-                }
                 AlertFiredEvent alertFired = 
                     createAlertFiredEvent(alertDefId, alertId, log);
                 alertFiredMap.put(alertDefId, alertFired);
@@ -198,7 +194,7 @@ public class EventLogManagerImpl implements EventLogManager {
     }
     
     private final AlertFiredEvent createAlertFiredEvent(Integer alertDefId,Integer alertId,EventLog eventLog) {
-        return new AlertFiredEvent(alertId, alertDefId, eventLog.getResource().getId(), eventLog.getSubject(),
+        return new AlertFiredEvent(alertId, alertDefId, eventLog.getResource(), eventLog.getSubject(),
             eventLog.getTimestamp(), eventLog.getDetail());
     }
     
@@ -221,16 +217,16 @@ public class EventLogManagerImpl implements EventLogManager {
         if (r instanceof ResourceGroup) {
             if(eventTypes == null) {
                 return eventLogDAO.findByTimestampBetweenAndResourcesOrderByTimestamp(begin,end,
-                    ((ResourceGroup)r).getMembers());
+                    ((ResourceGroup)r).getMemberIds());
             }else {
                 return eventLogDAO.findByTimestampBetweenAndResourcesAndEventTypesOrderByTimestamp(begin,end,
-                    ((ResourceGroup)r).getMembers(), Arrays.asList(eventTypes));
+                    ((ResourceGroup)r).getMemberIds(), Arrays.asList(eventTypes));
             }
         } else {
             if(eventTypes == null) {
-                return eventLogDAO.findByTimestampBetweenAndResourceOrderByTimestampAsc(begin, end, r);
+                return eventLogDAO.findByTimestampBetweenAndResourceOrderByTimestampAsc(begin, end, r.getId());
             }else {
-                return eventLogDAO.findByTimestampBetweenAndResourceAndEventTypesOrderByTimestamp(begin, end, r, 
+                return eventLogDAO.findByTimestampBetweenAndResourceAndEventTypesOrderByTimestamp(begin, end, r.getId(), 
                     Arrays.asList(eventTypes));
             }
         }
@@ -245,8 +241,7 @@ public class EventLogManagerImpl implements EventLogManager {
      */
     @Transactional(readOnly=true)
     public List<EventLog> findLogs(AppdefEntityID ent, AuthzSubject user, String status, long begin, long end) {
-        Resource r = resourceManager.findResource(ent);
-        return eventLogDAO.findByTimestampBetweenAndStatusAndResourceOrderByTimestampAsc(begin, end, status, r);
+        return eventLogDAO.findByTimestampBetweenAndStatusAndResourceOrderByTimestampAsc(begin, end, status, ent.getId());
     }
 
     /**
@@ -279,8 +274,7 @@ public class EventLogManagerImpl implements EventLogManager {
     @Transactional(readOnly=true)
     public boolean[] logsExistPerInterval(AppdefEntityID entityId, AuthzSubject subject, long begin, long end,
                                           int intervals) {
-        Resource r = resourceManager.findResource(entityId);
-        return eventLogDAO.logsExistPerInterval(r, begin, end, intervals);
+        return eventLogDAO.logsExistPerInterval(entityId.getId(), begin, end, intervals);
     }
 
     /**
@@ -288,7 +282,7 @@ public class EventLogManagerImpl implements EventLogManager {
      * 
      */
     public void deleteLogs(Resource r) {
-        eventLogDAO.deleteByResource(r);
+        eventLogDAO.deleteByResource(r.getId());
     }
 
     /**

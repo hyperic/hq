@@ -31,9 +31,10 @@ import java.util.Map;
 
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.inventory.domain.RelationshipTypes;
 import org.hyperic.hq.inventory.domain.Resource;
-import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
 
 /** AppdefUtil - utility methods for appdef entities and
@@ -108,48 +109,7 @@ public class AppdefUtil {
                    ( server.isWasAutodiscovered() &&
                      !server.isServicesAutomanaged()) ));
     }
-    
-    public static AppdefEntityID newAppdefEntityId(Resource rv) {   
-        ResourceType resType = rv.getType();
-         
-        if (resType == null) {
-                throw new IllegalArgumentException(rv.getName() + 
-                    " does not have a Resource Type");
-        }
-        int entityID = rv.getId();
-            
-        return new AppdefEntityID(getAppdefType(resType), entityID);
-    }
-    
-    public static int getAppdefType(ResourceType rv) {
-        if(!(rv.getResourceTypesTo(RelationshipTypes.PLATFORM).isEmpty())) {
-            return AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
-        }
-        if(!(rv.getResourceTypesTo(RelationshipTypes.SERVER).isEmpty()) || !(rv.getResourceTypesTo(RelationshipTypes.VIRTUAL).isEmpty())) {
-            return AppdefEntityConstants.APPDEF_TYPE_SERVER;
-        }
-        if(!(rv.getResourceTypesTo(RelationshipTypes.SERVICE)).isEmpty()) {
-            return AppdefEntityConstants.APPDEF_TYPE_SERVICE;
-        }
-        if(rv.getName().equals(AppdefEntityConstants.APPDEF_NAME_APPLICATION)){
-            return AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
-        }
-    
-        int[] groupTypes = AppdefEntityConstants.getAppdefGroupTypes();
-        for(int i=0;i< groupTypes.length;i++) {
-            if(rv.getName().equals(AppdefEntityConstants.getAppdefGroupTypeName(groupTypes[i]))) {
-                return AppdefEntityConstants.APPDEF_TYPE_GROUP;
-            }
-        }
-    
-        throw new IllegalArgumentException(rv.getName() + 
-            " is not a valid Appdef Resource Type");
-    }
-    
-    public static AppdefEntityID newAppdefEntityId(ResourceType resourceType) {
-        return new AppdefEntityID(getAppdefType(resourceType), resourceType.getId());
-    }
-    
+      
     public static Map groupByAppdefType(AppdefEntityID[] ids) {
         HashMap m = new HashMap();
         for (int i = 0; i < ids.length; i++) {

@@ -28,9 +28,11 @@ package org.hyperic.hq.measurement.server.session;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -38,11 +40,9 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.mgmt.domain.Agent;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
-import org.hyperic.hq.appdef.shared.PlatformManager;
-import org.hyperic.hq.appdef.shared.ServerManager;
-import org.hyperic.hq.appdef.shared.ServiceManager;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -68,30 +68,28 @@ public class ReportProcessorImpl implements ReportProcessor {
     private static final long PRIORITY_OFFSET = MINUTE * 3;
 
     private MeasurementManager measurementManager;
-    private PlatformManager platformManager;
-    private ServerManager serverManager;
-    private ServiceManager serviceManager;
     private SRNManager srnManager;
     private ReportStatsCollector reportStatsCollector;
     private MeasurementInserterHolder measurementInserterManager;
     private AgentManager agentManager;
     private ZeventEnqueuer zEventManager;
+    private ResourceManager resourceManager;
+    private AppdefConverter appdefConverter;
 
     @Autowired
     public ReportProcessorImpl(MeasurementManager measurementManager,
-                               PlatformManager platformManager, ServerManager serverManager,
-                               ServiceManager serviceManager, SRNManager srnManager,
+                               ResourceManager resourceManager, SRNManager srnManager,
                                ReportStatsCollector reportStatsCollector, MeasurementInserterHolder measurementInserterManager,
-                               AgentManager agentManager, ZeventEnqueuer zEventManager) {
+                               AgentManager agentManager, ZeventEnqueuer zEventManager,
+                               AppdefConverter appdefConverter) {
         this.measurementManager = measurementManager;
-        this.platformManager = platformManager;
-        this.serverManager = serverManager;
-        this.serviceManager = serviceManager;
+        this.resourceManager = resourceManager;
         this.srnManager = srnManager;
         this.reportStatsCollector = reportStatsCollector;
         this.measurementInserterManager = measurementInserterManager;
         this.agentManager = agentManager;
         this.zEventManager = zEventManager;
+        this.appdefConverter = appdefConverter;
     }
 
     private void addPoint(List<DataPoint> points, List<DataPoint> priorityPts, Measurement m, MetricValue[] vals) {
@@ -181,6 +179,8 @@ public class ReportProcessorImpl implements ReportProcessor {
         final boolean debug = log.isDebugEnabled();
         final StopWatch watch = new StopWatch();
         final Set<AppdefEntityID> toUnschedule = new HashSet<AppdefEntityID>();
+        Map<Integer,Map<Measurement,ValueList[]>> resourceToDSNs = new HashMap<Integer,Map<Measurement,ValueList[]>>();
+        //Minimize expensive call to get a Resource's agent by consolidating unique Resources
         for (DSNList dsnList : dsnLists) {
             Integer dmId = new Integer(dsnList.getClientId());
             if (debug) watch.markTimeBegin("getMeasurement");
@@ -199,14 +199,24 @@ public class ReportProcessorImpl implements ReportProcessor {
             // Need to check if resource was asynchronously deleted (type ==
             // null)
             if (debug) watch.markTimeBegin("getResource");
-            final Resource res = m.getResource();
+            final Integer resId = m.getResource();
             if (debug) watch.markTimeEnd("getResource");
-            if (res == null || res.isInAsyncDeleteState()) {
+            if (resId == null) {
                 if (debug) {
                     log.debug("dropping metricId=" + m.getId() + " since resource is in async delete state");
                 }
                 continue;
             }
+            Map<Measurement,ValueList[]> values = resourceToDSNs.get(resId);
+            if(values == null) {
+                values = new HashMap<Measurement,ValueList[]>();
+            }
+            values.put(m,dsnList.getDsns());
+            resourceToDSNs.put(resId,values);
+        }
+        
+        for(Map.Entry<Integer,Map<Measurement,ValueList[]>> resourceToDSN : resourceToDSNs.entrySet()) {
+            final Resource res = resourceManager.findResourceById(resourceToDSN.getKey());
             
             if (debug) watch.markTimeBegin("resMatchesAgent");
             // TODO reosurceMatchesAgent() and the call to getAgent() can be
@@ -223,32 +233,34 @@ public class ReportProcessorImpl implements ReportProcessor {
                     // leave values as default
                     log.debug("Error trying to construct string for WARN message below", e);
                 }
-                             
-                log.warn("measurement (id=" + m.getId() + ", name=" +
+                for(Measurement m : resourceToDSN.getValue().keySet()) {             
+                    log.warn("measurement (id=" + m.getId() + ", name=" +
                           m.getTemplate().getName() + ") was sent to the " +
                           "HQ server from agent (agentToken=" + agentToken + ", name=" +
                           ipAddr + ", port=" + portString + ")" +
                           " but resource (id=" + res.getId() + ", name=" +
                           res.getName() + ") is not associated " +
                           " with that agent.  Dropping measurement.");
+                }
                 if (debug) watch.markTimeEnd("resMatchesAgent");
-                toUnschedule.add(AppdefUtil.newAppdefEntityId(res));
+                toUnschedule.add(appdefConverter.newAppdefEntityId(res));
                 continue;
             }
             if (debug) watch.markTimeEnd("resMatchesAgent");
-            
-            final boolean isAvail = m.getTemplate().isAvailability();
-            final ValueList[] valLists = dsnList.getDsns();
-            if (debug) watch.markTimeBegin("addData");
-            for (ValueList valList : valLists) {
-                final MetricValue[] vals = valList.getValues();
-                if (isAvail) {
-                    addData(availPoints, priorityAvailPts, m, vals);
-                } else {
-                    addData(dataPoints, null, m, vals);
+            for(Map.Entry<Measurement, ValueList[]> dsn: resourceToDSN.getValue().entrySet()) {
+                final boolean isAvail = dsn.getKey().getTemplate().isAvailability();
+                final ValueList[] valLists = dsn.getValue();
+                if (debug) watch.markTimeBegin("addData");
+                for (ValueList valList : valLists) {
+                    final MetricValue[] vals = valList.getValues();
+                    if (isAvail) {
+                        addData(availPoints, priorityAvailPts, dsn.getKey(), vals);
+                    } else {
+                        addData(dataPoints, null, dsn.getKey(), vals);
+                    }
                 }
+                if (debug) watch.markTimeEnd("addData");
             }
-            if (debug) watch.markTimeEnd("addData");
         }
         if (debug) log.debug(watch);
 
@@ -291,7 +303,13 @@ public class ReportProcessorImpl implements ReportProcessor {
         if (resource == null || resource.isInAsyncDeleteState()) {
             return false;
         }
-        return agentManager.getAgent(resource).getAgentToken().equals(agentToken);  
+        try {
+            return agentManager.getAgent(appdefConverter.newAppdefEntityId(resource)).
+                getAgentToken().equals(agentToken);
+        } catch (AgentNotFoundException e) {
+            log.warn("Agent not found for Id=" + resource.getId());
+        }
+        return false;
     }
 
     /**

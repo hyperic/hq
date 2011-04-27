@@ -1,7 +1,6 @@
 package org.hyperic.hq.event.data;
 
 import org.hyperic.hq.events.server.session.EventLog;
-import org.hyperic.hq.inventory.domain.Resource;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface EventLogRepositoryCustom {
@@ -39,5 +38,5 @@ public interface EventLogRepositoryCustom {
      *         interval
      */
     @Transactional(readOnly = true)
-    boolean[] logsExistPerInterval(Resource resource, long begin, long end, int intervals);
+    boolean[] logsExistPerInterval(Integer resource, long begin, long end, int intervals);
 }

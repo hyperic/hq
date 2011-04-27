@@ -62,7 +62,7 @@ public class ResourceAuditFactory {
     public ResourceAudit createResource(Resource r, AuthzSubject creator, long start, long end) {
         //TODO below used to be type.getLocalizedName()
         String msg = MSGS.format("auditMsg.resource.create", r.getType().getName());
-        ResourceAudit res = new ResourceAudit(r, creator, RESOURCE_CREATE, AuditImportance.MEDIUM, AuditNature.CREATE,
+        ResourceAudit res = new ResourceAudit(r.getId(), creator, RESOURCE_CREATE, AuditImportance.MEDIUM, AuditNature.CREATE,
             msg, start, end);
 
         auditManager.saveAudit(res);
@@ -71,7 +71,7 @@ public class ResourceAuditFactory {
 
     public ResourceAudit deleteResource(Resource systemResource, AuthzSubject creator, long start, long end) {
         String msg = MSGS.format("auditMsg.resource.delete");
-        ResourceAudit res = new ResourceAudit(systemResource, creator,
+        ResourceAudit res = new ResourceAudit(systemResource.getId(), creator,
             RESOURCE_DELETE, AuditImportance.HIGH, AuditNature.DELETE, msg, start, end);
 
         auditManager.saveAudit(res);
@@ -80,7 +80,7 @@ public class ResourceAuditFactory {
 
     public ResourceAudit moveResource(Resource target, Resource destination, AuthzSubject mover, long start, long end) {
         String msg = MSGS.format("auditMsg.resource.move", destination.getName());
-        ResourceAudit res = new ResourceAudit(target, mover, RESOURCE_MOVE, AuditImportance.HIGH, AuditNature.MOVE,
+        ResourceAudit res = new ResourceAudit(target.getId(), mover, RESOURCE_MOVE, AuditImportance.HIGH, AuditNature.MOVE,
             msg, start, end);
         auditManager.saveAudit(res);
         return res;

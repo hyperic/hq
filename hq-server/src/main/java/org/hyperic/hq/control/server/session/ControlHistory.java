@@ -31,15 +31,12 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
 import org.hyperic.hq.control.shared.ControlConstants;
-import org.hyperic.hq.inventory.domain.Resource;
 
 @Entity
 @Table(name = "EAM_CONTROL_HISTORY")
@@ -74,9 +71,8 @@ public class ControlHistory implements Serializable {
     @Column(name = "MESSAGE", length = 500)
     private String message;
 
-    @ManyToOne
-    @JoinColumn(name = "RESOURCE_ID", nullable = false)
-    private Resource resource;
+    @Column(name = "RESOURCE_ID", nullable = false)
+    private Integer resource;
 
     @Column(name = "SCHEDULED", nullable = false)
     private boolean scheduled;
@@ -101,7 +97,7 @@ public class ControlHistory implements Serializable {
     public ControlHistory() {
     }
 
-    public ControlHistory(Resource resource, Integer groupId, Integer batchId, String subject,
+    public ControlHistory(Integer resource, Integer groupId, Integer batchId, String subject,
                           String action, String args, Boolean scheduled, long startTime,
                           long endTime, long dateScheduled, String status, String description,
                           String message) {
@@ -181,7 +177,7 @@ public class ControlHistory implements Serializable {
         return this.message;
     }
 
-    public Resource getResource() {
+    public Integer getResource() {
         return resource;
     }
 
@@ -253,7 +249,7 @@ public class ControlHistory implements Serializable {
         this.message = message;
     }
 
-    public void setResource(Resource resource) {
+    public void setResource(Integer resource) {
         this.resource = resource;
     }
 

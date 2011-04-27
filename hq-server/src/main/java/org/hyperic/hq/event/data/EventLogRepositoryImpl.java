@@ -10,7 +10,6 @@ import javax.persistence.Query;
 import org.hyperic.hibernate.DialectAccessor;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.events.server.session.EventLog;
-import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.Number;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +47,7 @@ public class EventLogRepositoryImpl implements EventLogRepositoryCustom {
         return rowsDeleted;
     }
 
-    private String getLogsExistSQL(Resource resource, long begin, long end, int intervals) {
+    private String getLogsExistSQL(Integer resource, long begin, long end, int intervals) {
         HQDialect dialect = dialectAccessor.getHQDialect();
         StringBuilder sql = new StringBuilder();
         // String resVar = wherePermCheck.getResourceVar();
@@ -103,7 +102,7 @@ public class EventLogRepositoryImpl implements EventLogRepositoryCustom {
     }
 
     @SuppressWarnings("unchecked")
-    public boolean[] logsExistPerInterval(Resource resource, long begin, long end, int intervals) {
+    public boolean[] logsExistPerInterval(Integer resource, long begin, long end, int intervals) {
         long interval = (end - begin) / intervals;
         // TODO EventLogManager indicates that descendents will be taken into
         // consideration, but below passing of false only uses distance of 0
@@ -113,7 +112,7 @@ public class EventLogRepositoryImpl implements EventLogRepositoryCustom {
         // permissionManager.makePermCheckSql("rez", false);
         String sql = getLogsExistSQL(resource, begin, end, intervals);
         List<Number> results = entityManager.createNativeQuery(sql, Number.class)
-            .setParameter("resourceId", resource.getId().intValue()).setParameter("begin", begin)
+            .setParameter("resourceId", resource).setParameter("begin", begin)
             .setParameter("interval", interval).getResultList();
         // TODO impl permission checking in EE
         // List result = wherePermCheck.addQueryParameters(q, subject, resource,

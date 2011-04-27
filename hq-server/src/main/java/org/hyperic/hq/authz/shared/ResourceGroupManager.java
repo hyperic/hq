@@ -204,6 +204,12 @@ public interface ResourceGroupManager
     
     Collection<ResourceGroup> getGroups(Resource r);
     
+    PageList<ResourceGroup> getResourceGroupsById(AuthzSubject whoami, Integer[] ids,
+        PageControl pc) throws PermissionException;
+    
     PageList<Resource> getCompatibleGroupsContainingType(int resourceTypeId, PageControl pageControl);
+    
+    Collection<ResourceGroup> getCompatibleResourceGroups(AuthzSubject subject,
+        int resourceTypeId);
  
 }

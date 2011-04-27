@@ -5,20 +5,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.GenericGenerator;
 import org.hyperic.hq.inventory.InvalidRelationshipException;
 import org.hyperic.hq.inventory.NotUniqueException;
 import org.hyperic.hq.inventory.events.CPropChangeEvent;
@@ -31,13 +19,14 @@ import org.neo4j.graphdb.StopEvaluator;
 import org.neo4j.graphdb.TraversalPosition;
 import org.neo4j.graphdb.Traverser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.annotation.Indexed;
+import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.data.graph.annotation.GraphProperty;
 import org.springframework.data.graph.annotation.NodeEntity;
 import org.springframework.data.graph.annotation.RelatedTo;
 import org.springframework.data.graph.core.Direction;
+import org.springframework.data.graph.neo4j.annotation.Indexed;
 import org.springframework.data.graph.neo4j.support.GraphDatabaseContext;
-import org.springframework.data.graph.neo4j.support.SubReferenceNodeTypeStrategy;
+import org.springframework.data.graph.neo4j.support.typerepresentation.SubReferenceNodeTypeRepresentationStrategy;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -46,55 +35,47 @@ import org.springframework.transaction.annotation.Transactional;
  * @author dcrutchfield
  * 
  */
-@Entity
-@NodeEntity(partial = true)
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+
+@NodeEntity
+@Configurable
 public class Resource {
 
     @RelatedTo(type = RelationshipTypes.HAS_CONFIG, direction = Direction.OUTGOING, elementClass = Config.class)
-    @Transient
     private Set<Config> configs;
 
     @GraphProperty
-    @Transient
     private String description;
-
-    @PersistenceContext
-    private transient EntityManager entityManager;
 
     @Autowired
     private transient GraphDatabaseContext graphDatabaseContext;
 
-    @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")
-    @GeneratedValue(generator = "mygen1")
-    @Column(name = "id")
+    // TODO unique ID string instead of number
+    @GraphProperty
     private Integer id;
 
     @GraphProperty
-    @Transient
     private String location;
 
     @Autowired
     private transient MessagePublisher messagePublisher;
 
     @GraphProperty
-    @Transient
     private String modifiedBy;
-    
+
     @NotNull
     @Indexed
     @GraphProperty
-    @Transient
     private String name;
 
     @GraphProperty
-    @Transient
     @Indexed
     private String owner;
 
-    @Transient
+    @NotNull
+    @Indexed
+    @GraphProperty
+    private String sortName;
+
     @RelatedTo(type = RelationshipTypes.IS_A, direction = Direction.OUTGOING, elementClass = ResourceType.class)
     private ResourceType type;
 
@@ -107,7 +88,7 @@ public class Resource {
      * @param type The resource type
      */
     public Resource(String name, ResourceType type) {
-        this.name = name;
+        setName(name);
         this.type = type;
     }
 
@@ -116,7 +97,7 @@ public class Resource {
      * @param config The config, whose ConfigType should be one supported by
      *        this Resource's ResourceType
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void addConfig(Config config) {
         // TODO can't do this in a detached env b/c relationship doesn't take
         // unless both items are node-backed
@@ -134,9 +115,11 @@ public class Resource {
         Set<ResourceRelationship> relations = new HashSet<ResourceRelationship>();
         for (org.neo4j.graphdb.Relationship relationship : relationships) {
             // Don't include Neo4J relationship b/w Node and its Java type
-            if (!relationship.isType(SubReferenceNodeTypeStrategy.INSTANCE_OF_RELATIONSHIP_TYPE)) {
+            if (!relationship
+                .isType(SubReferenceNodeTypeRepresentationStrategy.INSTANCE_OF_RELATIONSHIP_TYPE)) {
                 Node node = relationship.getOtherNode(getPersistentState());
-                Class<?> otherEndType = graphDatabaseContext.getJavaType(node);
+                Class<?> otherEndType = graphDatabaseContext.getNodeTypeRepresentationStrategy()
+                    .getJavaType(node);
                 if (Resource.class.isAssignableFrom(otherEndType)) {
                     if (entity == null || node.equals(entity.getPersistentState())) {
                         relations.add(graphDatabaseContext.createEntityFromState(relationship,
@@ -199,7 +182,7 @@ public class Resource {
             DynamicRelationshipType.withName(RelationshipTypes.CONTAINS),
             Direction.OUTGOING.toNeo4jDir());
         for (Node related : relationTraverser) {
-            children.add((Integer) related.getProperty("foreignId"));
+            children.add((Integer) related.getProperty("id"));
         }
         return children;
     }
@@ -232,12 +215,8 @@ public class Resource {
         return description;
     }
 
-    /**
-     * 
-     * @return The Resource Id
-     */
     public Integer getId() {
-        return this.id;
+        return id;
     }
 
     /**
@@ -296,11 +275,13 @@ public class Resource {
                     continue;
                 }
             }
-            try {
+            // filter out the properties we've defined at class-level
+            // Not checking against PropertyType for performance optimization
+            if (!(key.equals("location")) && !(key.equals("name")) &&
+                !(key.equals("description")) && !(key.equals("modifiedBy")) &&
+                !(key.equals("owner")) && !(key.equals("id")) && !(key.equals("privateGroup")) &&
+                !(key.equals("sortName")) && !(key.equals("__type__"))) {
                 properties.put(key, getProperty(key));
-            } catch (IllegalArgumentException e) {
-                // filter out the properties we've defined at class-level, like
-                // name
             }
         }
         return properties;
@@ -309,21 +290,13 @@ public class Resource {
     /**
      * 
      * @param key The property key
-     * @return The property value
-     * @throws IllegalArgumentException If the property is not defined on the
-     *         {@link ResourceType}
+     * @return The property value or null if value not found
      */
     public Object getProperty(String key) {
-        PropertyType propertyType = type.getPropertyType(key);
-        if (propertyType == null) {
-            throw new IllegalArgumentException("Property " + key +
-                                               " is not defined for resource of type " +
-                                               type.getName());
-        }
         try {
             return getPersistentState().getProperty(key);
         } catch (NotFoundException e) {
-            return propertyType.getDefaultValue();
+            return null;
         }
     }
 
@@ -338,7 +311,7 @@ public class Resource {
             DynamicRelationshipType.withName(relationName), direction.toNeo4jDir());
         for (Node related : relationTraverser) {
             Resource resource = graphDatabaseContext.createEntityFromState(related, Resource.class);
-            resource.getId();
+            resource.persist();
             resources.add(resource);
         }
         return resources;
@@ -463,6 +436,10 @@ public class Resource {
         return resources.iterator().next();
     }
 
+    public String getSortName() {
+        return sortName;
+    }
+
     /**
      * 
      * @return The Resource type
@@ -518,7 +495,7 @@ public class Resource {
      * @param relationName The name of the relationship
      * @return The created relationship
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public ResourceRelationship relateTo(Resource resource, String relationName) {
         if (!(RelationshipTypes.CONTAINS.equals(relationName)) &&
             !type.isRelatedTo(resource.getType(), relationName)) {
@@ -532,16 +509,10 @@ public class Resource {
      * Remove this resource, including all related Config and properties and
      * relationships
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void remove() {
         removeConfig();
         graphDatabaseContext.removeNodeEntity(this);
-        if (this.entityManager.contains(this)) {
-            this.entityManager.remove(this);
-        } else {
-            Resource attached = this.entityManager.find(this.getClass(), this.id);
-            this.entityManager.remove(attached);
-        }
     }
 
     private void removeConfig() {
@@ -557,7 +528,7 @@ public class Resource {
     /**
      * Remove all properties of this Resource
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void removeProperties() {
         for (String key : getPersistentState().getPropertyKeys()) {
             getPersistentState().removeProperty(key);
@@ -567,7 +538,7 @@ public class Resource {
     /**
      * Remove all relationships this Resource is involved in
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void removeRelationships() {
         for (org.neo4j.graphdb.Relationship relationship : getPersistentState().getRelationships()) {
             relationship.delete();
@@ -579,7 +550,7 @@ public class Resource {
      * @param resource The resource related to
      * @param relationName The name of the relationship
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void removeRelationships(Resource resource, String relationName) {
         removeRelationships(resource, relationName, Direction.BOTH);
     }
@@ -590,7 +561,7 @@ public class Resource {
      * @param name The name of the relationship
      * @param direction The {@link Direction} of the relationship to remove
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void removeRelationships(Resource entity, String name, Direction direction) {
         for (ResourceRelationship relation : getRelationships(entity, name, direction)) {
             relation.getPersistentState().delete();
@@ -601,7 +572,7 @@ public class Resource {
      * Remove specific relationships
      * @param relationName The name of the relationship
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void removeRelationships(String relationName) {
         for (org.neo4j.graphdb.Relationship relationship : getPersistentState().getRelationships(
             DynamicRelationshipType.withName(relationName), Direction.BOTH.toNeo4jDir())) {
@@ -613,14 +584,11 @@ public class Resource {
      * 
      * @param description The Resource description
      */
+    @Transactional("neoTxManager")
     public void setDescription(String description) {
         this.description = description;
     }
 
-    /**
-     * 
-     * @param id The ID of the Resource
-     */
     public void setId(Integer id) {
         this.id = id;
     }
@@ -629,6 +597,7 @@ public class Resource {
      * 
      * @param location The Resource location
      */
+    @Transactional("neoTxManager")
     public void setLocation(String location) {
         this.location = location;
     }
@@ -637,6 +606,7 @@ public class Resource {
      * 
      * @param modifiedBy The user that last modified the Resource
      */
+    @Transactional("neoTxManager")
     public void setModifiedBy(String modifiedBy) {
         this.modifiedBy = modifiedBy;
     }
@@ -645,15 +615,21 @@ public class Resource {
      * 
      * @param name The name of the Resource
      */
+    @Transactional("neoTxManager")
     public void setName(String name) {
         this.name = name;
+        if (this.sortName == null) {
+            // Strip out all special chars b/c Lucene can't sort tokenized
+            // Strings
+            this.sortName = name.toUpperCase().replaceAll("\\W", "");
+        }
     }
-    
-    
+
     /**
      * 
      * @param owner The owner of the Resource
      */
+    @Transactional("neoTxManager")
     public void setOwner(String owner) {
         this.owner = owner;
     }
@@ -663,27 +639,10 @@ public class Resource {
      * @param key The property name
      * @param value The property value
      * @return The previous property value
-     * @throws IllegalArgumentException If the property is not defined for the
-     *         {@link ResourceType}
      */
-    @Transactional
-    public Object setProperty(String key, Object value) {
-        if (value == null) {
-            // You can't set null property values in Neo4j, so we won't know if
-            // a missing property means explicit set to null or to return
-            // default value
-            throw new IllegalArgumentException("Null property values are not allowed");
-        }
-        PropertyType propertyType = type.getPropertyType(key);
-        if (propertyType == null) {
-            throw new IllegalArgumentException("Property " + key +
-                                               " is not defined for resource of type " +
-                                               type.getName());
-        }
-        if (propertyType.getPropertyValidator() != null) {
-            // TODO validation
-            // propertyType.getPropertyValidator().validate()
-        }
+    @Transactional("neoTxManager")
+    public Object setProperty(String key, Object value, boolean index) {
+        // TODO validation
         Object oldValue = null;
         try {
             oldValue = getPersistentState().getProperty(key);
@@ -691,14 +650,23 @@ public class Resource {
             // could be first time
         }
         getPersistentState().setProperty(key, value);
-        if (propertyType.isIndexed()) {
-           
-            graphDatabaseContext.getIndex(Resource.class,null).add(
-                getPersistentState(), key, value);
+        if (index) {
+            graphDatabaseContext.getIndex(Resource.class, null).add(getPersistentState(), key,
+                value);
         }
         CPropChangeEvent event = new CPropChangeEvent(getId(), key, oldValue, value);
         messagePublisher.publishMessage(MessagePublisher.EVENTS_TOPIC, event);
         return oldValue;
+    }
+    
+    @Transactional("neoTxManager")
+    public Object setProperty(String key, Object value) {
+        return setProperty(key,value,false);
+    }
+
+    @Transactional("neoTxManager")
+    public void setSortName(String sortName) {
+        this.sortName = sortName;
     }
 
     public String toString() {

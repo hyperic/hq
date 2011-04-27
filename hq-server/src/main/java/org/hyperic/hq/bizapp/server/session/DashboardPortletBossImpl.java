@@ -39,10 +39,10 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
@@ -113,6 +113,8 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
     private AlertPermissionManager alertPermissionManager;
     
     private GalertLogRepository galertLogRepository;
+    
+    private AppdefConverter appdefConverter;
 
     @Autowired
     public DashboardPortletBossImpl(PermissionManager permissionManager, ResourceManager resourceManager,
@@ -120,7 +122,8 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
                                     MeasurementBoss measurementBoss, ResourceGroupManager resourceGroupManager,
                                     GalertManager galertManager, AlertManager alertManager,
                                     AlertDefinitionManager alertDefinitionManager, EscalationManager escalationManager, 
-                                    AlertPermissionManager alertPermissionManager, GalertLogRepository galertLogRepository) {
+                                    AlertPermissionManager alertPermissionManager, GalertLogRepository galertLogRepository,
+                                    AppdefConverter appdefConverter) {
         this.permissionManager = permissionManager;
         this.resourceManager = resourceManager;
         this.measurementManager = measurementManager;
@@ -133,6 +136,7 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
         this.escalationManager = escalationManager;
         this.alertPermissionManager = alertPermissionManager;
         this.galertLogRepository = galertLogRepository;
+        this.appdefConverter = appdefConverter;
     }
     
     @Transactional(readOnly=true)
@@ -149,7 +153,7 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
             return result;
         }
         
-        AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(res);
+        AppdefEntityID aeid = appdefConverter.newAppdefEntityId(res);
         
         try {
         	chartData.put("resourceName", res.getName());
@@ -251,7 +255,7 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
             for (GalertLog galert : galerts) {
 
                 try {
-                    alertPermissionManager.canViewAlertDefinition(subj, AppdefUtil.newAppdefEntityId(galert.getAlertDef().getResource()));
+                    alertPermissionManager.canViewAlertDefinition(subj, appdefConverter.newAppdefEntityId(galert.getAlertDef().getResource()));
                 } catch (PermissionException pe) {
                     // continue to next group alert
                     continue;
@@ -328,7 +332,7 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
                 List<AlertDefinitionValue> alertDefs = null;
                 for (Resource r : resources) {
 
-                    AppdefEntityID aId = AppdefUtil.newAppdefEntityId(r);
+                    AppdefEntityID aId = appdefConverter.newAppdefEntityId(r);
 
                     try {
                         permissionManager.checkViewPermission(subj, aId);
@@ -336,7 +340,7 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
                         // go to next resource
                         continue;
                     }
-                    alertDefs = alertDefinitionManager.findAlertDefinitions(subj, AppdefUtil.newAppdefEntityId(r), pc);
+                    alertDefs = alertDefinitionManager.findAlertDefinitions(subj, appdefConverter.newAppdefEntityId(r), pc);
                     if (alertDefs.size() > 0) {
                         return ALERT_OK;
                     }

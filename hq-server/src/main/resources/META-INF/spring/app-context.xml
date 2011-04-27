@@ -26,6 +26,18 @@
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
+	<context:spring-configured />
+
+	<tx:annotation-driven mode="aspectj"/>
+
+	<bean id="performanceMonitorAspect" class="org.hyperic.hq.monitor.aop.aspects.PerformanceMonitor"
+		factory-method="aspectOf">
+		<description>Monitors duration of execution on transactional methods
+			in the service layer.</description>
+		<property name="maximumDuration" value="${hq.methodWarn.time}" />
+		<property name="warningMessage" value="Method exceeded acceptable duration: " />
+	</bean>
+	
 	<bean id="jasyptConfiguration"
 		class="org.jasypt.encryption.pbe.config.EnvironmentStringPBEConfig">
 		<property name="algorithm" value="PBEWithMD5AndDES" />
@@ -67,16 +79,6 @@
 				<prop key="ha.node.cacheProvider.port">45568</prop>
 				<prop key="ha.node.ipTTL">64</prop>
 			</props>
-		</property>
-	</bean>
-
-	<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter"
-		lazy-init="false">
-		<property name="beans">
-			<map>
-				<entry key="hyperic.jmx:type=DataSource,name=tomcat.jdbc"
-					value-ref="tomcatDataSource" />
-			</map>
 		</property>
 	</bean>
 
@@ -166,5 +168,20 @@
 	<bean class="org.hyperic.hq.common.Log4jWatcher">
 		<constructor-arg value="/log4j.xml" />
 	</bean>
+	
+	<bean id="sessionFactory"
+		class="org.hyperic.hibernate.CacheInitializingLocalSessionFactoryBean">
+		<constructor-arg ref="preloadCaches" />
+	</bean>
+	
+	<util:list id="preloadCaches">
+		<value>org.hyperic.hq.agent.mgmt.domain.AgentType</value>
+		<value>org.hyperic.hq.agent.mgmt.domain.Agent</value>
+		<value>org.hyperic.hq.agent.mgmt.domain.ManagedResource</value>
+		<value>org.hyperic.hq.measurement.server.session.Category</value>
+		<value>org.hyperic.hq.measurement.server.session.MonitorableType
+		</value>
+		<value>org.hyperic.hq.plugin.mgmt.domain.Plugin</value>
+	</util:list>
 
 </beans>

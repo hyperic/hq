@@ -3,7 +3,7 @@ package org.hyperic.hq.appdef.server.session;
 import org.hyperic.hq.inventory.domain.RelationshipTypes;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
-import org.hyperic.hq.plugin.mgmt.data.PluginRepository;
+import org.hyperic.hq.plugin.mgmt.data.PluginResourceTypeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,21 +20,19 @@ public class ServerFactory {
 
     static final String SERVICES_AUTO_MANAGED = "servicesAutoManaged";
 
-    static final String AUTODISCOVERY_ZOMBIE = "autodiscoveryZombie";
-
     static final String AUTO_INVENTORY_IDENTIFIER = "autoInventoryIdentifier";
 
     static final String INSTALL_PATH = "installPath";
     
     private PlatformFactory platformFactory;
     
-    private PluginRepository pluginRepository;
+    private PluginResourceTypeRepository pluginResourceTypeRepository;
     
     
     @Autowired
-    public ServerFactory(PlatformFactory platformFactory, PluginRepository pluginRepository) {
+    public ServerFactory(PlatformFactory platformFactory, PluginResourceTypeRepository pluginResourceTypeRepository) {
         this.platformFactory = platformFactory;
-        this.pluginRepository = pluginRepository;
+        this.pluginResourceTypeRepository = pluginResourceTypeRepository;
     }
   
     public Server createServer(Resource serverResource) {
@@ -52,8 +50,7 @@ public class ServerFactory {
         server.setServerType(createServerType(serverResource.getType()));
         server.setServicesAutomanaged((Boolean)serverResource.getProperty(SERVICES_AUTO_MANAGED));
         server.setWasAutodiscovered((Boolean)serverResource.getProperty(WAS_AUTODISCOVERED));
-        server.setAutodiscoveryZombie((Boolean)serverResource.getProperty(AUTODISCOVERY_ZOMBIE));
-        server.setSortName((String) serverResource.getProperty(AppdefResource.SORT_NAME));
+        server.setSortName(serverResource.getSortName());
         server.setOwnerName(serverResource.getOwner());
         Resource platform = serverResource.getResourceTo(RelationshipTypes.SERVER);
         if(platform != null) {
@@ -72,7 +69,7 @@ public class ServerFactory {
         serverType.setDescription(serverResType.getDescription());
         serverType.setId(serverResType.getId());
         serverType.setName(serverResType.getName());
-        serverType.setPlugin(pluginRepository.findByResourceType(serverResType).getName());
+        serverType.setPlugin(pluginResourceTypeRepository.findNameByResourceType(serverResType.getId()));
         //TODO for types, we just fake out sort name for now.  Can't do setProperty on ResourceType
         serverType.setSortName(serverResType.getName().toUpperCase());
         if(!(serverResType.getResourceTypesTo(RelationshipTypes.VIRTUAL).isEmpty())) {

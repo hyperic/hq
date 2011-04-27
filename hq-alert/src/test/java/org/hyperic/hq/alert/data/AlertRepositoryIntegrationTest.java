@@ -6,7 +6,9 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -20,8 +22,6 @@ import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertInfo;
 import org.hyperic.hq.events.server.session.ClassicEscalatable;
 import org.hyperic.hq.events.server.session.ResourceAlertDefinition;
-import org.hyperic.hq.inventory.domain.Resource;
-import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,13 +52,10 @@ public class AlertRepositoryIntegrationTest {
     @PersistenceContext
     private EntityManager entityManager;
 
-    private Resource resource2;
+    private Integer resource2 = 56934;
 
     @Before
     public void setUp() {
-        resource2 = new Resource();
-        resource2.setName("Resource 2");
-        entityManager.persist(resource2);
         alertdef2 = new ResourceAlertDefinition();
         alertdef2.setName("High Heap");
         alertdef2.setResource(resource2);
@@ -90,9 +87,7 @@ public class AlertRepositoryIntegrationTest {
         long timestamp = System.currentTimeMillis();
         alert.setCtime(timestamp);
         alert2.setCtime(timestamp - 5000);
-        Resource resource1 = new Resource();
-        resource1.setName("Resource 1");
-        entityManager.persist(resource1);
+        int resource1 = 555;
         ResourceAlertDefinition alertdef = new ResourceAlertDefinition();
         alertdef.setName("High CPU");
         alertdef.setResource(resource1);
@@ -121,16 +116,10 @@ public class AlertRepositoryIntegrationTest {
 
     @Test
     public void testCountByCreateTimeAndPriorityGroup() {
-        ResourceGroup group = new ResourceGroup();
-        group.setName("Group 1");
-        group.addMember(resource2);
-        entityManager.persist(group);
         long timestamp = System.currentTimeMillis();
         alert.setCtime(timestamp);
         alert2.setCtime(timestamp - 5000);
-        Resource resource1 = new Resource();
-        resource1.setName("Resource 1");
-        entityManager.persist(resource1);
+        int resource1 = 555;
         ResourceAlertDefinition alertdef = new ResourceAlertDefinition();
         alertdef.setName("High CPU");
         alertdef.setResource(resource1);
@@ -140,7 +129,27 @@ public class AlertRepositoryIntegrationTest {
         alert3.setCtime(timestamp + 2000);
         alertRepository.save(alert3);
         assertEquals(2l, alertRepository.countByCreateTimeAndPriority(timestamp - 6000,
-            timestamp + 3000, 3, false, false, group.getId(), null));
+            timestamp + 3000, 3, false, false,
+            new HashSet<Integer>(Collections.singletonList(resource2)), null));
+    }
+    
+    @Test
+    public void testCountByCreateTimeAndPriorityGroupNoMembers() {
+        long timestamp = System.currentTimeMillis();
+        alert.setCtime(timestamp);
+        alert2.setCtime(timestamp - 5000);
+        int resource1 = 555;
+        ResourceAlertDefinition alertdef = new ResourceAlertDefinition();
+        alertdef.setName("High CPU");
+        alertdef.setResource(resource1);
+        entityManager.persist(alertdef);
+        Alert alert3 = new Alert();
+        alert3.setAlertDefinition(alertdef);
+        alert3.setCtime(timestamp + 2000);
+        alertRepository.save(alert3);
+        assertEquals(0l, alertRepository.countByCreateTimeAndPriority(timestamp - 6000,
+            timestamp + 3000, 3, false, false,
+            new HashSet<Integer>(0), null));
     }
 
     @Test
@@ -164,9 +173,7 @@ public class AlertRepositoryIntegrationTest {
 
     @Test
     public void testCountByResource() {
-        Resource resource1 = new Resource();
-        resource1.setName("Resource 1");
-        entityManager.persist(resource1);
+        int resource1 = 555;
         ResourceAlertDefinition alertdef = new ResourceAlertDefinition();
         alertdef.setName("High CPU");
         alertdef.setResource(resource1);
@@ -179,9 +186,7 @@ public class AlertRepositoryIntegrationTest {
 
     @Test
     public void testDeleteByAlertDefinition() {
-        Resource resource1 = new Resource();
-        resource1.setName("Resource 1");
-        entityManager.persist(resource1);
+        int resource1 = 555;
         ResourceAlertDefinition alertdef = new ResourceAlertDefinition();
         alertdef.setName("High CPU");
         alertdef.setResource(resource1);
@@ -248,9 +253,7 @@ public class AlertRepositoryIntegrationTest {
         long timestamp = System.currentTimeMillis();
         alert.setCtime(timestamp);
         alert2.setCtime(timestamp - 5000);
-        Resource resource1 = new Resource();
-        resource1.setName("Resource 1");
-        entityManager.persist(resource1);
+        int resource1 = 555;
         ResourceAlertDefinition alertdef = new ResourceAlertDefinition();
         alertdef.setName("High CPU");
         alertdef.setResource(resource1);
@@ -306,16 +309,10 @@ public class AlertRepositoryIntegrationTest {
 
     @Test
     public void testFindByCreateTimeAndPriorityGroup() {
-        ResourceGroup group = new ResourceGroup();
-        group.setName("Group 1");
-        group.addMember(resource2);
-        entityManager.persist(group);
         long timestamp = System.currentTimeMillis();
         alert.setCtime(timestamp);
         alert2.setCtime(timestamp - 5000);
-        Resource resource1 = new Resource();
-        resource1.setName("Resource 1");
-        entityManager.persist(resource1);
+        int resource1 = 555;
         ResourceAlertDefinition alertdef = new ResourceAlertDefinition();
         alertdef.setName("High CPU");
         alertdef.setResource(resource1);
@@ -330,7 +327,30 @@ public class AlertRepositoryIntegrationTest {
         expected.add(alert);
         assertEquals(new PageImpl<Alert>(expected, request, 2l),
             alertRepository.findByCreateTimeAndPriority(timestamp - 6000, timestamp + 3000, 3,
-                false, false, group.getId(), null, request));
+                false, false, new HashSet<Integer>(Collections.singletonList(resource2)), null,
+                request));
+    }
+    
+    @Test
+    public void testFindByCreateTimeAndPriorityGroupNoMembers() {
+        long timestamp = System.currentTimeMillis();
+        alert.setCtime(timestamp);
+        alert2.setCtime(timestamp - 5000);
+        int resource1 = 555;
+        ResourceAlertDefinition alertdef = new ResourceAlertDefinition();
+        alertdef.setName("High CPU");
+        alertdef.setResource(resource1);
+        entityManager.persist(alertdef);
+        Alert alert3 = new Alert();
+        alert3.setAlertDefinition(alertdef);
+        alert3.setCtime(timestamp + 2000);
+        alertRepository.save(alert3);
+        PageRequest request = new PageRequest(0, 5, new Sort("ctime"));
+        List<Alert> expected = new ArrayList<Alert>();
+        assertEquals(new PageImpl<Alert>(expected, request, 0l),
+            alertRepository.findByCreateTimeAndPriority(timestamp - 6000, timestamp + 3000, 3,
+                false, false, new HashSet<Integer>(0), null,
+                request));
     }
 
     @Test
@@ -361,9 +381,7 @@ public class AlertRepositoryIntegrationTest {
         long timestamp = System.currentTimeMillis();
         alert.setCtime(timestamp);
         alert2.setCtime(timestamp - 5000);
-        Resource resource1 = new Resource();
-        resource1.setName("Resource 1");
-        entityManager.persist(resource1);
+        int resource1 = 555;
         ResourceAlertDefinition alertdef = new ResourceAlertDefinition();
         alertdef.setName("High CPU");
         alertdef.setResource(resource1);
@@ -392,9 +410,7 @@ public class AlertRepositoryIntegrationTest {
         long timestamp = System.currentTimeMillis();
         alert.setCtime(timestamp);
         alert2.setCtime(timestamp - 5000);
-        Resource resource1 = new Resource();
-        resource1.setName("Resource 1");
-        entityManager.persist(resource1);
+        int resource1 = 555;
         ResourceAlertDefinition alertdef = new ResourceAlertDefinition();
         alertdef.setName("High CPU");
         alertdef.setResource(resource1);
@@ -434,6 +450,37 @@ public class AlertRepositoryIntegrationTest {
         alert2.setFixed(true);
         assertEquals(alert2, alertRepository.findLastByDefinition(alertdef2, true));
     }
+    
+    @Test
+    public void testFindByFixedOrderByCtimeAsco() {
+        long timestamp = System.currentTimeMillis();
+        alert.setCtime(timestamp);
+        alert2.setCtime(timestamp - 5000);
+        Alert alert3 = new Alert();
+        alert3.setAlertDefinition(alertdef2);
+        alert3.setCtime(timestamp - 10000);
+        alert3.setFixed(true);
+        List<Alert> expected = new ArrayList<Alert>();
+        expected.add(alert2);
+        expected.add(alert);
+        assertEquals(expected,alertRepository.findByFixedOrderByCtimeAsc(false));
+    }
+    
+    @Test
+    public void testFindByResourcesAndFixedOrderByCtimeAsc() {
+        long timestamp = System.currentTimeMillis();
+        alert.setCtime(timestamp);
+        alert2.setCtime(timestamp - 5000);
+        Alert alert3 = new Alert();
+        alert3.setAlertDefinition(alertdef2);
+        alert3.setCtime(timestamp - 10000);
+        alert3.setFixed(true);
+        List<Alert> expected = new ArrayList<Alert>();
+        expected.add(alert2);
+        expected.add(alert);
+        assertEquals(expected,alertRepository.findByResourcesAndFixedOrderByCtimeAsc(Collections.singletonList(resource2),false));
+    }
+
 
     @Test
     public void testGetOldestUnfixedAlertTime() {
@@ -447,12 +494,12 @@ public class AlertRepositoryIntegrationTest {
         alertRepository.save(alert3);
         assertEquals(timestamp - 5000, alertRepository.getOldestUnfixedAlertTime());
     }
-    
+
     @Test
     public void testGetOldestUnfixedAlertTimeNoAlerts() {
         alertRepository.delete(alert);
         alertRepository.delete(alert2);
-        assertEquals(0l,alertRepository.getOldestUnfixedAlertTime());
+        assertEquals(0l, alertRepository.getOldestUnfixedAlertTime());
     }
 
     @Test

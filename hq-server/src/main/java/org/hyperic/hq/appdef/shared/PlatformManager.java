@@ -42,6 +42,7 @@ import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.plugin.mgmt.domain.Plugin;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -57,7 +58,7 @@ public interface PlatformManager {
      * @return
      * @throws NotFoundException
      */
-    PlatformType createPlatformType(String name, String plugin) throws NotFoundException;
+    PlatformType createPlatformType(String name, Plugin plugin) throws NotFoundException;
 
     /**
      * Find a PlatformType by id
@@ -191,6 +192,8 @@ public interface PlatformManager {
      */
     public Collection<Integer> getPlatformPksByAgentToken(AuthzSubject subject, String agentToken)
         throws PlatformNotFoundException;
+    
+    Set<Platform> getPlatformsByAgent(Agent agent);
 
     /**
      * Get the platform that hosts the server that provides the specified
@@ -265,7 +268,7 @@ public interface PlatformManager {
     /**
      * Update platform types
      */
-    public void updatePlatformTypes(String plugin, org.hyperic.hq.product.PlatformTypeInfo[] infos)
+    public void updatePlatformTypes(Plugin plugin, org.hyperic.hq.product.PlatformTypeInfo[] infos)
         throws VetoException, NotFoundException;
 
     /**

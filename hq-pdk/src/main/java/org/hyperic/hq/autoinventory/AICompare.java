@@ -129,7 +129,6 @@ public class AICompare {
                 if (configsEqual(s1.getProductConfig(),      s2.getProductConfig()) &&
                     configsEqual(s1.getControlConfig(),      s2.getControlConfig()) &&
                     configsEqual(s1.getMeasurementConfig(),  s2.getMeasurementConfig()) &&
-                    configsEqual(s1.getResponseTimeConfig(), s2.getResponseTimeConfig()) &&
                     configsEqual(s1.getCustomProperties(),   s2.getCustomProperties()) &&
                     compare(s1.getName(), s2.getName()) &&
                     compare(s1.getServerTypeName(),s2.getServerTypeName()) &&
@@ -195,7 +194,6 @@ public class AICompare {
                     configsEqual(s1.getProductConfig(),      s2.getProductConfig()) &&
                     configsEqual(s1.getControlConfig(),      s2.getControlConfig()) &&
                     configsEqual(s1.getMeasurementConfig(),  s2.getMeasurementConfig()) &&
-                    configsEqual(s1.getResponseTimeConfig(), s2.getResponseTimeConfig()) &&
                     configsEqual(s1.getCustomProperties(),   s2.getCustomProperties()) &&
                     compare(s1.getName(),                    s2.getName()) &&
                     compare(s1.getDescription(),             s2.getDescription())) {
@@ -324,7 +322,16 @@ public class AICompare {
 
     public static boolean configsEqual(byte[] c1, byte[] c2) {
         if ((c1 == null) != (c2 == null)) {
-            return false;
+            try {
+                if(c1 == null && ConfigResponse.decode(c2).size() == 0) {
+                    return true;
+                }
+                if(c2 == null && ConfigResponse.decode(c1).size() == 0) {
+                    return true;
+                }
+            } catch (EncodingException e) {
+                throw new SystemException(e.getMessage());
+            }
         }
         if (c1 == c2 || Arrays.equals(c1, c2)) {
             return true;

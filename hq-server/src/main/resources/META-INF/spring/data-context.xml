@@ -34,47 +34,55 @@
 		p:initialSize="${server.database-minpoolsize}" p:maxWait="${server.database-blockingtimeout}"
 		p:jdbcInterceptors="ConnectionState;StatementFinalizer"
 		p:validationQuery="${server.connection-validation-sql}"
-		p:validationInterval="30000" p:logAbandoned="true" p:testOnBorrow="true" p:defaultTransactionIsolation="2"/>
+		p:validationInterval="30000" p:logAbandoned="true" p:testOnBorrow="true"
+		p:defaultTransactionIsolation="2" />
 
 	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
 		<property name="dataSource" ref="dataSource" />
 	</bean>
 
-	<bean id="persistenceProvider" class="org.hyperic.hibernate.HibernateConfigHolder"/>
-	
-	<bean id="persistenceUnitMgr"
-		class="org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager">
-		<property name="defaultDataSource" ref="dataSource"/>
+	<bean class="org.springframework.orm.jpa.JpaTransactionManager"
+		id="transactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory" />
+		<!--  TODO re-enable SPR-8086 is resolved -->
+		<!-- <property name="defaultTimeout" value="${server.transaction.timeout}"/> -->
 	</bean>
 
-	<bean class="org.springframework.orm.hibernate3.HibernateTemplate">
-		<constructor-arg ref="sessionFactory" />
+	<bean
+		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
+		id="entityManagerFactory" depends-on="neo4jNodeBacking,neo4jRelationshipBacking">
+		<property name="persistenceUnitName" value="persistenceUnit" />
+		<property name="dataSource" ref="dataSource" />
+		<!-- HibernateJpaDialect necessary for RequiresNew txs created by our id 
+			generator, HQMultipleHiLoPerTableGenerator -->
+		<property name="jpaDialect">
+			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaDialect" />
+		</property>
+		<property name="persistenceProvider" ref="persistenceProvider"/>
+		<property name="persistenceUnitManager">
+			<bean
+				class="org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager">
+				<property name="defaultDataSource" ref="dataSource" />
+			</bean>
+		</property>
 	</bean>
 	
+	<bean id="persistenceProvider" class="org.hyperic.hibernate.HibernateConfigHolder" />
+
 	<bean class="org.springframework.orm.jpa.JpaTemplate">
 		<constructor-arg ref="entityManagerFactory" />
 	</bean>
 
-	<bean id="sessionFactory"
-		class="org.hyperic.hibernate.CacheInitializingLocalSessionFactoryBean">
-		<constructor-arg ref="preloadCaches" />
+	<jpa:repositories base-package="org.hyperic.hq.**.data" />
+	
+	<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter"
+		lazy-init="false">
+		<property name="beans">
+			<map>
+				<entry key="hyperic.jmx:type=DataSource,name=tomcat.jdbc"
+					value-ref="tomcatDataSource" />
+			</map>
+		</property>
 	</bean>
 	
-	<jpa:repositories base-package="org.hyperic.hq.**.data"/>
-
-	<util:list id="preloadCaches">
-		<value>org.hyperic.hq.agent.mgmt.domain.AgentType</value>
-		<value>org.hyperic.hq.agent.mgmt.domain.Agent</value>
-		<value>org.hyperic.hq.measurement.server.session.Category</value>
-		<value>org.hyperic.hq.measurement.server.session.MonitorableType</value>
-		<value>org.hyperic.hq.inventory.domain.Resource</value>
-		<value>org.hyperic.hq.inventory.domain.ResourceType</value>
-		<value>org.hyperic.hq.inventory.domain.ResourceGroup</value>
-		<value>org.hyperic.hq.inventory.domain.Config</value>
-		<value>org.hyperic.hq.plugin.mgmt.domain.Plugin</value>
-		<value>org.hyperic.hq.inventory.domain.OperationType</value>
-		<value>org.hyperic.hq.inventory.domain.PropertyType</value>
-		<value>org.hyperic.hq.inventory.domain.ConfigType</value>
-		<value>org.hyperic.hq.inventory.domain.ConfigOptionType</value>
-	</util:list>
 </beans>

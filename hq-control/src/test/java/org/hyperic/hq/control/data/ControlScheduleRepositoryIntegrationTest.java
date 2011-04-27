@@ -5,11 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-
 import org.hyperic.hq.control.server.session.ControlSchedule;
-import org.hyperic.hq.inventory.domain.Resource;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,26 +24,23 @@ public class ControlScheduleRepositoryIntegrationTest {
     @Autowired
     private ControlScheduleRepository controlScheduleRepository;
 
-    @PersistenceContext
-    private EntityManager entityManager;
-
     @Test
     public void testFindByResource() {
-        Resource resource1 = createResource("Resource1");
+        int resource1 = 83723;
+        int resource2 = 898773;
         ControlSchedule schedule1 = createControlSchedule(resource1, "Job1", "Trig1",
             System.currentTimeMillis() + 10000);
-        Resource resource2 = createResource("Resource2");
         createControlSchedule(resource2, "Job2", "Trig2", System.currentTimeMillis() + 10000);
         List<ControlSchedule> expected = new ArrayList<ControlSchedule>();
         expected.add(schedule1);
-        assertEquals(expected, controlScheduleRepository.findByResource(resource1.getId()));
+        assertEquals(expected, controlScheduleRepository.findByResource(resource1));
     }
 
     @Test
     public void testFindByResourceSorted() {
-        Resource resource1 = createResource("Resource1");
+        int resource1 = 83723;
+        int resource2 = 898773;
         createControlSchedule(resource1, "Job1", "Trig1", System.currentTimeMillis() + 10000);
-        Resource resource2 = createResource("Resource2");
         ControlSchedule job2Schedule = createControlSchedule(resource2, "Job2", "Trig2",
             System.currentTimeMillis() + 10000);
         ControlSchedule aJobSchedule = createControlSchedule(resource2, "AJob", "ATrig",
@@ -56,10 +49,10 @@ public class ControlScheduleRepositoryIntegrationTest {
         expected.add(aJobSchedule);
         expected.add(job2Schedule);
         assertEquals(expected,
-            controlScheduleRepository.findByResource(resource2.getId(), new Sort("jobName")));
+            controlScheduleRepository.findByResource(resource2, new Sort("jobName")));
     }
 
-    private ControlSchedule createControlSchedule(Resource resource, String jobName,
+    private ControlSchedule createControlSchedule(Integer resource, String jobName,
                                                   String triggerName, long nextFireTime) {
         ControlSchedule s = new ControlSchedule();
         s.setResource(resource);
@@ -71,13 +64,6 @@ public class ControlScheduleRepositoryIntegrationTest {
         s.setScheduleValueBytes(new byte[0]);
         controlScheduleRepository.save(s);
         return s;
-    }
-
-    private Resource createResource(String name) {
-        Resource resource = new Resource();
-        resource.setName(name);
-        entityManager.persist(resource);
-        return resource;
     }
 
 }

@@ -10,9 +10,9 @@ import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceType;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.control.shared.ControlManager;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.test.BaseInfrastructureTest;
@@ -26,9 +26,14 @@ public class ControlManagerTest
     extends BaseInfrastructureTest {
 
     @Autowired
+    private AppdefConverter appdefConverter;
+    
+    @Autowired
     private ControlManager controlManager;
 
     private Service service;
+    
+    private ServiceType serviceType;
 
     @Before
     public void setUp() throws Exception {
@@ -39,9 +44,9 @@ public class ControlManagerTest
             "TestPlatform1", 2);
         ServerType serverType = serverManager.findServerTypeByName("PluginTestServer 1.0");
         Server server = createServer(platform, serverType, "Server1");
-        ServiceType webModuleStats = serviceManager
+        serviceType = serviceManager
             .findServiceTypeByName("PluginTestServer 1.0 Web Module Stats");
-        service = createService(server.getId(), webModuleStats, "Service1", "", "");
+        service = createService(server.getId(), serviceType, "Service1", "", "");
     }
 
     @Test
@@ -68,7 +73,7 @@ public class ControlManagerTest
         assertEquals(
             expected,
             new HashSet<String>(controlManager.getActions(authzSubjectManager.getOverlordPojo(),
-                AppdefUtil.newAppdefEntityId(group))));
+                appdefConverter.newAppdefEntityId(group))));
 
     }
     
@@ -81,6 +86,6 @@ public class ControlManagerTest
         assertEquals(
             expected,
             new HashSet<String>(controlManager.getActions(authzSubjectManager.getOverlordPojo(),
-               new AppdefEntityTypeID(AppdefEntityConstants.APPDEF_TYPE_SERVICE,service.getId()))));
+               new AppdefEntityTypeID(AppdefEntityConstants.APPDEF_TYPE_SERVICE,serviceType.getId()))));
     }
 }

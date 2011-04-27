@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.events.server.session.ResourceAlertDefinition;
-import org.hyperic.hq.inventory.domain.Resource;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,9 +16,9 @@ public interface ResourceAlertDefinitionRepository extends
 
     List<ResourceAlertDefinition> findByEscalation(Escalation escalation);
 
-    List<ResourceAlertDefinition> findByResource(Resource resource, Sort sort);
+    List<ResourceAlertDefinition> findByResource(Integer resource, Sort sort);
 
-    ResourceAlertDefinition findByResourceAndResourceTypeAlertDefinition(Resource resource,
+    ResourceAlertDefinition findByResourceAndResourceTypeAlertDefinition(Integer resource,
                                                                          Integer typeAlertDefId);
 
     @Transactional(readOnly = true)

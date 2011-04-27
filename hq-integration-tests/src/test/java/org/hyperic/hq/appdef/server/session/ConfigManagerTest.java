@@ -45,13 +45,13 @@ public class ConfigManagerTest
         String agentToken = "agentToken123";
         createAgent("127.0.0.1", 2144, "authToken", agentToken, "4.5");
         flush();
-        platform = createPlatform(agentToken, "PluginTestPlatform", "TestPlatform1",
+        createPlatformType("MyType");
+        platform = createPlatform(agentToken, "MyType", "TestPlatform1",
             "TestPlatform1", 2);
         platformManager.addIp(platform, "10.1.4.5", "255:255:255:0", "181");
-        ServerType serverType = serverManager.findServerTypeByName("PluginTestServer 1.0");
+        ServerType serverType = createServerType("MyServerType", "1.0", new String[] {"MyType"});
         server = createServer(platform, serverType, "Server1");
-        ServiceType serviceType = serviceManager
-            .findServiceTypeByName("PluginTestServer 1.0 Web Module Stats");
+        ServiceType serviceType = createServiceType("MyServiceType",serverType);
         service = createService(server.getId(), serviceType, "Service1", "A svc", "Somewhere");
     }
 

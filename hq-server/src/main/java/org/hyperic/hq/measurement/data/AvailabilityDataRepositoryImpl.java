@@ -14,7 +14,6 @@ import javax.persistence.TypedQuery;
 
 import org.hyperic.hibernate.DialectAccessor;
 import org.hyperic.hibernate.dialect.HQDialect;
-import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.AvailabilityDataRLE;
 import org.hyperic.hq.measurement.server.session.Measurement;
@@ -62,9 +61,15 @@ public class AvailabilityDataRepositoryImpl implements AvailabilityDataCustom {
             // Nothing to do
             return new ArrayList<Object[]>(0);
         }
-        String sql = new StringBuilder().append("SELECT m, min(rle.availVal),")
-            .append(" max(rle.availVal),").append(" avg(rle.availVal),")
-            .append(" (cast(:endtime as long) - cast(:startime as long)) / m.interval, ").append(" sum(")
+        HQDialect dialect = dialectAccessor.getHQDialect();
+        StringBuilder sql = new StringBuilder().append("SELECT m, min(rle.availVal),")
+            .append(" max(rle.availVal),").append(" avg(rle.availVal),");
+        if(dialect.requiresCast()) {
+            sql.append(" (cast(:endtime as long) - cast(:startime as long)) / m.interval, ");
+        }else {
+            sql.append(" (:endtime  - :startime) / m.interval, ");
+        }
+        sql.append(" sum(")
             .append(TOTAL_UPTIME)
             .append("), ")
             .append(" sum(")
@@ -86,14 +91,13 @@ public class AvailabilityDataRepositoryImpl implements AvailabilityDataCustom {
             .append(" rle.endtime").append(" ORDER BY rle.endtime").toString();
 
         final int size = measIds.size();
-        final HQDialect dialect = dialectAccessor.getHQDialect();
         final int batchSize = dialect.getMaxExpressions() < 0 ? Integer.MAX_VALUE : dialect
             .getMaxExpressions();
         final List<Object[]> rtn = new ArrayList<Object[]>(size);
         for (int i = 0; i < size; i += batchSize) {
             final int last = Math.min(i + batchSize, size);
             final List<Integer> sublist = measIds.subList(i, last);
-            rtn.addAll(entityManager.createQuery(sql)
+            rtn.addAll(entityManager.createQuery(sql.toString())
                 .setParameter("startime", start).setParameter("endtime", end)
                 .setParameter("mids", sublist).getResultList());
         }
@@ -222,7 +226,7 @@ public class AvailabilityDataRepositoryImpl implements AvailabilityDataCustom {
             .getResultList();
     }
 
-    public List<AvailabilityDataRLE> getHistoricalAvails(Resource resource, long start, long end) {
+    public List<AvailabilityDataRLE> getHistoricalAvails(Integer resource, long start, long end) {
         String sql = new StringBuilder().append("SELECT rle")
             .append(" FROM AvailabilityDataRLE rle").append(" JOIN rle.measurement m")
             .append(" WHERE m.resource = :resource").append(" AND rle.endtime > :startime")

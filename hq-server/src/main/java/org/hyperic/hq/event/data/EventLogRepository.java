@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.hyperic.hq.events.server.session.EventLog;
-import org.hyperic.hq.inventory.domain.Resource;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -17,7 +16,7 @@ public interface EventLogRepository extends JpaRepository<EventLog, Integer>,
     @Transactional
     @Modifying
     @Query("delete EventLog l where l.resource = :resource")
-    void deleteByResource(@Param("resource") Resource resource);
+    void deleteByResource(@Param("resource") Integer resource);
 
     // TODO this method used to do perm checks
     @Transactional(readOnly = true)
@@ -25,19 +24,19 @@ public interface EventLogRepository extends JpaRepository<EventLog, Integer>,
            + "and :end and l.type in (:eventTypes) order by l.timestamp")
     List<EventLog> findByTimestampBetweenAndResourceAndEventTypesOrderByTimestamp(@Param("begin") long begin,
                                                                                   @Param("end") long end,
-                                                                                  @Param("resource") Resource resource,
+                                                                                  @Param("resource") Integer resource,
                                                                                   @Param("eventTypes") List<String> eventTypes);
 
     // TODO this method used to do perm checks
     List<EventLog> findByTimestampBetweenAndResourceOrderByTimestampAsc(long begin, long end,
-                                                                        Resource resource);
+                                                                        Integer resource);
 
     @Transactional(readOnly = true)
     @Query("select l from EventLog l where l.resource in (:resources) and l.timestamp between :begin and :end "
            + "and l.type in (:eventTypes) order by l.timestamp")
     List<EventLog> findByTimestampBetweenAndResourcesAndEventTypesOrderByTimestamp(@Param("begin") long begin,
                                                                                    @Param("end") long end,
-                                                                                   @Param("resources") Set<Resource> resources,
+                                                                                   @Param("resources") Set<Integer> resources,
                                                                                    @Param("eventTypes") List<String> eventTypes);
 
     @Transactional(readOnly = true)
@@ -45,13 +44,13 @@ public interface EventLogRepository extends JpaRepository<EventLog, Integer>,
            + "order by l.timestamp")
     List<EventLog> findByTimestampBetweenAndResourcesOrderByTimestamp(@Param("begin") long begin,
                                                                       @Param("end") long end,
-                                                                      @Param("resources") Set<Resource> resources);
+                                                                      @Param("resources") Set<Integer> resources);
 
     // TODO this method used to do perm checks
     List<EventLog> findByTimestampBetweenAndStatusAndResourceOrderByTimestampAsc(long begin,
                                                                                  long end,
                                                                                  String status,
-                                                                                 Resource resource);
+                                                                                 Integer resource);
 
     @Transactional(readOnly = true)
     @Query("select e FROM EventLog e WHERE e.timestamp >= :timestamp AND e.type = :type AND e.instanceId is not null")

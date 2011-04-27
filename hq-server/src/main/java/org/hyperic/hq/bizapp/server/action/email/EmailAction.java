@@ -44,8 +44,8 @@ import javax.mail.internet.InternetAddress;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.application.Scheduler;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
@@ -190,7 +190,7 @@ public class EmailAction extends EmailActionConfig
     }
 
     private AppdefEntityID getResource(AlertDefinitionInterface def) {
-        return AppdefUtil.newAppdefEntityId(def.getResource());
+        return Bootstrap.getBean(AppdefConverter.class).newAppdefEntityId(def.getResource());
     }
 
     public String execute(AlertInterface alert, ActionExecutionInfo info)
@@ -216,9 +216,9 @@ public class EmailAction extends EmailActionConfig
             String logStr = "No notifications sent, see server log for details.";
             if (appEnt != null) {
 
-            	Resource resource = alertDef.getResource();
-            	if (resource != null && !resource.isInAsyncDeleteState()) {
-
+            	Integer resourceId = alertDef.getResource();
+            	if (resourceId != null) {
+            	    Resource resource = Bootstrap.getBean(ResourceManager.class).findResourceById(resourceId);
             		String[] body = new String[addrs.size()];
             		String[] htmlBody = new String[addrs.size()];
             		EmailRecipient[] to = (EmailRecipient[])

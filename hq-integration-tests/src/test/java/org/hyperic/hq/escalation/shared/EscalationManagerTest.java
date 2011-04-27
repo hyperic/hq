@@ -64,6 +64,7 @@ import org.hyperic.hq.events.shared.AlertManager;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
+import org.hyperic.hq.messaging.MessagePublisher;
 import org.hyperic.hq.messaging.Messenger;
 import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.junit.Before;
@@ -98,7 +99,7 @@ public class EscalationManagerTest
     private Service testService;
 
     @Autowired
-    private Messenger messenger;
+    private MessagePublisher messenger;
 
     private AlertDefinition testPlatformAlertDef;
 

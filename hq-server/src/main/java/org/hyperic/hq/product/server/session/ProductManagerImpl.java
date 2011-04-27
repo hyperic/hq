@@ -30,6 +30,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -66,7 +67,9 @@ import org.hyperic.hq.pdk.domain.MetricInfo;
 import org.hyperic.hq.pdk.domain.PluginDefinition;
 import org.hyperic.hq.pdk.domain.PluginDefinition.Triple;
 import org.hyperic.hq.plugin.mgmt.data.PluginRepository;
+import org.hyperic.hq.plugin.mgmt.data.PluginResourceTypeRepository;
 import org.hyperic.hq.plugin.mgmt.domain.Plugin;
+import org.hyperic.hq.plugin.mgmt.domain.PluginResourceType;
 import org.hyperic.hq.product.FlexibleProductPlugin;
 import org.hyperic.hq.product.MeasurementInfo;
 import org.hyperic.hq.product.PlatformTypeInfo;
@@ -110,6 +113,7 @@ public class ProductManagerImpl implements ProductManager {
     private PluginAuditFactory pluginAuditFactory;
     private ResourceManager resourceManager;
     private ResourceTypeDao resourceTypeDao;
+    private PluginResourceTypeRepository pluginResourceTypeRepository;
 	
     @Autowired
     public ProductManagerImpl(PluginRepository pluginRepository, AlertDefinitionManager alertDefinitionManager,
@@ -118,7 +122,8 @@ public class ProductManagerImpl implements ProductManager {
                               ServiceManager serviceManager, PlatformManager platformManager,
                               AlertDefinitionXmlParser alertDefinitionXmlParser,
                               PluginAuditFactory pluginAuditFactory,
-                              ResourceManager resourceManager, ResourceTypeDao resourceTypeDao) {        
+                              ResourceManager resourceManager, ResourceTypeDao resourceTypeDao,
+                              PluginResourceTypeRepository pluginResourceTypeRepository) {        
         this.pluginRepository = pluginRepository;
         this.alertDefinitionManager = alertDefinitionManager;
         this.templateManager = templateManager;
@@ -130,12 +135,13 @@ public class ProductManagerImpl implements ProductManager {
         this.pluginAuditFactory = pluginAuditFactory;
         this.resourceManager = resourceManager;
         this.resourceTypeDao = resourceTypeDao;
+        this.pluginResourceTypeRepository = pluginResourceTypeRepository;
     }
 
     /**
      * Update the appdef entities based on TypeInfo
      */
-    private void updateAppdefEntities(String pluginName, TypeInfo[] entities) throws VetoException,
+    private void updateAppdefEntities(Plugin plugin, TypeInfo[] entities) throws VetoException,
         NotFoundException {
         ArrayList<TypeInfo> platforms = new ArrayList<TypeInfo>();
         ArrayList<TypeInfo> servers = new ArrayList<TypeInfo>();
@@ -164,21 +170,21 @@ public class ProductManagerImpl implements ProductManager {
         final boolean debug = log.isDebugEnabled();
         // Update platforms
         if (platforms.size() > 0) {
-            this.platformManager.updatePlatformTypes(pluginName, platforms
+            this.platformManager.updatePlatformTypes(plugin, platforms
                 .toArray(new PlatformTypeInfo[0]));
         }
 
         // Update servers
         if (servers.size() > 0) {
             if (debug) watch.markTimeBegin("updateServerTypes");
-            serverManager.updateServerTypes(pluginName, servers.toArray(new ServerTypeInfo[0]));
+            serverManager.updateServerTypes(plugin, servers.toArray(new ServerTypeInfo[0]));
             if (debug) watch.markTimeEnd("updateServerTypes");
         }
 
         // Update services
         if (services.size() > 0) {
             if (debug) watch.markTimeBegin("updateServiceTypes");
-            serviceManager.updateServiceTypes(pluginName, services.toArray(new ServiceTypeInfo[0]));
+            serviceManager.updateServiceTypes(plugin, services.toArray(new ServiceTypeInfo[0]));
             if (debug) watch.markTimeEnd("updateServiceTypes");
         }
         if (debug) log.debug(watch);
@@ -223,7 +229,7 @@ public class ProductManagerImpl implements ProductManager {
         return resource.getType().getConfigType(type);
     }
     
-    private void updatePlugin(PluginInfo pInfo) {
+    private Plugin updatePlugin(PluginInfo pInfo) {
         Plugin plugin = pluginRepository.findByName(pInfo.name);
         if (plugin == null) {
             plugin = new Plugin(pInfo.name,pInfo.jar,pInfo.md5);
@@ -231,7 +237,8 @@ public class ProductManagerImpl implements ProductManager {
             plugin.setPath(pInfo.jar);
             plugin.setMD5(pInfo.md5);
         }
-        pluginRepository.save(plugin);
+        plugin = pluginRepository.save(plugin);
+        return plugin;
     }
 
     // e.g. in ~/.hq/plugin.properties
@@ -349,15 +356,23 @@ public class ProductManagerImpl implements ProductManager {
     			
     			entity = new ResourceType(resourceType.getName(),resourceType.getDescription());
     			resourceTypeDao.persist(entity);
-    			plugin.addResourceType(entity);
+    			PluginResourceType pluginResourceType = new PluginResourceType(plugin.getName(),entity.getId());
+    			pluginResourceTypeRepository.save(pluginResourceType);
+    			Set<OperationType> opTypes = new HashSet<OperationType>();
     			for (org.hyperic.hq.pdk.domain.OperationType ot : resourceType.getOperationTypes()) {
     	            OperationType opType = new OperationType(ot.getName());
-    	            entity.addOperationType(opType);
+    	            opTypes.add(opType);
     	        }
-
+    			if(!opTypes.isEmpty()) {
+    			    entity.addOperationTypes(opTypes);
+    			}
+    			Set<PropertyType> propertyTypes = new HashSet<PropertyType>();
     	        for (org.hyperic.hq.pdk.domain.PropertyType pt : resourceType.getPropertyTypes()) {
     	            PropertyType propType = new PropertyType(pt.getName(), pt.getDescription());
-    	            entity.addPropertyType(propType);
+    	            propertyTypes.add(propType);
+    	        }
+    	        if(!propertyTypes.isEmpty()) {
+    	            entity.addPropertyTypes(propertyTypes);
     	        }
     		}
     		
@@ -407,19 +422,19 @@ public class ProductManagerImpl implements ProductManager {
         ProductPlugin pplugin = (ProductPlugin) ppm.getPlugin(pluginName);
         PluginInfo pInfo = getProductPluginManager().getPluginInfo(pluginName);
         
-        updatePlugin(pInfo);
+        Plugin plugin = updatePlugin(pInfo);
 
         // Get the measurement templates
         // Keep a list of templates to add
         Map<MonitorableType, List<MonitorableMeasurementInfo>> toAdd = new HashMap<MonitorableType, List<MonitorableMeasurementInfo>>();
-        Map<String, MonitorableType> types = new HashMap<String,MonitorableType>(templateManager.getMonitorableTypesByName(pluginName));
+        Map<String, MonitorableType> types = new HashMap<String,MonitorableType>(templateManager.getMonitorableTypesByName(plugin.getName()));
         TypeInfo[] entities = pplugin.getTypes();
 
         if (pluginDefinition == null) {
         	
 	        if (debug) watch.markTimeBegin("updateAppdefEntities");
 	        
-	        updateAppdefEntities(pluginName, entities);
+	        updateAppdefEntities(plugin, entities);
 	
 	        if (debug) watch.markTimeEnd("updateAppdefEntities");
 	        if (debug) watch.markTimeBegin("loop0");
@@ -443,14 +458,14 @@ public class ProductManagerImpl implements ProductManager {
 	        		MonitorableType monitorableType = types.get(info.getName());
 
 	        		if (monitorableType == null) {
-	        			monitorableType = templateManager.createMonitorableType(pluginName, info);
+	        			monitorableType = templateManager.createMonitorableType(plugin.getName(), info);
 	        			types.put(info.getName(), monitorableType);
 	        		}
 
 	        		if (debug) watch.markTimeEnd("getMonitorableType");
 	        		if (debug) watch.markTimeBegin("updateTemplates");
 
-	        		Map<String, MeasurementInfo> newMeasurements = templateManager.updateTemplates(pluginName, monitorableType, measurements);
+	        		Map<String, MeasurementInfo> newMeasurements = templateManager.updateTemplates(plugin.getName(), monitorableType, measurements);
 
 	        		if (debug) watch.markTimeEnd("updateTemplates");
 	        		
@@ -475,7 +490,7 @@ public class ProductManagerImpl implements ProductManager {
 	        		MonitorableType monitorableType = types.get(resourceType.getName());
 	
 	        		if (monitorableType == null) {
-	        			monitorableType = templateManager.createMonitorableType(pluginName, resourceType);
+	        			monitorableType = templateManager.createMonitorableType(plugin.getName(), resourceType);
 	        			
 	        			types.put(resourceType.getName(), monitorableType);
 	        		}
@@ -498,7 +513,7 @@ public class ProductManagerImpl implements ProductManager {
 	        			measurements[index++] = info;
 	        		}
 	        	
-	        		Map<String, MeasurementInfo> newMeasurements = templateManager.updateTemplates(pluginName, monitorableType, measurements);
+	        		Map<String, MeasurementInfo> newMeasurements = templateManager.updateTemplates(plugin.getName(), monitorableType, measurements);
 	        		List<MonitorableMeasurementInfo> infos = new ArrayList<MonitorableMeasurementInfo>();
 
 	        		for(MeasurementInfo measurementInfo: newMeasurements.values()) {
@@ -516,7 +531,7 @@ public class ProductManagerImpl implements ProductManager {
 	    // For performance reasons, we add all the new measurements at once.
 	    if (debug) watch.markTimeBegin("createTemplates");
 
-	    templateManager.createTemplates(pluginName, toAdd);
+	    templateManager.createTemplates(plugin.getName(), toAdd);
 	        
 	    if (debug) watch.markTimeEnd("createTemplates");
         
@@ -560,12 +575,10 @@ public class ProductManagerImpl implements ProductManager {
     }
     
     private void updateConfigType(ResourceType appdefType, String configTypeName, ConfigSchema configSchema) {
-        List<ConfigOption> options = configSchema.getOptions();
-        if(options.isEmpty()) {
-            return;
-        }
         ConfigType configType = new ConfigType(configTypeName);
         appdefType.addConfigType(configType);
+        List<ConfigOption> options = configSchema.getOptions();
+        Set<ConfigOptionType> optionTypes = new HashSet<ConfigOptionType>();
         for(ConfigOption option: options) {
             ConfigOptionType configOptType = new ConfigOptionType(option.getName(), option.getDescription());
             configOptType.setDefaultValue(option.getDefault());
@@ -574,11 +587,15 @@ public class ProductManagerImpl implements ProductManager {
             if(option instanceof HiddenConfigOption) {
                 configOptType.setHidden(true);
             }
-            configType.addConfigOptionType(configOptType);
+            optionTypes.add(configOptType);
+        }
+        if(! optionTypes.isEmpty()) {
+            configType.addConfigOptionTypes(optionTypes);
         }
     }
     
     private void updatePropertyTypes(ResourceType appdefType, ConfigSchema customPropertiesSchema) {
+        Set<PropertyType> propertyTypes = new HashSet<PropertyType>();
         for (ConfigOption opt : customPropertiesSchema.getOptions()) {
             if (appdefType.getPropertyType(opt.getName()) == null) {
                 PropertyType propertyType = new PropertyType(opt.getName(), opt.getDescription());
@@ -587,17 +604,24 @@ public class ProductManagerImpl implements ProductManager {
                 if(opt instanceof HiddenConfigOption) {
                     propertyType.setHidden(true);
                 }
-                appdefType.addPropertyType(propertyType);
+                propertyTypes.add(propertyType);
             }
+        }
+        if(!propertyTypes.isEmpty()) {
+            appdefType.addPropertyTypes(propertyTypes);
         }
     }
     
     private void updateOperationTypes(ResourceType appdefType,List<String> actions) {
+        Set<OperationType> opTypes = new HashSet<OperationType>();
         for(String action: actions) {
             OperationType existing = appdefType.getOperationType(action);
             if(existing == null) {
-                appdefType.addOperationType(new OperationType(action));
+               opTypes.add(new OperationType(action));
             }
+        }
+        if(!opTypes.isEmpty()) {
+            appdefType.addOperationTypes(opTypes);
         }
     }
     

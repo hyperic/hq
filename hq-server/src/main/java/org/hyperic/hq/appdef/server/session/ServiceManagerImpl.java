@@ -40,7 +40,9 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.agent.mgmt.data.AgentRepository;
+import org.hyperic.hq.agent.mgmt.data.ManagedResourceRepository;
+import org.hyperic.hq.agent.mgmt.domain.Agent;
+import org.hyperic.hq.agent.mgmt.domain.ManagedResource;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
@@ -67,7 +69,9 @@ import org.hyperic.hq.inventory.domain.RelationshipTypes;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
-import org.hyperic.hq.plugin.mgmt.data.PluginRepository;
+import org.hyperic.hq.plugin.mgmt.data.PluginResourceTypeRepository;
+import org.hyperic.hq.plugin.mgmt.domain.Plugin;
+import org.hyperic.hq.plugin.mgmt.domain.PluginResourceType;
 import org.hyperic.hq.product.ServiceTypeInfo;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.pager.PageControl;
@@ -97,31 +101,30 @@ public class ServiceManagerImpl implements ServiceManager {
     private PermissionManager permissionManager;
     private ResourceManager resourceManager;
     private AuthzSubjectManager authzSubjectManager;
-    private PluginRepository pluginRepository;
+    private PluginResourceTypeRepository pluginResourceTypeRepository;
     private ServiceFactory serviceFactory;
     private ResourceGroupManager resourceGroupManager;
     private ZeventEnqueuer zeventEnqueuer;
     private ResourceDao resourceDao;
     private ResourceTypeDao resourceTypeDao;
-    private AgentRepository agentRepository;
+  
 
     @Autowired
     public ServiceManagerImpl(PermissionManager permissionManager,
                               ResourceManager resourceManager,
-                              AuthzSubjectManager authzSubjectManager, PluginRepository pluginRepository,
+                              AuthzSubjectManager authzSubjectManager, PluginResourceTypeRepository pluginResourceTypeRepository,
                               ServiceFactory serviceFactory,
                               ResourceGroupManager resourceGroupManager, ZeventEnqueuer zeventEnqueuer,
-                              ResourceDao resourceDao, ResourceTypeDao resourceTypeDao, AgentRepository agentRepository) {
+                              ResourceDao resourceDao, ResourceTypeDao resourceTypeDao) {
         this.permissionManager = permissionManager;
         this.resourceManager = resourceManager;
         this.authzSubjectManager = authzSubjectManager;
-        this.pluginRepository = pluginRepository;
+        this.pluginResourceTypeRepository = pluginResourceTypeRepository;
         this.serviceFactory = serviceFactory;
         this.resourceGroupManager = resourceGroupManager;
         this.zeventEnqueuer = zeventEnqueuer;
         this.resourceDao = resourceDao;
         this.resourceTypeDao = resourceTypeDao;
-        this.agentRepository = agentRepository;
     }
     
     private Resource create(AuthzSubject subject,ResourceType type, Resource parent, String name, String desc,
@@ -131,20 +134,15 @@ public class ServiceManagerImpl implements ServiceManager {
         //  .findResourceTypeByName(AuthzConstants.serverResType), server.getId(),
         //AuthzConstants.serverOpAddService);
         Resource s = new Resource(name, type);
-        resourceDao.persist(s);
         s.setDescription(desc);
         s.setModifiedBy(subject.getName());
         s.setLocation(location);
+        s.setOwner(subject.getName());
+        resourceDao.persist(s);
         s.setProperty(ServiceFactory.AUTO_INVENTORY_IDENTIFIER,name);
-        s.setProperty(ServiceFactory.AUTO_DISCOVERY_ZOMBIE,false);
-        s.setProperty(ServiceFactory.SERVICE_RT,false);
-        s.setProperty(ServiceFactory.END_USER_RT,false);
         s.setProperty(ServiceFactory.CREATION_TIME, System.currentTimeMillis());
         s.setProperty(ServiceFactory.MODIFIED_TIME,System.currentTimeMillis());
-        s.setProperty(AppdefResource.SORT_NAME, name.toUpperCase());
-        s.setProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_SERVICE);
-        s.setOwner(subject.getName());
-        agentRepository.findByManagedResource(parent).addManagedResource(s);
+        s.setProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_SERVICE,true);
         parent.relateTo(s, RelationshipTypes.SERVICE);
         parent.relateTo(s, RelationshipTypes.CONTAINS);
         return s;
@@ -315,7 +313,7 @@ public class ServiceManagerImpl implements ServiceManager {
     @Transactional(readOnly=true)
     public PageList<Resource> getAllServiceResources(AuthzSubject subject, PageControl pc) {
         PageRequest pageInfo = new PageRequest(pc.getPagenum(),pc.getPagesize(),
-            new Sort(pc.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"name"));
+            new Sort(pc.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"sortName"));
         Page<Resource> resources = resourceDao.findByIndexedProperty(AppdefResourceType.APPDEF_TYPE_ID, 
             AppdefEntityConstants.APPDEF_TYPE_SERVICE,pageInfo,String.class);
         return new PageList<Resource>(resources.getContent(),(int)resources.getTotalElements());
@@ -762,27 +760,13 @@ public class ServiceManagerImpl implements ServiceManager {
         return appServiceCollection;
     }
 
-   
-    public void updateServiceZombieStatus(AuthzSubject subject, Service svc, boolean zombieStatus)
-        throws PermissionException {
-        //TODO perm checks
-        //permissionManager.checkModifyPermission(subject, svc.getEntityId());
-        Resource resource = resourceManager.findResourceById(svc.getId());
-        resource.setModifiedBy(subject.getName());
-        resource.setProperty(ServiceFactory.AUTO_DISCOVERY_ZOMBIE,zombieStatus);
-        resourceDao.merge(resource);
-    }
     
     private void updateService(ServiceValue valueHolder, Resource service) {
         service.setProperty(ServiceFactory.AUTO_INVENTORY_IDENTIFIER,valueHolder.getAutoinventoryIdentifier());
         service.setDescription( valueHolder.getDescription() );
-        service.setProperty(ServiceFactory.AUTO_DISCOVERY_ZOMBIE, valueHolder.getAutodiscoveryZombie() );
-        service.setProperty(ServiceFactory.SERVICE_RT, valueHolder.getServiceRt() );
-        service.setProperty(ServiceFactory.END_USER_RT, valueHolder.getEndUserRt() );
         service.setModifiedBy( valueHolder.getModifiedBy() );
         service.setLocation( valueHolder.getLocation() );
         service.setName( valueHolder.getName() );
-        resourceDao.merge(service);
         Resource parent = service.getResourceTo(RelationshipTypes.SERVICE);
         if(valueHolder.getParent() != null && !(parent.getId().equals(valueHolder.getParent().getId()))) {
             service.removeRelationships(parent, RelationshipTypes.SERVICE);
@@ -818,7 +802,7 @@ public class ServiceManagerImpl implements ServiceManager {
         return svc;
     }
 
-    public void updateServiceTypes(String plugin, ServiceTypeInfo[] infos)
+    public void updateServiceTypes(Plugin plugin, ServiceTypeInfo[] infos)
     throws VetoException, NotFoundException {
     	final boolean debug = log.isDebugEnabled();
         StopWatch watch = new StopWatch();
@@ -841,7 +825,7 @@ public class ServiceManagerImpl implements ServiceManager {
             Collection<ResourceType> serviceTypes = getAllServiceResourceTypes();
             Set<ResourceType> curServices = new HashSet<ResourceType>();
             for(ResourceType curResourceType: serviceTypes) {
-                if(pluginRepository.findByResourceType(curResourceType).getName().equals(plugin)) {
+                if(pluginResourceTypeRepository.findNameByResourceType(curResourceType.getId()).equals(plugin.getName())) {
                     curServices.add(curResourceType);
                 }
             }
@@ -861,7 +845,6 @@ public class ServiceManagerImpl implements ServiceManager {
                     // Just update it
                     if (!sinfo.getDescription().equals(serviceType.getDescription())) {
                         serviceType.setDescription(sinfo.getDescription());
-                        resourceTypeDao.merge(serviceType);
                     }
 
                     //TODO  update platform association
@@ -925,14 +908,14 @@ public class ServiceManagerImpl implements ServiceManager {
         }
     }
 
-    public ServiceType createServiceType(ServiceTypeInfo sinfo, String plugin,
+    public ServiceType createServiceType(ServiceTypeInfo sinfo, Plugin plugin,
                                           ResourceType parentType) throws NotFoundException {
         ResourceType serviceType = createServiceType(sinfo, plugin);
         parentType.relateTo(serviceType, RelationshipTypes.SERVICE);
         return serviceFactory.createServiceType(serviceType);
     }
     
-    public ServiceType createServiceType(ServiceTypeInfo sinfo, String plugin,
+    public ServiceType createServiceType(ServiceTypeInfo sinfo, Plugin plugin,
                                          String[] platformTypes) throws NotFoundException {
         ResourceType serviceType = createServiceType(sinfo, plugin);
         findAndSetPlatformType(platformTypes, serviceType);
@@ -950,21 +933,18 @@ public class ServiceManagerImpl implements ServiceManager {
     }
 
     
-    private ResourceType createServiceType(ServiceTypeInfo sinfo, String plugin) throws NotFoundException {
+    private ResourceType createServiceType(ServiceTypeInfo sinfo, Plugin plugin) throws NotFoundException {
         ResourceType serviceType = new ResourceType(sinfo.getName());
-        resourceTypeDao.persist(serviceType);
-        pluginRepository.findByName(plugin).addResourceType(serviceType);
         serviceType.setDescription(sinfo.getDescription());
-        serviceType.addPropertyType(createServicePropertyType(ServiceFactory.AUTO_INVENTORY_IDENTIFIER,String.class));
-        serviceType.addPropertyType(createServicePropertyType(ServiceFactory.CREATION_TIME,Long.class));
-        serviceType.addPropertyType(createServicePropertyType(ServiceFactory.MODIFIED_TIME,Long.class));
-        serviceType.addPropertyType(createServicePropertyType(AppdefResource.SORT_NAME,String.class));
-        serviceType.addPropertyType(createServicePropertyType(ServiceFactory.AUTO_DISCOVERY_ZOMBIE,Boolean.class));
-        serviceType.addPropertyType(createServicePropertyType(ServiceFactory.END_USER_RT,Boolean.class));
-        serviceType.addPropertyType(createServicePropertyType(ServiceFactory.SERVICE_RT,Boolean.class));
-        PropertyType appdefType = createServicePropertyType(AppdefResourceType.APPDEF_TYPE_ID, Integer.class);
-        appdefType.setIndexed(true);
-        serviceType.addPropertyType(appdefType);
+        resourceTypeDao.persist(serviceType);
+        PluginResourceType pluginResType = new PluginResourceType(plugin.getName(), serviceType.getId());
+        pluginResourceTypeRepository.save(pluginResType);
+        Set<PropertyType> propertyTypes = new HashSet<PropertyType>();
+        propertyTypes.add(createServicePropertyType(ServiceFactory.AUTO_INVENTORY_IDENTIFIER,String.class));
+        propertyTypes.add(createServicePropertyType(ServiceFactory.CREATION_TIME,Long.class));
+        propertyTypes.add(createServicePropertyType(ServiceFactory.MODIFIED_TIME,Long.class));
+        propertyTypes.add(createServicePropertyType(AppdefResourceType.APPDEF_TYPE_ID, Integer.class));
+        serviceType.addPropertyTypes(propertyTypes);
         return serviceType;
     }
     

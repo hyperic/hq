@@ -34,11 +34,6 @@ import javax.management.ObjectName;
 
 import org.hyperic.hq.plugin.weblogic.WeblogicMetric;
 import org.hyperic.hq.plugin.weblogic.WeblogicProductPlugin;
-import org.hyperic.hq.product.RtPlugin;
-
-import weblogic.management.descriptors.WebDescriptorMBean;
-import weblogic.management.descriptors.webapp.FilterMBean;
-import weblogic.management.descriptors.webapp.ParameterMBean;
 
 public class WebAppComponentQuery extends ComponentQuery {
     public static final String MBEAN_TYPE = "WebAppComponentRuntime";
@@ -48,8 +43,7 @@ public class WebAppComponentQuery extends ComponentQuery {
     private static final String[] RUNTIME_ATTRS =
         new String[] { "ContextRoot" };
 
-    private String rtLogDir = null;
-    private Properties rtConfig = null;
+  
     private String webappDir = ".";
 
     public String getMBeanType() {
@@ -70,27 +64,6 @@ public class WebAppComponentQuery extends ComponentQuery {
 
     public String[] getCustomPropertiesNames() {
         return RUNTIME_ATTRS;
-    }
-
-    public Properties getResponseTimeConfig() {
-        if (this.rtLogDir == null) {
-            return super.getResponseTimeConfig();
-        }
-
-        if (this.rtConfig != null) {
-            return this.rtConfig;
-        }
-
-        this.rtConfig = new Properties();
-
-        String rtLogFile = getName() + RtPlugin.LOGFILE_SUFFIX;
-
-        this.rtConfig.setProperty(RtPlugin.CONFIG_LOGMASK, rtLogFile);
-        this.rtConfig.setProperty(RtPlugin.CONFIG_LOGDIR, this.rtLogDir);
-        this.rtConfig.setProperty(RtPlugin.CONFIG_INTERVAL,
-                                  RtPlugin.DEFAULT_INTERVAL);
-
-        return this.rtConfig;
     }
 
     public boolean getAttributes(MBeanServer mServer,
@@ -120,40 +93,7 @@ public class WebAppComponentQuery extends ComponentQuery {
             return true;
         }
 
-        //web.xml is already parsed into MBeans,
-        //just need to dig out the rtlog dir.
-
-        try {
-            WebDescriptorMBean descriptor = (WebDescriptorMBean)
-                mServer.invoke(configMBean,
-                               "findOrCreateWebDescriptor",
-                               new Object[0], new String[0]);
-
-            FilterMBean[] filters =
-                descriptor.getWebAppDescriptor().getFilters();
-
-            for (int i=0; i<filters.length; i++) {
-                ParameterMBean[] params = filters[i].getInitParams();
-
-                for (int j=0; j<params.length; j++) {
-                    String pName = params[j].getParamName();
-
-                    if (pName.equals(RtPlugin.PARAM_LOG_DIR)) {
-                        this.rtLogDir = params[j].getParamValue();
-                        break;
-                    }
-                }
-            }
-        } catch (Throwable e) {
-            //yes, we are catching Throwable.
-            WeblogicDiscover.getLog().debug("RT config lookup failed: " + e);
-            return true;
-        }
-
-        if (WeblogicDiscover.getLog().isDebugEnabled()) {
-            WeblogicDiscover.getLog().debug(getName() + " RT config=" +
-                                            getResponseTimeConfig());
-        }
+       
 
         String path = getParent().getAttribute("Path");
         if (path != null) {

@@ -39,8 +39,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.ApplicationEvent;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.server.session.GroupDeleteRequestedEvent;
 import org.hyperic.hq.authz.server.session.GroupMembersChangedEvent;
@@ -69,14 +69,12 @@ import org.hyperic.hq.galert.data.GtriggerInfoRepository;
 import org.hyperic.hq.galerts.processor.GalertProcessor;
 import org.hyperic.hq.galerts.processor.Gtrigger;
 import org.hyperic.hq.galerts.shared.GalertManager;
-import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.context.ApplicationListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -104,6 +102,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
     private ResourceGroupManager resourceGroupManager;
     private ExecutionStrategyInfoRepository executionStrategyInfoRepository;
     private GtriggerInfoRepository gtriggerInfoRepository;
+    private AppdefConverter appdefConverter;
 
     @Autowired
     public GalertManagerImpl(ExecutionStrategyTypeInfoRepository executionStrategyTypeInfoRepository, GalertDefRepository galertDefRepository,
@@ -112,7 +111,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
                              EscalationManager escalationManager,
                              ResourceGroupManager resourceGroupManager, GalertProcessor gAlertProcessor,
                              ExecutionStrategyInfoRepository executionStrategyInfoRepository,
-                             GtriggerInfoRepository gtriggerInfoRepository) {
+                             GtriggerInfoRepository gtriggerInfoRepository, AppdefConverter appdefConverter) {
         this.executionStrategyTypeInfoRepository = executionStrategyTypeInfoRepository;
         this.galertDefRepository = galertDefRepository;
         this.auxLogRepository = auxLogRepository;
@@ -124,6 +123,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
         this.galertProcessor = gAlertProcessor;
         this.executionStrategyInfoRepository = executionStrategyInfoRepository;
         this.gtriggerInfoRepository = gtriggerInfoRepository;
+        this.appdefConverter = appdefConverter;
     }
 
     /**
@@ -213,7 +213,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
     public PageList<GalertDef> findAlertDefs(ResourceGroup g, PageControl pc) {
         Pager pager = Pager.getDefaultPager();
         // TODO: G
-        return pager.seek(galertDefRepository.findByGroupExcludeDeletedOrderByName(g), pc);
+        return pager.seek(galertDefRepository.findByGroupExcludeDeletedOrderByName(g.getId()), pc);
     }
 
   
@@ -300,8 +300,8 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
      */
     public GalertLog createAlertLog(GalertDef def, ExecutionReason reason)
         throws ResourceDeletedException {
-        Resource r = def.getResource();
-        if (r == null || r.isInAsyncDeleteState()) {
+        Integer r = def.getResource();
+        if (r == null) {
             throw ResourceDeletedException.newInstance(r);
         }
         Map<GalertAuxLog, AlertAuxLog> gAuxLogToAuxLog = new HashMap<GalertAuxLog, AlertAuxLog>(); // Stores
@@ -403,7 +403,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
      */
     @Transactional(readOnly = true)
     public List<GalertLog> findAlertLogs(ResourceGroup group) {
-        return gAlertLogRepository.findByDefGroupOrderByTimestampAsc(group);
+        return gAlertLogRepository.findByDefGroupOrderByTimestampAsc(group.getId());
     }
 
     /**
@@ -412,7 +412,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
     @Transactional(readOnly = true)
     public PageList<GalertLog> findAlertLogsByTimeWindow(ResourceGroup group, long begin, long end,
                                                          PageControl pc) {
-        Page<GalertLog> results = gAlertLogRepository.findByGroupAndTimestampBetween(group, begin, end,new PageRequest(pc.getPagenum(),
+        Page<GalertLog> results = gAlertLogRepository.findByGroupAndTimestampBetween(group.getId(), begin, end,new PageRequest(pc.getPagenum(),
             pc.getPagesize(),new Sort(pc.isAscending()? Direction.ASC: Direction.DESC,"timestamp")));
         return new PageList<GalertLog>(results.getContent(),(int)results.getTotalElements());
     }
@@ -422,7 +422,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
      */
     public List<GalertLog> findUnfixedAlertLogsByTimeWindow(ResourceGroup group, long begin,
                                                             long end) {
-        return gAlertLogRepository.findUnfixedByGroupAndTimestampBetween(group, begin, end);
+        return gAlertLogRepository.findUnfixedByGroupAndTimestampBetween(group.getId(), begin, end);
     }
 
     /**
@@ -479,12 +479,9 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
         List<GalertLog> result = new ArrayList<GalertLog>();
         for (GalertLog l : alerts) {
             GalertDef def = l.getAlertDef();
-            if (def.getResource().isInAsyncDeleteState()) {
-                continue;
-            }
 
             // Filter by appdef entity
-            AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(def.getResource());
+            AppdefEntityID aeid = appdefConverter.newAppdefEntityId(def.getResource());
             if (includes != null && !includes.contains(aeid))
                 continue;
 
@@ -541,10 +538,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
         throws PermissionException {
         for (int i = 0; i < ids.length; i++) {
             if (ids[i].isGroup()) {
-                ResourceGroup group = resourceGroupManager.findResourceGroupById(subj, ids[i]
-                    .getId());
-
-                counts[i] = gAlertLogRepository.countByGroup(group).intValue();
+                counts[i] = gAlertLogRepository.countByGroup(ids[i].getId()).intValue();
             }
         }
         return counts;
@@ -561,7 +555,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
      * 
      */
     public void deleteAlertLogs(ResourceGroup group) {
-        gAlertLogRepository.deleteByGroup(group);
+        gAlertLogRepository.deleteByGroup(group.getId());
     }
 
     /**
@@ -646,7 +640,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
                                     AlertSeverity severity, boolean enabled, ResourceGroup group) {
         GalertDef def;
 
-        def = new GalertDef(name, description, severity, enabled, group);
+        def = new GalertDef(name, description, severity, enabled, group.getId());
 
         galertDefRepository.save(def);
         galertProcessor.validateAlertDef(def);
@@ -733,7 +727,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
      * 
      */
     public void processGroupDeletion(ResourceGroup g) {
-        Collection<GalertDef> defs = galertDefRepository.findByGroup(g);
+        Collection<GalertDef> defs = galertDefRepository.findByGroup(g.getId());
 
         for (GalertDef def : defs) {
             _log.debug("Cascade deleting GalertDef[" + def.getName() + "]");

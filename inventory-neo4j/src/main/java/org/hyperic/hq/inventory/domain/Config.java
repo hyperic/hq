@@ -3,19 +3,9 @@ package org.hyperic.hq.inventory.domain;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Transient;
-
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.GenericGenerator;
 import org.neo4j.graphdb.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.data.graph.annotation.NodeEntity;
 import org.springframework.data.graph.annotation.RelatedTo;
 import org.springframework.data.graph.core.Direction;
@@ -28,36 +18,17 @@ import org.springframework.transaction.annotation.Transactional;
  * @author jhickey
  * @author dcrutchfield
  */
-@NodeEntity(partial = true)
-@Entity
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@NodeEntity
+@Configurable
 public class Config {
 
     @Autowired
     private transient GraphDatabaseContext graphDatabaseContext;
 
-    @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")
-    @GeneratedValue(generator = "mygen1")
-    @Column(name = "id")
-    private Integer id;
-
-    @Transient
     @RelatedTo(type = RelationshipTypes.IS_A, direction = Direction.OUTGOING, elementClass = ConfigType.class)
     private ConfigType type;
 
-    @PersistenceContext
-    private transient EntityManager entityManager;
-
     public Config() {
-    }
-
-    /**
-     * 
-     * @return The config ID
-     */
-    public Integer getId() {
-        return this.id;
     }
 
     /**
@@ -67,7 +38,7 @@ public class Config {
     public ConfigType getType() {
         return type;
     }
-    
+
     /**
      * 
      * @param key The config option key
@@ -105,34 +76,21 @@ public class Config {
     }
 
     /**
-     *  Removes this Config.  Only supported as part of Resource removal
+     * Removes this Config. Only supported as part of Resource removal
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void remove() {
         graphDatabaseContext.removeNodeEntity(this);
-        if (this.entityManager.contains(this)) {
-            this.entityManager.remove(this);
-        } else {
-            Config persisted = this.entityManager.find(this.getClass(), this.id);
-            this.entityManager.remove(persisted);
-        }
     }
 
-    /**
-     * 
-     * @param id The Config id
-     */
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
+    @Transactional("neoTxManager")
     public void setType(ConfigType configType) {
-        //TODO can't do this in a detached env b/c relationship doesn't take unless both items are node-backed
-        if(getPersistentState() == null) {
-            entityManager.persist(this);
+        // TODO can't do this in a detached env b/c relationship doesn't take
+        // unless both items are node-backed
+        if (getPersistentState() == null) {
             persist();
         }
-       this.type = configType;
+        this.type = configType;
     }
 
     /**
@@ -141,7 +99,7 @@ public class Config {
      * @param value The config value
      * @return The previous value or null if there was none
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public Object setValue(String key, Object value) {
         if (value == null) {
             // You can't set null property values in Neo4j, so we won't know if
@@ -149,11 +107,11 @@ public class Config {
             // default value
             throw new IllegalArgumentException("Null config values are not allowed");
         }
-       
-        if ( type.getConfigOptionType(key) == null) {
+
+        if (type.getConfigOptionType(key) == null) {
             throw new IllegalArgumentException("Config option " + key + " is not defined");
         }
-        //TODO validation
+        // TODO validation
         Object oldValue = null;
         try {
             oldValue = getPersistentState().getProperty(key);
@@ -167,7 +125,6 @@ public class Config {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Config[");
-        sb.append("Id: ").append(getId()).append(", ");
         sb.append("Type: ").append(getType()).append("]");
         return sb.toString();
     }

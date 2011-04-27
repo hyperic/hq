@@ -45,10 +45,10 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
@@ -125,12 +125,14 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     private AvailabilityCache availabilityCache;
     private ConcurrentStatsCollector concurrentStatsCollector;
     private PlatformManager platformManager;
+    private AppdefConverter appdefConverter;
     
     @Autowired
     public AvailabilityManagerImpl(ResourceManager resourceManager, ResourceGroupManager groupManager, MessagePublisher messenger,
                                    AvailabilityDataRepository availabilityDataRepository, MeasurementRepository measurementRepository,
                                    MessagePublisher messagePublisher, RegisteredTriggers registeredTriggers, AvailabilityCache availabilityCache,
-                                   ConcurrentStatsCollector concurrentStatsCollector,PlatformManager platformManager) {
+                                   ConcurrentStatsCollector concurrentStatsCollector,PlatformManager platformManager,
+                                   AppdefConverter appdefConverter) {
         this.resourceManager = resourceManager;
         this.groupManager = groupManager;
         this.messenger = messenger;
@@ -141,6 +143,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         this.availabilityCache = availabilityCache;
         this.concurrentStatsCollector = concurrentStatsCollector;
         this.platformManager = platformManager;
+        this.appdefConverter = appdefConverter;
     }
 
     @PostConstruct
@@ -161,7 +164,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      */
     @Transactional(readOnly = true)
     public Measurement getAvailMeasurement(Resource resource) {
-        return measurementRepository.findAvailabilityMeasurementByResource(resource);
+        return measurementRepository.findAvailabilityMeasurementByResource(resource.getId());
     }
 
     /**
@@ -184,7 +187,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      */
     @Transactional(readOnly = true)
     public long getDowntime(Resource resource, long begin, long end) throws MeasurementNotFoundException {
-        Measurement meas = measurementRepository.findAvailabilityMeasurementByResource(resource);
+        Measurement meas = measurementRepository.findAvailabilityMeasurementByResource(resource.getId());
         if (meas == null) {
             throw new MeasurementNotFoundException("Availability measurement " + "not found for resource " +
                                                    resource.getId());
@@ -273,13 +276,13 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
                         		// measurement could be null if resource has not been configured
                         		continue;
                         	}
-                            Resource r = m.getResource();
-                            if (r == null || r.isInAsyncDeleteState()) {
+                            Integer r = m.getResource();
+                            if (r == null) {
                                 continue;
                             }
                             // availability measurement in scheduled downtime are disabled
-                            if (!m.isEnabled() && eids.contains(AppdefUtil.newAppdefEntityId(r))) {
-                                measMap.put(r.getId(), m);
+                            if (!m.isEnabled() && eids.contains(appdefConverter.newAppdefEntityId(r))) {
+                                measMap.put(r, m);
                             }
                         }
                     }
@@ -336,7 +339,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      * 
      */
     @Transactional(readOnly = true)
-    public List<AvailabilityDataRLE> getHistoricalAvailData(Resource res, long begin, long end) {
+    public List<AvailabilityDataRLE> getHistoricalAvailData(Integer res, long begin, long end) {
         return availabilityDataRepository.getHistoricalAvails(res, begin, end);
     }
 
@@ -579,11 +582,11 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             for (Measurement m : measurements) {
                 // populate the Map if value doesn't exist
                 if (measCache != null) {
-                    List<Measurement> measids =  measCache.get(m.getResource().getId());
+                    List<Measurement> measids =  measCache.get(m.getResource());
                     if (measids == null) {
                         measids = new ArrayList<Measurement>();
                         measids.add(m);
-                        measCache.put(m.getResource().getId(), measids);
+                        measCache.put(m.getResource(), measids);
                     }
                    
                 }
@@ -668,7 +671,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             long timestamp = rle.getStartime();
             Integer mid = meas.getId();
             MetricValue val = new MetricValue(AVAIL_DOWN, timestamp);
-            rtn.add(new DownMetricValue(AppdefUtil.newAppdefEntityId(meas.getResource()), mid, val));
+            rtn.add(new DownMetricValue(appdefConverter.newAppdefEntityId(meas.getResource()), mid, val));
         }
         return rtn;
     }

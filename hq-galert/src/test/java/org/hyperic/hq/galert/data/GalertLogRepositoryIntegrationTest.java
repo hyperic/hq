@@ -1,9 +1,9 @@
 package org.hyperic.hq.galert.data;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -22,7 +22,6 @@ import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.server.session.GalertDefPartition;
 import org.hyperic.hq.galerts.server.session.GalertEscalatable;
 import org.hyperic.hq.galerts.server.session.GalertLog;
-import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,12 +47,8 @@ public class GalertLogRepositoryIntegrationTest {
 
     @Test
     public void testDeleteByDef() {
-        ResourceGroup group = new ResourceGroup();
-        group.setName("Group1");
-        entityManager.persist(group);
-        ResourceGroup group2 = new ResourceGroup();
-        group2.setName("Group2");
-        entityManager.persist(group2);
+        int group = 8888;
+        int group2 = 98352;
         GalertDef def1 = new GalertDef("Platforms Down", "desc", AlertSeverity.HIGH, true, group);
         entityManager.persist(def1);
         GalertDef def2 = new GalertDef("CPU High", "desc", AlertSeverity.MEDIUM, true, group2);
@@ -78,12 +73,8 @@ public class GalertLogRepositoryIntegrationTest {
 
     @Test
     public void testDeleteByGroup() {
-        ResourceGroup group = new ResourceGroup();
-        group.setName("Group1");
-        entityManager.persist(group);
-        ResourceGroup group2 = new ResourceGroup();
-        group2.setName("Group2");
-        entityManager.persist(group2);
+        int group = 8888;
+        int group2 = 98352;
         GalertDef def1 = new GalertDef("Platforms Down", "desc", AlertSeverity.HIGH, true, group);
         entityManager.persist(def1);
         GalertDef def2 = new GalertDef("CPU High", "desc", AlertSeverity.MEDIUM, true, group2);
@@ -108,12 +99,8 @@ public class GalertLogRepositoryIntegrationTest {
 
     @Test
     public void testFindByCreateTimeAndPriorityAndNotFixed() {
-        ResourceGroup group = new ResourceGroup();
-        group.setName("Group1");
-        entityManager.persist(group);
-        ResourceGroup group2 = new ResourceGroup();
-        group2.setName("Group2");
-        entityManager.persist(group2);
+        int group = 8888;
+        int group2 = 98352;
         GalertDef def1 = new GalertDef("Platforms Down", "desc", AlertSeverity.HIGH, true, group);
         entityManager.persist(def1);
         GalertDef def2 = new GalertDef("CPU High", "desc", AlertSeverity.MEDIUM, true, group2);
@@ -143,12 +130,8 @@ public class GalertLogRepositoryIntegrationTest {
 
     @Test
     public void testFindByCreateTimeAndPriorityAndNotFixedSort() {
-        ResourceGroup group = new ResourceGroup();
-        group.setName("Group1");
-        entityManager.persist(group);
-        ResourceGroup group2 = new ResourceGroup();
-        group2.setName("Group2");
-        entityManager.persist(group2);
+        int group = 8888;
+        int group2 = 98352;
         GalertDef def1 = new GalertDef("Platforms Down", "desc", AlertSeverity.HIGH, true, group);
         entityManager.persist(def1);
         GalertDef def2 = new GalertDef("CPU High", "desc", AlertSeverity.MEDIUM, true, group2);
@@ -181,12 +164,8 @@ public class GalertLogRepositoryIntegrationTest {
 
     @Test
     public void testFindByCreateTimeAndPriorityReqParams() {
-        ResourceGroup group = new ResourceGroup();
-        group.setName("Group1");
-        entityManager.persist(group);
-        ResourceGroup group2 = new ResourceGroup();
-        group2.setName("Group2");
-        entityManager.persist(group2);
+        int group = 8888;
+        int group2 = 98352;
         GalertDef def1 = new GalertDef("Platforms Down", "desc", AlertSeverity.HIGH, true, group);
         entityManager.persist(def1);
         GalertDef def2 = new GalertDef("CPU High", "desc", AlertSeverity.MEDIUM, true, group2);
@@ -217,12 +196,8 @@ public class GalertLogRepositoryIntegrationTest {
 
     @Test
     public void testFindByCreateTimeAndPrioritySpecifyDefId() {
-        ResourceGroup group = new ResourceGroup();
-        group.setName("Group1");
-        entityManager.persist(group);
-        ResourceGroup group2 = new ResourceGroup();
-        group2.setName("Group2");
-        entityManager.persist(group2);
+        int group = 8888;
+        int group2 = 98352;
         GalertDef def1 = new GalertDef("Platforms Down", "desc", AlertSeverity.HIGH, true, group);
         entityManager.persist(def1);
         GalertDef def2 = new GalertDef("CPU High", "desc", AlertSeverity.HIGH, true, group2);
@@ -251,12 +226,8 @@ public class GalertLogRepositoryIntegrationTest {
 
     @Test
     public void testFindByCreateTimeAndPrioritySpecifyGroupId() {
-        ResourceGroup group = new ResourceGroup();
-        group.setName("Group1");
-        entityManager.persist(group);
-        ResourceGroup group2 = new ResourceGroup();
-        group2.setName("Group2");
-        entityManager.persist(group2);
+        int group = 8888;
+        int group2 = 98352;
         GalertDef def1 = new GalertDef("Platforms Down", "desc", AlertSeverity.HIGH, true, group);
         entityManager.persist(def1);
         GalertDef def2 = new GalertDef("CPU High", "desc", AlertSeverity.HIGH, true, group2);
@@ -280,17 +251,13 @@ public class GalertLogRepositoryIntegrationTest {
         PageRequest request = new PageRequest(0, 20, new Sort("timestamp"));
         assertEquals(new PageImpl<GalertLog>(expected, request, 1l),
             galertLogRepository.findByCreateTimeAndPriority(timestamp - 5000, timestamp,
-                AlertSeverity.HIGH, false, false, group2.getId(), null, request));
+                AlertSeverity.HIGH, false, false, group2, null, request));
     }
 
     @Test
     public void testFindByGroup() {
-        ResourceGroup group = new ResourceGroup();
-        group.setName("Group1");
-        entityManager.persist(group);
-        ResourceGroup group2 = new ResourceGroup();
-        group2.setName("Group2");
-        entityManager.persist(group2);
+        int group = 8888;
+        int group2 = 98352;
         GalertDef def1 = new GalertDef("Platforms Down", "desc", AlertSeverity.HIGH, true, group);
         entityManager.persist(def1);
         GalertDef def2 = new GalertDef("CPU High", "desc", AlertSeverity.HIGH, true, group2);
@@ -313,9 +280,7 @@ public class GalertLogRepositoryIntegrationTest {
 
     @Test
     public void testFindByGroupAndTimestampBetween() {
-        ResourceGroup group = new ResourceGroup();
-        group.setName("Group1");
-        entityManager.persist(group);
+        int group = 8888;
         GalertDef def1 = new GalertDef("Platforms Down", "desc", AlertSeverity.HIGH, true, group);
         entityManager.persist(def1);
         long timestamp = System.currentTimeMillis();
@@ -343,9 +308,7 @@ public class GalertLogRepositoryIntegrationTest {
 
     @Test
     public void testFindByGroupAndTimestampBetweenNoResults() {
-        ResourceGroup group = new ResourceGroup();
-        group.setName("Group1");
-        entityManager.persist(group);
+        int group = 8888;
         long timestamp = System.currentTimeMillis();
         PageRequest request = new PageRequest(0, 3, new Sort("timestamp"));
         assertEquals(new PageImpl<GalertLog>(new ArrayList<GalertLog>(0), request, 0),
@@ -355,12 +318,8 @@ public class GalertLogRepositoryIntegrationTest {
 
     @Test
     public void testFindLastByDefinition() {
-        ResourceGroup group = new ResourceGroup();
-        group.setName("Group1");
-        entityManager.persist(group);
-        ResourceGroup group2 = new ResourceGroup();
-        group2.setName("Group2");
-        entityManager.persist(group2);
+        int group = 8888;
+        int group2 = 98352;
         GalertDef def1 = new GalertDef("Platforms Down", "desc", AlertSeverity.HIGH, true, group);
         entityManager.persist(def1);
         GalertDef def2 = new GalertDef("CPU High", "desc", AlertSeverity.HIGH, true, group2);
@@ -385,12 +344,8 @@ public class GalertLogRepositoryIntegrationTest {
 
     @Test
     public void testFindLastByDefinitionNone() {
-        ResourceGroup group = new ResourceGroup();
-        group.setName("Group1");
-        entityManager.persist(group);
-        ResourceGroup group2 = new ResourceGroup();
-        group2.setName("Group2");
-        entityManager.persist(group2);
+        int group = 8888;
+        int group2 = 98352;
         GalertDef def1 = new GalertDef("Platforms Down", "desc", AlertSeverity.HIGH, true, group);
         entityManager.persist(def1);
         GalertDef def2 = new GalertDef("CPU High", "desc", AlertSeverity.HIGH, true, group2);
@@ -413,12 +368,8 @@ public class GalertLogRepositoryIntegrationTest {
 
     @Test
     public void testFindUnfixedByGroupAndTimestampBetween() {
-        ResourceGroup group = new ResourceGroup();
-        group.setName("Group1");
-        entityManager.persist(group);
-        ResourceGroup group2 = new ResourceGroup();
-        group2.setName("Group2");
-        entityManager.persist(group2);
+        int group = 8888;
+        int group2 = 98352;
         GalertDef def1 = new GalertDef("Platforms Down", "desc", AlertSeverity.HIGH, true, group);
         entityManager.persist(def1);
         GalertDef def2 = new GalertDef("CPU High", "desc", AlertSeverity.HIGH, true, group2);
@@ -448,12 +399,8 @@ public class GalertLogRepositoryIntegrationTest {
 
     @Test
     public void testGetCountByGroup() {
-        ResourceGroup group = new ResourceGroup();
-        group.setName("Group1");
-        entityManager.persist(group);
-        ResourceGroup group2 = new ResourceGroup();
-        group2.setName("Group2");
-        entityManager.persist(group2);
+        int group = 8888;
+        int group2 = 98352;
         GalertDef def1 = new GalertDef("Platforms Down", "desc", AlertSeverity.HIGH, true, group);
         entityManager.persist(def1);
         GalertDef def2 = new GalertDef("CPU High", "desc", AlertSeverity.MEDIUM, true, group2);
@@ -479,9 +426,7 @@ public class GalertLogRepositoryIntegrationTest {
     public void testHasEscalationState() {
         Escalation escalation2 = new Escalation("Escalation2", "Important", true, 1l, true, true);
         entityManager.persist(escalation2);
-        ResourceGroup group2 = new ResourceGroup();
-        group2.setName("Group2");
-        entityManager.persist(group2);
+        int group2 = 98352;
         GalertDef def2 = new GalertDef("CPU High", "desc", AlertSeverity.MEDIUM, true, group2);
         def2.setEscalation(escalation2);
         entityManager.persist(def2);
@@ -498,9 +443,7 @@ public class GalertLogRepositoryIntegrationTest {
     public void testHasNoEscalationState() {
         Escalation escalation2 = new Escalation("Escalation2", "Important", true, 1l, true, true);
         entityManager.persist(escalation2);
-        ResourceGroup group2 = new ResourceGroup();
-        group2.setName("Group2");
-        entityManager.persist(group2);
+        int group2 = 98352;
         GalertDef def2 = new GalertDef("CPU High", "desc", AlertSeverity.MEDIUM, true, group2);
         def2.setEscalation(escalation2);
         entityManager.persist(def2);
@@ -515,9 +458,7 @@ public class GalertLogRepositoryIntegrationTest {
     public void testIsAcknowledgable() {
         Escalation escalation2 = new Escalation("Escalation2", "Important", true, 1l, true, true);
         entityManager.persist(escalation2);
-        ResourceGroup group2 = new ResourceGroup();
-        group2.setName("Group2");
-        entityManager.persist(group2);
+        int group2 = 98352;
         GalertDef def2 = new GalertDef("CPU High", "desc", AlertSeverity.MEDIUM, true, group2);
         def2.setEscalation(escalation2);
         entityManager.persist(def2);
@@ -537,9 +478,7 @@ public class GalertLogRepositoryIntegrationTest {
         entityManager.persist(bob);
         Escalation escalation2 = new Escalation("Escalation2", "Important", true, 1l, true, true);
         entityManager.persist(escalation2);
-        ResourceGroup group2 = new ResourceGroup();
-        group2.setName("Group2");
-        entityManager.persist(group2);
+        int group2 = 98352;
         GalertDef def2 = new GalertDef("CPU High", "desc", AlertSeverity.MEDIUM, true, group2);
         def2.setEscalation(escalation2);
         entityManager.persist(def2);
@@ -560,9 +499,7 @@ public class GalertLogRepositoryIntegrationTest {
         entityManager.persist(bob);
         Escalation escalation2 = new Escalation("Escalation2", "Important", true, 1l, true, true);
         entityManager.persist(escalation2);
-        ResourceGroup group2 = new ResourceGroup();
-        group2.setName("Group2");
-        entityManager.persist(group2);
+        int group2 = 98352;
         GalertDef def2 = new GalertDef("CPU High", "desc", AlertSeverity.MEDIUM, true, group2);
         def2.setEscalation(escalation2);
         entityManager.persist(def2);
@@ -580,9 +517,7 @@ public class GalertLogRepositoryIntegrationTest {
     public void testIsAcknowledgedNot() {
         Escalation escalation2 = new Escalation("Escalation2", "Important", true, 1l, true, true);
         entityManager.persist(escalation2);
-        ResourceGroup group2 = new ResourceGroup();
-        group2.setName("Group2");
-        entityManager.persist(group2);
+        int group2 = 98352;
         GalertDef def2 = new GalertDef("CPU High", "desc", AlertSeverity.MEDIUM, true, group2);
         def2.setEscalation(escalation2);
         entityManager.persist(def2);

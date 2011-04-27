@@ -37,21 +37,23 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.util.MessageResources;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.control.server.session.ControlHistory;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.portlet.BaseRSSAction;
 import org.hyperic.hq.ui.action.portlet.RSSFeed;
 import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.units.DateFormatter.DateSpecifics;
 import org.hyperic.util.units.FormattedNumber;
 import org.hyperic.util.units.UnitNumber;
 import org.hyperic.util.units.UnitsConstants;
 import org.hyperic.util.units.UnitsFormat;
-import org.hyperic.util.units.DateFormatter.DateSpecifics;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -64,11 +66,18 @@ public class RSSAction
     extends BaseRSSAction {
 
     private ControlBoss controlBoss;
+    
+    private ResourceManager resourceManager;
+    
+    private AppdefConverter appdefConverter;
 
     @Autowired
-    public RSSAction(DashboardManager dashboardManager, ConfigBoss configBoss, ControlBoss controlBoss) {
+    public RSSAction(DashboardManager dashboardManager, ConfigBoss configBoss, ControlBoss controlBoss,
+                     ResourceManager resourceManager, AppdefConverter appdefConverter) {
         super(dashboardManager, configBoss);
         this.controlBoss = controlBoss;
+        this.resourceManager = resourceManager;
+        this.appdefConverter = appdefConverter;
     }
 
     public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
@@ -111,7 +120,7 @@ public class RSSAction
             int i = 0;
             for (Iterator<ControlHistory> it = list.iterator(); it.hasNext(); i++) {
                 ControlHistory hist = it.next();
-                AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(hist.getResource());
+                AppdefEntityID aeid = appdefConverter.newAppdefEntityId(hist.getResource());
 
                 String link = feed.getBaseUrl() + "/ResourceControlHistory.do?eid=" + aeid.getAppdefKey();
 
@@ -126,8 +135,8 @@ public class RSSAction
 
                 StringBuffer desc = new StringBuffer(fmtd.toString());
                 desc.append(" ").append(res.getMessage("common.label.Dash")).append(" ").append(hist.getAction());
-
-                feed.addItem(hist.getResource().getName(), link, desc.toString(), current);
+                Resource resource = resourceManager.findResourceById(hist.getResource());
+                feed.addItem(resource.getName(), link, desc.toString(), current);
             }
         }
         request.setAttribute("rssFeed", feed);

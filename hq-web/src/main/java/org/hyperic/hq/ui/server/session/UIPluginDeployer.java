@@ -29,39 +29,39 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.hqu.RenditServer;
-import org.hyperic.hq.product.server.session.ProductPluginDeployer;
 import org.hyperic.util.file.DirWatcher;
 import org.hyperic.util.file.DirWatcher.DirWatcherCallback;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UIPluginDeployer implements ApplicationContextAware {
+public class UIPluginDeployer implements ApplicationContextAware, ApplicationListener<ContextRefreshedEvent> {
     private final Log log = LogFactory.getLog(UIPluginDeployer.class);
 
-  
+    private ApplicationContext applicationContext;
     private RenditServer renditServer;
-    // TODO this is only injected to ensure that PPD.start() is called first to
-    // unpack ui plugins from product plugins. Make this cleaner
-    private ProductPluginDeployer productPluginDeployer;
     private File pluginDir;
 
     @Autowired
-    public UIPluginDeployer(RenditServer renditServer, ProductPluginDeployer productPluginDeployer) {
+    public UIPluginDeployer(RenditServer renditServer) {
         this.renditServer = renditServer;
-        this.productPluginDeployer = productPluginDeployer;
     }
 
-    @PostConstruct
-    public void initPlugins() {
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if(event.getApplicationContext().equals(applicationContext)) {
+            start();
+        }
+    }
+
+    public void start() {
         if (this.pluginDir == null) {
             return;
         }
@@ -112,6 +112,7 @@ public class UIPluginDeployer implements ApplicationContextAware {
     }
 
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
         try {
             this.pluginDir = applicationContext.getResource("hqu").getFile();
         } catch (IOException e) {

@@ -29,15 +29,15 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
+import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
@@ -79,10 +79,6 @@ public class Agent implements ContainerManagedTimestampTrackable, Serializable {
     @Column(name = "ID")
     private Integer id;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "MANAGED_RESOURCES", joinColumns = { @JoinColumn(name = "AGENT_ID") }, inverseJoinColumns = { @JoinColumn(name = "RESOURCE_ID") })
-    private Set<Resource> managedResources = new HashSet<Resource>();
-
     @Column(name = "MTIME")
     private Long modifiedTime;
 
@@ -108,10 +104,6 @@ public class Agent implements ContainerManagedTimestampTrackable, Serializable {
         this.authToken = authToken;
         this.agentToken = agentToken;
         this.agentVersion = version;
-    }
-
-    public void addManagedResource(Resource resource) {
-        managedResources.add(resource);
     }
 
     public boolean allowContainerManagedCreationTime() {
@@ -176,10 +168,6 @@ public class Agent implements ContainerManagedTimestampTrackable, Serializable {
         return id;
     }
 
-    public Set<Resource> getManagedResources() {
-        return managedResources;
-    }
-
     public long getModifiedTime() {
         return modifiedTime != null ? modifiedTime.longValue() : 0;
     }
@@ -213,10 +201,6 @@ public class Agent implements ContainerManagedTimestampTrackable, Serializable {
 
     public boolean isUnidirectional() {
         return unidirectional;
-    }
-
-    public void removeManagedResource(Resource resource) {
-        managedResources.remove(resource);
     }
 
     public void setAddress(String address) {

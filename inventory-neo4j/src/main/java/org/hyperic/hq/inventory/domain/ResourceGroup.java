@@ -3,11 +3,7 @@ package org.hyperic.hq.inventory.domain;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.Entity;
-import javax.persistence.Transient;
-
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.data.graph.annotation.GraphProperty;
 import org.springframework.data.graph.annotation.NodeEntity;
 import org.springframework.data.graph.annotation.RelatedTo;
@@ -21,18 +17,15 @@ import org.springframework.transaction.annotation.Transactional;
  * @author dcrutchfield
  * 
  */
-@Entity
-@NodeEntity(partial = true)
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@Configurable
+@NodeEntity
 public class ResourceGroup
     extends Resource {
 
     @RelatedTo(type = RelationshipTypes.HAS_MEMBER, direction = Direction.OUTGOING, elementClass = Resource.class)
-    @Transient
     private Set<Resource> members;
 
     @GraphProperty
-    @Transient
     private boolean privateGroup;
 
     public ResourceGroup() {
@@ -62,7 +55,7 @@ public class ResourceGroup
      * 
      * @param member Add a member to the group
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void addMember(Resource member) {
         if (this.members == null) {
             this.members = new HashSet<Resource>();
@@ -76,6 +69,14 @@ public class ResourceGroup
      */
     public Set<Resource> getMembers() {
         return members;
+    }
+    
+    public Set<Integer> getMemberIds() {
+        Set<Integer> memberIds = new HashSet<Integer>();
+        for(Resource member: members) {
+            memberIds.add(member.getId());
+        }
+        return memberIds;
     }
 
     /**
@@ -99,7 +100,7 @@ public class ResourceGroup
      * 
      * @param member Remove a group member
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void removeMember(Resource member) {
         members.remove(member);
     }

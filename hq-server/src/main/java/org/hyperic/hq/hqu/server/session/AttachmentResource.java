@@ -25,16 +25,12 @@
 
 package org.hyperic.hq.hqu.server.session;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Index;
-import org.hyperic.hq.inventory.domain.Resource;
 
 @Entity
 @Table(name = "EAM_UI_ATTACH_RSRC")
@@ -45,15 +41,14 @@ public class AttachmentResource
     @Column(name = "CATEGORY", nullable = false, length = 255)
     private String category;
 
-    @ManyToOne(cascade = { CascadeType.MERGE, CascadeType.PERSIST })
-    @JoinColumn(name = "RESOURCE_ID", nullable = false)
+    @Column(name = "RESOURCE_ID", nullable = false)
     @Index(name = "UI_ATTACHMENT_RES_ID_IDX")
-    private Resource resource;
+    private Integer resource;
 
     protected AttachmentResource() {
     }
 
-    public AttachmentResource(ViewResource view, ViewResourceCategory cat, Resource r) {
+    public AttachmentResource(ViewResource view, ViewResourceCategory cat, Integer r) {
         super(view);
         category = cat.getDescription();
         resource = r;
@@ -80,7 +75,7 @@ public class AttachmentResource
         return category;
     }
 
-    public Resource getResource() {
+    public Integer getResource() {
         return resource;
     }
 
@@ -96,12 +91,12 @@ public class AttachmentResource
         category = cat;
     }
 
-    protected void setResource(Resource r) {
+    protected void setResource(Integer r) {
         resource = r;
     }
 
     public String toString() {
-        return super.toString() + " (to " + resource.getName() + " under " +
+        return super.toString() + " (to " + resource + " under " +
                getCategory().getValue() + ")";
     }
 }

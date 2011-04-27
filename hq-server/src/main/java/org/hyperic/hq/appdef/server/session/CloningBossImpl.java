@@ -55,19 +55,6 @@ public class CloningBossImpl implements CloningBoss {
     }
 
     /**
-     * @param subj
-     * @param pType platform type
-     * @param nameRegEx regex which matches either the platform fqdn or the
-     *        resource sortname
-     * 
-     */
-    @Transactional(readOnly = true)
-    public List<Platform> findPlatformsByTypeAndName(AuthzSubject subj, Integer pType,
-                                                     String nameRegEx) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
      * @param subj Method ensures that the master platform has viewable
      *        permissions and the clone targets have modifiable permissions.
      * @param platformId master platform id

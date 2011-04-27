@@ -1,5 +1,7 @@
 package org.hyperic.hq.galert.data;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.Arrays;
 
 import javax.persistence.EntityManager;
@@ -13,8 +15,6 @@ import org.hyperic.hq.galerts.server.session.GalertAuxLogProvider;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.server.session.GalertDefPartition;
 import org.hyperic.hq.galerts.server.session.GalertLog;
-import org.hyperic.hq.inventory.domain.Resource;
-import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.galerts.MetricAuxLog;
 import org.hyperic.hq.measurement.server.session.Category;
@@ -29,7 +29,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
-import static org.junit.Assert.assertEquals;
 
 @DirtiesContext
 @Transactional
@@ -45,9 +44,7 @@ public class GalertAuxLogRepositoryIntegrationTest {
 
     @Test
     public void testDeleteByDef() {
-        ResourceGroup group2 = new ResourceGroup();
-        group2.setName("Group2");
-        entityManager.persist(group2);
+        int group2 = 98342;
         GalertDef def1 = new GalertDef("Platforms Down", "desc", AlertSeverity.HIGH, true, group2);
         entityManager.persist(def1);
         GalertDef def2 = new GalertDef("CPU High", "desc", AlertSeverity.HIGH, true, group2);
@@ -73,12 +70,8 @@ public class GalertAuxLogRepositoryIntegrationTest {
     @Test
     public void testResetAuxType() {
         long timestamp = System.currentTimeMillis();
-        ResourceGroup group2 = new ResourceGroup();
-        group2.setName("Group2");
-        entityManager.persist(group2);
-        Resource resource = new Resource();
-        resource.setName("Resource1");
-        entityManager.persist(resource);
+        int group2 = 98342;
+        int resource = 99999;
         MonitorableType type = new MonitorableType("Tomcat Server", "tomcat");
         entityManager.persist(type);
         Category category = new Category("Availability");

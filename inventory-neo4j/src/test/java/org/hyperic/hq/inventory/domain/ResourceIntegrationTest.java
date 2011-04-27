@@ -10,9 +10,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.inventory.InvalidRelationshipException;
@@ -32,7 +29,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 @DirtiesContext
-@Transactional
+@Transactional("neoTxManager")
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "classpath:META-INF/spring/neo4j-context.xml",
                                    "classpath:org/hyperic/hq/inventory/InventoryIntegrationTest-context.xml" })
@@ -54,9 +51,6 @@ public class ResourceIntegrationTest {
 
     @Autowired
     private MockMessagePublisher messagePublisher;
-
-    @PersistenceContext
-    private EntityManager entityManager;
 
     @Before
     public void initializeTestData() throws ApplicationException, NotFoundException {
@@ -148,20 +142,9 @@ public class ResourceIntegrationTest {
         assertEquals("123 My Street", traderJoes.getProperty("Address"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testGetPropertyNotDefined() {
-        traderJoes.getProperty("Hours");
-    }
-
     @Test
     public void testGetPropertyNotSet() {
         assertNull(traderJoes.getProperty("Address"));
-    }
-
-    @Test
-    public void testGetPropertyNotSetDefaultValue() {
-        store.getPropertyType("Address").setDefaultValue("Jones St");
-        assertEquals("Jones St", traderJoes.getProperty("Address"));
     }
 
     @Test
@@ -311,16 +294,17 @@ public class ResourceIntegrationTest {
         produce.relateTo(traderJoes, "ManagedBy");
     }
 
-    @Test
+    @Test(expected=IllegalStateException.class)
     public void testRemove() {
         Config product = new Config();
         product.setType(store.getConfigType("Product"));
         product.setValue("user", "bob");
         traderJoes.addConfig(product);
+        int traderJoesId = traderJoes.getId();
         traderJoes.remove();
         // verify relationship removed
         assertEquals(1, produce.getRelationships().size());
-        assertNull(resourceDao.findById(traderJoes.getId()));
+        resourceDao.findById(traderJoesId);
     }
 
     @Test
@@ -395,11 +379,6 @@ public class ResourceIntegrationTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testSetPropertyNotDefined() {
-        traderJoes.setProperty("Hours", "9-5");
-    }
-
-    @Test(expected = IllegalArgumentException.class)
     public void testSetPropertyToNull() {
         traderJoes.setProperty("Address", null);
     }
@@ -418,7 +397,7 @@ public class ResourceIntegrationTest {
     public void testAddConfigInvalidType() {
         Config measurement = new Config();
         ConfigType measType = new ConfigType("Measurement");
-        entityManager.persist(measType);
+       
         measType.persist();
         measurement.setType(measType);
         traderJoes.addConfig(measurement);
@@ -433,10 +412,11 @@ public class ResourceIntegrationTest {
     public void testGetConfigInvalidType() {
         assertNull(traderJoes.getConfig("Measurement"));
     }
-
-    @Test(expected = NotUniqueException.class)
-    public void testPersistResourceAlreadyExists() {
-        resourceDao.persist(new Resource("Trader Joes", store));
+    
+    @Test
+    public void testSetSortName() {
+        Resource res = new Resource("Trader Joe!!!:;s", store);
+        resourceDao.persist(res);
+        assertEquals("TRADERJOES",res.getSortName());
     }
-
 }

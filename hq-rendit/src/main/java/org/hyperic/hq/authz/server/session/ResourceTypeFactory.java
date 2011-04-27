@@ -1,6 +1,7 @@
 package org.hyperic.hq.authz.server.session;
 
-import org.hyperic.hq.appdef.shared.AppdefUtil;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
+import org.hyperic.hq.context.Bootstrap;
 
 abstract public class ResourceTypeFactory {
 
@@ -12,7 +13,7 @@ abstract public class ResourceTypeFactory {
         resourceTypeDto.setId(resourceType.getId());
         resourceTypeDto.setName(resourceType.getName());
         try {
-            int appdefType = AppdefUtil.getAppdefType(resourceType);
+            int appdefType = Bootstrap.getBean(AppdefConverter.class).getAppdefType(resourceType);
             resourceTypeDto.setAppdefType(appdefType);
             //TODO other fields
             return resourceTypeDto;

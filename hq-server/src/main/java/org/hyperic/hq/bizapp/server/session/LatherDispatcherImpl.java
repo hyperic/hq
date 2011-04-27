@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -51,6 +52,7 @@ import org.hyperic.hq.appdef.shared.AgentCreateException;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AgentUnauthorizedException;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
@@ -93,6 +95,8 @@ import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.control.shared.ControlManager;
 import org.hyperic.hq.ha.HAService;
 import org.hyperic.hq.ha.HAUtil;
+import org.hyperic.hq.inventory.domain.RelationshipTypes;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.data.TrackEventReport;
 import org.hyperic.hq.measurement.server.session.DataInserterException;
 import org.hyperic.hq.measurement.shared.ConfigChangedEvent;
@@ -374,6 +378,18 @@ public class LatherDispatcherImpl implements LatherDispatcher {
                             zevent = new ResourceRefreshZevent(overlord, service.getEntityId());
                             zevents.add(zevent);
                         }
+                    }
+                    //Add deprecated "virtual" servers so they have runtime AI enabled
+                    Set<Resource> virtualServers = platform.getResource().getResourcesFrom(RelationshipTypes.VIRTUAL);
+                    for(Resource virtualServer : virtualServers) {
+                        ResourceRefreshZevent event = new ResourceRefreshZevent(overlord, 
+                            new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVER, virtualServer.getId()));
+                        zevents.add(event);
+                    }
+                    //Platform services (no longer children of virtual servers)
+                    for (Service service :platform.getServices()) {
+                        zevent = new ResourceRefreshZevent(overlord, service.getEntityId());
+                        zevents.add(zevent);
                     }
                 }
 

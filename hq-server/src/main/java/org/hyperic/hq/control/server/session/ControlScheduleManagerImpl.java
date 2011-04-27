@@ -36,10 +36,10 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
@@ -104,17 +104,20 @@ public class ControlScheduleManagerImpl
     private ControlScheduleRepository controlScheduleRepository; 
     private PermissionManager permissionManager;
     private ResourceManager resourceManager;
+    private AppdefConverter appdefConverter;
   
 
     @Autowired
     public ControlScheduleManagerImpl(Scheduler scheduler, DBUtil dbUtil, ControlHistoryRepository controlHistoryRepository,
                                       ControlScheduleRepository controlScheduleRepository, 
-                                      PermissionManager permissionManager, ResourceManager resourceManager) {
+                                      PermissionManager permissionManager, ResourceManager resourceManager,
+                                      AppdefConverter appdefConverter) {
         super(scheduler, dbUtil);
         this.controlHistoryRepository = controlHistoryRepository;
         this.controlScheduleRepository = controlScheduleRepository;
         this.permissionManager = permissionManager;
         this.resourceManager = resourceManager;
+        this.appdefConverter = appdefConverter;
     }
 
     protected String getHistoryPagerClass() {
@@ -174,7 +177,7 @@ public class ControlScheduleManagerImpl
             int count = 0;
             for (Iterator<ControlHistory> i = recent.iterator(); i.hasNext();) {
                 ControlHistory cLocal = i.next();
-                AppdefEntityID entity = AppdefUtil.newAppdefEntityId(cLocal.getResource());
+                AppdefEntityID entity = appdefConverter.newAppdefEntityId(cLocal.getResource());
                 try {
                     checkControlPermission(subject, entity);
 
@@ -217,7 +220,7 @@ public class ControlScheduleManagerImpl
             int count = 0;
             for (Iterator<ControlSchedule> i = pending.iterator(); i.hasNext();) {
                 ControlSchedule sLocal = i.next();
-                AppdefEntityID entity = AppdefUtil.newAppdefEntityId(sLocal.getResource());
+                AppdefEntityID entity = appdefConverter.newAppdefEntityId(sLocal.getResource());
                 try {
                     checkControlPermission(subject, entity);
                     if (++count > rows)
@@ -257,7 +260,7 @@ public class ControlScheduleManagerImpl
         try {
               List<ControlFrequency> frequencies = controlHistoryRepository.getControlFrequencies(numToReturn);
               for(ControlFrequency frequency: frequencies) {
-                 AppdefEntityID resourceId = AppdefUtil.newAppdefEntityId(resourceManager.findResourceById(frequency.getId()));
+                 AppdefEntityID resourceId = appdefConverter.newAppdefEntityId(resourceManager.findResourceById(frequency.getId()));
                  try {
                      checkControlPermission(subject, resourceId);
                  } catch (PermissionException e) {
@@ -665,7 +668,7 @@ public class ControlScheduleManagerImpl
                                               String jobName, String jobOrderData) {
         ControlSchedule s = new ControlSchedule();
         try {
-            s.setResource(resource);
+            s.setResource(resource.getId());
             s.setSubject(subject);
             s.setScheduleValue(schedule);
             s.setNextFireTime(nextFire);
@@ -700,8 +703,7 @@ public class ControlScheduleManagerImpl
     public Integer createHistory(AppdefEntityID id, Integer groupId, Integer batchId, String subjectName,
                                         String action, String args, Boolean scheduled, long startTime, long stopTime,
                                         long scheduleTime, String status, String description, String errorMessage) {
-        Resource resource = resourceManager.findResourceById(id.getId());
-        ControlHistory controlHistory = new ControlHistory(resource, groupId, batchId, subjectName, action, truncateText(MAX_HISTORY_TEXT_SIZE,
+        ControlHistory controlHistory = new ControlHistory(id.getId(), groupId, batchId, subjectName, action, truncateText(MAX_HISTORY_TEXT_SIZE,
             args), scheduled, startTime, stopTime, scheduleTime, status, truncateText(MAX_HISTORY_TEXT_SIZE,
             description), truncateText(MAX_HISTORY_TEXT_SIZE, errorMessage));
         controlHistoryRepository.save(controlHistory);
@@ -769,7 +771,9 @@ public class ControlScheduleManagerImpl
     private class ControlHistoryLocalComparatorAsc implements Comparator<ControlHistory> {
 
         public int compare(ControlHistory o1, ControlHistory o2) {
-            return o1.getResource().getName().compareTo(o2.getResource().getName());
+            Resource res1 = resourceManager.findResourceById(o1.getResource());
+            Resource res2 = resourceManager.findResourceById(o2.getResource());
+            return res1.getName().compareTo(res2.getName());
         }
 
         public boolean equals(Object other) {
@@ -780,7 +784,9 @@ public class ControlScheduleManagerImpl
     private class ControlHistoryLocalComparatorDesc implements Comparator<ControlHistory> {
 
         public int compare(ControlHistory o1, ControlHistory o2) {
-            return -(o1.getResource().getName().compareTo(o2.getResource().getName()));
+            Resource res1 = resourceManager.findResourceById(o1.getResource());
+            Resource res2 = resourceManager.findResourceById(o2.getResource());
+            return -(res1.getName().compareTo(res2.getName()));
         }
 
         public boolean equals(Object other) {

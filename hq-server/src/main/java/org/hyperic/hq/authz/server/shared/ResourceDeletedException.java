@@ -25,15 +25,14 @@
 
 package org.hyperic.hq.authz.server.shared;
 
-import org.hyperic.hq.inventory.domain.Resource;
 
 public class ResourceDeletedException extends Exception {
     public ResourceDeletedException(String m, Throwable t) {
         super(m, t);
     }
 
-    public static ResourceDeletedException newInstance(Resource r) {
-        final String m = "Resource with id " + r.getId() + " not found";
+    public static ResourceDeletedException newInstance(Integer resourceId) {
+        final String m = "Resource with id " + resourceId + " not found";
         return new ResourceDeletedException(m);
     }
 

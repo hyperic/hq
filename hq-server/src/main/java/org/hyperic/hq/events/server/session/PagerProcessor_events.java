@@ -62,8 +62,8 @@ public class PagerProcessor_events implements PagerProcessorExt {
                 return aval; 
             } else if (o instanceof AlertDefinition) {
                 AlertDefinition def = (AlertDefinition) o;
-                Resource r = def.getResource();
-                if (r == null || r.isInAsyncDeleteState()) {
+                Integer r = def.getResource();
+                if (r == null) {
                     return null;
                 } else {
                     return def.getAlertDefinitionValue();

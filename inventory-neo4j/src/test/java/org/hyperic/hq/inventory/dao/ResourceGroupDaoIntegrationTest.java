@@ -24,7 +24,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 @DirtiesContext
-@Transactional
+@Transactional("neoTxManager")
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "classpath:META-INF/spring/neo4j-context.xml",
                                    "classpath:org/hyperic/hq/inventory/InventoryIntegrationTest-context.xml" })
@@ -38,11 +38,13 @@ public class ResourceGroupDaoIntegrationTest {
     private ResourceGroup group1;
     
     private ResourceGroup group2;
+    
+    private ResourceType type;
    
 
     @Before
     public void initializeTestData() throws ApplicationException, NotFoundException {
-        ResourceType type = new ResourceType("TestGroupType");
+        type = new ResourceType("TestGroupType");
         resourceTypeDao.persist(type);
         this.group1 = new ResourceGroup("Some Group", type);
         resourceGroupDao.persist(group1);
@@ -59,12 +61,7 @@ public class ResourceGroupDaoIntegrationTest {
     public void testFindByIdNonExistent() {
         assertNull(resourceGroupDao.findById(98765));
     }
-    
-    @Test
-    public void testFindByIdNullId() {
-        assertNull(resourceGroupDao.findById(null));
-    }
-    
+      
     @Test
     public void testFindAll() {
         Set<Resource> expected = new HashSet<Resource>();
@@ -90,6 +87,16 @@ public class ResourceGroupDaoIntegrationTest {
     public void testFindPagedFirstResultLargerThanSize() {
         List<ResourceGroup> resources = resourceGroupDao.find(6, 10);
         assertEquals(0,resources.size());
+    }
+    
+    @Test
+    public void testFindByIndexedProperty() {
+        List<ResourceGroup> actual = resourceGroupDao
+            .findByIndexedProperty("type",type.getId());
+        Set<ResourceGroup> expected = new HashSet<ResourceGroup>();
+        expected.add(group1);
+        expected.add(group2);
+        assertEquals(expected, new HashSet<Resource>(actual));
     }
     
     @Test

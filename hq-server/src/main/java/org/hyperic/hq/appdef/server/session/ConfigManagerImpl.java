@@ -30,14 +30,11 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManager;
-import org.hyperic.hq.appdef.shared.PlatformManager;
-import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -46,6 +43,7 @@ import org.hyperic.hq.autoinventory.AICompare;
 import org.hyperic.hq.inventory.domain.Config;
 import org.hyperic.hq.inventory.domain.ConfigOptionType;
 import org.hyperic.hq.inventory.domain.ConfigType;
+import org.hyperic.hq.inventory.domain.RelationshipTypes;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.config.ConfigResponse;
@@ -62,16 +60,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class ConfigManagerImpl implements ConfigManager {
     protected final Log log = LogFactory.getLog(ConfigManagerImpl.class.getName());
     private ServiceManager serviceManager;
-    private ServerManager serverManager;
-    private PlatformManager platformManager;
     private ResourceManager resourceManager;
 
     @Autowired
-    public ConfigManagerImpl(ServiceManager serviceManager, ServerManager serverManager,
-                             PlatformManager platformManager, ResourceManager resourceManager) {
+    public ConfigManagerImpl(ServiceManager serviceManager, ResourceManager resourceManager) {
         this.serviceManager = serviceManager;
-        this.serverManager = serverManager;
-        this.platformManager = platformManager;
         this.resourceManager = resourceManager;
     }
 
@@ -217,13 +210,10 @@ public class ConfigManagerImpl implements ConfigManager {
             responseList[responseIdx++] = data;
 
             if (!isProductType) {
-                if (productType.equals(ProductPlugin.TYPE_RESPONSE_TIME)) {
-                    // Skip merging of response time configuration
-                    // since platforms don't have it.
-                } else {
+               
                     data = getConfigForType(productType, platformId, platformConfigRequired);
                     responseList[responseIdx++] = data;
-                }
+                
             }
         }
 
@@ -237,14 +227,9 @@ public class ConfigManagerImpl implements ConfigManager {
 
             if (!isProductType) {
                 required = id.isServer() && origReq; // Reset the required flag
-
-                if (productType.equals(ProductPlugin.TYPE_RESPONSE_TIME)) {
-                    // Skip merging of response time configuration
-                    // since servers don't have it.
-                } else {
-                    data = getConfigForType(productType, serverId, required);
-                    responseList[responseIdx++] = data;
-                }
+                data = getConfigForType(productType, serverId, required);
+                responseList[responseIdx++] = data;
+                
             }
         }
 
@@ -416,9 +401,10 @@ public class ConfigManagerImpl implements ConfigManager {
     private ServerConfigStuff getServerStuffForServer(Integer id)
         throws AppdefEntityNotFoundException {
 
-        Server server = serverManager.findServerById(id);
+        Resource server = resourceManager.findResourceById(id);
 
-        return new ServerConfigStuff(server.getId().intValue(), server.getInstallPath());
+        return new ServerConfigStuff(server.getId().intValue(), 
+            (String)server.getProperty(ServerFactory.INSTALL_PATH));
     }
 
     private PlatformConfigStuff getPlatformStuffForService(Integer id)
@@ -432,21 +418,22 @@ public class ConfigManagerImpl implements ConfigManager {
         Platform platform = (Platform) platRes;
         PlatformConfigStuff pConfig = new PlatformConfigStuff(platform.getId().intValue(),
             platform.getName(), platform.getFqdn(), platform.getPlatformType().getName());
-        loadPlatformIp(platform, pConfig);
+        loadPlatformIp(platform.getResource(), pConfig);
         return pConfig;
     }
 
     private PlatformConfigStuff getPlatformStuffForServer(Integer id)
         throws AppdefEntityNotFoundException {
 
-        Server server = serverManager.findServerById(id);
-        Platform platform = server.getPlatform();
+        Resource server = resourceManager.findResourceById(id);
+        Resource platform = server.getResourceTo(RelationshipTypes.SERVER);
         if (platform == null) {
             return null;
         }
 
         PlatformConfigStuff pConfig = new PlatformConfigStuff(platform.getId().intValue(),
-            platform.getName(), platform.getFqdn(), platform.getPlatformType().getName());
+            platform.getName(), (String)platform.getProperty(PlatformFactory.FQDN), 
+            platform.getType().getName());
         loadPlatformIp(platform, pConfig);
         return pConfig;
     }
@@ -454,23 +441,23 @@ public class ConfigManagerImpl implements ConfigManager {
     private PlatformConfigStuff getPlatformStuffForPlatform(Integer id)
         throws AppdefEntityNotFoundException {
 
-        Platform platform = platformManager.findPlatformById(id);
+        Resource platform = resourceManager.findResourceById(id);
 
         PlatformConfigStuff pConfig = new PlatformConfigStuff(platform.getId().intValue(),
-            platform.getName(), platform.getFqdn(), platform.getPlatformType().getName());
+            platform.getName(), (String)platform.getProperty(PlatformFactory.FQDN), 
+            platform.getType().getName());
         loadPlatformIp(platform, pConfig);
         return pConfig;
     }
 
-    private void loadPlatformIp(Platform platform, PlatformConfigStuff pConfig)
+    private void loadPlatformIp(Resource platform, PlatformConfigStuff pConfig)
         throws AppdefEntityNotFoundException {
-
-        Collection<Ip> ips = platform.getIps();
-        for (Ip ip : ips) {
-
-            if (!ip.getAddress().equals("127.0.0.1")) {
+        
+        Collection<Resource> ips = platform.getResourcesFrom(RelationshipTypes.IP);
+        for (Resource ip : ips) {
+            if (!ip.getProperty(PlatformFactory.IP_ADDRESS).equals("127.0.0.1")) {
                 // First non-loopback address
-                pConfig.ip = ip.getAddress();
+                pConfig.ip = (String)ip.getProperty(PlatformFactory.IP_ADDRESS);
                 break;
             }
         }

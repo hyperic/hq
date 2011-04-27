@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
-import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.server.session.AvailabilityDataRLE;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,5 +42,5 @@ public interface AvailabilityDataCustom {
     List<AvailabilityDataRLE> getHistoricalAvails(Measurement m, long start, long end,
                                                   boolean descending);
 
-    List<AvailabilityDataRLE> getHistoricalAvails(Resource resource, long start, long end);
+    List<AvailabilityDataRLE> getHistoricalAvails(Integer resource, long start, long end);
 }

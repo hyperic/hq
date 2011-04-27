@@ -25,19 +25,10 @@
 
 	<context:component-scan base-package="org.hyperic.hq.inventory" />
 
-	<tx:annotation-driven mode="aspectj"
-		transaction-manager="transactionManager" />
-
-	<jdbc:embedded-database id="dataSource" type="HSQL" />
-
-	<bean id="persistenceUnitMgr"
-		class="org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager">
-		<property name="persistenceXmlLocation" value="classpath*:META-INF/test-persistence.xml"/>
-		<property name="defaultDataSource" ref="dataSource"/>
-	</bean>
-
-	<bean id="persistenceProvider" class="org.hibernate.ejb.HibernatePersistence" />
+	<tx:annotation-driven mode="aspectj"/>
 	
 	<bean id="messagePublisher" class="org.hyperic.hq.messaging.MockMessagePublisher"/>
+	
+	<bean id="neo4jStoreFactory" class="org.hyperic.hq.inventory.store.NeoStoreLocationFactory"/>
 
 </beans>

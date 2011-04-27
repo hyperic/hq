@@ -45,8 +45,8 @@ import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.mgmt.domain.Agent;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.inventory.domain.Resource;
@@ -83,6 +83,7 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
     private ResourceManager resourceManager;
     private ZeventEnqueuer zEventManager;
     private ConcurrentStatsCollector concurrentStatsCollector;
+    private AppdefConverter appdefConverter;
     
     @Autowired
     public MeasurementProcessorImpl(AgentManager agentManager, MeasurementManager measurementManager,
@@ -90,7 +91,8 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
                                     AgentMonitor agentMonitor,
                                     MeasurementCommandsClientFactory measurementCommandsClientFactory, 
                                     ResourceManager resourceManager, AvailabilityManager availManager,
-                                    ZeventEnqueuer zEventManager, ConcurrentStatsCollector concurrentStatsCollector) {
+                                    ZeventEnqueuer zEventManager, ConcurrentStatsCollector concurrentStatsCollector,
+                                    AppdefConverter appdefConverter) {
 
         this.agentManager = agentManager;
         this.measurementManager = measurementManager;
@@ -101,6 +103,7 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
         this.availManager = availManager;
         this.zEventManager = zEventManager;
         this.concurrentStatsCollector = concurrentStatsCollector;
+        this.appdefConverter = appdefConverter;
     }
     
     @PostConstruct
@@ -132,12 +135,12 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
                 continue;
             }
             final Set<Resource> children= resource.getChildren(true);
-            aeids.add(AppdefUtil.newAppdefEntityId(resource));
+            aeids.add(appdefConverter.newAppdefEntityId(resource));
             for (Resource child: children ) { 
                 if (child == null || child.isInAsyncDeleteState()) {
                     continue;
                 }
-                aeids.add(AppdefUtil.newAppdefEntityId(child));
+                aeids.add(appdefConverter.newAppdefEntityId(child));
             }
         }
         if (!aeids.isEmpty()) {

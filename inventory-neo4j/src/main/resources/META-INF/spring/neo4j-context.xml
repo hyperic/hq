@@ -1,122 +1,103 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context"
-	xmlns:jee="http://www.springframework.org/schema/jee" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:datagraph="http://www.springframework.org/schema/data/graph"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd   http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd   http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd   http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd   http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
+	xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd 
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+	http://www.springframework.org/schema/data/graph http://www.springframework.org/schema/data/graph/datagraph-1.0.xsd">
+
+	<bean id="graphDatabaseService" class="org.neo4j.kernel.EmbeddedGraphDatabase"
+		destroy-method="shutdown">
+		<constructor-arg ref="neo4jStoreFactory" />
+	</bean>
+
+	<bean id="graphDatabaseContext"
+		class="org.springframework.data.graph.neo4j.support.GraphDatabaseContext">
+		<property name="graphDatabaseService" ref="graphDatabaseService" />
+		<property name="conversionService">
+			<bean
+				class="org.springframework.data.graph.neo4j.fieldaccess.Neo4jConversionServiceFactoryBean" />
+		</property>
+		<property name="nodeTypeRepresentationStrategy">
+			<bean factory-bean="typeRepStrategyFactory" factory-method="getNodeTypeRepresentationStrategy" />
+		</property>
+		<property name="relationshipTypeRepresentationStrategy">
+			<bean factory-bean="typeRepStrategyFactory" factory-method="getRelationshipTypeRepresentationStrategy" />
+		</property>
+	</bean>
+
+
+	<bean id="graphEntityInstantiator"
+		class="org.hyperic.hq.inventory.support.InventoryNodeEntityInstantiator" />
+
+	<bean id="relationshipEntityInstantiator"
+		class="org.hyperic.hq.inventory.support.InventoryRelationshipEntityInstantiator" />
+
+
+	<bean id="typeRepStrategyFactory"
+		class="org.springframework.data.graph.neo4j.support.typerepresentation.TypeRepresentationStrategyFactory">
+		<constructor-arg ref="graphDatabaseService" />
+		<constructor-arg ref="graphEntityInstantiator" />
+		<constructor-arg ref="relationshipEntityInstantiator" />
+	</bean>
+
+	<bean id="repositoryFactory"
+		class="org.springframework.data.graph.neo4j.repository.DirectGraphRepositoryFactory">
+		<constructor-arg ref="graphDatabaseContext" />
+	</bean>
 
 	<bean id="neo4jNodeBacking"
 		class="org.springframework.data.graph.neo4j.support.node.Neo4jNodeBacking"
 		factory-method="aspectOf">
 		<property name="graphDatabaseContext" ref="graphDatabaseContext" />
-		<property name="nodeEntityStateFactory" ref="nodeEntityStateFactory" />
+		<property name="nodeEntityStateFactory">
+			<bean
+				class="org.springframework.data.graph.neo4j.support.node.NodeEntityStateFactory">
+				<property name="graphDatabaseContext" ref="graphDatabaseContext" />
+				<property name="nodeDelegatingFieldAccessorFactory">
+					<bean
+						class="org.springframework.data.graph.neo4j.fieldaccess.NodeDelegatingFieldAccessorFactory">
+						<constructor-arg ref="graphDatabaseContext" />
+					</bean>
+				</property>
+			</bean>
+		</property>
 	</bean>
 
 	<bean id="neo4jRelationshipBacking"
 		class="org.springframework.data.graph.neo4j.support.relationship.Neo4jRelationshipBacking"
 		factory-method="aspectOf">
 		<property name="graphDatabaseContext" ref="graphDatabaseContext" />
-		<property name="relationshipEntityStateFactory" ref="relationshipEntityStateFactory" />
-	</bean>
-
-	<bean id="graphDatabaseService" class="org.neo4j.kernel.EmbeddedGraphDatabase"
-		destroy-method="shutdown" scope="singleton">
-		<constructor-arg index="0" value="${neo4j.location}" />
-	</bean>
-	<bean id="nodeTypeStrategy"
-		class="org.springframework.data.graph.neo4j.support.SubReferenceNodeTypeStrategy">
-		<constructor-arg index="0" ref="graphDatabaseContext" />
-	</bean>
-	<bean id="graphDatabaseContext"
-		class="org.springframework.data.graph.neo4j.support.GraphDatabaseContext">
-		<property name="graphDatabaseService" ref="graphDatabaseService" />
-		<property name="relationshipEntityInstantiator">
+		<property name="relationshipEntityStateFactory">
 			<bean
-				class="org.springframework.data.graph.neo4j.support.relationship.ConstructorBypassingGraphRelationshipInstantiator" />
-		</property>
-		<property name="graphEntityInstantiator">
-			<bean
-				class="org.springframework.data.graph.neo4j.support.node.PartialNeo4jEntityInstantiator">
-				<constructor-arg>
-					<bean
-						class="org.springframework.data.graph.neo4j.support.node.Neo4jConstructorGraphEntityInstantiator" />
-				</constructor-arg>
-				<constructor-arg ref="entityManagerFactory" />
-			</bean>
-		</property>
-		<property name="conversionService">
-			<bean
-				class="org.springframework.data.graph.neo4j.fieldaccess.Neo4jConversionServiceFactoryBean" />
-		</property>
-		<property name="nodeTypeStrategy">
-			<bean
-				class="org.springframework.data.graph.neo4j.support.SubReferenceNodeTypeStrategy">
-				<constructor-arg index="0" ref="graphDatabaseContext" />
+				class="org.springframework.data.graph.neo4j.support.relationship.RelationshipEntityStateFactory">
+				<property name="graphDatabaseContext" ref="graphDatabaseContext" />
 			</bean>
 		</property>
 	</bean>
 
-	<bean id="nodeEntityStateFactory"
-		class="org.springframework.data.graph.neo4j.fieldaccess.NodeEntityStateFactory">
-		<property name="nodeDelegatingFieldAccessorFactory">
-			<bean
-				class="org.springframework.data.graph.neo4j.fieldaccess.NodeDelegatingFieldAccessorFactory">
-				<constructor-arg ref="graphDatabaseContext" />
-				<constructor-arg ref="finderFactory" />
+	<bean id="neoTxManager"
+		class="org.springframework.transaction.jta.JtaTransactionManager">
+		<property name="transactionManager">
+			<bean class="org.neo4j.kernel.impl.transaction.SpringTransactionManager">
+				<constructor-arg ref="graphDatabaseService" />
 			</bean>
 		</property>
-		<property name="graphDatabaseContext" ref="graphDatabaseContext" />
-		<property name="finderFactory" ref="finderFactory" />
-	</bean>
-
-	<bean id="relationshipEntityStateFactory"
-		class="org.springframework.data.graph.neo4j.fieldaccess.RelationshipEntityStateFactory">
-		<property name="graphDatabaseContext" ref="graphDatabaseContext" />
-		<property name="finderFactory" ref="finderFactory" />
-	</bean>
-
-	<bean id="finderFactory"
-		class="org.springframework.data.graph.neo4j.finder.FinderFactory">
-		<constructor-arg ref="graphDatabaseContext" />
-	</bean>
-
-	<bean id="neo4jTransactionManagerService"
-		class="org.neo4j.kernel.impl.transaction.SpringTransactionManager">
-		<constructor-arg index="0" ref="graphDatabaseService" />
-	</bean>
-
-	<bean id="neo4jUserTransactionService" class="org.neo4j.kernel.impl.transaction.UserTransactionImpl">
-		<constructor-arg index="0" ref="graphDatabaseService" />
-	</bean>
-
-	<bean id="transactionManager"
-		class="org.springframework.data.graph.neo4j.transaction.ChainedTransactionManager">
-		<constructor-arg>
-			<list>
-				<bean class="org.springframework.orm.jpa.JpaTransactionManager"
-					id="jpaTransactionManager">
-					<property name="entityManagerFactory" ref="entityManagerFactory" />
-				</bean>
-
-				<bean class="org.springframework.transaction.jta.JtaTransactionManager">
-					<property name="transactionManager" ref="neo4jTransactionManagerService" />
-					<property name="userTransaction" ref="neo4jUserTransactionService" />
-				</bean>
-			</list>
-		</constructor-arg>
-	</bean>
-
-	<bean
-		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
-		id="entityManagerFactory" depends-on="neo4jNodeBacking,neo4jRelationshipBacking">
-		<property name="dataSource" ref="dataSource" />
-		<!-- HibernateJpaDialect necessary for RequiresNew txs created by our id 
-			generator, HQMultipleHiLoPerTableGenerator -->
-		<property name="jpaDialect">
-			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaDialect" />
+		<property name="userTransaction">
+			<bean class="org.neo4j.kernel.impl.transaction.UserTransactionImpl">
+				<constructor-arg ref="graphDatabaseService" />
+			</bean>
 		</property>
-		<property name="persistenceProvider" ref="persistenceProvider" />
-		<property name="persistenceUnitManager" ref="persistenceUnitMgr" />
+		<qualifier value="neoTxManager" />
 	</bean>
-
+	
+	<bean class="org.springframework.data.graph.neo4j.config.ConfigurationCheck">
+		<constructor-arg ref="graphDatabaseContext"/>
+		<constructor-arg ref="neoTxManager"/>
+	</bean>
+	
+	<bean class="org.springframework.data.graph.neo4j.template.Neo4jExceptionTranslator"/>
+	
 </beans>

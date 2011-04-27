@@ -596,8 +596,6 @@
     <service name="VHost">
       <config include="url,protocol"/>
 
-      <plugin type="responsetime"
-              class="iPlanetRtPlugin"/>
     </service>
   </server>
 

@@ -5,7 +5,6 @@ import java.util.List;
 import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.server.session.GalertLog;
-import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -23,7 +22,7 @@ public interface GalertLogRepositoryCustom {
                                                 boolean inEscalation, boolean notFixed,
                                                 Integer groupId, Integer galertDefId, Sort sort);
 
-    Page<GalertLog> findByGroupAndTimestampBetween(ResourceGroup group, long begin, long end,
+    Page<GalertLog> findByGroupAndTimestampBetween(Integer group, long begin, long end,
                                                    Pageable pageable);
 
     GalertLog findLastByDefinition(GalertDef def, boolean fixed);

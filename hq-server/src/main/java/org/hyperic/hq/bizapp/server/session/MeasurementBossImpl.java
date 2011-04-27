@@ -51,6 +51,7 @@ import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.shared.AppdefCompatException;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -58,7 +59,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ApplicationManager;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
@@ -151,7 +151,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
     private ServerManager serverManager;
     private ServiceManager serviceManager;
     private ApplicationManager applicationManager;
-   
+    private AppdefConverter appdefConverter;
     private ProblemMetricManager problemMetricManager;
 
     @Autowired
@@ -164,7 +164,8 @@ public class MeasurementBossImpl implements MeasurementBoss {
                                ResourceGroupManager resourceGroupManager,
                                ServerManager serverManager, ServiceManager serviceManager,
                                ApplicationManager applicationManager, 
-                               ProblemMetricManager problemMetricManager) {
+                               ProblemMetricManager problemMetricManager,
+                               AppdefConverter appdefConverter) {
         this.sessionManager = sessionManager;
         this.authBoss = authBoss;
         this.measurementManager = measurementManager;
@@ -179,6 +180,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
         this.serviceManager = serviceManager;
         this.applicationManager = applicationManager;
         this.problemMetricManager = problemMetricManager;
+        this.appdefConverter = appdefConverter;
     }
 
     private List<Measurement> findDesignatedMetrics(AuthzSubject subject, AppdefEntityID id,
@@ -1356,7 +1358,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
         List<Measurement> mms = measurementManager.findMeasurements(subject, tid, aeids);
         for (Measurement mm : mms) {
 
-            Integer instanceId = mm.getResource().getId();
+            Integer instanceId = mm.getResource();
             AppdefResourceValue resource = (AppdefResourceValue) resourceMap.get(instanceId
                 .intValue());
 
@@ -1578,7 +1580,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
                     if (r == null || r.isInAsyncDeleteState()) {
                         continue;
                     }
-                    resources.add(AppdefUtil.newAppdefEntityId(r));
+                    resources.add(appdefConverter.newAppdefEntityId(r));
                 }
             } else {
                 // Just one
@@ -1921,11 +1923,11 @@ public class MeasurementBossImpl implements MeasurementBoss {
                 aeid = r.getEntityId();
             } else if (o instanceof Resource) {
                 final Resource resource = (Resource) o;
-                aeid = AppdefUtil.newAppdefEntityId(resource);
+                aeid = appdefConverter.newAppdefEntityId(resource);
             } else if (o instanceof ResourceGroup) {
                 final ResourceGroup grp = (ResourceGroup) o;
                 final Resource resource = grp;
-                aeid = AppdefUtil.newAppdefEntityId(resource);
+                aeid = appdefConverter.newAppdefEntityId(resource);
             } else {
                 final AppdefResourceValue r = (AppdefResourceValue) o;
                 aeid = r.getEntityId();
@@ -2073,7 +2075,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
             if (r == null || r.isInAsyncDeleteState()) {
                 continue;
             }
-            aeids.add(AppdefUtil.newAppdefEntityId(r));
+            aeids.add(appdefConverter.newAppdefEntityId(r));
         }
         final AppdefEntityID[] ids = (AppdefEntityID[]) aeids.toArray(new AppdefEntityID[0]);
         return getMidMap(ids, null);
@@ -2291,7 +2293,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
         for (Measurement m : metrics) {
 
             try {
-                midMap.put(m.getResource().getId(), m);
+                midMap.put(m.getResource(), m);
             } catch (IllegalArgumentException e) {
                 // Resource has been deleted, waiting for purging. Ignore.
             }
@@ -2350,7 +2352,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
 //                List<Resource> children = critterTranslator.translate(ctx, cList).list();
 //                for (Resource child : children) {
 //
-//                    res.add(AppdefUtil.newAppdefEntityId(child));
+//                    res.add(appdefConverter.newAppdefEntityId(child));
 //                }
 //            }
 //        }
@@ -3098,7 +3100,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
                     continue;
                 }
 
-                mmap.put(m.getResource(), m);
+                mmap.put(resourceManager.findResourceById(m.getResource()), m);
             }
             entry.setValue(mmap);
         }
@@ -3114,7 +3116,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
         List<Measurement> metrics = measCache.remove(group.getId());
         for (Measurement meas : metrics) {
 
-            measCache.put(meas.getResource().getId(), Collections.singletonList(meas));
+            measCache.put(meas.getResource(), Collections.singletonList(meas));
         }
 
         // Members are sorted
@@ -3125,7 +3127,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
         watch.markTimeEnd("getLastAvail");
         for (Resource res : members) {
 
-            AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(res);
+            AppdefEntityID aeid = appdefConverter.newAppdefEntityId(res);
             ResourceDisplaySummary summary = new ResourceDisplaySummary();
 
             // Set the resource
@@ -3458,7 +3460,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
             }
         }
 
-        final AppdefEntityID id = AppdefUtil.newAppdefEntityId(res);
+        final AppdefEntityID id = appdefConverter.newAppdefEntityId(res);
         for (Measurement m : resMetrics) {
 
             final MeasurementTemplate templ = m.getTemplate();

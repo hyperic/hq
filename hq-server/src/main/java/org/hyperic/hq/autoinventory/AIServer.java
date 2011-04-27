@@ -114,11 +114,6 @@ public class AIServer implements ContainerManagedTimestampTrackable, Serializabl
     @Column(name="QUEUESTATUS")
     private Integer queueStatus;
     
-    @Basic(fetch=FetchType.LAZY)
-    @Lob
-    @Column(name="RESPONSETIME_CONFIG",length=256)
-    private byte[] responseTimeConfig;
-    
     @Column(name="SERVERTYPENAME",length=200,nullable=false)
     private String serverTypeName;
     
@@ -221,7 +216,6 @@ public class AIServer implements ContainerManagedTimestampTrackable, Serializabl
         aIServerValue.setProductConfig(getProductConfig());
         aIServerValue.setControlConfig(getControlConfig());
         aIServerValue.setMeasurementConfig(getMeasurementConfig());
-        aIServerValue.setResponseTimeConfig(getResponseTimeConfig());
         aIServerValue.setDiff(getDiff());
         aIServerValue.setIgnored(isIgnored());
         aIServerValue.setServerTypeName(
@@ -326,11 +320,6 @@ public class AIServer implements ContainerManagedTimestampTrackable, Serializabl
         return queueStatus != null ? queueStatus.intValue() : 0;
     }
 
-    public byte[] getResponseTimeConfig()
-    {
-        return this.responseTimeConfig;
-    }
-
     public String getServerTypeName()
     {
         return this.serverTypeName;
@@ -394,7 +383,6 @@ public class AIServer implements ContainerManagedTimestampTrackable, Serializabl
         setProductConfig( valueHolder.getProductConfig() );
         setControlConfig( valueHolder.getControlConfig() );
         setMeasurementConfig( valueHolder.getMeasurementConfig() );
-        setResponseTimeConfig( valueHolder.getResponseTimeConfig() );
         setDiff( valueHolder.getDiff() );
         setIgnored( valueHolder.getIgnored() );
         setServerTypeName( valueHolder.getServerTypeName() );
@@ -481,10 +469,6 @@ public class AIServer implements ContainerManagedTimestampTrackable, Serializabl
         this.queueStatus = queueStatus;
     }
     
-    public void setResponseTimeConfig(byte[] responseTime_Config)
-    {
-        this.responseTimeConfig = responseTime_Config;
-    }
     
     public void setServerTypeName(String serverTypeName)
     {

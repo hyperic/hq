@@ -44,7 +44,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.mgmt.data.AgentRepository;
+import org.hyperic.hq.agent.mgmt.data.ManagedResourceRepository;
 import org.hyperic.hq.agent.mgmt.domain.Agent;
+import org.hyperic.hq.agent.mgmt.domain.ManagedResource;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
@@ -95,7 +97,9 @@ import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.measurement.server.session.AgentScheduleSyncZevent;
-import org.hyperic.hq.plugin.mgmt.data.PluginRepository;
+import org.hyperic.hq.plugin.mgmt.data.PluginResourceTypeRepository;
+import org.hyperic.hq.plugin.mgmt.domain.Plugin;
+import org.hyperic.hq.plugin.mgmt.domain.PluginResourceType;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.PlatformTypeInfo;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
@@ -120,7 +124,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class PlatformManagerImpl implements PlatformManager {
     
-    static final String IP_RESOURCE_TYPE_NAME = "IP";
+    public static final String IP_RESOURCE_TYPE_NAME = "IP";
     
     private final Log log = LogFactory.getLog(PlatformManagerImpl.class.getName());
 
@@ -146,7 +150,9 @@ public class PlatformManagerImpl implements PlatformManager {
 
     private ResourceAuditFactory resourceAuditFactory;
     
-    private PluginRepository pluginRepository;
+    private ManagedResourceRepository managedResourceRepository;
+    
+    private PluginResourceTypeRepository pluginResourceTypeRepository;
     
     private ServerManager serverManager;
     
@@ -157,6 +163,8 @@ public class PlatformManagerImpl implements PlatformManager {
     private ResourceDao resourceDao;
     
     private ResourceTypeDao resourceTypeDao;
+    
+    private ServiceFactory serviceFactory;
    
 
     @Autowired
@@ -166,10 +174,11 @@ public class PlatformManagerImpl implements PlatformManager {
                                ResourceGroupManager resourceGroupManager,
                                AuditManager auditManager, AgentManager agentManager,
                                ZeventEnqueuer zeventManager,
-                               ResourceAuditFactory resourceAuditFactory, PluginRepository pluginRepository,
+                               ResourceAuditFactory resourceAuditFactory, PluginResourceTypeRepository pluginResourceTypeRepository,
                                ServerManager serverManager, PlatformFactory platformFactory,
                                ServiceManager serviceManager, ServerFactory serverFactory,
-                               ResourceDao resourceDao, ResourceTypeDao resourceTypeDao) {
+                               ResourceDao resourceDao, ResourceTypeDao resourceTypeDao, 
+                               ManagedResourceRepository managedResourceRepository, ServiceFactory serviceFactory) {
         this.permissionManager = permissionManager;
         this.agentDAO = agentDAO;
         this.resourceManager = resourceManager;
@@ -178,13 +187,15 @@ public class PlatformManagerImpl implements PlatformManager {
         this.agentManager = agentManager;
         this.zeventManager = zeventManager;
         this.resourceAuditFactory = resourceAuditFactory;
-        this.pluginRepository = pluginRepository;
+        this.pluginResourceTypeRepository = pluginResourceTypeRepository;
         this.serverManager = serverManager;
         this.platformFactory = platformFactory;
         this.serviceManager = serviceManager;
         this.serverFactory = serverFactory;
         this.resourceDao = resourceDao;
         this.resourceTypeDao  = resourceTypeDao;
+        this.managedResourceRepository = managedResourceRepository;
+        this.serviceFactory = serviceFactory;
     }
     
     private Platform toPlatform(Resource resource) {
@@ -192,6 +203,10 @@ public class PlatformManagerImpl implements PlatformManager {
         Set<Resource> servers = resource.getResourcesFrom(RelationshipTypes.SERVER);
         for(Resource server: servers) {
             platform.addServer(serverFactory.createServer(server));
+        }
+        Set<Resource> services = resource.getResourcesFrom(RelationshipTypes.SERVICE);
+        for(Resource service: services) {
+            platform.addService(serviceFactory.createService(service));
         }
         return platform;
     }
@@ -413,17 +428,17 @@ public class PlatformManagerImpl implements PlatformManager {
         p.setDescription(aip.getDescription());
         p.setLocation("");
         
-        //TODO abstract creationTime, modifiedTime, and sortName?
+        //TODO abstract creationTime, modifiedTime?
         p.setProperty(PlatformFactory.CREATION_TIME, System.currentTimeMillis());
         p.setProperty(PlatformFactory.MODIFIED_TIME,System.currentTimeMillis());
-        p.setProperty(AppdefResource.SORT_NAME, aip.getName().toUpperCase());
         p.setProperty(PlatformFactory.CERT_DN,aip.getCertdn());
         p.setProperty(PlatformFactory.FQDN,aip.getFqdn());
         p.setProperty(PlatformFactory.COMMENT_TEXT,"");
         p.setProperty(PlatformFactory.CPU_COUNT,aip.getCpuCount());
-        p.setProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_PLATFORM);
+        p.setProperty(AppdefResourceType.APPDEF_TYPE_ID, AppdefEntityConstants.APPDEF_TYPE_PLATFORM,true);
         p.setModifiedBy(initialOwner);
-        agent.addManagedResource(p);
+        ManagedResource managedResource =  new ManagedResource(p.getId(), agent);
+        managedResourceRepository.save(managedResource);
         p.setOwner(subject.getName());
         resourceManager.findRootResource().relateTo(p, RelationshipTypes.PLATFORM);
         resourceManager.findRootResource().relateTo(p, RelationshipTypes.CONTAINS);
@@ -434,20 +449,20 @@ public class PlatformManagerImpl implements PlatformManager {
                               ResourceType type) 
     {
         Resource p = new Resource(pv.getName(), type);
-        resourceDao.persist(p);
         p.setDescription(pv.getDescription());
         p.setLocation(pv.getLocation());
         p.setModifiedBy(pv.getModifiedBy());
+        p.setOwner(owner.getName());
+        resourceDao.persist(p);
         p.setProperty(PlatformFactory.CERT_DN,pv.getCertdn());
         p.setProperty(PlatformFactory.COMMENT_TEXT,pv.getCommentText());
         p.setProperty(PlatformFactory.CPU_COUNT,pv.getCpuCount());
         p.setProperty(PlatformFactory.FQDN,pv.getFqdn());
-        //TODO abstract creationTime, modifiedTime, and sortName?
+        //TODO abstract creationTime, modifiedTime
         p.setProperty(PlatformFactory.CREATION_TIME, System.currentTimeMillis());
         p.setProperty(PlatformFactory.MODIFIED_TIME,System.currentTimeMillis());
-        p.setProperty(AppdefResource.SORT_NAME, pv.getName().toUpperCase());
-        agent.addManagedResource(p);
-        p.setOwner(owner.getName());
+        ManagedResource managedResource =  new ManagedResource(p.getId(), agent);
+        managedResourceRepository.save(managedResource);
         for (IpValue ipv : pv.getAddedIpValues()) {
             addIp(toPlatform(p), ipv.getAddress(), ipv.getNetmask(), ipv.getMACAddress());
         }
@@ -597,7 +612,7 @@ public class PlatformManagerImpl implements PlatformManager {
     
     public PageList<Resource> getAllPlatformResources(AuthzSubject subject, PageControl pc) {
         PageRequest pageInfo = new PageRequest(pc.getPagenum(),pc.getPagesize(),
-            new Sort(pc.getSortorder() == PageControl.SORT_ASC? Direction.ASC : Direction.DESC,"name"));
+            new Sort(pc.getSortorder() == PageControl.SORT_ASC? Direction.ASC : Direction.DESC,"sortName"));
         Page<Resource> resources = resourceDao.findByIndexedProperty(AppdefResourceType.APPDEF_TYPE_ID, 
             AppdefEntityConstants.APPDEF_TYPE_PLATFORM,pageInfo,String.class);
         return new PageList<Resource>(resources.getContent(),(int)resources.getTotalElements());
@@ -670,6 +685,16 @@ public class PlatformManagerImpl implements PlatformManager {
         //TODO perm check
         //permissionManager.checkViewPermission(subject, platform.getId());
         return platform;
+    }
+    
+    public Set<Platform> getPlatformsByAgent(Agent agent) {
+        Set<Platform> platforms = new HashSet<Platform>();
+        List<ManagedResource> managedResources = managedResourceRepository.findByAgent(agent);
+        for(ManagedResource managedResource: managedResources) {
+            Resource resource = resourceManager.findResourceById(managedResource.getResourceId());
+            platforms.add(toPlatform(resource));
+        }
+        return platforms;
     }
 
     /**
@@ -889,7 +914,7 @@ public class PlatformManagerImpl implements PlatformManager {
             if (porker && // Let agent porker
                 // create new platforms
                 !(p.getProperty(PlatformFactory.FQDN).equals(fqdn) || p.getProperty(PlatformFactory.CERT_DN).equals(certdn) || 
-                    agentDAO.findByManagedResource(p).getAgentToken().equals(agentToken))) {
+                    managedResourceRepository.findAgentByResource(p.getId()).getAgentToken().equals(agentToken))) {
                 p = null;
             }
         }
@@ -910,7 +935,7 @@ public class PlatformManagerImpl implements PlatformManager {
             Agent agent = agentManager.getAgent(agentToken);
             Collection<Resource> platforms = getAllPlatforms();
             for (Resource platform : platforms) {
-                if(agent.equals(agentDAO.findByManagedResource(platform))) {
+                if(agent.equals(managedResourceRepository.findAgentByResource(platform.getId()))) {
                     String platType = platform.getType().getName();
                     // need to check if the platform is not a platform device
                     if (PlatformDetector.isSupportedPlatform(platType)) {
@@ -1005,7 +1030,7 @@ public class PlatformManagerImpl implements PlatformManager {
         Set<Resource> agentPlatforms = new HashSet<Resource>();
         Collection<Resource> platforms = getAllPlatforms();
         for (Resource platform : platforms) {
-            if(agentToken.equals(agentDAO.findByManagedResource(platform).getAgentToken())) {
+            if(agentToken.equals(managedResourceRepository.findAgentByResource(platform.getId()).getAgentToken())) {
                 agentPlatforms.add(platform);
             }
         }
@@ -1055,7 +1080,7 @@ public class PlatformManagerImpl implements PlatformManager {
         }
         Collections.sort(platforms, new Comparator<Resource>() {
             public int compare(Resource o1, Resource o2) {
-                return ((String)o1.getProperty(AppdefResource.SORT_NAME)).compareTo((String)o2.getProperty(AppdefResource.SORT_NAME));
+                return o1.getSortName().compareTo(o2.getSortName());
             }
         });
         return platforms;
@@ -1411,7 +1436,7 @@ public class PlatformManagerImpl implements PlatformManager {
 
             // See if we need to create an AIPlatform
             if (existing.getAgent() != null) {
-                if (agentDAO.findByManagedResource(plat) == null) {
+                if (managedResourceRepository.findAgentByResource(plat.getId()) == null) {
                     // Create AIPlatform for manually created platform
 
                     AIPlatformValue aiPlatform = new AIPlatformValue();
@@ -1432,7 +1457,7 @@ public class PlatformManagerImpl implements PlatformManager {
                     }
 
                     getAIQueueManager().queue(subject, aiPlatform, false, false, true);
-                } else if (!agentDAO.findByManagedResource(plat).equals(existing.getAgent())) {
+                } else if (!managedResourceRepository.findAgentByResource(plat.getId()).equals(existing.getAgent())) {
                     // Need to enqueue the ResourceUpdatedZevent if the
                     // agent changed to get the metrics scheduled
                     List<ResourceUpdatedZevent> events = new ArrayList<ResourceUpdatedZevent>();
@@ -1515,9 +1540,11 @@ public class PlatformManagerImpl implements PlatformManager {
         // if there is a agent
         if (existing.getAgent() != null) {
             // get the agent token and set the agent to the platform
-            existing.getAgent().addManagedResource(platform);
+            if(managedResourceRepository.findAgentByResource(platform.getId()) == null) {
+                ManagedResource managedResource =  new ManagedResource(platform.getId(), existing.getAgent());
+                managedResourceRepository.save(managedResource);
+            }
         }
-        resourceDao.merge(platform);
     }
 
     /**
@@ -1548,7 +1575,7 @@ public class PlatformManagerImpl implements PlatformManager {
      * 
      * 
      */
-    public void updatePlatformTypes(String plugin, PlatformTypeInfo[] infos) throws VetoException,
+    public void updatePlatformTypes(Plugin plugin, PlatformTypeInfo[] infos) throws VetoException,
         NotFoundException {
         // First, put all of the infos into a Hash
         HashMap<String, PlatformTypeInfo> infoMap = new HashMap<String, PlatformTypeInfo>();
@@ -1559,7 +1586,7 @@ public class PlatformManagerImpl implements PlatformManager {
         Collection<ResourceType> platformTypes = findAllPlatformResourceTypes();
         Set<ResourceType> curPlatforms = new HashSet<ResourceType>();
         for(ResourceType curResourceType: platformTypes) {
-            if(pluginRepository.findByResourceType(curResourceType).getName().equals(plugin)) {
+            if(pluginResourceTypeRepository.findNameByResourceType(curResourceType.getId()).equals(plugin)) {
                 curPlatforms.add(curResourceType);
             }
         }
@@ -1581,21 +1608,21 @@ public class PlatformManagerImpl implements PlatformManager {
         }
     }
 
-    public PlatformType createPlatformType(String name, String plugin) throws NotFoundException {
+    public PlatformType createPlatformType(String name, Plugin plugin) throws NotFoundException {
         log.debug("Creating new PlatformType: " + name);
         ResourceType pt = new ResourceType(name);
         resourceTypeDao.persist(pt);
-        pluginRepository.findByName(plugin).addResourceType(pt);
-        pt.addPropertyType(createPropertyType(PlatformFactory.CERT_DN,String.class));
-        pt.addPropertyType(createPropertyType(PlatformFactory.FQDN,String.class));
-        pt.addPropertyType(createPropertyType(PlatformFactory.COMMENT_TEXT,String.class));
-        pt.addPropertyType(createPropertyType(PlatformFactory.CPU_COUNT,Integer.class));
-        pt.addPropertyType(createPropertyType(PlatformFactory.CREATION_TIME,Long.class));
-        pt.addPropertyType(createPropertyType(PlatformFactory.MODIFIED_TIME,Long.class));
-        pt.addPropertyType(createPropertyType(AppdefResource.SORT_NAME,String.class));
-        PropertyType appdefType = createPropertyType(AppdefResourceType.APPDEF_TYPE_ID, Integer.class);
-        appdefType.setIndexed(true);
-        pt.addPropertyType(appdefType);
+        PluginResourceType pluginResourceType = new PluginResourceType(plugin.getName(),pt.getId());
+        pluginResourceTypeRepository.save(pluginResourceType);
+        Set<PropertyType> propertyTypes = new HashSet<PropertyType>();
+        propertyTypes.add(createPropertyType(PlatformFactory.CERT_DN,String.class));
+        propertyTypes.add(createPropertyType(PlatformFactory.FQDN,String.class));
+        propertyTypes.add(createPropertyType(PlatformFactory.COMMENT_TEXT,String.class));
+        propertyTypes.add(createPropertyType(PlatformFactory.CPU_COUNT,Integer.class));
+        propertyTypes.add(createPropertyType(PlatformFactory.CREATION_TIME,Long.class));
+        propertyTypes.add(createPropertyType(PlatformFactory.MODIFIED_TIME,Long.class));
+        propertyTypes.add(createPropertyType(AppdefResourceType.APPDEF_TYPE_ID, Integer.class));
+        pt.addPropertyTypes(propertyTypes);
         resourceManager.findRootResourceType().relateTo(pt, RelationshipTypes.PLATFORM);
         pt.relateTo(resourceManager.findResourceTypeByName(IP_RESOURCE_TYPE_NAME),RelationshipTypes.IP);
         return platformFactory.createPlatformType(pt);
@@ -1625,7 +1652,6 @@ public class PlatformManagerImpl implements PlatformManager {
          resource.setModifiedBy(owner);
          resource.setProperty(PlatformFactory.CPU_COUNT,aiplatform.getCpuCount());
          resource.setDescription(aiplatform.getDescription());
-         resourceDao.merge(resource);
     }
 
     /**
@@ -1681,7 +1707,10 @@ public class PlatformManagerImpl implements PlatformManager {
             // make sure we have the current agent that exists on the platform
             // and associate it
             agent = agentManager.getAgent(aiplatform.getAgentToken());
-            agent.addManagedResource(platform);
+            if(managedResourceRepository.findAgentByResource(platform.getId()) == null) {
+                ManagedResource managedResource =  new ManagedResource(platform.getId(), agent);
+                managedResourceRepository.save(managedResource);
+            }
         } catch (AgentNotFoundException e) {
             // the agent should exist at this point even if it is a new agent.
             // something failed at another stage of this process
@@ -1723,7 +1752,10 @@ public class PlatformManagerImpl implements PlatformManager {
                     agentManager.pingAgent(subj, agent);
                     log.info("updating ip for agentId=" + agent.getId() + " and platformid=" +
                              platform.getId() + " from ip=" + origIp + " to ip=" + ip.getAddress());
-                    agent.addManagedResource(platform);
+                    if(managedResourceRepository.findAgentByResource(platform.getId()) == null) {
+                        ManagedResource managedResource =  new ManagedResource(platform.getId(), agent);
+                        managedResourceRepository.save(managedResource);
+                    }
                     enableMeasurements(subj, platform);
                     break;
                 } catch (AgentConnectionException e) {
@@ -1735,7 +1767,7 @@ public class PlatformManagerImpl implements PlatformManager {
                 // make sure address does not change if/when last ping fails
                 agent.setAddress(origIp);
             }
-            if (agentDAO.findByManagedResource(platform) == null) {
+            if (managedResourceRepository.findAgentByResource(platform.getId()) == null) {
                 log.warn("Removing agent reference from platformid=" + platform.getId() +
                          ".  Server cannot ping the agent from any IP " +
                          "associated with the platform");
@@ -1859,7 +1891,6 @@ public class PlatformManagerImpl implements PlatformManager {
     private void updateIp(Resource ip, String netmask, String macAddress) {
         ip.setProperty(PlatformFactory.NETMASK,netmask);
         ip.setProperty(PlatformFactory.MAC_ADDRESS,macAddress);
-        resourceDao.merge(ip);
     }
 
     /**
@@ -1950,7 +1981,8 @@ public class PlatformManagerImpl implements PlatformManager {
         Collection<Platform> plats  = new HashSet<Platform>();
         Collection<Resource> resources = getAllPlatforms();
         for(Resource resource: resources) {
-            if(agentDAO.findByManagedResource(resource).equals(agt)) {
+            Agent resourceAgent = managedResourceRepository.findAgentByResource(resource.getId());
+            if(resourceAgent.equals(agt)) {
                 plats.add(toPlatform(resource));
             }
         }
@@ -1987,18 +2019,6 @@ public class PlatformManagerImpl implements PlatformManager {
     @PostConstruct
     public void afterPropertiesSet() throws Exception {
         valuePager = Pager.getPager(VALUE_PROCESSOR);
-        //TODO preload some other way?
-        if(resourceManager.findResourceTypeByName(IP_RESOURCE_TYPE_NAME) == null) {
-            ResourceType ipType = new ResourceType(IP_RESOURCE_TYPE_NAME);
-            resourceTypeDao.persist(ipType);
-            //TODO ipType isn't really getting a plugin here.  
-            //Maybe give it System plugin or consider making it a first class citizen in new model?
-            ipType.addPropertyType(createPropertyType(PlatformFactory.IP_ADDRESS,String.class));
-            ipType.addPropertyType(createPropertyType(PlatformFactory.NETMASK,String.class));
-            ipType.addPropertyType(createPropertyType(PlatformFactory.MAC_ADDRESS,String.class));
-            ipType.addPropertyType(createPropertyType(PlatformFactory.CREATION_TIME,Long.class));
-            ipType.addPropertyType(createPropertyType(PlatformFactory.MODIFIED_TIME,Long.class));
-        }
     }
 
 }

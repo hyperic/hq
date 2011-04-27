@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -70,6 +71,10 @@ public class Role implements Serializable {
     @Column(name = "NAME", length = 100, nullable = false, unique = true)
     private String name;
 
+    @ManyToMany
+    @JoinTable(name = "EAM_ROLE_OPERATION_MAP", joinColumns = { @JoinColumn(name = "ROLE_ID") }, inverseJoinColumns = { @JoinColumn(name = "OPERATION_ID") })
+    private Set<Operation> operations;
+
     @Column(name = "SORT_NAME", length = 100)
     private String sortName;
 
@@ -79,7 +84,7 @@ public class Role implements Serializable {
 
     @Column(name = "FSYSTEM")
     private boolean system;
-
+    
     @Column(name = "VERSION_COL", nullable = false)
     @Version
     private Long version;
@@ -158,6 +163,14 @@ public class Role implements Serializable {
         return name;
     }
 
+    public Set<Operation> getOperations() {
+        return operations;
+    }
+
+    public String getSortName() {
+        return sortName;
+    }
+
     // TODO - possibly model allowable operations such as create/modify/delete
     // etc
 
@@ -173,10 +186,6 @@ public class Role implements Serializable {
     // void setOperations(Collection<Operation> val) {
     // //TODO graph access
     // }
-
-    public String getSortName() {
-        return sortName;
-    }
 
     public Collection<AuthzSubject> getSubjects() {
         return subjects;
@@ -220,6 +229,10 @@ public class Role implements Serializable {
             name = "";
         this.name = name;
         setSortName(name);
+    }
+
+    public void setOperations(Set<Operation> operations) {
+        this.operations = operations;
     }
 
     public void setSortName(String sortName) {

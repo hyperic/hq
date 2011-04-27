@@ -19,15 +19,15 @@ public interface ResourceTypeDao extends GenericDao<ResourceType> {
     ResourceType findRoot();
 
     /**
-     * Saves changes to an existing ResourceType
-     * @param resourceType The changed ResourceType
-     * @return The merged ResourceType
-     */
-    ResourceType merge(ResourceType resourceType);
-
-    /**
      * Persists a new ResourceType
      * @param resourceType The new resource type
      */
     void persist(ResourceType resourceType);
+
+    /**
+     * Persists a new ResourceType to use as the Root ResourceType for traversal
+     * of rootless objects
+     * @param resource The new root ResourceType
+     */
+    void persistRoot(ResourceType resourceType);
 }

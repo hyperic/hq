@@ -1,18 +1,9 @@
 package org.hyperic.hq.inventory.domain;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.GenericGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.data.graph.annotation.GraphProperty;
 import org.springframework.data.graph.annotation.NodeEntity;
 import org.springframework.data.graph.neo4j.support.GraphDatabaseContext;
@@ -26,48 +17,29 @@ import org.springframework.validation.Validator;
  * @author dcrutchfield
  * 
  */
-@NodeEntity(partial = true)
-@Entity
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@Configurable
+@NodeEntity
 public class PropertyType {
 
-    @Transient
     @GraphProperty
     private Object defaultValue;
 
     @NotNull
-    @Transient
     @GraphProperty
     private String description;
 
-    @Transient
     @GraphProperty
     private boolean hidden;
 
-    @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")
-    @GeneratedValue(generator = "mygen1")
-    @Column(name = "id")
-    private Integer id;
-
-    @Transient
-    @GraphProperty
-    private boolean indexed;
-
-    @Transient
     @GraphProperty
     @NotNull
     private String name;
 
-    @Transient
     @GraphProperty
     private boolean secret;
 
     @Autowired
     private transient GraphDatabaseContext graphDatabaseContext;
-
-    @PersistenceContext
-    private transient EntityManager entityManager;
 
     private transient Validator propertyValidator;
 
@@ -107,14 +79,6 @@ public class PropertyType {
 
     /**
      * 
-     * @return The ID
-     */
-    public Integer getId() {
-        return this.id;
-    }
-
-    /**
-     * 
      * @return The property name
      */
     public String getName() {
@@ -131,14 +95,6 @@ public class PropertyType {
 
     /**
      * 
-     * @return true if the property should be indexed for lookup when set
-     */
-    public boolean isIndexed() {
-        return indexed;
-    }
-
-    /**
-     * 
      * @return true if value should be obscured (like a password)
      */
     public boolean isSecret() {
@@ -148,16 +104,10 @@ public class PropertyType {
     /**
      * Removes this PropertyType. Only supported as part of ResourceType removal
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void remove() {
         // TODO remove property instances?
         graphDatabaseContext.removeNodeEntity(this);
-        if (this.entityManager.contains(this)) {
-            this.entityManager.remove(this);
-        } else {
-            PropertyType attached = this.entityManager.find(this.getClass(), this.id);
-            this.entityManager.remove(attached);
-        }
     }
 
     /**
@@ -186,22 +136,6 @@ public class PropertyType {
 
     /**
      * 
-     * @param id The ID
-     */
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    /**
-     * 
-     * @param indexed true if the property should be indexed for lookup when set
-     */
-    public void setIndexed(boolean indexed) {
-        this.indexed = indexed;
-    }
-
-    /**
-     * 
      * @param secret true if the property value should be obscured (like a
      *        password)
      */
@@ -220,7 +154,6 @@ public class PropertyType {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("PropertyType[");
-        sb.append("Id: ").append(getId()).append(", ");
         sb.append("Name: ").append(getName()).append(", ");
         sb.append("Description: ").append(getDescription()).append(", ");
         sb.append("Secret: ").append(isSecret()).append(", ");

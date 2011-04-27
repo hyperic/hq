@@ -26,6 +26,8 @@
 
 package org.hyperic.hq.bizapp.server.session;
 
+import java.util.Date;
+
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
@@ -55,7 +57,8 @@ public class UpdateFetcher implements Runnable {
 
     @PostConstruct
     public void init() {
-        taskScheduler.scheduleAtFixedRate(this, checkInterval);
+        taskScheduler.scheduleAtFixedRate(this, new Date(System.currentTimeMillis() + (5*50*1000)),
+            checkInterval);
     }
 
     public void run() {

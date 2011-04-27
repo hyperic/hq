@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.hyperic.hq.hqu.server.session.Attachment;
 import org.hyperic.hq.hqu.server.session.AttachmentResource;
-import org.hyperic.hq.inventory.domain.Resource;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,5 +14,5 @@ public interface AttachmentResourceRepository extends JpaRepository<AttachmentRe
     // TODO previously accepted Resource prototypes for type-based attachment
     @Transactional(readOnly=true)
     @Query("select a from AttachmentResource a where a.resource = :resource and a.category = :cat")
-    List<Attachment> findByResourceAndCategory(@Param("resource") Resource resource, @Param("cat") String category);
+    List<Attachment> findByResourceAndCategory(@Param("resource") Integer resource, @Param("cat") String category);
 }

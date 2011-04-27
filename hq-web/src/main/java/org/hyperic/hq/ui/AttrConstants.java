@@ -719,27 +719,6 @@ public interface AttrConstants {
      */
     public static final String AGENTS_COUNT = "agentsCount";
     
-    /**
-     * Attribute name to represent the whether rt is supported for this service or not
-     */
-    public static final String RT_SUPPORTED = "rtSupported";
-    
-    /**
-     * Attribute name to represent the whether end user rt is supported for this
-     * service or not
-     */
-    public static final String EU_RT_SUPPORTED = "euRtSupported";
-    
-    /**
-     * Attribute name to represent serviceResponseTime
-     */
-    public static final String SERVICE_RT = "serviceRT";
-    
-    /**
-     * Attribute name to represent endUserResponseTime
-     */
-    public static final String EU_RT = "euRT";
-
     /*
      * Attribute for metrics pending for addition to a resource.
      */
@@ -783,10 +762,6 @@ public interface AttrConstants {
      * resource.
      */
     public static final String CONTROL_ENABLED_ATTR = "controlEnabledAttr";
-
-    /** is performance enabled for this resource?
-     */
-    public static final String PERFORMANCE_SUPPORTED_ATTR = "perfSupported";
     
     /**
      * Request attribute of the list of scheduled control actions.
@@ -826,11 +801,6 @@ public interface AttrConstants {
      */
     public static final String MONITOR_HELP = "monitorHelp";
     
-    /**
-     * Attribute name to represent the monitor configOptions of a resource
-     */
-    public static final String RT_CONFIG_OPTIONS = "rtConfigOptions";
-
     /**
      * Attribute name to represent the control configOptions of a resource
      */

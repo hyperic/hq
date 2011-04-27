@@ -29,10 +29,9 @@ package org.hyperic.hq.events;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -41,9 +40,7 @@ import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceOperationsHelper;
 import org.hyperic.hq.authz.shared.RoleManager;
 import org.hyperic.hq.events.server.session.AlertDefinition;
-import org.hyperic.hq.inventory.data.ResourceDao;
 import org.hyperic.hq.inventory.data.ResourceTypeDao;
-import org.hyperic.hq.inventory.domain.OperationType;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -64,12 +61,15 @@ public class DefaultAlertPermissionManager implements AlertPermissionManager {
     private  Map operations = new HashMap();
     private RoleManager roleManager;
     private ResourceTypeDao resourceTypeDao;
+    private AppdefConverter appdefConverter;
     
     
     @Autowired
-    public DefaultAlertPermissionManager(RoleManager roleManager, ResourceTypeDao resourceTypeDao) {
+    public DefaultAlertPermissionManager(RoleManager roleManager, ResourceTypeDao resourceTypeDao,
+                                         AppdefConverter appdefConverter) {
         this.roleManager = roleManager;
         this.resourceTypeDao = resourceTypeDao;
+        this.appdefConverter = appdefConverter;
     }
 
     private  void checkPermission(Integer subjectId, String rtName, Integer instId, String opName) throws PermissionException
@@ -85,8 +85,8 @@ public class DefaultAlertPermissionManager implements AlertPermissionManager {
             if (!operations.containsKey(opName)) {
                 operations.put(opName,resType.getOperationType(opName));
             }
-            OperationType operation = (OperationType) operations.get(opName);
-            permMgr.check(subjectId, resType.getId(), instId, operation.getId());
+            //TODO operation Id?
+            //permMgr.check(subjectId, resType.getId(), instId, operation.getId());
             // Permission Check Succesful
         }
     }
@@ -208,7 +208,7 @@ public class DefaultAlertPermissionManager implements AlertPermissionManager {
         
         //TODO for group alerts?
         //if (!EventConstants.TYPE_ALERT_DEF_ID.equals(parentId)) {
-            canFixAcknowledgeAlerts(who, AppdefUtil.newAppdefEntityId(adi.getResource()));
+            canFixAcknowledgeAlerts(who, appdefConverter.newAppdefEntityId(adi.getResource()));
         //}
     }
     
@@ -238,7 +238,7 @@ public class DefaultAlertPermissionManager implements AlertPermissionManager {
     public  AppdefEntityID getAppdefEntityID(AlertDefinitionInterface adi) {
         //TODO impl?
 //        try {
-//            return AppdefUtil.newAppdefEntityId(adi.getResource());
+//            return appdefConverter.newAppdefEntityId(adi.getResource());
 //        } catch (IllegalArgumentException e) {
 //            if (adi instanceof AlertDefinition) {
 //                AlertDefinition ad = (AlertDefinition) adi;

@@ -34,10 +34,10 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.auth.domain.AuthzSubject;
+import org.hyperic.hq.auth.domain.Operation;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
-import org.hyperic.hq.inventory.domain.OperationType;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.RequestUtils;
@@ -86,7 +86,7 @@ public class EditPasswordAction
 
         boolean admin = false;
 
-        for (OperationType operation : authzBoss.getAllOperations(sessionId)) {
+        for (Operation operation : authzBoss.getAllOperations(sessionId)) {
             if (admin = AuthzConstants.subjectOpModifySubject.equals(operation.getName())) {
                 break;
             }

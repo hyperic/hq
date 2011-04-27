@@ -15,7 +15,8 @@ import org.springframework.data.domain.Pageable;
  */
 public interface ResourceDao extends GenericDao<Resource> {
     /**
-     * 
+     * NOTE: Sorting on a field that contains tokenized values (for example "127.0.0.1") is
+     * NOT SUPPORTED
      * @param propertyName The name of the property. The property must be
      *        indexed for lookup to succeed (set indexed to true on
      *        PropertyType)
@@ -44,15 +45,14 @@ public interface ResourceDao extends GenericDao<Resource> {
     Resource findRoot();
 
     /**
-     * Saves changes to an existing Resource
-     * @param resource The changed Resource
-     * @return The merged Resource
-     */
-    Resource merge(Resource resource);
-
-    /**
      * Persists a new Resource
      * @param resource The new resource
      */
     void persist(Resource resource);
+    
+    /**
+     * Persists a new Resource to use as the Root resource for traversal of rootless objects
+     * @param resource The new root resource
+     */
+    void persistRoot(Resource resource);
 }

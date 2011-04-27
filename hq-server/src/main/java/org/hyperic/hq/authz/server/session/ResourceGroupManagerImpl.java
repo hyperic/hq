@@ -28,27 +28,25 @@ package org.hyperic.hq.authz.server.session;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.GroupTypeValue;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.auth.domain.Role;
@@ -68,14 +66,12 @@ import org.hyperic.hq.grouping.shared.GroupEntry;
 import org.hyperic.hq.inventory.data.ResourceDao;
 import org.hyperic.hq.inventory.data.ResourceGroupDao;
 import org.hyperic.hq.inventory.data.ResourceTypeDao;
-import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
-import org.hyperic.util.pager.Pager;
 import org.quartz.SchedulerException;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,45 +103,23 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
    
    
     private EventLogManager eventLogManager;
-    private final Log log = LogFactory.getLog(ResourceGroupManagerImpl.class);
     private ApplicationContext applicationContext;
     private ResourceGroupDao resourceGroupDao;
     private ResourceDao resourceDao;
     private ResourceTypeDao resourceTypeDao;
-    private Pager defaultPager;
+    private AppdefConverter appdefConverter;
 
     @Autowired
     public ResourceGroupManagerImpl(EventLogManager eventLogManager, ResourceGroupDao resourceGroupDao,
-                                    ResourceDao resourceDao, ResourceTypeDao resourceTypeDao) {
+                                    ResourceDao resourceDao, ResourceTypeDao resourceTypeDao,
+                                    AppdefConverter appdefConverter) {
         this.eventLogManager = eventLogManager;
         this.resourceGroupDao = resourceGroupDao;
         this.resourceDao = resourceDao;
         this.resourceTypeDao = resourceTypeDao;
+        this.appdefConverter = appdefConverter;
     }
     
-    @PostConstruct
-    public void initialize() {
-        this.defaultPager = Pager.getDefaultPager();
-        //TODO move init logic?
-        int[] groupTypes = AppdefEntityConstants.getAppdefGroupTypes();
-        for(int i=0;i< groupTypes.length;i++) {
-            if(resourceTypeDao.findByName(AppdefEntityConstants.getAppdefGroupTypeName(groupTypes[i])) == null) {
-                ResourceType groupType = new ResourceType(AppdefEntityConstants.getAppdefGroupTypeName(groupTypes[i]));
-                resourceTypeDao.persist(groupType);
-                setPropertyType(groupType,"groupEntType",Integer.class,false);
-                setPropertyType(groupType,"groupEntResType",Integer.class,true);
-                setPropertyType(groupType,"mixed",Boolean.class,true);
-            }
-        }
-    }
-    
-    private void setPropertyType(ResourceType groupType, String propTypeName, Class<?> type,boolean indexed) {
-        PropertyType propType = new PropertyType(propTypeName,type);
-        propType.setDescription(propTypeName);
-        propType.setHidden(true);
-        propType.setIndexed(indexed);
-        groupType.addPropertyType(propType);
-    }
     
     /**
      * Create a resource group. Currently no permission checking.
@@ -173,10 +147,11 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         }
         ResourceType groupType = resourceTypeDao.findByName(AppdefEntityConstants.getAppdefGroupTypeName(cInfo.getGroupTypeId()));
         ResourceGroup res = new ResourceGroup(cInfo.getName(), groupType,cInfo.isPrivateGroup());
-        resourceGroupDao.persist(res);
         res.setLocation(cInfo.getLocation());
         res.setDescription(cInfo.getDescription());
         res.setModifiedBy(whoami.getName());
+        resourceGroupDao.persist(res);
+       
         for(Resource resource : resources) {
             res.addMember(resource);
         }
@@ -187,11 +162,11 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         res.setOwner(whoami.getName());
         if(cInfo.getGroupTypeId() == AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS || 
             cInfo.getGroupTypeId() == AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC) {
-            res.setProperty(MIXED,false);
+            res.setProperty(MIXED,false,true);
         }else {
-            res.setProperty(MIXED,true);
+            res.setProperty(MIXED,true, true);
         }
-        res.setProperty(GROUP_ENT_RES_TYPE, cInfo.getGroupEntResType());
+        res.setProperty(GROUP_ENT_RES_TYPE, cInfo.getGroupEntResType(),true);
         res.setProperty(GROUP_ENT_TYPE, cInfo.getGroupEntType());
         return res;
     }
@@ -308,7 +283,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         // TODO scottmf, this should be invoking a pre-transaction callback
         eventLogManager.deleteLogs(group);
         applicationContext.publishEvent(new GroupDeleteRequestedEvent(group));
-        AppdefEntityID groupId = AppdefUtil.newAppdefEntityId(group);
+        AppdefEntityID groupId = appdefConverter.newAppdefEntityId(group);
         group.remove();
         // Send resource delete event
         ResourceDeletedZevent zevent = new ResourceDeletedZevent(whoami, groupId);
@@ -470,7 +445,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
 
         // Add the group members
         for (Resource r : members) {
-           GroupEntry ge = new GroupEntry(r.getId(), AppdefUtil.newAppdefEntityId(r).getAuthzTypeName());
+           GroupEntry ge = new GroupEntry(r.getId(), appdefConverter.newAppdefEntityId(r).getAuthzTypeName());
            retVal.addEntry(ge); 
         }
         
@@ -644,6 +619,46 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         Collection<ResourceGroup> groups = getAllResourceGroups();
         return groups;
     }
+    
+    /**
+     * Get the resource groups with the specified ids
+     * @param ids the resource group ids
+     * @param pc Paging information for the request
+     * 
+     */
+    @Transactional(readOnly = true)
+    public PageList<ResourceGroup> getResourceGroupsById(AuthzSubject whoami, Integer[] ids,
+                                                              PageControl pc)
+        throws PermissionException {
+        if (ids.length == 0)
+            return new PageList<ResourceGroup>();
+
+        PageControl allPc = new PageControl();
+        // get all roles, sorted but not paged
+        allPc.setSortattribute(pc.getSortattribute());
+        allPc.setSortorder(pc.getSortorder());
+        Collection<ResourceGroup> all = getAllResourceGroups(whoami);
+
+        // build an index of ids
+        HashSet<Integer> index = new HashSet<Integer>();
+        index.addAll(Arrays.asList(ids));
+        int numToFind = index.size();
+
+        // find the requested roles
+        List<ResourceGroup> groups = new ArrayList<ResourceGroup>(numToFind);
+        Iterator<ResourceGroup> i = all.iterator();
+        while (i.hasNext() && groups.size() < numToFind) {
+            ResourceGroup g = (ResourceGroup) i.next();
+            if (index.contains(g.getId()))
+                groups.add(g);
+        }
+
+        // TODO: G
+        PageList<ResourceGroup> plist = new PageList(groups,groups.size());
+        return plist;
+    }
+
+
 
     private Collection<ResourceGroup> getAllResourceGroups() {
         return resourceGroupDao.findAll();
@@ -673,24 +688,49 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     
     public PageList<Resource> getCompatibleGroups(PageControl pageControl) {
         PageRequest pageInfo = new PageRequest(pageControl.getPagenum(),pageControl.getPagesize(),
-            new Sort(pageControl.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"name"));
+            new Sort(pageControl.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"sortName"));
         Page<Resource> resources = resourceDao.findByIndexedProperty(MIXED, false,pageInfo,String.class);
         return new PageList<Resource>(resources.getContent(),(int)resources.getTotalElements());
     }
 
     public PageList<Resource> getMixedGroups(PageControl pageControl) {
         PageRequest pageInfo = new PageRequest(pageControl.getPagenum(),pageControl.getPagesize(),
-            new Sort(pageControl.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"name"));
+            new Sort(pageControl.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"sortName"));
         Page<Resource> resources = resourceDao.findByIndexedProperty(MIXED, true,pageInfo,String.class);
         return new PageList<Resource>(resources.getContent(),(int)resources.getTotalElements());
     }
     
     public PageList<Resource> getCompatibleGroupsContainingType(int resourceTypeId, PageControl pageControl) {
         PageRequest pageInfo = new PageRequest(pageControl.getPagenum(),pageControl.getPagesize(),
-            new Sort(pageControl.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"name"));
+            new Sort(pageControl.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"sortName"));
         Page<Resource> resources = resourceDao.findByIndexedProperty(GROUP_ENT_RES_TYPE, resourceTypeId,pageInfo,String.class);
         return new PageList<Resource>(resources.getContent(),(int)resources.getTotalElements());
     }
+    
+    @Transactional(readOnly = true)
+    public Collection<ResourceGroup> getCompatibleResourceGroups(AuthzSubject subject,
+                                                                 int resourceTypeId)
+    {
+        // TODO auth
+        //PermissionManager pm = PermissionManagerFactory.getInstance();
+        //List<Integer> groupIds =
+        // TODO: G
+       // pm.findOperationScopeBySubject(subject, AuthzConstants.groupOpViewResourceGroup,
+           // AuthzConstants.groupResourceTypeName);
+        return resourceGroupDao.findByIndexedProperty(GROUP_ENT_RES_TYPE, resourceTypeId);
+        //TODO filter out unviewable
+//        Collection<ResourceGroup> groups = resourceGroupDAO.findCompatible(resProto);
+//        for (Iterator<ResourceGroup> i = groups.iterator(); i.hasNext();) {
+//            ResourceGroup g = (ResourceGroup) i.next();
+//            if (!groupIds.contains(g.getId())) {
+//                i.remove();
+//            }
+//        }
+//
+//        return groups;
+    }
+
+
 
     @Transactional(readOnly=true)
     public ResourceGroup findResourceGroupByName(String name) {

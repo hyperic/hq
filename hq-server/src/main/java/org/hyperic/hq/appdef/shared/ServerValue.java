@@ -44,8 +44,6 @@ public class ServerValue extends AppdefResourceValue
     private boolean runtimeAutodiscoveryHasBeenSet = false;
     private boolean wasAutodiscovered;
     private boolean wasAutodiscoveredHasBeenSet = false;
-    private boolean autodiscoveryZombie;
-    private boolean autodiscoveryZombieHasBeenSet = false;
     private Integer configResponseId;
     private boolean configResponseIdHasBeenSet = false;
     private String modifiedBy;
@@ -79,7 +77,7 @@ public class ServerValue extends AppdefResourceValue
     {
     }
 
-    public ServerValue( String sortName,boolean runtimeAutodiscovery,boolean wasAutodiscovered,boolean autodiscoveryZombie,Integer configResponseId,String modifiedBy,String owner,String location,String name,String autoinventoryIdentifier,String installPath,String description,boolean servicesAutomanaged,Integer id,Long mTime,Long cTime )
+    public ServerValue( String sortName,boolean runtimeAutodiscovery,boolean wasAutodiscovered,Integer configResponseId,String modifiedBy,String owner,String location,String name,String autoinventoryIdentifier,String installPath,String description,boolean servicesAutomanaged,Integer id,Long mTime,Long cTime )
     {
         this.sortName = sortName;
         sortNameHasBeenSet = true;
@@ -87,8 +85,6 @@ public class ServerValue extends AppdefResourceValue
         runtimeAutodiscoveryHasBeenSet = true;
         this.wasAutodiscovered = wasAutodiscovered;
         wasAutodiscoveredHasBeenSet = true;
-        this.autodiscoveryZombie = autodiscoveryZombie;
-        autodiscoveryZombieHasBeenSet = true;
         this.configResponseId = configResponseId;
         configResponseIdHasBeenSet = true;
         this.modifiedBy = modifiedBy;
@@ -124,8 +120,6 @@ public class ServerValue extends AppdefResourceValue
         runtimeAutodiscoveryHasBeenSet = true;
         this.wasAutodiscovered = otherValue.wasAutodiscovered;
         wasAutodiscoveredHasBeenSet = true;
-        this.autodiscoveryZombie = otherValue.autodiscoveryZombie;
-        autodiscoveryZombieHasBeenSet = true;
         this.configResponseId = otherValue.configResponseId;
         configResponseIdHasBeenSet = true;
         this.modifiedBy = otherValue.modifiedBy;
@@ -203,21 +197,6 @@ public class ServerValue extends AppdefResourceValue
 
     public boolean wasAutodiscoveredHasBeenSet(){
         return wasAutodiscoveredHasBeenSet;
-    }
-    public boolean getAutodiscoveryZombie()
-    {
-        return this.autodiscoveryZombie;
-    }
-
-    public void setAutodiscoveryZombie( boolean autodiscoveryZombie )
-    {
-        this.autodiscoveryZombie = autodiscoveryZombie;
-        autodiscoveryZombieHasBeenSet = true;
-
-    }
-
-    public boolean autodiscoveryZombieHasBeenSet(){
-        return autodiscoveryZombieHasBeenSet;
     }
     public Integer getConfigResponseId()
     {
@@ -425,8 +404,7 @@ public class ServerValue extends AppdefResourceValue
 
         str.append("sortName=" + getSortName() + " runtimeAutodiscovery="
                 + getRuntimeAutodiscovery() + " wasAutodiscovered="
-                + getWasAutodiscovered() + " autodiscoveryZombie="
-                + getAutodiscoveryZombie() + " configResponseId="
+                + getWasAutodiscovered() +  " configResponseId="
                 + getConfigResponseId() + " modifiedBy=" + getModifiedBy()
                 + " owner=" + getOwner() + " location=" + getLocation()
                 + " name=" + getName() + " autoinventoryIdentifier="
@@ -496,7 +474,7 @@ public class ServerValue extends AppdefResourceValue
             }
             lEquals = lEquals && this.runtimeAutodiscovery == that.runtimeAutodiscovery;
             lEquals = lEquals && this.wasAutodiscovered == that.wasAutodiscovered;
-            lEquals = lEquals && this.autodiscoveryZombie == that.autodiscoveryZombie;
+          
             if( this.configResponseId == null )
             {
                 lEquals = lEquals && ( that.configResponseId == null );
@@ -610,8 +588,6 @@ public class ServerValue extends AppdefResourceValue
         result = 37*result + (runtimeAutodiscovery ? 0 : 1);
 
         result = 37*result + (wasAutodiscovered ? 0 : 1);
-
-        result = 37*result + (autodiscoveryZombie ? 0 : 1);
 
         result = 37*result + ((this.configResponseId != null) ? this.configResponseId.hashCode() : 0);
 

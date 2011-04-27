@@ -194,7 +194,7 @@ public class UIPluginManagerImpl implements UIPluginManager {
             }
         }
 
-        view.addAttachment(new AttachmentResource(view, cat, r));
+        view.addAttachment(new AttachmentResource(view, cat, r.getId()));
 
         log.info("Attaching [" + view + "] to [" + r + "] via [" + cat + "]");
     }
@@ -260,18 +260,18 @@ public class UIPluginManagerImpl implements UIPluginManager {
         if (ent.isGroup()) {
             ResourceGroup group = resourceGroupManager.findResourceGroupById(ent.getId());
 
-            attachments = attachmentResourceRepository.findByResourceAndCategory(resourceManager.findRootResource(), cat.getDescription());
+            attachments = attachmentResourceRepository.findByResourceAndCategory(resourceManager.findRootResource().getId(), cat.getDescription());
 
             if (!resourceGroupManager.getGroupConvert(user, group).isMixed()) {
                 // For compatible groups add in attachments specific to that
                 // resource type.
                 Collection<Attachment> compatAttachments = attachmentResourceRepository
-                    .findByResourceAndCategory(group, cat.getDescription());
+                    .findByResourceAndCategory(group.getId(), cat.getDescription());
 
                 attachments.addAll(compatAttachments);
             }
         } else {
-            attachments = attachmentResourceRepository.findByResourceAndCategory(resourceManager.findResource(ent), cat.getDescription());
+            attachments = attachmentResourceRepository.findByResourceAndCategory(ent.getId(), cat.getDescription());
         }
 
         Resource viewedResource = resourceManager.findResource(ent);

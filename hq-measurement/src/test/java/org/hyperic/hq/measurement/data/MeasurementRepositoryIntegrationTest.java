@@ -1,16 +1,18 @@
 package org.hyperic.hq.measurement.data;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertArrayEquals;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -18,8 +20,6 @@ import javax.persistence.PersistenceContext;
 import net.sf.ehcache.CacheManager;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
-import org.hyperic.hq.inventory.domain.Resource;
-import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.Category;
 import org.hyperic.hq.measurement.server.session.CollectionSummary;
@@ -50,7 +50,7 @@ public class MeasurementRepositoryIntegrationTest {
     @Autowired
     private MeasurementRepository measurementRepository;
 
-    private Resource resource;
+    private int resource = 9342;
 
     private MeasurementTemplate template;
 
@@ -66,9 +66,6 @@ public class MeasurementRepositoryIntegrationTest {
             MeasurementConstants.COLL_TYPE_DYNAMIC, true, 1234, true, "service:queueSize", type,
             category, "tomcat");
         entityManager.persist(template);
-        resource = new Resource();
-        resource.setName("Resource1");
-        entityManager.persist(resource);
     }
 
     @After
@@ -109,9 +106,7 @@ public class MeasurementRepositoryIntegrationTest {
 
     @Test
     public void testFindAvailabilityMeasurementsByResourceIds() {
-        Resource resource2 = new Resource();
-        resource2.setName("Resource2");
-        entityManager.persist(resource2);
+        int resource2 = 43;
         Category category2 = new Category("Performance");
         entityManager.persist(category2);
         MeasurementTemplate template2 = new MeasurementTemplate("Queue Size", "queueSize",
@@ -128,19 +123,17 @@ public class MeasurementRepositoryIntegrationTest {
         measurement3.setDsn("throughput");
         measurement3.setEnabled(false);
         measurementRepository.save(measurement3);
-        List<Measurement> expected = new ArrayList<Measurement>();
+        Set<Measurement> expected = new HashSet<Measurement>();
         expected.add(measurement);
         expected.add(measurement3);
-        assertEquals(expected, measurementRepository.findAvailabilityMeasurementsByResources(Arrays
-            .asList(new Integer[] { resource.getId(), resource2.getId() })));
+        assertEquals(expected, new HashSet<Measurement>(measurementRepository.findAvailabilityMeasurementsByResources(Arrays
+            .asList(new Integer[] { resource, resource2 }))));
         verifyQueryCaching("Measurement.findAvailMeasurementsByInstances");
     }
-
+    
     @Test
-    public void testFindAvailabilityMeasurementsByResources() {
-        Resource resource2 = new Resource();
-        resource2.setName("Resource2");
-        entityManager.persist(resource2);
+    public void testFindAvailabilityMeasurementsByTemplatesAndResources() {
+        int resource2 = 43;
         Category category2 = new Category("Performance");
         entityManager.persist(category2);
         MeasurementTemplate template2 = new MeasurementTemplate("Queue Size", "queueSize",
@@ -159,24 +152,13 @@ public class MeasurementRepositoryIntegrationTest {
         measurementRepository.save(measurement3);
         List<Measurement> expected = new ArrayList<Measurement>();
         expected.add(measurement);
-        expected.add(measurement3);
-        List<Resource> resources = new ArrayList<Resource>();
-        resources.add(resource);
-        resources.add(resource2);
-        assertEquals(expected,
-            measurementRepository.findAvailabilityMeasurementsByResources(resources));
+        assertEquals(expected,measurementRepository.findAvailabilityMeasurementsByTemplatesAndResources(new Integer[] {template.getId()}, 
+            new Integer[] {resource}));
     }
-
+    
     @Test
-    public void testFindAvailabilityMeasurementsGroup() {
-        Resource resource2 = new Resource();
-        resource2.setName("Resource2");
-        entityManager.persist(resource2);
-        ResourceGroup group = new ResourceGroup();
-        group.setName("Group1");
-        group.addMember(resource);
-        group.addMember(resource2);
-        entityManager.persist(group);
+    public void testFindAvailabilityMeasurementsGroupMembers() {
+        int resource2 = 43;
         Category category2 = new Category("Performance");
         entityManager.persist(category2);
         MeasurementTemplate template2 = new MeasurementTemplate("Queue Size", "queueSize",
@@ -193,18 +175,45 @@ public class MeasurementRepositoryIntegrationTest {
         measurement3.setDsn("throughput");
         measurement3.setEnabled(false);
         measurementRepository.save(measurement3);
-        List<Measurement> expected = new ArrayList<Measurement>();
+        Set<Measurement> expected = new HashSet<Measurement>();
         expected.add(measurement);
         expected.add(measurement3);
-        assertEquals(expected, measurementRepository.findAvailabilityMeasurementsByGroup(group));
+        Set<Integer> groupMembers = new HashSet<Integer>();
+        groupMembers.add(resource);
+        groupMembers.add(resource2);
+        assertEquals(expected,
+            new HashSet<Measurement>(measurementRepository.findAvailabilityMeasurementsByGroupMembers(groupMembers)));
         verifyQueryCaching("Measurement.findAvailMeasurementsForGroup");
+    }
+    
+    @Test
+    public void testFindAvailabilityMeasurementsGroupMembersNoMembers() {
+        int resource2 = 43;
+        Category category2 = new Category("Performance");
+        entityManager.persist(category2);
+        MeasurementTemplate template2 = new MeasurementTemplate("Queue Size", "queueSize",
+            "messages", MeasurementConstants.COLL_TYPE_DYNAMIC, true, 1234, true,
+            "service:queueSize", type, category2, "tomcat");
+        entityManager.persist(template2);
+        Measurement measurement = new Measurement(resource, template, 1234);
+        measurement.setDsn("queueSize");
+        measurementRepository.save(measurement);
+        Measurement measurement2 = new Measurement(resource, template2, 1234);
+        measurement2.setDsn("queueErrors");
+        measurementRepository.save(measurement2);
+        Measurement measurement3 = new Measurement(resource2, template, 1234);
+        measurement3.setDsn("throughput");
+        measurement3.setEnabled(false);
+        measurementRepository.save(measurement3);
+        Set<Measurement> expected = new HashSet<Measurement>();
+        Set<Integer> groupMembers = new HashSet<Integer>();
+        assertEquals(expected,
+            new HashSet<Measurement>(measurementRepository.findAvailabilityMeasurementsByGroupMembers(groupMembers)));
     }
 
     @Test
     public void testFindByCategory() {
-        Resource resource2 = new Resource();
-        resource2.setName("Resource2");
-        entityManager.persist(resource2);
+        int resource2 = 43;
         Category category2 = new Category("Performance");
         entityManager.persist(category2);
         MeasurementTemplate template2 = new MeasurementTemplate("Queue Size", "queueSize",
@@ -232,9 +241,7 @@ public class MeasurementRepositoryIntegrationTest {
         Measurement measurement = new Measurement(resource, template, 1234);
         measurement.setDsn("queueSize");
         measurementRepository.save(measurement);
-        Resource resource2 = new Resource();
-        resource2.setName("Resource2");
-        entityManager.persist(resource2);
+        int resource2 = 43;
         Measurement measurement2 = new Measurement(resource2, template, 1234);
         measurement2.setDsn("queueErrors");
         measurementRepository.save(measurement2);
@@ -285,9 +292,6 @@ public class MeasurementRepositoryIntegrationTest {
 
     @Test
     public void testFindByResourceNullNoNull() {
-        Resource resource2 = new Resource();
-        resource2.setName("Resource2");
-        entityManager.persist(resource2);
         Category category2 = new Category("Performance");
         entityManager.persist(category2);
         MeasurementTemplate template2 = new MeasurementTemplate("Queue Rate", "queueSize",
@@ -308,19 +312,31 @@ public class MeasurementRepositoryIntegrationTest {
         Measurement measurement = new Measurement(resource, template, 1234);
         measurement.setDsn("queueSize");
         measurementRepository.save(measurement);
-        Resource resource2 = new Resource();
-        resource2.setName("Resource2");
-        entityManager.persist(resource2);
+        int resource2 = 43;
         Measurement measurement2 = new Measurement(resource2, template, 1234);
         measurement2.setDsn("queueErrors");
         measurementRepository.save(measurement2);
-        List<Measurement> expected = new ArrayList<Measurement>();
+        Set<Measurement> expected = new HashSet<Measurement>();
         expected.add(measurement);
         expected.add(measurement2);
-        List<Resource> resources = new ArrayList<Resource>();
+        List<Integer> resources = new ArrayList<Integer>();
         resources.add(resource);
         resources.add(resource2);
-        assertEquals(expected, measurementRepository.findByResources(resources));
+        assertEquals(expected, new HashSet<Measurement>(measurementRepository.findByResources(resources)));
+    }
+    
+    @Test
+    public void testFindByResourcesEmpty() {
+        Measurement measurement = new Measurement(resource, template, 1234);
+        measurement.setDsn("queueSize");
+        measurementRepository.save(measurement);
+        int resource2 = 43;
+        Measurement measurement2 = new Measurement(resource2, template, 1234);
+        measurement2.setDsn("queueErrors");
+        measurementRepository.save(measurement2);
+        Set<Measurement> expected = new HashSet<Measurement>();
+        List<Integer> resources = new ArrayList<Integer>();
+        assertEquals(expected, new HashSet<Measurement>(measurementRepository.findByResources(resources)));
     }
 
     @Test
@@ -339,12 +355,30 @@ public class MeasurementRepositoryIntegrationTest {
         expected.add(measurement);
         assertEquals(expected, measurementRepository.findByTemplate(template));
     }
+    
+    @Test
+    public void testFindByTemplateAliasAndResource() {
+        MeasurementTemplate template2 = new MeasurementTemplate("Queue Size", "queueSize",
+            "messages", MeasurementConstants.COLL_TYPE_DYNAMIC, true, 1234, true,
+            "service:queueSize", type, category, "tomcat");
+        entityManager.persist(template2);
+        Measurement measurement = new Measurement(resource, template, 1234);
+        measurement.setDsn("queueSize");
+        measurementRepository.save(measurement);
+        Measurement measurement2 = new Measurement(resource, template2, 1234);
+        measurement2.setDsn("queueErrors");
+        measurementRepository.save(measurement2);
+        assertEquals(measurement2, measurementRepository.findByTemplateAliasAndResource("queueSize",resource));
+    }
+    
+    @Test
+    public void testFindByTemplateAliasAndResourceNone() {
+        assertNull( measurementRepository.findByTemplateAliasAndResource("Availability",resource));
+    }
 
     @Test
     public void testFindByTemplateAndResource() {
-        Resource resource2 = new Resource();
-        resource2.setName("Resource2");
-        entityManager.persist(resource2);
+        int resource2 = 43;
         Measurement measurement = new Measurement(resource, template, 1234);
         measurement.setDsn("queueSize");
         measurementRepository.save(measurement);
@@ -352,14 +386,13 @@ public class MeasurementRepositoryIntegrationTest {
         measurement2.setDsn("queueErrors");
         measurementRepository.save(measurement2);
         assertEquals(measurement2,
-            measurementRepository.findByTemplateAndResource(template.getId(), resource2.getId()));
+            measurementRepository.findByTemplateAndResource(template.getId(), resource2));
         verifyQueryCaching("Measurement.findByTemplateForInstance");
     }
 
     @Test
     public void testFindByTemplateAndResourceNotFound() {
-        assertNull(measurementRepository.findByTemplateAndResource(template.getId(),
-            resource.getId()));
+        assertNull(measurementRepository.findByTemplateAndResource(template.getId(), resource));
     }
 
     @Test
@@ -381,9 +414,7 @@ public class MeasurementRepositoryIntegrationTest {
 
     @Test
     public void testFindByTemplatesAndResource() {
-        Resource resource2 = new Resource();
-        resource2.setName("Resource2");
-        entityManager.persist(resource2);
+        int resource2 = 43;
         Measurement measurement = new Measurement(resource, template, 1234);
         measurement.setDsn("queueSize");
         measurementRepository.save(measurement);
@@ -398,6 +429,8 @@ public class MeasurementRepositoryIntegrationTest {
                 Collections.singletonList(template.getId()), resource2));
         verifyQueryCaching("Measurement.findByTemplateForInstance");
     }
+    
+   
 
     @Test
     public void testFindByTemplatesAndResourcesAll() {
@@ -405,9 +438,7 @@ public class MeasurementRepositoryIntegrationTest {
             "messages", MeasurementConstants.COLL_TYPE_DYNAMIC, true, 1234, true,
             "service:queueSize", type, category, "tomcat");
         entityManager.persist(template2);
-        Resource resource2 = new Resource();
-        resource2.setName("Resource2");
-        entityManager.persist(resource2);
+        int resource2 = 43;
         Measurement measurement = new Measurement(resource, template, 1234);
         measurement.setDsn("queueSize");
         measurementRepository.save(measurement);
@@ -418,13 +449,59 @@ public class MeasurementRepositoryIntegrationTest {
         measurement3.setDsn("throughput");
         measurement3.setEnabled(false);
         measurementRepository.save(measurement3);
-        List<Measurement> expected = new ArrayList<Measurement>();
+        Set<Measurement> expected = new HashSet<Measurement>();
         expected.add(measurement2);
         expected.add(measurement3);
-        assertEquals(expected, measurementRepository.findByTemplatesAndResources(
-            new Integer[] { template.getId(), template2.getId() },
-            new Integer[] { resource2.getId() }, false));
+        assertEquals(expected, new HashSet<Measurement>(measurementRepository.findByTemplatesAndResources(
+            new Integer[] { template.getId(), template2.getId() }, new Integer[] { resource2 },
+            false)));
         verifyQueryCaching("Measurement.findMeasurements");
+    }
+    
+    @Test
+    public void testFindByTemplatesAndResourcesEmptyTemplates() {
+        MeasurementTemplate template2 = new MeasurementTemplate("Queue Size", "queueSize",
+            "messages", MeasurementConstants.COLL_TYPE_DYNAMIC, true, 1234, true,
+            "service:queueSize", type, category, "tomcat");
+        entityManager.persist(template2);
+        int resource2 = 43;
+        Measurement measurement = new Measurement(resource, template, 1234);
+        measurement.setDsn("queueSize");
+        measurementRepository.save(measurement);
+        Measurement measurement2 = new Measurement(resource2, template, 1234);
+        measurement2.setDsn("queueErrors");
+        measurementRepository.save(measurement2);
+        Measurement measurement3 = new Measurement(resource2, template2, 1234);
+        measurement3.setDsn("throughput");
+        measurement3.setEnabled(false);
+        measurementRepository.save(measurement3);
+        Set<Measurement> expected = new HashSet<Measurement>();
+        assertEquals(expected, new HashSet<Measurement>(measurementRepository.findByTemplatesAndResources(
+            new Integer[0], new Integer[] { resource2 },
+            false)));
+    }
+    
+    @Test
+    public void testFindByTemplatesAndResourcesEmptyResources() {
+        MeasurementTemplate template2 = new MeasurementTemplate("Queue Size", "queueSize",
+            "messages", MeasurementConstants.COLL_TYPE_DYNAMIC, true, 1234, true,
+            "service:queueSize", type, category, "tomcat");
+        entityManager.persist(template2);
+        int resource2 = 43;
+        Measurement measurement = new Measurement(resource, template, 1234);
+        measurement.setDsn("queueSize");
+        measurementRepository.save(measurement);
+        Measurement measurement2 = new Measurement(resource2, template, 1234);
+        measurement2.setDsn("queueErrors");
+        measurementRepository.save(measurement2);
+        Measurement measurement3 = new Measurement(resource2, template2, 1234);
+        measurement3.setDsn("throughput");
+        measurement3.setEnabled(false);
+        measurementRepository.save(measurement3);
+        Set<Measurement> expected = new HashSet<Measurement>();
+        assertEquals(expected, new HashSet<Measurement>(measurementRepository.findByTemplatesAndResources(
+            new Integer[] { template.getId(), template2.getId() }, new Integer[0],
+            false)));
     }
 
     @Test
@@ -433,9 +510,7 @@ public class MeasurementRepositoryIntegrationTest {
             "messages", MeasurementConstants.COLL_TYPE_DYNAMIC, true, 1234, true,
             "service:queueSize", type, category, "tomcat");
         entityManager.persist(template2);
-        Resource resource2 = new Resource();
-        resource2.setName("Resource2");
-        entityManager.persist(resource2);
+        int resource2 = 43;
         Measurement measurement = new Measurement(resource, template, 1234);
         measurement.setDsn("queueSize");
         measurementRepository.save(measurement);
@@ -449,17 +524,13 @@ public class MeasurementRepositoryIntegrationTest {
         List<Measurement> expected = new ArrayList<Measurement>();
         expected.add(measurement2);
         assertEquals(expected, measurementRepository.findByTemplatesAndResources(
-            new Integer[] { template.getId(), template2.getId() },
-            new Integer[] { resource2.getId() }, true));
+            new Integer[] { template.getId(), template2.getId() }, new Integer[] { resource2 },
+            true));
         verifyQueryCaching("Measurement.findMeasurements");
     }
 
     @Test
     public void testFindDesignatedByGroupAndCategory() {
-        ResourceGroup group = new ResourceGroup();
-        group.setName("Group1");
-        group.addMember(resource);
-        entityManager.persist(group);
         Category category2 = new Category("Performance");
         entityManager.persist(category2);
         MeasurementTemplate template2 = new MeasurementTemplate("Queue Size", "queueSize",
@@ -481,11 +552,37 @@ public class MeasurementRepositoryIntegrationTest {
         measurementRepository.save(measurement3);
         List<Measurement> expected = new ArrayList<Measurement>();
         expected.add(measurement);
-        assertEquals(
-            expected,
-            measurementRepository.findDesignatedByGroupAndCategoryOrderByTemplate(group,
-                category.getName()));
+        assertEquals(expected,
+            measurementRepository.findDesignatedByGroupAndCategoryOrderByTemplate(
+                new HashSet<Integer>(Collections.singletonList(resource)), category.getName()));
         verifyQueryCaching("Measurement.findDesignatedByCategoryForGroup");
+    }
+    
+    @Test
+    public void testFindDesignatedByGroupAndCategoryEmpty() {
+        Category category2 = new Category("Performance");
+        entityManager.persist(category2);
+        MeasurementTemplate template2 = new MeasurementTemplate("Queue Size", "queueSize",
+            "messages", MeasurementConstants.COLL_TYPE_DYNAMIC, true, 1234, true,
+            "service:queueSize", type, category2, "tomcat");
+        entityManager.persist(template2);
+        Measurement measurement = new Measurement(resource, template, 1234);
+        measurement.setDsn("queueSize");
+        measurementRepository.save(measurement);
+        Measurement measurement2 = new Measurement(resource, template2, 1234);
+        measurement2.setDsn("queueErrors");
+        measurementRepository.save(measurement2);
+        MeasurementTemplate template3 = new MeasurementTemplate("Throughput", "throughput",
+            "messages", MeasurementConstants.COLL_TYPE_DYNAMIC, true, 1234, false,
+            "service:queueSize", type, category, "tomcat");
+        entityManager.persist(template3);
+        Measurement measurement3 = new Measurement(resource, template3, 1234);
+        measurement3.setDsn("throughput");
+        measurementRepository.save(measurement3);
+        List<Measurement> expected = new ArrayList<Measurement>();
+        assertEquals(expected,
+            measurementRepository.findDesignatedByGroupAndCategoryOrderByTemplate(
+                new HashSet<Integer>(0), category.getName()));
     }
 
     @Test
@@ -547,14 +644,7 @@ public class MeasurementRepositoryIntegrationTest {
 
     @Test
     public void testFindEnabledByResourceGroupAndTemplate() {
-        Resource resource2 = new Resource();
-        resource2.setName("Resource2");
-        entityManager.persist(resource2);
-        ResourceGroup group = new ResourceGroup();
-        group.setName("Group1");
-        group.addMember(resource);
-        group.addMember(resource2);
-        entityManager.persist(group);
+        int resource2 = 43;
         Category category2 = new Category("Performance");
         entityManager.persist(category2);
         MeasurementTemplate template2 = new MeasurementTemplate("Queue Size", "queueSize",
@@ -571,11 +661,43 @@ public class MeasurementRepositoryIntegrationTest {
         measurement3.setDsn("throughput");
         measurement3.setEnabled(false);
         measurementRepository.save(measurement3);
+        Set<Integer> groupMembers = new HashSet<Integer>();
+        groupMembers.add(resource);
+        groupMembers.add(resource2);
         List<Measurement> expected = new ArrayList<Measurement>();
         expected.add(measurement);
-        assertEquals(expected,
-            measurementRepository.findEnabledByResourceGroupAndTemplate(group, template.getId()));
+        assertEquals(
+            expected,
+            measurementRepository.findEnabledByResourceGroupAndTemplate(groupMembers,
+                template.getId()));
         verifyQueryCaching("ResourceGroup.getMetricsCollecting");
+    }
+    
+    @Test
+    public void testFindEnabledByResourceGroupAndTemplateNoGroupMembers() {
+        int resource2 = 43;
+        Category category2 = new Category("Performance");
+        entityManager.persist(category2);
+        MeasurementTemplate template2 = new MeasurementTemplate("Queue Size", "queueSize",
+            "messages", MeasurementConstants.COLL_TYPE_DYNAMIC, true, 1234, true,
+            "service:queueSize", type, category2, "tomcat");
+        entityManager.persist(template2);
+        Measurement measurement = new Measurement(resource, template, 1234);
+        measurement.setDsn("queueSize");
+        measurementRepository.save(measurement);
+        Measurement measurement2 = new Measurement(resource, template2, 1234);
+        measurement2.setDsn("queueErrors");
+        measurementRepository.save(measurement2);
+        Measurement measurement3 = new Measurement(resource2, template, 1234);
+        measurement3.setDsn("throughput");
+        measurement3.setEnabled(false);
+        measurementRepository.save(measurement3);
+        Set<Integer> groupMembers = new HashSet<Integer>();
+        List<Measurement> expected = new ArrayList<Measurement>();
+        assertEquals(
+            expected,
+            measurementRepository.findEnabledByResourceGroupAndTemplate(groupMembers,
+                template.getId()));
     }
 
     @Test
@@ -587,9 +709,6 @@ public class MeasurementRepositoryIntegrationTest {
         Measurement measurement = new Measurement(resource, template, 1234);
         measurement.setDsn("queueSize");
         measurementRepository.save(measurement);
-        Resource resource2 = new Resource();
-        resource2.setName("Resource2");
-        entityManager.persist(resource2);
         Measurement measurement2 = new Measurement(resource, template2, 1234);
         measurement2.setDsn("queueErrors");
         measurement2.setEnabled(false);
@@ -605,16 +724,14 @@ public class MeasurementRepositoryIntegrationTest {
         Measurement measurement = new Measurement(resource, template, 1234);
         measurement.setDsn("queueSize");
         measurementRepository.save(measurement);
-        Resource resource2 = new Resource();
-        resource2.setName("Resource2");
-        entityManager.persist(resource2);
+        int resource2 = 43;
         Measurement measurement2 = new Measurement(resource2, template, 1234);
         measurement2.setDsn("queueErrors");
         measurementRepository.save(measurement2);
         Map<Integer, List<Measurement>> expected = new HashMap<Integer, List<Measurement>>();
-        expected.put(resource.getId(), Collections.singletonList(measurement));
-        expected.put(resource2.getId(), Collections.singletonList(measurement2));
-        List<Resource> resources = new ArrayList<Resource>();
+        expected.put(resource, Collections.singletonList(measurement));
+        expected.put(resource2, Collections.singletonList(measurement2));
+        List<Integer> resources = new ArrayList<Integer>();
         resources.add(resource);
         resources.add(resource2);
         assertEquals(expected, measurementRepository.findEnabledByResources(resources));
@@ -622,9 +739,7 @@ public class MeasurementRepositoryIntegrationTest {
 
     @Test
     public void testFindIdsByTemplatesAndResources() {
-        Resource resource2 = new Resource();
-        resource2.setName("Resource2");
-        entityManager.persist(resource2);
+        int resource2 = 43;
         Measurement measurement = new Measurement(resource, template, 1234);
         measurement.setDsn("queueSize");
         measurementRepository.save(measurement);
@@ -636,7 +751,7 @@ public class MeasurementRepositoryIntegrationTest {
         assertEquals(
             expected,
             measurementRepository.findIdsByTemplateAndResources(template.getId(),
-                Collections.singletonList(resource2.getId())));
+                Collections.singletonList(resource2)));
         verifyQueryCaching("Measurement.findIdsByTemplateForInstances");
     }
 
@@ -645,24 +760,20 @@ public class MeasurementRepositoryIntegrationTest {
         Measurement measurement = new Measurement(resource, template, 1234);
         measurement.setDsn("queueSize");
         measurementRepository.save(measurement);
-        Resource resource2 = new Resource();
-        resource2.setName("Resource2");
-        entityManager.persist(resource2);
+        int resource2 = 43;
         Measurement measurement2 = new Measurement(resource2, template, 1234);
         measurement2.setDsn("queueErrors");
         measurementRepository.save(measurement2);
-        List<Resource> expected = new ArrayList<Resource>();
+        Set<Integer> expected = new HashSet<Integer>();
         expected.add(resource);
         expected.add(resource2);
         assertEquals(expected,
-            measurementRepository.findMeasurementResourcesByTemplate(template.getId()));
+            new HashSet<Integer>(measurementRepository.findMeasurementResourcesByTemplate(template.getId())));
     }
 
     @Test
     public void testFindMetricCountSummaries() {
-        Resource resource2 = new Resource();
-        resource2.setName("Resource2");
-        entityManager.persist(resource2);
+        int resource2 = 43;
         Category category2 = new Category("Performance");
         entityManager.persist(category2);
         MeasurementTemplate template2 = new MeasurementTemplate("Queue Rate", "queueSize",
@@ -690,9 +801,7 @@ public class MeasurementRepositoryIntegrationTest {
 
     @Test
     public void testFindMetricCountSummariesSomeDisabled() {
-        Resource resource2 = new Resource();
-        resource2.setName("Resource2");
-        entityManager.persist(resource2);
+        int resource2 = 43;
         Category category2 = new Category("Performance");
         entityManager.persist(category2);
         MeasurementTemplate template2 = new MeasurementTemplate("Queue Rate", "queueSize",
@@ -720,12 +829,8 @@ public class MeasurementRepositoryIntegrationTest {
 
     @Test
     public void testFindRelatedAvailabilityMeasurements() {
-        Resource resource2 = new Resource();
-        resource2.setName("Resource2");
-        entityManager.persist(resource2);
-        Resource resource3 = new Resource();
-        resource3.setName("Resource3");
-        entityManager.persist(resource3);
+        int resource2 = 43;
+        int resource3 = 99;
         Measurement measurement = new Measurement(resource, template, 1234);
         measurement.setDsn("queueSize");
         measurementRepository.save(measurement);
@@ -736,11 +841,9 @@ public class MeasurementRepositoryIntegrationTest {
         measurement3.setDsn("throughput");
         measurementRepository.save(measurement3);
         Map<Integer, List<Measurement>> expected = new HashMap<Integer, List<Measurement>>();
-        expected.put(resource.getId(),
-            Arrays.asList(new Measurement[] { measurement2, measurement3 }));
+        expected.put(resource, Arrays.asList(new Measurement[] { measurement2, measurement3 }));
         Map<Integer, List<Integer>> parentToChildIds = new HashMap<Integer, List<Integer>>();
-        parentToChildIds.put(resource.getId(),
-            Arrays.asList(new Integer[] { resource2.getId(), resource3.getId() }));
+        parentToChildIds.put(resource, Arrays.asList(new Integer[] { resource2, resource3 }));
         assertEquals(expected,
             measurementRepository.findRelatedAvailabilityMeasurements(parentToChildIds));
         verifyQueryCaching("Measurement.findRelatedAvailMeasurements");
@@ -754,9 +857,7 @@ public class MeasurementRepositoryIntegrationTest {
             "messages", MeasurementConstants.COLL_TYPE_DYNAMIC, true, 1234, true,
             "service:queueSize", type, category2, "tomcat");
         entityManager.persist(template2);
-        Resource resource2 = new Resource();
-        resource2.setName("Resource2");
-        entityManager.persist(resource2);
+        int resource2 = 43;
         Measurement measurement = new Measurement(resource, template, 10);
         measurement.setDsn("queueSize");
         measurementRepository.save(measurement);
@@ -768,8 +869,8 @@ public class MeasurementRepositoryIntegrationTest {
         measurementRepository.save(measurement3);
         List<Object[]> actual = measurementRepository.getMinIntervals();
         assertEquals(2, actual.size());
-        assertArrayEquals(new Object[] { resource.getId(), 10l }, actual.get(0));
-        assertArrayEquals(new Object[] { resource2.getId(), 20l }, actual.get(1));
+        assertArrayEquals(new Object[] { resource, 10l }, actual.get(0));
+        assertArrayEquals(new Object[] { resource2, 20l }, actual.get(1));
     }
 
     @Test
@@ -780,16 +881,14 @@ public class MeasurementRepositoryIntegrationTest {
             "messages", MeasurementConstants.COLL_TYPE_DYNAMIC, true, 1234, true,
             "service:queueSize", type, category2, "tomcat");
         entityManager.persist(template2);
-        Resource resource2 = new Resource();
-        resource2.setName("Resource2");
-        entityManager.persist(resource2);
+        int resource2 = 43;
         Measurement measurement2 = new Measurement(resource2, template, 20);
         measurement2.setDsn("queueErrors");
         measurementRepository.save(measurement2);
         Measurement measurement3 = new Measurement(resource2, template2, 30);
         measurement3.setDsn("throughput");
         measurementRepository.save(measurement3);
-        assertEquals(Long.valueOf(20), measurementRepository.getMinInterval(resource2.getId()));
+        assertEquals(Long.valueOf(20), measurementRepository.getMinInterval(resource2));
     }
 
     private void verifyQueryCaching(String cacheName) {

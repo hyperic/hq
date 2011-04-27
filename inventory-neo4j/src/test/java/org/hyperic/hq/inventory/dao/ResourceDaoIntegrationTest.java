@@ -29,13 +29,15 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
 @DirtiesContext
-@Transactional
+@Transactional("neoTxManager")
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "classpath:META-INF/spring/neo4j-context.xml",
                                    "classpath:org/hyperic/hq/inventory/InventoryIntegrationTest-context.xml" })
+@TransactionConfiguration(transactionManager="neoTxManager")
 public class ResourceDaoIntegrationTest {
 
     @Autowired
@@ -55,7 +57,7 @@ public class ResourceDaoIntegrationTest {
         type = new ResourceType("TestType");
         resourceTypeDao.persist(type);
         PropertyType propType = new PropertyType(SKU, "A SKU Number");
-        propType.setIndexed(true);
+        propType.setDefaultValue("12345");
         type.addPropertyType(propType);
     }
 
@@ -63,10 +65,10 @@ public class ResourceDaoIntegrationTest {
     public void testFindByIndexedPropertySortAsc() {
         Resource resource1 = new Resource("Some Resource", type);
         resourceDao.persist(resource1);
-        resource1.setProperty(SKU, SKU1);
+        resource1.setProperty(SKU, SKU1,true);
         Resource resource2 = new Resource("Another Resource", type);
         resourceDao.persist(resource2);
-        resource2.setProperty(SKU, SKU1);
+        resource2.setProperty(SKU, SKU1, true);
         Resource resource3 = new Resource("Not a service", type);
         resourceDao.persist(resource3);
         PageRequest pageInfo = new PageRequest(0, 15, new Sort("name"));
@@ -81,10 +83,10 @@ public class ResourceDaoIntegrationTest {
     public void testFindByIndexedPropertySortDesc() {
         Resource resource1 = new Resource("Some Resource", type);
         resourceDao.persist(resource1);
-        resource1.setProperty(SKU, SKU1);
+        resource1.setProperty(SKU, SKU1,true);
         Resource resource2 = new Resource("Another Resource", type);
         resourceDao.persist(resource2);
-        resource2.setProperty(SKU, SKU1);
+        resource2.setProperty(SKU, SKU1,true);
         Resource resource3 = new Resource("Not a service", type);
         resourceDao.persist(resource3);
         PageRequest pageInfo = new PageRequest(0, 15, new Sort(Direction.DESC, "name"));
@@ -99,13 +101,13 @@ public class ResourceDaoIntegrationTest {
     public void testFindByIndexedPropertyTotalResultsLargerThanPage() {
         Resource resource1 = new Resource("Some Resource", type);
         resourceDao.persist(resource1);
-        resource1.setProperty(SKU, SKU1);
+        resource1.setProperty(SKU, SKU1,true);
         Resource resource2 = new Resource("Another Resource", type);
         resourceDao.persist(resource2);
-        resource2.setProperty(SKU, SKU1);
+        resource2.setProperty(SKU, SKU1,true);
         Resource resource3 = new Resource("Ummm", type);
         resourceDao.persist(resource3);
-        resource3.setProperty(SKU, SKU1);
+        resource3.setProperty(SKU, SKU1,true);
         PageRequest pageInfo = new PageRequest(0, 2, new Sort("name"));
         Page<Resource> actual = resourceDao
             .findByIndexedProperty(SKU, SKU1, pageInfo, String.class);
@@ -126,7 +128,7 @@ public class ResourceDaoIntegrationTest {
             }
             Resource resource = new Resource(resourceName, type);
             resourceDao.persist(resource);
-            resource.setProperty(SKU, SKU1);
+            resource.setProperty(SKU, SKU1,true);
             if (i >= 6 && i < 11) {
                 expected.add(resource);
             }
@@ -157,7 +159,7 @@ public class ResourceDaoIntegrationTest {
             }
             Resource resource = new Resource(resourceName, type);
             resourceDao.persist(resource);
-            resource.setProperty(SKU, SKU1);
+            resource.setProperty(SKU, SKU1,true);
         }
         PageRequest pageInfo = new PageRequest(2, 5);
         Page<Resource> actual = resourceDao.findByIndexedProperty(SKU, SKU1, pageInfo, null);
@@ -187,11 +189,6 @@ public class ResourceDaoIntegrationTest {
     @Test
     public void testFindByIdNonExistent() {
         assertNull(resourceDao.findById(98765));
-    }
-
-    @Test
-    public void testFindByIdNullId() {
-        assertNull(resourceDao.findById(null));
     }
 
     @Test
@@ -306,6 +303,25 @@ public class ResourceDaoIntegrationTest {
         expected.add(resource1);
         expected.add(resource3);
         assertEquals(expected, resourceDao.findByOwner("bob"));
+    }
+    
+    @Test
+    public void testPersistRoot() {
+        Resource resource1 = new Resource("Some Resource", type);
+        resourceDao.persistRoot(resource1);
+        assertEquals(resource1,resourceDao.findRoot());
+    }
+    
+    @Test
+    public void testPersistWithDefaultPropertyValues() {
+        Resource resource1 = new Resource("Some Resource", type);
+        resourceDao.persist(resource1);
+        assertEquals("12345",resource1.getProperty(SKU));
+    }
+    
+    @Test
+    public void testFindRootNoRoot() {
+        assertNull(resourceDao.findRoot());
     }
 
 }

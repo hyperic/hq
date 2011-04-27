@@ -33,7 +33,6 @@ import javax.security.auth.login.LoginException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
-import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
@@ -48,7 +47,6 @@ import org.hyperic.hq.events.ActionConfigInterface;
 import org.hyperic.hq.events.ActionCreateException;
 import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.AlertConditionCreateException;
-import org.hyperic.hq.events.AlertDefinitionCreateException;
 import org.hyperic.hq.events.AlertNotFoundException;
 import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.events.TriggerCreateException;
@@ -168,6 +166,15 @@ public interface EventsBoss {
      */
     public Alert getAlert(int sessionID, Integer id) throws SessionNotFoundException,
         SessionTimeoutException, AlertNotFoundException;
+    
+    
+    Map<String, Integer> findResourceAlertDefinitionNames(int sessionID, AppdefEntityID id)
+        throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException,
+        PermissionException;
+    
+    Map<String, Integer> findResourceTypeAlertDefinitionNames(int sessionID, Integer resourceType)
+        throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException,
+        PermissionException;
 
     /**
      * Get a list of all alert definitions

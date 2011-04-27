@@ -360,4 +360,10 @@ public class MySQL5InnoDBDialect
     public String getMetricDataHint() {
         return "USE INDEX (PRIMARY)";
     }
+
+    public boolean requiresCast() {
+        return false;
+    }
+    
+    
 }

@@ -38,6 +38,7 @@ import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
+import org.hyperic.hq.plugin.mgmt.domain.Plugin;
 import org.hyperic.hq.product.ServiceTypeInfo;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -161,13 +162,10 @@ public interface ServiceManager {
     PageList<ServiceValue> getServicesByApplication(AuthzSubject subject, Integer appId, Integer serviceTypeId, PageControl pc) throws PermissionException,
     org.hyperic.hq.appdef.shared.ApplicationNotFoundException, ServiceNotFoundException;
 
-    public void updateServiceZombieStatus(AuthzSubject subject, Service svc, boolean zombieStatus)
-        throws PermissionException;
-
     public Service updateService(AuthzSubject subject, ServiceValue existing) throws PermissionException,
         ServiceNotFoundException;
     
-    public void updateServiceTypes(String plugin, org.hyperic.hq.product.ServiceTypeInfo[] infos) throws VetoException, NotFoundException;
+    public void updateServiceTypes(Plugin plugin, org.hyperic.hq.product.ServiceTypeInfo[] infos) throws VetoException, NotFoundException;
 
     public void deleteServiceType(ServiceType serviceType, AuthzSubject overlord) throws VetoException;
 
@@ -188,10 +186,10 @@ public interface ServiceManager {
     
     Number getServiceCount();
     
-    ServiceType createServiceType(ServiceTypeInfo sinfo, String plugin,
+    ServiceType createServiceType(ServiceTypeInfo sinfo, Plugin plugin,
                                   ResourceType parentType) throws NotFoundException;
     
-    ServiceType createServiceType(ServiceTypeInfo sinfo, String plugin,
+    ServiceType createServiceType(ServiceTypeInfo sinfo, Plugin plugin,
                                   String[] platformTypes) throws NotFoundException;
 
 }

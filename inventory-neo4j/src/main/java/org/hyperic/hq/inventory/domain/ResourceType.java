@@ -3,18 +3,8 @@ package org.hyperic.hq.inventory.domain;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.GenericGenerator;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.ReturnableEvaluator;
@@ -22,13 +12,14 @@ import org.neo4j.graphdb.StopEvaluator;
 import org.neo4j.graphdb.TraversalPosition;
 import org.neo4j.graphdb.Traverser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.annotation.Indexed;
+import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.data.graph.annotation.GraphProperty;
 import org.springframework.data.graph.annotation.NodeEntity;
 import org.springframework.data.graph.annotation.RelatedTo;
 import org.springframework.data.graph.core.Direction;
+import org.springframework.data.graph.neo4j.annotation.Indexed;
 import org.springframework.data.graph.neo4j.support.GraphDatabaseContext;
-import org.springframework.data.graph.neo4j.support.SubReferenceNodeTypeStrategy;
+import org.springframework.data.graph.neo4j.support.typerepresentation.SubReferenceNodeTypeRepresentationStrategy;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -38,47 +29,34 @@ import org.springframework.transaction.annotation.Transactional;
  * @author dcrutchfield
  * 
  */
-@Entity
-@NodeEntity(partial = true)
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@Configurable
+@NodeEntity
 public class ResourceType {
 
     @RelatedTo(type = RelationshipTypes.HAS_CONFIG_TYPE, direction = Direction.OUTGOING, elementClass = ConfigType.class)
-    @Transient
     private Set<ConfigType> configTypes;
 
     @GraphProperty
-    @Transient
     private String description;
-
-    @PersistenceContext
-    private transient EntityManager entityManager;
 
     @Autowired
     private transient GraphDatabaseContext graphDatabaseContext;
 
-    @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")
-    @GeneratedValue(generator = "mygen1")
-    @Column(name = "id")
+    @GraphProperty
     private Integer id;
 
     @NotNull
     @Indexed
     @GraphProperty
-    @Transient
     private String name;
 
     @RelatedTo(type = RelationshipTypes.HAS_OPERATION_TYPE, direction = Direction.OUTGOING, elementClass = OperationType.class)
-    @Transient
     private Set<OperationType> operationTypes;
 
     @RelatedTo(type = RelationshipTypes.HAS_PROPERTY_TYPE, direction = Direction.OUTGOING, elementClass = PropertyType.class)
-    @Transient
     private Set<PropertyType> propertyTypes;
 
     @RelatedTo(type = RelationshipTypes.IS_A, direction = Direction.INCOMING, elementClass = Resource.class)
-    @Transient
     private Set<Resource> resources;
 
     public ResourceType() {
@@ -106,10 +84,10 @@ public class ResourceType {
      * 
      * @param configType The ConfigType to add
      */
+    @Transactional("neoTxManager")
     public void addConfigType(ConfigType configType) {
         // TODO can't do this in a detached env b/c relationship doesn't take
         // unless both items are node-backed
-        entityManager.persist(configType);
         configType.persist();
         configTypes.add(configType);
     }
@@ -118,24 +96,48 @@ public class ResourceType {
      * 
      * @param operationType The OperationType to add
      */
+    @Transactional("neoTxManager")
     public void addOperationType(OperationType operationType) {
         // TODO can't do this in a detached env b/c relationship doesn't take
         // unless both items are node-backed
-        entityManager.persist(operationType);
         operationType.persist();
         operationTypes.add(operationType);
+    }
+    
+    /**
+     * 
+     * @param operationType The OperationType to add
+     */
+    @Transactional("neoTxManager")
+    public void addOperationTypes(Set<OperationType> operationTypes) {
+        // TODO can't do this in a detached env b/c relationship doesn't take
+        // unless both items are node-backed
+        for(OperationType operationType: operationTypes) {
+            operationType.persist();
+        }
+        this.operationTypes.addAll(operationTypes);
     }
 
     /**
      * 
      * @param propertyType The PropertyType to add
      */
+    @Transactional("neoTxManager")
     public void addPropertyType(PropertyType propertyType) {
         // TODO can't do this in a detached env b/c relationship doesn't take
         // unless both items are node-backed
-        entityManager.persist(propertyType);
         propertyType.persist();
         propertyTypes.add(propertyType);
+    }
+    
+    @Transactional("neoTxManager")
+    public void addPropertyTypes(Set<PropertyType> propertyTypes) {
+        for(PropertyType propertyType: propertyTypes) {
+        // TODO can't do this in a detached env b/c relationship doesn't take
+        // unless both items are node-backed
+            propertyType.persist();
+        }
+        this.propertyTypes.addAll(propertyTypes);
     }
 
     private Set<ResourceTypeRelationship> convertRelationships(ResourceType entity,
@@ -143,9 +145,9 @@ public class ResourceType {
         Set<ResourceTypeRelationship> relations = new HashSet<ResourceTypeRelationship>();
         for (org.neo4j.graphdb.Relationship relationship : relationships) {
             // Don't include Neo4J relationship b/w Node and its Java type
-            if (!relationship.isType(SubReferenceNodeTypeStrategy.INSTANCE_OF_RELATIONSHIP_TYPE)) {
+            if (!relationship.isType(SubReferenceNodeTypeRepresentationStrategy.INSTANCE_OF_RELATIONSHIP_TYPE)) {
                 Node node = relationship.getOtherNode(getPersistentState());
-                Class<?> otherEndType = graphDatabaseContext.getJavaType(node);
+                Class<?> otherEndType = graphDatabaseContext.getNodeTypeRepresentationStrategy().getJavaType(node);
                 if (ResourceType.class.isAssignableFrom(otherEndType)) {
                     if (entity == null || node.equals(entity.getPersistentState())) {
                         relations.add(graphDatabaseContext.createEntityFromState(relationship,
@@ -392,7 +394,7 @@ public class ResourceType {
      * @param relationName The name of the relationship
      * @return The created relationship
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public ResourceTypeRelationship relateTo(ResourceType entity, String relationName) {
         return (ResourceTypeRelationship) this.relateTo(entity, ResourceTypeRelationship.class,
             relationName);
@@ -402,19 +404,13 @@ public class ResourceType {
      * Removes this ResourceType, including all Resources of this type and all
      * relationships
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void remove() {
         removeResources();
         removePropertyTypes();
         removeOperationTypes();
         removeConfigTypes();
         graphDatabaseContext.removeNodeEntity(this);
-        if (this.entityManager.contains(this)) {
-            this.entityManager.remove(this);
-        } else {
-            ResourceType persisted = this.entityManager.find(this.getClass(), this.id);
-            this.entityManager.remove(persisted);
-        }
     }
 
     private void removeConfigTypes() {
@@ -438,7 +434,7 @@ public class ResourceType {
     /**
      * Removes all relationships
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void removeRelationships() {
         for (org.neo4j.graphdb.Relationship relationship : getPersistentState().getRelationships()) {
             relationship.delete();
@@ -450,7 +446,7 @@ public class ResourceType {
      * @param entity The related ResourceType
      * @param relationName The name of the relationship
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void removeRelationships(ResourceType entity, String relationName) {
         removeRelationships(entity, relationName, Direction.BOTH);
     }
@@ -461,7 +457,7 @@ public class ResourceType {
      * @param name The name of the relationship
      * @param direction The Direction of the relationship
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void removeRelationships(ResourceType entity, String name, Direction direction) {
         for (ResourceTypeRelationship relation : getRelationships(entity, name, direction)) {
             relation.getPersistentState().delete();
@@ -472,7 +468,7 @@ public class ResourceType {
      * Removes relationships
      * @param relationName The name of the relationship
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void removeRelationships(String relationName) {
         for (org.neo4j.graphdb.Relationship relationship : getPersistentState().getRelationships(
             DynamicRelationshipType.withName(relationName), Direction.BOTH.toNeo4jDir())) {
@@ -490,6 +486,7 @@ public class ResourceType {
      * 
      * @param description The ResourceType decscription
      */
+    @Transactional("neoTxManager")
     public void setDescription(String description) {
         this.description = description;
     }

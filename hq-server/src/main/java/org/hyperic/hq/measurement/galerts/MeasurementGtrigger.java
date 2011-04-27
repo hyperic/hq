@@ -38,9 +38,9 @@ import java.util.TreeSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.galerts.ResourceAuxLog;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
@@ -556,9 +556,7 @@ public class MeasurementGtrigger
                 // Make sure the resource hasn't been deleted
                 Measurement metric =
                     getDMMan().getMeasurement(new Integer(src.getId()));
-                if (metric == null ||
-                    metric.getResource() == null ||
-                    metric.getResource().isInAsyncDeleteState()) {
+                if (metric == null || metric.getResource() == null) {
                     iter.remove();
                     continue;
                 }
@@ -705,7 +703,7 @@ public class MeasurementGtrigger
                 continue;
             }
             
-            entId  = AppdefUtil.newAppdefEntityId(metric.getResource());
+            entId  = Bootstrap.getBean(AppdefConverter.class).newAppdefEntityId(metric.getResource());
                                        
             entVal = new AppdefEntityValue(entId, overlord);
             
@@ -747,9 +745,7 @@ public class MeasurementGtrigger
         return Bootstrap.getBean(MeasurementManager.class);
     }
      
-    public void setGroup(ResourceGroup rg) {
-        _resourceGroup = rg;
-        
+    public void setGroup(Integer rg) { 
         _interestedEvents.clear();
         ResourceGroupManager gMan = Bootstrap.getBean(ResourceGroupManager.class); 
         AuthzSubjectManager sMan = Bootstrap.getBean(AuthzSubjectManager.class); 
@@ -757,12 +753,12 @@ public class MeasurementGtrigger
             
         try {
             ResourceGroup g = gMan.findResourceGroupById(sMan.getOverlordPojo(),
-                                                         rg.getId());
+                                                         rg);
                                              
-            
+            _resourceGroup = g;
             _groupSize = gMan.getNumMembers(g);
             
-            _log.debug("Resource group set: id="+rg.getId()+", size="+_groupSize);
+            _log.debug("Resource group set: id="+rg +", size="+_groupSize);
             
             List derivedMeas = getMeasurementsCollecting();
             

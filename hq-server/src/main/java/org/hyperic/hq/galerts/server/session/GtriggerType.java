@@ -26,7 +26,6 @@
 package org.hyperic.hq.galerts.server.session;
 
 import org.hyperic.hq.galerts.processor.Gtrigger;
-import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 
@@ -42,5 +41,5 @@ public interface GtriggerType {
      * to determine whether or not a trigger should be an option when creating
      * an alert definition.
      */
-    boolean validForGroup(ResourceGroup g);
+    boolean validForGroup(Integer g);
 }

@@ -40,6 +40,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.shared.AppServiceValue;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -47,7 +48,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ApplicationManager;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
@@ -55,7 +55,6 @@ import org.hyperic.hq.appdef.shared.DependencyTree;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.auth.domain.AuthzSubject;
-import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
@@ -66,9 +65,7 @@ import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.inventory.data.ResourceDao;
 import org.hyperic.hq.inventory.data.ResourceGroupDao;
-import org.hyperic.hq.inventory.data.ResourceTypeDao;
 import org.hyperic.hq.inventory.domain.OperationType;
-import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.RelationshipTypes;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceGroup;
@@ -112,7 +109,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     
     private ResourceDao resourceDao;
     
-    private ResourceTypeDao resourceTypeDao;
+    private AppdefConverter appdefConverter;
     
     public static final String MODIFIED_TIME = "ModifiedTime";
 
@@ -149,7 +146,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
                                   ZeventEnqueuer zeventManager,
                                   ResourceGroupManager resourceGroupManager, ServiceFactory serviceFactory,
                                   ResourceGroupDao resourceGroupDao, ResourceDao resourceDao,
-                                  ResourceTypeDao resourceTypeDao) {
+                                  AppdefConverter appdefConverter) {
         this.resourceManager = resourceManager;
         this.permissionManager = permissionManager;
         this.zeventManager = zeventManager;
@@ -157,7 +154,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         this.serviceFactory = serviceFactory;
         this.resourceGroupDao = resourceGroupDao;
         this.resourceDao = resourceDao;
-        this.resourceTypeDao = resourceTypeDao;
+        this.appdefConverter = appdefConverter;
     }
 
     /**
@@ -243,7 +240,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         application.setModifiedTime((Long)resourceGroup.getProperty(MODIFIED_TIME));
         application.setName(resourceGroup.getName());
         application.setResource(resourceGroup);
-        application.setSortName((String) resourceGroup.getProperty(AppdefResource.SORT_NAME));
+        application.setSortName(resourceGroup.getSortName());
         application.setBusinessContact((String)resourceGroup.getProperty(BUSINESS_CONTACT));
         application.setEngContact((String)resourceGroup.getProperty(ENG_CONTACT));
         application.setOpsContact((String)resourceGroup.getProperty(OPS_CONTACT));
@@ -265,7 +262,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
     
     private void updateApplication(ResourceGroup app, ApplicationValue appV) {
-        app.setProperty(AppdefResource.SORT_NAME,appV.getName().toUpperCase());
         app.setModifiedBy(appV.getModifiedBy());
         app.setLocation(appV.getLocation());
         app.setDescription(appV.getDescription());
@@ -285,7 +281,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 app.removeMember(resourceManager.findResourceById(o.getId()));
             }
         }
-        resourceGroupDao.merge(app);
     }
 
     /**
@@ -335,7 +330,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         ResourceGroup app = resourceGroupManager.findResourceGroupById(id);
         //TODO perm check
         //permissionManager.checkRemovePermission(subject, app.getEntityId());
-        AppdefEntityID appId = AppdefUtil.newAppdefEntityId(app);
+        AppdefEntityID appId = appdefConverter.newAppdefEntityId(app);
         app.remove();
         // Send resource delete event
         ResourceDeletedZevent zevent = new ResourceDeletedZevent(subject, appId);
@@ -516,26 +511,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
         throw new PermissionException("Operation: " + opName + " not valid for ResourceType: " +
                                       rtV.getName());
-    }
-
-    /**
-     * Get the scope of viewable apps for a given user
-     * @param whoami
-     * @return list of ApplicationPKs for which the subject has
-     *         AuthzConstants.applicationOpViewApplication
-     */
-    protected List<Integer> getViewableApplications(AuthzSubject whoami)
-        throws PermissionException, NotFoundException {
-
-        OperationType op = getOperationByName(resourceManager
-            .findResourceTypeByName(AuthzConstants.applicationResType),
-            AuthzConstants.appOpViewApplication);
-        List<Integer> idList = permissionManager.findOperationScopeBySubject(whoami, op.getId());
-        List<Integer> keyList = new ArrayList<Integer>(idList.size());
-        for (int i = 0; i < idList.size(); i++) {
-            keyList.add(idList.get(i));
-        }
-        return keyList;
     }
    
     private AppService toAppService(Resource service) {
@@ -875,35 +850,16 @@ public class ApplicationManagerImpl implements ApplicationManager {
     public PageList<Resource> getAllApplicationResources(AuthzSubject subject, PageControl pc) {
         int appGroupTypeId = resourceManager.findResourceTypeByName(AppdefEntityConstants.APPDEF_NAME_APPLICATION).getId();
         PageRequest pageInfo = new PageRequest(pc.getPagenum(),pc.getPagesize(),
-            new Sort(pc.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"name"));
+            new Sort(pc.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"sortName"));
         Page<Resource> resources = resourceDao.findByIndexedProperty("type", appGroupTypeId,pageInfo,String.class);
         return new PageList<Resource>(resources.getContent(),(int)resources.getTotalElements());
     }
 
     @PostConstruct
     public void afterPropertiesSet() throws Exception {
-        valuePager = Pager.getPager(VALUE_PROCESSOR);
-        //TODO move init logic?
-        if(resourceTypeDao.findByName(AppdefEntityConstants.APPDEF_NAME_APPLICATION) == null) {
-            ResourceType groupType = new ResourceType(AppdefEntityConstants.APPDEF_NAME_APPLICATION);
-            resourceTypeDao.persist(groupType);
-            setPropertyType(groupType,AppdefResource.SORT_NAME,String.class);
-            setPropertyType(groupType,ApplicationManagerImpl.BUSINESS_CONTACT,String.class);
-            setPropertyType(groupType,ApplicationManagerImpl.CREATION_TIME,Long.class);
-            setPropertyType(groupType,ApplicationManagerImpl.ENG_CONTACT,String.class);
-            setPropertyType(groupType,ApplicationManagerImpl.MODIFIED_TIME,Long.class);
-            setPropertyType(groupType,ApplicationManagerImpl.OPS_CONTACT,String.class);
-        }
-       
+        valuePager = Pager.getPager(VALUE_PROCESSOR); 
     }
         
-    private void setPropertyType(ResourceType groupType, String propTypeName, Class<?> type) {
-        PropertyType propType = new PropertyType(propTypeName,type);
-        propType.setDescription(propTypeName);
-        propType.setHidden(true);
-        groupType.addPropertyType(propType);
-    }
-
     private void trimStrings(ApplicationValue app) {
         if (app.getBusinessContact() != null)
             app.setBusinessContact(app.getBusinessContact().trim());

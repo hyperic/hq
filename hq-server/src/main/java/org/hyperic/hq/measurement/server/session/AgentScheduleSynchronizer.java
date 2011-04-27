@@ -46,8 +46,6 @@ import org.hyperic.hq.agent.mgmt.domain.Agent;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.authz.shared.ResourceManager;
-import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.shared.MeasurementProcessor;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.hq.zevents.Zevent;
@@ -70,8 +68,6 @@ public class AgentScheduleSynchronizer {
 
     private AgentManager agentManager;
 
-    private ResourceManager resourceManager;
-
     private final Map<Integer, Collection<AppdefEntityID>> scheduleAeids = new HashMap<Integer, Collection<AppdefEntityID>>();
 
     private final Map<Integer, Collection<AppdefEntityID>> unscheduleAeids = new HashMap<Integer, Collection<AppdefEntityID>>();
@@ -87,13 +83,11 @@ public class AgentScheduleSynchronizer {
     @Autowired
     public AgentScheduleSynchronizer(ZeventEnqueuer zEventManager, AgentManager agentManager,
                                      MeasurementProcessor measurementProcessor,
-                                     ConcurrentStatsCollector concurrentStatsCollector,
-                                     ResourceManager resourceManager) {
+                                     ConcurrentStatsCollector concurrentStatsCollector) {
         this.zEventManager = zEventManager;
         this.agentManager = agentManager;
         this.measurementProcessor = measurementProcessor;
         this.concurrentStatsCollector = concurrentStatsCollector;
-        this.resourceManager = resourceManager;
     }
 
     @PostConstruct
@@ -124,7 +118,7 @@ public class AgentScheduleSynchronizer {
                         AgentScheduleSyncZevent event = (AgentScheduleSyncZevent) z;
                         toSchedule.addAll(event.getEntityIds());
                         if (debug)
-                            log.debug("Schduling eids=[" + event.getEntityIds() + "]");
+                            log.debug("Scheduling eids=[" + event.getEntityIds() + "]");
                     } else if (z instanceof AgentUnscheduleZevent) {
                         AgentUnscheduleZevent event = (AgentUnscheduleZevent) z;
                         String token = event.getAgentToken();
@@ -141,22 +135,19 @@ public class AgentScheduleSynchronizer {
                             log.debug("Unschduling eids=[" + event.getEntityIds() + "]");
                     }
                 }
-
+                final Map<Integer, Collection<AppdefEntityID>> agentAppdefIds = agentManager
+                .getAgentMap(toSchedule);
                 synchronized (scheduleAeids) {
-                    for (AppdefEntityID id : toSchedule) {
-                        Resource resource = resourceManager.findResourceById(id.getId());
-                        // Resource may have been deleted while we are
-                        // processing this
-                        if (resource != null) {
-                            Collection<AppdefEntityID> tmp;
-                            int agentId = agentManager.getAgent(resource).getId();
-                             if (null == (tmp = scheduleAeids.get(agentId))) {
-                                    tmp = new HashSet<AppdefEntityID>();
-                                    scheduleAeids.put(agentId, tmp);
-                             }
-                             tmp.add(id);
-                           
+                    for (final Map.Entry<Integer, Collection<AppdefEntityID>> entry : agentAppdefIds
+                        .entrySet()) {
+                        final Integer agentId = entry.getKey();
+                        final Collection<AppdefEntityID> eids = entry.getValue();
+                        Collection<AppdefEntityID> tmp;
+                        if (null == (tmp = scheduleAeids.get(agentId))) {
+                            tmp = new HashSet<AppdefEntityID>(eids.size());
+                            scheduleAeids.put(agentId, tmp);
                         }
+                        tmp.addAll(eids);
                     }
                 }
                 synchronized (unscheduleAeids) {

@@ -28,7 +28,6 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
 import org.hyperic.hq.auth.domain.AuthzSubject;
-import org.hyperic.hq.inventory.domain.Resource;
 
 @Entity
 @DiscriminatorValue("sysConfig")
@@ -37,7 +36,7 @@ public class ServerConfigAudit
 
     protected ServerConfigAudit() {}
     
-    ServerConfigAudit(AuthzSubject s, Resource r, AuditPurpose p, AuditImportance i, AuditNature n, String msg) {
+    ServerConfigAudit(AuthzSubject s, Integer r, AuditPurpose p, AuditImportance i, AuditNature n, String msg) {
         super(s, r, p, n, i, msg);
     }
 

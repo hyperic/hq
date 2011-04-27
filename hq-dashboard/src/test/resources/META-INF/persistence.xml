@@ -9,6 +9,7 @@
      <class>org.hyperic.hq.config.domain.CrispoOption</class>
      <class>org.hyperic.hq.auth.domain.AuthzSubject</class>
      <class>org.hyperic.hq.auth.domain.Role</class>
+      <class>org.hyperic.hq.auth.domain.Operation</class>
      <class>org.hyperic.hq.auth.domain.RoleCalendar</class>
      <class>org.hyperic.hq.auth.domain.Calendar</class>
      <class>org.hyperic.hq.auth.domain.CalendarEntry</class>

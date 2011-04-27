@@ -128,7 +128,6 @@ var pageData = new Array();
     <tiles:put name="productConfigOptions" beanName="productConfigOptions"/>
     <tiles:put name="productConfigOptionsCount" beanName="productConfigOptionsCount"/>
     <tiles:put name="monitorConfigOptions" beanName="monitorConfigOptions"/>
-    <tiles:put name="rtConfigOptions" beanName="rtConfigOptions"/>
     <tiles:put name="monitorConfigOptionsCount" beanName="monitorConfigOptionsCount"/>
     <tiles:put name="controlConfigOptions" beanName="controlConfigOptions"/>
     <tiles:put name="controlConfigOptionsCount" beanName="controlConfigOptionsCount"/>

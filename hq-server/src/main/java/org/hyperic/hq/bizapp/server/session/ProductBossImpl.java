@@ -34,13 +34,12 @@ import java.util.Map;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManager;
-import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
@@ -76,26 +75,26 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProductBossImpl implements ProductBoss {
     private ResourceGroupManager resourceGroupManager;
     private ProductManager productManager;
-    private PlatformManager platformManager;
     private ConfigManager configManager;
     private UIPluginManager uiPluginManager;
     private AuthzSubjectManager authzSubjectManager;
     private SessionManager sessionManager;
+    private AppdefConverter appdefConverter;
     
 
     @Autowired
     public ProductBossImpl(ResourceGroupManager resourceGroupManager,
-                           PlatformManager platformManager, ConfigManager configManager,
+                           ConfigManager configManager,
                            UIPluginManager uiPluginManager, AuthzSubjectManager authzSubjectManager,
                            SessionManager sessionManager,
-                           ProductManager productManager) {
+                           ProductManager productManager, AppdefConverter appdefConverter) {
         this.resourceGroupManager = resourceGroupManager;
-        this.platformManager = platformManager;
         this.configManager = configManager;
         this.uiPluginManager = uiPluginManager;
         this.authzSubjectManager = authzSubjectManager;
         this.sessionManager = sessionManager;
         this.productManager = productManager;
+        this.appdefConverter = appdefConverter;
     }
 
     private AuthzSubject getOverlord() {
@@ -157,7 +156,7 @@ public class ProductBossImpl implements ProductBoss {
         ConfigResponse[] res = new ConfigResponse[members.size()];
         int idx = 0;
         for (Resource r : members) {
-            AppdefEntityID id = AppdefUtil.newAppdefEntityId(r);
+            AppdefEntityID id = appdefConverter.newAppdefEntityId(r);
             res[idx++] = getMergedConfigResponse(subject, productType, id, required);
         }
 

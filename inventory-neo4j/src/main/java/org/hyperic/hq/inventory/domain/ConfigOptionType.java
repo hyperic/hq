@@ -1,18 +1,9 @@
 package org.hyperic.hq.inventory.domain;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.GenericGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.data.graph.annotation.GraphProperty;
 import org.springframework.data.graph.annotation.NodeEntity;
 import org.springframework.data.graph.neo4j.support.GraphDatabaseContext;
@@ -27,48 +18,32 @@ import org.springframework.validation.Validator;
  * @author dcrutchfield
  * 
  */
-@NodeEntity(partial = true)
-@Entity
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@NodeEntity
+@Configurable
 public class ConfigOptionType {
 
-    @Transient
     @GraphProperty
     private Object defaultValue;
 
     @NotNull
-    @Transient
     @GraphProperty
     private String description;
-
-    @PersistenceContext
-    private transient EntityManager entityManager;
 
     @Autowired
     private transient GraphDatabaseContext graphDatabaseContext;
 
-    @Transient
     @GraphProperty
     private boolean hidden;
 
-    @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")
-    @GeneratedValue(generator = "mygen1")
-    @Column(name = "id")
-    private Integer id;
-
-    @Transient
     @GraphProperty
     @NotNull
     private String name;
 
-    @Transient
     @GraphProperty
     private boolean optional;
 
     private transient Validator propertyValidator;
 
-    @Transient
     @GraphProperty
     private boolean secret;
 
@@ -99,14 +74,6 @@ public class ConfigOptionType {
      */
     public String getDescription() {
         return this.description;
-    }
-
-    /**
-     * 
-     * @return The ID
-     */
-    public Integer getId() {
-        return this.id;
     }
 
     /**
@@ -148,15 +115,9 @@ public class ConfigOptionType {
     /**
      * Removes this ConfigOptionType, only supported on removal of ResourceType
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public void remove() {
         graphDatabaseContext.removeNodeEntity(this);
-        if (this.entityManager.contains(this)) {
-            this.entityManager.remove(this);
-        } else {
-            ConfigOptionType attached = this.entityManager.find(this.getClass(), this.id);
-            this.entityManager.remove(attached);
-        }
     }
 
     /**
@@ -185,14 +146,6 @@ public class ConfigOptionType {
 
     /**
      * 
-     * @param id The ID
-     */
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    /**
-     * 
      * @param optional true If this config option does not need to have a value
      *        set
      */
@@ -216,7 +169,6 @@ public class ConfigOptionType {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("ConfigOptionType[");
-        sb.append("Id: ").append(getId()).append(", ");
         sb.append("Name: ").append(getName()).append(", ");
         sb.append("Description: ").append(getDescription()).append(", ");
         sb.append("Secret: ").append(isSecret()).append(", ");

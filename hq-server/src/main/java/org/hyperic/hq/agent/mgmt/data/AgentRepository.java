@@ -5,7 +5,6 @@ import java.util.List;
 import javax.persistence.QueryHint;
 
 import org.hyperic.hq.agent.mgmt.domain.Agent;
-import org.hyperic.hq.inventory.domain.Resource;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;
@@ -15,10 +14,10 @@ import org.springframework.transaction.annotation.Transactional;
 public interface AgentRepository extends JpaRepository<Agent, Integer>, AgentRepositoryCustom {
 
     @Transactional(readOnly = true)
-    @Query("select count(a) from Agent a where a.managedResources is not empty")
-    long countUsed();
-
-    List<Agent> findByAddress(String address);
+    @Query("select a from Agent a where a.address = :address")
+    @QueryHints({ @QueryHint(name = "org.hibernate.cacheable", value = "true"),
+                 @QueryHint(name = "org.hibernate.cacheRegion", value = "Agent.findByAddress") })
+    List<Agent> findByAddress(@Param("address") String address);
 
     Agent findByAddressAndPort(String address, int port);
 
@@ -27,9 +26,5 @@ public interface AgentRepository extends JpaRepository<Agent, Integer>, AgentRep
     @QueryHints({ @QueryHint(name = "org.hibernate.cacheable", value = "true"),
                  @QueryHint(name = "org.hibernate.cacheRegion", value = "Agent.findByAgentToken") })
     Agent findByAgentToken(@Param("agentToken") String token);
-
-    @Transactional(readOnly = true)
-    @Query("select a from Agent a join a.managedResources r where r=:resource")
-    Agent findByManagedResource(@Param("resource") Resource resource);
 
 }

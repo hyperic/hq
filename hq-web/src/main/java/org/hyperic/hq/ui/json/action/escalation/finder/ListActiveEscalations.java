@@ -28,9 +28,9 @@ package org.hyperic.hq.ui.json.action.escalation.finder;
 import java.util.Iterator;
 import java.util.List;
 
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
@@ -52,6 +52,7 @@ public class ListActiveEscalations extends BaseAction {
         EventsBoss eBoss = Bootstrap.getBean(EventsBoss.class);
         AuthzBoss aBoss = Bootstrap.getBean(AuthzBoss.class);
         AuthzSubject me = aBoss.getCurrentSubject(ctx.getSessionId());
+        AppdefConverter appdefConverter = Bootstrap.getBean(AppdefConverter.class);
         List states = eBoss.getActiveEscalations(ctx.getSessionId(),
                                                  10);  // XXX
 
@@ -65,7 +66,7 @@ public class ListActiveEscalations extends BaseAction {
             AlertDefinitionInterface defInfo = 
                 alert.getAlertInfo().getAlertDefinitionInterface();
             AppdefEntityID entId = 
-                AppdefUtil.newAppdefEntityId(defInfo.getResource());
+                appdefConverter.newAppdefEntityId(defInfo.getResource());
             AppdefEntityValue ent = new AppdefEntityValue(entId, me);
                 
             sj.put(Escalation.JSON_NAME, s.getEscalation().toJSON());
@@ -73,7 +74,7 @@ public class ListActiveEscalations extends BaseAction {
             sj.put("alertType", s.getAlertType().getCode());
             sj.put("alertName", defInfo.getName()); 
             sj.put("entName", ent.getName());
-            AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(defInfo.getResource());
+            AppdefEntityID aeid = appdefConverter.newAppdefEntityId(defInfo.getResource());
             sj.put("entType", aeid.getType());
             sj.put("entId", aeid.getID()); 
             sj.put("timeUntilNext", 

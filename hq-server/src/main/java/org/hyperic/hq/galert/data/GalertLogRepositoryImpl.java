@@ -11,7 +11,6 @@ import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.server.session.GalertLog;
-import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -64,7 +63,7 @@ public class GalertLogRepositoryImpl implements GalertLogRepositoryCustom {
             .setParameter("end", end).setParameter("priority", severity.getCode()).getResultList();
     }
 
-    public Page<GalertLog> findByGroupAndTimestampBetween(ResourceGroup group, long begin,
+    public Page<GalertLog> findByGroupAndTimestampBetween(Integer group, long begin,
                                                           long end, Pageable pageable) {
         long total = entityManager
             .createQuery(
@@ -117,7 +116,7 @@ public class GalertLogRepositoryImpl implements GalertLogRepositoryCustom {
         // TODO this query used to do perm checking with a passed-in subject ID
         return "select " + (count ? "count(a)" : "a") + " from " +
                (inEscalation ? "EscalationState es, " : "") + "GalertLog a " + "join a.def d " +
-               "where " + (groupId != null ? " d.group.id = " + groupId + " and " : "") +
+               "where " + (groupId != null ? " d.group = " + groupId + " and " : "") +
                "a.timestamp between :begin and :end " + (notFixed ? " and a.fixed = false " : "") +
                (galertDefId == null ? "" : "and d.id = " + galertDefId + " ") +
                "and d.severity >= :priority " +

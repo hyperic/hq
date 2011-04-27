@@ -11,13 +11,8 @@ public class Service
 
     private ServiceType serviceType;
 
-    private boolean endUserRt;
-
-    private boolean serviceRt;
-
     private String autoinventoryIdentifier;
 
-    private boolean autodiscoveryZombie;
 
     public String getAutoinventoryIdentifier() {
         return autoinventoryIdentifier;
@@ -25,30 +20,6 @@ public class Service
 
     public void setAutoinventoryIdentifier(String autoinventoryIdentifier) {
         this.autoinventoryIdentifier = autoinventoryIdentifier;
-    }
-
-    public boolean isAutodiscoveryZombie() {
-        return autodiscoveryZombie;
-    }
-
-    public void setAutodiscoveryZombie(boolean autodiscoveryZombie) {
-        this.autodiscoveryZombie = autodiscoveryZombie;
-    }
-
-    public boolean isServiceRt() {
-        return serviceRt;
-    }
-
-    public void setServiceRt(boolean serviceRt) {
-        this.serviceRt = serviceRt;
-    }
-
-    public boolean isEndUserRt() {
-        return endUserRt;
-    }
-
-    public void setEndUserRt(boolean endUserRt) {
-        this.endUserRt = endUserRt;
     }
 
     public AppdefResource getParent() {
@@ -88,10 +59,7 @@ public class Service
     public ServiceValue getServiceValue() {
         ServiceValue _serviceValue = new ServiceValue();
         _serviceValue.setSortName(getSortName());
-        _serviceValue.setAutodiscoveryZombie(isAutodiscoveryZombie());
         _serviceValue.setAutoinventoryIdentifier(getAutoinventoryIdentifier());
-        _serviceValue.setServiceRt(isServiceRt());
-        _serviceValue.setEndUserRt(isEndUserRt());
         _serviceValue.setModifiedBy(getModifiedBy());
         _serviceValue.setOwner(getOwnerName());
         _serviceValue.setLocation(getLocation());
@@ -127,8 +95,7 @@ public class Service
                       .getLocation() == null)) &&
                   (getAutoinventoryIdentifier() != null ? getAutoinventoryIdentifier().equals(
                                                            obj.getAutoinventoryIdentifier())
-                                                       : (obj.getAutoinventoryIdentifier() == null)) &&
-                  (isEndUserRt() == obj.getEndUserRt()) && (isServiceRt() == obj.getServiceRt());
+                                                       : (obj.getAutoinventoryIdentifier() == null));
         return matches;
     }
 

@@ -43,7 +43,6 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertManager;
-import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEventPayload;
 import org.hyperic.hq.messaging.MessagePublisher;
@@ -106,9 +105,8 @@ public class ClassicEscalatableCreator implements EscalatableCreator {
     }
 
     private Alert createAlert() throws ResourceDeletedException {
-        Resource r = _def.getResource();
-        if (r == null || r.isInAsyncDeleteState()) {
-            throw ResourceDeletedException.newInstance(r);
+        if (_def.getResource() == null) {
+            throw ResourceDeletedException.newInstance(_def.getResource());
         }
         return alertMan.createAlert(_def, ((AlertConditionsSatisfiedZEventPayload) _event
             .getPayload()).getTimestamp());
@@ -194,7 +192,7 @@ public class ClassicEscalatableCreator implements EscalatableCreator {
                         // wait until successful tx commit before publishing
                         // messages
                         messagePublisher.publishMessage(MessagePublisher.EVENTS_TOPIC,
-                            new AlertFiredEvent(alertId, _def.getId(), _def.getResource().getId(), _def.getName(), payload
+                            new AlertFiredEvent(alertId, _def.getId(), _def.getResource(), _def.getName(), payload
                                 .getTimestamp(), payload.getMessage()));
                     }
                 });

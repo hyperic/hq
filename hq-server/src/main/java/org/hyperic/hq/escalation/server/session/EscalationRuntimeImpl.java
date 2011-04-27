@@ -56,7 +56,6 @@ import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.galert.data.GalertLogRepository;
 import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
-import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -485,8 +484,8 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
 			endEscalation(s);
 			return false;
 		}
-		Resource r = def.getResource();
-		if (r == null || r.isInAsyncDeleteState()) {
+		Integer r = def.getResource();
+		if (r == null) {
 			if (debug)
 				log.debug("Resource from alertid=" + s.getAlertId()
 						+ " was not found.");

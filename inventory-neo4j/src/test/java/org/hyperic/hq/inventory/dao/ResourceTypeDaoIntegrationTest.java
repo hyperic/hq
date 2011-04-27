@@ -22,7 +22,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 @DirtiesContext
-@Transactional
+@Transactional("neoTxManager")
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "classpath:META-INF/spring/neo4j-context.xml",
                                    "classpath:org/hyperic/hq/inventory/InventoryIntegrationTest-context.xml" })
@@ -51,11 +51,6 @@ public class ResourceTypeDaoIntegrationTest {
     @Test
     public void testFindByIdNonExistent() {
         assertNull(resourceTypeDao.findById(98765));
-    }
-
-    @Test
-    public void testFindByIdNullId() {
-        assertNull(resourceTypeDao.findById(null));
     }
 
     @Test
@@ -98,5 +93,18 @@ public class ResourceTypeDaoIntegrationTest {
     @Test
     public void testFindByNameNonExistent() {
         assertNull(resourceTypeDao.findByName("Fake Type"));
+    }
+    
+    
+    @Test
+    public void testPersistRoot() {
+        ResourceType resourceType1 = new ResourceType("Some Type");
+        resourceTypeDao.persistRoot(resourceType1);
+        assertEquals(resourceType1,resourceTypeDao.findRoot());
+    }
+    
+    @Test
+    public void testFindRootNoRoot() {
+        assertNull(resourceTypeDao.findRoot());
     }
 }

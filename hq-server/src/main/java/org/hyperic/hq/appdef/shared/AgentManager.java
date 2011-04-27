@@ -191,7 +191,6 @@ public interface AgentManager {
      */
     public Agent getAgent(AppdefEntityID aID) throws AgentNotFoundException;
     
-    Agent getAgent(Resource resource);
 
     /**
      * Return the bundle that is currently running on a give agent. The returned

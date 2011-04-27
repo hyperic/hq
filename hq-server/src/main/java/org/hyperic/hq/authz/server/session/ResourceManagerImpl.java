@@ -29,15 +29,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
-import org.hyperic.hq.auth.data.AuthzSubjectRepository;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -80,7 +75,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ResourceManagerImpl implements ResourceManager, ApplicationContextAware {
 
-    private final Log log = LogFactory.getLog(ResourceManagerImpl.class);
     private Pager resourceTypePager = null;
    
     private AuthzSubjectManager authzSubjectManager;
@@ -91,13 +85,14 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     private ApplicationContext applicationContext;
     private ResourceDao resourceDao;
     private ResourceTypeDao resourceTypeDao;
+    private AppdefConverter appdefConverter;
 
     @Autowired
     public ResourceManagerImpl(AuthzSubjectManager authzSubjectManager,
                                
                                ZeventEnqueuer zeventManager, PermissionManager permissionManager,
                                ResourceAuditFactory resourceAuditFactory, ResourceDao resourceDao,
-                               ResourceTypeDao resourceTypeDao) {
+                               ResourceTypeDao resourceTypeDao, AppdefConverter appdefConverter) {
         this.authzSubjectManager = authzSubjectManager;
         this.zeventManager = zeventManager;
         this.permissionManager = permissionManager;
@@ -105,6 +100,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         this.resourceAuditFactory = resourceAuditFactory;
         this.resourceDao = resourceDao;
         this.resourceTypeDao = resourceTypeDao;
+        this.appdefConverter = appdefConverter;
     }
     
    
@@ -157,7 +153,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         //TODO audit
         //resourceAuditFactory.deleteResource(findResourceById(AuthzConstants.authzHQSystem),
           //  subject, now, now);
-        AppdefEntityID resourceId = AppdefUtil.newAppdefEntityId(r);
+        AppdefEntityID resourceId = appdefConverter.newAppdefEntityId(r);
         r.remove();
         // Send resource delete event
         ResourceDeletedZevent zevent = new ResourceDeletedZevent(subject, resourceId);
@@ -174,7 +170,6 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         if (pm.hasAdminPermission(whoami.getId()) || resourceDao.findByOwner(whoami.getName()).contains(resource)) {
             resource.setOwner(newOwner.getName());
             resource.setModifiedBy(whoami.getName());
-            resourceDao.merge(resource);
         } else {
             throw new PermissionException("Only an owner or admin may " + "reassign ownership.");
         }
@@ -294,10 +289,10 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
 
        
         for (final Resource resource : resources) {
-            events.add(new ResourceUpdatedZevent(subj, AppdefUtil.newAppdefEntityId(resource)));
+            events.add(new ResourceUpdatedZevent(subj, appdefConverter.newAppdefEntityId(resource)));
             final Set<Resource> children = resource.getChildren(true);
             for (Resource child: children) {
-                events.add(new ResourceUpdatedZevent(subj, AppdefUtil.newAppdefEntityId(child)));
+                events.add(new ResourceUpdatedZevent(subj, appdefConverter.newAppdefEntityId(child)));
             }
         }
         zeventManager.enqueueEventsAfterCommit(events);
@@ -322,19 +317,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     public Resource findResourceByName(String name) {
        return resourceDao.findByName(name);
     }
-    
-    @PostConstruct
-    public void initializeResourceTypes() {
-        //TODO Is this the place for this?
-        if(resourceTypeDao.findRoot() == null) {
-            ResourceType system= new ResourceType("System");
-            resourceTypeDao.persist(system);
-            Resource root = new Resource("Root", system);
-            resourceDao.persist(root);
-        }     
-    }
-    
-    
+  
     public Set<ResourceType> findResourceTypesWithResources() {
         final Set<ResourceType> typesWithResources = new HashSet<ResourceType>();
         Collection<ResourceType> resTypes = resourceTypeDao.findAll();
@@ -348,7 +331,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     
     public PageList<Resource> getResourcesOfType(ResourceType resourceType, PageControl pc) {
         PageRequest pageInfo = new PageRequest(pc.getPagenum(),pc.getPagesize(),
-            new Sort(pc.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"name"));
+            new Sort(pc.getSortorder() == PageControl.SORT_ASC ? Direction.ASC: Direction.DESC,"sortName"));
         Page<Resource> resources = resourceDao.findByIndexedProperty("type", resourceType.getId(),pageInfo,String.class);
         return new PageList<Resource>(resources.getContent(),(int)resources.getTotalElements());
     }

@@ -5,22 +5,23 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import javax.annotation.PostConstruct;
 
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
-import org.hyperic.hq.inventory.NotUniqueException;
+import org.hyperic.hq.inventory.domain.PropertyType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.IndexHits;
-import org.neo4j.index.impl.lucene.QueryContext;
+import org.neo4j.index.lucene.QueryContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Order;
-import org.springframework.data.graph.neo4j.finder.FinderFactory;
+import org.springframework.data.graph.neo4j.repository.DirectGraphRepositoryFactory;
+import org.springframework.data.graph.neo4j.repository.GraphRepository;
+import org.springframework.data.graph.neo4j.repository.NamedIndexRepository;
 import org.springframework.data.graph.neo4j.support.GraphDatabaseContext;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,58 +29,55 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 public class Neo4jResourceDao implements ResourceDao {
 
-    @PersistenceContext
-    protected EntityManager entityManager;
-
     @Autowired
-    private FinderFactory finderFactory;
+    private DirectGraphRepositoryFactory finderFactory;
 
     @Autowired
     private GraphDatabaseContext graphDatabaseContext;
 
-    @Transactional(readOnly = true)
+    private GraphRepository<Resource> resourceFinder;
+
     public Long count() {
-        return (Long) entityManager.createQuery("select count(o) from Resource o")
-            .getSingleResult();
+        return resourceFinder.count();
     }
 
-    @Transactional(readOnly = true)
     public List<Resource> find(Integer firstResult, Integer maxResults) {
         // TODO the root resource is not filtered out from DAO. Find a way to do
         // so?
-        List<Resource> result = entityManager
-            .createQuery("select o from Resource o", Resource.class).setFirstResult(firstResult)
-            .setMaxResults(maxResults).getResultList();
+        List<Resource> resources = new ArrayList<Resource>();
+        Iterable<Resource> result = resourceFinder.findAll();
+        int currentPosition = 0;
+        int endIndex = firstResult + maxResults;
         for (Resource resource : result) {
-            resource.persist();
+            if (currentPosition > endIndex) {
+                break;
+            }
+            if (currentPosition >= firstResult) {
+                resources.add(resource);
+            }
+            currentPosition++;
         }
-        return result;
+        return resources;
     }
 
-    @Transactional(readOnly = true)
     public List<Resource> findAll() {
         // TODO the root resource is not filtered out from DAO. Find a way to do
         // so?
-        List<Resource> result = entityManager.createQuery("select o from Resource o",
-            Resource.class).getResultList();
+        List<Resource> resources = new ArrayList<Resource>();
+        Iterable<Resource> result = resourceFinder.findAll();
         for (Resource resource : result) {
-            resource.persist();
+            resources.add(resource);
         }
-        return result;
+        return resources;
     }
 
-    @Transactional(readOnly = true)
     public Resource findById(Integer id) {
-        if (id == null)
-            return null;
-        Resource result = entityManager.find(Resource.class, id);
-        if (result != null) {
-            result.persist();
-        }
-        return result;
+        // TODO once id becomes a String, look up by indexed property. Using id
+        // index doesn't work for some reason.
+        Resource resource = resourceFinder.findOne(id.longValue());
+        return resource;
     }
 
-    @Transactional(readOnly = true)
     public Page<Resource> findByIndexedProperty(String propertyName, Object propertyValue,
                                                 Pageable pageInfo, Class<?> sortAttributeType) {
         QueryContext queryContext = new QueryContext(propertyValue);
@@ -108,28 +106,21 @@ public class Neo4jResourceDao implements ResourceDao {
             }
             currentPosition++;
         }
-        return new PageImpl<Resource>(resources, pageInfo, indexHits.size());
+        Page<Resource> page = new PageImpl<Resource>(resources, pageInfo, indexHits.size());
+        indexHits.close();
+        return page;
     }
 
-    // TODO Assumes name is unique...I think we want to change that behavior in
-    // the product
-    @Transactional(readOnly = true)
+    // TODO Get rid of assumption that name is unique and use identifier
     public Resource findByName(String name) {
-        // Can't do JPA-style queries on property values that are only in graph
-        Resource resource = finderFactory.createNodeEntityFinder(Resource.class)
-            .findByPropertyValue(null, "name", name);
-        if (resource != null) {
-            resource.persist();
-        }
+        Resource resource = resourceFinder.findByPropertyValue("name", name);
 
         return resource;
     }
 
-    @Transactional(readOnly = true)
     public Set<Resource> findByOwner(String owner) {
         Set<Resource> ownedResources = new HashSet<Resource>();
-        Iterable<Resource> resourceIterator = finderFactory.createNodeEntityFinder(Resource.class)
-            .findAllByPropertyValue(null, "owner", owner);
+        Iterable<Resource> resourceIterator = resourceFinder.findAllByPropertyValue("owner", owner);
         // Walk the lazy iterator to return all results
         for (Resource resource : resourceIterator) {
             ownedResources.add(resource);
@@ -137,9 +128,9 @@ public class Neo4jResourceDao implements ResourceDao {
         return ownedResources;
     }
 
-    @Transactional(readOnly = true)
+    @SuppressWarnings("unchecked")
     public Resource findRoot() {
-        return findById(1);
+        return ((NamedIndexRepository<Resource>)resourceFinder).findByPropertyValue("root", "root", true);
     }
 
     private int getSortFieldType(Class<?> type) {
@@ -164,26 +155,35 @@ public class Neo4jResourceDao implements ResourceDao {
         throw new IllegalArgumentException("Sort field type " + type + " is not allowed");
     }
 
-    @Transactional
-    public Resource merge(Resource resource) {
-        Resource merged = entityManager.merge(resource);
-        entityManager.flush();
-        return merged;
+    @PostConstruct
+    public void initFinder() {
+        resourceFinder = finderFactory.createGraphRepository(Resource.class);
     }
 
-    @Transactional
+    @Transactional("neoTxManager")
     public void persist(Resource resource) {
-        if (findByName(resource.getName()) != null) {
-            throw new NotUniqueException("Resource with name " + resource.getName() +
-                                         " already exists");
-        }
-        entityManager.persist(resource);
         resource.persist();
+        // TODO meaningful id
+        resource.setId(resource.getNodeId().intValue());
         // Set the type index here b/c Resource needs an ID before we can access
         // the underlying node
         graphDatabaseContext.getIndex(Resource.class, null).add(resource.getPersistentState(),
             "type", resource.getType().getId());
-        // flush to get the JSR-303 validation done sooner
-        entityManager.flush();
+        //Populate default prop values
+        Set<PropertyType> propertyTypes = resource.getType().getPropertyTypes();
+        for(PropertyType propertyType: propertyTypes) {
+            if(propertyType.getDefaultValue() != null) {
+                resource.setProperty(propertyType.getName(), propertyType.getDefaultValue());
+            }
+        }
+    }
+
+    @Transactional("neoTxManager")
+    public void persistRoot(Resource resource) {
+        persist(resource);
+        // add an index for lookup later. Property name/value can be anything
+        // here, the unique index name is important
+        graphDatabaseContext.getIndex(Resource.class, "root").add(resource.getPersistentState(),
+            "root", true);
     }
 }

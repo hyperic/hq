@@ -13,7 +13,6 @@ import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.Version;
 
@@ -22,8 +21,6 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
-import org.hyperic.hq.inventory.domain.Resource;
-import org.hyperic.hq.inventory.domain.ResourceType;
 
 @Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
 @Entity
@@ -48,9 +45,9 @@ public class ResourceTypeAlertDefinition
     @Column(name = "ID", nullable = false)
     private Integer id;
 
-    @OneToOne
+    @Column
     @Index(name = "ALERT_DEF_RES_TYPE_ID_IDX")
-    private ResourceType resourceType;
+    private Integer resourceType;
 
     @Column(name = "VERSION_COL", nullable = false)
     @Version
@@ -93,12 +90,12 @@ public class ResourceTypeAlertDefinition
         return id;
     }
 
-    public Resource getResource() {
+    public Integer getResource() {
         // TODO
         throw new UnsupportedOperationException();
     }
 
-    public ResourceType getResourceType() {
+    public Integer getResourceType() {
         return resourceType;
     }
 
@@ -118,7 +115,7 @@ public class ResourceTypeAlertDefinition
         this.id = id;
     }
 
-    public void setResourceType(ResourceType resourceType) {
+    public void setResourceType(Integer resourceType) {
         this.resourceType = resourceType;
     }
 

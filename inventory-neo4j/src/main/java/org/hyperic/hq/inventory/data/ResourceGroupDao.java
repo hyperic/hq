@@ -1,5 +1,7 @@
 package org.hyperic.hq.inventory.data;
 
+import java.util.List;
+
 import org.hyperic.hq.inventory.domain.ResourceGroup;
 
 /**
@@ -10,13 +12,17 @@ import org.hyperic.hq.inventory.domain.ResourceGroup;
  * 
  */
 public interface ResourceGroupDao extends GenericDao<ResourceGroup> {
-
+    
+    
     /**
-     * Saves changes to an existing ResourceGroup
-     * @param resourceGroup The changed ResourceGroup
-     * @return The merged ResourceGroup
+     * 
+     * @param propertyName The name of the property. The property must be
+     *        indexed for lookup to succeed (set indexed to true on
+     *        PropertyType)
+     * @param propertyValue The value to search for
+     * @return A list of ResourceGroup search results
      */
-    ResourceGroup merge(ResourceGroup resourceGroup);
+    List<ResourceGroup> findByIndexedProperty(String propertyName, Object propertyValue);
 
     /**
      * Persists a new ResourceGroup

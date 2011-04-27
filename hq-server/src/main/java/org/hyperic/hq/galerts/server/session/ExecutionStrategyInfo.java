@@ -48,7 +48,6 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
 import org.hyperic.hq.config.domain.Crispo;
-import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.util.config.ConfigResponse;
 
 @Entity
@@ -99,7 +98,7 @@ public class ExecutionStrategyInfo implements Serializable {
         this.partition = partition.getCode();
     }
 
-    GtriggerInfo addTrigger(GtriggerTypeInfo typeInfo, Crispo config, ResourceGroup group,
+    GtriggerInfo addTrigger(GtriggerTypeInfo typeInfo, Crispo config, Integer group,
                             GalertDefPartition style) {
         GtriggerInfo trigger = new GtriggerInfo(typeInfo, this, config, getTriggerList().size());
 

@@ -15,7 +15,6 @@ import org.hyperic.hq.hqu.server.session.AttachmentResource;
 import org.hyperic.hq.hqu.server.session.UIPlugin;
 import org.hyperic.hq.hqu.server.session.ViewResource;
 import org.hyperic.hq.hqu.server.session.ViewResourceCategory;
-import org.hyperic.hq.inventory.domain.Resource;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,9 +39,7 @@ public class AttachmentResourceRepositoryIntegrationTest {
     public void testFindByResourceAndCategory() {
         UIPlugin plugin = new UIPlugin("mass", "2.0");
         entityManager.persist(plugin);
-        Resource resource = new Resource();
-        resource.setName("Resource1");
-        entityManager.persist(resource);
+        int resource = 123;
         ViewResource view = new ViewResource(plugin, new ViewDescriptor("/foo", "desciptor",
             AttachType.RESOURCE));
         entityManager.persist(view);
@@ -50,9 +47,7 @@ public class AttachmentResourceRepositoryIntegrationTest {
             resource);
         attachmentResourceRepository.save(attachment);
 
-        Resource resource2 = new Resource();
-        resource2.setName("Resource2");
-        entityManager.persist(resource2);
+        int resource2 = 456;
         ViewResource view2 = new ViewResource(plugin, new ViewDescriptor("/foo/bar", "desciptor",
             AttachType.RESOURCE));
         entityManager.persist(view2);

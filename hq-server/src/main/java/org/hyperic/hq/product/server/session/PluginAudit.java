@@ -32,7 +32,6 @@ import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditImportance;
 import org.hyperic.hq.common.server.session.AuditNature;
 import org.hyperic.hq.common.server.session.AuditPurpose;
-import org.hyperic.hq.inventory.domain.Resource;
 
 @Entity
 @DiscriminatorValue("plugin")
@@ -41,7 +40,7 @@ public class PluginAudit
 
     protected PluginAudit() {}
     
-    PluginAudit(Resource r, AuthzSubject s, AuditPurpose p, AuditImportance i, AuditNature n, String msg,
+    PluginAudit(Integer r, AuthzSubject s, AuditPurpose p, AuditImportance i, AuditNature n, String msg,
                 long startTime, long endTime) {
         super(s, r, p, n, i, msg);
         setStartTime(startTime);

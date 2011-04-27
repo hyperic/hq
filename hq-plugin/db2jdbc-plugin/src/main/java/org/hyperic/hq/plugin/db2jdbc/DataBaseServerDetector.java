@@ -84,7 +84,6 @@ public class DataBaseServerDetector extends DefaultServerDetector {
                 conf.setValue("schema", schema);
                 setProductConfig(tb, conf);
                 tb.setMeasurementConfig();
-                tb.setResponseTimeConfig(new ConfigResponse());
                 tb.setControlConfig();
 
                 res.add(tb);
@@ -105,7 +104,6 @@ public class DataBaseServerDetector extends DefaultServerDetector {
             conf.setValue("tablespace", tbspName);
             setProductConfig(bpS, conf);
             bpS.setMeasurementConfig();
-            bpS.setResponseTimeConfig(new ConfigResponse());
             bpS.setControlConfig();
 
             res.add(bpS);
@@ -125,7 +123,6 @@ public class DataBaseServerDetector extends DefaultServerDetector {
             conf.setValue("bufferpool", bpName);
             setProductConfig(bpS, conf);
             bpS.setMeasurementConfig();
-            bpS.setResponseTimeConfig(new ConfigResponse());
             bpS.setControlConfig();
 
             res.add(bpS);
@@ -151,7 +148,6 @@ public class DataBaseServerDetector extends DefaultServerDetector {
             conf.setValue("sec_pool_id", mpSId);
             setProductConfig(mpS, conf);
             mpS.setMeasurementConfig();
-            mpS.setResponseTimeConfig(new ConfigResponse());
             mpS.setControlConfig();
 
             res.add(mpS);

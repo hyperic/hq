@@ -37,6 +37,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.inventory.domain.Resource;
+import org.hyperic.hq.plugin.mgmt.domain.Plugin;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -45,6 +46,12 @@ import org.hyperic.util.pager.PageList;
  * Local interface for ServerManager.
  */
 public interface ServerManager {
+    
+    /**
+     * Clone a Server to a target Platform
+     */
+    Server cloneServer(AuthzSubject subject, Platform targetPlatform, Server serverToClone)
+        throws ValidationException, PermissionException, VetoException, NotFoundException;
   
     /**
      * Create a Server on the given platform.
@@ -89,9 +96,9 @@ public interface ServerManager {
     VetoException;
 
     
-    ServerType createServerType(ServerTypeInfo sinfo, String plugin) throws NotFoundException;
+    ServerType createServerType(ServerTypeInfo sinfo, Plugin plugin) throws NotFoundException;
     
-    ServerType createVirtualServerType(ServerTypeInfo sinfo, String plugin) throws NotFoundException;
+    ServerType createVirtualServerType(ServerTypeInfo sinfo, Plugin plugin) throws NotFoundException;
 
     /**
      * Find all server types
@@ -256,11 +263,8 @@ public interface ServerManager {
     /**
      * Update server types
      */
-    public void updateServerTypes(String plugin, org.hyperic.hq.product.ServerTypeInfo[] infos) throws 
+    public void updateServerTypes(Plugin plugin, org.hyperic.hq.product.ServerTypeInfo[] infos) throws 
           VetoException, NotFoundException;
-
-
-    public void setAutodiscoveryZombie(Server server, boolean zombie);
 
     /**
      * @return A Map of server type to the # of servers of that type in the

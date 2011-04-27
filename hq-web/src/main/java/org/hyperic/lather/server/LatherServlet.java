@@ -83,7 +83,7 @@ public class LatherServlet
    
     private Random       rand;
     private ConnManager  connMgr;
-    private int          execTimeout;
+    
 
     private String getReqCfg(ServletConfig cfg, String prop)
         throws ServletException
@@ -98,7 +98,7 @@ public class LatherServlet
     public void init(ServletConfig cfg)
         throws ServletException
     {
-        String sMaxConns, sExecTimeout;
+        String sMaxConns;
         int maxConns = Integer.MAX_VALUE;
 
         super.init(cfg); // Call super to ensure the servlet config is saved.
@@ -113,17 +113,6 @@ public class LatherServlet
                                            "an integer (" + sMaxConns + ")");
             }
         }
-
-        if((sExecTimeout = this.getReqCfg(cfg, PROP_EXECTIMEOUT)) != null){
-            try {
-                this.execTimeout = Integer.parseInt(sExecTimeout);
-            } catch(NumberFormatException exc){
-                throw new ServletException("init-param '" + PROP_EXECTIMEOUT +
-                                           "' does not have a value which is "+
-                                           "an integer (" + sExecTimeout +")");
-            }
-        }
-
         this.connMgr = ConnManager.getInstance(maxConns);
     }
 
@@ -250,95 +239,28 @@ public class LatherServlet
         this.doServiceCall(req, resp, method[0], val, xCoder, ctx);
     }
 
-    private class ServiceCaller 
-        extends Thread
-    {
-        private HttpServletResponse resp;
-        
-        private LatherXCoder        xcoder;
-        private LatherValue arg;
-        private LatherContext ctx;
-        private String method;
-        private Log                 log;
-        private LatherDispatcher latherDispatcher;
-        
-
-        private ServiceCaller(HttpServletResponse resp, 
-                          LatherXCoder xcoder, LatherContext ctx, String method, LatherValue arg, 
-                           Log log, LatherDispatcher latherDispatcher)
-        {
-            this.resp    = resp;
-           
-            this.xcoder  = xcoder;
-            this.ctx = ctx;
-            this.method = method;
-            this.arg = arg;
-            this.log     = log;
-            this.latherDispatcher = latherDispatcher;
-        }
-                          
-        private void doInvoke()
-            throws IOException 
-        {
-            LatherValue res;
-
-            try {
-                res = latherDispatcher.dispatch(ctx, method, arg);
-                                                         
-                issueSuccessResponse(this.resp, this.xcoder, res);
-            }  catch(IllegalArgumentException exc){
-                this.log.error("IllegalArgumentException when invoking LatherDispatcher." , exc);
-                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            } catch(RuntimeException exc){
-                this.log.error("RuntimeException when invoking LatherDispatcher." , exc);
-                issueErrorResponse(resp, exc.toString());
-            } catch(LatherRemoteException exc){
-                
-                
-                
-                    issueErrorResponse(resp, exc.toString());
-               
-            }
-        }
-
-        public void run(){
-            try {
-                this.doInvoke();
-            } catch(IOException exc){
-                this.log.warn("IOException", exc);
-            }
-        }
-    }
-
     private void doServiceCall(HttpServletRequest req, HttpServletResponse resp, 
                            String methName, LatherValue args,
                            LatherXCoder xCoder, LatherContext ctx)
         throws IOException
     {
        
-        ServiceCaller caller;
-      
-
         LatherDispatcher latherDispatcher = Bootstrap.getBean(LatherDispatcher.class);
+        LatherValue res;
 
-        caller = new ServiceCaller(resp, xCoder, 
-                               ctx, methName, args,
-                              this.log, latherDispatcher);
-        caller.start();
         try {
-            caller.join(this.execTimeout);
-            if(caller.isAlive()){
-                this.log.warn("Execution of '" + methName + "' exceeded " +
-                              (this.execTimeout / 1000) + " seconds");
-                caller.interrupt();
-                caller.join(5000);  /* Sleep for a small amount more, to give
-                                       it a chance to succeed */
-            }
-        } catch(InterruptedException exc){
-            this.log.warn("Interrupted while trying to join thread " +
-                          "executing '" + methName + "'");
+            res = latherDispatcher.dispatch(ctx, methName, args);                                      
+            issueSuccessResponse(resp, xCoder, res);
+        }  catch(IllegalArgumentException exc){
+            this.log.error("IllegalArgumentException when invoking LatherDispatcher." , exc);
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        } catch(RuntimeException exc){
+            this.log.error("RuntimeException when invoking LatherDispatcher." , exc);
+            issueErrorResponse(resp, exc.toString());
+        } catch(LatherRemoteException exc){
+            issueErrorResponse(resp, exc.toString());
+       
         }
     }
-
    
 }

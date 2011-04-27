@@ -16,7 +16,6 @@ import java.util.TreeSet;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
-import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.AvailabilityDataRLE;
 import org.hyperic.hq.measurement.server.session.Category;
@@ -62,9 +61,7 @@ public class AvailabilityDataRepositoryIntegrationTest {
             "messages", MeasurementConstants.COLL_TYPE_DYNAMIC, true, 1234, true,
             "service:queueSize", type, category, "tomcat");
         entityManager.persist(template2);
-        Resource resource = new Resource();
-        resource.setName("Resource1");
-        entityManager.persist(resource);
+        int resource = 765;
         measurement = new Measurement(resource, template, 1234);
         measurement.setDsn("queueSize");
         entityManager.persist(measurement);

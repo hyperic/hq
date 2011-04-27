@@ -1,7 +1,8 @@
 package org.hyperic.hq.alert.data;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +14,6 @@ import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertActionLog;
 import org.hyperic.hq.events.server.session.ResourceAlertDefinition;
-import org.hyperic.hq.inventory.domain.Resource;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,9 +36,7 @@ public class ActionRepositoryIntegrationTest {
 
     @Test
     public void testDeleteByAlertDefinition() {
-        Resource resource2 = new Resource();
-        resource2.setName("Resource 2");
-        entityManager.persist(resource2);
+        int resource2 = 555;
         Action action = new Action("myclass", new byte[0], null);
         actionRepository.save(action);
         ResourceAlertDefinition alertdef2 = new ResourceAlertDefinition();
@@ -54,9 +52,7 @@ public class ActionRepositoryIntegrationTest {
     
     @Test
     public void testFindByAlert() {
-        Resource resource2 = new Resource();
-        resource2.setName("Resource 2");
-        entityManager.persist(resource2);
+        int resource2 = 555;
         ResourceAlertDefinition alertdef2 = new ResourceAlertDefinition();
         alertdef2.setName("High Heap");
         alertdef2.setResource(resource2);

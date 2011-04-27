@@ -62,6 +62,7 @@ import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIQueueManager;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateFQDNException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -132,7 +133,6 @@ import org.hyperic.hq.bizapp.shared.uibeans.ResourceTreeNode;
 import org.hyperic.hq.bizapp.shared.uibeans.SearchResult;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
-import org.hyperic.hq.common.ProductProperties;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.events.MaintenanceEvent;
@@ -209,6 +209,10 @@ public class AppdefBossImpl implements AppdefBoss {
     private AppdefManager appdefManager;
 
     private ZeventEnqueuer zEventManager;
+    
+    private ConfigValidator configValidator;
+    
+    private AppdefConverter appdefConverter;
 
     protected Log log = LogFactory.getLog(AppdefBossImpl.class.getName());
     protected boolean debug = log.isDebugEnabled();
@@ -228,7 +232,8 @@ public class AppdefBossImpl implements AppdefBoss {
                           AIBoss aiBoss, ResourceGroupManager resourceGroupManager,
                           ResourceManager resourceManager, ServerManager serverManager,
                           ServiceManager serviceManager, TrackerManager trackerManager,
-                          AppdefManager appdefManager, ZeventEnqueuer zEventManager) {
+                          AppdefManager appdefManager, ZeventEnqueuer zEventManager,
+                          ConfigValidator configValidator, AppdefConverter appdefConverter) {
         this.sessionManager = sessionManager;
         this.agentManager = agentManager;
         this.aiQueueManager = aiQueueManager;
@@ -249,6 +254,8 @@ public class AppdefBossImpl implements AppdefBoss {
         this.trackerManager = trackerManager;
         this.appdefManager = appdefManager;
         this.zEventManager = zEventManager;
+        this.configValidator = configValidator;
+        this.appdefConverter = appdefConverter;
     }
 
     /**
@@ -773,7 +780,7 @@ public class AppdefBossImpl implements AppdefBoss {
             List<AppdefResourceValue> appdefResources = new ArrayList<AppdefResourceValue>();
             for (Resource res : pl) {
                 try {
-                    appdefResources.add(findById(subject, AppdefUtil.newAppdefEntityId(res)));
+                    appdefResources.add(findById(subject, appdefConverter.newAppdefEntityId(res)));
                 } catch (AppdefEntityNotFoundException e) {
                     log.error("Resource not found in Appdef: " + res.getId());
                 }
@@ -2267,7 +2274,7 @@ public class AppdefBossImpl implements AppdefBoss {
         res.setTotalSize(children.getTotalSize());
         for (Resource child : children) {
             try {
-                AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(child);
+                AppdefEntityID aeid = appdefConverter.newAppdefEntityId(child);
                 AppdefEntityValue arv = new AppdefEntityValue(aeid, subject);
                 if (aeid.isGroup()) {
                     res.add(arv.getAppdefGroupValue());
@@ -2335,7 +2342,7 @@ public class AppdefBossImpl implements AppdefBoss {
 
         List<SearchResult> searchResults = new ArrayList<SearchResult>(resources.size());
         for (Resource res : resources) {
-            AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(res);
+            AppdefEntityID aeid = appdefConverter.newAppdefEntityId(res);
             searchResults.add(new SearchResult(res.getName(), AppdefEntityConstants
                 .typeToString(aeid.getType()), aeid.getAppdefKey()));
         }
@@ -2411,7 +2418,7 @@ public class AppdefBossImpl implements AppdefBoss {
 
         List<AppdefEntityID> toBePaged = new ArrayList<AppdefEntityID>(authzResources.size());
         for (Resource r : authzResources) {
-            toBePaged.add(AppdefUtil.newAppdefEntityId(r));
+            toBePaged.add(appdefConverter.newAppdefEntityId(r));
         }
 
         // Page it, then convert to AppdefResourceValue
@@ -2498,7 +2505,7 @@ public class AppdefBossImpl implements AppdefBoss {
         Collection<Resource> resources = resourceManager.findResourceByOwner(currentOwner);
         AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
         for (Resource aRes : resources) {
-            AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(aRes);
+            AppdefEntityID aeid = appdefConverter.newAppdefEntityId(aRes);
 
             if (aeid.isGroup()) {
                 ResourceGroup g = resourceGroupManager
@@ -2679,7 +2686,7 @@ public class AppdefBossImpl implements AppdefBoss {
 
     /**
      * A method to set ALL the configs of a resource. This includes the
-     * resourceConfig, metricConfig, rtConfig and controlConfig.This also
+     * resourceConfig, metricConfig and controlConfig.This also
      * includes the enabling/disabling of rtMetrics for both service and
      * enduser. NOTE: This method should ONLY be called when a user manually
      * configures a resource.
@@ -2754,37 +2761,18 @@ public class AppdefBossImpl implements AppdefBoss {
 
                 if (allConfigs.shouldConfigProduct()) {
                     validationTypes.add(ProductPlugin.TYPE_CONTROL);
-                    validationTypes.add(ProductPlugin.TYPE_RESPONSE_TIME);
-                    validationTypes.add(ProductPlugin.TYPE_MEASUREMENT);
+                  
                 }
 
                 if (allConfigs.shouldConfigMetric()) {
                     validationTypes.add(ProductPlugin.TYPE_MEASUREMENT);
                 }
 
-                // Need to set the flags on the service so that they
-                // can be looked up immediately and RtEnabler to work
-                if (svc != null) {
-                    // These flags
-                    if (allConfigs.getEnableServiceRT() != svc.isServiceRt() ||
-                        allConfigs.getEnableEuRT() != svc.isEndUserRt()) {
-                        allConfigs.setShouldConfig(ProductPlugin.CFGTYPE_IDX_RESPONSE_TIME, true);
-                        svc.setServiceRt(allConfigs.getEnableServiceRT());
-                        svc.setEndUserRt(allConfigs.getEnableEuRT());
-                        serviceManager.updateService(subject, svc.getServiceValue());
-                    }
-                }
-
-                if (allConfigs.shouldConfigRt()) {
-                    validationTypes.add(ProductPlugin.TYPE_RESPONSE_TIME);
-                }
+               
 
                 if (allConfigs.shouldConfigControl()) {
                     validationTypes.add(ProductPlugin.TYPE_CONTROL);
                 }
-
-                ConfigValidator configValidator = (ConfigValidator) ProductProperties
-                    .getPropertyInstance(ConfigValidator.PDT_PROP);
 
                 // See if we can validate
                 if (configValidator != null) {
@@ -2810,10 +2798,6 @@ public class AppdefBossImpl implements AppdefBoss {
                     }
                 }
             }
-
-            // if should configure RT
-            if (allConfigs.shouldConfigRt())
-                ids.add(entityId);
 
             if (ids.size() > 0) { // Actually updated
                 List<ResourceUpdatedZevent> events = new ArrayList<ResourceUpdatedZevent>(

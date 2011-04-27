@@ -29,12 +29,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefResourcePermissions;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.auth.domain.AuthzSubject;
+import org.hyperic.hq.auth.domain.Operation;
 import org.hyperic.hq.authz.server.session.PagerProcessor_operation;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
@@ -45,7 +47,6 @@ import org.hyperic.hq.events.shared.HierarchicalAlertingManager;
 import org.hyperic.hq.events.shared.MaintenanceEventManager;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
-import org.hyperic.hq.inventory.domain.OperationType;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.util.pager.PageControl;
@@ -411,12 +412,7 @@ public abstract class PermissionManager {
      */
     private Integer getOpIdByResourceType(ResourceType rtV, String opName)
         throws PermissionException {
-        Collection<OperationType> ops = rtV.getOperationTypes();
-        for (OperationType op : ops) {
-            if (op.getName().equals(opName)) {
-                return op.getId();
-            }
-        }
+        //TODO
         throw new PermissionException("Operation: " + opName + " not valid for ResourceType: " +
                                       rtV.getName());
     }
@@ -669,31 +665,6 @@ public abstract class PermissionManager {
                                                               String resType)
         throws PermissionException, NotFoundException;
 
-    /**
-     * Find the list of instance ids for which a given subject id has a given
-     * operation.
-     * @return List of integer instance ids
-     */
-    public abstract List<Integer> findOperationScopeBySubject(AuthzSubject subj, Integer opId)
-        throws PermissionException, NotFoundException;
-
-    /**
-     * Find the list of resources for which a given subject id can perform
-     * specified operation. This method operates on a batch of resources and
-     * their corresponding operations. Unlike, other findOperScopeBySubj
-     * methods, this one operates on any type of resource and thus the
-     * "resource and operation" tuple should be expressed by common index.
-     * 
-     * @param whoami - subject
-     * @param resArr - batch of resources to verify
-     * @param opArr - corresponding batch of operations
-     * @return array of authz Resources
-     * @exception ApplicationException
-     */
-    public abstract Resource[] findOperationScopeBySubjectBatch(AuthzSubject whoami,
-                                                                ResourceValue[] resArr,
-                                                                String[] opArr)
-        throws ApplicationException;
 
     /**
      * Get viewable resources of a specific type
@@ -731,13 +702,8 @@ public abstract class PermissionManager {
      * 
      * @return a list of Integers representing instance ids
      */
-    public abstract List<OperationType> getAllOperations(AuthzSubject subject, PageControl pc)
+    public abstract List<Operation> getAllOperations(AuthzSubject subject, PageControl pc)
         throws PermissionException;
-
-    public abstract String getOperableGroupsHQL(AuthzSubject subject, String alias, String oper);
-
-    public abstract Collection<Resource> getGroupResources(Integer subjectId, Integer groupId,
-                                                           Boolean fsystem);
 
     public abstract Collection<Resource> findServiceResources(AuthzSubject subj, Boolean fsystem);
 

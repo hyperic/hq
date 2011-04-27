@@ -82,7 +82,7 @@ public class ResourceRelationship {
      * @param value The property value
      * @return The old value
      */
-    @Transactional
+    @Transactional("neoTxManager")
     public Object setProperty(String key, Object value) {
         // TODO give a way to model properties on a type relation to validate
         // creation of properties on the relation? What about pre-defined types?

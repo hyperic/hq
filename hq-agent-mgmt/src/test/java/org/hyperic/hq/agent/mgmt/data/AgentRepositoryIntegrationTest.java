@@ -1,7 +1,6 @@
 package org.hyperic.hq.agent.mgmt.data;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -13,7 +12,6 @@ import net.sf.ehcache.CacheManager;
 
 import org.hyperic.hq.agent.mgmt.domain.Agent;
 import org.hyperic.hq.agent.mgmt.domain.AgentType;
-import org.hyperic.hq.inventory.domain.Resource;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -59,20 +57,12 @@ public class AgentRepositoryIntegrationTest {
     }
 
     @Test
-    public void testCountUsed() {
-        Resource resource1 = new Resource();
-        resource1.setName("Resource 1");
-        entityManager.persist(resource1);
-        agent.addManagedResource(resource1);
-        assertEquals(1l, agentRepository.countUsed());
-    }
-
-    @Test
     public void testFindByAddress() {
         Set<Agent> expected = new HashSet<Agent>();
         expected.add(agent);
         expected.add(agent2);
         assertEquals(expected, new HashSet<Agent>(agentRepository.findByAddress("127.0.0.1")));
+        verifyQueryCaching("Agent.findByAddress");
     }
 
     @Test
@@ -87,26 +77,10 @@ public class AgentRepositoryIntegrationTest {
     }
 
     @Test
-    public void testFindByManagedResource() {
-        Resource resource1 = new Resource();
-        resource1.setName("Resource 1");
-        entityManager.persist(resource1);
-        agent.addManagedResource(resource1);
-        assertEquals(agent, agentRepository.findByManagedResource(resource1));
-    }
-
-    @Test
-    public void testFindByManagedResourceNone() {
-        Resource resource1 = new Resource();
-        resource1.setName("Resource 1");
-        entityManager.persist(resource1);
-        assertNull(agentRepository.findByManagedResource(resource1));
-    }
-
-    @Test
-    public void testLoadAgentTokenQueryCache() throws Exception {
-        agentRepository.loadAgentTokenQueryCache();
+    public void testLoadQueryCaches() throws Exception {
+        agentRepository.loadQueryCaches();
         assertEquals(2, CacheManager.getInstance().getCache("Agent.findByAgentToken").getSize());
+        assertEquals(1, CacheManager.getInstance().getCache("Agent.findByAddress").getSize());
     }
 
     private void verifyQueryCaching(String cacheName) {

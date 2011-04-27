@@ -169,8 +169,7 @@ public class ListAlertAction
             }
 
             // Determine whether or not this alert definition is viewable
-            bean.setViewable(!alertDefinition.isDeleted() && alertDefinition.getResource() != null &&
-                             !alertDefinition.getResource().isInAsyncDeleteState());
+            bean.setViewable(!alertDefinition.isDeleted() && alertDefinition.getResource() != null);
 
             Collection<AlertConditionLog> conditionLogs = alert.getConditionLog();
 

@@ -44,6 +44,7 @@ import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.diagnostics.DiagnosticObject;
 import org.hyperic.hq.diagnostics.DiagnosticsLogger;
@@ -73,6 +74,7 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
     private MeasurementManager measurementManager;
     private PlatformManager platformManager;
     private MetricDataCache metricDataCache;
+    private ResourceManager resourceManager;
 
     @Autowired
     public MetricsNotComingInDiagnostic(DiagnosticsLogger diagnosticsLogger,
@@ -80,13 +82,15 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
                                         AvailabilityManager availabilityManager,
                                         MeasurementManager measurementManager,
                                         PlatformManager platformManager,
-                                        MetricDataCache metricDataCache) {
+                                        MetricDataCache metricDataCache, 
+                                        ResourceManager resourceManager) {
         this.diagnosticsLogger = diagnosticsLogger;
         this.authzSubjectManager = authzSubjectManager;
         this.availabilityManager = availabilityManager;
         this.measurementManager = measurementManager;
         this.platformManager = platformManager;
         this.metricDataCache = metricDataCache;
+        this.resourceManager = resourceManager;
     }
 
     @PostConstruct
@@ -154,7 +158,7 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
         watch.markTimeEnd("getLastAvail");
                 
         watch.markTimeBegin("getChildren");
-        final List<Resource> children = new ArrayList<Resource>();
+        final List<Integer> children = new ArrayList<Integer>();
         final Map<Resource,Platform> childrenToPlatform = getChildren(platforms, measCache, avails, children);
         watch.markTimeEnd("getChildren");
         
@@ -206,10 +210,11 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
                     }
                     if (isVerbose) {
                         List<String> list = (List<String>) tmp;
+                        Resource resource = resourceManager.findResourceById(m.getResource());
                         list.add(new StringBuilder(128).append("\nmid=").append(m.getId()).append(
                             ", name=").append(m.getTemplate().getName()).append(", resid=").append(
-                            m.getResource().getId()).append(", resname=").append(
-                            m.getResource().getName()).toString());
+                            m.getResource()).append(", resname=").append(
+                            resource.getName()).toString());
                     } else {
                         Counter count = (Counter) tmp;
                         count.value++;
@@ -247,7 +252,7 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
     private Map<Resource, Platform> getChildren(Collection<Platform> platforms,
                                                 Map<Integer, List<Measurement>> measCache,
                                                 Map<Integer, MetricValue> avails,
-                                                List<Resource> children) {
+                                                List<Integer> children) {
         final Map<Resource, Platform> rtn = new HashMap<Resource, Platform>(platforms.size());
         final long now = now();
      
@@ -265,7 +270,7 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
                 if (child == null || child.isInAsyncDeleteState()) {
                     continue;
                 }
-                children.add(child);
+                children.add(child.getId());
                 rtn.put(child, platform);
             }
         }
