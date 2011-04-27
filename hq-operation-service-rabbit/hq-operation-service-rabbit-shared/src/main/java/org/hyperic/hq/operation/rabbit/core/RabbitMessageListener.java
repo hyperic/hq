@@ -6,12 +6,12 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.operation.rabbit.annotation.OperationEndpoint;
 import org.hyperic.hq.operation.rabbit.connection.ChannelTemplate;
 import org.hyperic.hq.operation.rabbit.connection.ConnectionException;
-
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.util.Assert;
 import org.springframework.util.ErrorHandler;
 import org.springframework.util.StringUtils;
 
+import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.HashSet;
@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * TODO secure credentials with connection factory
  * @author Helena Edelson
  */
-public class RabbitMessageListenerContainer {
+public class RabbitMessageListener {
 
     private final Log logger = LogFactory.getLog(this.getClass());
 
@@ -45,7 +45,7 @@ public class RabbitMessageListenerContainer {
     private volatile int concurrentConsumers = 1;
 
     private volatile Set<Channel> channels = null;
- 
+
     private volatile Set<QueueingConsumer> consumers;
 
     private final Object consumersMonitor = new Object();
@@ -64,7 +64,7 @@ public class RabbitMessageListenerContainer {
 
     private volatile int prefetchCount = 10;
 
-    public RabbitMessageListenerContainer(ConnectionFactory connectionFactory, Object endpoint,
+    public RabbitMessageListener(ConnectionFactory connectionFactory, Object endpoint,
                                           Method method, ErrorHandler errorHandler) {
 
         this.connectionFactory = connectionFactory;
@@ -95,7 +95,7 @@ public class RabbitMessageListenerContainer {
         try {
             synchronized (monitor) {
                 running = true;
-                monitor.notifyAll();
+                //monitor.notifyAll();
             }
 
             if (sharedConnection == null) {
@@ -103,11 +103,6 @@ public class RabbitMessageListenerContainer {
                 logger.debug("established a shared " + sharedConnection);
             }
             initializeConsumers();
-
-
-            for (QueueingConsumer consumer : this.consumers) {
-                this.taskExecutor.execute(new AsyncConsumer(consumer, receiveTimeout));
-            }
         }
         catch (Exception e) {
             channelTemplate.closeConnection(sharedConnection);
@@ -119,10 +114,10 @@ public class RabbitMessageListenerContainer {
     private void initializeConsumers() throws IOException {
         synchronized (this.consumersMonitor) {
             if (this.consumers == null) {
-                this.channels = new HashSet<Channel>(this.concurrentConsumers);
+                this.channels = new HashSet<Channel>(concurrentConsumers);
                 this.consumers = new HashSet<QueueingConsumer>(concurrentConsumers);
 
-                for (int i = 0; i < this.concurrentConsumers; i++) {
+                for (int i = 0; i < concurrentConsumers; i++) {
                     Channel channel = channelTemplate.createChannel();
                     QueueingConsumer consumer = createQueueingConsumer(channel);
 
@@ -132,32 +127,20 @@ public class RabbitMessageListenerContainer {
                 cancellationLock.release(consumers.size());
             }
         }
+
+        for (QueueingConsumer consumer : consumers) {
+            taskExecutor.execute(new AsyncConsumer(consumer, receiveTimeout));
+        }
     }
 
     protected QueueingConsumer createQueueingConsumer(final Channel channel) throws IOException {
         QueueingConsumer consumer = new QueueingConsumer(channel);
 
         channel.basicQos(prefetchCount);
-        channel.basicConsume(queueName, true, consumer);
-
         /* TODO workerQueues... */
+        channel.basicConsume(queueName, true, consumer);
+ 
         return consumer;
-    }
-
-    private Connection getSharedConnection() {
-        if (sharedConnection == null) {
-            throw new ConnectionException("This listener container's shared Connection has not been initialized yet");
-        }
-        return sharedConnection;
-    }
-
-    private void stopSharedConnection() {
-        try {
-            channelTemplate.closeConnection(sharedConnection);
-        }
-        catch (Exception ex) {
-            logger.debug("Ignoring Connection close exception - assuming already closed: " + ex);
-        }
     }
 
     public String extractQueue(Method method) {
@@ -177,11 +160,48 @@ public class RabbitMessageListenerContainer {
         this.receiveTimeout = receiveTimeout;
     }
 
-    public void destroy() throws Exception {
-        //TODO
-    }
+    /**
+	 * Stop the shared Connection, and close this container.
+     * Notify all invoker tasks and stop the shared Connection, if any.
+	 */
+    @PreDestroy
+	protected void stop() {
+        if (!this.isRunning()) return;
+
+		synchronized (monitor) {
+			running = false;
+			monitor.notifyAll();
+		}
+
+        try {
+			cancellationLock.acquire(consumers.size());
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
+
+		synchronized (consumersMonitor) {
+			try {
+				for (Channel channel : this.channels) {
+                    channelTemplate.releaseResources(channel);
+				} 
+                channelTemplate.closeConnection(sharedConnection);
+
+			} finally {
+				cancellationLock.release(consumers.size());
+			}
+
+            sharedConnection = null;
+            consumers = null;
+			channels = null;
+		}
+	}
 
 
+    /**
+	 * Determine whether this container is currently running,
+	 * that is, whether it has been started and not stopped yet
+     * @return true if running
+     */
     private boolean isRunning() {
         synchronized (monitor) {
             return (running);
@@ -211,6 +231,7 @@ public class RabbitMessageListenerContainer {
                 while (isRunning()) {
                     try {
                         consume();
+                        read.set(true);
                     } catch (Exception e) {
                         // Continue
                     }
@@ -237,16 +258,14 @@ public class RabbitMessageListenerContainer {
             Channel channel = consumer.getChannel();
 
             while (read.get()) {
-            //for (int i = 0; i < size; i++) {
                 QueueingConsumer.Delivery delivery = consumer.nextDelivery(receiveTimeout);
-                 
                 if (delivery == null) return true;
 
                 logger.debug("consume = " + delivery.getEnvelope().getExchange() + ", " + delivery.getEnvelope().getRoutingKey());
 
                 if (delivery.getBody().length > 0) {
-
-                    executeListener(channel, delivery);
+                    invokeListener(channel, delivery);
+                    
                     read.set(false);
                 }
             }
@@ -255,14 +274,9 @@ public class RabbitMessageListenerContainer {
         }
     }
 
-    private void executeListener(Channel channel, QueueingConsumer.Delivery delivery) throws Throwable {
-        if (!isRunning())
-            throw new IllegalStateException("rejecting message - listener has stopped: " + delivery.getEnvelope());
-
-        invokeListener(channel, delivery);
-    }
-
     private void invokeListener(Channel channel, QueueingConsumer.Delivery delivery) throws Exception {
+        if (!isRunning()) throw new IllegalStateException("rejecting message - listener has stopped: " + delivery.getEnvelope());
+
         try {
             handler.handle(delivery, channel);
         }

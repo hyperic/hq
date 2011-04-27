@@ -24,7 +24,7 @@ public class LatherReplacementIntegrationTests extends BaseInfrastructureTest {
     /**
      * Must configure
      */
-    private final static String AGENT_HOME = "/path/to/agent-4.6.0.BUILD-SNAPSHOT";
+    private final static String AGENT_HOME = "/agent-4.6.0.BUILD-SNAPSHOT";
 
     private BizappCallbackClient bizappClient;
 

@@ -47,7 +47,7 @@ public class AnnotatedOperationRegistry implements OperationRegistry {
 
     private final Log logger = LogFactory.getLog(this.getClass());
 
-    private final Map<String, RabbitMessageListenerContainer> handlers = new ConcurrentHashMap<String, RabbitMessageListenerContainer>();
+    private final Map<String, RabbitMessageListener> handlers = new ConcurrentHashMap<String, RabbitMessageListener>();
 
     private final RoutingRegistry routingRegistry;
 
@@ -73,14 +73,14 @@ public class AnnotatedOperationRegistry implements OperationRegistry {
         routingRegistry.register(method);
 
         if (method.isAnnotationPresent(OperationEndpoint.class)) { 
-            handlers.put(method.getName(), new RabbitMessageListenerContainer(connectionFactory, candidate, method, errorHandler));
+            handlers.put(method.getName(), new RabbitMessageListener(connectionFactory, candidate, method, errorHandler));
         }
     }
  
     @PreDestroy
     public void destroy() throws Exception {
-        for (Map.Entry<String, RabbitMessageListenerContainer> entry : handlers.entrySet()) {
-            entry.getValue().destroy();
+        for (Map.Entry<String, RabbitMessageListener> entry : handlers.entrySet()) {
+            entry.getValue().stop();
         }
     }
 }
