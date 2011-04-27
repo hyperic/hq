@@ -21,7 +21,7 @@
 	<div class="topInfo">
 		<c:if test="${info.agentErrorCount>0}">
 		    <span id="agentFailure" style="float:right">
-		      (<span id="agentErrorCount">${info.agentErrorCount}</span> <img src="<spring:url value="/static/images/icon_available_red.gif"/>"/>)
+		      (${info.agentErrorCount} <img src="<spring:url value="/static/images/icon_available_red.gif"/>"/>)
 		    </span>
 		</c:if>
 		<span id="agentInfo" style="float:right">
@@ -188,7 +188,8 @@
 	hqDojo.require("dojo.hash");
 	hqDojo.require("dojox.timing._base");
 	hqDojo.require("dojo.date.locale");
-
+	hqDojo.require("dijit._base.scroll");
+	
 	hqDojo.ready(function() {
 		var timer = new hqDojox.timing.Timer();
 		function refreshPage(){
@@ -203,7 +204,11 @@
                 },				
 				load: function(response){
 					hqDojo.byId("agentInfoAllCount").innerHTML=response.allAgentCount;
-					hqDojo.byId("agentErrorCount").innerHTML=response.agentErrorCount;
+					if(response.agentErrorCount>0){
+						hqDojo.byId("agentFailure").innerHTML="("+response.agentErrorCount+" <img src='<spring:url value="/static/images/icon_available_red.gif"/>'/>)";
+					}else{
+						hqDojo.byId("agentFailure").innerHTML="";
+					}
 				}
 			};
 			
