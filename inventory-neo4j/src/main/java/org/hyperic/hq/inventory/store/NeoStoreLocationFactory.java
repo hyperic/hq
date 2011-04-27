@@ -1,4 +1,4 @@
-package org.hyperic.hq.store;
+package org.hyperic.hq.inventory.store;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Value;

@@ -27,6 +27,6 @@
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 		
 		
-		<bean id="neo4jStoreFactory" class="org.hyperic.hq.store.NeoStoreLocationFactory"/>
+		<bean id="neo4jStoreFactory" class="org.hyperic.hq.inventory.store.NeoStoreLocationFactory"/>
 
 </beans>
