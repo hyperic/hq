@@ -583,7 +583,16 @@ public class PlatformManagerImpl implements PlatformManager {
 
         // Send resource create & increment platform count events
         zeventManager.enqueueEventAfterCommit(new ResourceCreatedZevent(subject, platform.getEntityId()));
-        zeventManager.enqueueEventAfterCommit(new IncrementPlatformCountZEvent(new ArrayList<Ip>(platform.getIps())));
+        
+        List<Ip> ips = new ArrayList<Ip>();
+        
+        for (AIIpValue ipValue : aipValue.getAIIpValues()) {
+        	Ip ip = new Ip(ipValue.getAddress(), ipValue.getNetmask(), ipValue.getMACAddress());
+        	
+        	ips.add(ip);
+        }
+        
+        zeventManager.enqueueEventAfterCommit(new IncrementPlatformCountZEvent(ips));
         
         return platform;
     }
