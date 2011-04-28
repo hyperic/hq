@@ -26,16 +26,20 @@
 
 package org.hyperic.hq.hqu.rendit.helpers
 
+import java.util.ArrayList
+import java.util.List
+
 import org.hyperic.hibernate.PageInfo
-import org.hyperic.hq.events.server.session.AlertDefSortField
 import org.hyperic.hq.auth.domain.AuthzSubject
-import org.hyperic.hq.galerts.shared.GalertManager;
-import org.hyperic.hq.events.server.session.AlertDefinition
-import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.events.shared.AlertDefinitionManager;
-import org.hyperic.hq.events.shared.AlertManager;
-import org.hyperic.hq.galerts.server.session.GalertManagerImpl
+import org.hyperic.hq.context.Bootstrap
 import org.hyperic.hq.events.AlertSeverity
+import org.hyperic.hq.events.server.session.AlertDefSortField
+import org.hyperic.hq.events.server.session.AlertDefinition
+import org.hyperic.hq.events.shared.AlertDefinitionManager
+import org.hyperic.hq.events.shared.AlertManager
+import org.hyperic.hq.galerts.shared.GalertManager
+import org.springframework.data.domain.Sort
+import org.springframework.data.domain.Sort.Direction
 
 class AlertHelper extends BaseHelper {
     private alertMan  = Bootstrap.getBean(AlertManager.class)
@@ -149,9 +153,11 @@ class AlertHelper extends BaseHelper {
      * Find all type based alert definitions.
      */
     def findTypeBasedDefinitions() {
-        defMan.findTypeBasedDefinitions(user, null, 
-                                        PageInfo.getAll(AlertDefSortField.NAME,
-                                                        true))
+        List<Sort.Order> orders = new ArrayList<Sort.Order>();
+        Sort.Order order1 = new Sort.Order( Direction.ASC,"name");
+        orders.add(order1);
+        orders.add(new Sort.Order(Direction.DESC,"ctime"));
+        defMan.findTypeBasedDefinitions(user, new Sort(orders))
     }
     
     /**

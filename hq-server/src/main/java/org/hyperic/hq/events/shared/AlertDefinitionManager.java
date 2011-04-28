@@ -43,6 +43,7 @@ import org.hyperic.hq.events.server.session.ResourceTypeAlertDefinition;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.util.pager.PageList;
+import org.springframework.data.domain.Sort;
 
 /**
  * Local interface for AlertDefinitionManager.
@@ -215,13 +216,15 @@ public interface AlertDefinitionManager {
 
     /**
      * Get the list of type-based alert
-     * @param enabled If non-null, specifies the nature of the returned
+     * @param enabled pecifies the nature of the returned
      * @param pInfo Paging The sort field must be a value from
      *        {@link AlertDefSortField}
      */
     public List<ResourceTypeAlertDefinition> findTypeBasedDefinitions(AuthzSubject subj, java.lang.Boolean enabled,
                                                           org.hyperic.hibernate.PageInfo pInfo)
         throws PermissionException;
+    
+    List<ResourceTypeAlertDefinition> findTypeBasedDefinitions(AuthzSubject subj, Sort sort) throws PermissionException;
 
     /**
      * Get list of alert definition POJOs for a resource
