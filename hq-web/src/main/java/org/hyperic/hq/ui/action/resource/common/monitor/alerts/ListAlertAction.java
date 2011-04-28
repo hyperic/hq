@@ -64,7 +64,6 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.beans.AlertBean;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.util.NumberUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.units.FormatSpecifics;
@@ -251,28 +250,8 @@ public class ListAlertAction
                 if (value == null || value.length() == 0) {
                     bean.setValue(Constants.UNKNOWN);
                 } else {
-                    String last = value.substring(value.length() - 1);
-                    try {
-                        // This is legacy code, used to format a comma delimited
-                        // number in the logs. However, we should be storing
-                        // fully formatted values into logs now. Remove post 4.1
-                        Integer.parseInt(last);
-
-                        // format threshold and value
-                        if (m == null) {
-                            m = measurementBoss.getMeasurement(sessionId, new Integer(cond.getMeasurementId()));
-
-                        }
-                        double dval = NumberUtil.stringAsNumber(value).doubleValue();
-
-                        FormattedNumber val = UnitsConvert.convert(dval, m.getTemplate().getUnits());
-
-                        bean.setValue(val.toString());
-                    } catch (NumberFormatException e) {
-                        bean.setValue(value);
-                    }
+                    bean.setValue(value);
                 }
-
                 break;
 
             case EventConstants.TYPE_CUST_PROP:

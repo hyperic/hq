@@ -38,12 +38,15 @@ import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.authz.shared.PermissionException;
 
 class AppdefCategory {
+
+    private static resMan = Bootstrap.getBean(ResourceManager.class)
+
     static Resource getResource(AppdefResource r) {
-		Bootstrap.getBean(ResourceManager.class).findResource(r.entityId) 
+		resMan.findResource(r.entityId)
     }
 
     static Resource getResource(AppdefResourceType r) {
-		Bootstrap.getBean(ResourceManager.class).findResourceByInstanceId(r.authzType, r.id)
+		resMan.findResourceByInstanceId(r.authzType, r.id)
     }
     
     /**
@@ -73,10 +76,14 @@ class AppdefCategory {
 
         ['operation', 'user'].each {p.get(it, null)}
 
-        def operation = r.getAuthzOp(p.operation)
         def user = p.user
         def resource = r.resource
-        
+
+        if (user.id == 1) {
+            // skip permission check for hqadmin
+            return resource
+        }
+
         // HHQ-3736 - null resource_id in EAM_PLATFORM,EAM_SERVER,EAM_SERVICE.
         if (resource == null) {
             throw new PermissionException()
@@ -85,6 +92,7 @@ class AppdefCategory {
         def instanceId = resource.instanceId
         assert instanceId == r.id
 
+        def operation = r.getAuthzOp(p.operation)
         permMan.check(user.id, resource.resourceType, instanceId,
                       operation)
         resource

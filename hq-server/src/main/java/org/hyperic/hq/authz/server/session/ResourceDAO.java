@@ -200,6 +200,18 @@ public class ResourceDAO
             .list();
     }
 
+    public List<Resource> findChildren(AuthzSubject subject, Resource r) {
+        final String[] VIEW_APPDEFS = new String[] { AuthzConstants.platformOpViewPlatform,
+                                                    AuthzConstants.serverOpViewServer,
+                                                    AuthzConstants.serviceOpViewService, };
+
+        EdgePermCheck wherePermCheck = permissionManager.makePermCheckHql("rez", false);
+        String hql = "select rez from Resource rez " + wherePermCheck;
+
+        Query q = createQuery(hql);
+        return wherePermCheck.addQueryParameters(q, subject, r, 1, Arrays.asList(VIEW_APPDEFS)).list();
+    }
+
     @SuppressWarnings("unchecked")
     public Collection<Resource> findByOwner(AuthzSubject owner) {
         String sql = "from Resource where owner.id = ?";
@@ -393,16 +405,6 @@ public class ResourceDAO
         return ((Number) getSession().createQuery(sql).setInteger("platProto",
             AuthzConstants.authzPlatform.intValue()).setString("vspherevm",
             AuthzConstants.platformPrototypeVmwareVsphereVm).uniqueResult()).intValue();
-    }
-
-    @SuppressWarnings("unchecked")
-	public List<Resource> getPlatformsMinusVsphereVmPlatforms() {
-        String sql = "select r from Resource r " + "where r.resourceType.id = :platProto "
-                     + "and r.prototype.name != :vspherevm";
-        return getSession().createQuery(sql)
-        	.setInteger("platProto", AuthzConstants.authzPlatform.intValue())
-        	.setString("vspherevm", AuthzConstants.platformPrototypeVmwareVsphereVm)
-        	.list();
     }
 
     @SuppressWarnings("unchecked")

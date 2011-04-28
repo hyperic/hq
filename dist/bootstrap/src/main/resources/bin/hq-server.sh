@@ -165,6 +165,30 @@ then
         exit 1
 fi
 
+REQUIRED_VERSION_STRING=1.6
+# Transform the required version string into a number that can be used in comparisons
+REQUIRED_VERSION=`echo ${REQUIRED_VERSION_STRING} | sed -e 's;\.;0;g'`
+# Check HQ_JAVA to see if Java version is adequate
+if [ ${HQ_JAVA} ]
+then
+	${HQ_JAVA} -version 2> /tmp/tmp.ver
+	VERSION=`cat /tmp/tmp.ver | grep "java version" | awk '{ print substr($3, 2, length($3)-2); }'`
+	rm /tmp/tmp.ver
+	VERSION=`echo $VERSION | awk '{ print substr($1, 1, 3); }' | sed -e 's;\.;0;g'`
+	if [ ${VERSION} ]
+	then
+		if [ ${VERSION} -lt ${REQUIRED_VERSION} ]
+		then
+			echo "Java version must be at least ${REQUIRED_VERSION_STRING}."
+			exit 1
+		fi
+	else
+		echo "Java version was not found."
+		exit 1
+	fi
+fi
+
+
 # ------------- 
 # End HQ specific logic
 # ------------- 

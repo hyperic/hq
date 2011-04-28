@@ -153,7 +153,7 @@ abstract class BaseController {
         def res
         eachUpload() { upload ->
             if (upload.fieldName == argName)
-                res = upload.openStream().getText()
+                res = upload.openStream().getText("utf-8")
         }
         res
     }
@@ -323,7 +323,9 @@ abstract class BaseController {
         invokeArgs.response.setContentType(opts.contentType)
         StreamingMarkupBuilder b = new StreamingMarkupBuilder()
         b.encoding = opts.encoding
-        b.bind(c).writeTo(invokeArgs.response.writer)
+        b.bind { mkp.xmlDeclaration()
+                 out << c
+        }.writeTo(invokeArgs.response.writer)
 	}
 	
     protected void render(opts) {
@@ -404,41 +406,77 @@ abstract class BaseController {
     protected AuthzSubject getUser() {
         invokeArgs.user 
     }
-    
+
+    private agentHelperInternal = null
     protected AgentHelper getAgentHelper() {
-        new AgentHelper(user)
+        if (agentHelperInternal == null) {
+            agentHelperInternal = new AgentHelper(user)
+        }
+        agentHelperInternal
     }
-    
+
+    private alertHelperInternal = null
     protected AlertHelper getAlertHelper() {
-        new AlertHelper(user)
+        if (alertHelperInternal == null) {
+            alertHelperInternal = new AlertHelper(user)
+        }
+        alertHelperInternal
     }
 
+    private auditHelperInternal = null
     protected AuditHelper getAuditHelper() {
-        new AuditHelper(user)
+        if (auditHelperInternal == null) {
+            auditHelperInternal = new AuditHelper(user)
+        }
+        auditHelperInternal
     }
 
+    private resourceHelperInternal = null
     protected ResourceHelper getResourceHelper() {
-        new ResourceHelper(user)
+        if (resourceHelperInternal == null) {
+            resourceHelperInternal = new ResourceHelper(user)
+        }
+        resourceHelperInternal
     }
-    
+
+    private metricHelperInternal = null
     protected MetricHelper getMetricHelper() {
-        new MetricHelper(user)
+        if (metricHelperInternal == null) {
+            metricHelperInternal = new MetricHelper(user)
+        }
+        metricHelperInternal
     }
 
+    private userHelperInternal = null
     protected UserHelper getUserHelper() {
-        new UserHelper(user)
+        if (userHelperInternal == null) {
+            userHelperInternal = new UserHelper(user)
+        }
+        userHelperInternal
     }
-    
+
+    private escalationHelperInternal = null
     protected EscalationHelper getEscalationHelper() {
-        new EscalationHelper(user)
+        if (escalationHelperInternal == null) {
+            escalationHelperInternal = new EscalationHelper(user)
+        }
+        escalationHelperInternal
     }
 
+    private autodiscoveryHelperInternal = null
     protected AutodiscoveryHelper getAutodiscoveryHelper() {
-        new AutodiscoveryHelper(user)
+        if (autodiscoveryHelperInternal == null) {
+            autodiscoveryHelperInternal = new AutodiscoveryHelper(user)
+        }
+        autodiscoveryHelperInternal
     }
 
+    private roleHelperInternal = null
     protected RoleHelper getRoleHelper() {
-        new RoleHelper(user)
+        if (roleHelperInternal == null) {
+            roleHelperInternal = new RoleHelper(user)
+        }
+        roleHelperInternal
     }
 
     /**

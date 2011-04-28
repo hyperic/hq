@@ -32,10 +32,10 @@ import org.hyperic.sigar.FileInfo;
 public class WeblogicLogFileTrackPlugin extends LogFileTailPlugin {
 
     private static final String[] LOG_LEVELS = {
-        "Error", //Error
+        "Error,Critical,Alert,Emergency", //Error
         "Warning", //Warning
         "Info,Notice", //Info
-        "Debug" //Debug
+        "Debug,Trace" //Debug
     };
 
     private WeblogicLogParser parser = null;

@@ -58,7 +58,7 @@
     </property>
 
     <property name="enabled" type="boolean">
-      <column name="ENABLED" not-null="true" index="MEAS_ENABLED_IDX"/>
+      <column name="ENABLED" not-null="true"/>
     </property>
     <property name="interval" type="long">
       <column name="COLL_INTERVAL" not-null="true"/>

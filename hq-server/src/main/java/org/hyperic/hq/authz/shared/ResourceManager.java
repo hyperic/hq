@@ -156,12 +156,10 @@ public interface ResourceManager {
      * @return AppdefEntityID[] - an array of the resources (including children)
      *         deleted
      */
-    public AppdefEntityID[] removeResourcePerms(AuthzSubject subj, Resource r,
+    public AppdefEntityID[] removeResourceAndRelatedResources(AuthzSubject subj, Resource r,
                                                 boolean nullResourceType,
                                                 boolean removeAllVirtual) throws VetoException,
         PermissionException;
-
-    public void _removeResource(AuthzSubject subj, Resource r, boolean nullResourceType);
 
     public void removeResource(AuthzSubject subject, Resource r) throws VetoException;
 
@@ -195,6 +193,12 @@ public interface ResourceManager {
      * Find all the resources which are descendents of the given resource
      */
     public List<Resource> findResourcesByParent(AuthzSubject subject, Resource res);
+
+    /**
+     * Find all the resources which are direct descendants of the given resource.
+     * In resource edge terminology, distance = 1.
+     */
+    public List<Resource> findChildren(AuthzSubject subject, Resource res);
 
     /**
      * Find all the resources of an authz resource type

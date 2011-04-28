@@ -11503,6 +11503,25 @@ has already been defined.
     <schema-alterColumn table="EAM_AGENT" column="version"
 	       	            precision="50" columnType="VARCHAR2" /> 	
  </schemaSpec>
+
+ <schemaSpec version="3.200.1">
+	<schema-alterColumn table="EAM_ALERT_CONDITION" column="OPTION_STATUS"
+		                precision="150" columnType="VARCHAR2" />
+ </schemaSpec>
+
+ <schemaSpec version="3.200.2">
+     <schema-directSQL>
+       <statement fail="false" targetDB="oracle">
+         drop index MEAS_ENABLED_IDX
+       </statement>
+       <statement fail="false" targetDB="postgresql">
+         drop index MEAS_ENABLED_IDX
+       </statement>
+       <statement fail="false" targetDB="mysql">
+         drop index MEAS_ENABLED_IDX on EAM_MEASUREMENT
+       </statement>
+     </schema-directSQL>
+ </schemaSpec>
 	
  <schemaSpec version="3.201">
     <schema-addColumn table="EAM_PLUGIN" column="version"
