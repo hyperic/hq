@@ -4,7 +4,7 @@
         <provider>org.hibernate.ejb.HibernatePersistence</provider>
         <shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
         <properties>
-        	<property name="hibernate.hbm2ddl.auto" value="create"/>  
+        <!--	<property name="hibernate.hbm2ddl.auto" value="create"/>  -->
             <property name="hibernate.ejb.interceptor" value="org.hyperic.hibernate.HypericInterceptor" />
             <property name="hibernate.cache.provider_class" value="net.sf.ehcache.hibernate.SingletonEhCacheProvider" />
 			<property name="hibernate.archive.autodetection" value="class"/>
