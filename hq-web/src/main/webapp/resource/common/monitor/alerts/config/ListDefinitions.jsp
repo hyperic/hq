@@ -112,8 +112,10 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
     <c:param name="ps" value="${param.ps}"/>
   </c:if>
 </c:url>
-<c:set var="newAction" value="/alerts/Config.do?mode=new&eid=${entityId.appdefKey}"/>
-
+<c:url var="newAction" value="/alerts/Config.do">
+	<c:param name="mode" value="new"/>
+	<c:param name="eid" value="${entityId.appdefKey}"/>
+</c:url>
 
 <c:set var="entityId" value="${Resource.entityId}"/>
 

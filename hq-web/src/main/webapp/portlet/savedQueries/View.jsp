@@ -32,31 +32,31 @@
 
 
 <div class="effectsPortlet">
-<tiles:importAttribute name="charts"/>
-<!-- Content Block Title -->
-<tiles:insert definition=".header.tab">
-  <tiles:put name="tabKey" value="dash.home.SavedQueries"/>
-  <tiles:put name="adminUrl" beanName="adminUrl" />
-  <tiles:put name="portletName" beanName="portletName" />
-</tiles:insert>
+	<tiles:importAttribute name="charts"/>
+	
+	<!-- Content Block Title -->
+	<tiles:insert definition=".header.tab">
+  		<tiles:put name="tabKey" value="dash.home.SavedQueries"/>
+  		<tiles:put name="adminUrl" beanName="adminUrl" />
+  		<tiles:put name="portletName" beanName="portletName" />
+	</tiles:insert>
 
-<!-- Content Block Contents -->
-<table width="100%" cellpadding="0" cellspacing="0" border="0" class="portletLRBorder">
-    <c:choose>    
-      <c:when test="${empty charts}">
-        <tr class="ListRow">
-          <td class="ListCell"><fmt:message key="dash.home.no.charts.to.display"/></td>
-        </tr>
-      </c:when>
-      <c:otherwise>
-        <c:forEach var="chart" items="${charts}">        
-          <tr class="ListRow">
-            <td class="ListCell" valign="middle" nowrap="true">&nbsp;<html:img page="/images/icon_chart.gif"/></td>
-            <td class="ListCell"><html:link page="${chart.value}"><c:out value="${chart.key}"/></html:link></td>        
-          </tr>
-        </c:forEach>
-      </c:otherwise>
-    </c:choose>
-</table>
-
+	<!-- Content Block Contents -->
+	<table width="100%" cellpadding="0" cellspacing="0" border="0" class="portletLRBorder">
+    	<c:choose>    
+      		<c:when test="${empty charts}">
+        		<tr class="ListRow">
+          			<td class="ListCell"><fmt:message key="dash.home.no.charts.to.display"/></td>
+        		</tr>
+      		</c:when>
+      		<c:otherwise>
+        		<c:forEach var="chart" items="${charts}">        
+          			<tr class="ListRow">
+            			<td class="ListCell" valign="middle" nowrap="true">&nbsp;<html:img page="/images/icon_chart.gif"/></td>
+            			<td class="ListCell"><html:link page="${chart.value}">${chart.key}</html:link></td>        
+          			</tr>
+        		</c:forEach>
+      		</c:otherwise>
+    	</c:choose>
+	</table>
 </div>

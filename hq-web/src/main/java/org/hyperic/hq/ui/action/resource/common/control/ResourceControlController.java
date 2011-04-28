@@ -134,7 +134,7 @@ public abstract class ResourceControlController
             SessionUtils.moveAttribute(request, Globals.ERROR_KEY);
         }
 
-        setResource(request);
+        setResource(request, response);
 
         if (checkControlEnabled) {
             checkControlEnabled(mapping, form, request, response);

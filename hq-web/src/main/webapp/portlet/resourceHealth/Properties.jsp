@@ -35,7 +35,9 @@
 
 <hq:pageSize var="pageSize"/>
 <c:set var="widgetInstanceName" value="resources"/>
-<c:url var="selfAction" value="/dashboard/Admin.do?mode=resourceHealth"/>
+<c:url var="selfAction" value="/dashboard/Admin.do">
+	<c:param name="mode" value="resourceHealth"/>
+</c:url>
 
 <script  src="<html:rewrite page="/js/prototype.js"/>" type="text/javascript"></script>
 <script  src="<html:rewrite page="/js/scriptaculous.js"/>" type="text/javascript"></script>
@@ -61,7 +63,7 @@ var help = '<hq:help/>';
   </tr>
   <tr valign="top"> 
     <td colspan="2">
-      <html:form action="/dashboard/ModifyResourceHealth.do" onsubmit="ResourceHealthForm.order.value=Sortable.serialize('resOrd')">
+      <html:form action="/dashboard/ModifyResourceHealth" onsubmit="ResourceHealthForm.order.value=Sortable.serialize('resOrd')">
 <div id="narrowlist_false">
       <tiles:insert definition=".header.tab">
         <tiles:put name="tabKey" value="dash.settings.SelectedResources"/>

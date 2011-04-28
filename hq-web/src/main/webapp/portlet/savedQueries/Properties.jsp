@@ -34,7 +34,9 @@
 
 <hq:pageSize var="pageSize"/>
 <c:set var="widgetInstanceName" value="savedQueriesList"/>
-<c:url var="selfAction" value="/dashboard/Admin.do?mode=savedQueries"/>
+<c:url var="selfAction" value="/dashboard/Admin.do">
+	<c:param name="mode" value="savedQueries"/>
+</c:url>
 
 <script  src="<html:rewrite page="/js/prototype.js"/>" type="text/javascript"></script>
 <script  src="<html:rewrite page="/js/scriptaculous.js"/>" type="text/javascript"></script>
@@ -64,7 +66,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   </tr>
   <tr valign="top"> 
     <td colspan='2'>
-      <html:form action="/dashboard/ModifySavedQueries.do" onsubmit="SavedQueriesForm.order.value=Sortable.serialize('qryOrd')">
+      <html:form action="/dashboard/ModifySavedQueries" onsubmit="SavedQueriesForm.order.value=Sortable.serialize('qryOrd')">
       <div id="narrowlist_false">
       <tiles:insert definition=".header.tab">
         <tiles:put name="tabKey" value="dash.settings.SelectedCharts"/>
@@ -99,7 +101,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
             <input type="checkbox" onclick="ToggleSelection(this, widgetProperties)" class="listMember" name="charts" value="|<c:out value="${chart.key},${chart.value}"/>">
           </c:otherwise>
           </c:choose>
-          <html:link page="${chart.value}"><c:out value="${chart.key}"/></html:link>
+          <html:link page="${chart.value}">${chart.key}</html:link>
         </span>
         </li>
         </c:forEach>

@@ -98,7 +98,7 @@ public class VisibilityPortalAction
 
     public ActionForward editRange(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                    HttpServletResponse response) throws Exception {
-        setResource(request);
+        setResource(request, response);
         Portal portal = Portal.createPortal(TITLE_EDIT_RANGE, PORTLET_EDIT_RANGE);
         portal.setWorkflowPortal(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
@@ -107,7 +107,7 @@ public class VisibilityPortalAction
 
     public ActionForward configureVisibility(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                              HttpServletResponse response) throws Exception {
-        setResource(request);
+        setResource(request, response);
         Portal portal = Portal.createPortal(TITLE_CONFIGURE_VISIBILITY, PORTLET_CONFIGURE_VISIBILITY);
         request.setAttribute(Constants.PORTAL_KEY, portal);
         return null;
@@ -120,7 +120,7 @@ public class VisibilityPortalAction
                                                          HttpServletRequest request, HttpServletResponse response)
         throws Exception {
         try {
-            setResource(request);
+            setResource(request, response);
         } catch (AppdefEntityNotFoundException e) {
             // It's ok, we'll offer to delete the link
         }
@@ -142,7 +142,7 @@ public class VisibilityPortalAction
                                                         HttpServletRequest request, HttpServletResponse response)
         throws Exception {
         try {
-            setResource(request);
+            setResource(request, response);
         } catch (AppdefEntityNotFoundException e) {
             // It's ok, we'll offer to delete the link
         }
@@ -159,7 +159,7 @@ public class VisibilityPortalAction
                                                         HttpServletRequest request, HttpServletResponse response)
         throws Exception {
         try {
-            setResource(request);
+            setResource(request, response);
         } catch (AppdefEntityNotFoundException e) {
             // It's ok, we'll offer to delete the link
         }
@@ -175,7 +175,7 @@ public class VisibilityPortalAction
 
     public ActionForward metricMetadata(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                         HttpServletResponse response) throws Exception {
-        setResource(request);
+        setResource(request, response);
         Portal portal = Portal.createPortal(TITLE_METRIC_METADATA, PORTLET_METRIC_METADATA);
         portal.setDialog(true);
         request.setAttribute(Constants.PORTAL_KEY, portal);
@@ -184,7 +184,7 @@ public class VisibilityPortalAction
 
     public ActionForward compareMetrics(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                         HttpServletResponse response) throws Exception {
-        setResource(request);
+        setResource(request, response);
         Portal portal = Portal.createPortal(TITLE_COMPARE_METRICS, PORTLET_COMPARE_METRICS);
 
         portal.setDialog(true);

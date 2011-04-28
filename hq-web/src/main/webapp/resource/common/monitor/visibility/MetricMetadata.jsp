@@ -93,8 +93,8 @@
   </c:when>
 </c:choose>
 
-<script src="<html:rewrite page="/js/"/>functions.js" type="text/javascript"></script>
-<link rel=stylesheet href="<html:rewrite page="/css/"/>win.css" type="text/css">
+<script src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
+<link rel=stylesheet href="<html:rewrite page="/css/win.css"/>" type="text/css">
 <c:choose>
   <c:when test="${Resource.entityId.type == platformType}">
     <fmt:message var="appdefType" key="resource.type.Platform" />

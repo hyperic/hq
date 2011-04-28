@@ -10,7 +10,7 @@ document.navTabCat = "Admin";
 function getSystemStats() {
   dojo.io.bind({
     url: '<%= urlFor(action:"getSystemStats") %>',
-    method: "post",
+    method: "get",
     mimetype: "text/json-comment-filtered",
     load: function(type, data, evt) {
       dojo.byId('userCPU').innerHTML = data.sysUserCpu;
@@ -301,15 +301,17 @@ function selectDiag(d) {
     return;
   }
     
-  dojo.io.bind({
-    url: '<%= urlFor(action:"getDiag") %>' + '?diag=' + d,
-    method: "post",
-    mimetype: "text/json-comment-filtered",
-    load: function(type, data, evt) {
-      dojo.byId('diagData').innerHTML = data.diagData;
-    }
-  });
-}
+	  	dojo11.xhrPost({
+    		url: '<%= urlFor(action:"getDiag", encodeUrl:true) %>',
+    		handleAs: "json-comment-filtered",
+	    	content: {
+    			diag: d
+        	},
+	    	load: function(response, args) {
+    	  		dojo11.byId('diagData').innerHTML = response.diagData;
+    		}
+	  	});
+	}
 
 function loadDiag() {
   var selectDrop = document.getElementById('diagSelect');
@@ -350,25 +352,43 @@ function executeQuery(q) {
     return;
   }
     
-  dojo.io.bind({
-    url: '<%= urlFor(action:"executeQuery") %>' + '?query=' + q,
-    method: "post",
-    mimetype: "text/json-comment-filtered",
-    load: function(type, data, evt) {
-      dojo.byId('queryData').innerHTML = data.queryData;
-    }
-  });
-}
+  		dojo11.xhrPost({
+    		url: '<%= urlFor(action:"runQuery", encodeUrl:true) %>',
+	    	handleAs: "json-comment-filtered",
+	    	content: {
+	    		query: q
+	        },
+	    	load: function(response, args) {
+	      		dojo11.byId('queryData').innerHTML = response.queryData;
+	    	}
+	  	});
+	}
 
 function loadQuery() {
   var selectDrop = document.getElementById('querySelect');
   selectQuery(selectDrop.options[selectDrop.selectedIndex].value);
 }
 
-function refreshQuery() {
-  loadQuery();
-  setTimeout("refreshQuery()", 1000 * 60);
-}
+		executeQuery(selectDrop.options[selectDrop.selectedIndex].value);
+	}
+	
+	function executeQuery(q) {
+	  	if (q == 'none') {
+	    	dojo11.byId('queryData').innerHTML = '';
+	    	return;
+	  	}
+	    
+	  	dojo11.xhrPost({
+	    	url: '<%= urlFor(action:"executeQuery", encodeUrl:true) %>',
+	    	handleAs: "json-comment-filtered",
+	    	content: {
+	    		query: q
+	        },
+	    	load: function(response, args) {
+	      		dojo11.byId('queryData').innerHTML = response.queryData;
+	    	}
+	  	});
+	}
 
 refreshQuery();
 
