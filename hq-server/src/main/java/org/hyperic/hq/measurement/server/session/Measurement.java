@@ -49,6 +49,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.Parameter;
 import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
 
 @Entity
@@ -74,8 +75,8 @@ public class Measurement implements ContainerManagedTimestampTrackable, Serializ
     private boolean enabled = true;
 
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")
-    @GeneratedValue(generator = "mygen1")
+    @GeneratedValue(generator = "combo")
+    @GenericGenerator(name = "combo", parameters = { @Parameter(name = "sequence", value = "EAM_MEASUREMENT_ID_SEQ") }, strategy = "org.hyperic.hibernate.id.ComboGenerator")
     @Column(name = "ID")
     private Integer id;
 
@@ -202,7 +203,7 @@ public class Measurement implements ContainerManagedTimestampTrackable, Serializ
     protected void setBaselinesBag(Collection<Baseline> baselines) {
         this.baselinesBag = baselines;
     }
-    
+
     public void setBaseline(Baseline b) {
         if (!baselinesBag.isEmpty()) {
             baselinesBag.clear();
@@ -211,7 +212,6 @@ public class Measurement implements ContainerManagedTimestampTrackable, Serializ
             baselinesBag.add(b);
         }
     }
-
 
     public void setDsn(String dsn) {
         this.dsn = dsn;
