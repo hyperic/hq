@@ -10,7 +10,7 @@
 <section id="pluginManagerPanel" class="container top">
 	<h1><fmt:message key="admin.managers.plugin.title" /> </h1> 
 	<p id="instruction"><fmt:message key="${instruction}" /></p>
-	
+
 	<div id="currentTimeInfo">
 		<span style="float:right;" id="refreshTimeInfo"><fmt:message key="admin.managers.Plugin.information.refresh.time"/> <span id="timeNow"></span>
 		</span>
@@ -104,6 +104,10 @@
 			<input id="showUploadFormButton" type="button" value="<fmt:message key="admin.managers.plugin.button.add.plugin" />" />
 		</div>	
 	</c:if>
+	
+	<div>
+		<span id="customDirInfo"><fmt:message key="admin.managers.Plugin.title.custom.directory" />${customDir}</span>
+	</div>
 
 </section>
 
@@ -257,6 +261,12 @@
 			connectId:["agentInfo"],
 			label: "<fmt:message key='admin.managers.Plugin.information.agent.count.tip' />"
 		});
+		
+		new hqDijit.Tooltip({
+			connectId:["customDirInfo"],
+			label: "<fmt:message key='admin.managers.Plugin.tip.custom.directory' />"
+		});
+
 
 		hqDojo.query(".notFound").forEach(function(e){
 			new hqDijit.Tooltip({

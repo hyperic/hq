@@ -76,6 +76,7 @@ public class PluginManagerController extends BaseController implements Applicati
         }else{
             model.addAttribute("instruction", "admin.managers.plugin.mechanism.off");
         }
+        model.addAttribute("customDir", pluginManager.getCustomPluginDir().getAbsolutePath());
         request.setAttribute(KeyConstants.PAGE_TITLE_KEY, HELP_PAGE_MAIN);
         return "admin/managers/plugin";
     }

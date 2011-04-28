@@ -212,7 +212,8 @@
 	}
 	.topInfo, 
 	#currentTimeInfo, 
-	#agentInfo{
+	#agentInfo,
+	#customDirInfo{
 		font-weight: bold;
 		height: 20px;
 		color: #777777;
