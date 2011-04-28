@@ -21,7 +21,7 @@
 	<div class="topInfo">
 		<c:if test="${info.agentErrorCount>0}">
 		    <span id="agentFailure" style="float:right">
-		      (<span id="agentErrorCount">${info.agentErrorCount}</span> <img src="<spring:url value="/static/images/icon_available_red.gif"/>"/>)
+		      (${info.agentErrorCount} <img src="<spring:url value="/static/images/icon_available_red.gif"/>"/>)
 		    </span>
 		</c:if>
 		<span id="agentInfo" style="float:right">
@@ -59,7 +59,7 @@
                     	<input type="checkbox" value="${pluginSummary.id}_${pluginSummary.jarName} (${pluginSummary.name})" name="deleteId"/>&nbsp; 
 					</c:if>
 				</span>
-				<span class="column span-small">${pluginSummary.name}
+				<span class="column span-small" id="row_${pluginSummary.id}">${pluginSummary.name}
 					<c:if test="${pluginSummary.deleted}">
 						<br/><span class="deleting"><fmt:message key="admin.managers.Plugin.column.plugin.deleting"/></span>
 					</c:if>				
@@ -130,13 +130,15 @@
 			</div>
 	</div>
 	<div id="confirmationPanel" style="visibility:hidden;">
+		<span id="deletLoadingIcon" style="visibility:hidden;"><img src="<spring:url value="/static/images/ajax-loader-blue.gif"/>"/></span>
+
 		<p><fmt:message key="admin.managers.plugin.confirmation.title" /></p>
 		<ul id="removeList">
 		</ul>
 		<p><fmt:message key="admin.managers.plugin.confirmation.message" /></p>
 		<div>
 			<input id="removeButton" type="button" name="remove" value="<fmt:message key="admin.managers.plugin.button.remove" />" />
-			<a href="#" class="cancelLink"><fmt:message key="admin.managers.plugin.button.cancel" /></a>
+			<a href="#" id="removeCancel" class="cancelLink"><fmt:message key="admin.managers.plugin.button.cancel" /></a>
 		</div>
 	</div>
 	<div id="errorMsgPanel" style="visibility:hidden;">
@@ -186,11 +188,11 @@
 	hqDojo.require("dojo.hash");
 	hqDojo.require("dojox.timing._base");
 	hqDojo.require("dojo.date.locale");
-
+	hqDojo.require("dijit._base.scroll");
+	
 	hqDojo.ready(function() {
 		var timer = new hqDojox.timing.Timer();
-
-		function refreshPage(){
+		function refreshPage(focusElement){
 			hqDojo.style(hqDojo.byId("pluginList"), "color","#AAAAAA");
 			var infoXhrArgs={
 				preventCache:true,
@@ -202,7 +204,11 @@
                 },				
 				load: function(response){
 					hqDojo.byId("agentInfoAllCount").innerHTML=response.allAgentCount;
-					hqDojo.byId("agentErrorCount").innerHTML=response.agentErrorCount;
+					if(response.agentErrorCount>0){
+						hqDojo.byId("agentFailure").innerHTML="("+response.agentErrorCount+" <img src='<spring:url value="/static/images/icon_available_red.gif"/>'/>)";
+					}else{
+						hqDojo.byId("agentFailure").innerHTML="";
+					}
 				}
 			};
 			
@@ -214,7 +220,11 @@
 			hqDojo.hash(hqDojo.objectToQuery(hashObj));
 			
 			hqDojo.xhrGet(infoXhrArgs);
-			hqDojo.publish("refreshDataGrid");
+			if(focusElement!==undefined && typeof(focusElement)!=="number"){
+				refreshDataGrid(focusElement);
+			}else{
+				refreshDataGrid();
+			}
 		}
 
 		function resizePluginMgrContentHeight(){
@@ -569,7 +579,7 @@
 					preventCache:true,
 					form: hqDojo.byId("deleteForm"),
 					url: "<spring:url value='/app/admin/managers/plugin/delete' />",
-					load: function(response) {
+					handle: function(response) {
 					    var anim;
 						if (response==="success") {
 							hqDojo.attr("progressMessage", "class", "information");
@@ -580,7 +590,7 @@
 									}),
 									hqDojo.fadeOut({
 										node: "progressMessage",
-										delay: 1000,
+										delay: 5000,
 										duration: 500
 									})];	
 						}else{
@@ -596,31 +606,23 @@
 										duration: 500
 									})];
 						}
-						hqDojo.fx.chain(anim).play();	
-						refreshPage();
-					},
-					error: function(response,arg){
-						hqDojo.attr("progressMessage", "class", "error");
-						hqDojo.byId("progressMessage").innerHTML = '<fmt:message key="admin.managers.Plugin.remove.error.dialog.failure" />';
-						var anim = [hqDojo.fadeIn({
-									node: "progressMessage",
-									duration: 500
-									}),
-									hqDojo.fadeOut({
-										node: "progressMessage",
-										delay: 10000,
-										duration: 500
-									})];
+						refreshPage("row_"+ checkedPlugins[0].value);
+						hqDijit.byId("removePanelDialog").hide();
+	
+						hqDojo.style("deletLoadingIcon","visibility","hidden");
+						hqDojo.style("removeButton","visibility","visible");
+						hqDojo.style("removeCancel","visibility","visible");
 						hqDojo.fx.chain(anim).play();
-						refreshPage();
 					}
 				};
 				hqDojo.xhrPost(xhrArgs);
-				hqDijit.byId("removePanelDialog").hide(); 
+				hqDojo.style("deletLoadingIcon","visibility","visible");
+				hqDojo.style("removeButton","visibility","hidden");
+				hqDojo.style("removeCancel","visibility","hidden");
 			});
 		}
 		
-		hqDojo.subscribe("refreshDataGrid", function() {			
+		function refreshDataGrid(focusElement) {
 			hqDojo.xhrGet({
 				preventCache:true,
 				url: "<spring:url value='/app/admin/managers/plugin/list' />",
@@ -660,7 +662,8 @@
                 		}
                 		var pluginName = hqDojo.create("span", {
                 			"class": "column span-small",
-                			"innerHTML": summary.name
+                			"innerHTML": summary.name,
+                			"id": "row_"+summary.id
                 		}, li);
                 		if(summary.deleted){
                 			span = hqDojo.create("span",{
@@ -745,12 +748,14 @@
 					if(hashObj.deleteIds!==""){
 						hqDojo.forEach(hashObj.deleteIds.split(","),function(pluginId){
 							var checkbox = hqDojo.query("input[value='"+pluginId+"']");
-							if(checkbox[0]!==null){
+							if(checkbox[0]!==undefined){
 								checkbox[0].checked="true";
 							}
 						});
 					}
-
+					if(focusElement!==undefined){
+						hqDijit.scrollIntoView(focusElement);
+					}
 					hqDojo.behavior.apply();
 					hqDojo.query(".notFound").forEach(function(e){
 						new hqDijit.Tooltip({
@@ -782,7 +787,7 @@
                 	
                 }
 			});
-		});
+		}
 		timer.setInterval(120000);
 		timer.onTick = refreshPage;
 		timer.start();
