@@ -86,6 +86,7 @@
 				<prop key="ha.node.cacheProvider.port">45568</prop>
 				<prop key="ha.node.ipTTL">64</prop>
                 <prop key="server.pluginsync.enabled">true</prop>
+                <prop key="server.custom.plugin.dir"></prop>
 			</props>
 		</property>
 	</bean>

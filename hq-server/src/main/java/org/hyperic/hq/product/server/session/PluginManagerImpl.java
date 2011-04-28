@@ -190,25 +190,26 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         if (this.customPluginDir != null) {
             return;
         }
-        final File file = new File(customPluginDir);
-        if (!file.exists()) {
-            final boolean success = file.mkdirs();
-            if (!success) {
-                throw new SystemException("cannot create custom plugin dir, " + customPluginDir +
-                                          ", as defined in hq-server.conf");
+        if (customPluginDir.trim().isEmpty()) {
+            File wdParent = new File(System.getProperty("user.dir")).getParentFile();
+            this.customPluginDir = new File(wdParent, PLUGIN_DIR);
+        } else {
+            final File file = new File(customPluginDir);
+            if (!file.exists()) {
+                final boolean success = file.mkdirs();
+                if (!success) {
+                    throw new SystemException("cannot create custom plugin dir, " + customPluginDir +
+                                              ", as defined in hq-server.conf");
+                }
+            } else if (!file.isDirectory()) {
+                throw new SystemException("custom plugin dir, " + customPluginDir +
+                                          ", defined in hq-server.conf is not a directory");
             }
-        } else if (!file.isDirectory()) {
-            throw new SystemException("custom plugin dir, " + customPluginDir +
-                                      ", defined in hq-server.conf is not a directory");
+            this.customPluginDir = file;
         }
-        this.customPluginDir = file;
     }
 
     public File getCustomPluginDir() {
-        if (customPluginDir == null) {
-            File wdParent = new File(System.getProperty("user.dir")).getParentFile();
-            return new File(wdParent, PLUGIN_DIR);
-        }
         return customPluginDir;
     }
 
