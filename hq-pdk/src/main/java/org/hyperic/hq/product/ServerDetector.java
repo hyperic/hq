@@ -1022,6 +1022,17 @@ public abstract class ServerDetector
 
         PluginManager manager = this.ppm.getMeasurementPluginManager();
         mergeConfigDefaults(getName(), manager, config);
+
+        manager = this.ppm.getLogTrackPluginManager();
+        if (manager.getPlugins().get(getName()) != null) {
+            mergeConfigDefaults(getName(), manager, config);
+        }
+
+        manager = this.ppm.getConfigTrackPluginManager();
+        if (manager.getPlugins().get(getName()) != null) {
+            mergeConfigDefaults(getName(), manager, config);
+        }
+
         server.setMeasurementConfig(config);
     }
 
