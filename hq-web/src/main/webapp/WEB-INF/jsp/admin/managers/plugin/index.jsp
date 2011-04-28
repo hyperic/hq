@@ -106,7 +106,7 @@
 	</c:if>
 	
 	<div>
-		<span id="customDirInfo"><fmt:message key="admin.managers.Plugin.title.custom.directory" />${customDir}</span>
+		<span id="customDirInfo"><fmt:message key="admin.managers.Plugin.title.custom.directory" /> ${customDir}</span>
 	</div>
 
 </section>

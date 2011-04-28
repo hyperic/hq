@@ -3,6 +3,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 
 <div id="headerLogo">
 	<a href="<html:rewrite action="/Dashboard" />">
@@ -46,7 +47,7 @@
 			</a>
 		</li>
 		<li>
-			<a id="helpLink" href="http://support.hyperic.com/confluence/display/DOC/" target="_blank" title="<fmt:message key="header.Help" />">
+			<a id="helpLink" href="<hq:help/>" target="_blank" title="<fmt:message key="header.Help" />">
 				<fmt:message key="header.Help" />
 			</a>
 		</li>
