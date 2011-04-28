@@ -12,6 +12,7 @@
 
     <properties>
         <hqapi.version>4.3.0.BUILD-SNAPSHOT</hqapi.version>
+		<surefire.version>2.6</surefire.version>
     </properties>
 
     <dependencies>
@@ -91,6 +92,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <version>${surefire.version}</version>
                 <configuration>
                     <useFile>false</useFile>
                     <includes>
