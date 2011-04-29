@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.hibernate.Hibernate;
+import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.SessionFactory;
 import org.hibernate.type.IntegerType;
@@ -349,15 +350,38 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
         return rtn;
     }
 
-    public Map<String, Long> getFileNameCounts() {
-        final String hql = "select fileName, count(*) from AgentPluginStatus group by fileName";
+    public Map<String, Long> getFileNameCounts(Collection<String> pluginFileNames) {
+        if (pluginFileNames != null && pluginFileNames.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        String where = "";
+        if (pluginFileNames != null) {
+            where = "where fileName in (:filenames)";
+        }
+        final String hql =
+            "select fileName, count(*) from AgentPluginStatus " + where + " group by fileName";
+        final Query query = getSession().createQuery(hql);
+        if (pluginFileNames != null) {
+            query.setParameterList("filenames", pluginFileNames);
+        }
         @SuppressWarnings("unchecked")
-        final List<Object[]> list = getSession().createQuery(hql).list();
+        final List<Object[]> list = query.list();
         final Map<String, Long> rtn = new HashMap<String, Long>(list.size());
         for (final Object[] obj : list) {
             rtn.put((String) obj[0], ((Number) obj[1]).longValue());
         }
         return rtn;
+    }
+
+    public Map<String, Long> getFileNameCounts() {
+        return getFileNameCounts(null);
+    }
+
+    @SuppressWarnings("unchecked")
+    public Collection<Plugin> getOrphanedPlugins() {
+        final String hql =
+            "from Plugin where deleted = '1' and path not in (select fileName from AgentPluginStatus)";
+        return getSession().createQuery(hql).list();
     }
 
 }

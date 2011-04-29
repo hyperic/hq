@@ -64,6 +64,7 @@ import org.hyperic.hq.appdef.server.session.AgentPluginStatusEnum;
 import org.hyperic.hq.appdef.server.session.AgentPluginSyncRestartThrottle;
 import org.hyperic.hq.appdef.shared.AgentPluginUpdater;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
@@ -117,13 +118,16 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
 
     private File customPluginDir;
 
+    private AuthzSubjectManager authzSubjectManager;
+
     @Autowired
     public PluginManagerImpl(PluginDAO pluginDAO, AgentPluginStatusDAO agentPluginStatusDAO,
                              MonitorableTypeDAO monitorableTypeDAO,
                              PermissionManager permissionManager,
                              ResourceManager resourceManager,
                              AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle,
-                             AgentSynchronizer agentSynchronizer) {
+                             AgentSynchronizer agentSynchronizer,
+                             AuthzSubjectManager authzSubjectManager) {
         this.pluginDAO = pluginDAO;
         this.agentPluginStatusDAO = agentPluginStatusDAO;
         this.monitorableTypeDAO = monitorableTypeDAO;
@@ -131,6 +135,7 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         this.agentPluginSyncRestartThrottle = agentPluginSyncRestartThrottle;
         this.agentSynchronizer = agentSynchronizer;
         this.resourceManager = resourceManager;
+        this.authzSubjectManager = authzSubjectManager;
     }
     
     @PostConstruct
@@ -159,8 +164,8 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
             throw new PluginDeployException("plugin.manager.deploy.super.user", e);
         }
         final Collection<Agent> agents = agentPluginStatusDAO.getAutoUpdatingAgents();
-        final Collection<Plugin> plugins = pluginDAO.getPluginsByFileNames(pluginFileNames);
-        removePluginsAndAssociatedResources(subj, plugins);
+        final Map<String, Plugin> pluginMap = getPluginMap(pluginFileNames);
+        removePluginsAndAssociatedResources(subj, new ArrayList<Plugin>(pluginMap.values()));
         final AgentPluginUpdater agentPluginUpdater = Bootstrap.getBean(AgentPluginUpdater.class);
         final Map<Integer, Collection<String>> toRemove = new HashMap<Integer, Collection<String>>(agents.size());
         for (final Agent agent : agents) {
@@ -168,7 +173,42 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         }
         agentPluginUpdater.queuePluginRemoval(toRemove);
         checkCanDeletePluginFiles(pluginFileNames);
+        removePluginsWithoutAssociatedStatuses(pluginFileNames, pluginMap);
         ZeventManager.getInstance().enqueueEventAfterCommit(new PluginFileRemoveZevent(pluginFileNames));
+    }
+
+    @Transactional(readOnly=false, propagation=Propagation.REQUIRES_NEW)
+    public void removeOrphanedPluginsInNewTran() throws PluginDeployException {
+        final Collection<Plugin> plugins = agentPluginStatusDAO.getOrphanedPlugins();
+        final boolean debug = log.isDebugEnabled();
+        final Collection<String> pluginFileNames = new ArrayList<String>(plugins.size());
+        for (final Plugin plugin : plugins) {
+            if (debug) log.debug("removing orphaned plugin " + plugin);
+            pluginFileNames.add(plugin.getPath());
+        }
+        final AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
+        removePlugins(overlord, pluginFileNames);
+    }
+
+    private void removePluginsWithoutAssociatedStatuses(Collection<String> pluginFileNames,
+                                                        Map<String, Plugin> pluginMap) {
+        final Map<String, Long> counts = agentPluginStatusDAO.getFileNameCounts(pluginFileNames);
+        for (final String filename : pluginFileNames) {
+            Long count = counts.get(filename);
+            if (count == null || count <= 0) {
+                final Plugin plugin = pluginMap.get(filename);
+                pluginDAO.remove(plugin);
+            }
+        }
+    }
+
+    private Map<String, Plugin> getPluginMap(Collection<String> pluginFileNames) {
+        final Collection<Plugin> plugins = pluginDAO.getPluginsByFileNames(pluginFileNames);
+        final Map<String, Plugin> rtn = new HashMap<String, Plugin>(plugins.size());
+        for (final Plugin plugin : plugins) {
+            rtn.put(plugin.getPath(), plugin);
+        }
+        return rtn;
     }
 
     private void removePluginsAndAssociatedResources(AuthzSubject subj,

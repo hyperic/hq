@@ -194,4 +194,6 @@ public interface PluginManager {
                                      Map<Integer, Collection<Plugin>> agentToPlugins,
                                      Map<Integer, Collection<String>> agentToFileNames);
 
+    void removeOrphanedPluginsInNewTran() throws PluginDeployException;
+
 }
