@@ -183,7 +183,7 @@ class ResourceCategory {
     static Map getMetricsSummary(Resource r, AuthzSubject user, long begin, long end) {
        def mgr = SessionManager.instance
        def sessionId = mgr.put(user)
-       def aeids = [AppdefUtil.newAppdefEntityId(r)] as AppdefEntityID[]
+       def aeids = [Bootstrap.getBean(AppdefConverter.class).newAppdefEntityId(r)] as AppdefEntityID[]
        return Bootstrap.getBean(MeasurementBoss.class).findMetrics(sessionId,
            aeids,
            MeasurementConstants.FILTER_NONE,
@@ -446,7 +446,7 @@ class ResourceCategory {
     }
 	
 	static Resource getPlatform(Resource r) {
-		def aeid = AppdefUtil.newAppdefEntityId(r)
+		def aeid = Bootstrap.getBean(AppdefConverter.class).newAppdefEntityId(r)
 		def aeval = new AppdefEntityValue(aeid, authzMan.overlordPojo)
 		def plats = aeval.getAssociatedPlatforms(PageControl.PAGE_ALL);
 		def plat = plats[0]

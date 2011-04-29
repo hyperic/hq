@@ -1,6 +1,7 @@
 package org.hyperic.hq.appdef.shared;
 
 import org.hyperic.hq.inventory.data.ResourceDao;
+import org.hyperic.hq.inventory.data.ResourceTypeDao;
 import org.hyperic.hq.inventory.domain.RelationshipTypes;
 import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.inventory.domain.ResourceType;
@@ -12,6 +13,9 @@ public class AppdefConverterImpl implements AppdefConverter {
     
     @Autowired
     private ResourceDao resourceDao;
+    
+    @Autowired
+    private ResourceTypeDao resourceTypeDao;
 
     public AppdefEntityID newAppdefEntityId(Resource rv) {   
         ResourceType resType = rv.getType();
@@ -50,6 +54,10 @@ public class AppdefConverterImpl implements AppdefConverter {
     public AppdefEntityID newAppdefEntityId(Integer resourceId) {
        return newAppdefEntityId(resourceDao.findById(resourceId));
     }
+    
+    public AppdefEntityID newAppdefEntityIdForType(Integer resourceTypeId) {
+        return newAppdefEntityId(resourceTypeDao.findById(resourceTypeId));
+     }
 
     public AppdefEntityID newAppdefEntityId(ResourceType resourceType) {
         return new AppdefEntityID(getAppdefType(resourceType), resourceType.getId());
