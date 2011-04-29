@@ -391,4 +391,14 @@ public interface PlatformManager {
 
     public Number getCpuCount();
 
+    /**
+     * Fetches the {@link Platform} that the {@link Agent} is running on or null if none exists.
+     * Uses PlatformDetector.isSupportedPlatform() to determine if the agent can run on the platform
+     * if the agent has multiple associated platforms.
+     * @param agentId
+     * @return {@link Platform} associated with the agentId, may return null.
+     * @see PlatformDetector#isSupportedPlatform(String)
+     */
+    public Platform getPlatformByAgentId(Integer agentId);
+
 }
