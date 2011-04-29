@@ -46,7 +46,6 @@ import org.hyperic.hq.bizapp.client.StaticProviderFetcher;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.operation.RegisterAgentResponse;
 import org.hyperic.sigar.*;
-import org.hyperic.util.StringUtil;
 import org.hyperic.util.security.SecurityUtil;
 import org.tanukisoftware.wrapper.WrapperManager;
 import sun.misc.Signal;
@@ -1356,16 +1355,5 @@ public class AgentClient {
         
         return true;
     }
-
-    /**
-     * @param s A string that might contain unix-style classpath separators.
-     * @return The correct path for this platform (i.e, if win32, replace : with ;).
-     */
-    private static String normalizeClassPath(String s) {
-        return StringUtil.replace(s, ":", File.pathSeparator);
-    }
-
-    public AgentConfig getAgentConfig() {
-        return config;
-    }
+ 
 }
