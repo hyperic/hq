@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
+
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
@@ -67,7 +67,7 @@ public class PluginManagerController extends BaseController implements Applicati
     }
     
     @RequestMapping(method = RequestMethod.GET)
-    public String index(Model model,HttpServletRequest request) {
+    public String index(Model model) {
         model.addAttribute("pluginSummaries", getPluginSummaries());
         model.addAttribute("info",getAgentInfo());
         model.addAttribute("mechanismOn", pluginManager.isPluginSyncEnabled());
@@ -77,7 +77,7 @@ public class PluginManagerController extends BaseController implements Applicati
             model.addAttribute("instruction", "admin.managers.plugin.mechanism.off");
         }
         model.addAttribute("customDir", pluginManager.getCustomPluginDir().getAbsolutePath());
-        request.setAttribute(KeyConstants.PAGE_TITLE_KEY, HELP_PAGE_MAIN);
+        model.addAttribute(KeyConstants.PAGE_TITLE_KEY, HELP_PAGE_MAIN);
         return "admin/managers/plugin";
     }
     
@@ -155,14 +155,16 @@ public class PluginManagerController extends BaseController implements Applicati
         int agentErrorCount=0;
         List<Agent> allAgents = agentManager.getAgents();
         
-        for(Agent agent:allAgents){
-            Collection<AgentPluginStatus> pluginStatus = agent.getPluginStatuses(); 
-            
-            for(AgentPluginStatus status:pluginStatus){
-                AgentPluginStatusEnum e =AgentPluginStatusEnum.valueOf(status.getLastSyncStatus());
-                if(e==AgentPluginStatusEnum.SYNC_FAILURE){
-                    agentErrorCount++;
-                    break;
+        if(allAgents!=null){
+            for(Agent agent:allAgents){
+                Collection<AgentPluginStatus> pluginStatus = agent.getPluginStatuses(); 
+                
+                for(AgentPluginStatus status:pluginStatus){
+                    AgentPluginStatusEnum e =AgentPluginStatusEnum.valueOf(status.getLastSyncStatus());
+                    if(e==AgentPluginStatusEnum.SYNC_FAILURE){
+                        agentErrorCount++;
+                        break;
+                    }
                 }
             }
         }
