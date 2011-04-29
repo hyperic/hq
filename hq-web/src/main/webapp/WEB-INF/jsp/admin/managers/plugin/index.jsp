@@ -19,11 +19,11 @@
 	</div>
 
 	<div class="topInfo">
-		<c:if test="${info.agentErrorCount>0}">
-		    <span id="agentFailure" style="float:right">
+		<span id="agentFailure" style="float:right">
+		    <c:if test="${info.agentErrorCount>0}">
 		      (${info.agentErrorCount} <img src="<spring:url value="/static/images/icon_available_red.gif"/>"/>)
-		    </span>
-		</c:if>
+			</c:if>    
+		</span>
 		<span id="agentInfo" style="float:right">
 			<fmt:message key="admin.managers.Plugin.information.agent.count"/>:
 		    <span id="agentInfoAllCount">${info.allAgentCount}</span>&nbsp;&nbsp;
