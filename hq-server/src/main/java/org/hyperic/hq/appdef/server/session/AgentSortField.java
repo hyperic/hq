@@ -43,8 +43,8 @@ public abstract class AgentSortField
             return true;
         }
 
-        public String getSortString(String agent) {
-            return agent + ".address";
+        public String getSortString() {
+            return "address";
         }
     };
     
@@ -55,8 +55,8 @@ public abstract class AgentSortField
             return true;
         }
 
-        public String getSortString(String agent) {
-            return agent + ".port";
+        public String getSortString() {
+            return "port";
         }
     };
     
@@ -67,8 +67,8 @@ public abstract class AgentSortField
             return true;
         }
 
-        public String getSortString(String agent) {
-            return agent + ".version";
+        public String getSortString() {
+            return "agentVersion";
         }
     };
 
@@ -79,8 +79,8 @@ public abstract class AgentSortField
             return true;
         }
 
-        public String getSortString(String agent) {
-            return agent + ".creationTime";
+        public String getSortString() {
+            return "creationTime";
         }
     };
     
@@ -88,9 +88,6 @@ public abstract class AgentSortField
         super(AgentSortField.class, code, desc, localeProp,
               ResourceBundle.getBundle(BUNDLE));
     }
-    
-    public abstract String getSortString(String agent);
-    
     public static AgentSortField findByCode(int code) {
         return (AgentSortField)
             HypericEnum.findByCode(AgentSortField.class, code); 

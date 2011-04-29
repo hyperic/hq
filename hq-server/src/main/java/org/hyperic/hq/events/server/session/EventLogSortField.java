@@ -36,17 +36,7 @@ public abstract class EventLogSortField
 {
     private static final String BUNDLE = "org.hyperic.hq.events.Resources";
     
-    public static final EventLogSortField RESOURCE = 
-        new EventLogSortField(0, "Resource", "eventLog.sortField.resource")  
-    {
-        public boolean isSortable() {
-            return false;
-        }
-
-        String getSortString(String resource, String eventLog) {
-            return resource + ".name";
-        }
-    };
+   
     
     public static final EventLogSortField DATE =  
         new EventLogSortField(1, "Date", "eventLog.sortField.date")  
@@ -55,8 +45,8 @@ public abstract class EventLogSortField
             return true;
         }
 
-        String getSortString(String resource, String eventLog) {
-            return eventLog + ".timestamp";
+        public String getSortString() {
+            return "timestamp";
         }
     };
     
@@ -67,8 +57,8 @@ public abstract class EventLogSortField
             return false;
         }
 
-        String getSortString(String resource, String eventLog) {
-            return eventLog + ".status";
+        public String getSortString() {
+            return "status";
         }
     };
 
@@ -79,8 +69,8 @@ public abstract class EventLogSortField
             return false;
         }
 
-        String getSortString(String resource, String eventLog) {
-            return eventLog + ".subject";
+        public String getSortString() {
+            return "subject";
         }
     };
 
@@ -91,8 +81,8 @@ public abstract class EventLogSortField
             return false;
         }
 
-        String getSortString(String resource, String eventLog) {
-            return eventLog + ".type";
+        public String getSortString() {
+            return "type";
         }
     };
 
@@ -103,8 +93,8 @@ public abstract class EventLogSortField
             return false;
         }
 
-        String getSortString(String resource, String eventLog) {
-            return eventLog + ".detail";
+        public String getSortString() {
+            return "detail";
         }
     };
 
@@ -113,8 +103,7 @@ public abstract class EventLogSortField
         super(EventLogSortField.class, code, desc, localeProp,
               ResourceBundle.getBundle(BUNDLE));
     }
-    
-    abstract String getSortString(String resource, String eventLog);
+   
     
     public static EventLogSortField findByCode(int code) {
         return (EventLogSortField)

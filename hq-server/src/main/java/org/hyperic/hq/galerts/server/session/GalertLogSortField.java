@@ -39,8 +39,8 @@ public abstract class GalertLogSortField
     public static final GalertLogSortField DATE = 
         new GalertLogSortField(0, "Date", "galert.sortField.date") 
     {
-        String getSortString(String alert, String def, String group) {
-            return alert + ".timestamp";
+        public String getSortString() {
+            return "timestamp";
         }
 
         public boolean isSortable() {
@@ -51,8 +51,8 @@ public abstract class GalertLogSortField
     public static final GalertLogSortField DEFINITION = 
         new GalertLogSortField(1, "Definition", "galert.sortField.def") 
     {
-        String getSortString(String alert, String def, String group) {
-            return def + ".name";
+        public String getSortString() {
+            return "def.name";
         }
 
         public boolean isSortable() {
@@ -60,23 +60,13 @@ public abstract class GalertLogSortField
         }
     };
     
-    public static final GalertLogSortField GROUP = 
-        new GalertLogSortField(2, "Group", "galert.sortField.group")
-    {
-        String getSortString(String alert, String def, String group) {
-            return group + ".name";
-        }
-
-        public boolean isSortable() {
-            return true;
-        }
-    };
+   
     
     public static final GalertLogSortField FIXED = 
         new GalertLogSortField(3, "Fixed", "galert.sortField.fixed")
     {
-        String getSortString(String alert, String def, String group) {
-            return alert + ".fixed";
+        public String getSortString() {
+            return "fixed";
         }
 
         public boolean isSortable() {
@@ -84,46 +74,17 @@ public abstract class GalertLogSortField
         }
     };
     
-    public static final GalertLogSortField ACKED_BY = 
-        new GalertLogSortField(4, "AckedBy", "galert.sortField.ackedBy") 
-    {
-        String getSortString(String alert, String def, String group) {
-            return alert + ".ackedBy";
-        }
-
-        /**
-         * AckedBy is unsortable, since it would just sort by the integer
-         * of the user who acknowledged it.  Instead, we'd like to sort on
-         * their name or something textual which makes sense.  Until we have
-         * a real relationship between alerts and authzsubjects, this will
-         * need to remain unsortable.
-         */
-        public boolean isSortable() {
-            return false;
-        }
-    };
+    
     
     public static final GalertLogSortField SEVERITY = 
         new GalertLogSortField(5, "Severity", "galert.sortField.severity")
     {
-        String getSortString(String alert, String def, String group) {
-            return def + ".severityEnum";
+        public String getSortString() {
+            return "def.severity";
         }
 
         public boolean isSortable() {
             return true;
-        }
-    };
-
-    public static final GalertLogSortField ACTION_TYPE = 
-        new GalertLogSortField(6, "ActionType", "galert.sortField.actionType") 
-    {
-        String getSortString(String alert, String def, String group) {
-            return def + ".actionType";
-        }
-
-        public boolean isSortable() {
-            return false;
         }
     };
     
@@ -131,11 +92,7 @@ public abstract class GalertLogSortField
         super(GalertLogSortField.class, code, desc, localeProp,
               ResourceBundle.getBundle(BUNDLE));
     }
-    
-    /**
-     * Returns HQL which can be used to tack onto an HQL query, to sort
-     */
-    abstract String getSortString(String alert, String def, String group);
+   
     
     public static GalertLogSortField findByCode(int code) {
         return (GalertLogSortField)

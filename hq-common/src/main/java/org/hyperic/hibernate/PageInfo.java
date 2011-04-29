@@ -26,7 +26,13 @@
 package org.hyperic.hibernate;
 
 
+
+
 import org.hyperic.util.pager.PageControl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 
 /**
  * A paging class
@@ -38,6 +44,7 @@ public class PageInfo {
     private int       _pageSize;
     private SortField _sort;
     private boolean   _ascending;
+    private boolean _isAll;
     
     private PageInfo(int pageNum, int pageSize, SortField sort,
                      boolean ascending) 
@@ -46,7 +53,15 @@ public class PageInfo {
         _pageSize  = pageSize;
         _sort      = sort;
         _ascending = ascending; 
+        _isAll = false;
     }
+    
+    private PageInfo(SortField sort, boolean ascending) {
+        _isAll     = true;
+        _sort      = sort;
+        _ascending = ascending;
+    }
+
     
     
     /**
@@ -80,8 +95,6 @@ public class PageInfo {
     public boolean isAscending() {
         return _ascending;
     }
-    
-    
   
     public static PageInfo create(int pageNum, int pageSize, SortField sort,
                                   boolean ascending) 
@@ -94,4 +107,26 @@ public class PageInfo {
         return new PageInfo(pc.getPagenum(), pc.getPagesize(),
                                 sort, pc.isAscending());
     }
+    
+    /**
+     * Returns a page control which will return all elements (not paged)
+     */
+    public static PageInfo getAll(SortField sort, boolean ascending) {
+        return new PageInfo(sort, ascending);
+    }
+    
+    public Pageable toPageable() {
+        if(_isAll) {
+            return null;
+        }
+        return new PageRequest(getPageNum(), getPageSize(),toSort());
+    }
+    
+    public Sort toSort() {
+        if(getSort() != null) {
+            return new Sort(isAscending() ? Direction.ASC : Direction.DESC,getSort().getSortString());
+        }
+        return null;
+    }
+
 }

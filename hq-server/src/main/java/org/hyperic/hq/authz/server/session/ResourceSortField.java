@@ -39,8 +39,8 @@ public abstract class ResourceSortField
     public static final ResourceSortField NAME = 
         new ResourceSortField(0, "Name", "resource.sortField.name") 
     {
-        String getSortString(String resource) {
-            return resource + ".name";
+        public String getSortString() {
+            return "name";
         }
 
         public boolean isSortable() {
@@ -53,10 +53,7 @@ public abstract class ResourceSortField
               ResourceBundle.getBundle(BUNDLE));
     }
     
-    /**
-     * Returns HQL which can be used to tack onto an HQL query, to sort
-     */
-    abstract String getSortString(String resource);
+   
     
     public static ResourceSortField findByCode(int code) {
         return (ResourceSortField)

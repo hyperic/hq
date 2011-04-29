@@ -72,6 +72,13 @@ public abstract class DownResSortField
                 
             };
         }
+
+        public String getSortString() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+        
+        
     };
     
     public static final DownResSortField TYPE = 
@@ -105,6 +112,13 @@ public abstract class DownResSortField
                 
             };
         }
+
+        public String getSortString() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+        
+        
     };
     
     public static final DownResSortField SINCE = 
@@ -136,6 +150,13 @@ public abstract class DownResSortField
                 
             };
         }
+
+        public String getSortString() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+        
+        
     };
     
     public static final DownResSortField DOWNTIME = 
@@ -167,6 +188,13 @@ public abstract class DownResSortField
                 
             };
         }
+
+        public String getSortString() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+        
+        
     };
     
     public static final DownResSortField ALERTS = 
@@ -179,6 +207,12 @@ public abstract class DownResSortField
         public Comparator getComparator(boolean asc) {
             return null;
         }
+
+        public String getSortString() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+        
     };
     
     private DownResSortField(int code, String desc, String localeProp) {
