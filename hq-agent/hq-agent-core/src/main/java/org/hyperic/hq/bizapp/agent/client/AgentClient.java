@@ -39,7 +39,10 @@ import org.hyperic.hq.agent.server.LoggingOutputStream;
 import org.hyperic.hq.bizapp.agent.ProviderInfo;
 import org.hyperic.hq.bizapp.agent.commands.CreateToken_args;
 import org.hyperic.hq.bizapp.agent.commands.CreateToken_result;
-import org.hyperic.hq.bizapp.client.*;
+import org.hyperic.hq.bizapp.client.AgentCallbackClient;
+import org.hyperic.hq.bizapp.client.AgentCallbackClientException;
+import org.hyperic.hq.bizapp.client.BizappCallbackClient;
+import org.hyperic.hq.bizapp.client.StaticProviderFetcher;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.operation.RegisterAgentResponse;
 import org.hyperic.sigar.*;
@@ -52,6 +55,8 @@ import sun.misc.SignalHandler;
 import java.io.*;
 import java.net.*;
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 /**
@@ -107,7 +112,10 @@ public class AgentClient {
     private boolean             nuking;
     private boolean             redirectedOutputs = false;
 
+    private static ExecutorService executor;
+
     public AgentClient(AgentConfig config, SecureAgentConnection conn){
+        executor = Executors.newSingleThreadExecutor();
         //this.agtCommands = null;//new AmqpCommandOperationService(new LegacyAgentCommandsClientImpl(conn));
         this.agtCommands = new LegacyAgentCommandsClientImpl(conn);
         this.camCommands = new CommandsClient(conn);
@@ -200,9 +208,7 @@ public class AgentClient {
         
     }
 
-    private void cmdDie(int waitTime)
-        throws AgentConnectionException, AgentRemoteException
-    {
+    private void cmdDie(int waitTime) throws AgentConnectionException, AgentRemoteException {
         try {
             this.agtCommands.die();
         } catch(AgentConnectionException exc){
@@ -390,10 +396,7 @@ public class AgentClient {
     /**
      * Test the connection information.
      */
-    private BizappCallbackClient         getConnection(String provider,
-                                               boolean secure)
-        throws AutoQuestionException, AgentCallbackClientException
-    {
+    private BizappCallbackClient getConnection(String provider, boolean secure) throws AutoQuestionException, AgentCallbackClientException {
         BizappCallbackClient bizapp;
         Properties bootP = this.config.getBootProperties();
         long start = System.currentTimeMillis();
@@ -517,7 +520,7 @@ public class AgentClient {
         throws AgentConnectionException, AgentRemoteException, IOException,
                AutoQuestionException
     {
-        log.info(".cmdSetup()**********");
+       
         BizappCallbackClient bizapp;
         InetAddress localHost;
         CreateToken_result tokenRes;
@@ -570,8 +573,7 @@ public class AgentClient {
         while(true){
             host = this.askQuestion("What is the " + PRODUCT +
                                     " server IP address",
-                                    null, QPROP_IPADDR);
-            System.out.println("host="+host);            
+                                    null, QPROP_IPADDR);          
             secure = askYesNoQuestion("Should Agent communications " +
                                       "to " + PRODUCT + " always " +
                                       "be secure", 
@@ -632,7 +634,7 @@ public class AgentClient {
                         AgentCallbackClient.getDefaultProviderURL(host,
                                                         unidirectionalPort,
                                                         true);
-                    log.info("*********testing connectivity to the unidirectional and lather servlet container: unidirectionalProvider=" +
+                    log.info("testing connectivity to the unidirectional and lather servlet container: unidirectionalProvider=" +
                                  unidirectionalProvider);
                     try {
                         getConnection(unidirectionalProvider, true);
@@ -655,7 +657,6 @@ public class AgentClient {
                                      QPROP_PWORD);
             try {
                 if(bizapp.userIsValid(user, pword)) {
-                    log.info("*********testing whether use is valid=" + true);
                     break;
                 }
             } catch(AgentCallbackClientException exc){
@@ -1037,15 +1038,14 @@ public class AgentClient {
         } catch (AgentConfigException e) {
             throw new AgentInvokeException("Invalid notify up port: "+startupSock.getLocalPort());
         }
-                
-        Thread t = new Thread(new AgentDaemon.RunnableAgent(this.config));
-        t.start();
+                 
+        executor.execute(new AgentDaemon.RunnableAgent(config));
+
         SYSTEM_OUT.println("- Agent thread running");
 
-        /* Now comes the painful task of figuring out if the agent
-           started correctly. */
+        /* Now comes the painful task of figuring out if the agent started correctly. */
         SYSTEM_OUT.println("- Verifying if agent is running...");
-        log.info("*************Calling verifyAgentRunning()");
+
         this.verifyAgentRunning(startupSock);
         SYSTEM_OUT.println("- Agent is running");            
 
@@ -1282,7 +1282,8 @@ public class AgentClient {
                 }
                 SYSTEM_OUT.println("Stopping agent ... ");
                 try {
-                    client.cmdDie(nWait); 
+                    client.cmdDie(nWait);
+                    executor.shutdown();
                     SYSTEM_OUT.println("Success -- agent is stopped!");
                 } catch(Exception exc){
                     SYSTEM_OUT.println("Failed to stop agent: " +
