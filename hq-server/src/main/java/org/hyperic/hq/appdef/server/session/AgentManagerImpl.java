@@ -80,6 +80,7 @@ import org.hyperic.hq.common.shared.TransactionRetry;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.product.server.session.PluginDAO;
+import org.hyperic.hq.product.shared.PluginDeployException;
 import org.hyperic.hq.product.shared.PluginManager;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.hq.zevents.Zevent;
@@ -90,6 +91,7 @@ import org.hyperic.hq.zevents.ZeventSourceId;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.security.MD5;
+import org.omg.CORBA.CTX_RESTRICT_SCOPE;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -1349,11 +1351,12 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
             return true;
         }
         final long lastCheckin = agent.getLastPluginInventoryCheckin();
+        final long startupTime = applicationContext.getStartupDate();
         final long maxModTime = pluginDAO.getMaxModTime();
         if (agent.getPluginInventoryChecksum().equals(pluginInventoryChecksum)) {
             // this means plugins haven't changed since the agent last checked in its plugin
             // inventory.  therefore don't restart the agent since nothing appears to have changed
-            if (lastCheckin > maxModTime) {
+            if (lastCheckin > maxModTime && lastCheckin > startupTime) {
                 return false;
             }
         }
@@ -1558,6 +1561,11 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                       " and " + removeMap.size() + " remove(s)");
         }
         agentPluginUpdater.queuePluginTransfer(updateMap, removeMap);
+        try {
+            pluginManager.removeOrphanedPluginsInNewTran();
+        } catch (PluginDeployException e) {
+            log.error(e,e);
+        }
     }
 
     private void setPluginsNotOnAgents(Map<Integer, Collection<Plugin>> updateMap) {
