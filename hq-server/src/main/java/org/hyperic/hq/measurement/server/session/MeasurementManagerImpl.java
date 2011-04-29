@@ -1319,8 +1319,8 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     private String[] getTemplatesToCheck(AuthzSubject s, AppdefEntityID id)
         throws AppdefEntityNotFoundException, PermissionException {
         String mType = (new AppdefEntityValue(id, s)).getMonitorableType();
-        List<MeasurementTemplate> templates = measurementTemplateRepository.findByMonitorableTypeDefaultOn(
-            mType);
+        List<MeasurementTemplate> templates = measurementTemplateRepository.findByMonitorableTypeAndDefaultOn(
+            mType,true);
         List<String> dsnList = new ArrayList<String>(SAMPLE_SIZE);
         int idx = 0;
         int availIdx = -1;

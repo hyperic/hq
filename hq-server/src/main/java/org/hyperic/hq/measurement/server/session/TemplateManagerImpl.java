@@ -37,11 +37,13 @@ import java.util.Map;
 
 import javax.persistence.EntityNotFoundException;
 
+import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
+import org.hyperic.hq.events.server.session.AlertDefSortField;
 import org.hyperic.hq.inventory.domain.ResourceType;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
@@ -58,6 +60,10 @@ import org.hyperic.util.StringUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -133,7 +139,62 @@ public class TemplateManagerImpl implements TemplateManager {
         return mts;
     }
 
+    /**
+     * Get all the templates. Must be superuser to execute.
+     * 
+     * @param pInfo must contain a sort field of type
+     *        {@link MeasurementTemplateSortField}
+     * @param defaultOn return templates with defaultOn ==
+     *        defaultOn
+     * 
+     * @return a list of {@link MeasurementTemplate}s
+     */
+    @Transactional(readOnly = true)
+    public List<MeasurementTemplate> findTemplates(AuthzSubject user, PageInfo pInfo,
+                                                   boolean defaultOn) throws PermissionException {
+        assertSuperUser(user);
+        Pageable request = pInfo.toPageable();
+        if(request == null) {
+                return  measurementTemplateRepository.findByDefaultOn(defaultOn, pInfo.toSort());
+        }
+        return measurementTemplateRepository.findByDefaultOn(defaultOn, request).getContent();
+    }
     
+  
+
+    /**
+     * Get all templates for a given MonitorableType
+     * 
+     * @param pInfo must contain a sort field of type
+     *        {@link MeasurementTemplateSortField}
+     * @param defaultOn If non-null, return templates with defaultOn ==
+     *        defaultOn
+     * 
+     * @return a list of {@link MeasurementTemplate}s
+     */
+    @Transactional(readOnly = true)
+    public List<MeasurementTemplate> findTemplatesByMonitorableType(AuthzSubject user,
+                                                                    PageInfo pInfo, String type,
+                                                                    boolean defaultOn)
+        throws PermissionException {
+        assertSuperUser(user);
+        Pageable request = pInfo.toPageable();
+        if(request == null) {
+            return measurementTemplateRepository.findByMonitorableTypeAndDefaultOn(type, defaultOn,pInfo.toSort());
+        }
+        return measurementTemplateRepository.findByMonitorableTypeAndDefaultOn(type, defaultOn,request).getContent();
+    }
+
+    @Transactional(readOnly = true)
+    public List<MeasurementTemplate> findTemplatesByMonitorableType(AuthzSubject user,PageInfo pInfo, String type)
+        throws PermissionException {
+        assertSuperUser(user);
+        Pageable request = pInfo.toPageable();
+        if(request == null) {
+            return measurementTemplateRepository.findByMonitorableType(type, pInfo.toSort());
+        }
+        return measurementTemplateRepository.findByMonitorableType(type, request).getContent();
+    }
 
     /**
      * Get all templates for a given MonitorableType

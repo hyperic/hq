@@ -23,6 +23,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -131,10 +134,70 @@ public class MeasurementTemplateRepositoryIntegrationTest {
             "service:queueFailures", type2, category, "tomcat");
         measurementTemplateRepository.save(mt4);
         List<MeasurementTemplate> expected = new ArrayList<MeasurementTemplate>();
-        expected.add(mt2);
         expected.add(mt4);
+        expected.add(mt2);
         assertEquals(expected,
-            measurementTemplateRepository.findByMonitorableTypeDefaultOn("JBoss Server"));
+            measurementTemplateRepository.findByMonitorableTypeAndDefaultOn("JBoss Server",true, new Sort("name")));
+    }
+    
+    @Test
+    public void testFindByDefaultOn() {
+        MeasurementTemplate mt1 = new MeasurementTemplate("Queue Size", "queueSize", "messages",
+            MeasurementConstants.COLL_TYPE_DYNAMIC, true, 1234, true, "service:queueSize", type,
+            category, "tomcat");
+        measurementTemplateRepository.save(mt1);
+        MonitorableType type2 = new MonitorableType("JBoss Server", "jboss");
+        entityManager.persist(type2);
+        MeasurementTemplate mt2 = new MeasurementTemplate("Queue Failures", "queueFailures",
+            "messages", MeasurementConstants.COLL_TYPE_DYNAMIC, true, 1234, true,
+            "service:queueFailures", type2, category, "tomcat");
+        measurementTemplateRepository.save(mt2);
+        MeasurementTemplate mt3 = new MeasurementTemplate("Message Throughput", "msgThroughput",
+            "messages", MeasurementConstants.COLL_TYPE_DYNAMIC, false, 1234, true,
+            "service:queueFailures", type2, category, "tomcat");
+        measurementTemplateRepository.save(mt3);
+        Category category2 = new Category("Atlas");
+        entityManager.persist(category2);
+        MeasurementTemplate mt4 = new MeasurementTemplate("Message Size", "messageSize",
+            "messages", MeasurementConstants.COLL_TYPE_DYNAMIC, true, 1234, true,
+            "service:queueFailures", type2, category2, "tomcat");
+        measurementTemplateRepository.save(mt4);
+        PageRequest request = new PageRequest(0, 2, new Sort("name"));
+        List<MeasurementTemplate> expected = new ArrayList<MeasurementTemplate>();
+        expected.add(mt4);
+        expected.add(mt2);
+        assertEquals(new PageImpl<MeasurementTemplate>(expected,request,3),
+            measurementTemplateRepository.findByDefaultOn(true, request));
+    }
+    
+    @Test
+    public void testFindByDefaultOnSort() {
+        MeasurementTemplate mt1 = new MeasurementTemplate("Queue Size", "queueSize", "messages",
+            MeasurementConstants.COLL_TYPE_DYNAMIC, true, 1234, true, "service:queueSize", type,
+            category, "tomcat");
+        measurementTemplateRepository.save(mt1);
+        MonitorableType type2 = new MonitorableType("JBoss Server", "jboss");
+        entityManager.persist(type2);
+        MeasurementTemplate mt2 = new MeasurementTemplate("Queue Failures", "queueFailures",
+            "messages", MeasurementConstants.COLL_TYPE_DYNAMIC, true, 1234, true,
+            "service:queueFailures", type2, category, "tomcat");
+        measurementTemplateRepository.save(mt2);
+        MeasurementTemplate mt3 = new MeasurementTemplate("Message Throughput", "msgThroughput",
+            "messages", MeasurementConstants.COLL_TYPE_DYNAMIC, false, 1234, true,
+            "service:queueFailures", type2, category, "tomcat");
+        measurementTemplateRepository.save(mt3);
+        Category category2 = new Category("Atlas");
+        entityManager.persist(category2);
+        MeasurementTemplate mt4 = new MeasurementTemplate("Message Size", "messageSize",
+            "messages", MeasurementConstants.COLL_TYPE_DYNAMIC, true, 1234, true,
+            "service:queueFailures", type2, category2, "tomcat");
+        measurementTemplateRepository.save(mt4);
+        List<MeasurementTemplate> expected = new ArrayList<MeasurementTemplate>();
+        expected.add(mt4);
+        expected.add(mt2);
+        expected.add(mt1);
+        assertEquals(expected,
+            measurementTemplateRepository.findByDefaultOn(true, new Sort("name")));
     }
 
     @Test
