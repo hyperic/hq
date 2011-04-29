@@ -1,9 +1,3 @@
-var _qualifyURL = function (url) {
-	var a = document.createElement('img');
-    a.src = url;
-    return a.src;
-};
-
 //INIT
 var SimileAjax = {
 	loaded:                 true,
@@ -12,7 +6,7 @@ var SimileAjax = {
 	params:                 { bundle:"true" }
 };
 SimileAjax.Platform = new Object();
-SimileAjax.urlPrefix = _qualifyURL('/');
+SimileAjax.urlPrefix = '/';
 //SIMILE AJAX - LOAD ORDER 1 of 3
 
 
