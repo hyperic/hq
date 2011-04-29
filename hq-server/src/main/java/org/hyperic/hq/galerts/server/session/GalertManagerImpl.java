@@ -78,6 +78,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
@@ -463,7 +464,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
         throws PermissionException {
       
         PageRequest request = new PageRequest(0, count,new Sort(Direction.DESC,
-            GalertLogSortField.DATE.getSortString("a", "d", "g")));
+            GalertLogSortField.DATE.getSortString()));
 
         if (priority == EventConstants.PRIORITY_ALL) {
             // if priority is "all" set the severity code as low
@@ -517,15 +518,16 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
     public List<GalertLog> findAlerts(AuthzSubject subj, AlertSeverity severity, long timeRange,
                                       long endTime, boolean inEsc, boolean notFixed,
                                       Integer groupId, Integer galertDefId, PageInfo pInfo) {
-        GalertLogSortField sort = (GalertLogSortField) pInfo.getSort();
-       
-        List<Sort.Order> sortOrders =  new ArrayList<Sort.Order>();
-        sortOrders.add(new Sort.Order(pInfo.isAscending() ? Direction.ASC : Direction.DESC, sort.getSortString("a", "d", "g")));
-        if (!sort.equals(GalertLogSortField.DATE)) {
-            sortOrders.add(new Sort.Order(Direction.DESC, GalertLogSortField.DATE.getSortString("a", "d", "g")));
+        Pageable request = pInfo.toPageable();
+        if(request.getSort().getOrderFor(GalertLogSortField.DATE.getSortString()) == null) {
+            //Always sort by desc date last
+            List<Sort.Order> newSortOrders =  new ArrayList<Sort.Order>();
+            for(Sort.Order order: request.getSort()) {
+                newSortOrders.add(order);
+            }
+            newSortOrders.add(new Sort.Order(Direction.DESC, GalertLogSortField.DATE.getSortString()));
+            request = new PageRequest(request.getPageNumber(),request.getPageSize(),new Sort(newSortOrders));
         }
-        PageRequest request = new PageRequest(pInfo.getPageNum(), pInfo.getPageSize(),new Sort(sortOrders));
-       
         return gAlertLogRepository.findByCreateTimeAndPriority(endTime - timeRange, endTime,
             severity, inEsc, notFixed, groupId, galertDefId, request).getContent();
     }
