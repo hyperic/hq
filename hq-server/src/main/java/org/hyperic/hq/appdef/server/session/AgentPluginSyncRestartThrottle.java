@@ -171,7 +171,7 @@ public class AgentPluginSyncRestartThrottle {
         }
     }
 
-    private int getNumRecords(boolean invalidate) {
+    private int getNumRecords(final boolean invalidate) {
         final long now = System.currentTimeMillis();
         int rtn = 0;
         final Set<Integer> restartFailures = new HashSet<Integer>();
@@ -179,11 +179,12 @@ public class AgentPluginSyncRestartThrottle {
             final Iterator<Entry<Integer, Long>> it=agentRestartTimestampMap.entrySet().iterator();
             while (it.hasNext()) {
                 final Entry<Integer, Long> entry = it.next();
+                final Integer agentId = entry.getKey();
                 final Long timestamp = entry.getValue();
                 if ((now - timestamp) >= RECORD_TIMEOUT) {
                     if (invalidate) {
-                        restartFailures.add(entry.getKey());
-	                    it.remove();
+                        restartFailures.add(agentId);
+                        it.remove();
                     }
                     continue;
                 }
