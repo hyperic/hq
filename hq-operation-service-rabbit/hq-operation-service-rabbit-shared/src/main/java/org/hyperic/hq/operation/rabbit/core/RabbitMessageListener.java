@@ -95,7 +95,6 @@ public class RabbitMessageListener {
         try {
             synchronized (monitor) {
                 running = true;
-                //monitor.notifyAll();
             }
 
             if (sharedConnection == null) {
@@ -169,8 +168,7 @@ public class RabbitMessageListener {
         if (!this.isRunning()) return;
 
 		synchronized (monitor) {
-			running = false;
-			monitor.notifyAll();
+			running = false; 
 		}
 
         try {
