@@ -3445,7 +3445,7 @@ window.Timeline = new Object();
 window.Timeline.DateTime = window.SimileAjax.DateTime
 Timeline.serverLocale = "en";
 Timeline.clientLocale = "en";
-Timeline.urlPrefix = _qualifyURL('/');
+Timeline.urlPrefix = '/';
 
 /* decorators.js */
 Timeline.SpanHighlightDecorator=function(A){this._unit=("unit" in A)?A.unit:SimileAjax.NativeDateUnit;
