@@ -70,6 +70,9 @@ public interface AlertDefinitionManager {
     
     SortedMap<String, Integer> findResourceTypeAlertDefinitionNames(AuthzSubject subj, 
         Integer resourceType) throws PermissionException;
+    
+    
+    ResourceTypeAlertDefinition getTypeDefByIdAndCheck(AuthzSubject subj, Integer id) throws PermissionException;
     /**
      * Update just the basics
      * @throws PermissionException
@@ -169,6 +172,8 @@ public interface AlertDefinitionManager {
      * @param id The alert def
      */
     public AlertDefinition getByIdNoCheck(Integer id);
+    
+    AlertDefinition getTypeDefByIdNoCheck(Integer id);
 
     
     public ResourceTypeAlertDefinition findResourceTypeAlertDefinitionById(Integer id);

@@ -1252,6 +1252,27 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
         }
         return ad;
     }
+    
+    /**
+     * Find an alert definition
+     * @throws PermissionException if user does not have permission to manage
+     *         alerts
+     */
+    @Transactional(readOnly=true)
+    public ResourceTypeAlertDefinition getTypeDefByIdAndCheck(AuthzSubject subj, Integer id) throws PermissionException {
+        ResourceTypeAlertDefinition ad = resTypeAlertDefRepository.findOne(id);
+        if (ad != null) {
+            if (ad.isDeleted()) {
+                ad = null;
+            }
+            if (ad != null) {
+                // ...check that user has view permission on alert definitions...
+                //TODO perm check
+                //alertPermissionManager.canViewAlertDefinition(subj, ad.getAppdefEntityId());
+            }
+        }
+        return ad;
+    }
 
     /**
      * Find an alert definition and return a basic value. This is called by the
@@ -1262,6 +1283,11 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
     @Transactional(readOnly=true)
     public AlertDefinition getByIdNoCheck(Integer id) {
         return resAlertDefRepository.findOne(id);
+    }
+    
+    @Transactional(readOnly=true)
+    public AlertDefinition getTypeDefByIdNoCheck(Integer id) {
+        return resTypeAlertDefRepository.findOne(id);
     }
     
     
@@ -1388,7 +1414,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
             throw new PermissionException("Only administrators can do this");
         }
         AlertDefSortField sortField = (AlertDefSortField)pInfo.getSort();
-        String sort = sortField.getSortString("d", "r");
+        String sort = sortField.getSortString();
         List<Sort.Order> orders = new ArrayList<Sort.Order>();
         Sort.Order order1 = new Sort.Order(pInfo.isAscending() ? Direction.ASC : Direction.DESC,sort);
         orders.add(order1);

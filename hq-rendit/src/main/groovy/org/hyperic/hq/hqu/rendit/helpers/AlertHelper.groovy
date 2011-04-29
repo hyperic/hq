@@ -189,10 +189,7 @@ class AlertHelper extends BaseHelper {
      * found or has been deleted.
      */
     def getById(Integer id) {
-        def definition = defMan.getByIdAndCheck(user, id)
-        if (definition?.deleted) {
-            return null
-        }
-        return definition
+        //TODO we need to separate getById for Resource and ResourceType alert defs
+        return defMan.getTypeDefByIdAndCheck(user, id)
     }
 }
