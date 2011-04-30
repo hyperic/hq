@@ -26,19 +26,16 @@
 package org.hyperic.hq.agent.spring;
 
 import com.rabbitmq.client.ConnectionFactory;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 
-//@Configuration
+@Configuration
 public class SpringAgentConfiguration {
 
-    //@Bean
-    public ConnectionFactory connectionFactory() {
-        //set creds etc: ConnectionFactory cf = new ConnectionFactory();
+    /* TODO credentials */
+    @Bean
+    public ConnectionFactory connectionFactory() { 
         return new ConnectionFactory();
-    }
-
-   /* @Bean
-    public BizappCallbackClient bizappCallbackClient() {
-        return new BizappCallbackClient();
-    }*/
+    }  
 }

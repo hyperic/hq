@@ -33,7 +33,6 @@ import org.hyperic.hq.bizapp.shared.lather.SecureAgentLatherValue;
 import org.hyperic.lather.LatherRemoteException;
 import org.hyperic.lather.LatherValue;
 import org.hyperic.lather.client.LatherHTTPClient;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.ConnectException;
@@ -41,8 +40,7 @@ import java.util.HashSet;
 
 /**
  * Central place for communication back to the server. 
- */
-@Component
+ */ 
 public abstract class AgentCallbackClient {
     private static final int TIMEOUT_CONN = 30 * 1000;
     private static final int TIMEOUT_DATA = 5 * 60 * 1000;
@@ -53,8 +51,6 @@ public abstract class AgentCallbackClient {
     private ProviderFetcher fetcher;        // Storage of provider info
     private HashSet         secureCommands; // Secure commands
 
-    public AgentCallbackClient() {}
-    
     public AgentCallbackClient(ProviderFetcher fetcher,
                                String[] secureCommands) {
 

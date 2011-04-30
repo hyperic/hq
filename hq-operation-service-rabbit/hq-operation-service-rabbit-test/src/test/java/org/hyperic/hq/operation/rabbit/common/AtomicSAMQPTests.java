@@ -58,6 +58,7 @@ public class AtomicSAMQPTests extends AbstractSamqpTest {
 		// Message was consumed so nothing left on queue
 		result = (String) requestTemplate.receiveAndConvert(responseQueue.getName());
 		assertEquals(null, result);
+        executor.shutdown();
 	}
 
 }

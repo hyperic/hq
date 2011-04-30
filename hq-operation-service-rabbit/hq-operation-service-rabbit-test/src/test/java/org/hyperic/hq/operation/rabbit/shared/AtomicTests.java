@@ -24,8 +24,6 @@ public class AtomicTests {
     @Before
     public void prepare() throws IOException {
         this.channel = new SingleConnectionFactory().newConnection().createChannel();
-        System.out.println(channel);
-
         channel.exchangeDeclare("agent", "direct", false);
         this.agentQueue = channel.queueDeclare().getQueue();
         channel.queueBind(agentQueue, "agent", "ping");
@@ -53,10 +51,8 @@ public class AtomicTests {
         while (serverReceived < messagesToSend) {
             QueueingConsumer.Delivery delivery = consumer.nextDelivery();
             String message = new String(delivery.getBody());
-            System.out.println("received message=" + message);
             serverReceived++;
         }
-        System.out.println("finished");
         assertEquals(messagesToSend, serverReceived);
     }
 
@@ -74,7 +70,6 @@ public class AtomicTests {
         while (serverReceived < 1) {
             QueueingConsumer.Delivery delivery = serverConsumer.nextDelivery();
             String message = new String(delivery.getBody());
-            System.out.println("server received message=" + message);
             serverReceived++;
             channel.basicPublish("agent", "ping", null, "server:ping".getBytes());
         }
@@ -83,11 +78,8 @@ public class AtomicTests {
         while (agentReceived < 1) {
             QueueingConsumer.Delivery delivery = agentConsumer.nextDelivery();
             String message = new String(delivery.getBody());
-            System.out.println("agent received message=" + message);
             serverReceived++;
         }
-        System.out.println("finished");
-
         assertEquals(1, serverReceived);
         assertEquals(1, agentReceived);
     }
@@ -105,9 +97,7 @@ public class AtomicTests {
             QueueingConsumer.Delivery delivery;
             try {
                 delivery = serverConsumer.nextDelivery();
-
                 String body = new String(delivery.getBody());
-                System.out.println("received message=" + body);
             } catch (InterruptedException ie) {
                 continue;
             }
@@ -120,17 +110,14 @@ public class AtomicTests {
         boolean autoAck = false;
         for (int i = 0; i < 10; i++) {
             channel.basicPublish("server", "ping", null, (i + "-message").getBytes());
-            System.out.println("sent message " + i);
         }
 
         while (true) {
             try {
-                System.out.println("listening...");
                 GetResponse response = channel.basicGet(serverQueue, true);
                 if (response != null) {
                     AMQP.BasicProperties props = response.getProps();
                     String body = new String(response.getBody());
-                    System.out.println("received message=" + body);
                     long deliveryTag = response.getEnvelope().getDeliveryTag();
                     channel.basicAck(deliveryTag, false); // acknowledge receipt of the message
                 }

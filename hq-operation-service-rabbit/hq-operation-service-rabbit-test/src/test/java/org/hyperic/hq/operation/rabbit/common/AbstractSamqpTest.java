@@ -118,8 +118,7 @@ public class AbstractSamqpTest {
             this.template = template;
         }
 
-        public void handleMessage(String message) {
-            System.out.println("received message=" + message);
+        public void handleMessage(String message) { 
             template.convertAndSend("Response message[" + message + "]");
         }
     }

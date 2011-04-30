@@ -72,5 +72,6 @@ public class SimpleRabbitTemplateTests {
 			}
 		});
         assertEquals(message, received.get(1000, TimeUnit.MILLISECONDS));
+        executor.shutdown();
     }
 }

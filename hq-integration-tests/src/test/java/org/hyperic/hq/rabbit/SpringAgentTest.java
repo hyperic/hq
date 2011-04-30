@@ -25,68 +25,48 @@
 
 package org.hyperic.hq.rabbit;
 
-import org.hyperic.hq.agent.AgentConfig;
-import org.hyperic.hq.agent.server.AgentDaemon;
-import org.hyperic.hq.bizapp.agent.ProviderInfo;
 import org.hyperic.hq.bizapp.agent.client.AgentClient;
-import org.hyperic.hq.bizapp.client.AgentCallbackClient;
 import org.hyperic.hq.test.BaseInfrastructureTest;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.concurrent.*;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals;
 
 
 public class SpringAgentTest extends BaseInfrastructureTest {
 
-    private ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    private final String agent_home = "/agent-4.6.0.BUILD-SNAPSHOT";
+    private final String agent_home = "/Users/hedelson/tools/hyperic/agent-4.6.0.BUILD-SNAPSHOT";
 
-    private final String host = "localhost";
-
-    private final int port = 7080;
+    private final String  agent_bundle_home = agent_home + "/bundles/agent-4.6.0.BUILD-SNAPSHOT";
 
     @Before
     public void before() {
         System.setProperty("agent.install.home", agent_home);
-        System.setProperty("agent.bundle.home", agent_home + "/bin");
+        System.setProperty("agent.bundle.home", agent_bundle_home);
+    }                                                     
+    @After
+    public void destroy () { 
+        executor.shutdown();
     }
-
+  
     @Test
-    public void daemonSpringAgentTest() throws InterruptedException {
-        executor.submit(new Callable<Boolean>() {
+    public void veryBasicSpringAgentTest() throws InterruptedException, ExecutionException, TimeoutException {
+         Future<Boolean> success = executor.submit(new Callable<Boolean>() {
             public Boolean call() throws Exception {
                 AgentClient.main(new String[]{"start"});
-                AgentConfig config = AgentConfig.newInstance();
-
-                /*AgentDaemon agentDaemon = AgentDaemon.newInstance(config);
-                  agentDaemon.configure(config);
-                */
-                AgentDaemon.RunnableAgent agentDaemon = new AgentDaemon.RunnableAgent(config);
-                agentDaemon.run();
-                TimeUnit.MILLISECONDS.sleep(5000);
+                TimeUnit.MILLISECONDS.sleep(1000);
+                  
+                AgentClient.main(new String[]{"die", "5000"});
+                TimeUnit.MILLISECONDS.sleep(1000);
                 return true;
             }
         });
-        executor.shutdown();
-    }
 
-    @Test
-    public void veryBasicSpringAgentTest() throws InterruptedException {
-        executor.submit(new Callable<Boolean>() {
-            public Boolean call() throws Exception {
-                AgentClient.main(new String[]{"start"});
-                ProviderInfo providerInfo = new ProviderInfo(AgentCallbackClient.getDefaultProviderURL(host, port, false), "no-auth");
-                assertNotNull(providerInfo);
-                AgentClient.main(new String[]{"status"});
-                AgentClient.main(new String[]{"die"});
-                TimeUnit.MILLISECONDS.sleep(5000);
-                return true;
-            }
-        });
-        executor.shutdown();
+        assertEquals(true, success.get(10000, TimeUnit.MILLISECONDS));
     }
 }

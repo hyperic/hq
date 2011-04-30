@@ -2,7 +2,10 @@ package org.hyperic.hq.rabbit;
 
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.agent.AgentConfigException;
+import org.hyperic.hq.agent.AgentConnectionException;
+import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.bizapp.agent.ProviderInfo;
+import org.hyperic.hq.bizapp.agent.client.AgentClient;
 import org.hyperic.hq.bizapp.client.*;
 import org.hyperic.hq.bizapp.server.operations.RegisterAgentService;
 import org.hyperic.hq.operation.RegisterAgentResponse;
@@ -11,6 +14,11 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -62,7 +70,26 @@ public class LatherReplacementIntegrationTests extends BaseInfrastructureTest {
     }
 
 
+    @Test
+    public void isUserValid() throws AgentConnectionException, AgentRemoteException, InterruptedException {
+        ExecutorService executor = Executors.newFixedThreadPool(1);
 
+        Callable<String> callable = new Callable<String>() {
+            public String call() throws Exception {
+                AgentClient.main(new String[]{"start"});
+                ProviderInfo providerInfo = new ProviderInfo(AgentCallbackClient.getDefaultProviderURL(host, port, false), "no-auth");
+                assertNotNull(providerInfo);
+                BizappCallbackClient bcc = new BizappCallbackClient(new StaticProviderFetcher(providerInfo), AgentConfig.newInstance());
+                assertTrue(bcc.userIsValid("hqadmin", "hqadmin"));
+                AgentClient.main(new String[]{"die"});
+                TimeUnit.MILLISECONDS.sleep(1000);
+                return null;
+            }
+        };
+        executor.submit(callable);
+        TimeUnit.MILLISECONDS.sleep(5000);
+        executor.shutdown();
+    }
 
 
 

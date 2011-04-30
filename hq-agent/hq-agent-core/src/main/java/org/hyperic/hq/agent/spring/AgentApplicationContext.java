@@ -31,7 +31,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.support.AbstractApplicationContext;
 
 /**
  * todo: exceptions, logging
@@ -41,18 +40,17 @@ public final class AgentApplicationContext implements SmartLifecycle {
 
     private static final Log logger = LogFactory.getLog(AgentApplicationContext.class);
 
-    private static AbstractApplicationContext applicationContext;
-
-    /*  "org.hyperic.hq.bizapp.client", "org.hyperic.hq.operation" */
-    public static AbstractApplicationContext create(String[] basePackages, Class<?>... annotatedClasses) {
-        if (applicationContext != null) return applicationContext;
-
-        AnnotationConfigApplicationContext ctx = null;
-
+    private static AnnotationConfigApplicationContext ctx;
+ 
+    public static AnnotationConfigApplicationContext create(String[] basePackages, Class<?>... annotatedClasses) {
+        if (ctx != null) return ctx;
+  
         try {
             ctx = new AnnotationConfigApplicationContext(annotatedClasses);
             ctx.registerShutdownHook();
             ctx.scan(basePackages);
+
+
         }
         catch (BeansException e) {
             shutdown();
@@ -66,7 +64,7 @@ public final class AgentApplicationContext implements SmartLifecycle {
 
     public static <T> T getBean(Class<T> requiredType) throws RuntimeException {
         try {
-            return applicationContext.getBean(requiredType);
+            return ctx.getBean(requiredType);
         } catch (NoSuchBeanDefinitionException e) {
             throw new RuntimeException(e.getMessage());
         }
@@ -76,8 +74,8 @@ public final class AgentApplicationContext implements SmartLifecycle {
      * Do graceful shutdown and close on demand if needed.
      */
     public static void shutdown() {
-        if (applicationContext != null) {
-            applicationContext.destroy();
+        if (ctx != null) {
+            ctx.destroy();
         }
     }
 

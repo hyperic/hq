@@ -45,7 +45,7 @@ import java.util.Properties;
 public class AgentConfig {
 
     private static final String DEV_URANDOM = "/dev/urandom";
-    
+
     //moved from ClientPluginDeployer
     public static final String WORK_DIR = "work";
 
@@ -56,17 +56,17 @@ public class AgentConfig {
                                "file:" + DEV_URANDOM);
         }
     }
-    
+
     // properties used with JSW
     public static final String JSW_PROP_AGENT_BUNDLE = "set.HQ_AGENT_BUNDLE";
-    public static final String JSW_PROP_AGENT_ROLLBACK_BUNDLE = 
+    public static final String JSW_PROP_AGENT_ROLLBACK_BUNDLE =
         "set.HQ_AGENT_ROLLBACK_BUNDLE";
-    
+
     public static final String PROP_LATHER_PROXYHOST = "lather.proxyHost";
     public static final String PROP_LATHER_PROXYPORT = "lather.proxyPort";
 
     public static final String IP_GLOBAL = "*";
-    
+
     private static final String DEFAULT_PROXY_HOST = "";
     private static final int DEFAULT_PROXY_PORT = -1;
     private static final int DEFAULT_NOTIFY_UP_PORT = -1;
@@ -77,7 +77,7 @@ public class AgentConfig {
     public static final String PDK_PLUGIN_DIR_KEY = "agent.pdkPluginDir";
     public static final String PDK_WORK_DIR_KEY = "agent.pdkWorkDir";
     public static final String AGENT_BUNDLE_HOME = "agent.bundle.home";
-  
+
 
     // The following final objects are the properties which are usable
     // within the configuation object.  The first element in the array
@@ -86,8 +86,8 @@ public class AgentConfig {
     { "agent.listenPort", Integer.toString(AgentCommandsAPI.DEFAULT_PORT) };
     public static final String[] PROP_LISTENIP           =
     { "agent.listenIp",   IP_GLOBAL };
-    public static final String[] PROP_STORAGEPROVIDER    = 
-    { "agent.storageProvider", 
+    public static final String[] PROP_STORAGEPROVIDER    =
+    { "agent.storageProvider",
       "org.hyperic.hq.agent.server.AgentDListProvider" };
     public static final String[] PROP_STORAGEPROVIDERINFO =
     { "agent.storageProvider.info", "${agent.dataDir}|m|100|20|50" };
@@ -95,45 +95,45 @@ public class AgentConfig {
     { "agent.install.home", System.getProperty("agent.install.home", System.getProperty("user.dir")) };
     // has no default since we want to throw an error when property is not set
     public static final String[] PROP_BUNDLEHOME =
-    { AGENT_BUNDLE_HOME, System.getProperty(AGENT_BUNDLE_HOME) };    
+    { AGENT_BUNDLE_HOME, System.getProperty(AGENT_BUNDLE_HOME) };
     public static final String[] PROP_TMPDIR =
     { "agent.tmpDir", System.getProperty("agent.tmpDir", PROP_BUNDLEHOME[1] + "/tmp") };
     public static final String[] PROP_LOGDIR =
     { "agent.logDir", System.getProperty("agent.logDir", PROP_INSTALLHOME[1] + "/log") };
-    public static final String[] PROP_DATADIR = 
+    public static final String[] PROP_DATADIR =
     { "agent.dataDir", System.getProperty("agent.dataDir", PROP_INSTALLHOME[1] + "/data") };
-    public static final String[] PROP_KEYSTORE = 
+    public static final String[] PROP_KEYSTORE =
     { "agent.keystore", PROP_DATADIR[1] + "/keystore" };
-    public static final String[] PROP_LIB_HANDLERS = 
+    public static final String[] PROP_LIB_HANDLERS =
     { "agent.lib.handlers", PROP_BUNDLEHOME[1] + "/lib/handlers" };
-    public static final String[] PROP_LIB_HANDLERS_LIB = 
+    public static final String[] PROP_LIB_HANDLERS_LIB =
     { "agent.lib.handlers.lib", PROP_LIB_HANDLERS[1] + "/lib" };
-    public static final String[] PROP_PDK_DIR = 
+    public static final String[] PROP_PDK_DIR =
     { PDK_DIR_KEY, System.getProperty(PDK_DIR_KEY, PROP_BUNDLEHOME[1] + "/pdk") };
-    public static final String[] PROP_PDK_LIB_DIR = 
-    { PDK_LIB_DIR_KEY, System.getProperty(PDK_LIB_DIR_KEY, PROP_PDK_DIR[1] + "/lib") };    
-    public static final String[] PROP_PDK_PLUGIN_DIR = 
-    { PDK_PLUGIN_DIR_KEY, 
-        System.getProperty(PDK_PLUGIN_DIR_KEY, PROP_PDK_DIR[1] + "/plugins") };  
-    public static final String[] PROP_PDK_WORK_DIR = 
-    { PDK_WORK_DIR_KEY, 
-        System.getProperty(PDK_WORK_DIR_KEY, 
-                PROP_PDK_DIR[1] + "/" + WORK_DIR) };      
-    public static final String[] PROP_PROXYHOST = 
+    public static final String[] PROP_PDK_LIB_DIR =
+    { PDK_LIB_DIR_KEY, System.getProperty(PDK_LIB_DIR_KEY, PROP_PDK_DIR[1] + "/lib") };
+    public static final String[] PROP_PDK_PLUGIN_DIR =
+    { PDK_PLUGIN_DIR_KEY,
+        System.getProperty(PDK_PLUGIN_DIR_KEY, PROP_PDK_DIR[1] + "/plugins") };
+    public static final String[] PROP_PDK_WORK_DIR =
+    { PDK_WORK_DIR_KEY,
+        System.getProperty(PDK_WORK_DIR_KEY,
+                PROP_PDK_DIR[1] + "/" + WORK_DIR) };
+    public static final String[] PROP_PROXYHOST =
     { "agent.proxyHost", DEFAULT_PROXY_HOST };
-    public static final String[] PROP_PROXYPORT = 
+    public static final String[] PROP_PROXYPORT =
     { "agent.proxyPort", String.valueOf(DEFAULT_PROXY_PORT)};
-    
+
     // A property provided for testing rollback during agent auto-upgrade.
-    // Set the property value to the bundle name that will fail when starting 
+    // Set the property value to the bundle name that will fail when starting
     // the agent so that the upgrade will revert to the rollback bundle.
-    public static final String[] PROP_ROLLBACK_AGENT_BUNDLE_UPGRADE = 
-    { "agent.rollbackAgentBundleUpgrade", ""};    
-    
+    public static final String[] PROP_ROLLBACK_AGENT_BUNDLE_UPGRADE =
+    { "agent.rollbackAgentBundleUpgrade", ""};
+
     public static final String PROP_PROPFILE = "agent.propFile";
-    
+
     public static final String DEFAULT_AGENT_PROPFILE_NAME = "agent.properties";
-    
+
     public static final String DEFAULT_PROPFILE = PROP_INSTALLHOME[1]
             + "/conf/"+DEFAULT_AGENT_PROPFILE_NAME;
 
@@ -143,10 +143,10 @@ public class AgentConfig {
 
     public static final String BUNDLE_PROPFILE = PROP_BUNDLEHOME[1]
             + "/conf/"+DEFAULT_AGENT_PROPFILE_NAME;
-    
+
     private static final String[][] propertyList = {
         PROP_LISTENPORT,
-        PROP_PROXYHOST, 
+        PROP_PROXYHOST,
         PROP_PROXYPORT,
         PROP_STORAGEPROVIDER,
         PROP_STORAGEPROVIDERINFO,
@@ -161,15 +161,15 @@ public class AgentConfig {
         PROP_PDK_DIR,
         PROP_PDK_LIB_DIR,
         PROP_PDK_PLUGIN_DIR,
-        PROP_PDK_WORK_DIR, 
+        PROP_PDK_WORK_DIR,
         PROP_ROLLBACK_AGENT_BUNDLE_UPGRADE
     };
-    
+
     private int        listenPort;          // Port the agent should listen on
     private String     listenIp;            // IP the agent listens on
     private int        proxyPort;           // Proxy server port
     private String     proxyIp;             // IP for the proxy server
-    private int        notifyUpPort;        // The port which the AgentClient defines 
+    private int        notifyUpPort;        // The port which the AgentClient defines
                                             // where the CommandServer can connect to notify
                                             // it of successful startup.
     private String     storageProvider;     // Classname for the provider
@@ -190,7 +190,7 @@ public class AgentConfig {
     }
 
     /**
-     * Create a new config object with default settings.  
+     * Create a new config object with default settings.
      *
      * @return A newly initialized AgentConfig object
      */
@@ -224,7 +224,7 @@ public class AgentConfig {
                     + PROP_BUNDLEHOME[0] + " provided!");
         }
     }
-    
+
     private static boolean loadProps(Properties props, File file) {
         FileInputStream fin = null;
 
@@ -247,7 +247,7 @@ public class AgentConfig {
             }
         }
     }
-    
+
     /**
     * Return an ordered list of property files used to configure the agent.  Only
     * the default agent.properties is required, all other files will not be added
@@ -257,7 +257,7 @@ public class AgentConfig {
     * @return The ordered list of Files to read for agent.properties.
     */
     public static File[] getPropertyFiles(String propsFile) {
-    
+
         List<File> files = new ArrayList<File>();
 
         files.add(new File(propsFile)); // Default agent.properties
@@ -266,25 +266,25 @@ public class AgentConfig {
             files.add(bundleFile); // Bundle agent.properties
         }
 
-       
+
         final String home = System.getProperty("user.home");
         File homeAgentProperties = new File(home + File.separator + ".hq" + File.separator + DEFAULT_AGENT_PROPFILE_NAME);
         if (homeAgentProperties.exists()) {
             files.add(homeAgentProperties); // ~/.hq/agent.properties
         }
-      
+
         File deployerProps = new File("deployer.properties");
         if (deployerProps.exists()) {
             files.add(deployerProps);
         }
-        
+
         return (File[])files.toArray(new File[files.size()]);
     }
-    
+
     /**
      * Return a Properties object that is the merged result all possible
      * locations for agent.properties.
-     * 
+     *
      * @param propsFile The default agent.properties.
      * @return The merge Properties object.
      * @see org.hyperic.hq.agent.AgentConfig#getPropertyFiles(String)
@@ -292,35 +292,35 @@ public class AgentConfig {
     public static Properties getProperties(String propsFile) throws AgentConfigException {
         Properties useProps = new Properties();
         useProps.putAll(AgentConfig.getDefaultProperties());
-       
+
         File[] propFiles = getPropertyFiles(propsFile);
         for (int i=0; i<propFiles.length; i++) {
             if (!loadProps(useProps, propFiles[i])) {
                 throw new AgentConfigException("Failed to load: " + propFiles[i]);
             }
         }
-        
+
         PropertyUtil.expandVariables(useProps);
         return useProps;
     }
-   
+
     public static AgentConfig newInstance(String propsFile)
         throws IOException, AgentConfigException {
         // verify that the agent bundle home has been properly defined
         // before populating the default properties
         checkAgentBundleHome();
-        
+
         Properties useProps = getProperties(propsFile);
-        
+
         return AgentConfig.newInstance(useProps);
     }
 
     /**
-     * Create a new config object with settings specified by 
-     * a properties object.  
+     * Create a new config object with settings specified by
+     * a properties object.
      *
      * @param props Properties to use when setting up the config object
-     * 
+     *
      * @return A AgentConfig object with settings as setup by
      *          the passed properties
      *
@@ -329,10 +329,10 @@ public class AgentConfig {
      */
 
     public static AgentConfig newInstance(Properties props)
-        throws AgentConfigException 
+        throws AgentConfigException
     {
         AgentConfig res = new AgentConfig();
-        
+
         res.useProperties(props);
         return res;
     }
@@ -357,7 +357,7 @@ public class AgentConfig {
     }
 
     /**
-     * Set the configuration based on a properties object.  
+     * Set the configuration based on a properties object.
      *
      * @param appProps Properties to use to setup the object
      *
@@ -365,7 +365,7 @@ public class AgentConfig {
      *                              invalid.
      */
 
-    public void useProperties(Properties appProps) 
+    public void useProperties(Properties appProps)
         throws AgentConfigException
     {
         String listenPort, storageProvider, storageProviderInfo;
@@ -373,7 +373,7 @@ public class AgentConfig {
 
         this.bootProps = appProps;
 
-        listenPort = 
+        listenPort =
             appProps.getProperty(AgentConfig.PROP_LISTENPORT[0],
                                  AgentConfig.PROP_LISTENPORT[1]);
         try {
@@ -386,14 +386,14 @@ public class AgentConfig {
         listenIp = appProps.getProperty(AgentConfig.PROP_LISTENIP[0],
                                         AgentConfig.PROP_LISTENIP[1]);
         this.setListenIp(listenIp);
-        
-        String proxyPort = 
-            appProps.getProperty(AgentConfig.PROP_PROXYPORT[0], 
+
+        String proxyPort =
+            appProps.getProperty(AgentConfig.PROP_PROXYPORT[0],
                                  AgentConfig.PROP_PROXYPORT[1]);
-                
+
         try {
             int proxyPortInt = Integer.parseInt(proxyPort);
-            
+
             if (proxyPortInt != AgentConfig.DEFAULT_PROXY_PORT) {
                 this.setProxyPort(proxyPortInt);
             }
@@ -401,14 +401,14 @@ public class AgentConfig {
             throw new AgentConfigException(AgentConfig.PROP_PROXYPORT[0]
                                            + " is not an integer");
         }
-        
-        String proxyIp = 
-            appProps.getProperty(AgentConfig.PROP_PROXYHOST[0], 
+
+        String proxyIp =
+            appProps.getProperty(AgentConfig.PROP_PROXYHOST[0],
                                  AgentConfig.PROP_PROXYPORT[1]);
-        
+
         this.setProxyIp(proxyIp);
-        
-        storageProvider = 
+
+        storageProvider =
             appProps.getProperty(AgentConfig.PROP_STORAGEPROVIDER[0],
                                  AgentConfig.PROP_STORAGEPROVIDER[1]);
         this.setStorageProvider(storageProvider);
@@ -418,20 +418,20 @@ public class AgentConfig {
                                 AgentConfig.PROP_STORAGEPROVIDERINFO[1]);
         this.setStorageProviderInfo(storageProviderInfo);
 
-        String dataDir = 
+        String dataDir =
             appProps.getProperty(PROP_DATADIR[0],
                                  PROP_DATADIR[1]);
 
         File dir = new File(dataDir);
-        
+
         boolean succeeded;
-        
+
         try {
             succeeded = FileUtil.makeDirs(dir, 3);
         } catch (InterruptedException e) {
             throw new AgentConfigException("creating data directory was interrupted");
         }
-        
+
         if (!succeeded) {
             String parent = new File(dir.getAbsolutePath())
                                     .getParentFile().getAbsolutePath();
@@ -439,28 +439,28 @@ public class AgentConfig {
                    ("Error creating data directory: " + dir.getAbsolutePath()
                     + "\nMake sure that the " + parent + " directory is "
                     + "owned by user '" + System.getProperty("user.name")
-                    + "' and is not a read-only directory.");            
+                    + "' and is not a read-only directory.");
         }
-        
-        this.tokenFile = 
+
+        this.tokenFile =
             appProps.getProperty("agent.tokenFile",
                                  dataDir + File.separator + "tokendata");
 
         //XXX the default log/agent.log still gets created even if this
         //changes, but if it is changed logs will be written to the new
         //location
-        String logDir = 
+        String logDir =
             appProps.getProperty(PROP_LOGDIR[0],
                                  PROP_LOGDIR[1]);
 
         dir = new File(logDir);
-        
+
         try {
             succeeded = FileUtil.makeDirs(dir, 3);
         } catch (InterruptedException e) {
             throw new AgentConfigException("creating log directory was interrupted");
         }
-        
+
         if (!succeeded) {
             String parent = new File(dir.getAbsolutePath())
                                     .getParentFile().getAbsolutePath();
@@ -468,10 +468,10 @@ public class AgentConfig {
                    ("Error creating log directory: " + dir.getAbsolutePath()
                     + "\nMake sure that the " + parent + " directory is "
                     + "owned by user '" + System.getProperty("user.name")
-                    + "' and is not a read-only directory.");            
+                    + "' and is not a read-only directory.");
         }
     }
-    
+
     /**
      * Sets the port the Agent should listen on.
      *
@@ -482,7 +482,7 @@ public class AgentConfig {
      *                              range
      */
 
-    public void setListenPort(int port) 
+    public void setListenPort(int port)
         throws AgentConfigException
     {
         verifyValidPortRange(port);
@@ -500,7 +500,7 @@ public class AgentConfig {
     }
 
     /**
-     * Sets the IP that the agent should listen on.  
+     * Sets the IP that the agent should listen on.
      *
      * @param ip The IP to bind to.  If it is '*', then the agent will
      *           listen on all interfaces
@@ -519,10 +519,10 @@ public class AgentConfig {
     public String getListenIp(){
         return this.listenIp;
     }
-    
+
     /**
      * Sets the proxy port.
-     * 
+     *
      * @param port New port to set.  The port should be in the range of
      *             1 to 65535
      *
@@ -530,40 +530,40 @@ public class AgentConfig {
      *                              range
      */
     public void setProxyPort(int port) throws AgentConfigException {
-        verifyValidPortRange(port);        
+        verifyValidPortRange(port);
         this.proxyPort = port;
     }
-    
+
     /**
-     * @return <code>true</code> if a proxy server is configured; 
+     * @return <code>true</code> if a proxy server is configured;
      *         <code>false</code> otherwise.
      */
     public boolean isProxyServerSet() {
-        return this.getProxyPort() != AgentConfig.DEFAULT_PROXY_PORT && 
+        return this.getProxyPort() != AgentConfig.DEFAULT_PROXY_PORT &&
                !AgentConfig.DEFAULT_PROXY_HOST.equals(this.getProxyIp());
     }
-    
+
     /**
      * Get the proxy port.
-     * 
+     *
      * @return The port or <code>-1</code> if no proxy server is set.
      */
     public int getProxyPort() {
         return this.proxyPort;
     }
-    
+
     /**
      * Set the IP for the proxy server.
-     * 
+     *
      * @param ip The IP for the proxy server.
      */
     public void setProxyIp(String ip) {
         this.proxyIp = ip;
     }
-    
+
     /**
      * Get the IP for the proxy server.
-     * 
+     *
      * @return The IP or the empty string if no proxy server is set.
      */
     public String getProxyIp() {
@@ -587,16 +587,16 @@ public class AgentConfig {
             return InetAddress.getByName(this.getListenIp());
         }
     }
-    
+
     /**
      * @return The notify up port or -1 if not set.
      */
     public int getNotifyUpPort() {
         return this.notifyUpPort;
     }
-    
+
     /**
-     * Sets the port which the AgentClient defines where the CommandServer 
+     * Sets the port which the AgentClient defines where the CommandServer
      * can connect to notify it of successful startup.
      *
      * @param port New port to set.  The port should be in the range of
@@ -611,9 +611,9 @@ public class AgentConfig {
     }
 
     /**
-     * Set the classpath of the storage provider.  
+     * Set the classpath of the storage provider.
      *
-     * @param storageProvider Fully qualified classname for a class 
+     * @param storageProvider Fully qualified classname for a class
      *                        implementing the AgentStorageProvider interface
      */
 
@@ -634,7 +634,7 @@ public class AgentConfig {
 
     /**
      * Sets the info string that the Agent will use to pass to the init()
-     * function of the storage provider.  
+     * function of the storage provider.
      *
      * @param info Info string to pass to init()
      */
@@ -644,7 +644,7 @@ public class AgentConfig {
     }
 
     /**
-     * Get the info string passed to the init() function of the 
+     * Get the info string passed to the init() function of the
      * storage provider.
      *
      * @return The info string previously configured for the config object.
@@ -669,11 +669,11 @@ public class AgentConfig {
     public String getTokenFile() {
         return this.tokenFile;
     }
-    
+
     private void verifyValidPortRange(int port) throws AgentConfigException {
         if(port < 1 || port > 65535)
             throw new AgentConfigException("Invalid port (not in range " +
-                                           "1->65535)");        
+                                           "1->65535)");
     }
 
 }

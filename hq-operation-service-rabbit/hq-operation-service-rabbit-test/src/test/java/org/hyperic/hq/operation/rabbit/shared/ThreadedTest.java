@@ -31,8 +31,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 
 public class ThreadedTest {
-
-     
+  
     @Test
     public void foo() throws ExecutionException, TimeoutException, InterruptedException {
         final Map<String, Long> map = new ConcurrentHashMap<String, Long>();

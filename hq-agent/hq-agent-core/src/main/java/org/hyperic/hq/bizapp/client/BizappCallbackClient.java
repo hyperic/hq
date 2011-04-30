@@ -31,30 +31,17 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.bizapp.agent.ProviderInfo;
 import org.hyperic.hq.bizapp.shared.lather.*;
-import org.hyperic.hq.operation.OperationService;
 import org.hyperic.hq.operation.RegisterAgentRequest;
 import org.hyperic.hq.operation.RegisterAgentResponse;
-import org.hyperic.hq.operation.rabbit.core.BindingHandler;
-import org.hyperic.hq.operation.rabbit.core.RabbitTemplate;
 import org.hyperic.hq.operation.rabbit.convert.JsonObjectMappingConverter;
+import org.hyperic.hq.operation.rabbit.core.BindingHandler;
 import org.hyperic.hq.operation.rabbit.core.DeclarativeBindingHandler;
+import org.hyperic.hq.operation.rabbit.core.RabbitTemplate;
 import org.hyperic.hq.operation.rabbit.core.SimpleRabbitTemplate;
 import org.hyperic.lather.NullLatherValue;
-
-//@OperationService
-
-//@Component
-
+ 
 public class BizappCallbackClient extends AgentCallbackClient {
     private final Log logger = LogFactory.getLog(this.getClass());
-
-    private OperationService operationService;
-
-    //  @Autowired
-
-    public BizappCallbackClient(OperationService operationService) {
-        this.operationService = operationService;
-    }
 
     public BizappCallbackClient(ProviderFetcher fetcher, AgentConfig config) {
         super(fetcher);
@@ -76,8 +63,7 @@ public class BizappCallbackClient extends AgentCallbackClient {
         this.invokeLatherCall(provider, CommandInfo.CMD_PING, NullLatherValue.INSTANCE);
     }
 
-    public boolean userIsValid(String user, String pword)
-            throws AgentCallbackClientException {
+    public boolean userIsValid(String user, String pword) throws AgentCallbackClientException {
         UserIsValid_result res;
         ProviderInfo provider;
 
@@ -104,8 +90,6 @@ public class BizappCallbackClient extends AgentCallbackClient {
      * @param unidirectional      <code>true</code> if the agent is unidirectional.
      * @return The result containing the new agent token.
      */
-    //@OperationDispatcher(exchange = "to.server", routingKey = "request.register", binding = "request.*", queue = "registerAgentRequest")
-    //@OperationEndpoint(exchange = "to.agent", routingKey = "response.register", binding = "response.*", queue = "agent")
     public RegisterAgentResponse registerAgent(String oldAgentToken, String user, String pword, String authToken, String agentIP, int agentPort,
                                                String version, int cpuCount, boolean isNewTransportAgent, boolean unidirectional) throws AgentCallbackClientException {
 
