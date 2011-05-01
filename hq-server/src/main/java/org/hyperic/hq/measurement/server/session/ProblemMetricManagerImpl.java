@@ -71,7 +71,7 @@ public class ProblemMetricManagerImpl implements ProblemMetricManager {
     @SuppressWarnings("unchecked")
     
     public Map<Integer, ProblemMetricInfo> getProblemsByTemplate(
-        int appdefType, Integer[] eids, long begin, long end) {
+        Integer[] eids, long begin, long end) {
         return Collections.emptyMap();
     }
 

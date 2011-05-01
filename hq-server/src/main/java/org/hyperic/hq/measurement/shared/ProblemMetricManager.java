@@ -32,7 +32,7 @@ public interface ProblemMetricManager {
     /**
      * Return the map of problem counts indexed by template IDs
      */
-    public Map<Integer, ProblemMetricInfo> getProblemsByTemplate(int appdefType, Integer[] eids, long begin, long end);
+    public Map<Integer, ProblemMetricInfo> getProblemsByTemplate(Integer[] eids, long begin, long end);
 
     /**
      * Return the list of problem metrics for an appdef entity
