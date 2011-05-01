@@ -1008,7 +1008,8 @@ public class ServiceManagerImpl implements ServiceManager {
     
     @Transactional(readOnly = true)
     public Number getServiceCount() {
-        return findAllServiceResources().size();
+        return resourceDao.countByIndexedProperty(AppdefResourceType.APPDEF_TYPE_ID, 
+            AppdefEntityConstants.APPDEF_TYPE_SERVICE);
     }
 
     @PostConstruct

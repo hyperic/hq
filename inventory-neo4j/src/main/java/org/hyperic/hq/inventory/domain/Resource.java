@@ -129,6 +129,25 @@ public class Resource {
         return relations;
     }
 
+    @SuppressWarnings("unused")
+    private int countRelatedResources(String relationName,Direction direction) {
+        int count = 0;
+        Traverser relationTraverser = getTraverser(relationName, direction);
+        for (Node related : relationTraverser) {
+            count++;
+        }
+        return count;
+    }
+
+    /**
+     * 
+     * @param relationName The relationship name
+     * @return The number of resources related to this resource by relationship name (outgoing)
+     */
+    public int countResourcesFrom(String relationName) {
+        return countRelatedResources(relationName, Direction.OUTGOING);
+    }
+
     /**
      * 
      * @param recursive true if return children of children, etc
@@ -257,7 +276,7 @@ public class Resource {
     public Map<String, Object> getProperties() {
         return getProperties(true);
     }
-
+    
     /**
      * @param includeHidden true if properties whose types are marked as
      *        "hidden" should be returned
@@ -314,16 +333,10 @@ public class Resource {
             // return propertyType.getDefaultValue();
         }
     }
-
+    
     private Set<Resource> getRelatedResources(String relationName, Direction direction) {
         Set<Resource> resources = new HashSet<Resource>();
-        Traverser relationTraverser = getPersistentState().traverse(Traverser.Order.BREADTH_FIRST,
-            new StopEvaluator() {
-                public boolean isStopNode(TraversalPosition currentPos) {
-                    return currentPos.depth() >= 1;
-                }
-            }, ReturnableEvaluator.ALL_BUT_START_NODE,
-            DynamicRelationshipType.withName(relationName), direction.toNeo4jDir());
+        Traverser relationTraverser = getTraverser(relationName, direction);
         for (Node related : relationTraverser) {
             Resource resource = graphDatabaseContext.createEntityFromState(related, Resource.class);
             resource.persist();
@@ -424,7 +437,7 @@ public class Resource {
     public Set<Resource> getResourcesFrom(String relationName) {
         return getRelatedResources(relationName, Direction.OUTGOING);
     }
-
+    
     /**
      * 
      * @param relationName The relationship name
@@ -453,6 +466,16 @@ public class Resource {
 
     public String getSortName() {
         return sortName;
+    }
+
+    private Traverser getTraverser(String relationName, Direction direction) {
+        return getPersistentState().traverse(Traverser.Order.BREADTH_FIRST,
+            new StopEvaluator() {
+                public boolean isStopNode(TraversalPosition currentPos) {
+                    return currentPos.depth() >= 1;
+                }
+            }, ReturnableEvaluator.ALL_BUT_START_NODE,
+            DynamicRelationshipType.withName(relationName), direction.toNeo4jDir());
     }
 
     /**

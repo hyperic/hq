@@ -1848,7 +1848,7 @@ public class PlatformManagerImpl implements PlatformManager {
      */
     @Transactional(readOnly = true)
     public Number getPlatformCount() {
-        return getAllPlatforms().size();
+        return resourceManager.findRootResource().countResourcesFrom(RelationshipTypes.PLATFORM);
     }
     
     public Collection<Platform> getPlatformsByType(AuthzSubject subject, String platformTypeName) throws PermissionException, InvalidAppdefTypeException {

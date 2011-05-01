@@ -1198,7 +1198,8 @@ public class ServerManagerImpl implements ServerManager {
     
     @Transactional(readOnly = true)
     public Number getServerCount() {
-        return getAllServers().size();
+        return resourceDao.countByIndexedProperty(AppdefResourceType.APPDEF_TYPE_ID, 
+            AppdefEntityConstants.APPDEF_TYPE_SERVER);
     }
     
     @PostConstruct
