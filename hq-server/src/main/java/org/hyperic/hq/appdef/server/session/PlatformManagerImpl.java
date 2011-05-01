@@ -277,7 +277,7 @@ public class PlatformManagerImpl implements PlatformManager {
         }
         Collections.sort(platformTypes, new Comparator<PlatformType>() {
             public int compare(PlatformType o1, PlatformType o2) {
-                return o1.getName().compareTo(o2.getName());
+                return o1.getSortName().compareTo(o2.getSortName());
             }
         });
         // valuePager converts local/remote interfaces to value objects
@@ -295,14 +295,9 @@ public class PlatformManagerImpl implements PlatformManager {
     public PageList<PlatformTypeValue> getViewablePlatformTypes(AuthzSubject subject, PageControl pc)
         throws PermissionException, NotFoundException {
 
-        // build the platform types from the visible list of platforms
-        Collection<Platform> platforms = getViewablePlatforms(subject, pc);
-
-        Collection<PlatformType> platTypes = filterResourceTypes(platforms);
-
-        // valuePager converts local/remote interfaces to value objects
-        // as it pages through them.
-        return valuePager.seek(platTypes, pc);
+        // TODO build the platform types from the platforms the user is allowed to view
+        //Collection<PlatformType> platTypes = filterResourceTypes(platforms);
+        return getAllPlatformTypes(subject, pc);
     }
 
     /**
@@ -659,13 +654,10 @@ public class PlatformManagerImpl implements PlatformManager {
         Collection<Resource> platforms = findByCreationTime(System.currentTimeMillis() - range);
         Set<Platform> plats = new HashSet<Platform>();
        
-        Collection<Integer> viewable = getViewablePlatformPKs(subject);
-        //and iterate over the list to remove any item not viewable
+        //TODO filter viewable
         for (Iterator<Resource> i = platforms.iterator(); i.hasNext();) {
             Resource platform = i.next();
-            if (viewable.contains(platform.getId())) {
-               plats.add(toPlatform(platform));
-            }
+            plats.add(toPlatform(platform));
         }
 
         // valuePager converts local/remote interfaces to value objects
@@ -1153,12 +1145,7 @@ public class PlatformManagerImpl implements PlatformManager {
     public PageList<PlatformValue> getPlatformsByServers(AuthzSubject subject,
                                                          List<AppdefEntityID> sIDs)
         throws PlatformNotFoundException, PermissionException {
-        Set<Integer> authzPks;
-        try {
-            authzPks = new HashSet<Integer>(getViewablePlatformPKs(subject));
-        } catch (NotFoundException exc) {
-            return new PageList<PlatformValue>();
-        }
+       
 
         Integer[] ids = new Integer[sIDs.size()];
         int i = 0;
@@ -1168,12 +1155,10 @@ public class PlatformManagerImpl implements PlatformManager {
         }
 
         List<Resource> foundPlats = findByServers(ids);
-
+        //TODO filter platforms by viewable
         ArrayList<Platform> platforms = new ArrayList<Platform>();
         for (Resource platform : foundPlats) {
-            if (authzPks.contains(platform.getId())) {
-                platforms.add(toPlatform(platform));
-            }
+            platforms.add(toPlatform(platform));
         }
         return valuePager.seek(platforms, null);
     }
@@ -1222,85 +1207,20 @@ public class PlatformManagerImpl implements PlatformManager {
         // as it pages through them.
         return valuePager.seek(platCollection, pc);
     }
-
-    /**
-     * builds a list of resource types from the list of resources
-     * @param resources - {@link Collection} of {@link AppdefResource}
-     * @param {@link Collection} of {@link AppdefResourceType}
-     */
-    private Collection<PlatformType> filterResourceTypes(Collection<Platform> resources) {
-        final Set<PlatformType> resTypes = new HashSet<PlatformType>();
-        for (final Platform o : resources) {
-            resTypes.add(o.getPlatformType());
-            
-        }
-        final List<PlatformType> rtn = new ArrayList<PlatformType>(resTypes);
-        Collections.sort(rtn, new Comparator<PlatformType>() {
-            private String getName(PlatformType obj) {
-                return obj.getSortName();
-            }
-            public int compare(PlatformType o1, PlatformType o2) {
-                return getName(o1).compareTo(getName(o2));
-            }
-        });
-        return rtn;
-    }
-
-    private Collection<Integer> getViewablePlatformPKs(AuthzSubject who) throws PermissionException,
-        NotFoundException {
-        //TODO perm check
-        //OperationType op = getOperationByName(resourceManager
-          //  .findResourceTypeByName(AuthzConstants.platformResType),
-            //AuthzConstants.platformOpViewPlatform);
-        //return permissionManager.findOperationScopeBySubject(who, op.getId());
-        Collection<Resource> resources = getAllPlatforms();
-        Set<Integer> platformIds = new HashSet<Integer>();
-        for(Resource resource: resources) {
-           platformIds.add(resource.getId());
-        }
-        return platformIds;
-    }
-
-    /**
-     * Find an operation by name inside a ResourcetypeValue object
-     */
-    protected OperationType getOperationByName(org.hyperic.hq.inventory.domain.ResourceType rtV, String opName)
-        throws PermissionException {
-        OperationType op = rtV.getOperationType(opName);
-        if(op == null) {
-            throw new PermissionException("Operation: " + opName + " not valid for ResourceType: " +
-                                      rtV.getName());
-        }
-        return op;
-    }
-
-  
+    
     @Transactional(readOnly = true)
     public Integer[] getPlatformIds(AuthzSubject subject, Integer platTypeId)
         throws PermissionException {
         //TODO this was never guaranteed to be ordered, should return a Collection
-        try {
+        Collection<Resource> platforms = resourceManager.findResourceTypeById(platTypeId).getResources();
+        Collection<Integer> platIds = new ArrayList<Integer>();
 
-            Collection<Resource> platforms = resourceManager.findResourceTypeById(platTypeId).getResources();
-            Collection<Integer> platIds = new ArrayList<Integer>();
-
-            // now get the list of PKs
-            Collection<Integer> viewable = getViewablePlatformPKs(subject);
-            // and iterate over the list to remove any item not in the
-            // viewable list
-            for (Resource platform : platforms) {
-
-                if (viewable.contains(platform.getId())) {
-                    // remove the item, user cant see it
-                    platIds.add(platform.getId());
-                }
-            }
-
-            return platIds.toArray(new Integer[0]);
-        } catch (NotFoundException e) {
-            // There are no viewable platforms
-            return new Integer[0];
+        // TODO filter viewable platforms
+        for (Resource platform : platforms) {
+            platIds.add(platform.getId());
         }
+
+        return platIds.toArray(new Integer[0]);
     }
     
     private Collection<Resource> findAllOrderName(boolean asc) {
@@ -1372,15 +1292,10 @@ public class PlatformManagerImpl implements PlatformManager {
                     throw new NotFoundException("Invalid sort attribute: " + attr);
             }
         }
-        // now get the list of PKs
-        Set<Integer> viewable = new HashSet<Integer>(getViewablePlatformPKs(whoami));
-        // and iterate over the List to remove any item not in the
-        // viewable list
+        // TODO filter by viewable
         Set<Platform> viewablePlatforms = new HashSet<Platform>();
         for (Resource platform : platforms) {
-            if (viewable.contains(platform.getId())) {
-                viewablePlatforms.add(toPlatform(platform));
-            }
+            viewablePlatforms.add(toPlatform(platform));
         }
         return viewablePlatforms;
     }
@@ -1937,38 +1852,23 @@ public class PlatformManagerImpl implements PlatformManager {
     }
     
     public Collection<Platform> getPlatformsByType(AuthzSubject subject, String platformTypeName) throws PermissionException, InvalidAppdefTypeException {
-        try {
-            ResourceType ptype = resourceManager.findResourceTypeByName(platformTypeName);
-            if (ptype == null) {
-                return new HashSet<Platform>(0);
-            }
-           
-            Collection<Resource> resources = ptype.getResources();
-            Set<Platform> platforms = new HashSet<Platform>(resources.size());
-           
-            if (resources.size() == 0) {
-                // There are no viewable platforms
-                return platforms;
-            }
-            // now get the list of PKs
-            Collection<Integer> viewable = getViewablePlatformPKs(subject);
-            // and iterate over the List to remove any item not in the
-            // viewable list
-            for (Iterator<Resource> it = resources.iterator(); it.hasNext();) {
-                Resource platform = it.next();
-                if (!viewable.contains(platform.getId())) {
-                    // remove the item, user can't see it
-                    it.remove();
-                }
-            }
-            for(Resource resource: resources) {
-                platforms.add(toPlatform(resource));
-            }
-            return platforms;
-        } catch (NotFoundException e) {
-            // There are no viewable platforms
-            return new PageList<Platform>();
+        ResourceType ptype = resourceManager.findResourceTypeByName(platformTypeName);
+        if (ptype == null) {
+            return new HashSet<Platform>(0);
         }
+           
+        Collection<Resource> resources = ptype.getResources();
+        Set<Platform> platforms = new HashSet<Platform>(resources.size());
+           
+        if (resources.size() == 0) {
+            // There are no viewable platforms
+            return platforms;
+        }
+        // TODO filter viewable
+        for(Resource resource: resources) {
+            platforms.add(toPlatform(resource));
+        }
+        return platforms;
     }
 
     

@@ -386,14 +386,8 @@ public class ServiceManagerImpl implements ServiceManager {
     @Transactional(readOnly = true)
     public PageList<ServiceTypeValue> getViewableServiceTypes(AuthzSubject subject, PageControl pc)
         throws PermissionException, NotFoundException {
-        // build the server types from the visible list of servers
-     
-        final List<Integer> authzPks = getViewableServices(subject);
-        final Collection<ServiceType> serviceTypes = getServiceTypes(authzPks, true);
-
-        // valuePager converts local/remote interfaces to value objects
-        // as it pages through them.
-        return valuePager.seek(serviceTypes, pc);
+        //TODO filter types by viewable service
+        return getAllServiceTypes(subject, pc);
     }
 
     @Transactional(readOnly = true)
@@ -1012,27 +1006,6 @@ public class ServiceManagerImpl implements ServiceManager {
         return resources;
     }
     
-    /**
-     * Get the scope of viewable services for a given user
-     * @param whoami - the user
-     * @return List of ServicePK's for which subject has
-     *         AuthzConstants.serviceOpViewService
-     */
-    private List<Integer> getViewableServices(AuthzSubject whoami) throws PermissionException,
-        NotFoundException {
-        //TODO perm check
-        //Operation op = getOperationByName(resourceManager
-          //  .findResourceTypeByName(AuthzConstants.serviceResType),
-            //AuthzConstants.serviceOpViewService);
-        //List<Integer> idList = permissionManager.findOperationScopeBySubject(whoami, op.getId());
-        ArrayList<Integer> idList = new ArrayList<Integer>();
-        Set<Resource> services = findAllServiceResources();
-        for(Resource service: services) {
-            idList.add(service.getId());
-        }
-        return idList;
-    }
-
     @Transactional(readOnly = true)
     public Number getServiceCount() {
         return findAllServiceResources().size();

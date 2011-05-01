@@ -260,33 +260,6 @@ public class ServerManagerImpl implements ServerManager {
         return newServerName;
     }
 
-    /**
-     * Get the scope of viewable servers for a given user
-     * @param whoami - the user
-     * @return List of ServerPK's for which subject has
-     *         AuthzConstants.serverOpViewServer
-     */
-    protected List<Integer> getViewableServers(AuthzSubject whoami) throws PermissionException, NotFoundException {
-        if (log.isDebugEnabled()) {
-            log.debug("Checking viewable servers for subject: " + whoami.getName());
-        }
-
-        //OperationType op = getOperationByName(resourceManager.findResourceTypeByName(AuthzConstants.serverResType),
-          //  AuthzConstants.serverOpViewServer);
-       // List<Integer> idList = permissionManager.findOperationScopeBySubject(whoami, op.getId());
-        
-        Collection<Resource> servers = getAllServers();
-
-        if (log.isDebugEnabled()) {
-            log.debug("There are: " + servers.size() + " viewable servers");
-        }
-        List<Integer> keyList = new ArrayList<Integer>(servers.size());
-        for (Resource server: servers) {
-            keyList.add(server.getId());
-        }
-        return keyList;
-    }
- 
     private Collection<Resource> getAllServers() {
         Set<Resource> servers = new HashSet<Resource>();
         Collection<Resource> platforms = resourceManager.findRootResource().getResourcesFrom(RelationshipTypes.PLATFORM);
@@ -458,10 +431,14 @@ public class ServerManagerImpl implements ServerManager {
      */
     @Transactional(readOnly=true)
     public PageList<ServerTypeValue> getAllServerTypes(AuthzSubject subject, PageControl pc) {
-        // valuePager converts local/remote interfaces to value objects
-        // as it pages through them.
-        //TODO order by name
-        return valuePager.seek(getAllServerTypes(), pc);
+        List<ServerType> serverTypes = new ArrayList<ServerType>();
+        Set<ResourceType> resourceTypes = getAllServerResourceTypes();
+        for(ResourceType serverType: resourceTypes) {
+            serverTypes.add(serverFactory.createServerType(serverType));
+        }
+        AppdefNameComparator comparator = new AppdefNameComparator(true);
+        Collections.sort(serverTypes,comparator);
+        return valuePager.seek(serverTypes, pc);
     }
     
     @Transactional(readOnly=true)
@@ -473,14 +450,6 @@ public class ServerManagerImpl implements ServerManager {
         return new PageList<Resource>(resources.getContent(),(int)resources.getTotalElements());
     }
     
-    private Set<ServerType> getAllServerTypes() {
-        Set<ServerType> serverTypes = new HashSet<ServerType>();
-        Set<ResourceType> resourceTypes = getAllServerResourceTypes();
-        for(ResourceType serverType: resourceTypes) {
-            serverTypes.add(serverFactory.createServerType(serverType));
-        }
-        return serverTypes;
-    }
     private Set<ResourceType> getAllServerResourceTypes() {
         Set<ResourceType> resourceTypes = new HashSet<ResourceType>();
         Collection<ResourceType> platformTypes = resourceManager.findRootResourceType().
@@ -490,17 +459,7 @@ public class ServerManagerImpl implements ServerManager {
         }
         return resourceTypes;
     }
-    
-    private Collection<ServerType> getServerTypes(final List<Integer> serverIds, final boolean asc) {
-        Set<ServerType> serverTypes = new HashSet<ServerType>();
-        for(Integer serverId: serverIds) {
-            serverTypes.add(serverFactory.createServerType(resourceManager.findResourceById(serverId).getType()));
-        }
-        final List<ServerType> rtn = new ArrayList<ServerType>(serverTypes);
-        Collections.sort(rtn, new AppdefNameComparator(asc));
-        return rtn;
-    }
-
+  
     /**
      * Find viewable server types
      * @return list of serverTypeValues
@@ -509,12 +468,8 @@ public class ServerManagerImpl implements ServerManager {
     @Transactional(readOnly=true)
     public PageList<ServerTypeValue> getViewableServerTypes(AuthzSubject subject, PageControl pc)
         throws PermissionException, NotFoundException {
-        // build the server types from the visible list of servers
-        final List<Integer> authzPks = getViewableServers(subject);
-        final Collection<ServerType> serverTypes =getServerTypes(authzPks, true);
-        // valuePager converts local/remote interfaces to value objects
-        // as it pages through them.
-        return valuePager.seek(serverTypes, pc);
+        //TODO filter viewable
+        return getAllServerTypes(subject, pc);
     }
 
     /**
@@ -699,33 +654,21 @@ public class ServerManagerImpl implements ServerManager {
      */
     @Transactional(readOnly=true)
     public Integer[] getServerIds(AuthzSubject subject, Integer servTypeId) throws PermissionException {
-
-        try {
-
-            Collection<Resource> servers = resourceManager.findResourceTypeById(servTypeId).getResources();
-            if (servers.size() == 0) {
-                return new Integer[0];
-            }
-            List<Integer> serverIds = new ArrayList<Integer>(servers.size());
-
-            // now get the list of PKs
-            Collection<Integer> viewable = getViewableServers(subject);
-            // and iterate over the List to remove any item not in the
-            // viewable list
-            int i = 0;
-            for (Iterator<Resource> it = servers.iterator(); it.hasNext(); i++) {
-                Resource server = it.next();
-                if (viewable.contains(server.getId())) {
-                    // add the item, user can see it
-                    serverIds.add(server.getId());
-                }
-            }
-
-            return (Integer[]) serverIds.toArray(new Integer[0]);
-        } catch (NotFoundException e) {
-            // There are no viewable servers
+        Collection<Resource> servers = resourceManager.findResourceTypeById(servTypeId).getResources();
+        if (servers.size() == 0) {
             return new Integer[0];
         }
+        List<Integer> serverIds = new ArrayList<Integer>(servers.size());
+
+        // TODO filter viewable
+        int i = 0;
+        for (Iterator<Resource> it = servers.iterator(); it.hasNext(); i++) {
+            Resource server = it.next();
+            // add the item, user can see it
+            serverIds.add(server.getId());
+        }
+
+        return (Integer[]) serverIds.toArray(new Integer[0]);
     }
  
     /**
@@ -772,13 +715,7 @@ public class ServerManagerImpl implements ServerManager {
     private Collection<Server> getServersByPlatformImpl(AuthzSubject subject, Integer platId, Integer servTypeId,
                                                         PageControl pc)
         throws PermissionException, ServerNotFoundException, PlatformNotFoundException {
-        List<Integer> authzPks;
-        try {
-            authzPks = getViewableServers(subject);
-        } catch (NotFoundException exc) {
-            throw new ServerNotFoundException("No (viewable) servers associated with platform " + platId);
-        }
-
+       
         List<Server> servers;
         // first, if they specified a server type, then filter on it
         if (servTypeId != null) {
@@ -789,14 +726,7 @@ public class ServerManagerImpl implements ServerManager {
             servers = findByPlatformOrderName(resourceManager.findResourceById(platId));
             
         }
-        for (Iterator<Server> i = servers.iterator(); i.hasNext();) {
-            Server aServer = i.next();
-
-            // Remove the server if its not viewable
-            if (!authzPks.contains(aServer.getId())) {
-                i.remove();
-            }
-        }
+        //TODO filter viewable servers
 
         // If sort descending, then reverse the list
         if (pc != null && pc.isDescending()) {
@@ -875,18 +805,11 @@ public class ServerManagerImpl implements ServerManager {
     private Collection<Server> getServersByApplicationImpl(AuthzSubject subject, Integer appId, Integer servTypeId)
         throws ServerNotFoundException, ApplicationNotFoundException, PermissionException {
 
-        List<Integer> authzPks;
+       
         ResourceGroup appLocal = resourceGroupManager.findResourceGroupById(appId);
         if(appLocal == null) {
             throw new ApplicationNotFoundException(appId);
         }
-
-        try {
-            authzPks = getViewableServers(subject);
-        } catch (NotFoundException e) {
-            throw new ServerNotFoundException("No (viewable) servers " + "associated with " + "application " + appId, e);
-        }
-
         HashMap<Integer, Server> serverCollection = new HashMap<Integer, Server>();
 
         // XXX - a better solution is to control the viewable set returned by
@@ -916,10 +839,7 @@ public class ServerManagerImpl implements ServerManager {
             if (servTypeId != null && !(aServer.getServerType().getId().equals(servTypeId))) {
                 i.remove();
             }
-            // otherwise, remove the server if its not viewable
-            else if (!authzPks.contains(aServer.getId())) {
-                i.remove();
-            }
+            //TODO remove server if not viewable
         }
 
         return serverCollection.values();
