@@ -3,12 +3,16 @@ package org.hyperic.hq.appdef.server.session;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import org.hyperic.hq.agent.mgmt.domain.Agent;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
+import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.inventory.domain.RelationshipTypes;
+import org.hyperic.hq.inventory.domain.Resource;
 
 public class Platform
     extends AppdefResource {
@@ -26,10 +30,6 @@ public class Platform
     private String commentText;
 
     private Collection<Ip> ips = new HashSet<Ip>();
-
-    private Collection<Server> servers = new HashSet<Server>();
-    
-    private Collection<Service> services = new HashSet<Service>();
 
     public Integer getCpuCount() {
         return cpuCount;
@@ -56,21 +56,23 @@ public class Platform
     }
 
     public Collection<Server> getServers() {
+        Set<Server> servers = new HashSet<Server>();
+        Set<Resource> serverResources = getResource().getResourcesFrom(RelationshipTypes.SERVER);
+        for(Resource server: serverResources) {
+            servers.add(Bootstrap.getBean(ServerFactory.class).createServer(server));
+        } 
         return servers;
     }
     
-    public void addServer(Server server) {
-        servers.add(server);
-    }
-    
     public Collection<Service> getServices() {
+        Set<Service> services = new HashSet<Service>();
+        Set<Resource> serviceResources = getResource().getResourcesFrom(RelationshipTypes.SERVICE);
+        for(Resource service: serviceResources) {
+            services.add(Bootstrap.getBean(ServiceFactory.class).createService(service));
+        }
         return services;
     }
     
-    public void addService(Service service) {
-        services.add(service);
-    }
-
     public PlatformType getPlatformType() {
         return platformType;
     }

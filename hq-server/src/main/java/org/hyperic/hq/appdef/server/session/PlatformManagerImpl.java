@@ -199,16 +199,7 @@ public class PlatformManagerImpl implements PlatformManager {
     }
     
     private Platform toPlatform(Resource resource) {
-        Platform platform = platformFactory.createPlatform(resource);
-        Set<Resource> servers = resource.getResourcesFrom(RelationshipTypes.SERVER);
-        for(Resource server: servers) {
-            platform.addServer(serverFactory.createServer(server));
-        }
-        Set<Resource> services = resource.getResourcesFrom(RelationshipTypes.SERVICE);
-        for(Resource service: services) {
-            platform.addService(serviceFactory.createService(service));
-        }
-        return platform;
+        return platformFactory.createPlatform(resource);
     }
 
     // TODO resolve circular dependency

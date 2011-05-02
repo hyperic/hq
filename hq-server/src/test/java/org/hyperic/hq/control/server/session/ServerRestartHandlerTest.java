@@ -88,7 +88,7 @@ public class ServerRestartHandlerTest
         Integer serviceId = Integer.valueOf(889);
         service.setId(serviceId);
         AppdefEntityID serviceEntityId = new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVICE, serviceId);
-        server.addService(service);
+        //server.addService(service);
         EasyMock.expect(serverManager.findServerById(SERVER_ID.getId())).andReturn(server);
         autoInvManager.toggleRuntimeScan(null, SERVER_ID, true);
         ConfigResponse response = new ConfigResponse();
@@ -118,7 +118,7 @@ public class ServerRestartHandlerTest
         Integer serviceId = Integer.valueOf(889);
         service.setId(serviceId);
         AppdefEntityID serviceEntityId = new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVICE, serviceId);
-        server.addService(service);
+        //server.addService(service);
         EasyMock.expect(serverManager.findServerById(SERVER_ID.getId())).andReturn(server);
         autoInvManager.toggleRuntimeScan(null, SERVER_ID, true);
         EasyMock.expectLastCall().andThrow(new RuntimeException("No!"));
@@ -153,7 +153,7 @@ public class ServerRestartHandlerTest
         Integer serviceId = Integer.valueOf(889);
         service.setId(serviceId);
         AppdefEntityID serviceEntityId = new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVICE, serviceId);
-        server.addService(service);
+        //server.addService(service);
         ConfigResponse response = new ConfigResponse();
         EasyMock.expect(serverManager.findServerById(SERVER_ID.getId())).andReturn(server);
         autoInvManager.toggleRuntimeScan(null, SERVER_ID, true);
@@ -183,7 +183,7 @@ public class ServerRestartHandlerTest
         Integer serviceId = Integer.valueOf(889);
         service.setId(serviceId);
         AppdefEntityID serviceEntityId = new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVICE, serviceId);
-        server.addService(service);
+        //server.addService(service);
         EasyMock.expect(serverManager.findServerById(SERVER_ID.getId())).andReturn(server);
         autoInvManager.toggleRuntimeScan(null, SERVER_ID, true);
 

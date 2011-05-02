@@ -148,12 +148,7 @@ public class ServerManagerImpl implements ServerManager {
     }
     
     private Server toServer(Resource resource) {
-        Server server = serverFactory.createServer(resource);
-        Set<Resource> services = resource.getResourcesFrom(RelationshipTypes.SERVICE);
-        for(Resource service: services) {
-            server.addService(serviceFactory.createService(service));
-        }
-        return server;
+        return serverFactory.createServer(resource);
     }
 
     /**
