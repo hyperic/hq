@@ -76,7 +76,8 @@ public class Measurement implements ContainerManagedTimestampTrackable, Serializ
 
     @Id
     @GeneratedValue(generator = "combo")
-    @GenericGenerator(name = "combo", parameters = { @Parameter(name = "sequence", value = "EAM_MEASUREMENT_ID_SEQ") }, strategy = "org.hyperic.hibernate.id.ComboGenerator")
+    @GenericGenerator(name = "combo", parameters = { @Parameter(name = "sequence", value = "EAM_MEASUREMENT_ID_SEQ") }, 
+        strategy = "org.hyperic.hibernate.id.ComboGenerator")
     @Column(name = "ID")
     private Integer id;
 
