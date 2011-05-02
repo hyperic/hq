@@ -1598,7 +1598,9 @@ hyperic.dashboard.chartWidget = function(args) {
     var portletName = args.portletName;
     var portletLabel = args.title;
     var baseUrl = args.url;
-
+    var chartUrl = args.chartUrl;
+    var ctypeChartUrl = args.ctypeChartUrl;
+    
     that.sheets = {};
     that.sheets.loading = hqDojo.query('.loading',node)[0];
     that.sheets.error_loading = hqDojo.query('.error_loading',node)[0];
@@ -1829,8 +1831,9 @@ hyperic.dashboard.chartWidget = function(args) {
         var chartId = that.currentChartId;
         var chartIndex = that.chartselect.select.selectedIndex;
         if(confirm('Remove ' + that.charts[chartId].name + ' from saved charts?')) {
+        	var urlToUse = chartUrl.replace("{rid}", that.charts[chartId].rid).replace("{mtid}", that.charts[chartId].mtid);
             hqDojo.xhrPost( {
-                url: baseUrl + "/chart/" + that.charts[chartId].rid + "/" + that.charts[chartId].mtid + "/",
+                url: urlToUse,
                 content: {
             		"_method" : "DELETE" // need to work around issue using PUT directly
             	},
@@ -2152,15 +2155,15 @@ hyperic.dashboard.chartWidget = function(args) {
     	
     	that._fetchingChart = true;
     	
-    	var chartUrl = baseUrl + "/chart/" + that.charts[chart].rid + "/" + that.charts[chart].mtid + "/";
+    	var urlToUse = unescape(chartUrl).replace("{rid}", that.charts[chart].rid).replace("{mtid}", that.charts[chart].mtid);
     	var ctype = that.charts[chart].ctype;
     	
     	if (ctype != null) {
-    		chartUrl += ctype + "/";
+    		urlToUse = unescape(ctypeChartUrl).replace("{rid}", that.charts[chart].rid).replace("{mtid}", that.charts[chart].mtid).replace("{ctype}", ctype);
     	}
     
     	return hqDojo.xhrGet( {
-            url: chartUrl,
+            url: urlToUse,
             handleAs: 'json',
             headers: { "Content-Type": "application/json"},
             preventCache: true,
