@@ -285,7 +285,7 @@ public class PluginManagerControllerTest extends BaseControllerTest {
     }
     
     @Test
-    public void testPluginSummaries(){
+    public void testPluginSummaries() throws ParseException{
         expect(mockPluginManager.getAllPlugins()).andReturn(getAllPlugins());
         expect(mockPluginManager.getPluginRollupStatus()).andReturn(getPluginRollupStatus());
         replay(mockPluginManager);
@@ -297,7 +297,7 @@ public class PluginManagerControllerTest extends BaseControllerTest {
         assertEquals("plugin-a: successAgentCount should be 100",100,summaries.get(0).get("successAgentCount"));
         assertEquals("plugin-a: errorAgentCount should be 1",1,summaries.get(0).get("errorAgentCount"));
         assertEquals("plugin-a: inProgress should be false",false,(Boolean)summaries.get(0).get("inProgress"));
-        assertEquals("plugin-a: updatedDate should be ...",format.format(date1),""+summaries.get(0).get("updatedDate"));
+        assertEquals("plugin-a: updatedDate should be ...", date1.getTime(), format.parse(summaries.get(0).get("updatedDate").toString()).getTime());
         assertEquals("plugin-a: initialDeployDate should be ...",format.format(date2),""+summaries.get(0).get("initialDeployDate"));
         assertEquals("plugin-a: id should be 1",1,summaries.get(0).get("id"));
         assertEquals("plugin-a: name should be plugin-a","plugin-a",summaries.get(0).get("name"));
