@@ -50,8 +50,8 @@ import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.OptimisticLock;
+import org.hibernate.annotations.Parameter;
 import org.hyperic.hq.auth.domain.AuthzSubject;
-import org.hyperic.hq.inventory.domain.Resource;
 
 @Entity
 @Table(name = "EAM_AUDIT")
@@ -70,8 +70,9 @@ public abstract class Audit implements Serializable {
     private String fieldName;
 
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")
-    @GeneratedValue(generator = "mygen1")
+    @GeneratedValue(generator = "combo")
+    @GenericGenerator(name = "combo", parameters = { @Parameter(name = "sequence", value = "EAM_AUDIT_ID_SEQ") }, 
+        strategy = "org.hyperic.hibernate.id.ComboGenerator")
     @Column(name = "ID")
     private Integer id;
 
