@@ -25,15 +25,14 @@
 
 package org.hyperic.hq.agent.server.monitor;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.AgentMonitorValue;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Iterator;
-
-import org.hyperic.hq.agent.AgentMonitorValue;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * A class which implements the AgentMonitorInterface to make
@@ -52,9 +51,7 @@ import org.apache.commons.logging.LogFactory;
  *
  * These methods are exposed through the monitoring interface.
  */
-public abstract class AgentMonitorSimple 
-    implements AgentMonitorInterface
-{
+public abstract class AgentMonitorSimple implements AgentMonitorInterface {
     // Hash of key names onto methods
     private HashMap   methodMap;
     private String[]  methodKeys;

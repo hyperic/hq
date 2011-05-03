@@ -23,22 +23,26 @@
  *  USA.
  */
 
-package org.hyperic.hq.agent.server;
+package org.hyperic.hq.agent.spring;
 
-import org.hyperic.hq.agent.AgentCommand;
-import org.hyperic.hq.agent.AgentRemoteException;
-import org.hyperic.hq.agent.AgentRemoteValue;
+import org.hyperic.hq.bizapp.client.AgentCallbackClientException;
+import org.hyperic.hq.operation.RegisterAgentResponse;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.List;
+/**
+ * @author Helena Edelson
+ */
+public interface OperationServiceCallback {
+
+    boolean userIsValid(String user, String pword) throws AgentCallbackClientException;
+
+    RegisterAgentResponse registerAgent(String oldAgentToken, String user, String pword, String authToken, String agentIP,
+                                        int agentPort, String version, int cpuCount, boolean isNewTransportAgent,
+                                        boolean unidirectional) throws AgentCallbackClientException;
 
 
-public interface CommandDispatcher {
+    String updateAgent(String agentToken, String user, String pword, String agentIp, int agentPort, boolean isNewTransportAgent,
+                              boolean unidirectional) throws AgentCallbackClientException;
 
-    void addServerHandlers(List<AgentServerHandler> startedHandlers);
 
-    /* TODO once remoting is removed from hyperic, these remote exceptions must be replaced */
-    AgentRemoteValue processRequest(AgentCommand agentCommand, InputStream inStream, OutputStream outStream) throws AgentRemoteException;
-    
+
 }

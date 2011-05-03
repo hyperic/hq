@@ -25,12 +25,6 @@
 
 package org.hyperic.hq.agent.server;
 
-import java.net.InetSocketAddress;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Properties;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConfig;
@@ -42,6 +36,12 @@ import org.hyperic.hq.common.YesOrNo;
 import org.hyperic.hq.transport.AgentTransport;
 import org.jboss.remoting.InvokerLocator;
 
+import java.net.InetSocketAddress;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Properties;
+
 /**
  * The class that manages the agent transport lifecycle.
  */
@@ -52,33 +52,23 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
     private static final String REMOTE_TRANSPORT_LOCATOR_PATH = "ServerInvokerServlet";
     
     private final Object _lock = new Object();
-    private final AgentDaemon _agent;
-    private final AgentConfig _config;
-    private final AgentStorageProvider _storageProvider;
-    private final Map _serviceInterfaceName2ServiceInterface;
-    private final Map _serviceInterface2ServiceImpl;
-    private AgentTransport _agentTransport;
-    private InvokerLocator _remoteTransportLocator;
-    
-    public AgentTransportLifecycleImpl(AgentDaemon agent,
-                                       AgentConfig bootConfig, 
-                                       AgentStorageProvider storageProvider) {
-        _agent = agent;
-        _config = bootConfig;
-        _storageProvider = storageProvider;
-        _serviceInterfaceName2ServiceInterface = new HashMap();
-        _serviceInterface2ServiceImpl = new HashMap();
-        
-        // Normally we don't want 'this' to escape the constructor, but 
-        // we made this class final so we don't have to worry about a 
-        // not fully initialized instance of a subclass (of this class) 
-        // handled by another thread.
-        
-        // register handler to be notified when the transport layer 
-        // configuration is finally set
-        _agent.registerNotifyHandler(this, CommandsAPIInfo.NOTIFY_SERVER_SET);
+    private final AgentService agentService;
+    private final AgentConfig config;
+    private final AgentStorageProvider storageProvider;
+    private final Map<String, Class> serviceInterfaceName2ServiceInterface = new HashMap<String, Class>();
+    private final Map<Class, Object> serviceInterface2ServiceImpl = new HashMap<Class, Object>();
+    private AgentTransport agentTransport;
+    private InvokerLocator remoteTransportLocator;
+
+
+    public AgentTransportLifecycleImpl(AgentService agentService) throws AgentRunningException {
+        this.agentService = agentService;
+        this.config = agentService.getBootConfig();
+        this.storageProvider = agentService.getStorageProvider();
+        agentService.registerNotifyHandler(this, CommandsAPIInfo.NOTIFY_SERVER_SET);
     }
-            
+
+
     /**
      * @see org.hyperic.hq.agent.server.AgentTransportLifecycle#startAgentTransport()
      */
@@ -87,9 +77,9 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
         // are available thru boot props - before starting, register all the services with the agent transport
         
         // Boot properties override stored values        
-        ProviderInfo provider = CommandsAPIInfo.getProvider(_storageProvider);
+        ProviderInfo provider = CommandsAPIInfo.getProvider(storageProvider);
         
-        Properties bootProperties = _config.getBootProperties();
+        Properties bootProperties = config.getBootProperties();
         
         boolean isNewTransport = isNewTransport(bootProperties, provider);
         
@@ -167,15 +157,15 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
             InetSocketAddress pollerBindAddr = 
                 new InetSocketAddress(host, unidirectionalPort);
             
-            if (_config.isProxyServerSet()) {                
+            if (config.isProxyServerSet()) {
                 _log.info("Configuring proxy host and port: host="+
-                         _config.getProxyIp()+"; port="+_config.getProxyPort());
+                         config.getProxyIp()+"; port="+ config.getProxyPort());
                 
-                System.setProperty("https.proxyHost", _config.getProxyIp());
-                System.setProperty("https.proxyPort", String.valueOf(_config.getProxyPort()));
+                System.setProperty("https.proxyHost", config.getProxyIp());
+                System.setProperty("https.proxyPort", String.valueOf(config.getProxyPort()));
             }            
             
-            _agentTransport = 
+            agentTransport =
                 new AgentTransport(pollerBindAddr, 
                                    REMOTE_TRANSPORT_LOCATOR_PATH, 
                                    true, 
@@ -188,24 +178,25 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
             // TODO need to implement bidirectional transport and return 
             // an agent transport instead of null
             // do we need to set up a proxy server for http or https protocol?
-            _agentTransport = null;
+            agentTransport = null;
         }        
         
-        if (_agentTransport != null) {
+        if (agentTransport != null) {
             synchronized (_lock) {
-                _remoteTransportLocator = _agentTransport.getRemoteEndpointLocator();
+                remoteTransportLocator = agentTransport.getRemoteEndpointLocator();
             }
             
-            // register the services and start the server            
-            for (Iterator iter = _serviceInterface2ServiceImpl.entrySet().iterator(); 
+            // register the services and start the server
+            
+            for (Iterator iter = serviceInterface2ServiceImpl.entrySet().iterator();
                  iter.hasNext();) {
                 Map.Entry entry = (Map.Entry) iter.next();
                 Class serviceInterface = (Class)entry.getKey();
                 Object serviceImpl = (Object)entry.getValue();
-                _agentTransport.registerService(serviceInterface, serviceImpl);
+                agentTransport.registerService(serviceInterface, serviceImpl);
             }
             
-            _agentTransport.start();
+            agentTransport.start();
         }
 
     }
@@ -214,16 +205,16 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
      * @see org.hyperic.hq.agent.server.AgentTransportLifecycle#stopAgentTransport()
      */
     public void stopAgentTransport() {
-        if (_agentTransport != null) {
+        if (agentTransport != null) {
             try {
-                _agentTransport.stop();
+                agentTransport.stop();
             } catch (InterruptedException e) {
             }
             
-            _agentTransport = null;
+            agentTransport = null;
             
             synchronized (_lock) {
-               _remoteTransportLocator = null;
+               remoteTransportLocator = null;
             }
         }
     }
@@ -232,8 +223,8 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
      * @see org.hyperic.hq.agent.server.AgentTransportLifecycle#handleNotification(java.lang.String, java.lang.String)
      */
     public void handleNotification(String msgClass, String msg) {
-        ProviderInfo provider = CommandsAPIInfo.getProvider(_storageProvider);
-        Properties bootProperties = _config.getBootProperties();
+        ProviderInfo provider = CommandsAPIInfo.getProvider(storageProvider);
+        Properties bootProperties = config.getBootProperties();
         
         if (!isNewTransport(bootProperties, provider)) {
             _log.info("Stopping agent transport.");
@@ -243,7 +234,7 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
         
         // Start the agent transport if configuration properties were 
         // not available on the original start attempt.
-        if (_agentTransport == null) {
+        if (agentTransport == null) {
             try {
                 startAgentTransport();
             } catch (Exception e) {
@@ -254,7 +245,7 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
         
         // If the agent transport is still not started and we are using 
         // the new transport, then we have a problem!
-        if (_agentTransport == null && isUnidirectional(bootProperties, provider)) {            
+        if (agentTransport == null && isUnidirectional(bootProperties, provider)) {
             _log.error("Failed to start agent transport after agent setup");                
             
             return;
@@ -265,12 +256,12 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
             _log.error("Agent transport expected agent token set but " +
                        "storage provider does not have token.");
         } else {            
-            if (_agentTransport != null) {
+            if (agentTransport != null) {
                 String agentToken = provider.getAgentToken();
                 
                 _log.info("Updating agent transport with new agent token: "+agentToken);
                 
-                _agentTransport.updateAgentToken(agentToken);                
+                agentTransport.updateAgentToken(agentToken);
             }
         }
     }
@@ -279,16 +270,16 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
      * @see org.hyperic.hq.agent.server.AgentTransportLifecycle#registerService(java.lang.Class, java.lang.Object)
      */
     public void registerService(Class serviceInterface, Object serviceImpl) {
-        Class oldInterface = (Class)_serviceInterfaceName2ServiceInterface.get(serviceInterface.getName());
+        Class oldInterface = (Class) serviceInterfaceName2ServiceInterface.get(serviceInterface.getName());
         
         if (oldInterface == null) {
-            _serviceInterfaceName2ServiceInterface.put(serviceInterface.getName(), serviceInterface);
-            _serviceInterface2ServiceImpl.put(serviceInterface, serviceImpl);                    
+            serviceInterfaceName2ServiceInterface.put(serviceInterface.getName(), serviceInterface);
+            serviceInterface2ServiceImpl.put(serviceInterface, serviceImpl);
         } else {
-            _serviceInterfaceName2ServiceInterface.remove(serviceInterface.getName());
-            _serviceInterface2ServiceImpl.remove(oldInterface);
-            _serviceInterfaceName2ServiceInterface.put(serviceInterface.getName(), serviceInterface);
-            _serviceInterface2ServiceImpl.put(serviceInterface, serviceImpl); 
+            serviceInterfaceName2ServiceInterface.remove(serviceInterface.getName());
+            serviceInterface2ServiceImpl.remove(oldInterface);
+            serviceInterfaceName2ServiceInterface.put(serviceInterface.getName(), serviceInterface);
+            serviceInterface2ServiceImpl.put(serviceInterface, serviceImpl);
         }
     }
     
@@ -297,7 +288,7 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
      */
     public InvokerLocator getRemoteTransportLocator() {
         synchronized (_lock) {
-            return _remoteTransportLocator;
+            return remoteTransportLocator;
         }
     }    
     

@@ -41,7 +41,7 @@ public final class AgentApplicationContext implements SmartLifecycle {
     private static final Log logger = LogFactory.getLog(AgentApplicationContext.class);
 
     private static AnnotationConfigApplicationContext ctx;
- 
+
     public static AnnotationConfigApplicationContext create(String[] basePackages, Class<?>... annotatedClasses) {
         if (ctx != null) return ctx;
   
@@ -49,8 +49,7 @@ public final class AgentApplicationContext implements SmartLifecycle {
             ctx = new AnnotationConfigApplicationContext(annotatedClasses);
             ctx.registerShutdownHook();
             ctx.scan(basePackages);
-
-
+            ctx.refresh();
         }
         catch (BeansException e) {
             shutdown();
@@ -74,13 +73,11 @@ public final class AgentApplicationContext implements SmartLifecycle {
      * Do graceful shutdown and close on demand if needed.
      */
     public static void shutdown() {
-        if (ctx != null) {
-            ctx.destroy();
-        }
+        if (ctx != null)  ctx.destroy(); 
     }
 
     public boolean isAutoStartup() {
-        return true;
+        return false;
     }
 
     public void stop(Runnable callback) {

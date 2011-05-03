@@ -81,7 +81,7 @@ public class AgentDaemon extends AgentMonitorSimple {
 
     private PluginLoader handlerClassLoader;
 
-    private CommandDispatcher dispatcher;
+    private RemotingCommandDispatcher dispatcher;
 
     private AgentStorageProvider storageProvider;
 
@@ -135,7 +135,7 @@ public class AgentDaemon extends AgentMonitorSimple {
         return started.get();
     }
 
-    public CommandDispatcher getCommandDispatcher() {
+    public RemotingCommandDispatcher getCommandDispatcher() {
         return dispatcher;
     }
 
@@ -367,7 +367,7 @@ public class AgentDaemon extends AgentMonitorSimple {
             this.handlerClassLoader.addURL(handlersLib);
         }
 
-        this.dispatcher = new CommandDispatcher();
+        this.dispatcher = null; //new CommandDispatcher();
 
         this.storageProvider = AgentDaemon.createStorageProvider(cfg);
 
@@ -456,7 +456,7 @@ public class AgentDaemon extends AgentMonitorSimple {
                     String jarPath = libJar.getAbsolutePath();
                     loadedHandler = this.handlerLoader.loadServerHandler(jarPath);
                     this.serverHandlers.add(loadedHandler);
-                    this.dispatcher.addServerHandler(loadedHandler);
+                    //this.dispatcher.addServerHandler(loadedHandler);
                 }
             } catch (Exception e) {
                 throw new AgentConfigException("Failed to load " + "'" + libJar + "': " + e.getMessage());
@@ -579,7 +579,7 @@ public class AgentDaemon extends AgentMonitorSimple {
     private void startHandlers() throws AgentStartException {
         for (AgentServerHandler serverHandler : this.serverHandlers) {
             AgentServerHandler handler = serverHandler;
-            try {
+            /*try {
                 handler.startup(this);
             } catch (AgentStartException exc) {
                 logger.error("Error starting plugin " + handler, exc);
@@ -587,7 +587,7 @@ public class AgentDaemon extends AgentMonitorSimple {
             } catch (Exception exc) {
                 logger.error("Unknown exception", exc);
                 throw new AgentStartException("Error starting plugin " + handler, exc);
-            }
+            }*/
             this.startedHandlers.add(handler);
         }
     }
@@ -641,8 +641,7 @@ public class AgentDaemon extends AgentMonitorSimple {
      *                             or one of the plugins failed to start.
      */
     public void start() throws AgentStartException {
-        System.out.println("***********Starting...");
-       // running.set(true);
+        // running.set(true);
 
         try {
             Properties bootProps = this.bootConfig.getBootProperties();
@@ -701,7 +700,7 @@ public class AgentDaemon extends AgentMonitorSimple {
 
             this.sendNotification(NOTIFY_AGENT_UP, "we're up");
 
-            this.listener.listenLoop();
+            this.listener.listen();
 
             this.sendNotification(NOTIFY_AGENT_DOWN, "going down");
 

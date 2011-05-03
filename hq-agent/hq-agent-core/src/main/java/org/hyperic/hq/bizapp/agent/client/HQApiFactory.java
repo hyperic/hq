@@ -26,9 +26,6 @@
 
 package org.hyperic.hq.bizapp.agent.client;
 
-import java.net.URI;
-import java.util.Properties;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.server.AgentDaemon;
@@ -37,6 +34,9 @@ import org.hyperic.hq.bizapp.agent.ProviderInfo;
 import org.hyperic.hq.hqapi1.HQApi;
 import org.hyperic.hq.product.PluginException;
 
+import java.net.URI;
+import java.util.Properties;
+
 public class HQApiFactory {
 
 	private static final Log _log = LogFactory.getLog(HQApiFactory.class.getName());
@@ -44,8 +44,8 @@ public class HQApiFactory {
 	private static final String HQ_USER = "agent.setup.camLogin";
 	private static final String HQ_PASS = "agent.setup.camPword";
 
-	public static HQApi getHQApi(AgentDaemon agent, Properties bootProps)
-		throws PluginException {
+	public static HQApi getHQApi(AgentDaemon agent, Properties bootProps) throws PluginException {
+
 
 		try {
 			ProviderInfo providerInfo = CommandsAPIInfo.getProvider(agent.getStorageProvider());

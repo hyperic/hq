@@ -38,18 +38,33 @@ import java.io.OutputStream;
  */
 
 public interface AgentServerHandler {
+
+     /**
+     * inform the plugin that it should startup.  When this method is invoked,
+     * a plugin should setup all the internal resources it needs (like
+     * helper threads, etc.)
+     * @throws AgentStartException
+     */
+    public void startup(AgentService agentService) throws AgentStartException;
+
     /**
-     * Get an array of strings with the commands that this handler
-     * recognizes.
+     * inform the plugin that it should shutdown.  When this method is invoked,
+     * a plugin should cleanup all resources (such as open sockets, threads,
+     * etc.).
      */
 
+    public void shutdown();
+
+    
+    /**
+     * Get an array of strings with the commands that this handler recognizes.
+     */
     public String[] getCommandSet();
 
     /**
      * Get information about the API, including the version number,
      * which is used to ensure that remote APIs match up with local
      * APIs.
-     *
      * @return an AgentAPIInfo object, valid for this server handler.
      */
 
@@ -76,28 +91,7 @@ public interface AgentServerHandler {
      * @see #getCommandSet
      */
 
-    public AgentRemoteValue dispatchCommand(String cmd, AgentRemoteValue arg,
-                                            InputStream inStream, 
-                                            OutputStream outStream)
-        throws AgentRemoteException;
+    public AgentRemoteValue dispatchCommand(String cmd, AgentRemoteValue arg, InputStream inStream,
+                                            OutputStream outStream) throws AgentRemoteException;
 
-
-    /**
-     * inform the plugin that it should startup.  When this method is invoked,
-     * a plugin should setup all the internal resources it needs (like 
-     * helper threads, etc.)
-     * 
-     * @param agent The agent.
-     */
-
-    public void startup(AgentDaemon agent) 
-        throws AgentStartException;
-
-    /**
-     * inform the plugin that it should shutdown.  When this method is invoked,
-     * a plugin should cleanup all resources (such as open sockets, threads,
-     * etc.).
-     */
-
-    public void shutdown();
 }

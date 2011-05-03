@@ -34,7 +34,7 @@ import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.client.LegacyAgentCommandsClientImpl;
-import org.hyperic.hq.agent.server.AgentDaemon;
+import org.hyperic.hq.agent.server.AgentLifecycleService;
 import org.hyperic.hq.agent.server.LoggingOutputStream;
 import org.hyperic.hq.agent.spring.AgentApplicationContext;
 import org.hyperic.hq.agent.spring.SpringAgentConfiguration;
@@ -55,7 +55,9 @@ import org.tanukisoftware.wrapper.WrapperManager;
 import java.io.*;
 import java.net.*;
 import java.util.Properties;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -66,7 +68,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class AgentClient {
 
     private Log log = LogFactory.getLog(AgentClient.class);
-    
+
     private static final PrintStream SYSTEM_ERR = System.err;
     private static final PrintStream SYSTEM_OUT = System.out;
 
@@ -99,28 +101,26 @@ public class AgentClient {
     private static final String PROP_STARTUP_TIMEOUT = "agent.startupTimeOut";
     private static final String PROP_FQDN = "platform.fqdn";
 
-    private static final String AGENT_CLASS =
-            "org.hyperic.hq.agent.server.AgentDaemon";
+    //private static final String AGENT_CLASS = "org.hyperic.hq.agent.server.AgentDaemon";
 
     private static final int AGENT_STARTUP_TIMEOUT = (60 * 5) * 1000; // 5 min
     private static final int FORCE_SETUP = -42;
 
-    private static final String JAAS_CONFIG = "jaas.config";
+    //private static final String JAAS_CONFIG = "jaas.config";
 
     private AgentCommandsClient agtCommands;
     private CommandsClient camCommands;
     private AgentConfig config;
-    private String sslHandlerPkg;
+    //private String sslHandlerPkg;
 
     private boolean redirectedOutputs = false;
 
     private static final AtomicBoolean running = new AtomicBoolean(false);
 
-    private static Thread agent;
+    private static AgentLifecycleService agentService;
 
     private static AnnotationConfigApplicationContext context;
 
-    public static final String[] BASE_PATHS = {"org.hyperic.hq", "com.hyperic.hq"};
 
     public AgentClient(AgentConfig config, SecureAgentConnection conn) {
         //this.agtCommands = null;//new AmqpCommandOperationService(new LegacyAgentCommandsClientImpl(conn));
@@ -129,26 +129,26 @@ public class AgentClient {
         this.config = config;
     }
 
-    private static void initialize(final AgentConfig config) throws ExecutionException, TimeoutException, InterruptedException {
+    private static void initialize(final AgentConfig config) throws ExecutionException, TimeoutException, InterruptedException { 
+        final String[] BASE_PATHS = {"org.hyperic.hq.agent", "org.hyperic.hq.operation.rabbit"};
         context = AgentApplicationContext.create(BASE_PATHS, SpringAgentConfiguration.class);
+        TimeUnit.MILLISECONDS.sleep(1000);
         System.out.println("context=" + context);
+        for (String n : context.getBeanDefinitionNames()) {
+            System.out.println(n);
+        }
+        agentService = context.getBean(AgentLifecycleService.class);
+        agentService.start(config);
 
+        while(!agentService.isRunning()) {
+           //System.out.println("Waiting...agent service is not running.");
+           if (agentService.isRunning()) break;
+        }
+        running.set(agentService.isRunning());
 
         /*new Thread(new AgentDaemon.RunnableAgent(config)).start();
         running.set(true);*/
 
-        /*agent = new Thread(new AgentDaemon.RunnableAgent(config));
-        agent.start(); */
-
-         //running.set(AgentDaemon.isRunning());
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-		Future<Boolean> received = executor.submit(new Callable<Boolean>() {
-			public Boolean call() throws Exception {
-                new AgentDaemon.RunnableAgent(config);
-                return AgentDaemon.isRunning();
-			}
-		});
-        running.set(received.get());
         SYSTEM_OUT.println("- Is the Agent running? " + running);
 
 
@@ -160,9 +160,9 @@ public class AgentClient {
 
     private static void destroy() {
         SYSTEM_OUT.println("- Is the Agent running? " + running);
-        
+
         try {
-            
+
             if (running.get()) {
                 running.set(false);
             }
@@ -964,12 +964,12 @@ public class AgentClient {
         }
 
         try {
-           agtCommands.ping();
+            agtCommands.ping();
         } catch (Exception exc) {
-             throw new AgentInvokeException("Unable to ping agent: " + exc.getMessage());
+            throw new AgentInvokeException("Unable to ping agent: " + exc.getMessage());
         }
     }
- 
+
 
     private PrintStream newLogStream(String stream, Properties bootProps) throws AgentConfigException, IOException {
         Logger logger = Logger.getLogger(stream);
@@ -1041,7 +1041,7 @@ public class AgentClient {
             initialize(config);
         } catch (Throwable t) {
             //running.set(false);
-            throw new AgentInvokeException(t.getCause().getMessage());
+            throw new AgentInvokeException(t.getMessage());
         }
 
         SYSTEM_OUT.println("- Agent thread running");
@@ -1280,7 +1280,7 @@ public class AgentClient {
                 } else {
                     nWait = 1;
                 }
-             
+
                 try {
                     client.cmdDie(nWait);
                     destroy();
