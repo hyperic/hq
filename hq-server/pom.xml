@@ -217,13 +217,31 @@
 			<plugin>
 				<artifactId>maven-source-plugin</artifactId>
 			</plugin>
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-resources</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<delimiters>
+									<delimiter>@</delimiter>
+							</delimiters>
+							<outputDirectory>${basedir}/target/classes</outputDirectory>
+								<resources>
+	  								<resource>
+	    								<directory>src/main/resources</directory>
+	    								<filtering>true</filtering>
+		  							</resource>
+								</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>	
-    	<resources>
-      		<resource>
-        		<directory>src/main/resources</directory>
-        		<filtering>true</filtering>
-      		</resource>
-    	</resources>
   </build>
 
  <repositories>
