@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2010], VMware, Inc.
+ * Copyright (C) [2004-2011], VMware, Inc.
  * This file is part of Hyperic.
  *
  * Hyperic is free software; you can redistribute it and/or modify
@@ -42,6 +42,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -270,6 +271,42 @@ public class ZeventManager implements ZeventEnqueuer {
 
             return true;
         }
+    }
+    
+    /**
+     * Register a list of event classes. These classes must be registered prior to
+     * attempting to listen to individual event types.
+     * 
+     * @param eventClasses a list of event classes to register
+     * @return false if an event class is already registered
+     */
+    @Resource(name="preregisterZevents")
+    public boolean registerEventClass(List<String> eventClasses) {
+    	if (_log.isDebugEnabled()) {
+    		_log.debug("Zevent classes to register: " + eventClasses);
+    	}
+    	
+        boolean success = true;
+        
+    	for (String className : eventClasses) {
+            Class<?> clazz;
+            className = className.trim();
+            if (className.length() == 0 || className.startsWith("#")) {
+                continue;
+            }
+            try {
+                clazz = Class.forName(className);
+            } catch (Exception e) {
+                _log.warn("Unable to find Zevent class [" + className + "]", e);
+                continue;
+            }
+            if (!registerEventClass(clazz)) {
+            	// return false if there is at least one failure
+            	success = false;
+            }
+        }
+    	
+    	return success;
     }
 
     /**

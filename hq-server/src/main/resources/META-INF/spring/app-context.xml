@@ -170,6 +170,11 @@
 	    <value>org.hyperic.hq.measurement.server.session.MonitorableType</value>
 	</util:list>
 
+	<util:list id="preregisterZevents">
+		<value>org.hyperic.hq.measurement.server.session.MeasurementZevent</value>
+		<value>org.hyperic.hq.zevents.HeartBeatZevent</value>
+	</util:list>
+	
 	<bean id="transactionManager"
 		class="org.springframework.orm.hibernate3.HibernateTransactionManager"
 		p:defaultTimeout="900">
