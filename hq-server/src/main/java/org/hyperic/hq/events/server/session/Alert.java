@@ -52,6 +52,7 @@ import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.OptimisticLock;
+import org.hibernate.annotations.Parameter;
 import org.hyperic.hq.alert.data.AlertActionLogRepository;
 import org.hyperic.hq.alert.data.AlertConditionLogRepository;
 import org.hyperic.hq.alert.data.ResourceAlertDefinitionRepository;
@@ -103,8 +104,9 @@ public class Alert implements AlertInterface, Serializable {
     private boolean fixed;
 
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")
-    @GeneratedValue(generator = "mygen1")
+    @GeneratedValue(generator = "combo")
+    @GenericGenerator(name = "combo", parameters = { @Parameter(name = "sequence", value = "EAM_ALERT_ID_SEQ") }, 
+        strategy = "org.hyperic.hibernate.id.ComboGenerator")
     @Column(name = "ID")
     private Integer id;
 

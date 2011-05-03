@@ -47,6 +47,7 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
+import org.hibernate.annotations.Parameter;
 import org.hyperic.hq.config.domain.Crispo;
 import org.hyperic.util.config.ConfigResponse;
 
@@ -65,8 +66,9 @@ public class ExecutionStrategyInfo implements Serializable {
     private Crispo config;
 
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")
-    @GeneratedValue(generator = "mygen1")
+    @GeneratedValue(generator = "combo")
+    @GenericGenerator(name = "combo", parameters = { @Parameter(name = "sequence", value = "EAM_EXEC_STRATEGIES_ID_SEQ") }, 
+        strategy = "org.hyperic.hibernate.id.ComboGenerator")
     @Column(name = "ID")
     private Integer id;
 

@@ -47,6 +47,7 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
+import org.hibernate.annotations.Parameter;
 import org.hyperic.hq.config.domain.Crispo;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
@@ -81,8 +82,9 @@ public class GalertDef implements AlertDefinitionInterface, PerformsEscalations,
     private Integer group;
 
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")
-    @GeneratedValue(generator = "mygen1")
+    @GeneratedValue(generator = "combo")
+    @GenericGenerator(name = "combo", parameters = { @Parameter(name = "sequence", value = "EAM_GALERT_DEFS_ID_SEQ") }, 
+        strategy = "org.hyperic.hibernate.id.ComboGenerator")
     @Column(name = "ID")
     private Integer id;
 

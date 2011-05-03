@@ -46,6 +46,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.Parameter;
 import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
@@ -113,8 +114,9 @@ public class AIPlatform implements ContainerManagedTimestampTrackable, Serializa
     private String gateway;
     
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")  
-    @GeneratedValue(generator = "mygen1")  
+    @GeneratedValue(generator = "combo")
+    @GenericGenerator(name = "combo", parameters = { @Parameter(name = "sequence", value = "EAM_AIQ_PLATFORM_ID_SEQ") }, 
+        strategy = "org.hyperic.hibernate.id.ComboGenerator")
     @Column(name = "ID")
     private Integer id;
     

@@ -50,6 +50,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.Parameter;
 import org.hyperic.hq.auth.domain.AuthzSubject;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.events.AlertAuxLog;
@@ -85,8 +86,9 @@ public class GalertLog implements AlertInterface, Serializable {
     private boolean fixed;
 
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")
-    @GeneratedValue(generator = "mygen1")
+    @GeneratedValue(generator = "combo")
+    @GenericGenerator(name = "combo", parameters = { @Parameter(name = "sequence", value = "EAM_GALERT_LOGS_ID_SEQ") }, 
+        strategy = "org.hyperic.hibernate.id.ComboGenerator")
     @Column(name = "ID")
     private Integer id;
 

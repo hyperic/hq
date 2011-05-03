@@ -42,6 +42,7 @@ import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
+import org.hibernate.annotations.Parameter;
 
 @Entity
 @Table(name = "EAM_MEASUREMENT_BL")
@@ -53,8 +54,9 @@ public class Baseline implements Serializable {
     private long computeTime;
 
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")
-    @GeneratedValue(generator = "mygen1")
+    @GeneratedValue(generator = "combo")
+    @GenericGenerator(name = "combo", parameters = { @Parameter(name = "sequence", value = "EAM_MEASUREMENT_BL_ID_SEQ") }, 
+        strategy = "org.hyperic.hibernate.id.ComboGenerator")
     @Column(name = "ID")
     private Integer id;
 

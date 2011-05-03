@@ -37,6 +37,7 @@ import javax.persistence.Version;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.config.domain.Crispo;
 import org.hyperic.util.config.ConfigResponse;
@@ -47,8 +48,9 @@ import org.hyperic.util.config.ConfigResponse;
 public class ExecutionStrategyTypeInfo implements Serializable {
 
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")
-    @GeneratedValue(generator = "mygen1")
+    @GeneratedValue(generator = "combo")
+    @GenericGenerator(name = "combo", parameters = { @Parameter(name = "sequence", value = "EAM_EXEC_STRATEGY_TYPES_ID_SEQ") }, 
+        strategy = "org.hyperic.hibernate.id.ComboGenerator")
     @Column(name = "ID")
     private Integer id;
 

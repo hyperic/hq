@@ -26,18 +26,13 @@
 package org.hyperic.hq.agent.mgmt.domain;
 
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
 
-import javax.persistence.CollectionTable;
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
@@ -45,8 +40,8 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
+import org.hibernate.annotations.Parameter;
 import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
-import org.hyperic.hq.inventory.domain.Resource;
 
 @Entity
 @Table(name = "EAM_AGENT")
@@ -74,8 +69,9 @@ public class Agent implements ContainerManagedTimestampTrackable, Serializable {
     private Long creationTime;
 
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")
-    @GeneratedValue(generator = "mygen1")
+    @GeneratedValue(generator = "combo")
+    @GenericGenerator(name = "combo", parameters = { @Parameter(name = "sequence", value = "EAM_AGENT_ID_SEQ") }, 
+        strategy = "org.hyperic.hibernate.id.ComboGenerator")
     @Column(name = "ID")
     private Integer id;
 

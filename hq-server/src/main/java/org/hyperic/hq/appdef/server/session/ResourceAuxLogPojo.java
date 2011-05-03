@@ -42,6 +42,7 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
+import org.hibernate.annotations.Parameter;
 import org.hyperic.hq.appdef.galerts.ResourceAuxLog;
 import org.hyperic.hq.galerts.server.session.GalertAuxLog;
 import org.hyperic.hq.galerts.server.session.GalertDef;
@@ -62,8 +63,9 @@ public class ResourceAuxLogPojo implements Serializable {
     private GalertDef def;
 
     @Id
-    @GenericGenerator(name = "mygen1", strategy = "increment")
-    @GeneratedValue(generator = "mygen1")
+    @GeneratedValue(generator = "combo")
+    @GenericGenerator(name = "combo", parameters = { @Parameter(name = "sequence", value = "EAM_RESOURCE_AUX_LOG_ID_SEQ") }, 
+        strategy = "org.hyperic.hibernate.id.ComboGenerator")
     @Column(name = "ID")
     private Integer id;
 
