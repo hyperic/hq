@@ -28,13 +28,13 @@ public class AppdefConverterImpl implements AppdefConverter {
     }
     
     public int getAppdefType(ResourceType rv) {
-        if(!(rv.getResourceTypesTo(RelationshipTypes.PLATFORM).isEmpty())) {
+        if(rv.hasResourceTypesTo(RelationshipTypes.PLATFORM)) {
             return AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
         }
-        if(!(rv.getResourceTypesTo(RelationshipTypes.SERVER).isEmpty()) || !(rv.getResourceTypesTo(RelationshipTypes.VIRTUAL).isEmpty())) {
+        if(rv.hasResourceTypesTo(RelationshipTypes.SERVER) || rv.hasResourceTypesTo(RelationshipTypes.VIRTUAL)) {
             return AppdefEntityConstants.APPDEF_TYPE_SERVER;
         }
-        if(!(rv.getResourceTypesTo(RelationshipTypes.SERVICE)).isEmpty()) {
+        if(rv.hasResourceTypesTo(RelationshipTypes.SERVICE)) {
             return AppdefEntityConstants.APPDEF_TYPE_SERVICE;
         }
         if(rv.getName().equals(AppdefEntityConstants.APPDEF_NAME_APPLICATION)){

@@ -266,6 +266,16 @@ public class ResourceTypeIntegrationTest {
         assertEquals(1, resourceTypes.size());
         assertEquals(store, resourceTypes.iterator().next());
     }
+    
+    @Test
+    public void testHasResourceTypesTo() {
+        assertTrue(produceDept.hasResourceTypesTo(RelationshipTypes.CONTAINS));
+    }
+    
+    @Test
+    public void testHasResourceTypesToNone() {
+        assertFalse(produceDept.hasResourceTypesTo("Foo"));
+    }
       
     @Test
     public void testHasResourcesNone() {

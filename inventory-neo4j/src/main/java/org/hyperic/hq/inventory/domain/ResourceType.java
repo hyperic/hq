@@ -266,17 +266,22 @@ public class ResourceType {
         }
         return getPropertyTypes();
     }
-
-    private Set<ResourceType> getRelatedResourceTypes(String relationName,
-                                                      org.neo4j.graphdb.Direction direction) {
-        Set<ResourceType> resourceTypes = new HashSet<ResourceType>();
-        Traverser relationTraverser = getPersistentState().traverse(Traverser.Order.BREADTH_FIRST,
+    
+    private Traverser getTraverser(String relationName,
+                                   org.neo4j.graphdb.Direction direction) {
+        return getPersistentState().traverse(Traverser.Order.BREADTH_FIRST,
             new StopEvaluator() {
                 public boolean isStopNode(TraversalPosition currentPos) {
                     return currentPos.depth() >= 1;
                 }
             }, ReturnableEvaluator.ALL_BUT_START_NODE,
             DynamicRelationshipType.withName(relationName), direction);
+    }
+
+    private Set<ResourceType> getRelatedResourceTypes(String relationName,
+                                                      org.neo4j.graphdb.Direction direction) {
+        Set<ResourceType> resourceTypes = new HashSet<ResourceType>();
+        Traverser relationTraverser = getTraverser(relationName, direction);
         for (Node related : relationTraverser) {
             ResourceType type = graphDatabaseContext.createEntityFromState(related,
                 ResourceType.class);
@@ -284,6 +289,15 @@ public class ResourceType {
             resourceTypes.add(type);
         }
         return resourceTypes;
+    }
+    
+    private boolean hasRelatedResourceTypes(String relationName,
+                                            org.neo4j.graphdb.Direction direction) {
+        Traverser relationTraverser = getTraverser(relationName, direction);
+        if(relationTraverser.iterator().hasNext()) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -355,6 +369,10 @@ public class ResourceType {
      */
     public Set<ResourceType> getResourceTypesTo(String relationName) {
         return getRelatedResourceTypes(relationName, org.neo4j.graphdb.Direction.INCOMING);
+    }
+    
+    public boolean hasResourceTypesTo(String relationName) {
+        return hasRelatedResourceTypes(relationName, org.neo4j.graphdb.Direction.INCOMING);
     }
 
     /**
