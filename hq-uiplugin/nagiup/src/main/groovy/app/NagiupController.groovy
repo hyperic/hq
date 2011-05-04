@@ -25,7 +25,6 @@
  */
 
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.appdef.server.session.CPropResourceSortField
 import org.hyperic.hq.bizapp.server.session.AppdefBossImpl
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.hqu.rendit.html.DojoUtil

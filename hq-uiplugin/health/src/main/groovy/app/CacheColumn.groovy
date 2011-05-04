@@ -41,6 +41,10 @@ class CacheColumn implements SortField {
         desc
     }
     
+    public String getSortString() {
+        value
+    }
+
     String getValue() {
         value
     }
