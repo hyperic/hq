@@ -147,15 +147,8 @@ public class Resource {
     public int countResourcesFrom(String relationName) {
         return countRelatedResources(relationName, Direction.OUTGOING);
     }
-
-    /**
-     * 
-     * @param recursive true if return children of children, etc
-     * @return The children of this resource (associated by a
-     *         {@link RelationshipTypes.CONTAINS} relationship)
-     */
-    public Set<Resource> getChildren(boolean recursive) {
-        Set<Resource> children = new HashSet<Resource>();
+    
+    private Traverser getChildTraverser(boolean recursive) {
         StopEvaluator stopEvaluator;
         if (recursive) {
             stopEvaluator = StopEvaluator.END_OF_GRAPH;
@@ -166,10 +159,21 @@ public class Resource {
                 }
             };
         }
-        Traverser relationTraverser = getPersistentState().traverse(Traverser.Order.BREADTH_FIRST,
+        return getPersistentState().traverse(Traverser.Order.BREADTH_FIRST,
             stopEvaluator, ReturnableEvaluator.ALL_BUT_START_NODE,
             DynamicRelationshipType.withName(RelationshipTypes.CONTAINS),
             Direction.OUTGOING.toNeo4jDir());
+    }
+
+    /**
+     * 
+     * @param recursive true if return children of children, etc
+     * @return The children of this resource (associated by a
+     *         {@link RelationshipTypes.CONTAINS} relationship)
+     */
+    public Set<Resource> getChildren(boolean recursive) {
+        Set<Resource> children = new HashSet<Resource>();
+        Traverser relationTraverser = getChildTraverser(recursive);
         for (Node related : relationTraverser) {
             children.add(graphDatabaseContext.createEntityFromState(related, Resource.class));
         }
@@ -184,20 +188,7 @@ public class Resource {
      */
     public Set<Integer> getChildrenIds(boolean recursive) {
         Set<Integer> children = new HashSet<Integer>();
-        StopEvaluator stopEvaluator;
-        if (recursive) {
-            stopEvaluator = StopEvaluator.END_OF_GRAPH;
-        } else {
-            stopEvaluator = new StopEvaluator() {
-                public boolean isStopNode(TraversalPosition currentPos) {
-                    return currentPos.depth() >= 1;
-                }
-            };
-        }
-        Traverser relationTraverser = getPersistentState().traverse(Traverser.Order.BREADTH_FIRST,
-            stopEvaluator, ReturnableEvaluator.ALL_BUT_START_NODE,
-            DynamicRelationshipType.withName(RelationshipTypes.CONTAINS),
-            Direction.OUTGOING.toNeo4jDir());
+        Traverser relationTraverser = getChildTraverser(recursive);
         for (Node related : relationTraverser) {
             children.add((Integer) related.getProperty("id"));
         }
@@ -493,8 +484,11 @@ public class Resource {
      * @return true if the specified relationship is a child
      */
     public boolean hasChild(Resource resource, boolean recursive) {
-        if (getChildren(recursive).contains(resource)) {
-            return true;
+        Traverser relationTraverser = getChildTraverser(recursive);
+        for (Node related : relationTraverser) {
+            if(related.equals(resource.getPersistentState())) {
+                return true;
+            }
         }
         return false;
     }
@@ -512,13 +506,7 @@ public class Resource {
      *         Resource by Outgoing relationship
      */
     public boolean isRelatedTo(Resource resource, String relationName) {
-        Traverser relationTraverser = getPersistentState().traverse(Traverser.Order.BREADTH_FIRST,
-            new StopEvaluator() {
-                public boolean isStopNode(TraversalPosition currentPos) {
-                    return currentPos.depth() >= 1;
-                }
-            }, ReturnableEvaluator.ALL_BUT_START_NODE,
-            DynamicRelationshipType.withName(relationName), Direction.OUTGOING.toNeo4jDir());
+        Traverser relationTraverser = getTraverser(relationName, Direction.OUTGOING);
         for (Node related : relationTraverser) {
             if (related.equals(resource.getPersistentState())) {
                 return true;

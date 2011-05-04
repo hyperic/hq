@@ -57,6 +57,7 @@ public class Neo4jResourceDao implements ResourceDao {
     public List<Resource> find(Integer firstResult, Integer maxResults) {
         // TODO the root resource is not filtered out from DAO. Find a way to do
         // so?
+        //TODO not efficient to create Resource objs for paging.  Better to page at Node level
         List<Resource> resources = new ArrayList<Resource>();
         Iterable<Resource> result = resourceFinder.findAll();
         int currentPosition = 0;
@@ -126,9 +127,7 @@ public class Neo4jResourceDao implements ResourceDao {
 
     // TODO Get rid of assumption that name is unique and use identifier
     public Resource findByName(String name) {
-        Resource resource = resourceFinder.findByPropertyValue("name", name);
-
-        return resource;
+        return resourceFinder.findByPropertyValue("name", name);
     }
 
     public Set<Resource> findByOwner(String owner) {

@@ -380,7 +380,11 @@ public class ResourceType {
      * @return true if resources exist of this type
      */
     public boolean hasResources() {
-        return resources.size() > 0;
+        Traverser resourceTraverser = getTraverser(RelationshipTypes.IS_A, org.neo4j.graphdb.Direction.INCOMING);
+        if(resourceTraverser.iterator().hasNext()) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -391,13 +395,7 @@ public class ResourceType {
      *         ResourceType by Outgoing relationship
      */
     public boolean isRelatedTo(ResourceType entity, String name) {
-        Traverser relationTraverser = getPersistentState().traverse(Traverser.Order.BREADTH_FIRST,
-            new StopEvaluator() {
-                public boolean isStopNode(TraversalPosition currentPos) {
-                    return currentPos.depth() >= 1;
-                }
-            }, ReturnableEvaluator.ALL_BUT_START_NODE, DynamicRelationshipType.withName(name),
-            org.neo4j.graphdb.Direction.OUTGOING);
+        Traverser relationTraverser = getTraverser(name, org.neo4j.graphdb.Direction.OUTGOING);
         for (Node related : relationTraverser) {
             if (related.equals(entity.getPersistentState())) {
                 return true;

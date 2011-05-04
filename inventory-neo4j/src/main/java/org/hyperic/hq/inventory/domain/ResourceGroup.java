@@ -3,6 +3,12 @@ package org.hyperic.hq.inventory.domain;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.neo4j.graphdb.DynamicRelationshipType;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.ReturnableEvaluator;
+import org.neo4j.graphdb.StopEvaluator;
+import org.neo4j.graphdb.TraversalPosition;
+import org.neo4j.graphdb.Traverser;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.data.graph.annotation.GraphProperty;
 import org.springframework.data.graph.annotation.NodeEntity;
@@ -57,9 +63,6 @@ public class ResourceGroup
      */
     @Transactional("neoTxManager")
     public void addMember(Resource member) {
-        if (this.members == null) {
-            this.members = new HashSet<Resource>();
-        }
         members.add(member);
     }
 
@@ -73,10 +76,21 @@ public class ResourceGroup
     
     public Set<Integer> getMemberIds() {
         Set<Integer> memberIds = new HashSet<Integer>();
-        for(Resource member: members) {
-            memberIds.add(member.getId());
+        Traverser relationTraverser = getTraverser();
+        for (Node related : relationTraverser) {
+            memberIds.add((Integer) related.getProperty("id"));
         }
         return memberIds;
+    }
+    
+    private Traverser getTraverser() {
+        return getPersistentState().traverse(Traverser.Order.BREADTH_FIRST,
+            new StopEvaluator() {
+                public boolean isStopNode(TraversalPosition currentPos) {
+                    return currentPos.depth() >= 1;
+                }
+            }, ReturnableEvaluator.ALL_BUT_START_NODE,
+            DynamicRelationshipType.withName(RelationshipTypes.HAS_MEMBER), Direction.OUTGOING.toNeo4jDir());
     }
 
     /**
@@ -85,7 +99,13 @@ public class ResourceGroup
      * @return true if the Resource is a member of the group
      */
     public boolean isMember(Resource member) {
-        return members.contains(member);
+        Traverser relationTraverser = getTraverser();
+        for (Node related : relationTraverser) {
+            if(related.equals(member.getPersistentState())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
