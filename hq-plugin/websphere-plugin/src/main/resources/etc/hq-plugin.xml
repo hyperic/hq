@@ -584,6 +584,21 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
         <config include="connector"/>
         <config include="control" type="control"/>
 
+		<plugin type="config_track" class="org.hyperic.hq.product.FileChangeTrackPlugin">
+			<monitored>
+				<folder path="configuration" recursive="true" filter=".*.ini|.lastTouched"/>
+				<folder path="deploytool/itp/plugins" recursive="true" filter=".*.jar"/>
+				<folder path="bin/ProfileManagement/plugins" recursive="true" filter=".*.jar"/>
+				<folder path="java" recursive="true" filter=".*.jar"/>
+				<folder path="plugins" recursive="true" filter=".*.jar"/>
+				<folder path="installableApps" recursive="true" filter=".*.jar"/>
+				<folder path="optionalLibraries" recursive="true" filter=".*.jar"/>
+				<folder path="lib" recursive="true" filter=".*.jar"/>
+				<folder path="runtimes" recursive="true" filter=".*.jar"/>
+			</monitored>
+		</plugin>
+		<property name="DEFAULT_CONFIG_TRACK_ENABLE" value="true" />
+
     </server>
 
     <server name="WebSphere"
@@ -718,6 +733,22 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
                   description="Maximum Size"/>
             </properties>
         </service>
+		
+		<plugin type="config_track" class="org.hyperic.hq.product.FileChangeTrackPlugin">
+			<monitored>
+				<folder path="configuration" recursive="true" filter=".*.ini|.lastTouched"/>
+				<folder path="deploytool/itp/plugins" recursive="true" filter=".*.jar"/>
+				<folder path="bin/ProfileManagement/plugins" recursive="true" filter=".*.jar"/>
+				<folder path="java" recursive="true" filter=".*.jar"/>
+				<folder path="plugins" recursive="true" filter=".*.jar"/>
+				<folder path="installableApps" recursive="true" filter=".*.jar"/>
+				<folder path="optionalLibraries" recursive="true" filter=".*.jar"/>
+				<folder path="lib" recursive="true" filter=".*.jar"/>
+				<folder path="runtimes" recursive="true" filter=".*.jar"/>
+			</monitored>
+		</plugin>
+		<property name="DEFAULT_CONFIG_TRACK_ENABLE" value="true" />
+		
     </server>
 
     <server name="WebSphere"

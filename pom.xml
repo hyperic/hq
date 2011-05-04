@@ -855,6 +855,14 @@
 				<enabled>false</enabled>
 			</snapshots>
 		</repository>
+		<repository>
+			<id>cm-release</id>
+			<name>Configuration Monitor Repository</name>
+			<url>http://maven.cm.hyperic.org/release</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
 	</repositories>
 
 	<distributionManagement>

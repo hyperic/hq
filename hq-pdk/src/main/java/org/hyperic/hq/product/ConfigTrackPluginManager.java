@@ -55,14 +55,15 @@ public class ConfigTrackPluginManager extends TrackEventPluginManager {
 
         // get property for max diff size
         fileMonitor.setAppDataDir(f.getAbsolutePath());
-        final String maxDiffSize = getProperty("hq.plugins.configmon.maxdiff", "5012");
+        final String maxDiffSize = getProperty("hq.plugins.configmon.maxdiff");
         long size = -1;
         try{
             size = Long.valueOf(maxDiffSize).longValue();
         } catch (NumberFormatException e) {
             log.error(e.getMessage(), e);
         }
-        fileMonitor.setMaxDiffSize(size);
+        if (size >= 0)
+            fileMonitor.setMaxDiffSize(size);
 
         // start the monitor, no events will be tracked until tracked folders are defined.
         if (!(MonitorStatus.STARTED.equals(fileMonitor.getStatus())))

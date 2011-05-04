@@ -181,6 +181,17 @@
     <plugin type="log_track"
             class="org.hyperic.hq.product.Log4JLogTrackPlugin"/>
 
+    <plugin type="config_track"
+            class="org.hyperic.hq.product.FileChangeTrackPlugin">
+            <monitored>
+            	<folder path="conf" recursive="true" filter=".*.properties|.*.xml|.*.policy"/>
+            	<folder path="bin" recursive="false" filter=".*.bat|.*.xml|.*.sh"/>
+            	<folder path="lib" recursive="false" filter=".*.jar"/>
+            	<folder path="webapps" recursive="true" filter=".*\.jar|.*\.war|.*\.ear|.*\.dll|.*\.class|.*\.jsp|.*\.php|.*\.pl|.*\.js|.*\.py|.*\.pyc|.*\.cgi"/>
+            </monitored>
+    </plugin>
+     <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="true" />
+
     <property name="DEFAULT_PROGRAM"
               value="bin/catalina.sh"/>
 
@@ -553,16 +564,6 @@
 
      &internal-services;
      &hibernate-services;
-
-    <plugin type="config_track"
-            class="org.hyperic.hq.product.ConfigFileTrackPlugin"/>
-    <!-- plugin type="config_track"
-            class="org.hyperic.hq.product.FileChangeTrackPlugin">
-            <monitored>
-            	<folder path="wtpwebapps" recursive="true" filter=".*.txt"/>
-            </monitored>
-    </plugin-->
-     <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="true" />
  
     
   </server>

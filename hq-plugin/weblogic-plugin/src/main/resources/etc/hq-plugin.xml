@@ -1179,6 +1179,19 @@
               class="WeblogicEJBControl"/>
     </service>
 
+	<filter name="conf" value=".*\.xml|.*\.cfg|.*\.properties|.*\.ini|.*\.conf|.*\.config"/>
+    <filter name="code" value=".*\.jar|.*\.war|.*\.ear|.*\.dll|.*\.class|.*\.jsp|.*\.php|.*\.pl|.*\.js|.*\.py|.*\.pyc|.*\.cgi"/>
+    <plugin type="config_track"
+    		class="org.hyperic.hq.product.FileChangeTrackPlugin">
+      <monitored>
+        <folder path="common/templates/applications" recursive="true" filter="${code}${conf}"/>
+        <folder path="common/templates/domains" recursive="true" filter="${code}${conf}"/>
+        <folder path="common/templates/scripts" recursive="true" filter="${code}${conf}"/>
+        <folder path="common/templates/silent_scripts" recursive="true" filter="${code}${conf}"/>
+      </monitored>
+    </plugin>
+    <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="true" />
+
   </server>
 
   <server name="Weblogic Admin"

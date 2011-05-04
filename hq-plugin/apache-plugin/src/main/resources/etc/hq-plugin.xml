@@ -801,6 +801,17 @@ ExtendedStatus On
 
       <metrics include="jk-worker"/>
     </service>
+    
+    <plugin type="config_track"
+    		platform="Unix"
+    		class="org.hyperic.hq.product.FileChangeTrackPlugin">
+      <monitored>
+        <folder path="httpd/conf" recursive="false" filter=".*\.conf"/>
+        <folder path="httpd/conf.d" recursive="false" filter=".*\.conf"/>
+      </monitored>
+    </plugin>
+    <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="true" />
+    
   </server>
 
   <server name="Apache"
@@ -921,6 +932,16 @@ ExtendedStatus On
 
       <metrics include="jk-worker"/>
     </service>
+
+    <plugin type="config_track"
+    		class="org.hyperic.hq.product.FileChangeTrackPlugin">
+      <monitored>
+        <folder path="httpd/conf" recursive="false" filter=".*.conf"/>
+        <folder path="httpd/conf.d" recursive="false" filter=".*.conf"/>
+      </monitored>
+    </plugin>
+    <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="true" />
+    
   </server>
 
   <server name="Apache"
