@@ -1169,11 +1169,11 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
      */
     public List<DataPoint> enableMeasurements(AuthzSubject admin,
                                               MaintenanceEvent event,
-                                              Collection<Resource> resources) {
+                                              Collection<Integer> resources) {
         final List<DataPoint> rtn = new ArrayList<DataPoint>(resources.size());
 
         AvailabilityManager am = getAvailabilityManager();
-        for (Resource resource : resources) {
+        for (Integer resource : resources) {
             // HQ-1653: Only disable/enable availability measurements
             // TODO: G (when AvailabilityManager is convered)
             List<Measurement> measurements = am.getAvailMeasurementChildren(resource);

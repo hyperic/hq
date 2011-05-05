@@ -62,7 +62,7 @@ public class AppdefEntityValue {
     private Platform                _platform    = null;
     private Server                  server      = null;
     private Service                 service     = null;
-    private AppdefGroupValue        group       = null;
+   
 
     private AppdefEntityID          _id;
     private AuthzSubject            _subject;
@@ -191,12 +191,9 @@ public class AppdefEntityValue {
     private AppdefGroupValue getGroup(boolean full)
         throws PermissionException, AppdefGroupNotFoundException 
     {
-        if (group == null) {
-            ResourceGroupManager groupMan = 
+       ResourceGroupManager groupMan = 
                Bootstrap.getBean(ResourceGroupManager.class);
-            group = groupMan.getGroupConvert(getSubject(), getGroup());
-        }
-        return group;
+       return groupMan.getGroupConvert(getSubject(), getGroup(),full);
     }
     
     private PageList getGroupAppdefEntityValues(int groupAppdefType,
@@ -301,7 +298,7 @@ public class AppdefEntityValue {
         switch(_id.getType()) {
         case AppdefEntityConstants.APPDEF_TYPE_GROUP:
             ResourceGroup g = getGroup();
-            if (getResourceGroupManager().getGroupConvert(null, g).isMixed()) {
+            if (getResourceGroupManager().getGroupConvert(null, g,false).isMixed()) {
                 return getGroup(false).getAppdefResourceTypeValue().getName();
             }
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
@@ -371,7 +368,7 @@ public class AppdefEntityValue {
         case AppdefEntityConstants.APPDEF_TYPE_GROUP:
             // Make sure this is a compatible group
             ResourceGroup g = getGroup();
-            if (getResourceGroupManager().getGroupConvert(null, g).isMixed())
+            if (getResourceGroupManager().getGroupConvert(null, g,false).isMixed())
                 throw new IllegalStateException("Can't return for mixed group: "
                                                 + _id);
        

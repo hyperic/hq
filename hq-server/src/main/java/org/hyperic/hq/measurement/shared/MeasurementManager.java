@@ -305,7 +305,7 @@ public interface MeasurementManager {
      */
     public List<DataPoint> enableMeasurements(AuthzSubject admin,
                                               MaintenanceEvent event,
-                                              Collection<Resource> resources);
+                                              Collection<Integer> resources);
 
     /**
      * Gets a summary of the metrics which are scheduled for collection, across

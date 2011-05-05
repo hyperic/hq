@@ -410,7 +410,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
      */
     @Transactional(readOnly = true)
     public int getNumMembers(ResourceGroup g) {
-        return getMembers(g).size();
+        return g.countMembers();
     }
     
     @Transactional(readOnly = true)
@@ -418,15 +418,21 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         ResourceGroup group = findResourceGroupById(groupId);
         return getGroupConvert(subject, group);
     }
+    
+    @Transactional(readOnly = true)
+    public AppdefGroupValue getGroupConvert(AuthzSubject subj, ResourceGroup g) {
+        return getGroupConvert(subj,g,true);
+    }
+    
 
     /**
      * Temporary method to convert a ResourceGroup into an AppdefGroupValue
      * 
      */
     @Transactional(readOnly = true)
-    public AppdefGroupValue getGroupConvert(AuthzSubject subj, ResourceGroup g) {
+    public AppdefGroupValue getGroupConvert(AuthzSubject subj, ResourceGroup g, boolean includeMembers) {
         AppdefGroupValue retVal = new AppdefGroupValue();
-        Collection<Resource> members = getMembers(g);
+        
         
         retVal.setId(g.getId());
         retVal.setName(g.getName());
@@ -435,7 +441,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         retVal.setGroupType(AppdefEntityConstants.getAppdefGroupTypeInt(g.getType().getName()));
         retVal.setGroupEntType((Integer)g.getProperty(GROUP_ENT_TYPE));
         retVal.setGroupEntResType((Integer)g.getProperty(GROUP_ENT_RES_TYPE));
-        retVal.setTotalSize(members.size());
+        retVal.setTotalSize(g.countMembers());
         retVal.setSubject(subj);
         //TODO don't have these at the moment
         //retVal.setMTime(new Long(g.getMtime()));
@@ -443,10 +449,12 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         retVal.setModifiedBy(g.getModifiedBy());
         retVal.setOwner(g.getOwner());
 
-        // Add the group members
-        for (Resource r : members) {
-           GroupEntry ge = new GroupEntry(r.getId(), appdefConverter.newAppdefEntityId(r).getAuthzTypeName());
-           retVal.addEntry(ge); 
+        if(includeMembers) {
+            // Add the group members
+            for (Resource r : getMembers(g)) {
+               GroupEntry ge = new GroupEntry(r.getId(), appdefConverter.newAppdefEntityId(r).getAuthzTypeName());
+               retVal.addEntry(ge); 
+            }
         }
         
         if(retVal.isMixed()) {

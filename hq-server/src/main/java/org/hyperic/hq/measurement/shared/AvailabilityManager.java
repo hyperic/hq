@@ -46,13 +46,13 @@ import org.hyperic.util.pager.PageList;
  */
 public interface AvailabilityManager {
 
-    public Measurement getAvailMeasurement(Resource resource);
+    public Measurement getAvailMeasurement(Integer resourceId);
 
     public List<Measurement> getPlatformResources();
 
     public long getDowntime(Resource resource, long begin, long end) throws MeasurementNotFoundException;
 
-    public List<Measurement> getAvailMeasurementChildren(Resource resource);
+    public List<Measurement> getAvailMeasurementChildren(Integer resourceId);
 
     public Map<Integer, List<Measurement>> getAvailMeasurementChildren(List<Integer> resourceIds);
 

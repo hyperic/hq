@@ -262,7 +262,7 @@ public class UIPluginManagerImpl implements UIPluginManager {
 
             attachments = attachmentResourceRepository.findByResourceAndCategory(resourceManager.findRootResource().getId(), cat.getDescription());
 
-            if (!resourceGroupManager.getGroupConvert(user, group).isMixed()) {
+            if (!resourceGroupManager.getGroupConvert(user, group,false).isMixed()) {
                 // For compatible groups add in attachments specific to that
                 // resource type.
                 Collection<Attachment> compatAttachments = attachmentResourceRepository

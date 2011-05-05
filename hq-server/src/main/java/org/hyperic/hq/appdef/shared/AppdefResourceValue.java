@@ -187,7 +187,7 @@ public abstract class AppdefResourceValue
      * 
      */
     public static AppdefResourceType getAppdefResourceType(AuthzSubject subject, ResourceGroup group) {
-        if (Bootstrap.getBean(ResourceGroupManager.class).getGroupConvert(subject, group).isMixed())
+        if (Bootstrap.getBean(ResourceGroupManager.class).getGroupConvert(subject, group,false).isMixed())
             throw new IllegalArgumentException("Group " + group.getId() +
                                                " is a mixed group");
         AppdefGroupValue groupValue = Bootstrap.getBean(ResourceGroupManager.class).getGroupConvert(subject, group);

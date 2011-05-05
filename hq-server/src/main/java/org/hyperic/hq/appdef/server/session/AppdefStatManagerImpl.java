@@ -514,7 +514,7 @@ public class AppdefStatManagerImpl implements AppdefStatManager {
         throws PermissionException {
 
         ResourceGroup group = resourceGroupManager.findResourceGroupById(subject, groupId);
-        AppdefGroupValue groupVal = resourceGroupManager.getGroupConvert(subject, group);
+        AppdefGroupValue groupVal = resourceGroupManager.getGroupConvert(subject, group,false);
         try {
             return appdefStatDAO.getNavMapDataForGroup(subject, group, groupVal);
         } catch (Exception e) {

@@ -158,6 +158,8 @@ public interface ResourceGroupManager
     public AppdefGroupValue getGroupConvert(AuthzSubject subj, ResourceGroup g);
     
     public AppdefGroupValue getGroupConvert(AuthzSubject subj, Integer groupId);
+    
+    AppdefGroupValue getGroupConvert(AuthzSubject subj, ResourceGroup g,boolean includeMembers);
 
     /**
      * Get a list of {@link ResourceGroup}s which are compatible with the
