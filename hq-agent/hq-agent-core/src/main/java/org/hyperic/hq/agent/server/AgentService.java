@@ -42,6 +42,8 @@ public interface AgentService extends AgentMonitorInterface {
     void stop() throws AgentException;
 
     void die() throws AgentRunningException;
+
+    public void stopRunning();
    
     AgentConfig getBootConfig();
 

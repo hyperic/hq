@@ -2,7 +2,7 @@ package org.hyperic.hq.operation.rabbit.shared;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.ConnectionFactory;
-import org.hyperic.hq.bizapp.client.RegisterAgentResult;
+import org.hyperic.hq.agent.bizapp.client.RegisterAgentResult;
 import org.hyperic.hq.operation.RegisterAgentRequest;
 import org.hyperic.hq.operation.rabbit.connection.ChannelCallback;
 import org.hyperic.hq.operation.rabbit.connection.ChannelException;
