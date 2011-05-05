@@ -51,7 +51,7 @@
 	<bean
 		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
 		id="entityManagerFactory" depends-on="neo4jNodeBacking,neo4jRelationshipBacking">
-		<property name="persistenceUnitName" value="persistenceUnit" />
+		<property name="persistenceUnitName" value="production" />
 		<property name="dataSource" ref="dataSource" />
 		<!-- HibernateJpaDialect necessary for RequiresNew txs created by our id 
 			generator, HQMultipleHiLoPerTableGenerator -->
@@ -83,6 +83,12 @@
 					value-ref="tomcatDataSource" />
 			</map>
 		</property>
+	</bean>
+	
+	<bean id="liquibase" class="liquibase.integration.spring.SpringLiquibase" depends-on="dataSource">
+		<property name="dataSource" ref="dataSource" />
+		<property name="changeLog"
+			value="classpath:/liquibase-db.xml" />
 	</bean>
 	
 </beans>
