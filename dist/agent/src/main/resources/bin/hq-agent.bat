@@ -99,7 +99,7 @@ set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\commons-httpclient-3.1.jar
 set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%PDK_LIB%\commons-codec-1.2.jar
 set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%AGENT_LIB%\hq-lather-${project.version}.jar
 
-set CLIENT_CLASS=org.hyperic.hq.bizapp.agent.client.AgentClient
+set CLIENT_CLASS=org.hyperic.hq.agent.bizapp.client.AgentClient
 
 set CLIENT_CMD="%HQ_JAVA_HOME%\bin\java" -Djava.net.preferIPv4Stack=true -D%AGENT_INSTALL_HOME_PROP%="%AGENT_INSTALL_HOME%" -D%AGENT_BUNDLE_HOME_PROP%="%AGENT_BUNDLE_HOME%" -cp "%CLIENT_CLASSPATH%" %CLIENT_CLASS%
 

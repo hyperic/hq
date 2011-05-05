@@ -28,9 +28,9 @@ package org.hyperic.hq.agent.spring;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConfig;
-import org.hyperic.hq.bizapp.client.AgentCallbackClientException;
-import org.hyperic.hq.bizapp.client.BizappCallbackClient;
-import org.hyperic.hq.bizapp.client.StaticProviderFetcher;
+import org.hyperic.hq.agent.bizapp.callback.AgentCallbackClientException;
+import org.hyperic.hq.agent.bizapp.callback.BizappCallbackClient;
+import org.hyperic.hq.agent.bizapp.callback.StaticProviderFetcher;
 import org.hyperic.hq.operation.RegisterAgentRequest;
 import org.hyperic.hq.operation.RegisterAgentResponse;
 import org.hyperic.hq.operation.rabbit.core.BindingHandler;
@@ -66,7 +66,7 @@ public class AnnotatedOperationServiceCallback implements OperationServiceCallba
     }
 
     /**
-     * @see org.hyperic.hq.bizapp.client.BizappCallbackClient
+     * @see org.hyperic.hq.agent.bizapp.callback.BizappCallbackClient
      */
     //@OperationDispatcher(exchange = "to.server", routingKey = "request.register", binding = "request.*", queue = "registerAgentRequest")
     //@OperationEndpoint(exchange = "to.agent", routingKey = "response.register", binding = "response.*", queue = "agent")
@@ -88,7 +88,7 @@ public class AnnotatedOperationServiceCallback implements OperationServiceCallba
     }
 
     /**
-     * @see org.hyperic.hq.bizapp.client.BizappCallbackClient
+     * @see org.hyperic.hq.agent.bizapp.callback.BizappCallbackClient
      */
     //@OperationDispatcher(exchange = "to.server", routingKey = "request.register", binding = "request.*", queue = "registerAgentRequest")
     public String updateAgent(String token, String user, String pass, String address, int port, boolean isNewTransport, boolean unidirectional) throws AgentCallbackClientException {

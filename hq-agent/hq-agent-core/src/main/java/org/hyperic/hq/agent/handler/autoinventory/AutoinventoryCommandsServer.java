@@ -31,13 +31,13 @@ import org.hyperic.hq.agent.AgentAPIInfo;
 import org.hyperic.hq.agent.AgentAssertionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentRemoteValue;
+import org.hyperic.hq.agent.bizapp.CommandsAPIInfo;
+import org.hyperic.hq.agent.bizapp.callback.AutoinventoryCallbackClient;
+import org.hyperic.hq.agent.bizapp.callback.StorageProviderFetcher;
 import org.hyperic.hq.agent.server.*;
 import org.hyperic.hq.autoinventory.*;
 import org.hyperic.hq.autoinventory.agent.AICommandsAPI;
 import org.hyperic.hq.autoinventory.agent.client.AICommandsClient;
-import org.hyperic.hq.bizapp.agent.CommandsAPIInfo;
-import org.hyperic.hq.bizapp.client.AutoinventoryCallbackClient;
-import org.hyperic.hq.bizapp.client.StorageProviderFetcher;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.product.AutoinventoryPluginManager;
 import org.hyperic.hq.product.ProductPlugin;
@@ -244,7 +244,7 @@ public class AutoinventoryCommandsServer implements AgentServerHandler, AgentNot
         _log.info("Autoinventory Commands Server shut down");
     }
 
-    private AutoinventoryCallbackClient setupClient() { 
+    private AutoinventoryCallbackClient setupClient() {
         StorageProviderFetcher fetcher =
             new StorageProviderFetcher(_storage);
 

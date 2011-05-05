@@ -29,13 +29,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.agent.AgentConnectionException;
+import org.hyperic.hq.agent.bizapp.TokenData;
+import org.hyperic.hq.agent.bizapp.TokenManager;
+import org.hyperic.hq.agent.bizapp.TokenNotFoundException;
 import org.hyperic.hq.agent.server.AgentConnectionListener;
 import org.hyperic.hq.agent.server.AgentServerConnection;
 import org.hyperic.hq.agent.server.AgentStartException;
 import org.hyperic.hq.bizapp.agent.CommonSSL;
-import org.hyperic.hq.bizapp.agent.TokenData;
-import org.hyperic.hq.bizapp.agent.TokenManager;
-import org.hyperic.hq.bizapp.agent.TokenNotFoundException;
 
 import javax.net.ssl.*;
 import java.io.DataInputStream;
@@ -53,7 +53,7 @@ class SSLConnectionListener
     private SSLServerSocket listenSock;
     private Log             log;
     private KeyManager[]    kManagers;
-    private TokenManager    tokenManager;
+    private TokenManager tokenManager;
 
     public SSLConnectionListener(AgentConfig cfg, 
                                  KeyManager[] kManagers,

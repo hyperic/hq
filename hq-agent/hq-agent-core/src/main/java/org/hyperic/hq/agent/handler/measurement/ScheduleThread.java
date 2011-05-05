@@ -32,7 +32,6 @@ import org.hyperic.hq.agent.server.monitor.AgentMonitorException;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorSimple;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.measurement.agent.ScheduledMeasurement;
 import org.hyperic.hq.product.*;
 import org.hyperic.util.TimeUtil;
 import org.hyperic.util.collection.IntHashMap;

@@ -27,8 +27,8 @@ package org.hyperic.hq.agent.handler.control;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.bizapp.client.AgentCallbackClientException;
-import org.hyperic.hq.bizapp.client.ControlCallbackClient;
+import org.hyperic.hq.agent.bizapp.callback.AgentCallbackClientException;
+import org.hyperic.hq.agent.bizapp.callback.ControlCallbackClient;
 import org.hyperic.hq.product.ControlPluginManager;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;

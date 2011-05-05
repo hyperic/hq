@@ -55,7 +55,7 @@ for /F  %%a in ('dir /b %PDK_LIB%\mx4j\*.jar') do (
 )
 set CLIENT_CLASSPATH_4=!CLIENT_CLASSPATH_4!
 
-set CLIENT_CLASS=org.hyperic.hq.bizapp.agent.client.AgentClient
+set CLIENT_CLASS=org.hyperic.hq.agent.bizapp.client.AgentClient
 
 set CLIENT_CMD="%JAVA%" -Dwrapper.native_library=wrapper -Djava.library.path=%java.library.path%;%WRAPPER_PATH% -D%AGENT_INSTALL_HOME_PROP%="%AGENT_INSTALL_HOME%" -D%AGENT_BUNDLE_HOME_PROP%="%AGENT_BUNDLE_HOME%" -classpath "%CLIENT_CLASSPATH_1%;%CLIENT_CLASSPATH_2%;%CLIENT_CLASSPATH_3%;%CLIENT_CLASSPATH_4%;" %CLIENT_CLASS%
 

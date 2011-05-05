@@ -26,7 +26,7 @@
 package org.hyperic.hq.agent.handler.control;
 
 import org.hyperic.hq.agent.AgentRemoteException;
-import org.hyperic.hq.bizapp.client.ControlCallbackClient;
+import org.hyperic.hq.agent.bizapp.callback.ControlCallbackClient;
 import org.hyperic.hq.control.agent.client.ControlCommandsClient;
 import org.hyperic.hq.product.ControlPluginManager;
 import org.hyperic.hq.product.PluginException;

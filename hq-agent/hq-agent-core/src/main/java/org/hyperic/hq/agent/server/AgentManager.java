@@ -33,10 +33,10 @@ import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.agent.AgentConfigException;
 import org.hyperic.hq.agent.AgentMonitorValue;
 import org.hyperic.hq.agent.AgentUpgradeManager;
+import org.hyperic.hq.agent.bizapp.callback.PlugininventoryCallbackClient;
+import org.hyperic.hq.agent.bizapp.callback.StorageProviderFetcher;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorInterface;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorSimple;
-import org.hyperic.hq.bizapp.client.PlugininventoryCallbackClient;
-import org.hyperic.hq.bizapp.client.StorageProviderFetcher;
 import org.hyperic.hq.product.GenericPlugin;
 import org.hyperic.hq.product.PluginInfo;
 import org.hyperic.util.security.SecurityUtil;
@@ -54,8 +54,6 @@ public class AgentManager extends AgentMonitorSimple {
 
     private final Log logger = LogFactory.getLog(this.getClass().getName());
 
-    private final String AGENT_COMMANDS_SERVER_JAR_NAME = "hq-agent-handler-commands";
-
     private final Map<String, List<AgentNotificationHandler>> notifyHandlers = new ConcurrentHashMap<String, List<AgentNotificationHandler>>();
 
     private final Map<CharSequence, AgentMonitorInterface> monitorClients = new ConcurrentHashMap<CharSequence, AgentMonitorInterface>();
@@ -68,11 +66,9 @@ public class AgentManager extends AgentMonitorSimple {
                 startedHandlers.add(serverHandler);
 
             } catch (AgentStartException e) {
-                System.out.println("*******Error starting agent: startHandlers - " + e);
                 logger.error("Error starting plugin " + serverHandler, e);
                 throw e;
             } catch (Exception e) {
-                System.out.println("*******Error starting agent: startHandlers - " + e);
                 logger.error("Unknown exception", e);
                 throw new AgentStartException("Error starting plugin " + serverHandler, e);
             }
@@ -90,7 +86,6 @@ public class AgentManager extends AgentMonitorSimple {
                 if (!updatedPlugins.isEmpty()) logger.info("Successfully updated plugins: " + updatedPlugins);
             }
             catch (IOException e) {
-                System.out.println("*******Error starting agent: doInitialCleanup - " + e);
                 logger.error("Failed to update plugins", e);
             }
             //this should always be the case.
@@ -305,21 +300,12 @@ public class AgentManager extends AgentMonitorSimple {
      * @param props boot props
      */
     protected void redirectStreams(Properties props) {
-        try {
-            PrintStream outStream = newLogStream("SystemOut", props);
-            PrintStream errorStream = newLogStream("SystemErr", props);
+        PrintStream outStream = newLogStream("SystemOut", props);
+        PrintStream errorStream = newLogStream("SystemErr", props);
 
-            if (outStream != null) System.setOut(outStream);
+        if (outStream != null) System.setOut(outStream);
 
-            if (errorStream != null) {
-                System.out.println(errorStream + "*******Setting error stream....");
-                System.setErr(errorStream);
-                System.out.println(errorStream + "*******Error stream set");
-            }
-            
-        } catch (Throwable t) {
-            System.out.println("*******Error redirecting streams from " + props);
-        }
+        if (errorStream != null) System.setErr(errorStream); 
     }
 
     protected void tryForceAgentFailure(AgentConfig bootConfig) throws AgentStartException {

@@ -32,7 +32,6 @@ import org.hyperic.hq.agent.PropertyPair;
 import org.hyperic.hq.agent.server.AgentStorageException;
 import org.hyperic.hq.agent.server.AgentStorageProvider;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.measurement.agent.ScheduledMeasurement;
 import org.hyperic.hq.measurement.agent.client.MeasurementCommandsClient;
 import org.hyperic.hq.measurement.agent.commands.*;
 import org.hyperic.hq.measurement.server.session.SRN;

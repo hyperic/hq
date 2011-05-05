@@ -4,11 +4,10 @@ import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.agent.AgentConfigException;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
-import org.hyperic.hq.bizapp.agent.ProviderInfo;
-import org.hyperic.hq.bizapp.agent.client.AgentClient;
-import org.hyperic.hq.bizapp.client.*;
+import org.hyperic.hq.agent.bizapp.ProviderInfo;
+import org.hyperic.hq.agent.bizapp.callback.*;
+import org.hyperic.hq.agent.bizapp.client.AgentClient;
 import org.hyperic.hq.bizapp.server.operations.RegisterAgentService;
-import org.hyperic.hq.operation.RegisterAgentResponse;
 import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -57,16 +56,16 @@ public class LatherReplacementIntegrationTests extends BaseInfrastructureTest {
     @Test
     public void bizappRegisterAgentSuccess() throws AgentCallbackClientException, InterruptedException {
         /* passed in from AgentClient.java */
-        RegisterAgentResponse response = this.bizappClient.registerAgent(null, user, pass, "fooAuthToken", host, port, "", 1, false, false);
+        String response = this.bizappClient.registerAgent(null, user, pass, "fooAuthToken", host, port, "", 1, false, false);
         assertNotNull(response);
-        assertTrue(response.getAgentToken().startsWith("token:"));
+        assertTrue(response.startsWith("token:"));
     }
 
     @Test
     public void bizappRegisterAgentFail() throws AgentCallbackClientException, InterruptedException {
-        RegisterAgentResponse error = this.bizappClient.registerAgent(null, "invalid", pass, "fooAuthToken", host, port, "", 1, false, false);
+        String error = this.bizappClient.registerAgent(null, "invalid", pass, "fooAuthToken", host, port, "", 1, false, false);
         assertNotNull(error);
-        assertTrue(error.getAgentToken().contains("Permission denied"));
+        assertTrue(error.contains("Permission denied"));
     }
 
 

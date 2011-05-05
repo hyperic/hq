@@ -25,7 +25,7 @@
 
 package org.hyperic.hq.agent.spring;
 
-import org.hyperic.hq.bizapp.client.AgentCallbackClientException;
+import org.hyperic.hq.agent.bizapp.callback.AgentCallbackClientException;
 import org.hyperic.hq.operation.RegisterAgentResponse;
 
 /**

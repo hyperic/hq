@@ -203,7 +203,7 @@ CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/commons-httpclient-3.1.jar"
 CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/commons-codec-1.2.jar"
 
 
-CLIENT_CLASS=org.hyperic.hq.bizapp.agent.client.AgentClient
+CLIENT_CLASS=org.hyperic.hq.agent.bizapp.client.AgentClient
 
 CLIENT_CMD="${HQ_JAVA} \
     -Djava.net.preferIPv4Stack=true \

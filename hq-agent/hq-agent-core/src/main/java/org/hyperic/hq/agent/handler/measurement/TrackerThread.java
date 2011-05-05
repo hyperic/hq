@@ -27,12 +27,12 @@ package org.hyperic.hq.agent.handler.measurement;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.bizapp.callback.AgentCallbackClientException;
+import org.hyperic.hq.agent.bizapp.callback.MeasurementCallbackClient;
+import org.hyperic.hq.agent.bizapp.callback.StorageProviderFetcher;
 import org.hyperic.hq.agent.server.AgentStartException;
 import org.hyperic.hq.agent.server.AgentStorageException;
 import org.hyperic.hq.agent.server.AgentStorageProvider;
-import org.hyperic.hq.bizapp.client.AgentCallbackClientException;
-import org.hyperic.hq.bizapp.client.MeasurementCallbackClient;
-import org.hyperic.hq.bizapp.client.StorageProviderFetcher;
 import org.hyperic.hq.measurement.data.TrackEventReport;
 import org.hyperic.hq.product.ConfigTrackPluginManager;
 import org.hyperic.hq.product.LogTrackPluginManager;

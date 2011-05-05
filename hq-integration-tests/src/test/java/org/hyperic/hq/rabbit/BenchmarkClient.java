@@ -1,7 +1,7 @@
 package org.hyperic.hq.rabbit;
 
 import org.hyperic.hq.agent.*;
-import org.hyperic.hq.bizapp.client.BizappCallbackClient;
+import org.hyperic.hq.agent.bizapp.callback.BizappCallbackClient;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -27,8 +27,8 @@ package org.hyperic.hq.agent.handler.measurement;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.bizapp.callback.MeasurementCallbackClient;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.bizapp.client.MeasurementCallbackClient;
 import org.hyperic.hq.measurement.shared.MeasurementConfigEntity;
 import org.hyperic.hq.measurement.shared.MeasurementConfigList;
 import org.hyperic.hq.product.ConfigTrackPlugin;
