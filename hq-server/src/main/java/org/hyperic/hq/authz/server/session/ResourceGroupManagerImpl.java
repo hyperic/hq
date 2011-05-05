@@ -397,7 +397,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         
         Map<String, Number> types = new HashMap<String, Number>();
         for(ResourceType memberType: orderedMemberTypes) {
-            types.put(memberType.getName(),memberType.getResources().size());
+            types.put(memberType.getName(),memberType.countResources());
            
         }
         return types;
@@ -683,7 +683,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     }
     
     public Number getGroupCountOfType(ResourceType groupType) {
-        return groupType.getResources().size();
+        return groupType.countResources();
     }
     
     public PageList<Resource> getCompatibleGroups(PageControl pageControl) {

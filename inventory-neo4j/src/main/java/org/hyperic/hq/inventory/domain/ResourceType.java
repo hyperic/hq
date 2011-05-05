@@ -350,6 +350,16 @@ public class ResourceType {
     public Set<Resource> getResources() {
         return resources;
     }
+    
+    public Set<Integer> getResourceIds() {
+        Set<Integer> resourceIds = new HashSet<Integer>();
+        Traverser traverser = getTraverser(RelationshipTypes.IS_A,Direction.INCOMING.toNeo4jDir());
+        for(Node related : traverser) {
+            resourceIds.add((int)related.getId());
+        }
+        return resourceIds;
+    }
+    
 
     /**
      * 
@@ -375,6 +385,15 @@ public class ResourceType {
         return hasRelatedResourceTypes(relationName, org.neo4j.graphdb.Direction.INCOMING);
     }
 
+    @SuppressWarnings("unused")
+    public int countResources() {
+       int count=0;
+       Traverser resourceTraverser = getTraverser(RelationshipTypes.IS_A, org.neo4j.graphdb.Direction.INCOMING);
+       for(Node related: resourceTraverser) {
+           count++;
+       }
+       return count;
+    }
     /**
      * 
      * @return true if resources exist of this type

@@ -74,6 +74,23 @@ public class ResourceGroup
         return members;
     }
     
+    public boolean hasMembers() {
+        Traverser relationTraverser = getTraverser();
+        if(relationTraverser.iterator().hasNext()) {
+            return true;
+        }
+        return false;
+    }
+    
+    public int countMembers() {
+        int count = 0;
+        Traverser relationTraverser = getTraverser();
+        for (Node related : relationTraverser) {
+            count++;
+        }
+        return count;
+    }
+    
     public Set<Integer> getMemberIds() {
         Set<Integer> memberIds = new HashSet<Integer>();
         Traverser relationTraverser = getTraverser();
@@ -106,6 +123,16 @@ public class ResourceGroup
             }
         }
         return false;
+    }
+    
+    public boolean isMember(Integer resourceId) {
+        Traverser relationTraverser = getTraverser();
+        for (Node related : relationTraverser) {
+            if((int)related.getId() == resourceId.intValue()) {
+                return true;
+            }
+        }
+        return false; 
     }
 
     /**

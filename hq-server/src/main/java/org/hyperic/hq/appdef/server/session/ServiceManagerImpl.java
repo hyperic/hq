@@ -166,18 +166,8 @@ public class ServiceManagerImpl implements ServiceManager {
     }
 
    
-    private Collection<Service> findByServiceType(Integer serviceTypeId, boolean asc) {
-        List<Service> services = new ArrayList<Service>();
-        Set<Resource> serviceResources = resourceManager.findResourceTypeById(serviceTypeId).getResources();
-        for(Resource serviceResource: serviceResources) {
-            services.add(serviceFactory.createService(serviceResource));
-        }
-        Collections.sort(services, new Comparator<Service>() {
-            public int compare(Service o1,Service o2) {
-                return (o1.getSortName().compareTo(o2.getSortName()));
-            }
-        });
-        return services;
+    private Collection<Integer> findByServiceType(Integer serviceTypeId, boolean asc) {
+        return resourceManager.findResourceTypeById(serviceTypeId).getResourceIds();
     }
 
     /**
@@ -190,31 +180,7 @@ public class ServiceManagerImpl implements ServiceManager {
     @Transactional(readOnly = true)
     public Integer[] getServiceIds(AuthzSubject subject, Integer servTypeId)
         throws PermissionException {
-
-        //try {
-            Collection<Service> services = findByServiceType(servTypeId, true);
-            if (services.size() == 0) {
-                return new Integer[0];
-            }
-            List<Integer> serviceIds = new ArrayList<Integer>(services.size());
-
-            //TODO perm check
-            //Set<Integer> viewable = new HashSet<Integer>(getViewableServices(subject));
-            // and iterate over the List to remove any item not in the
-            // viewable list
-            int i = 0;
-            for (Iterator<Service> it = services.iterator(); it.hasNext(); i++) {
-                Service service = it.next();
-                //if (viewable.contains(service.getId())) {
-                    // add the item, user can see it
-                    serviceIds.add(service.getId());
-                //}
-            }
-            return (Integer[]) serviceIds.toArray(new Integer[0]);
-        //} catch (NotFoundException e) {
-             //There are no viewable servers
-          //  return new Integer[0];
-       // }
+        return new ArrayList<Integer>(findByServiceType(servTypeId, true)).toArray(new Integer[0]);
     }
 
     /**
@@ -266,14 +232,14 @@ public class ServiceManagerImpl implements ServiceManager {
         Resource serverResource = resourceManager.findResourceById(server.getId());
         Set<Resource> services;
         if(server.getServerType().isVirtual()) {
-            services = serverResource.getResourceTo(RelationshipTypes.VIRTUAL).getResourcesFrom(RelationshipTypes.SERVICE);
+            services = serverResource.getResourceTo(RelationshipTypes.VIRTUAL).getResourcesFrom(RelationshipTypes.SERVICE,
+                ServiceFactory.AUTO_INVENTORY_IDENTIFIER,aiid);
         }else {
-            services = serverResource.getResourcesFrom(RelationshipTypes.SERVICE);
+            services = serverResource.getResourcesFrom(RelationshipTypes.SERVICE,
+                ServiceFactory.AUTO_INVENTORY_IDENTIFIER,aiid);
         }
         for(Resource service: services) {
-            if(aiid.equals(service.getProperty(ServiceFactory.AUTO_INVENTORY_IDENTIFIER))) {
-                aiidServices.add(serviceFactory.createService(service));
-            }
+            aiidServices.add(serviceFactory.createService(service));
         }
         return aiidServices;
     }
@@ -985,25 +951,9 @@ public class ServiceManagerImpl implements ServiceManager {
         });
         Map<String,Integer> counts = new HashMap<String,Integer>();
         for(ResourceType serviceType: orderedServiceTypes) {
-            counts.put(serviceType.getName(),serviceType.getResources().size());
+            counts.put(serviceType.getName(),serviceType.countResources());
         }
         return counts;
-    }
-      
-    private Set<Resource> findAllServiceResources() {
-        Set<Resource> resources = new HashSet<Resource>();
-        Collection<Resource> platforms = resourceManager.findRootResource().
-            getResourcesFrom(RelationshipTypes.PLATFORM);
-        for(Resource platform: platforms) {
-            Collection<Resource> servers = platform.getResourcesFrom(RelationshipTypes.SERVER);
-            for(Resource server: servers) {
-                resources.addAll(server.getResourcesFrom(RelationshipTypes.SERVICE));
-            }
-        }
-        for(Resource platform: platforms) {
-            resources.addAll(platform.getResourcesFrom(RelationshipTypes.SERVICE));
-        }
-        return resources;
     }
     
     @Transactional(readOnly = true)

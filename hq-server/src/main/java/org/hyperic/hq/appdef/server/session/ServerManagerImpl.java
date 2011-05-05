@@ -254,15 +254,6 @@ public class ServerManagerImpl implements ServerManager {
         newServerName = targetPlatform.getName() + " " + newServerName;
         return newServerName;
     }
-
-    private Collection<Resource> getAllServers() {
-        Set<Resource> servers = new HashSet<Resource>();
-        Collection<Resource> platforms = resourceManager.findRootResource().getResourcesFrom(RelationshipTypes.PLATFORM);
-        for(Resource platform: platforms) {
-            servers.addAll(platform.getResourcesFrom(RelationshipTypes.SERVER));
-        }
-        return servers;
-    }
     
     private Resource create(AuthzSubject owner, ServerValue sv, Resource p)  {
         ResourceType st = resourceManager.findResourceTypeById(sv.getServerType().getId());
@@ -405,9 +396,9 @@ public class ServerManagerImpl implements ServerManager {
             //auditManager.pushContainer(audit);
             //pushed = true;
          
-            Set<Resource> services=resourceManager.findResourceById(serverId).getResourcesFrom(RelationshipTypes.SERVICE);
-            for(Resource service: services) {
-                serviceManager.removeService(subject, service.getId());
+            Set<Integer> services=resourceManager.findResourceById(serverId).getResourceIdsFrom(RelationshipTypes.SERVICE);
+            for(Integer service: services) {
+                serviceManager.removeService(subject, service);
             }      
             //config, cprops, and relationships will get cleaned up by removal here
             resourceManager.removeResource(subject, resourceManager.findResourceById(serverId));
@@ -511,13 +502,8 @@ public class ServerManagerImpl implements ServerManager {
     }
     
     private Resource findServerByAIID(Resource platform, String aiid) {
-        Collection<Resource> servers = platform.getResourcesFrom(RelationshipTypes.SERVER);
-        for(Resource server: servers) {
-            if(server.getProperty(ServerFactory.AUTO_INVENTORY_IDENTIFIER).equals(aiid)) {
-                return server;
-            }
-        }
-        return null;
+        return platform.getResourceFrom(RelationshipTypes.SERVER,
+            ServerFactory.AUTO_INVENTORY_IDENTIFIER,aiid);
     }
 
     /**
@@ -649,21 +635,8 @@ public class ServerManagerImpl implements ServerManager {
      */
     @Transactional(readOnly=true)
     public Integer[] getServerIds(AuthzSubject subject, Integer servTypeId) throws PermissionException {
-        Collection<Resource> servers = resourceManager.findResourceTypeById(servTypeId).getResources();
-        if (servers.size() == 0) {
-            return new Integer[0];
-        }
-        List<Integer> serverIds = new ArrayList<Integer>(servers.size());
-
-        // TODO filter viewable
-        int i = 0;
-        for (Iterator<Resource> it = servers.iterator(); it.hasNext(); i++) {
-            Resource server = it.next();
-            // add the item, user can see it
-            serverIds.add(server.getId());
-        }
-
-        return (Integer[]) serverIds.toArray(new Integer[0]);
+        //TODO filter viewable
+        return new ArrayList<Integer>(resourceManager.findResourceTypeById(servTypeId).getResourceIds()).toArray(new Integer[0]);
     }
  
     /**
@@ -1186,7 +1159,7 @@ public class ServerManagerImpl implements ServerManager {
         });
         Map<String,Integer> counts = new HashMap<String,Integer>();
         for(ResourceType serverType: orderedServerTypes) {
-            counts.put(serverType.getName(),serverType.getResources().size());
+            counts.put(serverType.getName(),serverType.countResources());
         }
         return counts;
     }

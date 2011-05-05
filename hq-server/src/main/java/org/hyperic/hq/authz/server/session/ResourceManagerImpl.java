@@ -322,7 +322,7 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         final Set<ResourceType> typesWithResources = new HashSet<ResourceType>();
         Collection<ResourceType> resTypes = resourceTypeDao.findAll();
         for(ResourceType resType: resTypes) {
-            if(!(resType.getResources().isEmpty())) {
+            if(resType.hasResources()) {
                 typesWithResources.add(resType);
             }
         }

@@ -75,7 +75,7 @@ public class Resource {
     @Indexed
     @GraphProperty
     private String sortName;
-    
+
     @RelatedTo(type = RelationshipTypes.IS_A, direction = Direction.OUTGOING, elementClass = ResourceType.class)
     private ResourceType type;
 
@@ -115,9 +115,11 @@ public class Resource {
         Set<ResourceRelationship> relations = new HashSet<ResourceRelationship>();
         for (org.neo4j.graphdb.Relationship relationship : relationships) {
             // Don't include Neo4J relationship b/w Node and its Java type
-            if (!relationship.isType(SubReferenceNodeTypeRepresentationStrategy.INSTANCE_OF_RELATIONSHIP_TYPE)) {
+            if (!relationship
+                .isType(SubReferenceNodeTypeRepresentationStrategy.INSTANCE_OF_RELATIONSHIP_TYPE)) {
                 Node node = relationship.getOtherNode(getPersistentState());
-                Class<?> otherEndType = graphDatabaseContext.getNodeTypeRepresentationStrategy().getJavaType(node);
+                Class<?> otherEndType = graphDatabaseContext.getNodeTypeRepresentationStrategy()
+                    .getJavaType(node);
                 if (Resource.class.isAssignableFrom(otherEndType)) {
                     if (entity == null || node.equals(entity.getPersistentState())) {
                         relations.add(graphDatabaseContext.createEntityFromState(relationship,
@@ -130,7 +132,7 @@ public class Resource {
     }
 
     @SuppressWarnings("unused")
-    private int countRelatedResources(String relationName,Direction direction) {
+    private int countRelatedResources(String relationName, Direction direction) {
         int count = 0;
         Traverser relationTraverser = getTraverser(relationName, direction);
         for (Node related : relationTraverser) {
@@ -142,12 +144,13 @@ public class Resource {
     /**
      * 
      * @param relationName The relationship name
-     * @return The number of resources related to this resource by relationship name (outgoing)
+     * @return The number of resources related to this resource by relationship
+     *         name (outgoing)
      */
     public int countResourcesFrom(String relationName) {
         return countRelatedResources(relationName, Direction.OUTGOING);
     }
-    
+
     private Traverser getChildTraverser(boolean recursive) {
         StopEvaluator stopEvaluator;
         if (recursive) {
@@ -159,8 +162,8 @@ public class Resource {
                 }
             };
         }
-        return getPersistentState().traverse(Traverser.Order.BREADTH_FIRST,
-            stopEvaluator, ReturnableEvaluator.ALL_BUT_START_NODE,
+        return getPersistentState().traverse(Traverser.Order.BREADTH_FIRST, stopEvaluator,
+            ReturnableEvaluator.ALL_BUT_START_NODE,
             DynamicRelationshipType.withName(RelationshipTypes.CONTAINS),
             Direction.OUTGOING.toNeo4jDir());
     }
@@ -190,7 +193,7 @@ public class Resource {
         Set<Integer> children = new HashSet<Integer>();
         Traverser relationTraverser = getChildTraverser(recursive);
         for (Node related : relationTraverser) {
-            children.add((Integer) related.getProperty("id"));
+            children.add((int) related.getId());
         }
         return children;
     }
@@ -267,7 +270,7 @@ public class Resource {
     public Map<String, Object> getProperties() {
         return getProperties(true);
     }
-    
+
     /**
      * @param includeHidden true if properties whose types are marked as
      *        "hidden" should be returned
@@ -288,8 +291,8 @@ public class Resource {
             // name
             if (!(key.equals("location")) && !(key.equals("name")) &&
                 !(key.equals("description")) && !(key.equals("modifiedBy")) &&
-                !(key.equals("owner")) && !(key.equals("id")) && !(key.equals("privateGroup"))
-                && !(key.equals("sortName")) && !(key.equals("__type__"))) {
+                !(key.equals("owner")) && !(key.equals("id")) && !(key.equals("privateGroup")) &&
+                !(key.equals("sortName")) && !(key.equals("__type__"))) {
                 // try {
                 properties.put(key, getProperty(key));
                 // } catch (IllegalArgumentException e) {
@@ -324,14 +327,36 @@ public class Resource {
             // return propertyType.getDefaultValue();
         }
     }
-    
+
     private Set<Resource> getRelatedResources(String relationName, Direction direction) {
         Set<Resource> resources = new HashSet<Resource>();
         Traverser relationTraverser = getTraverser(relationName, direction);
         for (Node related : relationTraverser) {
             Resource resource = graphDatabaseContext.createEntityFromState(related, Resource.class);
-            resource.persist();
             resources.add(resource);
+        }
+        return resources;
+    }
+
+    private Resource getRelatedResource(String relationName, Direction direction,
+                                        String propertyName, Object propertyValue) {
+        Traverser relationTraverser = getTraverser(relationName, direction);
+        for (Node related : relationTraverser) {
+            if (related.getProperty(propertyName).equals(propertyValue)) {
+                return graphDatabaseContext.createEntityFromState(related, Resource.class);
+            }
+        }
+        return null;
+    }
+
+    private Set<Resource> getRelatedResources(String relationName, Direction direction,
+                                        String propertyName, Object propertyValue) {
+        Set<Resource> resources = new HashSet<Resource>();
+        Traverser relationTraverser = getTraverser(relationName, direction);
+        for (Node related : relationTraverser) {
+            if (related.getProperty(propertyName).equals(propertyValue)) {
+                resources.add(graphDatabaseContext.createEntityFromState(related, Resource.class));
+            }
         }
         return resources;
     }
@@ -428,7 +453,25 @@ public class Resource {
     public Set<Resource> getResourcesFrom(String relationName) {
         return getRelatedResources(relationName, Direction.OUTGOING);
     }
-    
+
+    public Resource getResourceFrom(String relationName, String propertyName, Object propertyValue) {
+        return getRelatedResource(relationName, Direction.OUTGOING, propertyName, propertyValue);
+    }
+
+    public Set<Resource> getResourcesFrom(String relationName, String propertyName,
+                                          Object propertyValue) {
+        return getRelatedResources(relationName, Direction.OUTGOING, propertyName, propertyValue);
+    }
+
+    public Set<Integer> getResourceIdsFrom(String relationName) {
+        Set<Integer> ids = new HashSet<Integer>();
+        Traverser relationTraverser = getTraverser(relationName, Direction.OUTGOING);
+        for (Node related : relationTraverser) {
+            ids.add((int) related.getId());
+        }
+        return ids;
+    }
+
     /**
      * 
      * @param relationName The relationship name
@@ -460,13 +503,12 @@ public class Resource {
     }
 
     private Traverser getTraverser(String relationName, Direction direction) {
-        return getPersistentState().traverse(Traverser.Order.BREADTH_FIRST,
-            new StopEvaluator() {
-                public boolean isStopNode(TraversalPosition currentPos) {
-                    return currentPos.depth() >= 1;
-                }
-            }, ReturnableEvaluator.ALL_BUT_START_NODE,
-            DynamicRelationshipType.withName(relationName), direction.toNeo4jDir());
+        return getPersistentState().traverse(Traverser.Order.BREADTH_FIRST, new StopEvaluator() {
+            public boolean isStopNode(TraversalPosition currentPos) {
+                return currentPos.depth() >= 1;
+            }
+        }, ReturnableEvaluator.ALL_BUT_START_NODE, DynamicRelationshipType.withName(relationName),
+            direction.toNeo4jDir());
     }
 
     /**
@@ -486,7 +528,7 @@ public class Resource {
     public boolean hasChild(Resource resource, boolean recursive) {
         Traverser relationTraverser = getChildTraverser(recursive);
         for (Node related : relationTraverser) {
-            if(related.equals(resource.getPersistentState())) {
+            if (related.equals(resource.getPersistentState())) {
                 return true;
             }
         }
@@ -590,7 +632,7 @@ public class Resource {
     @Transactional("neoTxManager")
     public void removeRelationships(Resource entity, String name, Direction direction) {
         for (ResourceRelationship relation : getRelationships(entity, name, direction)) {
-            relation.getPersistentState().delete();
+            relation.remove();
         }
     }
 
@@ -644,11 +686,12 @@ public class Resource {
     @Transactional("neoTxManager")
     public void setName(String name) {
         this.name = name;
-        if(this.sortName == null) {
-            //Strip out all special chars b/c Lucene can't sort tokenized Strings
+        if (this.sortName == null) {
+            // Strip out all special chars b/c Lucene can't sort tokenized
+            // Strings
             this.sortName = name.toUpperCase().replaceAll("\\W", "");
         }
-    } 
+    }
 
     /**
      * 

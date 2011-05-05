@@ -91,6 +91,39 @@ public class ResourceGroupIntegrationTest {
         assertFalse(group.isMember(vm));
     }
     
+    @Test
+    public void testIsMemberId() {
+        group.addMember(vm);
+        assertTrue(group.isMember(vm.getId()));
+    }
+
+    @Test
+    public void testIsMemberIdNotMember() {
+        assertFalse(group.isMember(vm.getId()));
+    }
+    
+    @Test
+    public void testHasMembers() {
+        group.addMember(vm);
+        assertTrue(group.hasMembers());
+    }
+
+    @Test
+    public void testHasMembersNone() {
+        assertFalse(group.hasMembers());
+    }
+    
+    @Test
+    public void testCountMembers() {
+        group.addMember(vm);
+        assertEquals(1,group.countMembers());
+    }
+
+    @Test
+    public void testCountMembersNone() {
+        assertEquals(0,group.countMembers());
+    }
+    
     @Test(expected=NotUniqueException.class)
     public void testPersistAlreadyExists() {
         resourceGroupDao.persist(new ResourceGroup("Group1",vApp));

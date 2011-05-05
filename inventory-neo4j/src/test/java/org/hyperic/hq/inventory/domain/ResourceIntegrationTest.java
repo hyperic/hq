@@ -281,6 +281,39 @@ public class ResourceIntegrationTest {
         expected.add(iceberg);
         assertEquals(expected, produce.getResourcesFrom(RelationshipTypes.CONTAINS));
     }
+    
+    @Test
+    public void testGetResourceIdsFrom() {
+        Set<Integer> expected = new HashSet<Integer>();
+        expected.add(iceberg.getId());
+        assertEquals(expected, produce.getResourceIdsFrom(RelationshipTypes.CONTAINS));
+    }
+    
+    @Test
+    public void testGetResourcesFromByPropValue() {
+        iceberg.setProperty("pickDate", "today");
+        Set<Resource> expected = new HashSet<Resource>();
+        expected.add(iceberg);
+        assertEquals(expected, produce.getResourcesFrom(RelationshipTypes.CONTAINS,"pickDate","today"));
+    }
+    
+    @Test
+    public void testGetResourcesFromByPropValueNone() {
+        iceberg.setProperty("pickDate", "yesterday");
+        assertTrue(produce.getResourcesFrom(RelationshipTypes.CONTAINS,"pickDate","today").isEmpty());
+    }
+    
+    @Test
+    public void testGetResourceFromByPropValue() {
+        iceberg.setProperty("pickDate", "today");
+        assertEquals(iceberg, produce.getResourceFrom(RelationshipTypes.CONTAINS,"pickDate","today"));
+    }
+    
+    @Test
+    public void testGetResourceFromByPropValueNone() {
+        iceberg.setProperty("pickDate", "yesterday");
+        assertNull(produce.getResourceFrom(RelationshipTypes.CONTAINS,"pickDate","today"));
+    }
 
     @Test
     public void testGetResourcesTo() {

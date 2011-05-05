@@ -214,7 +214,7 @@ public class ViewPlatformAction
             log.debug(oldResponse);
 
             ConfigType config = productBoss.getConfigSchema(sessionInt, entityId.getId(), ProductPlugin.TYPE_PRODUCT);
-            log.debug("configSchema = " + config.getConfigOptionTypes());
+            
 
             List<ConfigValues> uiResourceOptions = ActionUtils.getConfigValues(config, oldResponse);
 

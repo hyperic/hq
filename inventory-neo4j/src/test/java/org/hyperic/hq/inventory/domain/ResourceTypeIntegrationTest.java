@@ -290,6 +290,32 @@ public class ResourceTypeIntegrationTest {
     }
     
     @Test
+    public void testCountResources() {
+        Resource safeway = new Resource("Safeway",store);
+        resourceDao.persist(safeway);
+        assertEquals(1,store.countResources());
+    }
+    
+    @Test
+    public void testCountResourcesNone() {
+        assertEquals(0,store.countResources());
+    }
+    
+    @Test
+    public void testGetResourceIds() {
+        Resource safeway = new Resource("Safeway",store);
+        resourceDao.persist(safeway);
+        Set<Integer> expected = new HashSet<Integer>();
+        expected.add(safeway.getId());
+        assertEquals(expected,store.getResourceIds());
+    }
+    
+    @Test
+    public void testGetResourceIdsNone() {
+        assertTrue(store.getResourceIds().isEmpty());
+    }
+    
+    @Test
     public void testIsRelatedTo() {
         assertTrue(store.isRelatedTo(produceDept,RelationshipTypes.CONTAINS));
     }
