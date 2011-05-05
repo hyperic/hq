@@ -67,12 +67,14 @@ public class AgentManager extends AgentMonitorSimple {
                 serverHandler.startup(agentService);
                 startedHandlers.add(serverHandler);
 
-            } catch (AgentStartException exc) {
-                logger.error("Error starting plugin " + serverHandler, exc);
-                throw exc;
-            } catch (Exception exc) {
-                logger.error("Unknown exception", exc);
-                throw new AgentStartException("Error starting plugin " + serverHandler, exc);
+            } catch (AgentStartException e) {
+                System.out.println("*******Error starting agent: startHandlers - " + e);
+                logger.error("Error starting plugin " + serverHandler, e);
+                throw e;
+            } catch (Exception e) {
+                System.out.println("*******Error starting agent: startHandlers - " + e);
+                logger.error("Unknown exception", e);
+                throw new AgentStartException("Error starting plugin " + serverHandler, e);
             }
         }
     }
@@ -88,6 +90,7 @@ public class AgentManager extends AgentMonitorSimple {
                 if (!updatedPlugins.isEmpty()) logger.info("Successfully updated plugins: " + updatedPlugins);
             }
             catch (IOException e) {
+                System.out.println("*******Error starting agent: doInitialCleanup - " + e);
                 logger.error("Failed to update plugins", e);
             }
             //this should always be the case.
@@ -302,12 +305,20 @@ public class AgentManager extends AgentMonitorSimple {
      * @param props boot props
      */
     protected void redirectStreams(Properties props) {
-        PrintStream stream;
-        if ((stream = newLogStream("SystemOut", props)) != null) {
-            System.setOut(stream);
-        }
-        if ((stream = newLogStream("SystemErr", props)) != null) {
-            System.setErr(stream);
+        try {
+            PrintStream outStream = newLogStream("SystemOut", props);
+            PrintStream errorStream = newLogStream("SystemErr", props);
+
+            if (outStream != null) System.setOut(outStream);
+
+            if (errorStream != null) {
+                System.out.println(errorStream + "*******Setting error stream....");
+                System.setErr(errorStream);
+                System.out.println(errorStream + "*******Error stream set");
+            }
+            
+        } catch (Throwable t) {
+            System.out.println("*******Error redirecting streams from " + props);
         }
     }
 

@@ -26,7 +26,6 @@
 package org.hyperic.hq.agent.server;
 
 import org.hyperic.hq.agent.AgentConfig;
-import org.hyperic.hq.agent.AgentConfigException;
 import org.hyperic.hq.agent.AgentException;
 import org.hyperic.hq.agent.AgentMonitorValue;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorInterface;
@@ -38,17 +37,7 @@ import org.hyperic.hq.product.PluginManager;
  */
 public interface AgentService extends AgentMonitorInterface {
 
-   /* *//**
-     * Configure the agent to run with new parameters. This routine will load jars, open sockets,
-     * and other resources in preparation for running.
-     * @param //config Configuration to use to configure the Agent
-     * @throws org.hyperic.hq.agent.server.AgentRunningException
-     *                              indicating the Agent was running when a reconfiguration was attempted.
-     * @throws AgentConfigException indicating the configuration was invalid.
-     *//*
-   // void initialize(AgentConfig config) throws AgentRunningException, AgentConfigException;
-*/
-    void start() throws AgentStartException;
+    void start(AgentConfig config) throws AgentStartException;
 
     void stop() throws AgentException;
 

@@ -268,7 +268,7 @@ public class AgentDaemon extends AgentMonitorSimple {
 
         List<AgentNotificationHandler> handlers = notifyHandlers.get(msgClass);
         for (AgentNotificationHandler objHandler : handlers) {
-            objHandler.handleNotification(msgClass, message);
+            //objHandler.handleNotification(msgClass, message);
         }
     }
 

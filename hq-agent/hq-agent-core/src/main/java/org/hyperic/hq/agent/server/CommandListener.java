@@ -36,7 +36,6 @@ import org.hyperic.hq.agent.server.monitor.AgentMonitorIncalculableException;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorSimple;
 
 import java.io.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 
 /**
@@ -45,25 +44,27 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 
 public class CommandListener
-        extends AgentMonitorSimple {
-    private static final int DIE_FREQUENCY = 1000;  // Time between death chex
+    extends AgentMonitorSimple
+{
+    private static final int  DIE_FREQUENCY = 1000;  // Time between death chex
 
     private CommandDispatcher dispatcher;
     private Log logger = LogFactory.getLog(CommandListener.class);
 
-    private AtomicBoolean running = new AtomicBoolean(false);
-
+    private          boolean  running;    // Are we currently blocked, waiting?
+    private volatile boolean  shouldDie;  // Does someone want us to die?
     private volatile AgentConnectionListener listener;
 
-    private int stat_numRequestsServed = 0;
-    private int stat_numConnFailures = 0;
-    private long stat_maxRequestTime = -1;
-    private long stat_minRequestTime = -1;
-    private long stat_totRequestTime = 0;
+    private int  stat_numRequestsServed = 0;
+    private int  stat_numConnFailures   = 0;
+    private long stat_maxRequestTime    = -1;
+    private long stat_minRequestTime    = -1;
+    private long stat_totRequestTime    = 0;
 
     /**
      * Setup a listener on a specified port, with a dispatcher containing
      * known methods which can be invoked.
+     *
      * @param dispatcher Object to call when a command comes across the wire
      */
 
@@ -72,7 +73,7 @@ public class CommandListener
     }
 
     void setConnectionListener(AgentConnectionListener listener) throws AgentRunningException {
-        if (running.get())  throw new AgentRunningException("Cannot replace listener while running");
+        if (running)  throw new AgentRunningException("Cannot replace listener while running");
         this.listener = listener;
     }
 
@@ -81,7 +82,10 @@ public class CommandListener
      * @throws AgentRunningException indicating the listener was not listening when 'die' was requested.
      */
     void die() throws AgentRunningException {
-        if (!running.get()) throw new AgentRunningException("CommandListener not listening");
+        if (!running) {
+            throw new AgentRunningException("CommandListener not listening");
+        }
+        this.shouldDie = true;
     }
 
     /**
@@ -93,7 +97,7 @@ public class CommandListener
     }
 
     void setup() throws AgentStartException {
-        listener.setup(CommandListener.DIE_FREQUENCY);
+        listener.setup(CommandListener.DIE_FREQUENCY); 
     }
 
     /**
@@ -101,139 +105,121 @@ public class CommandListener
      * handled in a synchronous manner -- one connection is not processed
      * until the previous one is finished.
      */
-    void listen() {
+
+    void listen(){
         long lastRequestTime;
 
+        running = true;
+
         lastRequestTime = 0;
-        //while(continuable){
+        while(true){
 
-        AgentServerConnection conn = null;
-        InputStream inputStream = null;
-        OutputStream outputStream = null;
-        Object dispatchResult = null;
-        AgentCommand cmd;
-
-        try {
-            // Statistics block
-            if (lastRequestTime != 0) {
-                gatherLastRequestTimeStatistics(lastRequestTime);
-            }
-
-            lastRequestTime = 0;
-            try {
-                conn = this.listener.getNewConnection();
-            } catch (InterruptedIOException exc) {
-                System.out.println(this + " **********exc");
-                // Timeout occurred
-                    running.set(false);
-                    listener.cleanup();
-                    return;
-                 
-            } catch (AgentConnectionException exc) {
-                System.out.println(this + " **********exc");
-                this.stat_numConnFailures++;
-                this.logger.error("Failed handling new connection", exc);
-                //continue;
-            }
-
-            lastRequestTime = System.currentTimeMillis();
-            this.stat_numRequestsServed++;
+            AgentServerConnection conn = null;
+            InputStream           inputStream;
+            OutputStream          outputStream;
+            Object                dispatchResult;
+            AgentCommand          cmd;
 
             try {
-                inputStream = conn.getInputStream();
-                outputStream = conn.getOutputStream();
-            } catch (AgentConnectionException exc) {
-                System.out.println(this + " **********exc");
-                this.stat_numConnFailures++;
-                this.logger.error("Failed to get connection r/w handles", exc);
-                //continue;
-            }
-
-            cmd = null;
-            try {
-                cmd = conn.readCommand();
-                this.logger.debug("Dispatching request for '" +
-                        cmd.getCommand() + "'");
-
-                dispatchResult =
-                        this.dispatcher.processRequest(cmd, inputStream,
-                                outputStream);
-            } catch (AgentConnectionException exc) {
-                System.out.println(this + " **********exc");
-                this.stat_numConnFailures++;
-                this.logger.error("Failed to read method/args from client",
-                        exc);
-                dispatchResult = exc;
-            } catch (AgentRemoteException exc) {
-                System.out.println(this + " **********exc");
-                // This is a fine result, raised via the AgentServerHandler
-                // interface
-                dispatchResult = exc;
-            } catch (EOFException exc) {
-                System.out.println(this + " **********exc");
-                logger.debug(exc, exc);
-                //continue;
-            } catch (Exception exc) {
-                System.out.println(this + " **********exc");
-                // Catch-all so we don't blow up the program when a plugin
-                // fails.
-                dispatchResult = exc;
-            }
-
-            try {
-                if (dispatchResult instanceof AgentRemoteException) {
-                    this.logger.warn("Error invoking method",
-                            (Exception) dispatchResult);
-                    conn.sendErrorResponse(((AgentRemoteException) dispatchResult)
-                            .getMessage());
-                } else if (dispatchResult instanceof Exception) {
-                    this.logger.warn("Error invoking method",
-                            (Exception) dispatchResult);
-                    conn.sendErrorResponse(((Exception) dispatchResult).
-                            toString());
-                } else if (dispatchResult == null) {
-                    this.logger.debug("Method '" + cmd + "' returned null ");
-                    conn.sendSuccessResponse(new AgentRemoteValue());
-                } else {
-                    this.logger.debug("Method '" + cmd + "' returned an " +
-                            "object result");
-                    conn.sendSuccessResponse((AgentRemoteValue) dispatchResult);
+                // Statistics block
+                if(lastRequestTime != 0){
+                    gatherLastRequestTimeStatistics(lastRequestTime);
                 }
-            } catch (AgentConnectionException excIO) {
-                System.out.println(this + " **********exc");
-                // Close the socket
-                this.logger.error("Error writing result to client", excIO);
+
+                lastRequestTime = 0;
+                try {
+                    conn = this.listener.getNewConnection();
+                } catch(InterruptedIOException exc){
+                    // Timeout occurred
+                    if(shouldDie == true){
+                        this.running   = false;
+                        this.shouldDie = false;
+                        this.listener.cleanup();
+                        return;
+                    }
+                    continue;
+                } catch(AgentConnectionException exc){
+                    this.stat_numConnFailures++;
+                    this.logger.error("Failed handling new connection", exc);
+                    continue;
+                }
+
+                lastRequestTime = System.currentTimeMillis();
+                this.stat_numRequestsServed++;
+
+                try {
+                    inputStream   = conn.getInputStream();
+                    outputStream  = conn.getOutputStream();
+                } catch(AgentConnectionException exc){
+                    this.stat_numConnFailures++;
+                    this.logger.error("Failed to get connection r/w handles", exc);
+                    continue;
+                }
+
+                cmd = null;
+                try {
+                    cmd = conn.readCommand();
+                    this.logger.debug("Dispatching request for '" + cmd.getCommand() + "'");
+
+                    dispatchResult = this.dispatcher.processRequest(cmd, inputStream, outputStream);
+                } catch(AgentConnectionException exc){
+                    this.stat_numConnFailures++;
+                    this.logger.error("Failed to read method/args from client", exc);
+                    dispatchResult = exc;
+                } catch(AgentRemoteException exc){
+                    // This is a fine result, raised via the AgentServerHandler interface
+                    dispatchResult = exc;
+                } catch(EOFException exc){
+                    logger.debug(exc, exc);
+                    continue;
+                } catch(Exception exc){
+                    // Catch-all so we don't blow up the program when a plugin fails.
+                    dispatchResult = exc;
+                }
+
+                try {
+                    if(dispatchResult instanceof AgentRemoteException){
+                        this.logger.warn("Error invoking method", (Exception)dispatchResult);
+                        conn.sendErrorResponse(((AgentRemoteException)dispatchResult).getMessage());
+                    } else if(dispatchResult instanceof Exception){
+                        this.logger.warn("Error invoking method", (Exception)dispatchResult);
+                        conn.sendErrorResponse((dispatchResult).toString());
+                    } else if(dispatchResult == null){
+                        this.logger.debug("Method '" + cmd + "' returned null ");
+                        conn.sendSuccessResponse(new AgentRemoteValue());
+                    } else {
+                        this.logger.debug("Method '" + cmd + "' returned an object result");
+                        conn.sendSuccessResponse((AgentRemoteValue)dispatchResult);
+                    }
+                } catch(AgentConnectionException excIO) {
+                    this.logger.error("Error writing result to client", excIO);
+                } finally {
+                    try {outputStream.flush();} catch(IOException ignExc){}
+                    try {outputStream.close();} catch(IOException ignExc){}
+                }
+
             } finally {
-                try {
-                    outputStream.flush();
-                } catch (IOException ignExc) {
-                    System.out.println(this + " **********exc");
+                if (conn != null) {
+                    conn.close();
                 }
-                try {
-                    outputStream.close();
-                } catch (IOException ignExc) {
-                    System.out.println(this + " **********exc");
-                }
-            }
-
-        } finally {
-            if (conn != null) {
-                conn.close();
             }
         }
     }
 
-    private void gatherLastRequestTimeStatistics(long lastRequestTime) {
-        long requestTime = System.currentTimeMillis() - lastRequestTime;
+    private void gatherLastRequestTimeStatistics(long lastRequestTime)
+    {
+        long requestTime = System.currentTimeMillis()-lastRequestTime;
 
         this.stat_totRequestTime += requestTime;
-        if (requestTime > this.stat_maxRequestTime ||
-                this.stat_maxRequestTime == -1) {
+        if(requestTime > this.stat_maxRequestTime ||
+           this.stat_maxRequestTime == -1)
+        {
             this.stat_maxRequestTime = requestTime;
         }
 
-        if (requestTime < this.stat_minRequestTime ||
-                this.stat_minRequestTime == -1) {
+        if(requestTime < this.stat_minRequestTime ||
+           this.stat_minRequestTime == -1)
+        {
             this.stat_minRequestTime = requestTime;
         }
     }
@@ -242,7 +228,8 @@ public class CommandListener
      * MONITOR METHOD:  Gets the number of requests served
      */
     public double getNumRequestsServed()
-            throws AgentMonitorException {
+        throws AgentMonitorException
+    {
         return this.stat_numRequestsServed;
     }
 
@@ -250,16 +237,18 @@ public class CommandListener
      * MONITOR METHOD:  Gets the number of connection failures
      */
     public double getNumConnFailures()
-            throws AgentMonitorException {
+        throws AgentMonitorException
+    {
         return this.stat_numConnFailures;
     }
 
     /**
      * MONITOR METHOD:  Gets the total number of milliseconds spent
-     * in requests
+     *                  in requests
      */
     public double getTotalRequestTime()
-            throws AgentMonitorException {
+        throws AgentMonitorException
+    {
         return this.stat_totRequestTime;
     }
 
@@ -267,8 +256,9 @@ public class CommandListener
      * MONITOR METHOD:  Gets the longest request time in milliseconds
      */
     public double getMaxRequestTime()
-            throws AgentMonitorException {
-        if (this.stat_maxRequestTime == -1) {
+        throws AgentMonitorException
+    {
+        if(this.stat_maxRequestTime == -1){
             throw new AgentMonitorIncalculableException("No requests yet");
         }
         return this.stat_maxRequestTime;
@@ -278,8 +268,9 @@ public class CommandListener
      * MONITOR METHOD:  Gets the shortest request time in milliseconds
      */
     public double getMinRequestTime()
-            throws AgentMonitorException {
-        if (this.stat_minRequestTime == -1) {
+        throws AgentMonitorException
+    {
+        if(this.stat_minRequestTime == -1){
             throw new AgentMonitorIncalculableException("No requests yet");
         }
         return this.stat_minRequestTime;
