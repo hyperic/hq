@@ -144,6 +144,14 @@
 	</build>
 	<repositories>
 		<repository>
+			<id>hyperic-external</id>
+			<name>Hyperic External Repository</name>
+			<url>http://maven.hyperic.org/external</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		<repository>
 			<id>hyperic-snapshot</id>
 			<name>Hyperic Snapshot Repository</name>
 			<url>http://maven.hyperic.org/snapshot</url>
