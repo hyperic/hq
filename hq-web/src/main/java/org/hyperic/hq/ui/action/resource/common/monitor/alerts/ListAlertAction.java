@@ -30,6 +30,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.GregorianCalendar;
 
+import javax.print.attribute.standard.DateTimeAtCompleted;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -68,6 +69,7 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.units.FormatSpecifics;
 import org.hyperic.util.units.FormattedNumber;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -132,8 +134,9 @@ public class ListAlertAction
         PageList<Alert> alerts;
 
         try {
-            long begin = cal.getTimeInMillis();
-            alerts = eventsBoss.findAlerts(sessionId, appEntId, begin, begin + Constants.DAYS, pc);
+            final DateTime begin = new DateTime(cal);
+            final DateTime end = addAlmostOneDay(begin);
+            alerts = eventsBoss.findAlerts(sessionId, appEntId, begin.getMillis(), end.getMillis(), pc);
         } catch (PermissionException e) {
             // user is not allowed to see/manage alerts.
             // return empty list for now
@@ -212,6 +215,15 @@ public class ListAlertAction
 
         return null;
     }
+
+    /**
+     * Take the existing DateTime and add 23:59:59.
+     * @param begin
+     * @return
+     */
+	public DateTime addAlmostOneDay(final DateTime begin) {
+		return begin.plusDays(1).minusSeconds(1);
+	}
 
     private void setupCondition(AlertBean bean, AlertConditionValue cond, String value, HttpServletRequest request,
                                 int sessionId) throws SessionTimeoutException, SessionNotFoundException,
