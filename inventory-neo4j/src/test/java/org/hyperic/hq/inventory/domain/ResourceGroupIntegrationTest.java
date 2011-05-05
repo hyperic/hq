@@ -24,20 +24,20 @@ import org.springframework.transaction.annotation.Transactional;
                                    "classpath:org/hyperic/hq/inventory/InventoryIntegrationTest-context.xml" })
 public class ResourceGroupIntegrationTest {
 
-    @Autowired
-    private ResourceGroupDao resourceGroupDao;
+    private ResourceGroup group;
 
     @Autowired
     private ResourceDao resourceDao;
 
     @Autowired
+    private ResourceGroupDao resourceGroupDao;
+
+    @Autowired
     private ResourceTypeDao resourceTypeDao;
 
-    private ResourceGroup group;
+    private ResourceType vApp;
 
     private Resource vm;
-    
-    private ResourceType vApp;
 
     @Before
     public void setUp() {
@@ -66,6 +66,55 @@ public class ResourceGroupIntegrationTest {
     }
 
     @Test
+    public void testCountMembers() {
+        group.addMember(vm);
+        assertEquals(1, group.countMembers());
+    }
+
+    @Test
+    public void testCountMembersNone() {
+        assertEquals(0, group.countMembers());
+    }
+
+    @Test
+    public void testHasMembers() {
+        group.addMember(vm);
+        assertTrue(group.hasMembers());
+    }
+
+    @Test
+    public void testHasMembersNone() {
+        assertFalse(group.hasMembers());
+    }
+
+    @Test
+    public void testIsMember() {
+        group.addMember(vm);
+        assertTrue(group.isMember(vm));
+    }
+
+    @Test
+    public void testIsMemberId() {
+        group.addMember(vm);
+        assertTrue(group.isMember(vm.getId()));
+    }
+
+    @Test
+    public void testIsMemberIdNotMember() {
+        assertFalse(group.isMember(vm.getId()));
+    }
+
+    @Test
+    public void testIsMemberNotMember() {
+        assertFalse(group.isMember(vm));
+    }
+
+    @Test(expected = NotUniqueException.class)
+    public void testPersistAlreadyExists() {
+        resourceGroupDao.persist(new ResourceGroup("Group1", vApp));
+    }
+
+    @Test
     public void testRemoveMember() {
         group.addMember(vm);
         group.removeMember(vm);
@@ -78,55 +127,6 @@ public class ResourceGroupIntegrationTest {
         group.removeMember(vm);
         group.removeMember(vm);
         assertEquals(0, group.getMembers().size());
-    }
-
-    @Test
-    public void testIsMember() {
-        group.addMember(vm);
-        assertTrue(group.isMember(vm));
-    }
-
-    @Test
-    public void testIsMemberNotMember() {
-        assertFalse(group.isMember(vm));
-    }
-    
-    @Test
-    public void testIsMemberId() {
-        group.addMember(vm);
-        assertTrue(group.isMember(vm.getId()));
-    }
-
-    @Test
-    public void testIsMemberIdNotMember() {
-        assertFalse(group.isMember(vm.getId()));
-    }
-    
-    @Test
-    public void testHasMembers() {
-        group.addMember(vm);
-        assertTrue(group.hasMembers());
-    }
-
-    @Test
-    public void testHasMembersNone() {
-        assertFalse(group.hasMembers());
-    }
-    
-    @Test
-    public void testCountMembers() {
-        group.addMember(vm);
-        assertEquals(1,group.countMembers());
-    }
-
-    @Test
-    public void testCountMembersNone() {
-        assertEquals(0,group.countMembers());
-    }
-    
-    @Test(expected=NotUniqueException.class)
-    public void testPersistAlreadyExists() {
-        resourceGroupDao.persist(new ResourceGroup("Group1",vApp));
     }
 
 }

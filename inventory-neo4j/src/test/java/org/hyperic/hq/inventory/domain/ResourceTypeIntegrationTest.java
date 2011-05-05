@@ -29,15 +29,15 @@ import org.springframework.transaction.annotation.Transactional;
                                    "classpath:org/hyperic/hq/inventory/InventoryIntegrationTest-context.xml" })
 public class ResourceTypeIntegrationTest {
 
-    @Autowired
-    private ResourceTypeDao resourceTypeDao;
+    private ResourceType produceDept;
     
     @Autowired
     private ResourceDao resourceDao;
 
-    private ResourceType store;
+    @Autowired
+    private ResourceTypeDao resourceTypeDao;
 
-    private ResourceType produceDept;
+    private ResourceType store;
 
     @Before
     public void setUp() {
@@ -48,48 +48,6 @@ public class ResourceTypeIntegrationTest {
         store.relateTo(produceDept, RelationshipTypes.CONTAINS);
     }
 
-    @Test
-    public void testAddOperationType() {
-        OperationType inventory = new OperationType("inventory");
-        store.addOperationType(inventory);
-        OperationArgType lettuceCount = new OperationArgType("LettuceCount", Integer.class);
-        OperationArgType cucumberCount = new OperationArgType("CucumberCount", Integer.class);
-        Set<OperationArgType> argTypes = new HashSet<OperationArgType>();
-        argTypes.add(lettuceCount);
-        argTypes.add(cucumberCount);
-        inventory.addOperationArgTypes(argTypes);
-        inventory.setReturnType(String.class.getName());
-        Set<OperationType> expected = new HashSet<OperationType>(1);
-        expected.add(inventory);
-        assertEquals(expected, store.getOperationTypes());
-        assertEquals(2,store.getOperationTypes().iterator().next().getOperationArgTypes().size());
-        assertEquals(String.class.getName(),store.getOperationTypes().iterator().next().getReturnType());
-    }
-
-    @Test
-    public void testAddOperationTypeTwice() {
-        OperationType inventory = new OperationType("inventory");
-        store.addOperationType(inventory);
-        store.addOperationType(inventory);
-        Set<OperationType> expected = new HashSet<OperationType>(1);
-        expected.add(inventory);
-        assertEquals(expected, store.getOperationTypes());
-    }
-    
-    @Test
-    public void testAddOperationTypes() {
-        OperationType inventory = new OperationType("inventory");
-        OperationType takeBreak = new OperationType("takeBreak");
-        Set<OperationType> actual = new HashSet<OperationType>(2);
-        actual.add(inventory);
-        actual.add(takeBreak);
-        store.addOperationTypes(actual);
-        Set<OperationType> expected = new HashSet<OperationType>(2);
-        expected.add(inventory);
-        expected.add(takeBreak);
-        assertEquals(expected, store.getOperationTypes());
-    }
-    
     @Test
     public void testAddConfigType() {
         ConfigType security = new ConfigType("security");
@@ -102,7 +60,7 @@ public class ResourceTypeIntegrationTest {
         assertEquals(1,store.getConfigTypes().iterator().next().getConfigOptionTypes().size());
         assertEquals(securityCode,store.getConfigTypes().iterator().next().getConfigOptionTypes().iterator().next());
     }
-    
+
     @Test
     public void testAddConfigTypeMultipleConfigOpts() {
         ConfigType security = new ConfigType("security");
@@ -128,6 +86,48 @@ public class ResourceTypeIntegrationTest {
         expected.add(security);
         assertEquals(expected,store.getConfigTypes());
     }
+    
+    @Test
+    public void testAddOperationType() {
+        OperationType inventory = new OperationType("inventory");
+        store.addOperationType(inventory);
+        OperationArgType lettuceCount = new OperationArgType("LettuceCount", Integer.class);
+        OperationArgType cucumberCount = new OperationArgType("CucumberCount", Integer.class);
+        Set<OperationArgType> argTypes = new HashSet<OperationArgType>();
+        argTypes.add(lettuceCount);
+        argTypes.add(cucumberCount);
+        inventory.addOperationArgTypes(argTypes);
+        inventory.setReturnType(String.class.getName());
+        Set<OperationType> expected = new HashSet<OperationType>(1);
+        expected.add(inventory);
+        assertEquals(expected, store.getOperationTypes());
+        assertEquals(2,store.getOperationTypes().iterator().next().getOperationArgTypes().size());
+        assertEquals(String.class.getName(),store.getOperationTypes().iterator().next().getReturnType());
+    }
+    
+    @Test
+    public void testAddOperationTypes() {
+        OperationType inventory = new OperationType("inventory");
+        OperationType takeBreak = new OperationType("takeBreak");
+        Set<OperationType> actual = new HashSet<OperationType>(2);
+        actual.add(inventory);
+        actual.add(takeBreak);
+        store.addOperationTypes(actual);
+        Set<OperationType> expected = new HashSet<OperationType>(2);
+        expected.add(inventory);
+        expected.add(takeBreak);
+        assertEquals(expected, store.getOperationTypes());
+    }
+    
+    @Test
+    public void testAddOperationTypeTwice() {
+        OperationType inventory = new OperationType("inventory");
+        store.addOperationType(inventory);
+        store.addOperationType(inventory);
+        Set<OperationType> expected = new HashSet<OperationType>(1);
+        expected.add(inventory);
+        assertEquals(expected, store.getOperationTypes());
+    }
 
     @Test
     public void testAddPropertyType() {
@@ -138,16 +138,6 @@ public class ResourceTypeIntegrationTest {
         assertEquals(expected, store.getPropertyTypes());
     }
 
-    @Test
-    public void testAddPropertyTypeTwice() {
-        PropertyType address = new PropertyType("Address", "The store location");
-        store.addPropertyType(address);
-        store.addPropertyType(address);
-        Set<PropertyType> expected = new HashSet<PropertyType>(1);
-        expected.add(address);
-        assertEquals(expected, store.getPropertyTypes());
-    }
-    
     @Test
     public void testAddPropertyTypes() {
         PropertyType address = new PropertyType("Address", "The store location");
@@ -161,17 +151,27 @@ public class ResourceTypeIntegrationTest {
         expected.add(manager);
         assertEquals(expected, store.getPropertyTypes());
     }
-
+    
     @Test
-    public void testGetOperationType() {
-        OperationType inventory = new OperationType("inventory");
-        store.addOperationType(inventory);
-        assertEquals(inventory, store.getOperationType("inventory"));
+    public void testAddPropertyTypeTwice() {
+        PropertyType address = new PropertyType("Address", "The store location");
+        store.addPropertyType(address);
+        store.addPropertyType(address);
+        Set<PropertyType> expected = new HashSet<PropertyType>(1);
+        expected.add(address);
+        assertEquals(expected, store.getPropertyTypes());
     }
 
     @Test
-    public void testGetOperationTypeNotExistent() {
-        assertNull(store.getOperationType("inventory"));
+    public void testCountResources() {
+        Resource safeway = new Resource("Safeway",store);
+        resourceDao.persist(safeway);
+        assertEquals(1,store.countResources());
+    }
+
+    @Test
+    public void testCountResourcesNone() {
+        assertEquals(0,store.countResources());
     }
     
     @Test
@@ -187,6 +187,18 @@ public class ResourceTypeIntegrationTest {
     }
 
     @Test
+    public void testGetOperationType() {
+        OperationType inventory = new OperationType("inventory");
+        store.addOperationType(inventory);
+        assertEquals(inventory, store.getOperationType("inventory"));
+    }
+
+    @Test
+    public void testGetOperationTypeNotExistent() {
+        assertNull(store.getOperationType("inventory"));
+    }
+    
+    @Test
     public void testGetPropertyType() {
         PropertyType address = new PropertyType("Address", "The store location");
         store.addPropertyType(address);
@@ -197,7 +209,7 @@ public class ResourceTypeIntegrationTest {
     public void testGetPropertyTypeNotExistent() {
         assertNull(store.getPropertyType("Address"));
     }
-    
+
     @Test
     public void testGetPropertyTypesFilterHidden() {
         PropertyType address = new PropertyType("Address", "The store location");
@@ -220,22 +232,6 @@ public class ResourceTypeIntegrationTest {
     }
 
     @Test
-    public void testGetRelationshipsNameAndDirection() {
-        Set<ResourceTypeRelationship> relationships = store.getRelationships(produceDept,
-            RelationshipTypes.CONTAINS, Direction.OUTGOING);
-        assertEquals(1, relationships.size());
-        ResourceTypeRelationship relationship = relationships.iterator().next();
-        assertEquals(store, relationship.getFrom());
-        assertEquals(produceDept, relationship.getTo());
-    }
-
-    @Test
-    public void testGetRelationshipsNameAndDirectionNoRelation() {
-        assertTrue(store.getRelationships(produceDept, RelationshipTypes.CONTAINS,
-            Direction.INCOMING).isEmpty());
-    }
-
-    @Test
     public void testGetRelationshipsFrom() {
         Set<ResourceTypeRelationship> relationships = store.getRelationshipsFrom(RelationshipTypes.CONTAINS);
         assertEquals(1, relationships.size());
@@ -245,8 +241,9 @@ public class ResourceTypeIntegrationTest {
     }
 
     @Test
-    public void testGetRelationshipsTo() {
-        Set<ResourceTypeRelationship> relationships = produceDept.getRelationshipsTo(RelationshipTypes.CONTAINS);
+    public void testGetRelationshipsNameAndDirection() {
+        Set<ResourceTypeRelationship> relationships = store.getRelationships(produceDept,
+            RelationshipTypes.CONTAINS, Direction.OUTGOING);
         assertEquals(1, relationships.size());
         ResourceTypeRelationship relationship = relationships.iterator().next();
         assertEquals(store, relationship.getFrom());
@@ -254,51 +251,18 @@ public class ResourceTypeIntegrationTest {
     }
   
     @Test
-    public void testGetResourceTypesFrom() {
-        Set<ResourceType> resourceTypes = store.getResourceTypesFrom(RelationshipTypes.CONTAINS);
-        assertEquals(1, resourceTypes.size());
-        assertEquals(produceDept, resourceTypes.iterator().next());
+    public void testGetRelationshipsNameAndDirectionNoRelation() {
+        assertTrue(store.getRelationships(produceDept, RelationshipTypes.CONTAINS,
+            Direction.INCOMING).isEmpty());
     }
      
     @Test
-    public void testGetResourceTypesTo() {
-        Set<ResourceType> resourceTypes = produceDept.getResourceTypesTo(RelationshipTypes.CONTAINS);
-        assertEquals(1, resourceTypes.size());
-        assertEquals(store, resourceTypes.iterator().next());
-    }
-    
-    @Test
-    public void testHasResourceTypesTo() {
-        assertTrue(produceDept.hasResourceTypesTo(RelationshipTypes.CONTAINS));
-    }
-    
-    @Test
-    public void testHasResourceTypesToNone() {
-        assertFalse(produceDept.hasResourceTypesTo("Foo"));
-    }
-      
-    @Test
-    public void testHasResourcesNone() {
-        assertFalse(store.hasResources());
-    }
-    
-    @Test
-    public void testHasResources() {
-        Resource safeway = new Resource("Safeway",store);
-        resourceDao.persist(safeway);
-        assertTrue(store.hasResources());
-    }
-    
-    @Test
-    public void testCountResources() {
-        Resource safeway = new Resource("Safeway",store);
-        resourceDao.persist(safeway);
-        assertEquals(1,store.countResources());
-    }
-    
-    @Test
-    public void testCountResourcesNone() {
-        assertEquals(0,store.countResources());
+    public void testGetRelationshipsTo() {
+        Set<ResourceTypeRelationship> relationships = produceDept.getRelationshipsTo(RelationshipTypes.CONTAINS);
+        assertEquals(1, relationships.size());
+        ResourceTypeRelationship relationship = relationships.iterator().next();
+        assertEquals(store, relationship.getFrom());
+        assertEquals(produceDept, relationship.getTo());
     }
     
     @Test
@@ -314,6 +278,42 @@ public class ResourceTypeIntegrationTest {
     public void testGetResourceIdsNone() {
         assertTrue(store.getResourceIds().isEmpty());
     }
+      
+    @Test
+    public void testGetResourceTypesFrom() {
+        Set<ResourceType> resourceTypes = store.getResourceTypesFrom(RelationshipTypes.CONTAINS);
+        assertEquals(1, resourceTypes.size());
+        assertEquals(produceDept, resourceTypes.iterator().next());
+    }
+    
+    @Test
+    public void testGetResourceTypesTo() {
+        Set<ResourceType> resourceTypes = produceDept.getResourceTypesTo(RelationshipTypes.CONTAINS);
+        assertEquals(1, resourceTypes.size());
+        assertEquals(store, resourceTypes.iterator().next());
+    }
+    
+    @Test
+    public void testHasResources() {
+        Resource safeway = new Resource("Safeway",store);
+        resourceDao.persist(safeway);
+        assertTrue(store.hasResources());
+    }
+    
+    @Test
+    public void testHasResourcesNone() {
+        assertFalse(store.hasResources());
+    }
+    
+    @Test
+    public void testHasResourceTypesTo() {
+        assertTrue(produceDept.hasResourceTypesTo(RelationshipTypes.CONTAINS));
+    }
+    
+    @Test
+    public void testHasResourceTypesToNone() {
+        assertFalse(produceDept.hasResourceTypesTo("Foo"));
+    }
     
     @Test
     public void testIsRelatedTo() {
@@ -323,6 +323,11 @@ public class ResourceTypeIntegrationTest {
     @Test
     public void testIsRelatedToIncoming() {
         assertFalse(produceDept.isRelatedTo(store,RelationshipTypes.CONTAINS));
+    }
+    
+    @Test(expected=NotUniqueException.class)
+    public void testPersistResourceTypeAlreadyExists() {
+        resourceTypeDao.persist(new ResourceType("Grocery Store"));
     }
     
     @Test
@@ -361,9 +366,9 @@ public class ResourceTypeIntegrationTest {
     }
     
     @Test
-    public void testRemoveRelationshipsEntityName() {
-        store.removeRelationships(produceDept,RelationshipTypes.CONTAINS);
-        assertTrue(store.getRelationships().isEmpty());
+    public void testRemoveRelationshipName() {
+        store.removeRelationships(RelationshipTypes.CONTAINS);
+        assertTrue(store.getRelationships().isEmpty()); 
     }
     
     @Test
@@ -373,22 +378,17 @@ public class ResourceTypeIntegrationTest {
     }
     
     @Test
+    public void testRemoveRelationshipsEntityName() {
+        store.removeRelationships(produceDept,RelationshipTypes.CONTAINS);
+        assertTrue(store.getRelationships().isEmpty());
+    }
+    
+    @Test
     public void testRemoveRelationshipsEntityNameDir() {
         store.removeRelationships(produceDept,RelationshipTypes.CONTAINS,Direction.INCOMING);
         assertEquals(1,store.getRelationships().size());  
         store.removeRelationships(produceDept,RelationshipTypes.CONTAINS,Direction.OUTGOING);
         assertTrue(store.getRelationships().isEmpty()); 
-    }
-    
-    @Test
-    public void testRemoveRelationshipName() {
-        store.removeRelationships(RelationshipTypes.CONTAINS);
-        assertTrue(store.getRelationships().isEmpty()); 
-    }
-    
-    @Test(expected=NotUniqueException.class)
-    public void testPersistResourceTypeAlreadyExists() {
-        resourceTypeDao.persist(new ResourceType("Grocery Store"));
     }
 
 }

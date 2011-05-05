@@ -68,20 +68,9 @@ public class ResourceGroup
 
     /**
      * 
-     * @return The members of this group
+     * @return The number of group members
      */
-    public Set<Resource> getMembers() {
-        return members;
-    }
-    
-    public boolean hasMembers() {
-        Traverser relationTraverser = getTraverser();
-        if(relationTraverser.iterator().hasNext()) {
-            return true;
-        }
-        return false;
-    }
-    
+    @SuppressWarnings("unused")
     public int countMembers() {
         int count = 0;
         Traverser relationTraverser = getTraverser();
@@ -90,7 +79,11 @@ public class ResourceGroup
         }
         return count;
     }
-    
+
+    /**
+     * 
+     * @return The IDs of group members
+     */
     public Set<Integer> getMemberIds() {
         Set<Integer> memberIds = new HashSet<Integer>();
         Traverser relationTraverser = getTraverser();
@@ -99,15 +92,45 @@ public class ResourceGroup
         }
         return memberIds;
     }
-    
+
+    /**
+     * 
+     * @return The members of this group
+     */
+    public Set<Resource> getMembers() {
+        return members;
+    }
+
     private Traverser getTraverser() {
-        return getPersistentState().traverse(Traverser.Order.BREADTH_FIRST,
-            new StopEvaluator() {
-                public boolean isStopNode(TraversalPosition currentPos) {
-                    return currentPos.depth() >= 1;
-                }
-            }, ReturnableEvaluator.ALL_BUT_START_NODE,
-            DynamicRelationshipType.withName(RelationshipTypes.HAS_MEMBER), Direction.OUTGOING.toNeo4jDir());
+        return getPersistentState().traverse(Traverser.Order.BREADTH_FIRST, new StopEvaluator() {
+            public boolean isStopNode(TraversalPosition currentPos) {
+                return currentPos.depth() >= 1;
+            }
+        }, ReturnableEvaluator.ALL_BUT_START_NODE,
+            DynamicRelationshipType.withName(RelationshipTypes.HAS_MEMBER),
+            Direction.OUTGOING.toNeo4jDir());
+    }
+
+    /**
+     * 
+     * @return true if the group has members
+     */
+    public boolean hasMembers() {
+        Traverser relationTraverser = getTraverser();
+        if (relationTraverser.iterator().hasNext()) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isMember(Integer resourceId) {
+        Traverser relationTraverser = getTraverser();
+        for (Node related : relationTraverser) {
+            if ((int) related.getId() == resourceId.intValue()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -118,21 +141,11 @@ public class ResourceGroup
     public boolean isMember(Resource member) {
         Traverser relationTraverser = getTraverser();
         for (Node related : relationTraverser) {
-            if(related.equals(member.getPersistentState())) {
+            if (related.equals(member.getPersistentState())) {
                 return true;
             }
         }
         return false;
-    }
-    
-    public boolean isMember(Integer resourceId) {
-        Traverser relationTraverser = getTraverser();
-        for (Node related : relationTraverser) {
-            if((int)related.getId() == resourceId.intValue()) {
-                return true;
-            }
-        }
-        return false; 
     }
 
     /**

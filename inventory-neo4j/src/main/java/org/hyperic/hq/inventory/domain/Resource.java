@@ -151,23 +151,6 @@ public class Resource {
         return countRelatedResources(relationName, Direction.OUTGOING);
     }
 
-    private Traverser getChildTraverser(boolean recursive) {
-        StopEvaluator stopEvaluator;
-        if (recursive) {
-            stopEvaluator = StopEvaluator.END_OF_GRAPH;
-        } else {
-            stopEvaluator = new StopEvaluator() {
-                public boolean isStopNode(TraversalPosition currentPos) {
-                    return currentPos.depth() >= 1;
-                }
-            };
-        }
-        return getPersistentState().traverse(Traverser.Order.BREADTH_FIRST, stopEvaluator,
-            ReturnableEvaluator.ALL_BUT_START_NODE,
-            DynamicRelationshipType.withName(RelationshipTypes.CONTAINS),
-            Direction.OUTGOING.toNeo4jDir());
-    }
-
     /**
      * 
      * @param recursive true if return children of children, etc
@@ -196,6 +179,23 @@ public class Resource {
             children.add((int) related.getId());
         }
         return children;
+    }
+
+    private Traverser getChildTraverser(boolean recursive) {
+        StopEvaluator stopEvaluator;
+        if (recursive) {
+            stopEvaluator = StopEvaluator.END_OF_GRAPH;
+        } else {
+            stopEvaluator = new StopEvaluator() {
+                public boolean isStopNode(TraversalPosition currentPos) {
+                    return currentPos.depth() >= 1;
+                }
+            };
+        }
+        return getPersistentState().traverse(Traverser.Order.BREADTH_FIRST, stopEvaluator,
+            ReturnableEvaluator.ALL_BUT_START_NODE,
+            DynamicRelationshipType.withName(RelationshipTypes.CONTAINS),
+            Direction.OUTGOING.toNeo4jDir());
     }
 
     /**
@@ -328,16 +328,6 @@ public class Resource {
         }
     }
 
-    private Set<Resource> getRelatedResources(String relationName, Direction direction) {
-        Set<Resource> resources = new HashSet<Resource>();
-        Traverser relationTraverser = getTraverser(relationName, direction);
-        for (Node related : relationTraverser) {
-            Resource resource = graphDatabaseContext.createEntityFromState(related, Resource.class);
-            resources.add(resource);
-        }
-        return resources;
-    }
-
     private Resource getRelatedResource(String relationName, Direction direction,
                                         String propertyName, Object propertyValue) {
         Traverser relationTraverser = getTraverser(relationName, direction);
@@ -349,8 +339,18 @@ public class Resource {
         return null;
     }
 
+    private Set<Resource> getRelatedResources(String relationName, Direction direction) {
+        Set<Resource> resources = new HashSet<Resource>();
+        Traverser relationTraverser = getTraverser(relationName, direction);
+        for (Node related : relationTraverser) {
+            Resource resource = graphDatabaseContext.createEntityFromState(related, Resource.class);
+            resources.add(resource);
+        }
+        return resources;
+    }
+
     private Set<Resource> getRelatedResources(String relationName, Direction direction,
-                                        String propertyName, Object propertyValue) {
+                                              String propertyName, Object propertyValue) {
         Set<Resource> resources = new HashSet<Resource>();
         Traverser relationTraverser = getTraverser(relationName, direction);
         for (Node related : relationTraverser) {
@@ -448,21 +448,20 @@ public class Resource {
     /**
      * 
      * @param relationName The relationship name
-     * @return All end nodes of specified relationship
+     * @param propertyName The property name to use for filtering endpoints
+     * @param propertyValue The property value to use for filtering endpoints
+     * @return A single related resource with the specified property name and
+     *         value
      */
-    public Set<Resource> getResourcesFrom(String relationName) {
-        return getRelatedResources(relationName, Direction.OUTGOING);
-    }
-
     public Resource getResourceFrom(String relationName, String propertyName, Object propertyValue) {
         return getRelatedResource(relationName, Direction.OUTGOING, propertyName, propertyValue);
     }
 
-    public Set<Resource> getResourcesFrom(String relationName, String propertyName,
-                                          Object propertyValue) {
-        return getRelatedResources(relationName, Direction.OUTGOING, propertyName, propertyValue);
-    }
-
+    /**
+     * 
+     * @param relationName The relationship name
+     * @return The IDs of all related resources
+     */
     public Set<Integer> getResourceIdsFrom(String relationName) {
         Set<Integer> ids = new HashSet<Integer>();
         Traverser relationTraverser = getTraverser(relationName, Direction.OUTGOING);
@@ -470,6 +469,27 @@ public class Resource {
             ids.add((int) related.getId());
         }
         return ids;
+    }
+
+    /**
+     * 
+     * @param relationName The relationship name
+     * @return All end nodes of specified relationship
+     */
+    public Set<Resource> getResourcesFrom(String relationName) {
+        return getRelatedResources(relationName, Direction.OUTGOING);
+    }
+
+    /**
+     * 
+     * @param relationName The relationship name
+     * @param propertyName The property name to use for filtering endpoints
+     * @param propertyValue The property value to use for filtering endpoints
+     * @return All related resources with the specified property name and value
+     */
+    public Set<Resource> getResourcesFrom(String relationName, String propertyName,
+                                          Object propertyValue) {
+        return getRelatedResources(relationName, Direction.OUTGOING, propertyName, propertyValue);
     }
 
     /**

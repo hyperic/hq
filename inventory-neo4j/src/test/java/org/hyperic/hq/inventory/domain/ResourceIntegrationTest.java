@@ -264,22 +264,27 @@ public class ResourceIntegrationTest {
         assertEquals(iceberg, produce.getResourceFrom(RelationshipTypes.CONTAINS));
     }
 
+    @Test
+    public void testGetResourceFromByPropValue() {
+        iceberg.setProperty("pickDate", "today");
+        assertEquals(iceberg, produce.getResourceFrom(RelationshipTypes.CONTAINS,"pickDate","today"));
+    }
+
+    @Test
+    public void testGetResourceFromByPropValueNone() {
+        iceberg.setProperty("pickDate", "yesterday");
+        assertNull(produce.getResourceFrom(RelationshipTypes.CONTAINS,"pickDate","today"));
+    }
+
     @Test(expected = NotUniqueException.class)
     public void testGetResourceFromMultiple() {
         traderJoes.relateTo(iceberg, RelationshipTypes.CONTAINS);
         traderJoes.getResourceFrom(RelationshipTypes.CONTAINS);
     }
-
+    
     @Test
     public void testGetResourceFromNotRelated() {
         assertNull(iceberg.getResourceFrom(RelationshipTypes.CONTAINS));
-    }
-
-    @Test
-    public void testGetResourcesFrom() {
-        Set<Resource> expected = new HashSet<Resource>();
-        expected.add(iceberg);
-        assertEquals(expected, produce.getResourcesFrom(RelationshipTypes.CONTAINS));
     }
     
     @Test
@@ -287,6 +292,13 @@ public class ResourceIntegrationTest {
         Set<Integer> expected = new HashSet<Integer>();
         expected.add(iceberg.getId());
         assertEquals(expected, produce.getResourceIdsFrom(RelationshipTypes.CONTAINS));
+    }
+    
+    @Test
+    public void testGetResourcesFrom() {
+        Set<Resource> expected = new HashSet<Resource>();
+        expected.add(iceberg);
+        assertEquals(expected, produce.getResourcesFrom(RelationshipTypes.CONTAINS));
     }
     
     @Test
@@ -301,18 +313,6 @@ public class ResourceIntegrationTest {
     public void testGetResourcesFromByPropValueNone() {
         iceberg.setProperty("pickDate", "yesterday");
         assertTrue(produce.getResourcesFrom(RelationshipTypes.CONTAINS,"pickDate","today").isEmpty());
-    }
-    
-    @Test
-    public void testGetResourceFromByPropValue() {
-        iceberg.setProperty("pickDate", "today");
-        assertEquals(iceberg, produce.getResourceFrom(RelationshipTypes.CONTAINS,"pickDate","today"));
-    }
-    
-    @Test
-    public void testGetResourceFromByPropValueNone() {
-        iceberg.setProperty("pickDate", "yesterday");
-        assertNull(produce.getResourceFrom(RelationshipTypes.CONTAINS,"pickDate","today"));
     }
 
     @Test
