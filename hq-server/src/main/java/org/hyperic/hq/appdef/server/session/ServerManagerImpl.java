@@ -455,7 +455,16 @@ public class ServerManagerImpl implements ServerManager {
     public PageList<ServerTypeValue> getViewableServerTypes(AuthzSubject subject, PageControl pc)
         throws PermissionException, NotFoundException {
         //TODO filter viewable
-        return getAllServerTypes(subject, pc);
+        List<ServerType> serverTypes = new ArrayList<ServerType>();
+        Set<ResourceType> resourceTypes = getAllServerResourceTypes();
+        for(ResourceType serverType: resourceTypes) {
+            if(serverType.hasResources()) {
+                serverTypes.add(serverFactory.createServerType(serverType));
+            }
+        }
+        AppdefNameComparator comparator = new AppdefNameComparator(true);
+        Collections.sort(serverTypes,comparator);
+        return valuePager.seek(serverTypes, pc);
     }
 
     /**

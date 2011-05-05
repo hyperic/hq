@@ -308,18 +308,7 @@ public class ServiceManagerImpl implements ServiceManager {
         }
         return resourceTypes;
     }
-    
-    private Collection<ServiceType> getServiceTypes(List<Integer> authzPks,boolean asc) {
-       Set<ServiceType> serviceTypes = new HashSet<ServiceType>();
-       for(Integer serviceId: authzPks) {
-           serviceTypes.add(serviceFactory.createServiceType(resourceManager.findResourceById(serviceId).getType()));
-       }
-       final List<ServiceType> rtn = new ArrayList<ServiceType>(serviceTypes);
-       Collections.sort(rtn, new AppdefNameComparator(asc));
-       return rtn;
-
-    }
-    
+     
     private Collection<ServiceType> findByParentTypeOrderName(Integer parentTypeId, boolean asc) {
         List<ServiceType> serviceTypes = new ArrayList<ServiceType>();
         ResourceType serverType = resourceManager.findResourceTypeById(parentTypeId);
@@ -353,7 +342,14 @@ public class ServiceManagerImpl implements ServiceManager {
     public PageList<ServiceTypeValue> getViewableServiceTypes(AuthzSubject subject, PageControl pc)
         throws PermissionException, NotFoundException {
         //TODO filter types by viewable service
-        return getAllServiceTypes(subject, pc);
+        List<ServiceType> serviceTypes = new ArrayList<ServiceType>();
+        for(ResourceType serviceType: getAllServiceResourceTypes()) {
+            if(serviceType.hasResources()) {
+                serviceTypes.add(serviceFactory.createServiceType(serviceType));
+            }
+        }
+        Collections.sort(serviceTypes, new AppdefNameComparator(true));
+        return valuePager.seek(serviceTypes, pc);
     }
 
     @Transactional(readOnly = true)

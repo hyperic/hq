@@ -282,7 +282,21 @@ public class PlatformManagerImpl implements PlatformManager {
 
         // TODO build the platform types from the platforms the user is allowed to view
         //Collection<PlatformType> platTypes = filterResourceTypes(platforms);
-        return getAllPlatformTypes(subject, pc);
+        List<PlatformType> platformTypes = new ArrayList<PlatformType>();
+        Collection<ResourceType> resourceTypes = findAllPlatformResourceTypes();
+        for(ResourceType resourceType: resourceTypes) {
+            if(resourceType.hasResources()) {
+                platformTypes.add(platformFactory.createPlatformType(resourceType));
+            }
+        }
+        Collections.sort(platformTypes, new Comparator<PlatformType>() {
+            public int compare(PlatformType o1, PlatformType o2) {
+                return o1.getSortName().compareTo(o2.getSortName());
+            }
+        });
+        // valuePager converts local/remote interfaces to value objects
+        // as it pages through them.
+        return valuePager.seek(platformTypes, pc);
     }
 
     /**
@@ -696,7 +710,14 @@ public class PlatformManagerImpl implements PlatformManager {
     }
     
     private Collection<Resource> findByIpAddr(String address) {
-        return resourceManager.findRootResource().getResourcesFrom(RelationshipTypes.PLATFORM,PlatformFactory.IP_ADDRESS, address);
+        Set<Resource> platforms = new HashSet<Resource>();
+        for(Resource platform: getAllPlatforms()) {
+            Set<Resource> ips = platform.getResourcesFrom(RelationshipTypes.IP,PlatformFactory.IP_ADDRESS,address);
+            if(! ips.isEmpty()) {
+                platforms.add(platform);
+            }
+        }
+        return platforms;
     }
     
     private Collection<Resource> getIps(Resource platform) {
