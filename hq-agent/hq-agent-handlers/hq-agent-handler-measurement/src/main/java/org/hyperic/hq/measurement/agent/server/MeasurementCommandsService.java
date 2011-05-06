@@ -25,44 +25,23 @@
 
 package org.hyperic.hq.measurement.agent.server;
 
-import java.util.Map;
-import java.util.Vector;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.PropertyPair;
+import org.hyperic.hq.agent.handler.measurement.ScheduledMeasurement;
 import org.hyperic.hq.agent.server.AgentStorageException;
 import org.hyperic.hq.agent.server.AgentStorageProvider;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.measurement.agent.ScheduledMeasurement;
 import org.hyperic.hq.measurement.agent.client.MeasurementCommandsClient;
-import org.hyperic.hq.measurement.agent.commands.DeleteProperties_args;
-import org.hyperic.hq.measurement.agent.commands.GetMeasurements_args;
-import org.hyperic.hq.measurement.agent.commands.GetMeasurements_result;
-import org.hyperic.hq.measurement.agent.commands.ScheduleMeasurements_args;
-import org.hyperic.hq.measurement.agent.commands.ScheduleMeasurements_metric;
-import org.hyperic.hq.measurement.agent.commands.SetProperties_args;
-import org.hyperic.hq.measurement.agent.commands.TrackPluginAdd_args;
-import org.hyperic.hq.measurement.agent.commands.TrackPluginRemove_args;
-import org.hyperic.hq.measurement.agent.commands.UnscheduleMeasurements_args;
+import org.hyperic.hq.measurement.agent.commands.*;
 import org.hyperic.hq.measurement.server.session.SRN;
-import org.hyperic.hq.product.ConfigTrackPluginManager;
-import org.hyperic.hq.product.GenericPlugin;
-import org.hyperic.hq.product.LogTrackPluginManager;
-import org.hyperic.hq.product.MeasurementPluginManager;
-import org.hyperic.hq.product.Metric;
-import org.hyperic.hq.product.MetricInvalidException;
-import org.hyperic.hq.product.MetricNotFoundException;
-import org.hyperic.hq.product.MetricUnreachableException;
-import org.hyperic.hq.product.MetricValue;
-import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.PluginExistsException;
-import org.hyperic.hq.product.PluginManager;
-import org.hyperic.hq.product.PluginNotFoundException;
-import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.hq.product.*;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.schedule.UnscheduledItemException;
+
+import java.util.Map;
+import java.util.Vector;
 
 /**
  * The Measurement Commands service.

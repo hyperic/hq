@@ -27,19 +27,10 @@
 package org.hyperic.hq.measurement.agent.server;
 
 import junit.framework.TestCase;
-
+import org.hyperic.hq.agent.handler.measurement.ScheduledMeasurement;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.measurement.agent.ScheduledMeasurement;
-import org.hyperic.hq.product.GenericPlugin;
-import org.hyperic.hq.product.MeasurementValueGetter;
-import org.hyperic.hq.product.Metric;
-import org.hyperic.hq.product.MetricNotFoundException;
-import org.hyperic.hq.product.MetricUnreachableException;
-import org.hyperic.hq.product.MetricValue;
-import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.PluginNotFoundException;
-import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.hq.product.*;
 
 import java.util.Properties;
 

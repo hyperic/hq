@@ -25,19 +25,17 @@
 
 package org.hyperic.hq.measurement.agent.server;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.bizapp.client.MeasurementCallbackClient;
-import org.hyperic.hq.measurement.shared.MeasurementConfigEntity;
-import org.hyperic.hq.measurement.shared.MeasurementConfigList;
-
-import org.hyperic.hq.product.ConfigTrackPlugin;
-import org.hyperic.hq.product.LogTrackPlugin;
-import org.hyperic.hq.product.LogTrackPluginManager;
-import org.hyperic.hq.product.ConfigTrackPluginManager;
-import org.hyperic.util.config.ConfigResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.bizapp.callback.MeasurementCallbackClient;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.measurement.shared.MeasurementConfigEntity;
+import org.hyperic.hq.measurement.shared.MeasurementConfigList;
+import org.hyperic.hq.product.ConfigTrackPlugin;
+import org.hyperic.hq.product.ConfigTrackPluginManager;
+import org.hyperic.hq.product.LogTrackPlugin;
+import org.hyperic.hq.product.LogTrackPluginManager;
+import org.hyperic.util.config.ConfigResponse;
 
 /**
  * This class is used to query the HQ server for the configurations

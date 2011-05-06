@@ -25,38 +25,27 @@
 
 package org.hyperic.hq.measurement.agent.server;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Properties;
-import java.util.Set;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.bizapp.CommandsAPIInfo;
+import org.hyperic.hq.agent.bizapp.callback.AgentCallbackClientException;
+import org.hyperic.hq.agent.bizapp.callback.MeasurementCallbackClient;
+import org.hyperic.hq.agent.bizapp.callback.StorageProviderFetcher;
 import org.hyperic.hq.agent.server.AgentStartException;
 import org.hyperic.hq.agent.server.AgentStorageException;
 import org.hyperic.hq.agent.server.AgentStorageProvider;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorException;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorSimple;
-import org.hyperic.hq.bizapp.agent.CommandsAPIInfo;
-import org.hyperic.hq.bizapp.client.AgentCallbackClientException;
-import org.hyperic.hq.bizapp.client.MeasurementCallbackClient;
-import org.hyperic.hq.bizapp.client.StorageProviderFetcher;
-import org.hyperic.hq.measurement.server.session.SRN;
 import org.hyperic.hq.measurement.data.DSNList;
 import org.hyperic.hq.measurement.data.MeasurementReport;
 import org.hyperic.hq.measurement.data.MeasurementReportConstructor;
+import org.hyperic.hq.measurement.server.session.SRN;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.encoding.Base64;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.io.*;
+import java.util.*;
 
 /**
  * Deals with sending measurements back to the server (including 
@@ -88,7 +77,7 @@ public class SenderThread
 
     private volatile boolean                   shouldDie;
     private          Log                       log;
-    private          MeasurementCallbackClient client;
+    private MeasurementCallbackClient client;
     private          AgentStorageProvider      storage;
     private          String                    agentToken;
     private          LinkedList                transitionQueue;

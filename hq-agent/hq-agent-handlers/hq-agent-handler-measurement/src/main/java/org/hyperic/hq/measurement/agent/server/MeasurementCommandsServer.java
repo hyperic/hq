@@ -25,51 +25,29 @@
 
 package org.hyperic.hq.measurement.agent.server;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.*;
+import org.hyperic.hq.agent.bizapp.CommandsAPIInfo;
+import org.hyperic.hq.agent.bizapp.callback.MeasurementCallbackClient;
+import org.hyperic.hq.agent.bizapp.callback.StorageProviderFetcher;
+import org.hyperic.hq.agent.handler.measurement.ScheduledMeasurement;
+import org.hyperic.hq.agent.server.*;
+import org.hyperic.hq.measurement.agent.MeasurementCommandsAPI;
+import org.hyperic.hq.measurement.agent.client.MeasurementCommandsClient;
+import org.hyperic.hq.measurement.agent.commands.*;
+import org.hyperic.hq.measurement.agent.server.ScheduleThread.ParsedTemplate;
+import org.hyperic.hq.product.ConfigTrackPluginManager;
+import org.hyperic.hq.product.LogTrackPluginManager;
+import org.hyperic.hq.product.MeasurementPluginManager;
+import org.hyperic.hq.product.ProductPlugin;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.agent.AgentAPIInfo;
-import org.hyperic.hq.agent.AgentAssertionException;
-import org.hyperic.hq.agent.AgentConfig;
-import org.hyperic.hq.agent.AgentRemoteException;
-import org.hyperic.hq.agent.AgentRemoteValue;
-import org.hyperic.hq.agent.server.AgentDaemon;
-import org.hyperic.hq.agent.server.AgentNotificationHandler;
-import org.hyperic.hq.agent.server.AgentRunningException;
-import org.hyperic.hq.agent.server.AgentServerHandler;
-import org.hyperic.hq.agent.server.AgentStartException;
-import org.hyperic.hq.agent.server.AgentStorageProvider;
-import org.hyperic.hq.agent.server.AgentTransportLifecycle;
-import org.hyperic.hq.bizapp.agent.CommandsAPIInfo;
-import org.hyperic.hq.bizapp.client.MeasurementCallbackClient;
-import org.hyperic.hq.bizapp.client.StorageProviderFetcher;
-import org.hyperic.hq.measurement.agent.MeasurementCommandsAPI;
-import org.hyperic.hq.measurement.agent.ScheduledMeasurement;
-import org.hyperic.hq.measurement.agent.client.MeasurementCommandsClient;
-import org.hyperic.hq.measurement.agent.commands.DeleteProperties_args;
-import org.hyperic.hq.measurement.agent.commands.DeleteProperties_result;
-import org.hyperic.hq.measurement.agent.commands.GetMeasurements_args;
-import org.hyperic.hq.measurement.agent.commands.ScheduleMeasurements_args;
-import org.hyperic.hq.measurement.agent.commands.ScheduleMeasurements_result;
-import org.hyperic.hq.measurement.agent.commands.SetProperties_args;
-import org.hyperic.hq.measurement.agent.commands.SetProperties_result;
-import org.hyperic.hq.measurement.agent.commands.TrackPluginAdd_args;
-import org.hyperic.hq.measurement.agent.commands.TrackPluginAdd_result;
-import org.hyperic.hq.measurement.agent.commands.TrackPluginRemove_args;
-import org.hyperic.hq.measurement.agent.commands.TrackPluginRemove_result;
-import org.hyperic.hq.measurement.agent.commands.UnscheduleMeasurements_args;
-import org.hyperic.hq.measurement.agent.commands.UnscheduleMeasurements_result;
-import org.hyperic.hq.measurement.agent.server.ScheduleThread.ParsedTemplate;
-import org.hyperic.hq.product.ConfigTrackPluginManager;
-import org.hyperic.hq.product.LogTrackPluginManager;
-import org.hyperic.hq.product.MeasurementPluginManager;
-import org.hyperic.hq.product.ProductPlugin;
 
 public class MeasurementCommandsServer 
     implements AgentServerHandler, AgentNotificationHandler {
@@ -198,14 +176,14 @@ public class MeasurementCommandsServer
         }
     }
 
-    public void startup(AgentDaemon agent)
+    public void startup(org.hyperic.hq.agent.server.AgentService agentServer)
         throws AgentStartException 
     {
         Iterator i;
 
         try {
-            this.storage      = agent.getStorageProvider();
-            this.bootConfig   = agent.getBootConfig();
+            this.storage      = agentServer.getStorageProvider();
+            this.bootConfig   = agentServer.getBootConfig();
             this.schedStorage = new MeasurementSchedule(this.storage, bootConfig.getBootProperties());
             logMeasurementSchedule(this.schedStorage);
         } catch(AgentRunningException exc){
@@ -214,13 +192,13 @@ public class MeasurementCommandsServer
 
         try {
             this.pluginManager =
-                (MeasurementPluginManager)agent.
+                (MeasurementPluginManager)agentServer.
                 getPluginManager(ProductPlugin.TYPE_MEASUREMENT);
             this.ctPluginManager =
-                (ConfigTrackPluginManager)agent.
+                (ConfigTrackPluginManager)agentServer.
                 getPluginManager(ProductPlugin.TYPE_CONFIG_TRACK);
             this.ltPluginManager =
-                (LogTrackPluginManager)agent.
+                (LogTrackPluginManager)agentServer.
                 getPluginManager(ProductPlugin.TYPE_LOG_TRACK);
 
         } catch (Exception e) {
@@ -254,7 +232,7 @@ public class MeasurementCommandsServer
         AgentTransportLifecycle agentTransportLifecycle;
         
         try {
-            agentTransportLifecycle = agent.getAgentTransportLifecycle();
+            agentTransportLifecycle = agentServer.getAgentTransportLifecycle();
         } catch (Exception e) {
             throw new AgentStartException("Unable to get agent transport lifecycle: "+
                                             e.getMessage());
@@ -277,13 +255,13 @@ public class MeasurementCommandsServer
             this.measurementCommandsService.scheduleMeasurement(meas);
         }
 
-        agent.registerMonitor("camMetric.schedule", this.scheduleObject);
-        agent.registerMonitor("camMetric.sender", this.senderObject);
+        agentServer.registerMonitor("camMetric.schedule", this.scheduleObject);
+        agentServer.registerMonitor("camMetric.sender", this.senderObject);
 
         // If we have don't have a provider, register a handler until
         // we get one
         if(CommandsAPIInfo.getProvider(this.storage) == null){
-            agent.registerNotifyHandler(this,
+            agentServer.registerNotifyHandler(this,
                                         CommandsAPIInfo.NOTIFY_SERVER_SET);
         } else {
             this.startConfigPopulator();

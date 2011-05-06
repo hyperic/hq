@@ -25,45 +25,21 @@
 
 package org.hyperic.hq.measurement.agent.server;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.handler.measurement.ScheduledMeasurement;
 import org.hyperic.hq.agent.server.AgentStartException;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorException;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorSimple;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.measurement.agent.ScheduledMeasurement;
-import org.hyperic.hq.product.GenericPlugin;
-import org.hyperic.hq.product.MeasurementValueGetter;
-import org.hyperic.hq.product.Metric;
-import org.hyperic.hq.product.MetricInvalidException;
-import org.hyperic.hq.product.MetricNotFoundException;
-import org.hyperic.hq.product.MetricUnreachableException;
-import org.hyperic.hq.product.MetricValue;
-import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.PluginNotFoundException;
+import org.hyperic.hq.product.*;
 import org.hyperic.util.TimeUtil;
 import org.hyperic.util.collection.IntHashMap;
-import org.hyperic.util.schedule.EmptyScheduleException;
-import org.hyperic.util.schedule.Schedule;
-import org.hyperic.util.schedule.ScheduleException;
-import org.hyperic.util.schedule.ScheduledItem;
-import org.hyperic.util.schedule.UnscheduledItemException;
+import org.hyperic.util.schedule.*;
+
+import java.util.*;
+import java.util.concurrent.*;
 
 /**
  * The schedule thread which maintains the schedule, and dispatches on them.
