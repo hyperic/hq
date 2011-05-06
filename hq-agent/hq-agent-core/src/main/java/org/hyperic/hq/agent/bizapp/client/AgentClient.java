@@ -131,7 +131,7 @@ public class AgentClient {
 
         agentService = ctx.getBean(AgentLifecycleService.class);
         bizappCallback = ctx.getBean(BizappCallbackClient.class);
-        //bizappCallback.setConfig(config);
+        bizappCallback.setConfig(config);
 
         agentService.start(config);
 

@@ -33,12 +33,14 @@ import org.junit.Test;
 
 import java.util.concurrent.*;
 
+import static org.junit.Assert.assertEquals;
+
 
 public class SpringAgentTest extends BaseInfrastructureTest {
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    private static final String agent_home = "/Users/hedelson/tools/hyperic/agent-4.6.0.BUILD-SNAPSHOT";
+    private static final String agent_home = "/agent-4.6.0.BUILD-SNAPSHOT";
 
     private final String  agent_bundle_home = agent_home + "/bundles/agent-4.6.0.BUILD-SNAPSHOT";
 
@@ -65,6 +67,6 @@ public class SpringAgentTest extends BaseInfrastructureTest {
             }
         });
 
-        //assertEquals(true, success.get(10000, TimeUnit.MILLISECONDS));
+        assertEquals(true, success.get(10000, TimeUnit.MILLISECONDS));
     }
 }

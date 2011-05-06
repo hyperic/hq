@@ -304,7 +304,9 @@ public class AgentLifecycleService implements AgentService, SmartLifecycle {
                 else if (t.getCause() instanceof AgentStartException) {
                     logger.error("Agent startup failed: ", t.getCause());
                 }
-            } finally { 
+            } finally {
+                /*continuable.set(false); running.set(false); started.set(false);*/
+
                 if (!continuable.get()) {
                     cleanUpOnAgentConfigFailure(bootConfig);
                 } else if (!started.get()) {

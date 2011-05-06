@@ -104,8 +104,6 @@ public class BizappCallbackClient extends AgentCallbackClient {
     public String registerAgent(String oldAgentToken, String user, String pword, String authToken, String agentIP, int agentPort,
                                                String version, int cpuCount, boolean isNewTransportAgent, boolean unidirectional) throws AgentCallbackClientException {
 
-        /* cam* is how the agent contacts the server only the first time to get an agent token from the server.
-        subsequent agent-server communication uses the agent token as the auth token*/
         RegisterAgentRequest registerAgent;
         if (oldAgentToken != null) {
             registerAgent = new RegisterAgentRequest(oldAgentToken, authToken, version, cpuCount, agentIP, agentPort, user, pword, unidirectional);
