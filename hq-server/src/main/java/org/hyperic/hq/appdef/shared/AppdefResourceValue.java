@@ -190,7 +190,7 @@ public abstract class AppdefResourceValue
         if (Bootstrap.getBean(ResourceGroupManager.class).getGroupConvert(subject, group,false).isMixed())
             throw new IllegalArgumentException("Group " + group.getId() +
                                                " is a mixed group");
-        AppdefGroupValue groupValue = Bootstrap.getBean(ResourceGroupManager.class).getGroupConvert(subject, group);
+        AppdefGroupValue groupValue = Bootstrap.getBean(ResourceGroupManager.class).getGroupConvert(subject, group,false);
         return getResourceTypeById(groupValue.getGroupEntType(),groupValue.getGroupEntResType());
     }
  
