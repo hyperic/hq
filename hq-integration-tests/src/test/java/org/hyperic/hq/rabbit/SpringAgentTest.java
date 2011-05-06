@@ -40,7 +40,7 @@ public class SpringAgentTest extends BaseInfrastructureTest {
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    private static final String agent_home = "/Users/hedelson/tools/hyperic/agent-4.6.0.BUILD-SNAPSHOT";
+    private static final String agent_home = "/agent-4.6.0.BUILD-SNAPSHOT";
 
     private final String  agent_bundle_home = agent_home + "/bundles/agent-4.6.0.BUILD-SNAPSHOT";
 
