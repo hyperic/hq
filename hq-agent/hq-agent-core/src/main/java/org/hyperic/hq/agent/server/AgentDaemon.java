@@ -686,8 +686,7 @@ public class AgentDaemon extends AgentMonitorSimple {
             this.startPluginManagers();
             this.startHandlers();
 
-            // The started handlers should have already registered with the 
-            // agent transport lifecycle
+            // The started handlers should have already registered with the  agent transport lifecycle
             this.agentTransportLifecycle.startAgentTransport();
 
             this.listener.setup();

@@ -43,7 +43,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -56,7 +55,7 @@ public class AgentLifecycleService implements AgentService, SmartLifecycle {
 
     private static final Log logger = LogFactory.getLog(AgentLifecycleService.class);
 
-    //private PluginLoader handlerClassLoader;
+    private static final String agentThread = "AgentThread";
 
     private CommandDispatcher dispatcher;
 
@@ -102,14 +101,21 @@ public class AgentLifecycleService implements AgentService, SmartLifecycle {
     }
 
     public void start(final AgentConfig config) {
-        Thread agent = new Thread(new RunnableAgent(config), "AgentThread");
+        Thread agent = new Thread(new RunnableAgent(config), agentThread);
         agent.start();
+        while(!started.get()) {
 
+        } 
         //taskExecutor.execute(new RunnableAgent(config));
     }
 
     public boolean isRunning() {
         return started.get();
+    }
+
+    public void stopRunning() {
+        running.set(false);
+        Thread.currentThread().interrupt();
     }
 
     public boolean isAutoStartup() {
@@ -139,7 +145,15 @@ public class AgentLifecycleService implements AgentService, SmartLifecycle {
      *                             or one of the plugins failed to start.
      */
     public void start() {
-        if (!running.get()) return;
+        if (!running.get()) {
+            logger.error("Agent thread must be running to start the Agent");
+            return;
+        }
+
+        if (!continuable.get()) {
+            logger.error("Agent is not propertly initialized - unable to start the Agent.");
+            return;
+        }
 
         try {
             Properties bootProps = bootConfig.getBootProperties();
@@ -151,37 +165,64 @@ public class AgentLifecycleService implements AgentService, SmartLifecycle {
 
             agentManager.redirectStreams(bootProps);
 
-            /*TODO once jboss remoting is ripped out, remove. */
-            this.agentTransportLifecycle = new AgentTransportLifecycleImpl(this);
+            this.agentTransportLifecycle = agentManager.loadAgentTransportInSeparateClassloader(this);
 
             startPluginManagers();
 
+            /* calls handler.startup() which registers each handler with agentTransportLifecycle in turn. */
             agentManager.startHandlers(this, serverHandlers, startedHandlers);
 
             dispatcher.addServerHandlers(startedHandlers);
 
+            /* The started handlers should have already registered with the  agent transport lifecycle */
             agentTransportLifecycle.startAgentTransport();
 
             listener.setup();
 
             agentManager.tryForceAgentFailure(bootConfig);
 
+            continuable.set(true);
+
+            logger.info("Agent started successfully");
+
             agentManager.sendNotification(getNotifyAgentUp(), "we're up");
 
+            if (continuable.get()) {
+                System.out.println("AgentLifecycleService - Agent Listener started");
+
+                started.set(true);
+
+                listener.listen();
+            }
+            System.out.println("AgentLifecycleService - A problem occurred with the listener. Stopping the Agent");
+
+            listener.die();
+
+        } catch (AgentStartException e) {
+            logger.error("Agent startup error: ", e);
+
         } catch (Throwable t) {
-            System.out.println("*******Critical error starting agent: " + t);
-            logger.error("Error starting the agent", t);
+            logger.error("Critical error running the agent", t);
             agentManager.sendNotification(getNotifyAgentDown(), "going down");
 
+            if (!started.get()) {
+                logger.error("Error starting the agent", t);
+                agentManager.sendNotification(getNotifyAgentFailedStart(), "agent startup failed!");
+
+            }
             /* We don't flush the storage here, since we may be out of memory */
             if (storageProvider != null) {
                 storageProvider.dispose();
                 storageProvider = null;
             }
+
+            running.set(false);
             started.set(false);
+            continuable.set(false);
+
+            stop();
         }
     }
-
 
     /**
      * Cleanup any internal resources the agent is using.  The Agent must not be running
@@ -193,11 +234,12 @@ public class AgentLifecycleService implements AgentService, SmartLifecycle {
      * @throws AgentRunningException indicating the Agent was running when the routine was called.
      */
     public void stop() {
-        if (isRunning()) {
+        if (running.get()) {
             logger.info("Agent cannot be cleaned up while running");
             return;
         }
 
+        // Shutdown the server handlers first, in case they need to write something to storage
         if (startedHandlers != null) {
             for (AgentServerHandler handler : this.startedHandlers) {
                 handler.shutdown();
@@ -207,8 +249,10 @@ public class AgentLifecycleService implements AgentService, SmartLifecycle {
         }
 
         dispatcher = null;
+
         if (listener != null) {
             listener.cleanup();
+            //listener.die();
             listener = null;
         }
 
@@ -228,6 +272,12 @@ public class AgentLifecycleService implements AgentService, SmartLifecycle {
         } catch (PluginException e) {
             // Not much we can do
         }
+
+        if (agentTransportLifecycle != null) {
+            agentTransportLifecycle.stopAgentTransport();
+        }
+
+        logger.info("Agent shut down"); 
     }
 
     /**
@@ -243,60 +293,23 @@ public class AgentLifecycleService implements AgentService, SmartLifecycle {
 
         private final AgentConfig config;
 
-        private final CountDownLatch start;
-
         public RunnableAgent(AgentConfig config) {
-            this.config = config;
-            this.start = new CountDownLatch(1);
+            this.config = config; 
         }
 
         public void run() {
 
             try {
-                System.out.println("- Initializing the Agent");
+
                 initialize(config);
                 continuable.set(true);
+                running.set(true);
 
-                try {
-                    running.set(true);
-                    start(); 
-                    continuable.set(true);
+                start();
 
-                    System.out.println("- Agent started");
-
-
-                    if (continuable.get() && running.get()) {
-                        System.out.println("AgentLifecycleService - Agent Listener started");
-
-                        //start.countDown();
-                        try {
-                            started.set(true);
-                            while(!started.get()) {
-                                
-                            }
-                            listener.listen();
-                        } catch (Throwable t) {
-                            listener.die(); 
-                            System.out.println("AgentLifecycleService - A problem occurred with the listener. Stopping the Agent");
-                            throw t;
-                        }
-                    }
-
-                    running.set(false);
-                    // Set runtime start.getCount();
-                    agentManager.sendNotification(getNotifyAgentDown(), "going down");
-
-                } catch (Throwable t) {
-                    logger.error("Error running agent", t);
-                    if (!started.get()) {
-                        agentManager.sendNotification(getNotifyAgentFailedStart(), "agent startup failed!");
-                    }
-                    throw new AgentStartException("Error running agent: " + t.getMessage());
-                }
-
-            } catch (Throwable t) {  
-                logger.error("Agent thread interrupted, processing stopped: ", t);
+            } catch (Throwable t) {
                 Thread.currentThread().interrupt();
+                logger.error("Agent thread interrupted, processing stopped: ", t);
 
                 if (t.getCause() instanceof AgentConfigException) {
                     logger.error("Agent configuration error: ", t.getCause());
@@ -304,9 +317,7 @@ public class AgentLifecycleService implements AgentService, SmartLifecycle {
                 else if (t.getCause() instanceof AgentStartException) {
                     logger.error("Agent startup failed: ", t.getCause());
                 }
-            } finally {
-                /*continuable.set(false); running.set(false); started.set(false);*/
-
+            } finally { 
                 if (!continuable.get()) {
                     cleanUpOnAgentConfigFailure(bootConfig);
                 } else if (!started.get()) {
@@ -320,17 +331,20 @@ public class AgentLifecycleService implements AgentService, SmartLifecycle {
          * and other resources in preparation for running.
          * @param config Configuration to use to configure the Agent
          * @throws org.hyperic.hq.agent.server.AgentRunningException
-         *                              indicating the Agent was running when a reconfiguration was attempted.
+         *                              indicating the Agent
+         *                              was running when a reconfiguration was attempted.
          * @throws AgentConfigException indicating the configuration was invalid.
          */
         private void initialize(AgentConfig config) throws AgentRunningException, AgentConfigException {
             if (running.get()) throw new AgentRunningException("Agent cannot be configured while running");
 
+            System.out.println("- Initializing the Agent");
             storageProvider = agentManager.createStorageProvider(config);
-            agentManager.addProviderCertificate(storageProvider);   
+            agentManager.addProviderCertificate(storageProvider);
             listener.setConnectionListener(new DefaultConnectionListener(config));
             agentManager.setProxy(config); // remove when remoting is removed
             bootConfig = config;
+            continuable.set(true);
         }
 
         private void cleanUpOnAgentConfigFailure(AgentConfig config) {
@@ -356,6 +370,7 @@ public class AgentLifecycleService implements AgentService, SmartLifecycle {
 
         private void rollbackAndRestartJVM() {
             logger.info("Attempting to rollback agent bundle");
+
             boolean success = false;
             try {
                 success = AgentUpgradeManager.rollback();
@@ -384,7 +399,7 @@ public class AgentLifecycleService implements AgentService, SmartLifecycle {
         if (!running.get())
             throw new AgentRunningException("Agent Transport Lifecycle cannot be retrieved if the Agent is not running");
 
-        return this.agentTransportLifecycle;
+        return agentTransportLifecycle;
     }
 
     /**
