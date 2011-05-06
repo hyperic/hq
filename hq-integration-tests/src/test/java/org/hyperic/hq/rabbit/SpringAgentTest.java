@@ -27,8 +27,8 @@ package org.hyperic.hq.rabbit;
 
 import org.hyperic.hq.agent.bizapp.client.AgentClient;
 import org.hyperic.hq.test.BaseInfrastructureTest;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.concurrent.*;
@@ -36,29 +36,29 @@ import java.util.concurrent.*;
 
 public class SpringAgentTest extends BaseInfrastructureTest {
 
-    private static final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     private static final String agent_home = "/Users/hedelson/tools/hyperic/agent-4.6.0.BUILD-SNAPSHOT";
 
-    private static final String agent_bundle_home = agent_home + "/bundles/agent-4.6.0.BUILD-SNAPSHOT";
+    private final String  agent_bundle_home = agent_home + "/bundles/agent-4.6.0.BUILD-SNAPSHOT";
 
-    @BeforeClass
-    public static void prepare() {
+    @Before
+    public void before() {
         System.setProperty("agent.install.home", agent_home);
         System.setProperty("agent.bundle.home", agent_bundle_home);
+    }                                                     
+    @After
+    public void destroy () { 
+        executor.shutdown();
     }
-
-    @AfterClass
-    public static void tearDown() {
-        executor.shutdownNow();
-    }
-
+  
     @Test
-    public void startStopWithSpring() throws InterruptedException, ExecutionException, TimeoutException {
+    public void veryBasicSpringAgentTest() throws InterruptedException, ExecutionException, TimeoutException {
          Future<Boolean> success = executor.submit(new Callable<Boolean>() {
             public Boolean call() throws Exception {
                 AgentClient.main(new String[]{"start"});
                 TimeUnit.MILLISECONDS.sleep(1000);
+                  
                 AgentClient.main(new String[]{"die", "5000"});
                 TimeUnit.MILLISECONDS.sleep(1000);
                 return true;
@@ -67,5 +67,4 @@ public class SpringAgentTest extends BaseInfrastructureTest {
 
         //assertEquals(true, success.get(10000, TimeUnit.MILLISECONDS));
     }
- 
 }

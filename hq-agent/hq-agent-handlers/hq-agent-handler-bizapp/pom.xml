@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	
+	<parent>
+		<groupId>org.hyperic.hq</groupId>
+		<artifactId>hq-parent</artifactId>
+		<version>4.6.0.BUILD-SNAPSHOT</version>
+	</parent>
+	
+	<groupId>org.hyperic.hq.agent.handler</groupId>
+	<artifactId>hq-agent-handler-bizapp</artifactId>
+	<packaging>jar</packaging>
+	<name>Hyperic HQ Agent Handler - BizApp</name>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.hyperic.hq.agent</groupId>
+			<artifactId>hq-agent-core</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+		</dependency>
+	</dependencies>
+	
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>org.hyperic.hq.bizapp.agent.server.CommandsServer</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<descriptors>
+						<descriptor>src/main/assembly/agent.xml</descriptor>
+					</descriptors>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-source-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

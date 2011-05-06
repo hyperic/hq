@@ -39,15 +39,12 @@ import org.hyperic.hq.agent.server.monitor.AgentMonitorInterface;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorSimple;
 import org.hyperic.hq.product.GenericPlugin;
 import org.hyperic.hq.product.PluginInfo;
-import org.hyperic.util.PluginLoader;
 import org.hyperic.util.security.SecurityUtil;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -60,14 +57,6 @@ public class AgentManager extends AgentMonitorSimple {
     private final Map<String, List<AgentNotificationHandler>> notifyHandlers = new ConcurrentHashMap<String, List<AgentNotificationHandler>>();
 
     private final Map<CharSequence, AgentMonitorInterface> monitorClients = new ConcurrentHashMap<CharSequence, AgentMonitorInterface>();
-
-    private PluginLoader handlerClassLoader;
-
-
-    @PostConstruct
-    public void initialize() {
-        this.handlerClassLoader = PluginLoader.create("ServerHandlerLoader", getClass().getClassLoader());
-    }
 
 
     protected void startHandlers(AgentService agentService, List<AgentServerHandler> serverHandlers, List<AgentServerHandler> startedHandlers) throws AgentStartException {
@@ -86,17 +75,7 @@ public class AgentManager extends AgentMonitorSimple {
         }
     }
 
-
-    /* TODO remove */
-
-    protected void setProxy(AgentConfig config) {
-        if (config.isProxyServerSet()) {
-            System.setProperty(AgentConfig.PROP_LATHER_PROXYHOST, config.getProxyIp());
-            System.setProperty(AgentConfig.PROP_LATHER_PROXYPORT, String.valueOf(config.getProxyPort()));
-        }
-    }
-
-    protected void doInitialCleanup(Properties bootProps) {
+    public void doInitialCleanup(Properties bootProps) {
         String tmpDir = bootProps.getProperty(AgentConfig.PROP_TMPDIR[0]);
 
         if (tmpDir != null) {
@@ -115,45 +94,22 @@ public class AgentManager extends AgentMonitorSimple {
         }
     }
 
-    /**
-     * TODO when remoting is replaced simply remove this method and
-     * add the following line in AgentLifecycleService.start():
-     * this.agentTransportLifecycle = new AgentTransportLifecycleImpl(this);
-     * <p/>
-     * Load the agent transport in a separate classloader.
-     * This is necessary because we don't want the jboss remoting.
-     * classes in the root agent classloader - this causes conflicts with the jboss plugins.
-     * @param agentService
-     * @return configured instance of AgentTransportLifecycle
-     * @throws AgentStartException
-     */
-    protected AgentTransportLifecycle loadAgentTransportInSeparateClassloader(AgentService agentService) throws Exception {
-        String agentTransportLifecycleClass = "org.hyperic.hq.agent.server.AgentTransportLifecycleImpl";
-        AgentTransportLifecycle agentTransportLifecycle = null;
+    /* TODO remove */
 
-        try {
-            Class type = this.handlerClassLoader.loadClass(agentTransportLifecycleClass);
-            Constructor constructor = type.getConstructor(AgentService.class);
-            agentTransportLifecycle = (AgentTransportLifecycle) constructor.newInstance(agentService);
-
+    protected void setProxy(AgentConfig config) {
+        if (config.isProxyServerSet()) {
+            System.setProperty(AgentConfig.PROP_LATHER_PROXYHOST, config.getProxyIp());
+            System.setProperty(AgentConfig.PROP_LATHER_PROXYPORT, String.valueOf(config.getProxyPort()));
         }
-        catch (ClassNotFoundException e) {
-            throw new AgentStartException("Cannot find agent transport lifecycle class: " + agentTransportLifecycleClass);
-        }
-        catch (Throwable t) {
-            throw new AgentStartException("Cannot find agent transport lifecycle class: " + agentTransportLifecycleClass);
-        }
-
-        return agentTransportLifecycle;
     }
 
     /**
-     * Register an object to be called when a notification of the specified
-     * message class occurs
+     * Register an object to be called when a notifiation of the specified
+     * message class occurs;
      * @param handler  Handler to call to process the notification message
      * @param msgClass Message class to register with
      */
-    protected void registerNotifyHandler(AgentNotificationHandler handler, String msgClass) {
+    public void registerNotifyHandler(AgentNotificationHandler handler, String msgClass) {
         List<AgentNotificationHandler> handlers = notifyHandlers.get(msgClass);
 
         if (handlers == null) {
@@ -169,7 +125,7 @@ public class AgentManager extends AgentMonitorSimple {
      * @param msgClass Message class that the message belongs to
      * @param message  Message to send
      */
-    protected void sendNotification(String msgClass, String message) {
+    public void sendNotification(String msgClass, String message) {
         if (notifyHandlers.get(msgClass) == null) return;
 
         logger.debug("Notifying that agent startup failed");
@@ -186,7 +142,7 @@ public class AgentManager extends AgentMonitorSimple {
      * from another machine without removing the data directory.
      * @param config the agent config
      */
-    protected AgentStorageProvider createStorageProvider(AgentConfig config) throws AgentConfigException {
+    public AgentStorageProvider createStorageProvider(AgentConfig config) throws AgentConfigException {
         AgentStorageProvider storageProvider;
 
         try {
@@ -226,7 +182,7 @@ public class AgentManager extends AgentMonitorSimple {
      * Make sure the storage provider has a certificate DN. If not, create one.
      * @param storageProvider the storage provider to user
      */
-    protected void addProviderCertificate(AgentStorageProvider storageProvider) throws AgentConfigException {
+    public void addProviderCertificate(AgentStorageProvider storageProvider) throws AgentConfigException {
         String certDN = storageProvider.getValue(getCertDn());
 
         if (certDN == null || certDN.length() == 0) {
@@ -349,7 +305,7 @@ public class AgentManager extends AgentMonitorSimple {
 
         if (outStream != null) System.setOut(outStream);
 
-        if (errorStream != null) System.setErr(errorStream);
+        if (errorStream != null) System.setErr(errorStream); 
     }
 
     protected void tryForceAgentFailure(AgentConfig bootConfig) throws AgentStartException {

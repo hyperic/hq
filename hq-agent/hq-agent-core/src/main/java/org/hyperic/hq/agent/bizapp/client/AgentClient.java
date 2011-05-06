@@ -125,7 +125,9 @@ public class AgentClient {
         final String[] BASE_PATHS = {"org.hyperic.hq.agent", "org.hyperic.hq.operation.rabbit"};
 
         ApplicationContext ctx = AgentApplicationContext.create(BASE_PATHS, SpringAgentConfiguration.class);
-        for (String n : ctx.getBeanDefinitionNames()) System.out.println(n);
+        for (String n : ctx.getBeanDefinitionNames()) {
+            System.out.println(n);
+        }
 
         agentService = ctx.getBean(AgentLifecycleService.class);
         bizappCallback = ctx.getBean(BizappCallbackClient.class);
@@ -138,13 +140,12 @@ public class AgentClient {
 
     private static void destroy() {
         try {
-            agentService.stopRunning();
             agentService.stop();
-            AgentApplicationContext.shutdown();
-            
             running.set(agentService.isRunning());
 
-            SYSTEM_OUT.println("Agent successfully stopped"); 
+            SYSTEM_OUT.println("- AgentClient.destroy running=" + agentService.isRunning());
+            AgentApplicationContext.shutdown();
+            
         } catch (Throwable t) {
             SYSTEM_OUT.println("destroy failed: " + t);
         }
