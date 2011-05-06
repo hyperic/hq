@@ -33,15 +33,24 @@
 
 <tiles:importAttribute name="portlet"/>
 
-<html:link page="/ResourceHub.do?ff=" linkName="browseUrl" styleId="browseUrl" style="visibility:hidden;"></html:link>
+<html:link action="/ResourceHub" linkName="browseUrl" styleId="browseUrl" style="visibility:hidden;">
+	<html:param name="ff" value="{ff}"/> 
+</html:link>
 
 <script type="text/javascript">
-function requestAvailSummary<c:out value="${portlet.token}"/>() {
-    var dummyStr = '&hq=' + new Date().getTime();
-    var availResourcesUrl = "<html:rewrite page="/dashboard/ViewAvailSummary.do?token=${portlet.token}"/>" + dummyStr;
-	new Ajax.Request(availResourcesUrl, {method: 'get', onSuccess:showAvailSummary, onFailure :reportError});
-}
-onloads.push(requestAvailSummary<c:out value="${portlet.token}"/>);
+	function requestAvailSummary${portlet.token}() {
+		dojo11.xhrGet({
+			url: "<html:rewrite action="/dashboard/ViewAvailSummary" />",
+			content: {
+				token: "${portlet.token}",
+				hq: (new Date()).getTime()
+			},
+			handleAs: "json",
+			load: showAvailSummary,
+			error: reportError
+		});
+	}
+	onloads.push(requestAvailSummary<c:out value="${portlet.token}"/>);
 </script>
 
 <div class="effectsPortlet">
@@ -75,15 +84,15 @@ onloads.push(requestAvailSummary<c:out value="${portlet.token}"/>);
     </table>
     <table width="100%" cellpadding="0" cellspacing="0" border="0" id="<c:out value="${noTableName}"/>" style="display:none;">
         <tbody>
-        <tr class="ListRow">
-        <td class="ListCell">
-                <c:url var="path" value="/"/>
-                <fmt:message key="dash.home.add.resources.to.display">
-                  <fmt:param value="${path}"/>
-                </fmt:message>
-        </td>
-      </tr>
-      </tbody>
+        	<tr class="ListRow">
+        		<td class="ListCell">
+                	<c:url var="path" value="/images/4.0/icons/properties.gif" />
+                	<fmt:message key="dash.home.add.resources.to.display">
+                  		<fmt:param value="${path}"/>
+                	</fmt:message>
+        		</td>
+      		</tr>
+      	</tbody>
     </table>
   </div>
 

@@ -43,7 +43,12 @@
 
 <table border="0"><tr><td class="LinkBox">
     <c:if test="${canModify}">
-            <html:link page="/resource/platform/Inventory.do?mode=editConfig&eid=${resource.entityId}"><fmt:message key="resource.platform.inventory.link.Configure"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link><br>
+            <html:link action="/resource/platform/Inventory">
+            	<html:param name="mode" value="editConfig"/>
+            	<html:param name="eid" value="${resource.entityId}"/>
+            	<fmt:message key="resource.platform.inventory.link.Configure"/>
+            	<html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/>
+            </html:link><br/>
     </c:if>
     <c:if test="${canRemove}" >
     	<tiles:insert definition=".resource.common.quickDelete">
@@ -56,8 +61,18 @@
 	</c:if>
     <c:choose>
         <c:when test="${canCreateChild}" >
-            <html:link page="/resource/server/Inventory.do?mode=new&eid=${resource.entityId}"><fmt:message key="resource.platform.inventory.NewServerLink"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link><br>
-            <html:link page="/resource/service/Inventory.do?mode=new&eid=${resource.entityId}"><fmt:message key="resource.platform.inventory.NewServiceLink"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link><br>
+            <html:link action="/resource/server/Inventory">
+            	<html:param name="mode" value="new"/>
+            	<html:param name="eid" value="${resource.entityId}"/>
+            	<fmt:message key="resource.platform.inventory.NewServerLink"/>
+            	<html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/>
+            </html:link><br/>
+            <html:link action="/resource/service/Inventory">
+            	<html:param name="mode" value="new"/>
+            	<html:param name="eid" value="${resource.entityId}"/>
+            	<fmt:message key="resource.platform.inventory.NewServiceLink"/>
+            	<html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/>
+            </html:link><br/>
         </c:when>
         <c:otherwise>
             <fmt:message key="resource.platform.inventory.NewServerLink"/><html:img page="/images/tbb_new_locked.gif" alt="" border="0"/><br>
@@ -66,7 +81,13 @@
     </c:choose>
     <c:choose>
         <c:when test="${canModify && canCreateChild}" >            
-            <html:link page="/resource/platform/AutoDiscovery.do?mode=new&rid=${resource.id}&type=${resource.entityId.type}"><fmt:message key="resource.platform.inventory.NewDiscoveryLink"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link><br>
+            <html:link action="/resource/platform/AutoDiscovery">
+            	<html:param name="mode" value="new"/>
+            	<html:param name="rid" value="${resource.id}"/>
+            	<html:param name="type" value="${resource.entityId.type}"/>
+            	<fmt:message key="resource.platform.inventory.NewDiscoveryLink"/>
+            	<html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/>
+            </html:link><br/>
         </c:when>
         <c:otherwise>
             <fmt:message key="resource.platform.inventory.NewDiscoveryLink"/><html:img page="/images/tbb_new_locked.gif" alt="" border="0"/><br>
@@ -74,18 +95,22 @@
     </c:choose>
     <c:choose>
  	 	<c:when test="${canModify}">
- 	 	<html:link page="/alerts/EnableAlerts.do?alertState=enabled&eid=${resource.entityId.type}:${resource.id}">
- 	 	<fmt:message key="resource.platform.alerts.EnableAllAlerts"/>
- 	 	</html:link>
- 	 	<html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/><br/>
- 	 	<html:link page="/alerts/EnableAlerts.do?alertState=disabled&eid=${resource.entityId.type}:${resource.id}">
- 	 	<fmt:message key="resource.platform.alerts.DisableAllAlerts"/>
- 	 	</html:link>
- 	 	<html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/><br/>
+	 	 	<html:link action="/alerts/EnableAlerts">
+	 	 		<html:param name="alertState" value="enabled"/>
+	 	 		<html:param name="eid" value="${resource.entityId.type}:${resource.id}"/>
+	 	 		<fmt:message key="resource.platform.alerts.EnableAllAlerts"/>
+	 	 	</html:link>
+	 	 	<html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/><br/>
+	 	 	<html:link action="/alerts/EnableAlerts">
+	 	 		<html:param name="alertState" value="disabled"/>
+	 	 		<html:param name="eid" value="${resource.entityId.type}:${resource.id}"/>
+	 	 		<fmt:message key="resource.platform.alerts.DisableAllAlerts"/>
+	 	 	</html:link>
+	 	 	<html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/><br/>
  	 	</c:when>
  	 	<c:otherwise>
- 	 	<fmt:message key="resource.platform.alerts.EnableAllAlerts"/><html:img page="/images/tbb_new_locked.gif" alt="" border="0"/><br/>
- 	 	<fmt:message key="resource.platform.alerts.DisableAllAlerts"/><html:img page="/images/tbb_new_locked.gif" alt="" border="0"/><br/>
+	 	 	<fmt:message key="resource.platform.alerts.EnableAllAlerts"/><html:img page="/images/tbb_new_locked.gif" alt="" border="0"/><br/>
+	 	 	<fmt:message key="resource.platform.alerts.DisableAllAlerts"/><html:img page="/images/tbb_new_locked.gif" alt="" border="0"/><br/>
  	 	</c:otherwise>
  	 </c:choose>
  	  <tiles:insert definition=".resource.common.quickFavorites">

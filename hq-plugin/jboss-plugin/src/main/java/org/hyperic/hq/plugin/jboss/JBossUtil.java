@@ -203,21 +203,21 @@ public class JBossUtil {
                                                           Exception e) {
         String msg =
             "Can't connect to MBeanServer [" +
-            metric.getPropString() + "]: " + e;
+            metric.toDebugString() + "]: " + e;
         return new MetricUnreachableException(msg, e);
     }
 
     private static MetricNotFoundException notfound(Metric metric,
                                                     Exception e) {
         String msg =
-            "Metric not found [" + metric.toString() + "]: " + e;
+            "Metric not found [" + metric.toDebugString() + "]: " + e;
         return new MetricNotFoundException(msg, e);
     }
 
     private static PluginException error(Metric metric,
                                          Exception e) {
         String msg =
-            "Invocation error [" + metric.toString() + "]: " + e;
+            "Invocation error [" + metric.toDebugString() + "]: " + e;
         return new PluginException(msg, e);
     }
 
@@ -226,7 +226,7 @@ public class JBossUtil {
                                          String method) {
         String msg =
             "Method '" + method +
-            "' invocation error [" + metric.toString() + "]: " + e;
+            "' invocation error [" + metric.toDebugString() + "]: " + e;
         return new PluginException(msg, e);
     }
 

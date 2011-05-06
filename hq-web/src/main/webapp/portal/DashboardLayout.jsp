@@ -46,8 +46,10 @@
 	autoLogout = false;
 	
 	function removePortlet(name, label) {
+		var portletUrl = "<html:rewrite page="/app/dashboard/${selectedDashboardId}/portlets/{portletName}"/>";
+		
 	    dojo11.xhrPost({
-	        url: '/app/dashboard/<c:out value="${selectedDashboardId}" />/portlets/' + name,
+	        url: unescape(portletUrl).replace("{portletName}", name),
 	        content: {
 				_method: "DELETE"
 	        },
@@ -138,7 +140,9 @@
 	
 	onloads.push(refreshPortlets);
 </script>
-<html:link page="/Resource.do?eid=" linkName="viewResUrl" styleId="viewResUrl" style="display:none;"></html:link>
+<html:link action="/Resource" linkName="viewResUrl" styleId="viewResUrl" style="display:none;">
+	<html:param name="eid" value="{eid}"/>
+</html:link>
 
 <%
   String divStart;
@@ -179,7 +183,7 @@
 			<td colspan="100%" style="padding-left:16px; padding-right:15px;">
 				<c:choose>
 					<c:when test="${DashboardForm.dashboardSelectable}">
-						<html:form method="post" action="/SetDashboard.do" styleId="DashboardForm">
+						<html:form method="post" action="/SetDashboard" styleId="DashboardForm">
 							<div class="dashboard">
 								<div style="display: table-cell; vertical-align: middle; float:left;">
 									<span style="font-weight: bold; margin-right: 4px;">
@@ -287,7 +291,6 @@
 						        // This should be rewritten using dojo 1.1 dnd.move package
 						        // http://docs.google.com/View?docid=d764479_11fcs7s397
 						        // writing a new Sortable version using dojo 1.1 which will hopefully play better with IE
-						        // Anton Stroganov <anton@hyperic.com>
 						        // -----------
 					            Sortable.create("<c:out value="narrowList_${narrow}"/>", {
 						            dropOnEmpty: true,
@@ -296,7 +299,8 @@
 			               			handle: 'widgetHandle',
 			               			onUpdate: function() {
 			                    		dojo11.xhrPost({
-			                        		url: "<html:rewrite page="/dashboard/ReorderPortlets.do"/>?"+Sortable.serialize('<c:out value="narrowList_${narrow}"/>'),
+			                        		url: "<html:rewrite action="/dashboard/ReorderPortlets"/>",
+			                        		postData: Sortable.serialize('<c:out value="narrowList_${narrow}"/>'),
 			                        		load: function(){ }
 			                    		});
 			                    	},

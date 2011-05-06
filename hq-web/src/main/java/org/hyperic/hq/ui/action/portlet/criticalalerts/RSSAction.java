@@ -58,6 +58,7 @@ import org.hyperic.util.units.UnitsConstants;
 import org.hyperic.util.units.UnitsFormat;
 import org.hyperic.util.units.DateFormatter.DateSpecifics;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.util.UriTemplate;
 
 /**
  * An <code>Action</code> that loads the <code>Portal</code> identified by the
@@ -119,21 +120,21 @@ public class RSSAction
 
             FormattedNumber fmtd = UnitsFormat.format(new UnitNumber(alert.getAlertInfo().getTimestamp(),
                 UnitsConstants.UNIT_DATE, UnitsConstants.SCALE_MILLI), request.getLocale(), specs);
-
+            UriTemplate uriTemplate = new UriTemplate(feed.getBaseUrl() + "/alerts/Alerts.do?mode={mode}&a={alertId}&eid={entityId}");
             String desc;
             if (alert.getAlertInfo().isFixed()) {
                 desc = fmtd.toString() + " " +
                        res.getMessage("parenthesis", res.getMessage("resource.common.alert.action.fixed.label"));
             } else {
                 desc = "<table cellspacing=4><tr>" + "<td>" + fmtd.toString() + "</td>" + "<td><a href='" +
-                       feed.getBaseUrl() + "/alerts/Alerts.do?mode=FIXED&a=" + alert.getId() + "&eid=" +
-                       aeid.getAppdefKey() + "'>" + res.getMessage("resource.common.alert.action.fixed.label") +
+                       response.encodeURL(uriTemplate.expand("FIXED", alert.getId(), aeid.getAppdefKey()).toASCIIString()) + 
+                       "'>" + res.getMessage("resource.common.alert.action.fixed.label") +
                        "</a></td>";
 
                 if (alert.isAcknowledgeable()) {
-                    desc += "<td><a href='" + feed.getBaseUrl() + "/alerts/Alerts.do?mode=ACKNOWLEDGE&a=" +
-                            alert.getId() + "&eid=" + aeid.getAppdefKey() + "'>" +
-                            res.getMessage("resource.common.alert.action.acknowledge.label") + "</a></td></tr></table>";
+                	desc += "<td><a href='" + 
+                    	response.encodeURL(uriTemplate.expand("ACKNOWLEDGE", alert.getId(), aeid.getAppdefKey()).toASCIIString()) + "'>" +
+                        res.getMessage("resource.common.alert.action.acknowledge.label") + "</a></td></tr></table>";
 
                 }
             }
@@ -141,9 +142,8 @@ public class RSSAction
             AuthzSubject subject = authzBoss.getCurrentSubject(user);
             AppdefEntityValue resource = new AppdefEntityValue(aeid, subject);
 
-            String link = feed.getBaseUrl() + "/alerts/Alerts.do?mode=viewAlert&eid=" + aeid.getAppdefKey() + "&a=" +
-                          alert.getId();
-
+            String link = response.encodeURL(uriTemplate.expand("viewAlert", alert.getId(), aeid.getAppdefKey()).toASCIIString());
+            
             feed.addItem(resource.getName() + " " + defInfo.getName(), link, desc, alert.getAlertInfo().getTimestamp());
         }
         request.setAttribute("rssFeed", feed);

@@ -51,7 +51,10 @@
       <c:forEach items="${recentlyAdded}" var="platform">
       <tr class="ListRow">
         <td class="ListCell">
-            <html:link page="/Resource.do?eid=1:${platform.id}"><c:out value="${platform.name}"/>&nbsp;</html:link>
+            <html:link action="/Resource">
+            	<html:param name="eid" value="1:${platform.id}"/>
+            	${platform.name}&nbsp;
+            </html:link>
         </td>
         <td class="ListCell" align="center">
         <c:set var="formattedTime">

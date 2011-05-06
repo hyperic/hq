@@ -97,7 +97,8 @@ class ResourceCategory {
 	private static eventMan = Bootstrap.getBean(EventLogManager.class)
 	private static cMan     = Bootstrap.getBean(ControlManager.class)
 	private static csMan	= Bootstrap.getBean(ControlScheduleManager.class);
-	
+	private static resMan   = Bootstrap.getBean(ResourceManager.class)
+
 	/**
 	 * Creates a URL for the resource.  This should typically only be called
 	 * via HtmlUtil.linkTo (or from a controller).  
@@ -320,17 +321,17 @@ class ResourceCategory {
 	static boolean isService(Resource r) {
 		r.resourceType.id == AuthzConstants.authzService
 	}
-	
+
 	static Platform toPlatform(Resource r) {
 		assert isPlatform(r)
 		platMan.findPlatformById(r.instanceId)
 	}
-	
+
 	static Server toServer(Resource r) {
 		assert isServer(r)
 		svrMan.findServerById(r.instanceId)
 	}
-	
+
 	static Service toService(Resource r) {
 		assert isService(r)
 		svcMan.findServiceById(r.instanceId)
@@ -363,7 +364,7 @@ class ResourceCategory {
 		}
 		return description == null ? "" : description
 	}
-	
+
 	/**
 	 * @see documentation for ResourceConfig.  We don't return it directly
 	 * here, as we'd like to abstract the thing doing the persisting
@@ -387,29 +388,7 @@ class ResourceCategory {
 	 * @return a list of {@link Resource}s
 	 */
 	static Collection getViewableChildren(Resource r, AuthzSubject user) {
-		def res = []
-		if (isPlatform(r)) {
-			def plat    = toPlatform(r)
-			plat.servers.each {
-				try {
-					def resource = it.checkPerms(operation: 'view', user:user)
-					res.add(resource)
-				} catch (PermissionException e) {
-					// Ignore
-				}
-			}
-		} else if (isServer(r)) {
-			def svr = toServer(r)
-			svr.services.each {
-				try {
-					def resource = it.checkPerms(operation: 'view', user:user)
-					res.add(resource)
-				} catch (PermissionException e) {
-					// Ignore
-				}
-			}
-		}
-		res
+		resMan.findChildren(user, r)
 	}
 	
 	/**
@@ -456,7 +435,7 @@ class ResourceCategory {
 		def aeval = new AppdefEntityValue(aeid, authzMan.overlordPojo)
 		def plats = aeval.getAssociatedPlatforms(PageControl.PAGE_ALL);
 		def plat = plats[0]
-		return Bootstrap.getBean(ResourceManager.class).findResource(plat.entityId)
+		return resMan.findResource(plat.entityId)
 	}
 	
 	/**

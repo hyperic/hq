@@ -32,11 +32,11 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 
-<script src="<html:rewrite page="/js/"/>functions.js" type="text/javascript"></script>
-<link rel=stylesheet href="<html:rewrite page="/css/"/>win.css" type="text/css">
+<script src="<html:rewrite page="/js/functions.js" />" type="text/javascript"></script>
+<link rel=stylesheet href="<html:rewrite page="/css/win.css"/>" type="text/css">
 <%-- end vit: delete this block --%>
 <script type="text/javascript">
-  var imagePath = "<html:rewrite page="/images/"/>";
+  var imagePath = "/images/";
 </script>
 <script type="text/javascript">
 var pageData = new Array();
@@ -160,8 +160,8 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   </c:url>
     <tr class="ListRow">
       <td class="ListCellCheckbox">&nbsp;</td>
-      <td width="1%" class="ListCellCheckbox"><a href="<c:out value="${chartUrl}" />"><html:img page="/images/icon_chart.gif" width="10" height="10" alt="" border="0"/></a></td>
-      <td class="ListCell"><a href="<c:out value="${chartUrl}" />"><c:out value="${metricList.key.name}" /></a></td>
+      <td width="1%" class="ListCellCheckbox"><a href="${chartUrl}"><html:img page="/images/icon_chart.gif" width="10" height="10" alt="" border="0"/></a></td>
+      <td class="ListCell"><a href="${chartUrl}">${metricList.key.name}</a></td>
       <td class="ListCellRight" nowrap>&nbsp;</td>
       <td class="ListCellRight" nowrap>&nbsp;</td>
       <td class="ListCellRight" nowrap>&nbsp;</td>

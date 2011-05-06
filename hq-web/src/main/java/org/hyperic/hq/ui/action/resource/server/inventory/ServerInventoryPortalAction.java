@@ -104,7 +104,7 @@ public class ServerInventoryPortalAction
     public ActionForward editResourceGeneral(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                              HttpServletResponse response) throws Exception {
 
-        setResource(request);
+        setResource(request, response);
 
         Portal portal = Portal.createPortal("resource.server.inventory.EditGeneralPropertiesTitle",
             ".resource.server.inventory.EditGeneralProperties");
@@ -117,7 +117,7 @@ public class ServerInventoryPortalAction
     public ActionForward editResourceTypeHost(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                               HttpServletResponse response) throws Exception {
 
-        setResource(request);
+        setResource(request, response);
 
         Portal portal = Portal.createPortal("resource.server.inventory.EditTypeAndHostProperties",
             ".resource.server.inventory.EditTypeAndHostProperties");
@@ -130,7 +130,7 @@ public class ServerInventoryPortalAction
     public ActionForward addGroups(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                    HttpServletResponse response) throws Exception {
 
-        setResource(request);
+        setResource(request, response);
 
         // clean out the return path
         SessionUtils.resetReturnPath(request.getSession());
@@ -153,7 +153,7 @@ public class ServerInventoryPortalAction
     public ActionForward viewResource(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                       HttpServletResponse response) throws Exception {
 
-        findAndSetResource(request);
+        findAndSetResource(request, response);
 
         // clean out the return path
         SessionUtils.resetReturnPath(request.getSession());
@@ -175,7 +175,7 @@ public class ServerInventoryPortalAction
     public ActionForward changeOwner(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                      HttpServletResponse response) throws Exception {
 
-        setResource(request);
+        setResource(request, response);
 
         Portal portal = Portal.createPortal(Constants.CHANGE_OWNER_TITLE, ".resource.server.inventory.changeOwner");
         portal.setDialog(true);
@@ -190,12 +190,12 @@ public class ServerInventoryPortalAction
         Portal portal = Portal.createPortal("resource.server.inventory.ConfigurationPropertiesTitle",
             ".resource.server.inventory.EditConfigProperties");
 
-        super.editConfig(request, portal);
+        super.editConfig(request, response, portal);
 
         return null;
     }
 
-    private void findAndSetResource(HttpServletRequest request) throws Exception {
+    private void findAndSetResource(HttpServletRequest request, HttpServletResponse response) throws Exception {
 
         Integer sessionId = RequestUtils.getSessionId(request);
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
@@ -222,7 +222,7 @@ public class ServerInventoryPortalAction
             .findServicesByServer(sessionId.intValue(), aeid.getId(), pcs);
         request.setAttribute(Constants.SERVICES_ATTR, serviceList);
 
-        setResource(request);
+        setResource(request, response);
 
     }
 }

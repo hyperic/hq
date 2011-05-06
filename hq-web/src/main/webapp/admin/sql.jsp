@@ -330,7 +330,7 @@ try {
 <% if ( isAdmin ) { %>
 
 <i>You can enter multiple commands, separated by semi-colons.</i>
-<form action="<%=request.getRequestURI()%>" method="post">
+<form action="<%= response.encodeUrl(request.getRequestURI()) %>" method="post">
 <table>
 
 <tr>

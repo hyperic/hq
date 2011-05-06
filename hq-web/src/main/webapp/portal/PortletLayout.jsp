@@ -50,7 +50,7 @@ djConfig.scopeMap = [
 </script>
 <script src="<html:rewrite page='/js/dojo/1.1.2/dojo/dojo.js'/>" type="text/javascript"></script>
 <script type="text/javascript">
-    var imagePath = "<html:rewrite page="/images/"/>";
+    var imagePath = "/images/";
     dojo11.require('dojo.date');
     dojo.require('dojo.event.*');
 	dojo.require('dojo.widget.*');
@@ -133,7 +133,9 @@ var onloads = [];
 		initOnloads();
 	});
 </script>
-<html:link page="/Resource.do?eid=" linkName="viewResUrl" styleId="viewResUrl" style="display:none;"></html:link>
+<html:link action="/Resource" linkName="viewResUrl" styleId="viewResUrl" style="display:none;">
+	<html:param name="eid" value=""/>
+</html:link>
 
 <tiles:insert beanProperty="url" beanName="portlet" flush="true">
 	<tiles:put name="portlet" beanName="portlet" />

@@ -67,7 +67,7 @@
     </property>
 
     <property name="optionStatus" type="string">
-      <column name="OPTION_STATUS" length="25"/>
+      <column name="OPTION_STATUS" length="150"/>
     </property>
 
     <many-to-one name="alertDefinition" class="AlertDefinition">

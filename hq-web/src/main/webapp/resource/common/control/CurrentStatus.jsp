@@ -85,13 +85,17 @@
     hyperic.updateControlStatus = function (){
       setTimeout( "hyperic.updateControlStatus()", 5000 );
 
-      updateUrl = '<html:rewrite page="/resource/common/control/UpdateStatus.do"/>?eid=<c:out value="${Resource.entityId}"/>';
+      <c:url var="updateUrl" value="/resource/common/control/UpdateStatus.do">
+      	<c:param name="eid" value="${Resource.entityId}"/>
+      </c:url>
       <c:if test="${section eq 'group'}">
-        updateUrl += '&bid=<c:out value="${requestScope.bid}"/>';
+      	<c:url var="updateUrl" value="${updateUrl}">
+    		<c:param name="bid" value="${requestScope.bid}"/>
+    	</c:url>
       </c:if>
 
       dojo11.xhrGet( {
-          url: updateUrl,
+          url: '${updateUrl}',
           handleAs: 'json',
           load: function(status){
             console.log(status);

@@ -634,14 +634,11 @@ public class PlatformManagerImpl implements PlatformManager {
      */
     @Transactional(readOnly = true)
     public PageList<PlatformValue> getRecentPlatforms(AuthzSubject subject, long range, int size)
-        throws PermissionException, NotFoundException {
+    throws PermissionException, NotFoundException {
         PageControl pc = new PageControl(0, size);
-
-        Collection<Platform> platforms = platformDAO
-            .findByCTime(System.currentTimeMillis() - range);
-
+        Collection<Platform> platforms = platformDAO.findByCTime(System.currentTimeMillis() - range);
         // now get the list of PKs
-        List<Integer> viewable = getViewablePlatformPKs(subject);
+        Collection<Integer> viewable = new HashSet<Integer>(getViewablePlatformPKs(subject));
         // and iterate over the list to remove any item not viewable
         for (Iterator<Platform> i = platforms.iterator(); i.hasNext();) {
             Platform platform = i.next();
@@ -650,7 +647,6 @@ public class PlatformManagerImpl implements PlatformManager {
                 i.remove();
             }
         }
-
         // valuePager converts local/remote interfaces to value objects
         // as it pages through them.
         return valuePager.seek(platforms, pc);
@@ -1273,10 +1269,9 @@ public class PlatformManagerImpl implements PlatformManager {
         return rtn;
     }
 
-    protected List<Integer> getViewablePlatformPKs(AuthzSubject who) throws PermissionException,
-        NotFoundException {
+    protected Collection<Integer> getViewablePlatformPKs(AuthzSubject who)
+    throws PermissionException, NotFoundException {
         // now get a list of all the viewable items
-
         Operation op = getOperationByName(resourceManager
             .findResourceTypeByName(AuthzConstants.platformResType),
             AuthzConstants.platformOpViewPlatform);
@@ -1579,12 +1574,6 @@ public class PlatformManagerImpl implements PlatformManager {
             log.debug("No changes found between value object and entity");
             return plat;
         } else {
-            int newCount = existing.getCpuCount().intValue();
-            int prevCpuCount = plat.getCpuCount().intValue();
-            if (newCount > prevCpuCount) {
-                getCounter().addCPUs(newCount - prevCpuCount);
-            }
-
             if (!(existing.getName().equals(plat.getName()))) {
                 if (platformDAO.findByName(existing.getName()) != null)
                     // duplicate found, throw a duplicate object exception
@@ -1811,11 +1800,6 @@ public class PlatformManagerImpl implements PlatformManager {
         if (platform == null) {
             throw new PlatformNotFoundException("Platform not found with either FQDN: " + fqdn +
                                                 " nor CertDN: " + certdn);
-        }
-        int prevCpuCount = platform.getCpuCount().intValue();
-        Integer count = aiplatform.getCpuCount();
-        if ((count != null) && (count.intValue() > prevCpuCount)) {
-            getCounter().addCPUs(aiplatform.getCpuCount().intValue() - prevCpuCount);
         }
 
         // Get the FQDN before we update

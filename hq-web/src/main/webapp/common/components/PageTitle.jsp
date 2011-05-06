@@ -151,7 +151,10 @@
       											
       											<c:if test="${not empty resource}">
       												- 
-      												<html:link page="/resource/${resource.entityId.typeName}/Inventory.do?mode=changeOwner&rid=${resource.id}&type=${resource.entityId.type}">
+      												<html:link action="/resource/${resource.entityId.typeName}/Inventory">
+      													<html:param name="mode" value="changeOwner"/>
+      													<html:param name="rid" value="${resource.id}"/>
+      													<html:param name="type" value="${resource.entityId.type}"/>
       												  	<fmt:message key="resource.common.inventory.props.ChangeButton"/>
       												</html:link>
       												<br>
@@ -198,7 +201,7 @@
       									<c:if test="${not empty pluginLinkInfo}">
 											<tr>
 												<td colspan="100%" style="padding-top: 10px;">
-													<a href="<html:rewrite page="/mastheadAttach.do?typeId=${pluginLinkInfo.pluginId}&sn=${pluginLinkInfo.selectedId}"/>">View in HQ vSphere</a>
+													<a href="<html:rewrite action="/mastheadAttach"><html:param name="typeId" value="${pluginLinkInfo.pluginId}"/><html:param name="sn" value="${pluginLinkInfo.selectedId}"/></html:rewrite>">View in HQ vSphere</a>
 												</td>
 											</tr>
 										</c:if>					
@@ -214,7 +217,7 @@
 	    												<div class="toolsMenuStacked LinkBox">
 	        												<span onclick="toggleMenu('toolMenu');" id="toolMenuSpan">
 	        													<fmt:message key="resource.toolsmenu.text"/>
-	        													<img src="/images/arrow_dropdown.gif" border="0" alt="" id="toolMenuArrow">
+	        													<img src="<html:rewrite page="/images/arrow_dropdown.gif" />" border="0" alt="" id="toolMenuArrow">
 	        												</span>
 															<div style="clear: both"></div>
 	        												<div id="toolMenu" style="display: none; position: absolute; margin-top: 2px; margin-left: -7px; z-index:5">
@@ -263,7 +266,10 @@
 									<!-- TOOLS -->
 									<c:if test="${not empty linkUrl}">
 									    <div class="toolsMenu">
-									        <span class="LinkBox" onclick="toggleMenu('toolMenu');" id="toolMenuSpan"><fmt:message key="resource.toolsmenu.text"/><img src="/images/arrow_dropdown.gif" border="0" alt="" id="toolMenuArrow"></span>
+									        <span class="LinkBox" onclick="toggleMenu('toolMenu');" id="toolMenuSpan">
+									        	<fmt:message key="resource.toolsmenu.text"/>
+									        	<img src="<html:rewrite page="/images/arrow_dropdown.gif" />" border="0" alt="" id="toolMenuArrow">
+									        </span>
 									        <div style="clear: both"></div>
 									        <div id="toolMenu" style="display: none; position: absolute; margin-top: 2px; margin-left: -2px;z-index:5">
 									            <tiles:insert attribute="linkUrl">

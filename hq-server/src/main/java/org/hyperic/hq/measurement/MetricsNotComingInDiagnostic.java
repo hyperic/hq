@@ -28,6 +28,7 @@ package org.hyperic.hq.measurement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,9 +68,10 @@ import org.springframework.stereotype.Component;
 public class MetricsNotComingInDiagnostic implements DiagnosticObject {
 
     private final Log log = LogFactory.getLog(MetricsNotComingInDiagnostic.class);
-    private long started = now();
-    // 60 minutes
-    private static final long THRESHOLD = 1000 * 60 * 60;
+    private long last = now();
+    // 12 hours
+    private static final long REPORT_THRESHOLD = 1000 * 60 * 60 * 12;
+    private static final long VIOLATION_THRESHOLD = 1000 * 60 * 60;
     private DiagnosticsLogger diagnosticsLogger;
     private AuthzSubjectManager authzSubjectManager;
     private AvailabilityManager availabilityManager;
@@ -117,16 +119,16 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
     }
     
     public void reset() {
-        this.started = now();
+        this.last = now();
     }
     
     private String getReport(final boolean isVerbose) {
         if (!HAUtil.isMasterNode()) {
             return "Server must be the primary node in the HA configuration before this report is valid.";
         }
-        if ((now() - THRESHOLD) < started) {
-            return "Server must be up for " + THRESHOLD / 1000 / 60 +
-                   " minutes before this report is valid";
+        if ((now() - last) < REPORT_THRESHOLD) {
+            return "MetricsNotComingInDiagnostic is only run every " + REPORT_THRESHOLD / 1000 / 60 / 60 +
+                   " hours, next run at " + new Date(last + REPORT_THRESHOLD);
         }
         final StringBuilder rtn = new StringBuilder();
         try {
@@ -141,6 +143,8 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
             });
         } catch (Exception e) {
             log.error(e, e);
+        } finally {
+        	reset();
         }
         return rtn.toString();
     }
@@ -231,7 +235,7 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
             }
         }
         final StringBuilder rtn = new StringBuilder(platHierarchyNotReporting.size() * 128);
-        rtn.append("\nEnabled metrics not reported in for ").append(THRESHOLD / 1000 / 60).append(
+        rtn.append("\nEnabled metrics not reported in for ").append(VIOLATION_THRESHOLD / 1000 / 60).append(
             " minutes (by platform hierarchy)\n");
         rtn.append("------------------------------------------------------------------------\n");
         for (final Entry<Platform, Object> entry : platHierarchyNotReporting.entrySet()) {
@@ -269,7 +273,7 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
             if (r == null || r.isInAsyncDeleteState()) {
                 continue;
             }
-            if ((now - platform.getCreationTime()) < THRESHOLD ||
+            if ((now - platform.getCreationTime()) < VIOLATION_THRESHOLD ||
                 !measCache.containsKey(r.getId()) || 
                 !platformIsAvailable(platform, measCache, avails)) {
                 continue;
@@ -316,7 +320,7 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
                 mids.add(m.getId());
             }
         }
-        return metricDataCache.getAll(mids, now() - THRESHOLD);
+        return metricDataCache.getAll(mids, now() - VIOLATION_THRESHOLD);
     }
 
     private static long now() {

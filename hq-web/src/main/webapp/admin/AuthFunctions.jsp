@@ -40,8 +40,12 @@
 <table width="100%" cellpadding="0" cellspacing="0" border="0" class="TableBottomLine" style="margin-bottom: 24px;">
   <tr>
     <td width="20%" class="BlockLabel"><fmt:message key="admin.home.Users"/></td>
-    <td width="30%" class="BlockContent"><html:link page="/admin/user/UserAdmin.do?mode=list"><fmt:message key="admin.home.ListUsers"/></html:link></td>
-
+    <td width="30%" class="BlockContent">
+    	<html:link page="/admin/user/UserAdmin">
+    		<html:param name="mode" value="list"/>
+    		<fmt:message key="admin.home.ListUsers"/>
+    	</html:link>
+    </td>
     <td width="20%" class="BlockLabel"><fmt:message key="admin.home.Roles"/></td>
     <td width="30%" class="BlockContent" rowspan="2" valign="top">
       <span class="italicInfo">
@@ -57,7 +61,10 @@
     <td class="BlockContent" colspan="2">
     <c:choose>
     <c:when test="${useroperations['createSubject']}">
-    <html:link page="/admin/user/UserAdmin.do?mode=new"><fmt:message key="admin.home.NewUser"/></html:link>
+    	<html:link action="/admin/user/UserAdmin">
+    		<html:param name="mode" value="new"/>
+    		<fmt:message key="admin.home.NewUser"/>
+    	</html:link>
     </c:when>
     <c:otherwise>
     &nbsp;

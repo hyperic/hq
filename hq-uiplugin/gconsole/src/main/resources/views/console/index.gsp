@@ -1,40 +1,3 @@
-<script type="text/javascript">
-document.navTabCat = "Admin";
-function sendCode() {
-  dojo.byId('timeStatus').innerHTML = '... executing';
-   dojo.io.bind({
-    url: '<%= urlFor(action:"execute") %>',
-    method: "post",
-    mimetype: "text/json-comment-filtered",
-    content: {
-        code:   dojo.byId("code").value,
-    },
-    load: function(type, data, evt) {
-      dojo.byId('result').innerHTML = data.result;
-      dojo.byId('timeStatus').innerHTML = data.timeStatus;
-    },
-    error: function(type, data, evt) {
-      alert('error! ' + data);
-    }
-  });
-}
-
-function chooseTemplate(t) {
-  dojo.io.bind({
-    url: '<%= urlFor(action:"getTemplate") %>',
-    method: "get",
-    mimetype: "text/json-comment-filtered",
-    content: {template: t},
-    load: function(type, data, evt) {
-      dojo.byId('code').value = data.result;
-    },
-    error: function(type, data, evt) {
-      alert('error! ' + data);
-    }
-  });
-}
-
-</script>
 <div class="gConsoleContainer">
     <label>Available Templates</label>
     <fieldset>
@@ -42,7 +5,7 @@ function chooseTemplate(t) {
         There are no templates available.
     <% } %>
     <% for(t in templates) { %>
-      <a onclick="chooseTemplate('${t}')">${t}</a> |
+      <a class="chooseTemplateLink">${t}</a> |
     <% } %>
     </fieldset>
     <br/>
@@ -51,7 +14,7 @@ function chooseTemplate(t) {
     <br/><br/>
     
     <div>
-        <a class="buttonGreen" onclick="sendCode()" href="javascript:void(0)"><span>Execute</span></a>
+        <a id="executeLink" class="buttonGreen" href="#"><span>Execute</span></a>
     </div>
     <br/>
     
@@ -67,3 +30,43 @@ function chooseTemplate(t) {
         <pre>
     </fieldset>
 </div>
+<script type="text/javascript">
+document.navTabCat = "Admin";
+
+dojo11.addOnLoad(function() {
+	dojo11.connect(dojo11.byId("executeLink"), "onclick", function(e) {
+		dojo11.byId('timeStatus').innerHTML = '... executing';
+		
+		dojo11.xhrPost({
+    		url: "<%= urlFor(action:"execute", encodeUrl:true) %>",
+	    	handleAs: "json-comment-filtered",
+    		content: {
+        		code:   dojo11.byId("code").value
+	    	},
+    		load: function(response, args) {
+      			dojo11.byId('result').innerHTML = response.result;
+      			dojo11.byId('timeStatus').innerHTML = response.timeStatus;
+	    	},
+    		error: function(response, args) {
+      			alert('error! ' + response);
+	    	}
+	    });
+  	});
+
+  	dojo11.query(".chooseTemplateLink").onclick(function(e) {
+  		dojo11.xhrGet({
+    		url: '<%= urlFor(action:"getTemplate") %>',
+	    	handleAs: "json-comment-filtered",
+    		content: {
+        		template: e.target.innerHTML
+	        },
+    		load: function(response, args) {
+      			dojo11.byId('code').value = response.result;
+	    	},
+    		error: function(response, args) {
+      			alert('error! ' + response);
+	    	}
+  		});
+  	});
+});
+</script>

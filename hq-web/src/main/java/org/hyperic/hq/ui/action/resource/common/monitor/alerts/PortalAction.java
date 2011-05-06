@@ -99,7 +99,7 @@ public class PortalAction
 
     public ActionForward listAlerts(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                     HttpServletResponse response) throws Exception {
-        setResource(request);
+        setResource(request, response);
 
         super.setNavMapLocation(request, mapping, Constants.ALERT_LOC);
         // clean out the return path
@@ -167,7 +167,7 @@ public class PortalAction
 
         int sessionID = RequestUtils.getSessionId(request).intValue();
 
-        AppdefEntityID aeid = setResource(request);
+        AppdefEntityID aeid = setResource(request, response);
         Integer alertId = new Integer(request.getParameter("a"));
 
         try {
@@ -190,7 +190,7 @@ public class PortalAction
                 request.setAttribute(Constants.TITLE_PARAM2_ATTR, alertDefinition.getName());
 
                 if (aeid == null) {
-                    aeid = setResource(request, new AppdefEntityID(alertDefinition.getAppdefType(), alertDefinition
+                    aeid = setResource(request, response, new AppdefEntityID(alertDefinition.getAppdefType(), alertDefinition
                         .getAppdefId()), false);
                 }
 

@@ -31,6 +31,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -38,10 +39,12 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceDAO;
 import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.session.Role;
@@ -127,8 +130,9 @@ public class PermissionManagerImpl
         return true;
     }
 
-    public List<Integer> findOperationScopeBySubject(AuthzSubject subj, String opName,
-                                                     String resType) throws NotFoundException,
+    public Collection<Integer> findOperationScopeBySubject(AuthzSubject subj, String opName,
+                                                           String resType)
+    throws NotFoundException,
         PermissionException {
         if (_log.isDebugEnabled()) {
             _log.debug("Checking Scope for Operation: " + opName + " subject: " + subj);
@@ -147,8 +151,8 @@ public class PermissionManagerImpl
         return new ArrayList<Integer>();
     }
 
-    public List<Integer> findOperationScopeBySubject(AuthzSubject subj, Integer opId)
-        throws NotFoundException, PermissionException {
+    public Collection<Integer> findOperationScopeBySubject(AuthzSubject subj, Integer opId)
+    throws NotFoundException, PermissionException {
         if (_log.isDebugEnabled()) {
             _log.debug("Checking Scope for Operation: " + opId + " subject: " + subj);
         }
@@ -218,69 +222,6 @@ public class PermissionManagerImpl
         }
 
         return ret;
-    }
-
-    public List<Integer> findViewableResources(AuthzSubject subj, String resType, String resName,
-                                               String appdefTypeStr, Integer typeId, PageControl pc) {
-        List<Integer> viewableInstances = new ArrayList<Integer>();
-
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = getConnection();
-            String sql = VIEWABLE_SELECT;
-            if (appdefTypeStr != null && typeId != null) {
-                sql += ", EAM_" + appdefTypeStr.toUpperCase() +
-                       " appdef WHERE EAM_RESOURCE.instance_id = appdef.id AND " + " appdef." +
-                       appdefTypeStr + "_type_id = ? AND ";
-            } else {
-                sql += " WHERE ";
-            }
-            sql += VIEWABLE_CLAUSE;
-
-            if (resName != null) {
-                // Support wildcards
-                resName = resName.replace('*', '%');
-                resName = resName.replace('?', '_');
-
-                sql += VIEWABLE_BYNAME_SQL;
-                sql = StringUtil.replace(sql, "$$resName$$", resName);
-            }
-
-            sql += "ORDER BY EAM_RESOURCE.sort_name ";
-
-            if (!pc.isAscending()) {
-                sql = sql + "DESC";
-            }
-            sql = StringUtil.replace(sql, "DB_FALSE_TOKEN", _falseToken);
-
-            stmt = conn.prepareStatement(sql);
-            int i = 1;
-
-            if (appdefTypeStr != null && typeId != null) {
-                stmt.setInt(i++, typeId.intValue());
-            }
-            stmt.setString(i++, resType);
-
-            if (resName != null) {
-                stmt.setInt(i++, AppdefUtil.resNameToAppdefTypeId(resType));
-            }
-
-            _log.debug("Viewable SQL: " + sql);
-            rs = stmt.executeQuery();
-
-            for (i = 1; rs.next(); i++) {
-                viewableInstances.add(new Integer(rs.getInt(1)));
-            }
-            return viewableInstances;
-        } catch (SQLException e) {
-            _log.error("Error getting scope by SQL", e);
-            throw new SystemException("SQL Error getting scope: " + e.getMessage());
-        } finally {
-            DBUtil.closeJDBCObjects(PermissionManagerImpl.class, conn, stmt, rs);
-        }
     }
 
     public List<Integer> findViewableResources(AuthzSubject subj, String searchFor, PageControl pc) {
@@ -496,4 +437,53 @@ public class PermissionManagerImpl
     public HierarchicalAlertingManager getHierarchicalAlertingManager() {
         return (HierarchicalAlertingManager) Bootstrap.getBean("HierarchicalAlertingManager");
     }
+
+    public List<AppdefEntityID> findViewableInstances(AuthzSubject subj,
+                                                      Collection<ResourceType> resourceTypes) {
+        if (resourceTypes.isEmpty()) {
+            return Collections.emptyList();
+        }
+        final ResourceDAO resourceDAO = getResourceDAO();
+        final Collection<Resource> resources = (subj.getId().equals(1)) ?
+            resourceDAO.findAll() : resourceDAO.findByOwner(subj);
+        final List<AppdefEntityID> rtn = new ArrayList<AppdefEntityID>(resources.size());
+        final Set<Integer> typeIds = new HashSet<Integer>();
+        for (final ResourceType type : resourceTypes) {
+            typeIds.add(type.getId());
+        }
+        for (final Resource r : resources) {
+            if (r == null || r.isInAsyncDeleteState() || r.isSystem()) {
+                continue;
+            }
+            if (typeIds.contains(r.getResourceType().getId())) {
+                rtn.add(AppdefUtil.newAppdefEntityId(r));
+            }
+        }
+        return rtn;
+    }
+
+    public Set<Integer> findViewableResources(AuthzSubject subj,
+                                              Collection<ResourceType> resourceTypes) {
+        if (resourceTypes.isEmpty()) {
+            return Collections.emptySet();
+        }
+        final ResourceDAO resourceDAO = getResourceDAO();
+        final Collection<Resource> resources = (subj.getId().equals(1)) ?
+            resourceDAO.findAll() : resourceDAO.findByOwner(subj);
+        final Set<Integer> rtn = new HashSet<Integer>();
+        final Set<Integer> typeIds = new HashSet<Integer>();
+        for (final ResourceType type : resourceTypes) {
+            typeIds.add(type.getId());
+        }
+        for (final Resource r : resources) {
+            if (r == null || r.isInAsyncDeleteState() || r.isSystem()) {
+                continue;
+            }
+            if (typeIds.contains(r.getResourceType().getId())) {
+                rtn.add(r.getId());
+            }
+        }
+        return rtn;
+    }
+
 }

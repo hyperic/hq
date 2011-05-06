@@ -53,16 +53,11 @@ import org.hyperic.hq.events.server.session.AlertConditionLog;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
-import org.hyperic.hq.measurement.UnitsConvert;
-import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.beans.AlertConditionBean;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.util.NumberUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
-import org.hyperic.util.units.FormatSpecifics;
-import org.hyperic.util.units.FormattedNumber;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -155,47 +150,11 @@ public class ViewAlertAction
                 case EventConstants.TYPE_THRESHOLD:
                 case EventConstants.TYPE_BASELINE:
                 case EventConstants.TYPE_CHANGE:
-                    String last = logVal.substring(logVal.length() - 1);
-
-                    try {
-                        Integer.parseInt(last);
-
-                        // Let's actually format the value
-                        double value = NumberUtil.stringAsNumber(logVal).doubleValue();
-
-                        if (Double.isNaN(value)) {
-                            conditionBean.setActualValue(Constants.UNKNOWN);
-                        } else {
-                            // This is legacy code, used to format a comma
-                            // delimited
-                            // number in the logs. However, we should be storing
-                            // fully formatted values into logs now. Remove post
-                            // 4.1
-
-                            // format threshold and value
-                            Integer mid = new Integer(conditionLogValue.getCondition().getMeasurementId());
-                            Measurement m = measurementBoss.getMeasurement(sessionID, mid);
-                            FormatSpecifics precMax = new FormatSpecifics();
-
-                            precMax.setPrecision(FormatSpecifics.PRECISION_MAX);
-
-                            FormattedNumber val = UnitsConvert.convert(value, m.getTemplate().getUnits());
-
-                            conditionBean.setActualValue(val.toString());
-                        }
-                    } catch (NumberFormatException e) {
-                        conditionBean.setActualValue(logVal);
-                    }
-
-                    break;
-
                 case EventConstants.TYPE_CUST_PROP:
                 case EventConstants.TYPE_LOG:
                 case EventConstants.TYPE_CFG_CHG:
                     conditionBean.setActualValue(logVal);
-
                     break;
-
                 default:
                     conditionBean.setActualValue(Constants.UNKNOWN);
             }

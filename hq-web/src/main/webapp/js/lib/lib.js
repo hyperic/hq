@@ -294,7 +294,10 @@ hyperic.widget.search = function(/*Object*/ urls, /*number*/ minStrLenth, /*Obje
         if(this.searchBox.value.length >= this.minStrLen){
             this.searchStarted();
             dojo11.xhrGet({
-                url: this.searchURL+'?q='+string, 
+                url: this.searchURL,
+                content: {
+                	q: string
+                },
                 handleAs: "json",
                 headers: { "Content-Type": "application/json"},
                 timeout: 5000, 
@@ -343,8 +346,8 @@ hyperic.widget.search = function(/*Object*/ urls, /*number*/ minStrLenth, /*Obje
 };
 
 function loadSearchData(response, evt) {
-	var resURL = resourceURL+"?eid=";
-    var usrURL = userURL +"?mode=view&u=";
+	var resURL = resourceURL + ((resourceURL.indexOf("?") == -1) ? "?" : "&") + "eid=";
+    var usrURL = userURL + ((userURL.indexOf("?") == -1) ? "?" : "&") + "mode=view&u=";
     var template = "<li class='type'><a href='link' title='fullname'>text<\/a><\/li>";
     var count = 0;
     var res = "";
@@ -1559,7 +1562,9 @@ hyperic.dashboard.chartWidget = function(args) {
     var portletName = args.portletName;
     var portletLabel = args.title;
     var baseUrl = args.url;
-
+    var chartUrl = args.chartUrl;
+    var ctypeChartUrl = args.ctypeChartUrl;
+    
     that.sheets = {};
     that.sheets.loading = dojo11.query('.loading',node)[0];
     that.sheets.error_loading = dojo11.query('.error_loading',node)[0];
@@ -1790,8 +1795,9 @@ hyperic.dashboard.chartWidget = function(args) {
         var chartId = that.currentChartId;
         var chartIndex = that.chartselect.select.selectedIndex;
         if(confirm('Remove ' + that.charts[chartId].name + ' from saved charts?')) {
+        	var urlToUse = chartUrl.replace("{rid}", that.charts[chartId].rid).replace("{mtid}", that.charts[chartId].mtid);
             dojo11.xhrPost( {
-                url: baseUrl + "/chart/" + that.charts[chartId].rid + "/" + that.charts[chartId].mtid + "/",
+                url: urlToUse,
                 content: {
             		"_method" : "DELETE" // need to work around issue using PUT directly
             	},
@@ -2113,15 +2119,15 @@ hyperic.dashboard.chartWidget = function(args) {
     	
     	that._fetchingChart = true;
     	
-    	var chartUrl = baseUrl + "/chart/" + that.charts[chart].rid + "/" + that.charts[chart].mtid + "/";
+    	var urlToUse = unescape(chartUrl).replace("{rid}", that.charts[chart].rid).replace("{mtid}", that.charts[chart].mtid);
     	var ctype = that.charts[chart].ctype;
     	
     	if (ctype != null) {
-    		chartUrl += ctype + "/";
+    		urlToUse = unescape(ctypeChartUrl).replace("{rid}", that.charts[chart].rid).replace("{mtid}", that.charts[chart].mtid).replace("{ctype}", ctype);
     	}
     
     	return dojo11.xhrGet( {
-            url: chartUrl,
+            url: urlToUse,
             handleAs: 'json',
             headers: { "Content-Type": "application/json"},
             preventCache: true,
@@ -2719,7 +2725,6 @@ hyperic.dashboard.summaryWidget.prototype = hyperic.dashboard.widget;
 
 hyperic.group_manager = function(args) {
 	var that = this;
-	var baseUrl = args.url;
 	
 	that.dialogs = {};
 	that.message_area = {};
@@ -2824,8 +2829,6 @@ hyperic.group_manager = function(args) {
 		var entityType = eidArray[0].split(":")[0];
 		var myForm = document.AddToExistingGroupForm;
 		
-		myForm.action = "/resource/hub/RemoveResource.do";
-		myForm.method = "POST";
 		myForm.removeChild(myForm.eid);
 				
 		var a = new Array(eidArray.length+2);
@@ -2916,7 +2919,7 @@ hyperic.group_manager = function(args) {
 								'Please wait. Processing your request...');
 
 		dojo11.xhrPost( {
-            url: baseUrl + "association",
+            url: args.postUrl,
             content: {
 				eid: formArray.eid.split(","),
 				groupId: formArray.group.toString().split(",")
@@ -2942,7 +2945,7 @@ hyperic.group_manager = function(args) {
 	
 	that.getGroupsNotContaining = function(eids) {    
 		dojo11.xhrPost( {
-            url: baseUrl + "associations",
+            url: args.associationsUrl,
             content: {
 				eid: eids,
 				"_method": "PUT"
