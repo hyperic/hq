@@ -176,12 +176,11 @@ public class Agent extends AppdefBean {
     }
 
     public String toString() {
-        StringBuffer str = new StringBuffer("{");
+        StringBuffer str = new StringBuffer(64);
 
-        str.append("id=").append(getId()).append(" ")
+        str.append("{id=").append(getId()).append(" ")
            .append("address=").append(getAddress()).append(" ")
-           .append("port=").append(getPort()).append(" ")
-           .append("authToken=").append(getAuthToken()).append("}");
+           .append("port=").append(getPort()).append("}");
         return(str.toString());
     }
     
