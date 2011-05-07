@@ -255,9 +255,7 @@ public class AgentPluginSyncRestartThrottle {
         }
         concurrentStatsCollector.addStat(1, ConcurrentStatsCollector.AGENT_PLUGIN_SYNC_PENDING_RESTARTS);
         synchronized (LOCK) {
-            if (!agentRestartTimestampMap.containsKey(agentId)) {
-                pendingRestarts.add(agentId);
-            }
+            pendingRestarts.add(agentId);
             LOCK.notifyAll();
         }
     }
