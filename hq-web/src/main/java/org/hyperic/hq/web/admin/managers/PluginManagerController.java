@@ -154,14 +154,16 @@ public class PluginManagerController extends BaseController implements Applicati
         Map<String, Object> info = new HashMap<String,Object>();
         int agentErrorCount=0;
         List<Agent> allAgents = agentManager.getAgents();
-        
-        if(allAgents!=null){
-            for(Agent agent:allAgents){
+        if (allAgents != null){
+            for (Agent agent : allAgents){
                 Collection<AgentPluginStatus> pluginStatus = agent.getPluginStatuses(); 
-                
-                for(AgentPluginStatus status:pluginStatus){
-                    AgentPluginStatusEnum e =AgentPluginStatusEnum.valueOf(status.getLastSyncStatus());
-                    if(e==AgentPluginStatusEnum.SYNC_FAILURE){
+                for (AgentPluginStatus status : pluginStatus){
+                    String lastSyncStatus = status.getLastSyncStatus();
+                    if (lastSyncStatus == null) {
+                        continue;
+                    }
+                    AgentPluginStatusEnum e = AgentPluginStatusEnum.valueOf(lastSyncStatus);
+                    if (e == AgentPluginStatusEnum.SYNC_FAILURE){
                         agentErrorCount++;
                         break;
                     }
@@ -177,13 +179,15 @@ public class PluginManagerController extends BaseController implements Applicati
     public @ResponseBody List<String> getAgentStatusSummary() {
         List<String> agentNames = new ArrayList<String>();
         List<Agent> allAgents = agentManager.getAgents();
-        
-        for(Agent agent:allAgents){
+        for (Agent agent : allAgents){
             Collection<AgentPluginStatus> pluginStatus = agent.getPluginStatuses(); 
-            
             for(AgentPluginStatus status:pluginStatus){
-                AgentPluginStatusEnum e =AgentPluginStatusEnum.valueOf(status.getLastSyncStatus());
-                if(e==AgentPluginStatusEnum.SYNC_FAILURE){
+                String lastSyncStatus = status.getLastSyncStatus();
+                if (lastSyncStatus == null) {
+                    continue;
+                }
+                AgentPluginStatusEnum e =AgentPluginStatusEnum.valueOf(lastSyncStatus);
+                if (e == AgentPluginStatusEnum.SYNC_FAILURE){
                     agentNames.add(getAgentName(agent));
                     break;
                 }
@@ -199,9 +203,9 @@ public class PluginManagerController extends BaseController implements Applicati
             pluginManager.getStatusesByPluginId(pluginId, AgentPluginStatusEnum.SYNC_FAILURE);
 
         List<Map<String,Object>> resultAgents = new ArrayList<Map<String,Object>>();
-        for(AgentPluginStatus errorAgentStatus: errorAgentStatusList){
+        for (AgentPluginStatus errorAgentStatus : errorAgentStatusList){
             String agentName = getAgentName(errorAgentStatus.getAgent());
-            if("".equals(searchWord) || agentName.contains(searchWord)){
+            if ("".equals(searchWord) || agentName.contains(searchWord)){
                 Map<String,Object> errorAgent = new HashMap<String,Object>();
                 errorAgent.put("agentName", agentName); 
                 if(errorAgentStatus.getLastSyncAttempt()!=0){
