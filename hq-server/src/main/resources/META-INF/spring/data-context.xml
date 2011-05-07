@@ -50,7 +50,7 @@
 
 	<bean
 		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
-		id="entityManagerFactory" depends-on="neo4jNodeBacking,neo4jRelationshipBacking">
+		id="entityManagerFactory" depends-on="neo4jNodeBacking,neo4jRelationshipBacking,liquibase">
 		<property name="persistenceUnitName" value="production" />
 		<property name="dataSource" ref="dataSource" />
 		<!-- HibernateJpaDialect necessary for RequiresNew txs created by our id 
@@ -88,7 +88,7 @@
 	<bean id="liquibase" class="liquibase.integration.spring.SpringLiquibase" depends-on="dataSource">
 		<property name="dataSource" ref="dataSource" />
 		<property name="changeLog"
-			value="classpath:/liquibase-db.xml" />
+			value="classpath:/data/liquibase-db-master.xml" />
 	</bean>
 	
 </beans>
