@@ -49,6 +49,7 @@
 		<jstl.version>1.1.2</jstl.version>
 		<jug.version>2.0.0</jug.version>
 		<junit.version>4.6</junit.version>
+		<liquibase.version>2.0.1</liquibase.version>
 		<log4j.version>1.2.16</log4j.version>
 		<mail.version>1.4</mail.version>
 		<mx4j.version>3.0.1</mx4j.version>

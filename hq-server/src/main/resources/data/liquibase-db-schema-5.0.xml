@@ -1,0 +1,2904 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+	<changeSet author="hqdb" id="createActionTable">
+		<createTable tableName="EAM_ACTION">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column defaultValue="" name="CLASSNAME" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+			<column name="CONFIG" type="LONGBLOB" />
+			<column name="DELETED" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="PARENT_ID" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createAgentTable">
+		<createTable tableName="EAM_AGENT">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column defaultValue="" name="ADDRESS" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="AGENTTOKEN" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+			<column name="VERSION" type="VARCHAR(50)" />
+			<column defaultValue="" name="AUTHTOKEN" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+			<column name="CTIME" type="BIGINT" />
+			<column name="MTIME" type="BIGINT" />
+			<column name="PORT" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="UNIDIRECTIONAL" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="AGENT_TYPE_ID" type="INT" />
+		</createTable>
+		<createIndex indexName="AGENTTOKEN" tableName="EAM_AGENT"
+			unique="true">
+			<column name="AGENTTOKEN" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createAgentTypeTable">
+		<createTable tableName="EAM_AGENT_TYPE">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="CTIME" type="BIGINT" />
+			<column name="MTIME" type="BIGINT" />
+			<column name="NAME" type="VARCHAR(80)" />
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<createIndex indexName="NAME" tableName="EAM_AGENT_TYPE"
+			unique="true">
+			<column name="NAME" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createAIQIpTable">
+		<createTable tableName="EAM_AIQ_IP">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column defaultValue="" name="ADDRESS" type="VARCHAR(64)">
+				<constraints nullable="false" />
+			</column>
+			<column name="CTIME" type="BIGINT" />
+			<column name="DIFF" type="BIGINT" />
+			<column name="IGNORED" type="BIT" />
+			<column name="MAC_ADDRESS" type="VARCHAR(64)" />
+			<column name="MTIME" type="BIGINT" />
+			<column name="NETMASK" type="VARCHAR(64)" />
+			<column name="QUEUESTATUS" type="INT" />
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="AIQ_PLATFORM_ID" type="INT" />
+		</createTable>
+		<createIndex indexName="AIQ_PLATFORM_ID" tableName="EAM_AIQ_IP"
+			unique="true">
+			<column name="AIQ_PLATFORM_ID" />
+			<column name="ADDRESS" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createAIQPlatformTable">
+		<createTable tableName="EAM_AIQ_PLATFORM">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column defaultValue="" name="AGENTTOKEN" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+			<column name="ARCH" type="VARCHAR(80)" />
+			<column name="CERTDN" type="VARCHAR(200)" />
+			<column name="CONTROL_CONFIG" type="LONGBLOB" />
+			<column name="CPU_COUNT" type="INT" />
+			<column name="CPU_SPEED" type="INT" />
+			<column name="CTIME" type="BIGINT" />
+			<column name="CUSTOM_PROPERTIES" type="LONGBLOB" />
+			<column name="DESCRIPTION" type="VARCHAR(300)" />
+			<column name="DHCP_SERVER" type="VARCHAR(64)" />
+			<column name="DIFF" type="BIGINT" />
+			<column name="DNS_SERVER" type="VARCHAR(64)" />
+			<column defaultValue="" name="FQDN" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+			<column name="GATEWAY" type="VARCHAR(64)" />
+			<column name="IGNORED" type="BIT" />
+			<column name="LASTAPPROVED" type="BIGINT" />
+			<column name="LOCATION" type="VARCHAR(100)" />
+			<column name="MEASUREMENT_CONFIG" type="LONGBLOB" />
+			<column name="MTIME" type="BIGINT" />
+			<column defaultValue="" name="NAME" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="OSVERSION" type="VARCHAR(80)" />
+			<column name="OS" type="VARCHAR(80)" />
+			<column name="PRODUCT_CONFIG" type="LONGBLOB" />
+			<column name="QUEUESTATUS" type="INT" />
+			<column name="RAM" type="INT" />
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<createIndex indexName="AIQ_PLATFORM_AGENTTOKEN_IDX"
+			tableName="EAM_AIQ_PLATFORM" unique="false">
+			<column name="AGENTTOKEN" />
+		</createIndex>
+		<createIndex indexName="CERTDN" tableName="EAM_AIQ_PLATFORM"
+			unique="true">
+			<column name="CERTDN" />
+		</createIndex>
+		<createIndex indexName="FQDN" tableName="EAM_AIQ_PLATFORM"
+			unique="true">
+			<column name="FQDN" />
+		</createIndex>
+		<createIndex indexName="NAME" tableName="EAM_AIQ_PLATFORM"
+			unique="true">
+			<column name="NAME" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createAIQServerTable">
+		<createTable tableName="EAM_AIQ_SERVER">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="ACTIVE" type="CHAR(1)" />
+			<column name="AUTOINVENTORYIDENTIFIER" type="VARCHAR(255)" />
+			<column name="CONTROL_CONFIG" type="LONGBLOB" />
+			<column name="CTIME" type="BIGINT" />
+			<column name="CUSTOM_PROPERTIES" type="LONGBLOB" />
+			<column name="DESCRIPTION" type="VARCHAR(300)" />
+			<column name="DIFF" type="BIGINT" />
+			<column name="IGNORED" type="BIT" />
+			<column name="INSTALLPATH" type="VARCHAR(255)" />
+			<column name="MEASUREMENT_CONFIG" type="LONGBLOB" />
+			<column name="MTIME" type="BIGINT" />
+			<column defaultValue="" name="NAME" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="PRODUCT_CONFIG" type="LONGBLOB" />
+			<column name="QUEUESTATUS" type="INT" />
+			<column defaultValue="" name="SERVERTYPENAME" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+			<column name="SERVICESAUTOMANAGED" type="BIT" />
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VIRTUAL" type="BIT" />
+			<column name="AIQ_PLATFORM_ID" type="INT" />
+		</createTable>
+		<createIndex indexName="AIQ_PLATFORM_ID" tableName="EAM_AIQ_SERVER"
+			unique="true">
+			<column name="AIQ_PLATFORM_ID" />
+			<column name="AUTOINVENTORYIDENTIFIER" />
+		</createIndex>
+		<createIndex indexName="AIQ_SERVER_NAME" tableName="EAM_AIQ_SERVER"
+			unique="false">
+			<column name="NAME" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createAlertTable">
+		<createTable tableName="EAM_ALERT">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="CTIME" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="FIXED" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="ALERT_DEFINITION_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<createIndex indexName="ALERT_TIME_IDX" tableName="EAM_ALERT"
+			unique="false">
+			<column name="CTIME" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createAlertActionLogTable">
+		<createTable tableName="EAM_ALERT_ACTION_LOG">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="ALERT_TYPE" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="DETAIL" type="VARCHAR(500)">
+				<constraints nullable="false" />
+			</column>
+			<column name="TIMESTAMP" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="ACTION_ID" type="INT" />
+			<column name="ALERT_ID" type="INT" />
+			<column name="SUBJECT_ID" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createAlertConditionTable">
+		<createTable tableName="EAM_ALERT_CONDITION">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="COMPARATOR" type="VARCHAR(2)" />
+			<column name="MEASUREMENT_ID" type="INT" />
+			<column name="NAME" type="VARCHAR(100)" />
+			<column name="OPTION_STATUS" type="VARCHAR(25)" />
+			<column name="REQUIRED" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="THRESHOLD" type="DOUBLE" />
+			<column name="TYPE" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="TRIGGER_ID" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createAlertConditionLogTable">
+		<createTable tableName="EAM_ALERT_CONDITION_LOG">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="VALUE" type="VARCHAR(250)" />
+			<column name="ALERT_ID" type="INT" />
+			<column name="CONDITION_ID" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createAlertDefStateTable">
+		<createTable tableName="EAM_ALERT_DEF_STATE">
+			<column name="ALERT_DEFINITION_ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="LAST_FIRED" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createAuditTable">
+		<createTable tableName="EAM_AUDIT">
+			<column defaultValue="" name="KLAZZ" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="END_TIME" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="FIELD" type="VARCHAR(100)" />
+			<column name="IMPORTANCE" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="MESSAGE" type="VARCHAR(1000)">
+				<constraints nullable="false" />
+			</column>
+			<column name="NATURE" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="NEW_VAL" type="VARCHAR(1000)" />
+			<column name="OLD_VAL" type="VARCHAR(1000)" />
+			<column name="ORIGINAL" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="PURPOSE" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="RESOURCE_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="START_TIME" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="PARENT_ID" type="INT" />
+			<column name="SUBJECT_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<createIndex indexName="RESOURCE_ID_IDX" tableName="EAM_AUDIT"
+			unique="false">
+			<column name="RESOURCE_ID" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createAIHistoryTable">
+		<createTable tableName="EAM_AUTOINV_HISTORY">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="BATCH_ID" type="INT" />
+			<column name="CONFIG" type="LONGBLOB">
+				<constraints nullable="false" />
+			</column>
+			<column name="DATE_SCHEDULED" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="DESCRIPTION" type="VARCHAR(500)" />
+			<column name="DURATION" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="ENDTIME" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="ENTITY_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="ENTITY_TYPE" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="GROUP_ID" type="INT" />
+			<column name="MESSAGE" type="VARCHAR(500)" />
+			<column name="SCANDESC" type="VARCHAR(200)" />
+			<column name="SCANNAME" type="VARCHAR(100)" />
+			<column name="SCHEDULED" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="STARTTIME" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="STATUS" type="VARCHAR(64)">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="SUBJECT" type="VARCHAR(32)">
+				<constraints nullable="false" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<createIndex indexName="AI_HIST_SCANNAME_IDX" tableName="EAM_AUTOINV_HISTORY"
+			unique="false">
+			<column name="SCANNAME" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createAIScheduleTable">
+		<createTable tableName="EAM_AUTOINV_SCHEDULE">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="CONFIG" type="LONGBLOB" />
+			<column name="ENTITY_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="ENTITY_TYPE" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="JOBNAME" type="VARCHAR(128)">
+				<constraints nullable="false" />
+			</column>
+			<column name="JOB_ORDER_DATA" type="VARCHAR(500)" />
+			<column name="NEXTFIRETIME" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="SCANDESC" type="VARCHAR(200)" />
+			<column name="SCANNAME" type="VARCHAR(100)" />
+			<column name="SCHEDULEVALUEBYTES" type="LONGBLOB" />
+			<column defaultValue="" name="SUBJECT" type="VARCHAR(32)">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="TRIGGERNAME" type="VARCHAR(128)">
+				<constraints nullable="false" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<createIndex indexName="AI_SCHEDULE_ENTITY_IDX" tableName="EAM_AUTOINV_SCHEDULE"
+			unique="false">
+			<column name="ENTITY_ID" />
+			<column name="ENTITY_TYPE" />
+		</createIndex>
+		<createIndex indexName="AI_SCHEDULE_NEXTFIRETIME_IDX"
+			tableName="EAM_AUTOINV_SCHEDULE" unique="false">
+			<column name="NEXTFIRETIME" />
+		</createIndex>
+		<createIndex indexName="JOBNAME" tableName="EAM_AUTOINV_SCHEDULE"
+			unique="true">
+			<column name="JOBNAME" />
+		</createIndex>
+		<createIndex indexName="SCANNAME" tableName="EAM_AUTOINV_SCHEDULE"
+			unique="true">
+			<column name="SCANNAME" />
+		</createIndex>
+		<createIndex indexName="TRIGGERNAME" tableName="EAM_AUTOINV_SCHEDULE"
+			unique="true">
+			<column name="TRIGGERNAME" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createCalendarTable">
+		<createTable tableName="EAM_CALENDAR">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column defaultValue="" name="NAME" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<createIndex indexName="NAME" tableName="EAM_CALENDAR"
+			unique="true">
+			<column name="NAME" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createCalendarEntryTable">
+		<createTable tableName="EAM_CALENDAR_ENT">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="CALENDAR_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createCalendarWeekTable">
+		<createTable tableName="EAM_CALENDAR_WEEK">
+			<column name="endTime" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="startTime" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="weekDay" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="CALENDAR_WEEK_ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createConfigPropsTable">
+		<createTable tableName="EAM_CONFIG_PROPS">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="DEFAULT_PROPVALUE" type="VARCHAR(300)" />
+			<column name="PROPKEY" type="VARCHAR(80)" />
+			<column name="PREFIX" type="VARCHAR(80)" />
+			<column name="FREAD_ONLY" type="BIT" />
+			<column name="PROPVALUE" type="VARCHAR(300)" />
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<createIndex indexName="PREFIX" tableName="EAM_CONFIG_PROPS"
+			unique="true">
+			<column name="PREFIX" />
+			<column name="PROPKEY" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createControlHistoryTable">
+		<createTable tableName="EAM_CONTROL_HISTORY">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column defaultValue="" name="ACTION" type="VARCHAR(32)">
+				<constraints nullable="false" />
+			</column>
+			<column name="ARGS" type="VARCHAR(500)" />
+			<column name="BATCH_ID" type="INT" />
+			<column name="DATE_SCHEDULED" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="DESCRIPTION" type="VARCHAR(500)" />
+			<column name="ENDTIME" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="GROUP_ID" type="INT" />
+			<column name="MESSAGE" type="VARCHAR(500)" />
+			<column name="RESOURCE_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="SCHEDULED" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="STARTTIME" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="STATUS" type="VARCHAR(64)">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="SUBJECT" type="VARCHAR(32)">
+				<constraints nullable="false" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<createIndex indexName="CTL_HISTORY_STARTTIME_IDX"
+			tableName="EAM_CONTROL_HISTORY" unique="false">
+			<column name="STARTTIME" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createControlScheduleTable">
+		<createTable tableName="EAM_CONTROL_SCHEDULE">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column defaultValue="" name="ACTION" type="VARCHAR(32)">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="JOBNAME" type="VARCHAR(128)">
+				<constraints nullable="false" />
+			</column>
+			<column name="JOB_ORDER_DATA" type="VARCHAR(500)" />
+			<column name="NEXTFIRETIME" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="RESOURCE_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="SCHEDULEVALUEBYTES" type="LONGBLOB">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="SUBJECT" type="VARCHAR(32)">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="TRIGGERNAME" type="VARCHAR(128)">
+				<constraints nullable="false" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<createIndex indexName="CTL_SCHEDULE_NEXTFIRETIME_IDX"
+			tableName="EAM_CONTROL_SCHEDULE" unique="false">
+			<column name="NEXTFIRETIME" />
+		</createIndex>
+		<createIndex indexName="JOBNAME" tableName="EAM_CONTROL_SCHEDULE"
+			unique="true">
+			<column name="JOBNAME" />
+		</createIndex>
+		<createIndex indexName="TRIGGERNAME" tableName="EAM_CONTROL_SCHEDULE"
+			unique="true">
+			<column name="TRIGGERNAME" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createCrispoTable">
+		<createTable tableName="EAM_CRISPO">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createCrispoArrayTable">
+		<createTable tableName="EAM_CRISPO_ARRAY">
+			<column name="OPT_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="VAL" type="VARCHAR(4000)">
+				<constraints nullable="false" />
+			</column>
+			<column name="IDX" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addPrimaryKey columnNames="OPT_ID, IDX" tableName="EAM_CRISPO_ARRAY" />
+	</changeSet>
+	<changeSet author="hqdb" id="createCrispoOptTable">
+		<createTable tableName="EAM_CRISPO_OPT">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column defaultValue="" name="PROPKEY" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="VAL" type="VARCHAR(4000)" />
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="CRISPO_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createDashConfigTable">
+		<createTable tableName="EAM_DASH_CONFIG">
+			<column defaultValue="" name="CONFIG_TYPE" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column defaultValue="" name="name" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="CRISPO_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="USER_ID" type="INT" />
+			<column name="ROLE_ID" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createEscalationTable">
+		<createTable tableName="EAM_ESCALATION">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="CTIME" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="DESCRIPTION" type="VARCHAR(250)" />
+			<column name="MAX_WAIT_TIME" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="MTIME" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="NAME" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+			<column name="NOTIFY_ALL" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="ALLOW_PAUSE" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="FREPEAT" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<createIndex indexName="NAME" tableName="EAM_ESCALATION"
+			unique="true">
+			<column name="NAME" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createEscalationActionTable">
+		<createTable tableName="EAM_ESCALATION_ACTION">
+			<column name="ESCALATION_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="ACTION_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="WAIT_TIME" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="IDX" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addPrimaryKey columnNames="ESCALATION_ID, IDX"
+			tableName="EAM_ESCALATION_ACTION" />
+	</changeSet>
+	<changeSet author="hqdb" id="createEscalationStateTable">
+		<createTable tableName="EAM_ESCALATION_STATE">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="ALERT_DEF_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="ALERT_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="ALERT_TYPE" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="NEXT_ACTION_IDX" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="NEXT_ACTION_TIME" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="ACKNOWLEDGED_BY" type="INT" />
+			<column name="ESCALATION_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<createIndex indexName="ALERT_DEF_ID" tableName="EAM_ESCALATION_STATE"
+			unique="true">
+			<column name="ALERT_DEF_ID" />
+			<column name="ALERT_TYPE" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createEventLogTable">
+		<createTable tableName="EAM_EVENT_LOG">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column defaultValue="" name="DETAIL" type="VARCHAR(4000)">
+				<constraints nullable="false" />
+			</column>
+			<column name="INSTANCE_ID" type="INT" />
+			<column name="RESOURCE_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="STATUS" type="VARCHAR(100)" />
+			<column name="SUBJECT" type="VARCHAR(100)" />
+			<column name="TIMESTAMP" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="TYPE" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<createIndex indexName="EVENT_LOG_IDX" tableName="EAM_EVENT_LOG"
+			unique="false">
+			<column name="TIMESTAMP" />
+		</createIndex>
+		<createIndex indexName="EVENT_LOG_RES_ID_IDX" tableName="EAM_EVENT_LOG"
+			unique="false">
+			<column name="RESOURCE_ID" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createExecStrategyTable">
+		<createTable tableName="EAM_EXEC_STRATEGIES">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="PARTITION" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="DEF_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="CONFIG_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="TYPE_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createExecStrategyTypesTable">
+		<createTable tableName="EAM_EXEC_STRATEGY_TYPES">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column defaultValue="" name="TYPE_CLASS" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createGalertActionLogTable">
+		<createTable tableName="EAM_GALERT_ACTION_LOG">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="ALERT_TYPE" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="DETAIL" type="VARCHAR(1024)">
+				<constraints nullable="false" />
+			</column>
+			<column name="TIMESTAMP" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="ACTION_ID" type="INT" />
+			<column name="GALERT_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="SUBJECT_ID" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createGalertAuxLogTable">
+		<createTable tableName="EAM_GALERT_AUX_LOGS">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="AUXTYPE" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="DESCRIPTION" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="TIMESTAMP" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="GALERT_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="DEF_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="PARENT" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createGalertDefTable">
+		<createTable tableName="EAM_GALERT_DEFS">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="CTIME" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="DELETED" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="DESCR" type="VARCHAR(255)" />
+			<column name="ENABLED" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="GROUP_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="LAST_FIRED" type="BIGINT" />
+			<column name="MTIME" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="NAME" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="SEVERITY" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="ESCALATION_ID" type="INT" />
+		</createTable>
+		<createIndex indexName="GALERT_DEFS_GROUP_ID_IDX"
+			tableName="EAM_GALERT_DEFS" unique="false">
+			<column name="GROUP_ID" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createGalertLogTable">
+		<createTable tableName="EAM_GALERT_LOGS">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="FIXED" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="LONG_REASON" type="VARCHAR(2048)">
+				<constraints nullable="false" />
+			</column>
+			<column name="PARTITION" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="SHORT_REASON" type="VARCHAR(256)">
+				<constraints nullable="false" />
+			</column>
+			<column name="TIMESTAMP" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="DEF_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<createIndex indexName="EAM_GALERT_LOGS_TIME_IDX"
+			tableName="EAM_GALERT_LOGS" unique="false">
+			<column name="TIMESTAMP" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createGtriggerTypesTable">
+		<createTable tableName="EAM_GTRIGGER_TYPES">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column defaultValue="" name="TYPE_CLASS" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createGtriggerTable">
+		<createTable tableName="EAM_GTRIGGERS">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="LIDX" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="CONFIG_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="STRAT_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="TYPE_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createMeasurementTable">
+		<createTable tableName="EAM_MEASUREMENT">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column defaultValue="" name="DSN" type="VARCHAR(2048)">
+				<constraints nullable="false" />
+			</column>
+			<column name="ENABLED" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="COLL_INTERVAL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="MTIME" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="RESOURCE_ID" type="INT" />
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="TEMPLATE_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<createIndex indexName="MEAS_ENABLED_IDX" tableName="EAM_MEASUREMENT"
+			unique="false">
+			<column name="ENABLED" />
+		</createIndex>
+		<createIndex indexName="MEAS_RES_IDX" tableName="EAM_MEASUREMENT"
+			unique="false">
+			<column name="RESOURCE_ID" />
+		</createIndex>
+		<createIndex indexName="RESOURCE_ID" tableName="EAM_MEASUREMENT"
+			unique="true">
+			<column name="RESOURCE_ID" />
+			<column name="TEMPLATE_ID" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createMeasurementBaselineTable">
+		<createTable tableName="EAM_MEASUREMENT_BL">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="COMPUTE_TIME" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="MAX_EXPECTED_VAL" type="DOUBLE" />
+			<column name="MEAN" type="DOUBLE" />
+			<column name="MIN_EXPECTED_VAL" type="DOUBLE" />
+			<column name="USER_ENTERED" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="MEASUREMENT_ID" type="INT" />
+		</createTable>
+		<createIndex indexName="METRIC_BASELINE_CALCULATED_IDX"
+			tableName="EAM_MEASUREMENT_BL" unique="false">
+			<column name="COMPUTE_TIME" />
+			<column name="MEASUREMENT_ID" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createMeasurementCatTable">
+		<createTable tableName="EAM_MEASUREMENT_CAT">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column defaultValue="" name="NAME" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<createIndex indexName="NAME" tableName="EAM_MEASUREMENT_CAT"
+			unique="true">
+			<column name="NAME" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createMeasurementData1DTable">
+		<createTable tableName="EAM_MEASUREMENT_DATA_1D">
+			<column name="TIMESTAMP" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="MEASUREMENT_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VALUE" type="DECIMAL(24,5)" />
+			<column name="MINVALUE" type="DECIMAL(24,5)" />
+			<column name="MAXVALUE" type="DECIMAL(24,5)" />
+		</createTable>
+		<addPrimaryKey columnNames="TIMESTAMP, MEASUREMENT_ID"
+			tableName="EAM_MEASUREMENT_DATA_1D" />
+		<createIndex indexName="MEASUREMENT_DATA_1D_MID_IDX"
+			tableName="EAM_MEASUREMENT_DATA_1D" unique="false">
+			<column name="MEASUREMENT_ID" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createMeasurementData1HTable">
+		<createTable tableName="EAM_MEASUREMENT_DATA_1H">
+			<column name="TIMESTAMP" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="MEASUREMENT_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VALUE" type="DECIMAL(24,5)" />
+			<column name="MINVALUE" type="DECIMAL(24,5)" />
+			<column name="MAXVALUE" type="DECIMAL(24,5)" />
+		</createTable>
+		<addPrimaryKey columnNames="TIMESTAMP, MEASUREMENT_ID"
+			tableName="EAM_MEASUREMENT_DATA_1H" />
+		<createIndex indexName="MEASUREMENT_DATA_1H_MID_IDX"
+			tableName="EAM_MEASUREMENT_DATA_1H" unique="false">
+			<column name="MEASUREMENT_ID" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createMeasurementData6HTable">
+		<createTable tableName="EAM_MEASUREMENT_DATA_6H">
+			<column name="TIMESTAMP" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="MEASUREMENT_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VALUE" type="DECIMAL(24,5)" />
+			<column name="MINVALUE" type="DECIMAL(24,5)" />
+			<column name="MAXVALUE" type="DECIMAL(24,5)" />
+		</createTable>
+		<addPrimaryKey columnNames="TIMESTAMP, MEASUREMENT_ID"
+			tableName="EAM_MEASUREMENT_DATA_6H" />
+		<createIndex indexName="MEASUREMENT_DATA_6H_MID_IDX"
+			tableName="EAM_MEASUREMENT_DATA_6H" unique="false">
+			<column name="MEASUREMENT_ID" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createMeasurementTemplateTable">
+		<createTable tableName="EAM_MEASUREMENT_TEMPL">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column defaultValue="" name="ALIAS" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+			<column name="COLLECTION_TYPE" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="CTIME" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="DEFAULT_INTERVAL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="DEFAULT_ON" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="DESIGNATE" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="MTIME" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="NAME" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="PLUGIN" type="VARCHAR(250)">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="TEMPLATE" type="VARCHAR(2048)">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="UNITS" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="CATEGORY_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="MONITORABLE_TYPE_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<createIndex indexName="TEMPL_DESIG_IDX" tableName="EAM_MEASUREMENT_TEMPL"
+			unique="false">
+			<column name="DESIGNATE" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createMetricAuxLogTable">
+		<createTable tableName="EAM_METRIC_AUX_LOGS">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="AUX_LOG_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="DEF_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="METRIC_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createMetricProbTable">
+		<createTable tableName="EAM_METRIC_PROB">
+			<column name="ADDITIONAL" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="MEASUREMENT_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="TIMESTAMP" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="TYPE" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addPrimaryKey columnNames="ADDITIONAL, MEASUREMENT_ID, TIMESTAMP"
+			tableName="EAM_METRIC_PROB" />
+	</changeSet>
+	<changeSet author="hqdb" id="createMonitorableTypeTable">
+		<createTable tableName="EAM_MONITORABLE_TYPE">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column defaultValue="" name="NAME" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="PLUGIN" type="VARCHAR(250)">
+				<constraints nullable="false" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<createIndex indexName="TYPE_NAME_IDX" tableName="EAM_MONITORABLE_TYPE"
+			unique="false">
+			<column name="NAME" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createNumbersTable">
+		<createTable tableName="EAM_NUMBERS">
+			<column name="I" type="BIGINT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createOperationTable">
+		<createTable tableName="EAM_OPERATION">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column defaultValue="" name="NAME" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+			<column name="RESOURCE_TYPE_ID" type="INT" />
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<createIndex indexName="OP_RES_TYPE_ID_IDX" tableName="EAM_OPERATION"
+			unique="false">
+			<column name="RESOURCE_TYPE_ID" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createPluginTable">
+		<createTable tableName="EAM_PLUGIN">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="CTIME" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="MD5" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="NAME" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="PATH" type="VARCHAR(500)">
+				<constraints nullable="false" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<createIndex indexName="NAME" tableName="EAM_PLUGIN"
+			unique="true">
+			<column name="NAME" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createPrincipalTable">
+		<createTable tableName="EAM_PRINCIPAL">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column defaultValue="" name="PASSWORD" type="VARCHAR(64)">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="PRINCIPAL" type="VARCHAR(64)">
+				<constraints nullable="false" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<createIndex indexName="PRINCIPAL" tableName="EAM_PRINCIPAL"
+			unique="true">
+			<column name="PRINCIPAL" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createRegTriggerTable">
+		<createTable tableName="EAM_REGISTERED_TRIGGER">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column defaultValue="" name="CLASSNAME" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+			<column name="CONFIG" type="LONGBLOB" />
+			<column name="FREQUENCY" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="ALERT_DEFINITION_ID" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createResAuxLogTable">
+		<createTable tableName="EAM_RESOURCE_AUX_LOGS">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="RESOURCE_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="AUX_LOG_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="DEF_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createRoleTable">
+		<createTable tableName="EAM_ROLE">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="DESCRIPTION" type="VARCHAR(100)" />
+			<column defaultValue="" name="NAME" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+			<column name="SORT_NAME" type="VARCHAR(100)" />
+			<column name="FSYSTEM" type="BIT" />
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<createIndex indexName="NAME" tableName="EAM_ROLE" unique="true">
+			<column name="NAME" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createRoleCalendarTable">
+		<createTable tableName="EAM_ROLE_CALENDAR">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="CALTYPE" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT" />
+			<column name="CALENDAR_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="ROLE_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<createIndex indexName="ROLE_ID" tableName="EAM_ROLE_CALENDAR"
+			unique="true">
+			<column name="ROLE_ID" />
+			<column name="CALENDAR_ID" />
+			<column name="CALTYPE" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createRoleOpMapTable">
+		<createTable tableName="EAM_ROLE_OPERATION_MAP">
+			<column name="ROLE_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="OPERATION_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addPrimaryKey columnNames="ROLE_ID, OPERATION_ID"
+			tableName="EAM_ROLE_OPERATION_MAP" />
+	</changeSet>
+	<changeSet author="hqdb" id="createSrnTable">
+		<createTable tableName="EAM_SRN">
+			<column name="INSTANCE_ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="SRN" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createSubjectTable">
+		<createTable tableName="EAM_SUBJECT">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="FACTIVE" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="DEPARTMENT" type="VARCHAR(100)" />
+			<column defaultValue="" name="DSN" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+			<column name="EMAIL_ADDRESS" type="VARCHAR(100)" />
+			<column name="FIRST_NAME" type="VARCHAR(100)" />
+			<column name="HTML_EMAIL" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="LAST_NAME" type="VARCHAR(100)" />
+			<column defaultValue="" name="NAME" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+			<column name="PHONE_NUMBER" type="VARCHAR(100)" />
+			<column name="SMS_ADDRESS" type="VARCHAR(100)" />
+			<column name="SORT_NAME" type="VARCHAR(100)" />
+			<column name="FSYSTEM" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="PREF_CRISPO_ID" type="INT" />
+		</createTable>
+		<createIndex indexName="NAME" tableName="EAM_SUBJECT"
+			unique="true">
+			<column name="NAME" />
+			<column name="DSN" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createSubjectRoleMapTable">
+		<createTable tableName="EAM_SUBJECT_ROLE_MAP">
+			<column name="ROLE_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="SUBJECT_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addPrimaryKey columnNames="SUBJECT_ID, ROLE_ID"
+			tableName="EAM_SUBJECT_ROLE_MAP" />
+	</changeSet>
+	<changeSet author="hqdb" id="createUiAttachAdminTable">
+		<createTable tableName="EAM_UI_ATTACH_ADMIN">
+			<column defaultValue="" name="CATEGORY" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="ATTACH_ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createUiAttachMastTable">
+		<createTable tableName="EAM_UI_ATTACH_MAST">
+			<column defaultValue="" name="CATEGORY" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="ATTACH_ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createUIAttachRscTable">
+		<createTable tableName="EAM_UI_ATTACH_RSRC">
+			<column defaultValue="" name="CATEGORY" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="RESOURCE_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="ATTACH_ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+		</createTable>
+		<createIndex indexName="UI_ATTACHMENT_RES_ID_IDX"
+			tableName="EAM_UI_ATTACH_RSRC" unique="false">
+			<column name="RESOURCE_ID" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createUIAttachmentTable">
+		<createTable tableName="EAM_UI_ATTACHMENT">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="ATTACH_TIME" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VIEW_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createUIPluginTable">
+		<createTable tableName="EAM_UI_PLUGIN">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column defaultValue="" name="NAME" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="PLUGIN_VERSION" type="VARCHAR(30)">
+				<constraints nullable="false" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<createIndex indexName="NAME" tableName="EAM_UI_PLUGIN"
+			unique="true">
+			<column name="NAME" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createUIViewTable">
+		<createTable tableName="EAM_UI_VIEW">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="ATTACH_TYPE" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="DESCRIPTION" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="PATH" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="UI_PLUGIN_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<createIndex indexName="PATH" tableName="EAM_UI_VIEW"
+			unique="true">
+			<column name="PATH" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createUIViewAdminTable">
+		<createTable tableName="EAM_UI_VIEW_ADMIN">
+			<column name="VIEW_ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createUIViewMastheadTable">
+		<createTable tableName="EAM_UI_VIEW_MASTHEAD">
+			<column name="VIEW_ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createUIViewResTable">
+		<createTable tableName="EAM_UI_VIEW_RESOURCE">
+			<column name="VIEW_ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createUpdateStatusTable">
+		<createTable tableName="EAM_UPDATE_STATUS">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="IGNORED" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="REPORT" type="VARCHAR(4000)" />
+			<column name="UPMODE" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createAvailDataRLETable">
+		<createTable tableName="HQ_AVAIL_DATA_RLE">
+			<column name="STARTTIME" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="AVAILVAL" type="DOUBLE">
+				<constraints nullable="false" />
+			</column>
+			<column name="ENDTIME" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="MEASUREMENT_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addPrimaryKey columnNames="MEASUREMENT_ID, STARTTIME"
+			tableName="HQ_AVAIL_DATA_RLE" />
+		<createIndex indexName="AVAIL_RLE_ENDTIME_VAL_IDX"
+			tableName="HQ_AVAIL_DATA_RLE" unique="false">
+			<column name="AVAILVAL" />
+			<column name="ENDTIME" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createMetricData0D0STable">
+		<createTable tableName="HQ_METRIC_DATA_0D_0S">
+			<column name="TIMESTAMP" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="MEASUREMENT_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VALUE" type="DECIMAL(24,5)" />
+		</createTable>
+		<addPrimaryKey columnNames="TIMESTAMP, MEASUREMENT_ID"
+			tableName="HQ_METRIC_DATA_0D_0S" />
+		<createIndex indexName="METRIC_DATA_0D_0S_MID_IDX"
+			tableName="HQ_METRIC_DATA_0D_0S" unique="false">
+			<column name="MEASUREMENT_ID" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createMetricData0D1STable">
+		<createTable tableName="HQ_METRIC_DATA_0D_1S">
+			<column name="TIMESTAMP" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="MEASUREMENT_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VALUE" type="DECIMAL(24,5)" />
+		</createTable>
+		<addPrimaryKey columnNames="TIMESTAMP, MEASUREMENT_ID"
+			tableName="HQ_METRIC_DATA_0D_1S" />
+		<createIndex indexName="METRIC_DATA_0D_1S_MID_IDX"
+			tableName="HQ_METRIC_DATA_0D_1S" unique="false">
+			<column name="MEASUREMENT_ID" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createMetricData1D0STable">
+		<createTable tableName="HQ_METRIC_DATA_1D_0S">
+			<column name="TIMESTAMP" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="MEASUREMENT_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VALUE" type="DECIMAL(24,5)" />
+		</createTable>
+		<addPrimaryKey columnNames="TIMESTAMP, MEASUREMENT_ID"
+			tableName="HQ_METRIC_DATA_1D_0S" />
+		<createIndex indexName="METRIC_DATA_1D_0S_MID_IDX"
+			tableName="HQ_METRIC_DATA_1D_0S" unique="false">
+			<column name="MEASUREMENT_ID" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createMetricData1D1STable">
+		<createTable tableName="HQ_METRIC_DATA_1D_1S">
+			<column name="TIMESTAMP" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="MEASUREMENT_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VALUE" type="DECIMAL(24,5)" />
+		</createTable>
+		<addPrimaryKey columnNames="TIMESTAMP, MEASUREMENT_ID"
+			tableName="HQ_METRIC_DATA_1D_1S" />
+		<createIndex indexName="METRIC_DATA_1D_1S_MID_IDX"
+			tableName="HQ_METRIC_DATA_1D_1S" unique="false">
+			<column name="MEASUREMENT_ID" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createMetricData2D0STable">
+		<createTable tableName="HQ_METRIC_DATA_2D_0S">
+			<column name="TIMESTAMP" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="MEASUREMENT_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VALUE" type="DECIMAL(24,5)" />
+		</createTable>
+		<addPrimaryKey columnNames="TIMESTAMP, MEASUREMENT_ID"
+			tableName="HQ_METRIC_DATA_2D_0S" />
+		<createIndex indexName="METRIC_DATA_2D_0S_MID_IDX"
+			tableName="HQ_METRIC_DATA_2D_0S" unique="false">
+			<column name="MEASUREMENT_ID" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createMetricData2D1STable">
+		<createTable tableName="HQ_METRIC_DATA_2D_1S">
+			<column name="TIMESTAMP" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="MEASUREMENT_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VALUE" type="DECIMAL(24,5)" />
+		</createTable>
+		<addPrimaryKey columnNames="TIMESTAMP, MEASUREMENT_ID"
+			tableName="HQ_METRIC_DATA_2D_1S" />
+		<createIndex indexName="METRIC_DATA_2D_1S_MID_IDX"
+			tableName="HQ_METRIC_DATA_2D_1S" unique="false">
+			<column name="MEASUREMENT_ID" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createMetricData3D0STable">
+		<createTable tableName="HQ_METRIC_DATA_3D_0S">
+			<column name="TIMESTAMP" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="MEASUREMENT_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VALUE" type="DECIMAL(24,5)" />
+		</createTable>
+		<addPrimaryKey columnNames="TIMESTAMP, MEASUREMENT_ID"
+			tableName="HQ_METRIC_DATA_3D_0S" />
+		<createIndex indexName="METRIC_DATA_3D_0S_MID_IDX"
+			tableName="HQ_METRIC_DATA_3D_0S" unique="false">
+			<column name="MEASUREMENT_ID" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createMetricData3D1STable">
+		<createTable tableName="HQ_METRIC_DATA_3D_1S">
+			<column name="TIMESTAMP" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="MEASUREMENT_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VALUE" type="DECIMAL(24,5)" />
+		</createTable>
+		<addPrimaryKey columnNames="TIMESTAMP, MEASUREMENT_ID"
+			tableName="HQ_METRIC_DATA_3D_1S" />
+		<createIndex indexName="METRIC_DATA_3D_1S_MID_IDX"
+			tableName="HQ_METRIC_DATA_3D_1S" unique="false">
+			<column name="MEASUREMENT_ID" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createMetricData4D0STable">
+		<createTable tableName="HQ_METRIC_DATA_4D_0S">
+			<column name="TIMESTAMP" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="MEASUREMENT_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VALUE" type="DECIMAL(24,5)" />
+		</createTable>
+		<addPrimaryKey columnNames="TIMESTAMP, MEASUREMENT_ID"
+			tableName="HQ_METRIC_DATA_4D_0S" />
+		<createIndex indexName="METRIC_DATA_4D_0S_MID_IDX"
+			tableName="HQ_METRIC_DATA_4D_0S" unique="false">
+			<column name="MEASUREMENT_ID" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createMetricData4D1STable">
+		<createTable tableName="HQ_METRIC_DATA_4D_1S">
+			<column name="TIMESTAMP" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="MEASUREMENT_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VALUE" type="DECIMAL(24,5)" />
+		</createTable>
+		<addPrimaryKey columnNames="TIMESTAMP, MEASUREMENT_ID"
+			tableName="HQ_METRIC_DATA_4D_1S" />
+		<createIndex indexName="METRIC_DATA_4D_1S_MID_IDX"
+			tableName="HQ_METRIC_DATA_4D_1S" unique="false">
+			<column name="MEASUREMENT_ID" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createMetricData5D0STable">
+		<createTable tableName="HQ_METRIC_DATA_5D_0S">
+			<column name="TIMESTAMP" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="MEASUREMENT_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VALUE" type="DECIMAL(24,5)" />
+		</createTable>
+		<addPrimaryKey columnNames="TIMESTAMP, MEASUREMENT_ID"
+			tableName="HQ_METRIC_DATA_5D_0S" />
+		<createIndex indexName="METRIC_DATA_5D_0S_MID_IDX"
+			tableName="HQ_METRIC_DATA_5D_0S" unique="false">
+			<column name="MEASUREMENT_ID" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createMetricData5D1STable">
+		<createTable tableName="HQ_METRIC_DATA_5D_1S">
+			<column name="TIMESTAMP" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="MEASUREMENT_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VALUE" type="DECIMAL(24,5)" />
+		</createTable>
+		<addPrimaryKey columnNames="TIMESTAMP, MEASUREMENT_ID"
+			tableName="HQ_METRIC_DATA_5D_1S" />
+		<createIndex indexName="METRIC_DATA_5D_1S_MID_IDX"
+			tableName="HQ_METRIC_DATA_5D_1S" unique="false">
+			<column name="MEASUREMENT_ID" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createMetricData6D0STable">
+		<createTable tableName="HQ_METRIC_DATA_6D_0S">
+			<column name="TIMESTAMP" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="MEASUREMENT_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VALUE" type="DECIMAL(24,5)" />
+		</createTable>
+		<addPrimaryKey columnNames="TIMESTAMP, MEASUREMENT_ID"
+			tableName="HQ_METRIC_DATA_6D_0S" />
+		<createIndex indexName="METRIC_DATA_6D_0S_MID_IDX"
+			tableName="HQ_METRIC_DATA_6D_0S" unique="false">
+			<column name="MEASUREMENT_ID" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createMetricData6D1STable">
+		<createTable tableName="HQ_METRIC_DATA_6D_1S">
+			<column name="TIMESTAMP" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="MEASUREMENT_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VALUE" type="DECIMAL(24,5)" />
+		</createTable>
+		<addPrimaryKey columnNames="TIMESTAMP, MEASUREMENT_ID"
+			tableName="HQ_METRIC_DATA_6D_1S" />
+		<createIndex indexName="METRIC_DATA_6D_1S_MID_IDX"
+			tableName="HQ_METRIC_DATA_6D_1S" unique="false">
+			<column name="MEASUREMENT_ID" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createMetricData7D0STable">
+		<createTable tableName="HQ_METRIC_DATA_7D_0S">
+			<column name="TIMESTAMP" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="MEASUREMENT_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VALUE" type="DECIMAL(24,5)" />
+		</createTable>
+		<addPrimaryKey columnNames="TIMESTAMP, MEASUREMENT_ID"
+			tableName="HQ_METRIC_DATA_7D_0S" />
+		<createIndex indexName="METRIC_DATA_7D_0S_MID_IDX"
+			tableName="HQ_METRIC_DATA_7D_0S" unique="false">
+			<column name="MEASUREMENT_ID" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createMetricData7D1STable">
+		<createTable tableName="HQ_METRIC_DATA_7D_1S">
+			<column name="TIMESTAMP" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="MEASUREMENT_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VALUE" type="DECIMAL(24,5)" />
+		</createTable>
+		<addPrimaryKey columnNames="TIMESTAMP, MEASUREMENT_ID"
+			tableName="HQ_METRIC_DATA_7D_1S" />
+		<createIndex indexName="METRIC_DATA_7D_1S_MID_IDX"
+			tableName="HQ_METRIC_DATA_7D_1S" unique="false">
+			<column name="MEASUREMENT_ID" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createMetricData8D0STable">
+		<createTable tableName="HQ_METRIC_DATA_8D_0S">
+			<column name="TIMESTAMP" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="MEASUREMENT_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VALUE" type="DECIMAL(24,5)" />
+		</createTable>
+		<addPrimaryKey columnNames="TIMESTAMP, MEASUREMENT_ID"
+			tableName="HQ_METRIC_DATA_8D_0S" />
+		<createIndex indexName="METRIC_DATA_8D_0S_MID_IDX"
+			tableName="HQ_METRIC_DATA_8D_0S" unique="false">
+			<column name="MEASUREMENT_ID" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createMetricData8D1STable">
+		<createTable tableName="HQ_METRIC_DATA_8D_1S">
+			<column name="TIMESTAMP" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="MEASUREMENT_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VALUE" type="DECIMAL(24,5)" />
+		</createTable>
+		<addPrimaryKey columnNames="TIMESTAMP, MEASUREMENT_ID"
+			tableName="HQ_METRIC_DATA_8D_1S" />
+		<createIndex indexName="METRIC_DATA_8D_1S_MID_IDX"
+			tableName="HQ_METRIC_DATA_8D_1S" unique="false">
+			<column name="MEASUREMENT_ID" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createHQMetricDataCompatTable">
+		<createTable tableName="HQ_METRIC_DATA_compat">
+			<column name="TIMESTAMP" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="MEASUREMENT_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="VALUE" type="DECIMAL(24,5)" />
+		</createTable>
+		<addPrimaryKey columnNames="TIMESTAMP, MEASUREMENT_ID"
+			tableName="HQ_METRIC_DATA_compat" />
+		<createIndex indexName="METRIC_DATA_COMPAT_MID_IDX"
+			tableName="HQ_METRIC_DATA_compat" unique="false">
+			<column name="MEASUREMENT_ID" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createSequenceTable">
+		<createTable tableName="HQ_SEQUENCE">
+			<column defaultValue="" name="seq_name" type="VARCHAR(255)">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="seq_val" type="INT" />
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createManagedResTable">
+		<createTable tableName="MANAGED_RESOURCES">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="RESOURCE_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="AGENT_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<createIndex indexName="AGENT_ID" tableName="MANAGED_RESOURCES"
+			unique="true">
+			<column name="AGENT_ID" />
+			<column name="RESOURCE_ID" />
+		</createIndex>
+		<createIndex indexName="MANAGED_RES_ID_IDX" tableName="MANAGED_RESOURCES"
+			unique="false">
+			<column name="RESOURCE_ID" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createPluginResTypeTable">
+		<createTable tableName="PLUGIN_RESOURCE_TYPES">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column defaultValue="" name="PLUGIN_NAME" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="RESOURCE_TYPE_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<createIndex indexName="PLUGIN_NAME" tableName="PLUGIN_RESOURCE_TYPES"
+			unique="true">
+			<column name="PLUGIN_NAME" />
+			<column name="RESOURCE_TYPE_ID" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createQrtzBlobTriggersTable">
+		<createTable tableName="QRTZ_BLOB_TRIGGERS">
+			<column name="BLOB_DATA" type="BLOB" />
+			<column defaultValue="" name="TRIGGER_GROUP" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="TRIGGER_NAME" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addPrimaryKey columnNames="TRIGGER_GROUP, TRIGGER_NAME"
+			tableName="QRTZ_BLOB_TRIGGERS" />
+	</changeSet>
+	<changeSet author="hqdb" id="createQrtzCalendarsTable">
+		<createTable tableName="QRTZ_CALENDARS">
+			<column defaultValue="" name="CALENDAR_NAME" type="VARCHAR(200)">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="CALENDAR" type="BLOB">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createQrtzCronTriggersTable">
+		<createTable tableName="QRTZ_CRON_TRIGGERS">
+			<column defaultValue="" name="CRON_EXPRESSION" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+			<column name="TIME_ZONE_ID" type="VARCHAR(80)" />
+			<column defaultValue="" name="TRIGGER_GROUP" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="TRIGGER_NAME" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addPrimaryKey columnNames="TRIGGER_GROUP, TRIGGER_NAME"
+			tableName="QRTZ_CRON_TRIGGERS" />
+	</changeSet>
+	<changeSet author="hqdb" id="createQrtzFiredTriggersTable">
+		<createTable tableName="QRTZ_FIRED_TRIGGERS">
+			<column defaultValue="" name="ENTRY_ID" type="VARCHAR(95)">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="FIRED_TIME" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="INSTANCE_NAME" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+			<column name="IS_VOLATILE" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="JOB_GROUP" type="VARCHAR(200)" />
+			<column name="JOB_NAME" type="VARCHAR(200)" />
+			<column name="PRIORITY" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="REQUESTS_RECOVERY" type="BIT" />
+			<column defaultValue="" name="STATE" type="VARCHAR(16)">
+				<constraints nullable="false" />
+			</column>
+			<column name="IS_STATEFUL" type="BIT" />
+			<column defaultValue="" name="TRIGGER_GROUP" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="TRIGGER_NAME" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createQrtzJobDetailsTable">
+		<createTable tableName="QRTZ_JOB_DETAILS">
+			<column defaultValue="" name="JOB_GROUP" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="JOB_NAME" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+			<column name="DESCRIPTION" type="VARCHAR(250)" />
+			<column name="IS_DURABLE" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="IS_VOLATILE" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="JOB_CLASS_NAME" type="VARCHAR(250)">
+				<constraints nullable="false" />
+			</column>
+			<column name="JOB_DATA" type="BLOB" />
+			<column name="REQUESTS_RECOVERY" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="IS_STATEFUL" type="BIT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addPrimaryKey columnNames="JOB_GROUP, JOB_NAME"
+			tableName="QRTZ_JOB_DETAILS" />
+	</changeSet>
+	<changeSet author="hqdb" id="createQrtzJobListenersTable">
+		<createTable tableName="QRTZ_JOB_LISTENERS">
+			<column defaultValue="" name="JOB_GROUP" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="JOB_LISTENER" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="JOB_NAME" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addPrimaryKey columnNames="JOB_GROUP, JOB_LISTENER, JOB_NAME"
+			tableName="QRTZ_JOB_LISTENERS" />
+	</changeSet>
+	<changeSet author="hqdb" id="createQrtzLocksTable">
+		<createTable tableName="QRTZ_LOCKS">
+			<column defaultValue="" name="LOCK_NAME" type="VARCHAR(40)">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createQrtzPausedTriggerGrpsTable">
+		<createTable tableName="QRTZ_PAUSED_TRIGGER_GRPS">
+			<column defaultValue="" name="TRIGGER_GROUP" type="VARCHAR(200)">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createQrtzSchedulerStateTable">
+		<createTable tableName="QRTZ_SCHEDULER_STATE">
+			<column defaultValue="" name="INSTANCE_NAME" type="VARCHAR(200)">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="CHECKIN_INTERVAL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="LAST_CHECKIN_TIME" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createQrtzSimpleTriggersTable">
+		<createTable tableName="QRTZ_SIMPLE_TRIGGERS">
+			<column name="REPEAT_COUNT" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="REPEAT_INTERVAL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="TIMES_TRIGGERED" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="TRIGGER_GROUP" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="TRIGGER_NAME" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addPrimaryKey columnNames="TRIGGER_GROUP, TRIGGER_NAME"
+			tableName="QRTZ_SIMPLE_TRIGGERS" />
+	</changeSet>
+	<changeSet author="hqdb" id="createQrtzTriggerListenersTable">
+		<createTable tableName="QRTZ_TRIGGER_LISTENERS">
+			<column defaultValue="" name="TRIGGER_GROUP" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="TRIGGER_LISTENER" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="TRIGGER_NAME" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addPrimaryKey columnNames="TRIGGER_GROUP, TRIGGER_LISTENER, TRIGGER_NAME"
+			tableName="QRTZ_TRIGGER_LISTENERS" />
+	</changeSet>
+	<changeSet author="hqdb" id="createQrtzTriggersTable">
+		<createTable tableName="QRTZ_TRIGGERS">
+			<column defaultValue="" name="TRIGGER_GROUP" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="TRIGGER_NAME" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+			<column name="CALENDAR_NAME" type="VARCHAR(200)" />
+			<column name="DESCRIPTION" type="VARCHAR(250)" />
+			<column name="END_TIME" type="BIGINT" />
+			<column name="IS_VOLATILE" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="JOB_DATA" type="BLOB" />
+			<column defaultValue="" name="JOB_GROUP" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="JOB_NAME" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+			<column name="MISFIRE_INSTR" type="INT" />
+			<column name="NEXT_FIRE_TIME" type="BIGINT" />
+			<column name="PREV_FIRE_TIME" type="BIGINT" />
+			<column name="PRIORITY" type="INT" />
+			<column name="START_TIME" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="TRIGGER_STATE" type="VARCHAR(16)">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="TRIGGER_TYPE" type="VARCHAR(8)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addPrimaryKey columnNames="TRIGGER_GROUP, TRIGGER_NAME"
+			tableName="QRTZ_TRIGGERS" />
+	</changeSet>
+	<changeSet author="hqdb" id="createResAlertDefActionsTable">
+		<createTable tableName="RESOURCE_ALERTDEF_ACTIONS">
+			<column name="ALERTDEF_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="ACTION_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createResAlertDefCondsTable">
+		<createTable tableName="RESOURCE_ALERTDEF_CONDS">
+			<column name="ALERTDEF_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="COND_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createResTypeAlertdefActionsTable">
+		<createTable tableName="RESOURCE_TYPE_ALERTDEF_ACTIONS">
+			<column name="ALERTDEF_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="ACTION_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createResTypeAlertdefCondsTable">
+		<createTable tableName="RESOURCE_TYPE_ALERTDEF_CONDS">
+			<column name="ALERTDEF_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="COND_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	<changeSet author="hqdb" id="createResAlertDefTable">
+		<createTable tableName="ResourceAlertDefinition">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="ACTIVE" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="CONTROL_FILTERED" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="COUNTER" type="BIGINT" />
+			<column name="CTIME" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="DELETED" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="DESCRIPTION" type="VARCHAR(250)" />
+			<column name="ENABLED" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="FREQUENCY_TYPE" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="MTIME" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="NAME" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="NOTIFY_FILTERED" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="PRIORITY" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="TRANGE" type="BIGINT" />
+			<column name="WILL_RECOVER" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="RESOURCE_ID" type="INT" />
+			<column name="VERSION_COL" type="BIGINT" />
+			<column name="ESCALATION_ID" type="INT" />
+			<column name="resourceTypeAlertDefinition_ID" type="INT" />
+		</createTable>
+		<createIndex indexName="ALERT_DEF_RES_ID_IDX" tableName="ResourceAlertDefinition"
+			unique="false">
+			<column name="RESOURCE_ID" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createResTypeAlertDefTable">
+		<createTable tableName="ResourceTypeAlertDefinition">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="ACTIVE" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="CONTROL_FILTERED" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="COUNTER" type="BIGINT" />
+			<column name="CTIME" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="DELETED" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="DESCRIPTION" type="VARCHAR(250)" />
+			<column name="ENABLED" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="FREQUENCY_TYPE" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="MTIME" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column defaultValue="" name="NAME" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="NOTIFY_FILTERED" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="PRIORITY" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="TRANGE" type="BIGINT" />
+			<column name="WILL_RECOVER" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="resourceType" type="INT" />
+			<column name="VERSION_COL" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="ESCALATION_ID" type="INT" />
+		</createTable>
+		<createIndex indexName="ALERT_DEF_RES_TYPE_ID_IDX"
+			tableName="ResourceTypeAlertDefinition" unique="false">
+			<column name="resourceType" />
+		</createIndex>
+	</changeSet>
+	<changeSet author="hqdb" id="createActionParentFK">
+		<addForeignKeyConstraint baseColumnNames="PARENT_ID"
+			baseTableName="EAM_ACTION" constraintName="FKD0189B04C0BB4C7"
+			deferrable="false" initiallyDeferred="false" onDelete="CASCADE"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_ACTION"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createAgentTypeFK">
+		<addForeignKeyConstraint baseColumnNames="AGENT_TYPE_ID"
+			baseTableName="EAM_AGENT" constraintName="FKE5AFD0571C9518CC"
+			deferrable="false" initiallyDeferred="false" onDelete="CASCADE"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_AGENT_TYPE"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createAIQIPAIQPlatformFK">
+		<addForeignKeyConstraint baseColumnNames="AIQ_PLATFORM_ID"
+			baseTableName="EAM_AIQ_IP" constraintName="FKD06C1CCB1BFF8500"
+			deferrable="false" initiallyDeferred="false" onDelete="CASCADE"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_AIQ_PLATFORM"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createAIQServerAIQPlatformFK">
+		<addForeignKeyConstraint baseColumnNames="AIQ_PLATFORM_ID"
+			baseTableName="EAM_AIQ_SERVER" constraintName="FK60C6C4E71BFF8500"
+			deferrable="false" initiallyDeferred="false" onDelete="CASCADE"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_AIQ_PLATFORM"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createAlertDefFK">
+		<addForeignKeyConstraint baseColumnNames="ALERT_DEFINITION_ID"
+			baseTableName="EAM_ALERT" constraintName="FKE5B216AEB5626424"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="ResourceAlertDefinition"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createAlertActionLogActionFK">
+		<addForeignKeyConstraint baseColumnNames="ACTION_ID"
+			baseTableName="EAM_ALERT_ACTION_LOG" constraintName="FK423FA3CC9C76C3BB"
+			deferrable="false" initiallyDeferred="false" onDelete="CASCADE"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_ACTION"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createAlertActionLogAlertFK">
+		<addForeignKeyConstraint baseColumnNames="ALERT_ID"
+			baseTableName="EAM_ALERT_ACTION_LOG" constraintName="FK423FA3CC1AA4E259"
+			deferrable="false" initiallyDeferred="false" onDelete="CASCADE"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_ALERT"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createAlertActionLogSubjectFK">
+		<addForeignKeyConstraint baseColumnNames="SUBJECT_ID"
+			baseTableName="EAM_ALERT_ACTION_LOG" constraintName="FK423FA3CCEE165B9F"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_SUBJECT"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createAlertConditionTriggerFK">
+		<addForeignKeyConstraint baseColumnNames="TRIGGER_ID"
+			baseTableName="EAM_ALERT_CONDITION" constraintName="FKE4028CAAD448177"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_REGISTERED_TRIGGER"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createAlertConditionLogAlertFK">
+		<addForeignKeyConstraint baseColumnNames="ALERT_ID"
+			baseTableName="EAM_ALERT_CONDITION_LOG" constraintName="FKD1647E0F1AA4E259"
+			deferrable="false" initiallyDeferred="false" onDelete="CASCADE"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_ALERT"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createAlertConditionLogConditionFK">
+		<addForeignKeyConstraint baseColumnNames="CONDITION_ID"
+			baseTableName="EAM_ALERT_CONDITION_LOG" constraintName="FKD1647E0F2EAA2A9F"
+			deferrable="false" initiallyDeferred="false" onDelete="CASCADE"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_ALERT_CONDITION"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createAlertDefStateFK">
+		<addForeignKeyConstraint baseColumnNames="ALERT_DEFINITION_ID"
+			baseTableName="EAM_ALERT_DEF_STATE" constraintName="FKF0E90746B5626424"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="ResourceAlertDefinition"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createAuditParentFK">
+		<addForeignKeyConstraint baseColumnNames="PARENT_ID"
+			baseTableName="EAM_AUDIT" constraintName="FKE5B6292DC81F5938"
+			deferrable="false" initiallyDeferred="false" onDelete="CASCADE"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_AUDIT"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createAuditSubjectFK">
+		<addForeignKeyConstraint baseColumnNames="SUBJECT_ID"
+			baseTableName="EAM_AUDIT" constraintName="FKE5B6292DEE165B9F"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_SUBJECT"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createCalendarEntryFK">
+		<addForeignKeyConstraint baseColumnNames="CALENDAR_ID"
+			baseTableName="EAM_CALENDAR_ENT" constraintName="FK84892E98AA857E11"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_CALENDAR"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createCalendarWeekFK">
+		<addForeignKeyConstraint baseColumnNames="CALENDAR_WEEK_ID"
+			baseTableName="EAM_CALENDAR_WEEK" constraintName="FKCA4AFC730492E62"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_CALENDAR_ENT"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createCrispoArrayOptFK">
+		<addForeignKeyConstraint baseColumnNames="OPT_ID"
+			baseTableName="EAM_CRISPO_ARRAY" constraintName="FKEE7DCB205D47FFC5"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_CRISPO_OPT"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createOptCripsoFK">
+		<addForeignKeyConstraint baseColumnNames="CRISPO_ID"
+			baseTableName="EAM_CRISPO_OPT" constraintName="FKC161913ADE0698EB"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_CRISPO"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createDashConfigCrispoFK">
+		<addForeignKeyConstraint baseColumnNames="CRISPO_ID"
+			baseTableName="EAM_DASH_CONFIG" constraintName="FK1EF56C81DE0698EB"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_CRISPO"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createDashConfigRoleFK">
+		<addForeignKeyConstraint baseColumnNames="ROLE_ID"
+			baseTableName="EAM_DASH_CONFIG" constraintName="FK1EF56C81B0F4F691"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_ROLE"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createDashConfigUserFK">
+		<addForeignKeyConstraint baseColumnNames="USER_ID"
+			baseTableName="EAM_DASH_CONFIG" constraintName="FK1EF56C817824CA0"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_SUBJECT"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createEscalationActionFK">
+		<addForeignKeyConstraint baseColumnNames="ACTION_ID"
+			baseTableName="EAM_ESCALATION_ACTION" constraintName="FK846DE1929C76C3BB"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_ACTION"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createEscalationActionEscalationFK">
+		<addForeignKeyConstraint baseColumnNames="ESCALATION_ID"
+			baseTableName="EAM_ESCALATION_ACTION" constraintName="FK846DE1925029EFD7"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_ESCALATION"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createEscalationStateAckedByFK">
+		<addForeignKeyConstraint baseColumnNames="ACKNOWLEDGED_BY"
+			baseTableName="EAM_ESCALATION_STATE" constraintName="FKAA74019579BB793F"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_SUBJECT"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createEscalationStateEscFK">
+		<addForeignKeyConstraint baseColumnNames="ESCALATION_ID"
+			baseTableName="EAM_ESCALATION_STATE" constraintName="FKAA7401955029EFD7"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_ESCALATION"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createExecStrategiesConfigFK">
+		<addForeignKeyConstraint baseColumnNames="CONFIG_ID"
+			baseTableName="EAM_EXEC_STRATEGIES" constraintName="FKDC5C7EB1984CF301"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_CRISPO"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createExecStrategiesDefFK">
+		<addForeignKeyConstraint baseColumnNames="DEF_ID"
+			baseTableName="EAM_EXEC_STRATEGIES" constraintName="FKDC5C7EB1706267A5"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_GALERT_DEFS"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createExecStrategiesTypeFK">
+		<addForeignKeyConstraint baseColumnNames="TYPE_ID"
+			baseTableName="EAM_EXEC_STRATEGIES" constraintName="FKDC5C7EB127E934B3"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_EXEC_STRATEGY_TYPES"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createGalertActionLogActionFK">
+		<addForeignKeyConstraint baseColumnNames="ACTION_ID"
+			baseTableName="EAM_GALERT_ACTION_LOG" constraintName="FKEF4421379C76C3BB"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_ACTION"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createGalertActionLogGalertFK">
+		<addForeignKeyConstraint baseColumnNames="GALERT_ID"
+			baseTableName="EAM_GALERT_ACTION_LOG" constraintName="FKEF442137C7D09794"
+			deferrable="false" initiallyDeferred="false" onDelete="CASCADE"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_GALERT_LOGS"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createGalertActionLogSubjectFK">
+		<addForeignKeyConstraint baseColumnNames="SUBJECT_ID"
+			baseTableName="EAM_GALERT_ACTION_LOG" constraintName="FKEF442137EE165B9F"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_SUBJECT"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createGalertAuxLogsDefFK">
+		<addForeignKeyConstraint baseColumnNames="DEF_ID"
+			baseTableName="EAM_GALERT_AUX_LOGS" constraintName="FKE2089906706267A5"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_GALERT_DEFS"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createGalertAuxLogsGalertFK">
+		<addForeignKeyConstraint baseColumnNames="GALERT_ID"
+			baseTableName="EAM_GALERT_AUX_LOGS" constraintName="FKE2089906C7D09794"
+			deferrable="false" initiallyDeferred="false" onDelete="CASCADE"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_GALERT_LOGS"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createGalertAuxLogsParentFK">
+		<addForeignKeyConstraint baseColumnNames="PARENT"
+			baseTableName="EAM_GALERT_AUX_LOGS" constraintName="FKE20899066993629F"
+			deferrable="false" initiallyDeferred="false" onDelete="CASCADE"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_GALERT_AUX_LOGS"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createGalertDefEscalationFK">
+		<addForeignKeyConstraint baseColumnNames="ESCALATION_ID"
+			baseTableName="EAM_GALERT_DEFS" constraintName="FK64F3DAA5029EFD7"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_ESCALATION"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createGalertLogDefFK">
+		<addForeignKeyConstraint baseColumnNames="DEF_ID"
+			baseTableName="EAM_GALERT_LOGS" constraintName="FK653064B706267A5"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_GALERT_DEFS"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createGTriggerConfigFK">
+		<addForeignKeyConstraint baseColumnNames="CONFIG_ID"
+			baseTableName="EAM_GTRIGGERS" constraintName="FK54AE9774984CF301"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_CRISPO"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createGTriggerStratFK">
+		<addForeignKeyConstraint baseColumnNames="STRAT_ID"
+			baseTableName="EAM_GTRIGGERS" constraintName="FK54AE97747D9B78AF"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_EXEC_STRATEGIES"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createGTriggerTypeFK">
+		<addForeignKeyConstraint baseColumnNames="TYPE_ID"
+			baseTableName="EAM_GTRIGGERS" constraintName="FK54AE9774CE0FF839"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_GTRIGGER_TYPES"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createMeasurementTemplateFK">
+		<addForeignKeyConstraint baseColumnNames="TEMPLATE_ID"
+			baseTableName="EAM_MEASUREMENT" constraintName="FK3E0F978EC37F24B8"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_MEASUREMENT_TEMPL"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createMeasurementBaselineFK">
+		<addForeignKeyConstraint baseColumnNames="MEASUREMENT_ID"
+			baseTableName="EAM_MEASUREMENT_BL" constraintName="FK1877029BB6E3839C"
+			deferrable="false" initiallyDeferred="false" onDelete="CASCADE"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_MEASUREMENT"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createMeasurementTemplateCategoryFK">
+		<addForeignKeyConstraint baseColumnNames="CATEGORY_ID"
+			baseTableName="EAM_MEASUREMENT_TEMPL" constraintName="FK253D70712A378D8"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_MEASUREMENT_CAT"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb"
+		id="createMeasurementTemplateMonitorableTypeFK">
+		<addForeignKeyConstraint baseColumnNames="MONITORABLE_TYPE_ID"
+			baseTableName="EAM_MEASUREMENT_TEMPL" constraintName="FK253D707EF33C225"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_MONITORABLE_TYPE"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createMetricAuxLogFK">
+		<addForeignKeyConstraint baseColumnNames="AUX_LOG_ID"
+			baseTableName="EAM_METRIC_AUX_LOGS" constraintName="FKE7D70B0B997CFC6"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_GALERT_AUX_LOGS"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createMetricAuxLogDefFK">
+		<addForeignKeyConstraint baseColumnNames="DEF_ID"
+			baseTableName="EAM_METRIC_AUX_LOGS" constraintName="FKE7D70B0B706267A5"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_GALERT_DEFS"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createMetricAuxLogMetricFK">
+		<addForeignKeyConstraint baseColumnNames="METRIC_ID"
+			baseTableName="EAM_METRIC_AUX_LOGS" constraintName="FKE7D70B0BA1FCB528"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_MEASUREMENT"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createRegTriggerAlertDefFK">
+		<addForeignKeyConstraint baseColumnNames="ALERT_DEFINITION_ID"
+			baseTableName="EAM_REGISTERED_TRIGGER" constraintName="FK4A8354A9B5626424"
+			deferrable="false" initiallyDeferred="false" onDelete="CASCADE"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="ResourceAlertDefinition"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createResourceAuxLogFK">
+		<addForeignKeyConstraint baseColumnNames="AUX_LOG_ID"
+			baseTableName="EAM_RESOURCE_AUX_LOGS" constraintName="FK859D15ED997CFC6"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_GALERT_AUX_LOGS"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createResourceAuxLogDefFK">
+		<addForeignKeyConstraint baseColumnNames="DEF_ID"
+			baseTableName="EAM_RESOURCE_AUX_LOGS" constraintName="FK859D15ED706267A5"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_GALERT_DEFS"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createRoleCalendarFK">
+		<addForeignKeyConstraint baseColumnNames="CALENDAR_ID"
+			baseTableName="EAM_ROLE_CALENDAR" constraintName="FKD703BC59AA857E11"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_CALENDAR"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createRoleCalendarRoleFK">
+		<addForeignKeyConstraint baseColumnNames="ROLE_ID"
+			baseTableName="EAM_ROLE_CALENDAR" constraintName="FKD703BC59B0F4F691"
+			deferrable="false" initiallyDeferred="false" onDelete="CASCADE"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_ROLE"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createRoleOperationMapOperationFK">
+		<addForeignKeyConstraint baseColumnNames="OPERATION_ID"
+			baseTableName="EAM_ROLE_OPERATION_MAP" constraintName="FKDFBEA09576E0A23"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_OPERATION"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createRoleOperationMapRoleFK">
+		<addForeignKeyConstraint baseColumnNames="ROLE_ID"
+			baseTableName="EAM_ROLE_OPERATION_MAP" constraintName="FKDFBEA09B0F4F691"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_ROLE"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createSubjectPrefFK">
+		<addForeignKeyConstraint baseColumnNames="PREF_CRISPO_ID"
+			baseTableName="EAM_SUBJECT" constraintName="FK8E4D1FEE8DE25CF"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_CRISPO"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createSubjectRoleMapRoleFK">
+		<addForeignKeyConstraint baseColumnNames="ROLE_ID"
+			baseTableName="EAM_SUBJECT_ROLE_MAP" constraintName="FK320F6314B0F4F691"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_ROLE"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createSubjectRoleMapSubjectFK">
+		<addForeignKeyConstraint baseColumnNames="SUBJECT_ID"
+			baseTableName="EAM_SUBJECT_ROLE_MAP" constraintName="FK320F6314EE165B9F"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_SUBJECT"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createUiAttachAdminAttachFK">
+		<addForeignKeyConstraint baseColumnNames="ATTACH_ID"
+			baseTableName="EAM_UI_ATTACH_ADMIN" constraintName="FK6406D772D494BCA6"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_UI_ATTACHMENT"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createUiAttachMastAttachFK">
+		<addForeignKeyConstraint baseColumnNames="ATTACH_ID"
+			baseTableName="EAM_UI_ATTACH_MAST" constraintName="FKD9F51E52D494BCA6"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_UI_ATTACHMENT"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createUiAttachRsrcAttachFK">
+		<addForeignKeyConstraint baseColumnNames="ATTACH_ID"
+			baseTableName="EAM_UI_ATTACH_RSRC" constraintName="FKD9F7A78FD494BCA6"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_UI_ATTACHMENT"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createUiAttachViewFK">
+		<addForeignKeyConstraint baseColumnNames="VIEW_ID"
+			baseTableName="EAM_UI_ATTACHMENT" constraintName="FK2807DF20F6253048"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_UI_VIEW"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createUiViewPluginFK">
+		<addForeignKeyConstraint baseColumnNames="UI_PLUGIN_ID"
+			baseTableName="EAM_UI_VIEW" constraintName="FK5FD54E62B5F36A31"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_UI_PLUGIN"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createUiViewAdminViewFK">
+		<addForeignKeyConstraint baseColumnNames="VIEW_ID"
+			baseTableName="EAM_UI_VIEW_ADMIN" constraintName="FK7815EB12F6253048"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_UI_VIEW"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createUiViewMastheadViewFK">
+		<addForeignKeyConstraint baseColumnNames="VIEW_ID"
+			baseTableName="EAM_UI_VIEW_MASTHEAD" constraintName="FKC9583392F6253048"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_UI_VIEW"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createUiViewResourceViewFK">
+		<addForeignKeyConstraint baseColumnNames="VIEW_ID"
+			baseTableName="EAM_UI_VIEW_RESOURCE" constraintName="FKA416A54BF6253048"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_UI_VIEW"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createAvailDataMeasFK">
+		<addForeignKeyConstraint baseColumnNames="MEASUREMENT_ID"
+			baseTableName="HQ_AVAIL_DATA_RLE" constraintName="FK6E8F9E9CB6E3839C"
+			deferrable="false" initiallyDeferred="false" onDelete="CASCADE"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_MEASUREMENT"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createManagedResourceAgentFK">
+		<addForeignKeyConstraint baseColumnNames="AGENT_ID"
+			baseTableName="MANAGED_RESOURCES" constraintName="FKE0695145F8F6CB01"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_AGENT"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createQrtzBlobTriggersFK">
+		<addForeignKeyConstraint baseColumnNames="TRIGGER_GROUP, TRIGGER_NAME"
+			baseTableName="QRTZ_BLOB_TRIGGERS" constraintName="FKB6893E453C8E61F3"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="TRIGGER_GROUP, TRIGGER_NAME"
+			referencedTableName="QRTZ_TRIGGERS" referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createQrtzCronTriggersFK">
+		<addForeignKeyConstraint baseColumnNames="TRIGGER_GROUP, TRIGGER_NAME"
+			baseTableName="QRTZ_CRON_TRIGGERS" constraintName="FK46A772743C8E61F3"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="TRIGGER_GROUP, TRIGGER_NAME"
+			referencedTableName="QRTZ_TRIGGERS" referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createQrtzJobListenersFK">
+		<addForeignKeyConstraint baseColumnNames="JOB_GROUP, JOB_NAME"
+			baseTableName="QRTZ_JOB_LISTENERS" constraintName="FK2E3C7E2566BF7DC9"
+			deferrable="false" initiallyDeferred="false" onDelete="CASCADE"
+			onUpdate="NO ACTION" referencedColumnNames="JOB_GROUP, JOB_NAME"
+			referencedTableName="QRTZ_JOB_DETAILS" referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createQrtzSimpleTriggersFK">
+		<addForeignKeyConstraint baseColumnNames="TRIGGER_GROUP, TRIGGER_NAME"
+			baseTableName="QRTZ_SIMPLE_TRIGGERS" constraintName="FK4215DD03C8E61F3"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="TRIGGER_GROUP, TRIGGER_NAME"
+			referencedTableName="QRTZ_TRIGGERS" referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createQrtzTriggerListenersFK">
+		<addForeignKeyConstraint baseColumnNames="TRIGGER_GROUP, TRIGGER_NAME"
+			baseTableName="QRTZ_TRIGGER_LISTENERS" constraintName="FKC62AEE603C8E61F3"
+			deferrable="false" initiallyDeferred="false" onDelete="CASCADE"
+			onUpdate="NO ACTION" referencedColumnNames="TRIGGER_GROUP, TRIGGER_NAME"
+			referencedTableName="QRTZ_TRIGGERS" referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createQrtzTriggersFK">
+		<addForeignKeyConstraint baseColumnNames="JOB_GROUP, JOB_NAME"
+			baseTableName="QRTZ_TRIGGERS" constraintName="FK38DAF69366BF7DC9"
+			deferrable="false" initiallyDeferred="false" onDelete="CASCADE"
+			onUpdate="NO ACTION" referencedColumnNames="JOB_GROUP, JOB_NAME"
+			referencedTableName="QRTZ_JOB_DETAILS" referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createResourceAlertDefActionFK">
+		<addForeignKeyConstraint baseColumnNames="ACTION_ID"
+			baseTableName="RESOURCE_ALERTDEF_ACTIONS" constraintName="FK1563EBD89C76C3BB"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_ACTION"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createResourceAlertDefAlertDefFK">
+		<addForeignKeyConstraint baseColumnNames="ALERTDEF_ID"
+			baseTableName="RESOURCE_ALERTDEF_ACTIONS" constraintName="FK1563EBD8331E8A31"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="ResourceAlertDefinition"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createResourceAlertDefCondsFK">
+		<addForeignKeyConstraint baseColumnNames="ALERTDEF_ID"
+			baseTableName="RESOURCE_ALERTDEF_CONDS" constraintName="FKAB2CD72C331E8A31"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="ResourceAlertDefinition"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createResourceAlertDefCondsCondFK">
+		<addForeignKeyConstraint baseColumnNames="COND_ID"
+			baseTableName="RESOURCE_ALERTDEF_CONDS" constraintName="FKAB2CD72CAF08D738"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_ALERT_CONDITION"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createResTypeAlertDefActionFK">
+		<addForeignKeyConstraint baseColumnNames="ACTION_ID"
+			baseTableName="RESOURCE_TYPE_ALERTDEF_ACTIONS" constraintName="FKEC4AACBB9C76C3BB"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_ACTION"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createResTypeAlertDefActionDefFK">
+		<addForeignKeyConstraint baseColumnNames="ALERTDEF_ID"
+			baseTableName="RESOURCE_TYPE_ALERTDEF_ACTIONS" constraintName="FKEC4AACBB484A7717"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID"
+			referencedTableName="ResourceTypeAlertDefinition"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createResTypeAlertDefCondsFK">
+		<addForeignKeyConstraint baseColumnNames="ALERTDEF_ID"
+			baseTableName="RESOURCE_TYPE_ALERTDEF_CONDS" constraintName="FKB98474CF484A7717"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID"
+			referencedTableName="ResourceTypeAlertDefinition"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createResTypeAlertDefCondCondsFK">
+		<addForeignKeyConstraint baseColumnNames="COND_ID"
+			baseTableName="RESOURCE_TYPE_ALERTDEF_CONDS" constraintName="FKB98474CFAF08D738"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_ALERT_CONDITION"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createResAlertDefEscalationFK">
+		<addForeignKeyConstraint baseColumnNames="ESCALATION_ID"
+			baseTableName="ResourceAlertDefinition" constraintName="FKF9AB05C15029EFD7"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_ESCALATION"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createResAlertDefTypeDefFK">
+		<addForeignKeyConstraint baseColumnNames="resourceTypeAlertDefinition_ID"
+			baseTableName="ResourceAlertDefinition" constraintName="FKF9AB05C173D42D19"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID"
+			referencedTableName="ResourceTypeAlertDefinition"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createResTypeAlertDefEscalationFK">
+		<addForeignKeyConstraint baseColumnNames="ESCALATION_ID"
+			baseTableName="ResourceTypeAlertDefinition" constraintName="FKD0174A275029EFD7"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_ESCALATION"
+			referencesUniqueColumn="false" />
+	</changeSet>
+</databaseChangeLog>
