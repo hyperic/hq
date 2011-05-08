@@ -59,7 +59,6 @@ public class PluginSyncJob implements AgentDataTransferJob {
     private AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle;
     private AuthzSubject overlord;
     private PluginManager pluginManager;
-    private boolean restartAgent = true;
     private static final Log log = LogFactory.getLog(PluginSyncJob.class);
 
     @Autowired
@@ -142,12 +141,7 @@ public class PluginSyncJob implements AgentDataTransferJob {
                     log.error("error removing plugin file=" + file + " from agentId=" + agentId);
                 }
             }
-            if (restartAgent) {
-                agentPluginSyncRestartThrottle.restartAgent(agentId);
-            }
-            return;
-        }
-        if (!restartAgent) {
+            agentPluginSyncRestartThrottle.restartAgent(getAgentId());
             return;
         }
         for (final FileDataResult res : transferResult) {
@@ -183,10 +177,6 @@ public class PluginSyncJob implements AgentDataTransferJob {
             AgentPluginStatusEnum.SYNC_FAILURE,
             Collections.singletonMap(agentId, plugins),
             Collections.singletonMap(agentId, toRemove));
-    }
-
-    public void restartAgent(boolean restartAgent) {
-        this.restartAgent = restartAgent;
     }
 
 }

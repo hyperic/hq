@@ -91,6 +91,7 @@ import org.hyperic.hq.zevents.ZeventSourceId;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.security.MD5;
+import org.omg.CORBA.CTX_RESTRICT_SCOPE;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -1302,7 +1303,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                 return;
             }
             boolean canRestartAgent = false;
-            if (canRestartAgent(agent, arg.getStringLists().toString())) {
+            if (restartAgent(agent, arg.getStringLists().toString())) {
                 canRestartAgent = true;
                 // only check in if plugins from the last run to this run have changed on the
                 // agent side.
@@ -1325,13 +1326,15 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
             // want to ignore the plugins that were just checked in by the agent
             // contained in creates
             processPluginsNotOnAgent(agent, updateMap, creates);
-            if (!canRestartAgent && (!updateMap.isEmpty() || !removeMap.isEmpty())) {
+            if (canRestartAgent) {
+                agentPluginUpdater.queuePluginTransfer(updateMap, removeMap);
+            } else if (!updateMap.isEmpty() || !removeMap.isEmpty()) {
                 log.warn("agent=" + agent + " checked in the same plugin report twice in a row " +
                          " and plugins have not been updated on the server but it's inventory " +
-                         " should be sync'd. updateMap=" + updateMap + ", removeMap=" + removeMap +
-                         ".  All plugins will be sync'd but agent will not be restarted.");
+                         " should be sync'd. updateMap=" + updateMap + ", removeMap=" + removeMap);
+                pluginManager.updateAgentPluginSyncStatus(
+                    AgentPluginStatusEnum.SYNC_FAILURE, updateMap, removeMap);
             }
-            agentPluginUpdater.queuePluginTransfer(updateMap, removeMap, canRestartAgent);
         } catch (AgentNotFoundException e) {
             log.error(e,e);
         } finally {
@@ -1341,7 +1344,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         }
     }
 
-    private boolean canRestartAgent(Agent agent, String stringLists) {
+    private boolean restartAgent(Agent agent, String stringLists) {
         final String pluginInventoryChecksum = MD5.getMD5Checksum(stringLists.toString());
         if (agent.getPluginInventoryChecksum() == null) {
             agent.setPluginInventoryChecksum(pluginInventoryChecksum);
@@ -1534,7 +1537,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                 }
             }
         }
-        agentPluginUpdater.queuePluginTransfer(toSync, null, true);
+        agentPluginUpdater.queuePluginTransfer(toSync, null);
     }
     
     @Transactional(readOnly=true)
@@ -1557,7 +1560,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
             log.debug("syncAllAgentPlugins queueing " + updateMap.size() + " update(s), " +
                       " and " + removeMap.size() + " remove(s)");
         }
-        agentPluginUpdater.queuePluginTransfer(updateMap, removeMap, true);
+        agentPluginUpdater.queuePluginTransfer(updateMap, removeMap);
         try {
             pluginManager.removeOrphanedPluginsInNewTran();
         } catch (PluginDeployException e) {
