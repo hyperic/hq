@@ -16,7 +16,6 @@
 
 	<modules>
 		<module>hq-agent-core</module>
-		<!--<module>hq-agent-handlers</module>-->
 		<module>hq-product</module>
 	</modules>
 
