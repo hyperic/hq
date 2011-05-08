@@ -97,7 +97,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
 
     public static final String GROUP_ENT_RES_TYPE = "groupEntResType";
 
-    private static final String GROUP_ENT_TYPE = "groupEntType";
+    public static final String GROUP_ENT_TYPE = "groupEntType";
 
     private final String BUNDLE = "org.hyperic.hq.authz.Resources";
    
