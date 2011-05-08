@@ -27,9 +27,9 @@ package org.hyperic.hq.plugin.rabbitmq.manage;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.bizapp.agent.client.HQApiCommandsClient;
 import org.hyperic.hq.agent.server.AgentDaemon;
-import org.hyperic.hq.bizapp.agent.client.HQApiCommandsClient;
-import org.hyperic.hq.bizapp.agent.client.HQApiFactory;
+import org.hyperic.hq.agent.bizapp.agent.client.HQApiFactory;
 import org.hyperic.hq.hqapi1.HQApi;
 import org.hyperic.hq.hqapi1.types.Resource;
 import org.hyperic.hq.hqapi1.types.ResourceConfig;

@@ -35,12 +35,12 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.bizapp.agent.CommandsAPIInfo;
 import org.hyperic.hq.agent.server.AgentDaemon;
 import org.hyperic.hq.agent.server.AgentStorageProvider;
 import org.hyperic.hq.agent.server.ConfigStorage;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.bizapp.agent.CommandsAPIInfo;
-import org.hyperic.hq.bizapp.agent.ProviderInfo;
+import org.hyperic.hq.agent.bizapp.agent.ProviderInfo;
 import org.hyperic.hq.hqapi1.HQApi;
 import org.hyperic.hq.product.DaemonDetector;
 import org.hyperic.hq.product.PluginException;
