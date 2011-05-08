@@ -322,6 +322,7 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
     // plugins that are valid and return error status if any fail.
     public void deployPluginIfValid(AuthzSubject subj, Map<String, byte[]> pluginInfo)
     throws PluginDeployException {
+        validatePluginFileNotInDeleteState(pluginInfo.keySet());
         final Collection<File> files = new ArrayList<File>();
         for (final Entry<String, byte[]> entry : pluginInfo.entrySet()) {
             final String filename = entry.getKey();
@@ -337,6 +338,19 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
             files.add(file);
         }
         deployPlugins(files);
+    }
+
+    private void validatePluginFileNotInDeleteState(Collection<String> pluginFileNames)
+    throws PluginDeployException {
+        Collection<Plugin> plugins = pluginDAO.getPluginsByFileNames(pluginFileNames);
+        for (Plugin plugin : plugins) {
+            if (plugin == null) {
+                continue;
+            }
+            if (plugin.isDeleted()) {
+                throw new PluginDeployException("plugin.manager.plugin.is.deleted", plugin.getPath());
+            }
+        }
     }
 
     private File getFileAndValidateXML(String filename, byte[] bytes)
