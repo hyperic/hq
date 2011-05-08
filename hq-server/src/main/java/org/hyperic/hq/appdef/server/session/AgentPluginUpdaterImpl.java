@@ -64,7 +64,8 @@ implements AgentPluginUpdater, ApplicationContextAware {
     }
 
     public void queuePluginTransfer(Map<Integer, Collection<Plugin>> updateMap,
-                                    Map<Integer, Collection<String>> removeMap) {
+                                    Map<Integer, Collection<String>> removeMap,
+                                    boolean restartAgents) {
         if (isDisabled()) {
             return;
         }
@@ -73,8 +74,13 @@ implements AgentPluginUpdater, ApplicationContextAware {
         } if (removeMap == null) {
             removeMap = Collections.emptyMap();
         }
-        pluginManager.updateAgentPluginSyncStatus(
-            AgentPluginStatusEnum.SYNC_IN_PROGRESS, updateMap, removeMap);
+        if (restartAgents) {
+            pluginManager.updateAgentPluginSyncStatus(
+                AgentPluginStatusEnum.SYNC_IN_PROGRESS, updateMap, removeMap);
+        } else {
+            pluginManager.updateAgentPluginSyncStatus(
+                AgentPluginStatusEnum.SYNC_FAILURE, updateMap, removeMap);
+        }
         final Set<Integer> agentIds = new HashSet<Integer>();
         agentIds.addAll(updateMap.keySet());
         agentIds.addAll(removeMap.keySet());
@@ -99,6 +105,7 @@ implements AgentPluginUpdater, ApplicationContextAware {
             job.setAgentId(agentId);
             job.setPlugins(plugins);
             job.setToRemove(toRemove);
+            job.restartAgent(restartAgents);
             agentSynchronizer.addAgentJob(job);
         }
     }
