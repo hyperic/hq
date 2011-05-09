@@ -25,78 +25,74 @@
 
 package org.hyperic.hq.agent.spring;
 
+import edu.emory.mathcs.backport.java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.server.AgentLifecycleService;
+import org.hyperic.hq.agent.server.AgentService;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.context.SmartLifecycle;
+import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 /**
  * todo: exceptions, logging
  * @author Helena Edelson
  */
-public final class AgentApplicationContext implements SmartLifecycle {
+public final class AgentApplicationContext {
 
     private static final Log logger = LogFactory.getLog(AgentApplicationContext.class);
 
-    private static AnnotationConfigApplicationContext ctx;
+    private static final AtomicBoolean running = new AtomicBoolean(false);
 
-    public static AnnotationConfigApplicationContext create(String[] basePackages, Class<?>... annotatedClasses) {
-        if (ctx != null) return ctx;
-  
+    /* add: org.hyperic.hq.operation.rabbit */
+    private static final String[] basePackages = {"org.hyperic.hq.agent"};
+
+    private static final AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+
+
+    public static void start() throws RuntimeException {
+        if (running.get()) return;
+
         try {
-            ctx = new AnnotationConfigApplicationContext(annotatedClasses);
-            ctx.registerShutdownHook();
+            //ctx.register(SpringAgentConfiguration.class);
             ctx.scan(basePackages);
+            ctx.registerShutdownHook();
+            running.set(true);
             ctx.refresh();
         }
-        catch (BeansException e) {
-            shutdown();
-        } catch (IllegalStateException e) {
-            //TODO
-            logger.error(e.getCause() + " " + e.getMessage());
+        catch (UnsatisfiedDependencyException e) {
+            // ignore - thrown from integration tests 
         }
-         
-        return ctx;
+        catch (BeansException e) {
+            stop(); 
+            throw new RuntimeException(e);
+        }
+        catch (IllegalStateException e) {
+            stop();
+            throw new RuntimeException(e);
+        } 
     }
 
-    public static <T> T getBean(Class<T> requiredType) throws RuntimeException {
+    public static AgentService getAgentService() { 
+        return getBean(AgentLifecycleService.class);
+    }
+
+    private static <T> T getBean(Class<T> requiredType) throws RuntimeException {
+        if (!running.get()) throw new IllegalStateException("Application context is not running.");
+
         try {
             return ctx.getBean(requiredType);
         } catch (NoSuchBeanDefinitionException e) {
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 
     /**
      * Do graceful shutdown and close on demand if needed.
      */
-    public static void shutdown() {
-        if (ctx != null)  ctx.destroy(); 
-    }
-
-    public boolean isAutoStartup() {
-        return false;
-    }
-
-    public void stop(Runnable callback) {
-       stop();
-    }
-
-    public void start() {
-
-    }
-
-    public void stop() {
-        shutdown();
-    }
-
-    public boolean isRunning() {
-        return false;
-    }
-
-    public int getPhase() {
-        return 0;
+    public static void stop() {
+        running.set(false);
+        ctx.destroy();
     }
 }

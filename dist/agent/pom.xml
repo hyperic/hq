@@ -76,6 +76,27 @@
 			<artifactId>hq-product</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+       <!-- <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+            <version>${spring-framework.version}</version>
+            <classifier>agent</classifier>
+			<type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${spring-framework.version}</version>
+            <classifier>agent</classifier>
+			<type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>${spring-framework.version}</version>
+            <classifier>agent</classifier>
+			<type>zip</type>
+        </dependency>-->
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-util</artifactId>
@@ -110,49 +131,7 @@
 			<version>${project.version}</version>
 			<classifier>agent</classifier>
 			<type>zip</type>
-		</dependency>
-		<dependency>
-		   	<groupId>org.hyperic.hq.agent.handler</groupId>
-		    <artifactId>hq-agent-handler-autoinventory</artifactId>
-		    <version>${project.version}</version>
-		    <classifier>agent</classifier>
-			<type>zip</type>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq.agent.handler</groupId>
-			<artifactId>hq-agent-handler-bizapp</artifactId>
-			<version>${project.version}</version>
-			<classifier>agent</classifier>
-		    <type>zip</type>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq.agent.handler</groupId>
-			<artifactId>hq-agent-handler-commands</artifactId>
-			<version>${project.version}</version>
-			<classifier>agent</classifier>
-		    <type>zip</type>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq.agent.handler</groupId>
-			<artifactId>hq-agent-handler-control</artifactId>
-			<version>${project.version}</version>
-			<classifier>agent</classifier>
-		    <type>zip</type>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq.agent.handler</groupId>
-			<artifactId>hq-agent-handler-livedata</artifactId>
-			<version>${project.version}</version>
-			<classifier>agent</classifier>
-		    <type>zip</type>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq.agent.handler</groupId>
-			<artifactId>hq-agent-handler-measurement</artifactId>
-			<version>${project.version}</version>
-			<classifier>agent</classifier>
-		    <type>zip</type>
-		</dependency>
+		</dependency> 
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-pdk</artifactId>

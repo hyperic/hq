@@ -69,7 +69,7 @@ done
 
 CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}"
 
-CLIENT_CLASS=org.hyperic.hq.bizapp.agent.client.AgentClient
+CLIENT_CLASS=org.hyperic.hq.agent.bizapp.agent.client.AgentClient
 
 HQ_JAVA_OPTS="${HQ_JAVA_OPTS} \
     -Xmx128m

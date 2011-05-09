@@ -162,7 +162,7 @@ public class AgentManager extends AgentMonitorSimple {
      */
     protected AgentTransportLifecycle loadAgentTransportInSeparateClassloader(AgentService agentService) throws Exception {
         String agentTransportLifecycleClass = "org.hyperic.hq.agent.server.AgentTransportLifecycleImpl";
-        AgentTransportLifecycle agentTransportLifecycle = null;
+        AgentTransportLifecycle agentTransportLifecycle;
 
         try {
             Class type = this.handlerClassLoader.loadClass(agentTransportLifecycleClass);
@@ -173,7 +173,7 @@ public class AgentManager extends AgentMonitorSimple {
         catch (ClassNotFoundException e) {
             throw new AgentStartException("Cannot find agent transport lifecycle class: " + agentTransportLifecycleClass);
         }
-        catch (Throwable t) {
+        catch (Throwable t) {   //NoSuchMethodException
             throw new AgentStartException("Cannot find agent transport lifecycle class: " + agentTransportLifecycleClass);
         }
 

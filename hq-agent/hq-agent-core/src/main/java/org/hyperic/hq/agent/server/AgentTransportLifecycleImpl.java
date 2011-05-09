@@ -25,191 +25,169 @@
 
 package org.hyperic.hq.agent.server;
 
-import java.net.InetSocketAddress;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Properties;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConfig;
-import org.hyperic.hq.agent.bizapp.agent.ProviderInfo;
 import org.hyperic.hq.agent.bizapp.agent.CommandsAPIInfo;
+import org.hyperic.hq.agent.bizapp.agent.ProviderInfo;
 import org.hyperic.hq.agent.bizapp.agent.client.AgentClient;
 import org.hyperic.hq.agent.bizapp.client.AgentCallbackClient;
 import org.hyperic.hq.common.YesOrNo;
 import org.hyperic.hq.transport.AgentTransport;
 import org.jboss.remoting.InvokerLocator;
 
+import java.net.InetSocketAddress;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
 /**
  * The class that manages the agent transport lifecycle.
  */
 public final class AgentTransportLifecycleImpl implements AgentTransportLifecycle {
-    
+
     private static final Log _log = LogFactory.getLog(AgentTransportLifecycleImpl.class);
-    
+
     private static final String REMOTE_TRANSPORT_LOCATOR_PATH = "ServerInvokerServlet";
-    
+
     private final Object _lock = new Object();
-    private final AgentDaemon _agent;
-    private final AgentConfig _config;
-    private final AgentStorageProvider _storageProvider;
-    private final Map _serviceInterfaceName2ServiceInterface;
-    private final Map _serviceInterface2ServiceImpl;
+    private final AgentService agentService;
+    private final AgentConfig config;
+    private final AgentStorageProvider storageProvider;
+    private final Map<String, Class> serviceInterfaceName2ServiceInterface = new HashMap<String, Class>();
+    private final Map<Class, Object> serviceInterface2ServiceImpl = new HashMap<Class, Object>();
+
     private AgentTransport _agentTransport;
     private InvokerLocator _remoteTransportLocator;
-    
-    public AgentTransportLifecycleImpl(AgentDaemon agent,
-                                       AgentConfig bootConfig, 
-                                       AgentStorageProvider storageProvider) {
-        _agent = agent;
-        _config = bootConfig;
-        _storageProvider = storageProvider;
-        _serviceInterfaceName2ServiceInterface = new HashMap();
-        _serviceInterface2ServiceImpl = new HashMap();
-        
-        // Normally we don't want 'this' to escape the constructor, but 
-        // we made this class final so we don't have to worry about a 
-        // not fully initialized instance of a subclass (of this class) 
-        // handled by another thread.
-        
-        // register handler to be notified when the transport layer 
-        // configuration is finally set
-        _agent.registerNotifyHandler(this, CommandsAPIInfo.NOTIFY_SERVER_SET);
+
+    public AgentTransportLifecycleImpl(AgentService agentService) throws AgentRunningException {
+        this.agentService = agentService;
+        this.config = agentService.getBootConfig();
+        this.storageProvider = agentService.getStorageProvider();
+        agentService.registerNotifyHandler(this, CommandsAPIInfo.NOTIFY_SERVER_SET);
     }
-            
+
     /**
      * @see org.hyperic.hq.agent.server.AgentTransportLifecycle#startAgentTransport()
      */
-    public void startAgentTransport() throws Exception {        
+    public void startAgentTransport() throws Exception {
         // Start the agent transport here - only if all configuration properties 
         // are available thru boot props - before starting, register all the services with the agent transport
-        
+
         // Boot properties override stored values        
-        ProviderInfo provider = CommandsAPIInfo.getProvider(_storageProvider);
-        
-        Properties bootProperties = _config.getBootProperties();
-        
+        ProviderInfo provider = CommandsAPIInfo.getProvider(storageProvider);
+
+        Properties bootProperties = config.getBootProperties();
+
         boolean isNewTransport = isNewTransport(bootProperties, provider);
-        
+
         if (!isNewTransport) {
             _log.info("Agent is not using new transport.");
             return;
         }
-        
+
         _log.info("Agent is using the new transport. " +
-        		  "Looking for properties to start the new transport.");
-        
-        boolean isUnidirectionalPropertySet = 
-            isUnidirectionalPropertySet(bootProperties, provider);
-        
-        _log.info("Unidirectional property set="+isUnidirectionalPropertySet);
-        
+                "Looking for properties to start the new transport.");
+
+        boolean isUnidirectionalPropertySet =
+                isUnidirectionalPropertySet(bootProperties, provider);
+
+        _log.info("Unidirectional property set=" + isUnidirectionalPropertySet);
+
         boolean unidirectional = false;
-        
+
         if (isUnidirectionalPropertySet) {
             unidirectional = isUnidirectional(bootProperties, provider);
-            
-            _log.info("Unidirectional="+unidirectional);
+
+            _log.info("Unidirectional=" + unidirectional);
         }
-        
+
         String host = getHost(bootProperties, provider);
-        
+
         if (host == null) {
             _log.info("Host is not currently set.");
         } else {
-            _log.info("Host="+host);
+            _log.info("Host=" + host);
         }
-        
+
         int unidirectionalPort = getUndirectionalPort(bootProperties, provider);
-        
+
         if (unidirectionalPort == -1) {
             _log.info("Unidirectional port is not currently set.");
         } else {
-            _log.info("Unidirectional port="+unidirectionalPort);                
-        }            
-        
-        String agentToken = getAgentToken(provider);
-        
-        if (agentToken == null) {
-            _log.info("Agent token is not currently set. " +
-                      "Registering handler to notify agent transport when token is set.");
-        } else {
-            _log.info("Agent token="+agentToken);                
+            _log.info("Unidirectional port=" + unidirectionalPort);
         }
-        
+
+        String agentToken = getAgentToken(provider);
+
+        if (agentToken == null) {
+            _log.info("Agent token is not currently set. Registering handler to notify agent transport when token is set.");
+        } else {
+            _log.info("Agent token=" + agentToken);
+        }
+
         long pollingFrequency = getPollingFrequency(bootProperties);
-        
-        _log.info("Polling frequency="+pollingFrequency);
-        
+
+        _log.info("Polling frequency=" + pollingFrequency);
+
         if (!isUnidirectionalPropertySet) {
-            _log.info("Cannot start new transport since we do not " +
-            		  "know if the transport is unidirectional.");
+            _log.info("Cannot start new transport since we do not know if the transport is unidirectional.");
             return;
         }
-        
+
         if (host == null) {
             _log.info("Cannot start new transport since we do not know the host.");
-            
             return;
         }
-        
+
         if (unidirectional) {
             if (unidirectionalPort == -1) {
-                _log.info("Cannot start new transport since we do not " +
-                          "know the server port for the unidirectional transport.");
+                _log.info("Cannot start new transport since we do not know the server port for the unidirectional transport.");
                 return;
             }
-            
+
             _log.info("Setting up unidirectional transport");
-                        
-            InetSocketAddress pollerBindAddr = 
-                new InetSocketAddress(host, unidirectionalPort);
-            
-            if (_config.isProxyServerSet()) {                
-                _log.info("Configuring proxy host and port: host="+
-                         _config.getProxyIp()+"; port="+_config.getProxyPort());
-                
-                System.setProperty("https.proxyHost", _config.getProxyIp());
-                System.setProperty("https.proxyPort", String.valueOf(_config.getProxyPort()));
-            }            
-            
-            _agentTransport = 
-                new AgentTransport(pollerBindAddr, 
-                                   REMOTE_TRANSPORT_LOCATOR_PATH, 
-                                   true, 
-                                   agentToken, 
-                                   unidirectional, 
-                                   pollingFrequency, 
-                                   1);
+
+            InetSocketAddress pollerBindAddr = new InetSocketAddress(host, unidirectionalPort);
+
+            if (config.isProxyServerSet()) {
+                _log.info("Configuring proxy host and port: host=" + config.getProxyIp() + "; port=" + config.getProxyPort());
+
+                System.setProperty("https.proxyHost", config.getProxyIp());
+                System.setProperty("https.proxyPort", String.valueOf(config.getProxyPort()));
+            }
+
+            _agentTransport = new AgentTransport(pollerBindAddr,
+                            REMOTE_TRANSPORT_LOCATOR_PATH,
+                            true,
+                            agentToken,
+                            unidirectional,
+                            pollingFrequency,
+                            1);
         } else {
             _log.info("Setting up bidirectional transport");
             // TODO need to implement bidirectional transport and return 
             // an agent transport instead of null
             // do we need to set up a proxy server for http or https protocol?
             _agentTransport = null;
-        }        
-        
+        }
+
         if (_agentTransport != null) {
             synchronized (_lock) {
                 _remoteTransportLocator = _agentTransport.getRemoteEndpointLocator();
             }
-            
-            // register the services and start the server            
-            for (Iterator iter = _serviceInterface2ServiceImpl.entrySet().iterator(); 
-                 iter.hasNext();) {
-                Map.Entry entry = (Map.Entry) iter.next();
-                Class serviceInterface = (Class)entry.getKey();
-                Object serviceImpl = (Object)entry.getValue();
+
+            for (Map.Entry<Class, Object> entry : serviceInterface2ServiceImpl.entrySet()) {
+                Class serviceInterface = entry.getKey();
+                Object serviceImpl = entry.getValue();
                 _agentTransport.registerService(serviceInterface, serviceImpl);
             }
-            
+
             _agentTransport.start();
         }
 
     }
-    
+
     /**
      * @see org.hyperic.hq.agent.server.AgentTransportLifecycle#stopAgentTransport()
      */
@@ -219,28 +197,28 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
                 _agentTransport.stop();
             } catch (InterruptedException e) {
             }
-            
+
             _agentTransport = null;
-            
+
             synchronized (_lock) {
-               _remoteTransportLocator = null;
+                _remoteTransportLocator = null;
             }
         }
     }
-    
+
     /**
      * @see org.hyperic.hq.agent.server.AgentTransportLifecycle#handleNotification(java.lang.String, java.lang.String)
      */
     public void handleNotification(String msgClass, String msg) {
-        ProviderInfo provider = CommandsAPIInfo.getProvider(_storageProvider);
-        Properties bootProperties = _config.getBootProperties();
-        
+        ProviderInfo provider = CommandsAPIInfo.getProvider(storageProvider);
+        Properties bootProperties = config.getBootProperties();
+
         if (!isNewTransport(bootProperties, provider)) {
             _log.info("Stopping agent transport.");
             stopAgentTransport();
             return;
         }
-        
+
         // Start the agent transport if configuration properties were 
         // not available on the original start attempt.
         if (_agentTransport == null) {
@@ -251,47 +229,46 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
                 return;
             }
         }
-        
+
         // If the agent transport is still not started and we are using 
         // the new transport, then we have a problem!
-        if (_agentTransport == null && isUnidirectional(bootProperties, provider)) {            
-            _log.error("Failed to start agent transport after agent setup");                
-            
+        if (_agentTransport == null && isUnidirectional(bootProperties, provider)) {
+            _log.error("Failed to start agent transport after agent setup");
             return;
         }
-        
+
         // Update the agent transport agent token
         if (provider == null) {
             _log.error("Agent transport expected agent token set but " +
-                       "storage provider does not have token.");
-        } else {            
+                    "storage provider does not have token.");
+        } else {
             if (_agentTransport != null) {
                 String agentToken = provider.getAgentToken();
-                
-                _log.info("Updating agent transport with new agent token: "+agentToken);
-                
-                _agentTransport.updateAgentToken(agentToken);                
+
+                _log.info("Updating agent transport with new agent token: " + agentToken);
+
+                _agentTransport.updateAgentToken(agentToken);
             }
         }
     }
-    
+
     /**
      * @see org.hyperic.hq.agent.server.AgentTransportLifecycle#registerService(java.lang.Class, java.lang.Object)
      */
     public void registerService(Class serviceInterface, Object serviceImpl) {
-        Class oldInterface = (Class)_serviceInterfaceName2ServiceInterface.get(serviceInterface.getName());
-        
+        Class oldInterface = serviceInterfaceName2ServiceInterface.get(serviceInterface.getName());
+
         if (oldInterface == null) {
-            _serviceInterfaceName2ServiceInterface.put(serviceInterface.getName(), serviceInterface);
-            _serviceInterface2ServiceImpl.put(serviceInterface, serviceImpl);                    
+            serviceInterfaceName2ServiceInterface.put(serviceInterface.getName(), serviceInterface);
+            serviceInterface2ServiceImpl.put(serviceInterface, serviceImpl);
         } else {
-            _serviceInterfaceName2ServiceInterface.remove(serviceInterface.getName());
-            _serviceInterface2ServiceImpl.remove(oldInterface);
-            _serviceInterfaceName2ServiceInterface.put(serviceInterface.getName(), serviceInterface);
-            _serviceInterface2ServiceImpl.put(serviceInterface, serviceImpl); 
+            serviceInterfaceName2ServiceInterface.remove(serviceInterface.getName());
+            serviceInterface2ServiceImpl.remove(oldInterface);
+            serviceInterfaceName2ServiceInterface.put(serviceInterface.getName(), serviceInterface);
+            serviceInterface2ServiceImpl.put(serviceInterface, serviceImpl);
         }
     }
-    
+
     /**
      * @see org.hyperic.hq.agent.server.AgentTransportLifecycle#getRemoteTransportLocator()
      */
@@ -299,101 +276,71 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
         synchronized (_lock) {
             return _remoteTransportLocator;
         }
-    }    
-    
+    }
+
     private boolean isNewTransport(Properties bootProperties, ProviderInfo provider) {
         boolean isNewTransport = false;
-        
-        String isNewTransportString = 
-            bootProperties.getProperty(AgentClient.QPROP_NEWTRANSPORT);
-        
+
+        String isNewTransportString = bootProperties.getProperty(AgentClient.QPROP_NEWTRANSPORT);
+
         if (isNewTransportString == null) {
-            if (provider != null) {
-                isNewTransport = provider.isNewTransport();                
-            }
+            if (provider != null)  isNewTransport = provider.isNewTransport();
         } else {
-            isNewTransport = 
-                YesOrNo.valueFor(isNewTransportString).toBoolean().booleanValue();
+            isNewTransport = YesOrNo.valueFor(isNewTransportString).toBoolean();
         }
-        
+
         return isNewTransport;
     }
-    
-    private boolean isUnidirectionalPropertySet(Properties bootProperties, ProviderInfo provider) {        
-        String isUnidirectionalString = 
-            bootProperties.getProperty(AgentClient.QPROP_UNI);
-        
-        if (isUnidirectionalString != null) {
-            return true;
-        } else if (provider != null) {
-            return provider.isNewTransport();
-        } else {
-            return false;
-        }  
+
+    private boolean isUnidirectionalPropertySet(Properties bootProperties, ProviderInfo provider) {
+        String isUnidirectionalString = bootProperties.getProperty(AgentClient.QPROP_UNI); 
+        return isUnidirectionalString != null || provider != null && provider.isNewTransport();
     }
-    
+
     private boolean isUnidirectional(Properties bootProperties, ProviderInfo provider) {
         boolean isUnidirectional = false;
-        
-        String isUnidirectionalString = 
-            bootProperties.getProperty(AgentClient.QPROP_UNI);
-        
+
+        String isUnidirectionalString = bootProperties.getProperty(AgentClient.QPROP_UNI);
+
         if (isUnidirectionalString == null && provider != null) {
-            if (provider.isNewTransport()) {
-                isUnidirectional = provider.isUnidirectional();
-            }
+            if (provider.isNewTransport()) isUnidirectional = provider.isUnidirectional();
         } else {
-            isUnidirectional = 
-                YesOrNo.valueFor(isUnidirectionalString).toBoolean().booleanValue();
+            isUnidirectional = YesOrNo.valueFor(isUnidirectionalString).toBoolean();
         }
-        
-        return isUnidirectional;    
+
+        return isUnidirectional;
     }
-    
+
     private String getHost(Properties bootProperties, ProviderInfo provider) {
         String host = bootProperties.getProperty(AgentClient.QPROP_IPADDR);
-                
+
         if (host == null && provider != null) {
             host = AgentCallbackClient.getHostFromProviderURL(provider.getProviderAddress());
         }
-        
-        return host;              
-    }   
-    
+
+        return host;
+    }
+
     private int getUndirectionalPort(Properties bootProperties, ProviderInfo provider) {
         int port = -1;
-        
-        String portString = 
-            bootProperties.getProperty(AgentClient.QPROP_SSLPORT);
-        
+
+        String portString = bootProperties.getProperty(AgentClient.QPROP_SSLPORT);
+
         if (portString == null) {
-            if (provider != null && provider.isNewTransport()) {
-                port = provider.getUnidirectionalPort();
-            }
+            if (provider != null && provider.isNewTransport()) port = provider.getUnidirectionalPort();
         } else {
-            port = Integer.valueOf(portString).intValue();
+            port = Integer.valueOf(portString);
         }
-        
-        return port;              
-    }   
+
+        return port;
+    }
 
     private long getPollingFrequency(Properties bootProperties) {
-        String pollingFrequencyString = bootProperties.getProperty(
-                AgentClient.QPROP_UNI_POLLING_FREQUENCY);
-        
-        if (pollingFrequencyString == null) {
-            return 1000;
-        } else {
-            return Long.valueOf(pollingFrequencyString).longValue();            
-        }
-    }
-    
-    private String getAgentToken(ProviderInfo provider) {
-        if (provider != null) {
-            return provider.getAgentToken();
-        } else {
-            return null;
-        }
+        String pollingFrequencyString = bootProperties.getProperty(AgentClient.QPROP_UNI_POLLING_FREQUENCY);
+        return pollingFrequencyString != null ? Long.valueOf(pollingFrequencyString) : 1000;
     }
 
+    private String getAgentToken(ProviderInfo provider) {
+        return provider != null ? provider.getAgentToken() : null;
+    } 
 }

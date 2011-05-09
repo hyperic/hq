@@ -38,23 +38,20 @@ import org.hyperic.hq.agent.bizapp.agent.commands.CreateToken_result;
 import org.hyperic.hq.agent.bizapp.client.*;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.client.LegacyAgentCommandsClientImpl;
-import org.hyperic.hq.agent.server.AgentLifecycleService;
+import org.hyperic.hq.agent.server.AgentService;
+import org.hyperic.hq.agent.server.AgentStartException;
 import org.hyperic.hq.agent.server.LoggingOutputStream;
 import org.hyperic.hq.agent.spring.AgentApplicationContext;
-import org.hyperic.hq.agent.spring.SpringAgentConfiguration;
 import org.hyperic.hq.bizapp.agent.client.SecureAgentConnection;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.sigar.*;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.security.SecurityUtil;
-import org.springframework.context.ApplicationContext;
 import org.tanukisoftware.wrapper.WrapperManager;
 
 import java.io.*;
 import java.net.*;
 import java.util.Properties;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -103,40 +100,48 @@ public class AgentClient {
     private AgentCommandsClient agtCommands;
     private CommandsClient camCommands;
     private AgentConfig config;
-    private Log log = LogFactory.getLog(AgentClient.class);
+    private static final Log log = LogFactory.getLog(AgentClient.class);
     private boolean redirectedOutputs = false;
 
     private static final AtomicBoolean running = new AtomicBoolean(false);
 
-    private static AgentLifecycleService agentService;
+    private static AgentService agentService;
 
     //private static BizappCallbackClient bizappCallback;
 
     private AgentClient(AgentConfig config, SecureAgentConnection conn) {
         this.agtCommands = new LegacyAgentCommandsClientImpl(conn);
         this.camCommands = new CommandsClient(conn);
-        this.config = config;  
+        this.config = config;
     }
 
-    private static void initialize(final AgentConfig config) throws ExecutionException, TimeoutException, InterruptedException {
-        final String[] BASE_PATHS = {"org.hyperic.hq.operation.rabbit", "org.hyperic.hq.agent"};
+    /**
+     * @param config the Agent configuration
+     */
+    private static void initialize(final AgentConfig config) throws AgentStartException {
 
-        ApplicationContext ctx = AgentApplicationContext.create(BASE_PATHS, SpringAgentConfiguration.class);
-        for (String n : ctx.getBeanDefinitionNames()) System.out.println(n);
+        try {
+            AgentApplicationContext.start();
+        } catch (RuntimeException e) {
+            log.error(e);
+            throw new AgentStartException("Unable to start the ApplicationContext: " + e);
+        }
 
-        agentService = ctx.getBean(AgentLifecycleService.class);
-        //bizappCallback = ctx.getBean(BizappCallbackClient.class);
-        //bizappCallback.setConfig(config);
+        agentService = AgentApplicationContext.getAgentService();
+
+        /*bizappCallback = ctx.getBean(BizappCallbackClient.class); bizappCallback.setConfig(config);*/
 
         agentService.start(config);
+
+        SYSTEM_OUT.println("AgentService started");
 
         running.set(agentService.isRunning());
     }
 
     private static void destroy() {
         try {
-            AgentApplicationContext.shutdown();
-            running.set(agentService.isRunning());
+            AgentApplicationContext.stop();
+            running.set(false);
             SYSTEM_OUT.println("Agent successfully stopped");
         }
         catch (Throwable t) {
@@ -230,6 +235,7 @@ public class AgentClient {
     private void cmdDie(int waitTime)
             throws AgentConnectionException, AgentRemoteException {
         try {
+            destroy();
             this.agtCommands.die();
         } catch (AgentConnectionException exc) {
             return; // If we can't connect then we know the agent is dead
@@ -917,13 +923,11 @@ public class AgentClient {
             DataInputStream dIs = new DataInputStream(conn.getInputStream());
 
             if (dIs.readInt() != 1) {
-                throw new AgentInvokeException("Agent reported an error " +
-                        "while starting up");
+                throw new AgentInvokeException("Agent reported an error while starting up");
             }
 
         } catch (InterruptedIOException exc) {
-            throw new AgentInvokeException("Timed out waiting for Agent " +
-                    "to report startup success");
+            throw new AgentInvokeException("Timed out waiting for Agent to report startup success");
         } catch (IOException exc) {
             throw new AgentInvokeException("Agent failure while starting");
         } finally {
@@ -936,8 +940,7 @@ public class AgentClient {
         try {
             this.agtCommands.ping();
         } catch (Exception exc) {
-            throw new AgentInvokeException("Unable to ping agent: " +
-                    exc.getMessage());
+            throw new AgentInvokeException("Unable to ping agent: " + exc.getMessage());
         }
     }
 
@@ -1012,7 +1015,7 @@ public class AgentClient {
         }
 
         /*Thread t = new Thread(new AgentDaemon.RunnableAgent(this.config));
-        t.start();*/ 
+        t.start();*/
         try {
             initialize(config);
             SYSTEM_OUT.println("- Agent thread running");
@@ -1033,8 +1036,7 @@ public class AgentClient {
         } catch (Exception exc) {
             // This should rarely (never) occur, since we just ensured things
             // were operational.
-            throw new AgentInvokeException("Unexpected connection exception: " +
-                    "agent is still running");
+            throw new AgentInvokeException("Unexpected connection exception: agent is still running");
         }
 
         SYSTEM_OUT.println("Agent successfully started");

@@ -28,24 +28,27 @@
 -->
 
 <assembly>
-	<id>agent</id>
-	<formats>
-		<format>zip</format>
-	</formats>
+    <id>agent</id>
+    <formats>
+        <format>zip</format>
+    </formats>
 
-	<includeBaseDirectory>false</includeBaseDirectory>
+    <includeBaseDirectory>false</includeBaseDirectory>
 
-	<dependencySets>
-		<dependencySet>
-			<useProjectArtifact>true</useProjectArtifact>
-			<outputDirectory>lib</outputDirectory>
-			<fileMode>0644</fileMode>
-			<directoryMode>0755</directoryMode>
-			<useTransitiveDependencies>false</useTransitiveDependencies>
-			<includes>
-				<include>org.hyperic.hq.agent:hq-agent-core</include>
-			</includes>
-		</dependencySet>
-	</dependencySets>
+    <dependencySets>
+        <dependencySet>
+            <useProjectArtifact>true</useProjectArtifact>
+            <outputDirectory>lib</outputDirectory>
+            <fileMode>0644</fileMode>
+            <directoryMode>0755</directoryMode>
+            <useTransitiveDependencies>false</useTransitiveDependencies>
+            <includes>
+                <include>org.hyperic.hq.agent:hq-agent-core</include>
+                <include>org.springframework:spring-beans</include>
+                <include>org.springframework:spring-content</include>
+                <include>org.springframework:spring-core</include>
+            </includes>
+        </dependencySet>
+    </dependencySets>
 
 </assembly>

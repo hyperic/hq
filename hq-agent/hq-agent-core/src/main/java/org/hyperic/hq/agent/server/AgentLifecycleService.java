@@ -85,13 +85,10 @@ public class AgentLifecycleService implements AgentService, SmartLifecycle {
      * Create a new AbstractAgentService object based on a passed configuration
      * @param agentManager the agent manager
      * @param dispatcher   the command dispatcher
-     * @throws org.hyperic.hq.agent.AgentConfigException
-     *          indicating the passed configuration is invalid.
+     * @param serverHandlers the server handlers (pre-started)
      */
     @Autowired
-    public AgentLifecycleService(AgentManager agentManager, CommandDispatcher dispatcher, List<AgentServerHandler> serverHandlers)
-            throws AgentConfigException, AgentRunningException {
-
+    public AgentLifecycleService(AgentManager agentManager, CommandDispatcher dispatcher, List<AgentServerHandler> serverHandlers) { 
         this.serverHandlers.addAll(serverHandlers);
         this.agentManager = agentManager;
         this.dispatcher = dispatcher;
@@ -101,9 +98,8 @@ public class AgentLifecycleService implements AgentService, SmartLifecycle {
     public void start(final AgentConfig config) {
         Thread agent = new Thread(new RunnableAgent(config), agentThread);
         agent.start();
-        while(!started.get()) {
-
-        } 
+        //TODO
+        while(!started.get()) {  }
         //taskExecutor.execute(new RunnableAgent(config));
     }
 

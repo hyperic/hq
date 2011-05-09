@@ -188,8 +188,11 @@ CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/sigar-${sigar.version}.jar"
 CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/commons-httpclient-3.1.jar"
 CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/commons-codec-1.2.jar"
 CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}/hq-lather-${project.version}.jar"
+CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}/spring-beans-3.0.5.RELEASE.jar"
+CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}/spring-content-3.0.5.RELEASE.jar"
+CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}/spring-core-3.0.5.RELEASE.jar"
 
-CLIENT_CLASS=org.hyperic.hq.bizapp.agent.client.AgentClient
+CLIENT_CLASS=org.hyperic.hq.agent.bizapp.agent.client.AgentClient
 
 CLIENT_CMD="${HQ_JAVA} \
     -Djava.net.preferIPv4Stack=true \
