@@ -32,8 +32,11 @@ import java.util.List;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.RegistryServerDetector;
+import org.hyperic.hq.product.Win32ControlPlugin;
 
 import org.hyperic.sigar.win32.RegistryKey;
+import org.hyperic.sigar.win32.Service;
+import org.hyperic.sigar.win32.Win32Exception;
 import org.hyperic.util.config.ConfigResponse;
 
 public class ErsApacheServerDetector
@@ -99,6 +102,14 @@ public class ErsApacheServerDetector
             server.setIdentifier(getAIID(serverRoot));
 
             if (configureServer(server, null)) {
+                if (isWin32()) {
+                    ConfigResponse cf = new ConfigResponse();
+                    String sname = getWindowsServiceName(serverName);
+                    if (sname != null) {
+                        cf.setValue(Win32ControlPlugin.PROP_SERVICENAME, sname);
+                        setControlConfig(server, cf);
+                    }
+                }
                 getLog().debug("[getServerList] serverRoot="+serverRoot+" serverName="+serverName+" OK");
                 servers.add(server);
             }else{
@@ -109,10 +120,27 @@ public class ErsApacheServerDetector
         return servers;
     }
 
+    @Override
     protected String getWindowsServiceName() {
-        return
-            "Covalent" + getPlatformName() + "ApacheERS" +
-            getTypeInfo().getVersion();
+        return null;
+    }
+
+    protected String getWindowsServiceName(String serverName) {
+        String name =  "ERS"+serverName+"httpsd";
+        try {
+            List services = Service.getServiceNames();
+            if (!services.contains(name)) {
+                name = "Covalent" + getPlatformName() + "ApacheERS" + getTypeInfo().getVersion();
+                if (!services.contains(name)) {
+                    name = null;
+                }
+            }
+        } catch (Win32Exception ex) {
+            getLog().debug("[getWindowsServiceName] " + ex.getMessage(), ex);
+            name = null;
+        }
+        getLog().debug("[getWindowsServiceName] name=" + name);
+        return name;
     }
 
     public List getServerResources(ConfigResponse platformConfig) throws PluginException {
