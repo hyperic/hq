@@ -217,20 +217,14 @@ public class RunPlugin extends AbstractMojo implements UserInfo, StreamConsumer 
             channel.connect();
 
             byte[] tmp = new byte[1024];
-            while (true) {
+            while (!channel.isClosed()) {
                 while (in.available() > 0) {
                     int i = in.read(tmp, 0, 1024);
-                    if (i < 0) {
-                        break;
-                    }
                     System.out.print(new String(tmp, 0, i));
-                }
-                if (channel.isClosed()) {
-                    System.out.println("exit-status: " + channel.getExitStatus());
-                    break;
                 }
                 Thread.sleep(0);
             }
+            System.out.println("exit-status: " + channel.getExitStatus());
 
         } catch (Exception ex) {
             throw new MojoExecutionException("error", ex);
@@ -265,14 +259,14 @@ public class RunPlugin extends AbstractMojo implements UserInfo, StreamConsumer 
                 try {
                     in.close();
                 } catch (IOException ex) {
-                    ex.printStackTrace();
+                    throw new MojoExecutionException("error", ex);
                 }
             }
             if (out != null) {
                 try {
                     out.close();
                 } catch (IOException ex) {
-                    ex.printStackTrace();
+                    throw new MojoExecutionException("error", ex);
                 }
             }
         }
@@ -364,7 +358,7 @@ public class RunPlugin extends AbstractMojo implements UserInfo, StreamConsumer 
         //          -1
 
         if (b == 1 || b == 2) {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             int c;
             do {
                 c = in.read();
@@ -380,13 +374,13 @@ public class RunPlugin extends AbstractMojo implements UserInfo, StreamConsumer 
         return b;
     }
 
-    static final String inputStreamAsString(InputStream stream) throws IOException {
+    static String inputStreamAsString(InputStream stream) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(stream));
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         try {
             String line = null;
             while ((line = br.readLine()) != null) {
-                sb.append(line + "\n");
+                sb.append(line).append("\n");
             }
         } finally {
             br.close();
