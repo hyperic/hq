@@ -28,23 +28,17 @@ package org.hyperic.bootstrap;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import javax.sql.DataSource;
-
 import org.easymock.EasyMock;
-import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.sigar.SigarException;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -56,13 +50,10 @@ public class HQServerTest {
 
     private HQServer server;
     private ServerConfigurator serverConfigurator;
-    private ProcessManager processManager;
     private EngineController engineController;
     private EmbeddedDatabaseController embeddedDatabaseController;
     private String serverHome = "/Applications/HQ5/server-5.0.0";
-    private String engineHome = "/Applications/HQ5/server-5.0.0/hq-engine";
     private OperatingSystem osInfo;
-    private DataSource dataSource;
     private Connection connection;
     private Statement statement;
     private ResultSet resultSet;
@@ -70,16 +61,14 @@ public class HQServerTest {
     @Before
     public void setUp() {
         this.serverConfigurator = EasyMock.createMock(ServerConfigurator.class);
-        this.processManager = EasyMock.createMock(ProcessManager.class);
         this.engineController = EasyMock.createMock(EngineController.class);
         this.embeddedDatabaseController = EasyMock.createMock(EmbeddedDatabaseController.class);
-        this.dataSource = EasyMock.createMock(DataSource.class);
         this.connection = EasyMock.createMock(Connection.class);
         this.statement = EasyMock.createMock(Statement.class);
         this.resultSet = EasyMock.createMock(ResultSet.class);
         this.osInfo = org.easymock.classextension.EasyMock.createMock(OperatingSystem.class);
-        this.server = new HQServer(serverHome, engineHome, processManager,
-            embeddedDatabaseController, serverConfigurator, engineController, osInfo, dataSource);
+        this.server = new HQServer(serverHome, embeddedDatabaseController, serverConfigurator,
+            engineController, osInfo);
     }
 
     @Test
@@ -110,38 +99,6 @@ public class HQServerTest {
         serverConfigurator.configure();
         EasyMock.expect(embeddedDatabaseController.shouldUse()).andReturn(true);
         EasyMock.expect(embeddedDatabaseController.startBuiltInDB()).andReturn(true);
-        //TODO re-enable if we add dbupgrade back to bootstrap?
-//        EasyMock.expect(
-//            processManager.executeProcess(EasyMock
-//                .aryEq(new String[] { System.getProperty("java.home") + "/bin/java",
-//                                     "-cp",
-//                                     serverHome + "/lib/ant-launcher-1.7.1.jar",
-//                                     "-Dserver.home=" + serverHome,
-//                                     "-Dant.home=" + serverHome,
-//                                     "-Dtomcat.home=" + engineHome + "/hq-server",
-//                                     "-Dlog4j.configuration=" +
-//                                         new File(serverHome + "/conf/log4j.xml").toURI().toURL()
-//                                             .toString(),
-//                                     "org.apache.tools.ant.launch.Launcher",
-//                                     "-q",
-//                                     "-lib",
-//                                     serverHome + "/lib",
-//                                     "-listener",
-//                                     "org.apache.tools.ant.listener.Log4jListener",
-//                                     "-buildfile",
-//                                     serverHome + "/data/db-upgrade.xml",
-//                                     "upgrade" }), EasyMock.eq(serverHome), EasyMock.eq(true),
-//                EasyMock.eq(HQServer.DB_UPGRADE_PROCESS_TIMEOUT))).andReturn(0);
-//        EasyMock.expect(dataSource.getConnection()).andReturn(connection);
-//        EasyMock.expect(connection.createStatement()).andReturn(statement);
-//        EasyMock.expect(
-//            statement.executeQuery("select propvalue from EAM_CONFIG_PROPS " + "WHERE propkey = '" +
-//                                   HQConstants.SchemaVersion + "'")).andReturn(resultSet);
-//        EasyMock.expect(resultSet.next()).andReturn(true);
-//        EasyMock.expect(resultSet.getString("propvalue")).andReturn("3.1.88");
-//        connection.close();
-//        resultSet.close();
-//        statement.close();
         Properties testProps = new Properties();
         testProps.put("server.java.opts",
             "-XX:MaxPermSize=192m -Xmx512m -Xms512m -XX:+HeapDumpOnOutOfMemoryError");
@@ -182,184 +139,7 @@ public class HQServerTest {
         serverConfigurator.configure();
         EasyMock.expectLastCall().andThrow(new NullPointerException());
         EasyMock.expect(embeddedDatabaseController.shouldUse()).andReturn(false);
-        //TODO re-enable if we add dbupgrade back to bootstrap?
-//        EasyMock.expect(
-//            processManager.executeProcess(EasyMock
-//                .aryEq(new String[] { System.getProperty("java.home") + "/bin/java",
-//                                     "-cp",
-//                                     serverHome + "/lib/ant-launcher-1.7.1.jar",
-//                                     "-Dserver.home=" + serverHome,
-//                                     "-Dant.home=" + serverHome,
-//                                     "-Dtomcat.home=" + engineHome + "/hq-server",
-//                                     "-Dlog4j.configuration=" +
-//                                         new File(serverHome + "/conf/log4j.xml").toURI().toURL()
-//                                             .toString(),
-//                                     "org.apache.tools.ant.launch.Launcher",
-//                                     "-q",
-//                                     "-lib",
-//                                     serverHome + "/lib",
-//                                     "-listener",
-//                                     "org.apache.tools.ant.listener.Log4jListener",
-//                                     "-buildfile",
-//                                     serverHome + "/data/db-upgrade.xml",
-//                                     "upgrade" }), EasyMock.eq(serverHome), EasyMock.eq(true),
-//                EasyMock.eq(HQServer.DB_UPGRADE_PROCESS_TIMEOUT))).andReturn(0);
-//        EasyMock.expect(dataSource.getConnection()).andReturn(connection);
-//        EasyMock.expect(connection.createStatement()).andReturn(statement);
-//        EasyMock.expect(
-//            statement.executeQuery("select propvalue from EAM_CONFIG_PROPS " + "WHERE propkey = '" +
-//                                   HQConstants.SchemaVersion + "'")).andReturn(resultSet);
-//        EasyMock.expect(resultSet.next()).andReturn(true);
-//        EasyMock.expect(resultSet.getString("propvalue")).andReturn("3.1.88");
-//        connection.close();
-//        resultSet.close();
-//        statement.close();
-        Properties testProps = new Properties();
-        testProps.put("server.java.opts",
-            "-XX:MaxPermSize=192m -Xmx512m -Xms512m -XX:+HeapDumpOnOutOfMemoryError");
-        testProps.put("server.webapp.port", "7080");
-        final List<String> expectedOpts = new ArrayList<String>();
-        expectedOpts.add("-XX:MaxPermSize=192m");
-        expectedOpts.add("-Xmx512m");
-        expectedOpts.add("-Xms512m");
-        expectedOpts.add("-XX:+HeapDumpOnOutOfMemoryError");
-        expectedOpts.add("-Dserver.home=" + serverHome);
-        EasyMock.expect(serverConfigurator.getServerProps()).andReturn(testProps);
-        org.easymock.classextension.EasyMock.expect(osInfo.getName()).andReturn("Mac OS X");
-        EasyMock.expect(engineController.start(expectedOpts)).andReturn(0);
-        replay();
-        server.start();
-        verify();
-    }
 
-    @Ignore("Re-enable if we add dbupgrade back to bootstrap?")
-    @Test
-    public void testStartErrorVerifyingSchema() throws Exception {
-        EasyMock.expect(engineController.isEngineRunning()).andReturn(false);
-        serverConfigurator.configure();
-        EasyMock.expect(embeddedDatabaseController.shouldUse()).andReturn(true);
-        EasyMock.expect(embeddedDatabaseController.startBuiltInDB()).andReturn(true);
-        EasyMock.expect(
-            processManager.executeProcess(EasyMock
-                .aryEq(new String[] { System.getProperty("java.home") + "/bin/java",
-                                     "-cp",
-                                     serverHome + "/lib/ant-launcher-1.7.1.jar",
-                                     "-Dserver.home=" + serverHome,
-                                     "-Dant.home=" + serverHome,
-                                     "-Dtomcat.home=" + engineHome + "/hq-server",
-                                     "-Dlog4j.configuration=" +
-                                         new File(serverHome + "/conf/log4j.xml").toURI().toURL()
-                                             .toString(),
-                                     "org.apache.tools.ant.launch.Launcher",
-                                     "-q",
-                                     "-lib",
-                                     serverHome + "/lib",
-                                     "-listener",
-                                     "org.apache.tools.ant.listener.Log4jListener",
-                                     "-buildfile",
-                                     serverHome + "/data/db-upgrade.xml",
-                                     "upgrade" }), EasyMock.eq(serverHome), EasyMock.eq(true),
-                EasyMock.eq(HQServer.DB_UPGRADE_PROCESS_TIMEOUT))).andReturn(0);
-        EasyMock.expect(dataSource.getConnection()).andThrow(new SQLException());
-        Properties testProps = new Properties();
-        testProps.put("server.java.opts",
-            "-XX:MaxPermSize=192m -Xmx512m -Xms512m -XX:+HeapDumpOnOutOfMemoryError");
-        testProps.put("server.webapp.port", "7080");
-        final List<String> expectedOpts = new ArrayList<String>();
-        expectedOpts.add("-XX:MaxPermSize=192m");
-        expectedOpts.add("-Xmx512m");
-        expectedOpts.add("-Xms512m");
-        expectedOpts.add("-XX:+HeapDumpOnOutOfMemoryError");
-        expectedOpts.add("-Dserver.home=" + serverHome);
-        EasyMock.expect(serverConfigurator.getServerProps()).andReturn(testProps);
-        org.easymock.classextension.EasyMock.expect(osInfo.getName()).andReturn("Mac OS X");
-        EasyMock.expect(engineController.start(expectedOpts)).andReturn(0);
-        replay();
-        server.start();
-        verify();
-    }
-
-    @Test
-    @Ignore("Re-enable if we add dbupgrade back to bootstrap?")
-    public void testStartInvalidDBSchema() throws Exception {
-        EasyMock.expect(engineController.isEngineRunning()).andReturn(false);
-        serverConfigurator.configure();
-        EasyMock.expect(embeddedDatabaseController.shouldUse()).andReturn(true);
-        EasyMock.expect(embeddedDatabaseController.startBuiltInDB()).andReturn(true);
-        EasyMock.expect(
-            processManager.executeProcess(EasyMock
-                .aryEq(new String[] { System.getProperty("java.home") + "/bin/java",
-                                     "-cp",
-                                     serverHome + "/lib/ant-launcher-1.7.1.jar",
-                                     "-Dserver.home=" + serverHome,
-                                     "-Dant.home=" + serverHome,
-                                     "-Dtomcat.home=" + engineHome + "/hq-server",
-                                     "-Dlog4j.configuration=" +
-                                         new File(serverHome + "/conf/log4j.xml").toURI().toURL()
-                                             .toString(),
-                                     "org.apache.tools.ant.launch.Launcher",
-                                     "-q",
-                                     "-lib",
-                                     serverHome + "/lib",
-                                     "-listener",
-                                     "org.apache.tools.ant.listener.Log4jListener",
-                                     "-buildfile",
-                                     serverHome + "/data/db-upgrade.xml",
-                                     "upgrade" }), EasyMock.eq(serverHome), EasyMock.eq(true),
-                EasyMock.eq(HQServer.DB_UPGRADE_PROCESS_TIMEOUT))).andReturn(0);
-        EasyMock.expect(dataSource.getConnection()).andReturn(connection);
-        EasyMock.expect(connection.createStatement()).andReturn(statement);
-        EasyMock.expect(
-            statement.executeQuery("select propvalue from EAM_CONFIG_PROPS " + "WHERE propkey = '" +
-                                   HQConstants.SchemaVersion + "'")).andReturn(resultSet);
-        EasyMock.expect(resultSet.next()).andReturn(true);
-        EasyMock.expect(resultSet.getString("propvalue")).andReturn(
-            HQConstants.SCHEMA_MOD_IN_PROGRESS);
-        connection.close();
-        resultSet.close();
-        statement.close();
-        replay();
-        server.start();
-        verify();
-    }
-
-    @Ignore("Re-enable if we add dbupgrade back to bootstrap?")
-    @Test
-    public void testStartNoDBResultsWithSchemaCheck() throws Exception {
-        EasyMock.expect(engineController.isEngineRunning()).andReturn(false);
-        serverConfigurator.configure();
-        EasyMock.expect(embeddedDatabaseController.shouldUse()).andReturn(true);
-        EasyMock.expect(embeddedDatabaseController.startBuiltInDB()).andReturn(true);
-        EasyMock.expect(
-            processManager.executeProcess(EasyMock
-                .aryEq(new String[] { System.getProperty("java.home") + "/bin/java",
-                                     "-cp",
-                                     serverHome + "/lib/ant-launcher-1.7.1.jar",
-                                     "-Dserver.home=" + serverHome,
-                                     "-Dant.home=" + serverHome,
-                                     "-Dtomcat.home=" + engineHome + "/hq-server",
-                                     "-Dlog4j.configuration=" +
-                                         new File(serverHome + "/conf/log4j.xml").toURI().toURL()
-                                             .toString(),
-                                     "org.apache.tools.ant.launch.Launcher",
-                                     "-q",
-                                     "-lib",
-                                     serverHome + "/lib",
-                                     "-listener",
-                                     "org.apache.tools.ant.listener.Log4jListener",
-                                     "-buildfile",
-                                     serverHome + "/data/db-upgrade.xml",
-                                     "upgrade" }), EasyMock.eq(serverHome), EasyMock.eq(true),
-                EasyMock.eq(HQServer.DB_UPGRADE_PROCESS_TIMEOUT))).andReturn(0);
-        EasyMock.expect(dataSource.getConnection()).andReturn(connection);
-        EasyMock.expect(connection.createStatement()).andReturn(statement);
-        EasyMock.expect(
-            statement.executeQuery("select propvalue from EAM_CONFIG_PROPS " + "WHERE propkey = '" +
-                                   HQConstants.SchemaVersion + "'")).andReturn(resultSet);
-        EasyMock.expect(resultSet.next()).andReturn(false);
-        connection.close();
-        resultSet.close();
-        statement.close();
         Properties testProps = new Properties();
         testProps.put("server.java.opts",
             "-XX:MaxPermSize=192m -Xmx512m -Xms512m -XX:+HeapDumpOnOutOfMemoryError");
@@ -430,14 +210,14 @@ public class HQServerTest {
     }
 
     private void replay() {
-        EasyMock.replay(engineController, serverConfigurator, processManager,
-            embeddedDatabaseController, dataSource, connection, statement, resultSet);
+        EasyMock.replay(engineController, serverConfigurator, embeddedDatabaseController,
+            connection, statement, resultSet);
         org.easymock.classextension.EasyMock.replay(osInfo);
     }
 
     private void verify() {
-        EasyMock.verify(engineController, serverConfigurator, processManager,
-            embeddedDatabaseController, dataSource, connection, statement, resultSet);
+        EasyMock.verify(engineController, serverConfigurator, embeddedDatabaseController,
+            connection, statement, resultSet);
         org.easymock.classextension.EasyMock.verify(osInfo);
     }
 
