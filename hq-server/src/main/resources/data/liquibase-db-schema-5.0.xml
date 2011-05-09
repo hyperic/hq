@@ -90,7 +90,7 @@
 			</column>
 			<column name="AIQ_PLATFORM_ID" type="INT" />
 		</createTable>
-		<createIndex indexName="AIQ_PLATFORM_ID" tableName="EAM_AIQ_IP"
+		<createIndex indexName="AIQ_IP_UNIQUE" tableName="EAM_AIQ_IP"
 			unique="true">
 			<column name="AIQ_PLATFORM_ID" />
 			<column name="ADDRESS" />
@@ -148,7 +148,7 @@
 			unique="true">
 			<column name="FQDN" />
 		</createIndex>
-		<createIndex indexName="NAME" tableName="EAM_AIQ_PLATFORM"
+		<createIndex indexName="AIPLATFORMNAME" tableName="EAM_AIQ_PLATFORM"
 			unique="true">
 			<column name="NAME" />
 		</createIndex>
@@ -184,7 +184,7 @@
 			<column name="VIRTUAL" type="BIT" />
 			<column name="AIQ_PLATFORM_ID" type="INT" />
 		</createTable>
-		<createIndex indexName="AIQ_PLATFORM_ID" tableName="EAM_AIQ_SERVER"
+		<createIndex indexName="AIQ_SERVER_UNIQUE" tableName="EAM_AIQ_SERVER"
 			unique="true">
 			<column name="AIQ_PLATFORM_ID" />
 			<column name="AUTOINVENTORYIDENTIFIER" />
@@ -442,7 +442,7 @@
 				<constraints nullable="false" />
 			</column>
 		</createTable>
-		<createIndex indexName="NAME" tableName="EAM_CALENDAR"
+		<createIndex indexName="CALENDAR_NAME" tableName="EAM_CALENDAR"
 			unique="true">
 			<column name="NAME" />
 		</createIndex>
@@ -574,11 +574,11 @@
 			tableName="EAM_CONTROL_SCHEDULE" unique="false">
 			<column name="NEXTFIRETIME" />
 		</createIndex>
-		<createIndex indexName="JOBNAME" tableName="EAM_CONTROL_SCHEDULE"
+		<createIndex indexName="SCHEDULED_JOBNAME" tableName="EAM_CONTROL_SCHEDULE"
 			unique="true">
 			<column name="JOBNAME" />
 		</createIndex>
-		<createIndex indexName="TRIGGERNAME" tableName="EAM_CONTROL_SCHEDULE"
+		<createIndex indexName="SCHEDULED_TRIGGERNAME" tableName="EAM_CONTROL_SCHEDULE"
 			unique="true">
 			<column name="TRIGGERNAME" />
 		</createIndex>
@@ -676,7 +676,7 @@
 				<constraints nullable="false" />
 			</column>
 		</createTable>
-		<createIndex indexName="NAME" tableName="EAM_ESCALATION"
+		<createIndex indexName="ESCALATION_NAME" tableName="EAM_ESCALATION"
 			unique="true">
 			<column name="NAME" />
 		</createIndex>
@@ -1026,7 +1026,7 @@
 				<constraints nullable="false" />
 			</column>
 		</createTable>
-		<createIndex indexName="NAME" tableName="EAM_MEASUREMENT_CAT"
+		<createIndex indexName="CAT_NAME" tableName="EAM_MEASUREMENT_CAT"
 			unique="true">
 			<column name="NAME" />
 		</createIndex>
@@ -1247,7 +1247,7 @@
 				<constraints nullable="false" />
 			</column>
 		</createTable>
-		<createIndex indexName="NAME" tableName="EAM_PLUGIN"
+		<createIndex indexName="PLUGIN_NAME" tableName="EAM_PLUGIN"
 			unique="true">
 			<column name="NAME" />
 		</createIndex>
@@ -1324,7 +1324,7 @@
 				<constraints nullable="false" />
 			</column>
 		</createTable>
-		<createIndex indexName="NAME" tableName="EAM_ROLE" unique="true">
+		<createIndex indexName="ROLE_NAME" tableName="EAM_ROLE" unique="true">
 			<column name="NAME" />
 		</createIndex>
 	</changeSet>
@@ -1408,7 +1408,7 @@
 			</column>
 			<column name="PREF_CRISPO_ID" type="INT" />
 		</createTable>
-		<createIndex indexName="NAME" tableName="EAM_SUBJECT"
+		<createIndex indexName="SUBJECT_NAME" tableName="EAM_SUBJECT"
 			unique="true">
 			<column name="NAME" />
 			<column name="DSN" />
@@ -1494,7 +1494,7 @@
 				<constraints nullable="false" />
 			</column>
 		</createTable>
-		<createIndex indexName="NAME" tableName="EAM_UI_PLUGIN"
+		<createIndex indexName="UI_PLUGIN_NAME" tableName="EAM_UI_PLUGIN"
 			unique="true">
 			<column name="NAME" />
 		</createIndex>
@@ -1951,7 +1951,7 @@
 				<constraints nullable="false" />
 			</column>
 		</createTable>
-		<createIndex indexName="PLUGIN_NAME" tableName="PLUGIN_RESOURCE_TYPES"
+		<createIndex indexName="PLUGIN_RES_TYPE_UNIQUE" tableName="PLUGIN_RESOURCE_TYPES"
 			unique="true">
 			<column name="PLUGIN_NAME" />
 			<column name="RESOURCE_TYPE_ID" />
