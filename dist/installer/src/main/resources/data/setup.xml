@@ -456,8 +456,13 @@ __ll__
 
     <!-- Do DB-specific validation stuff -->
     <echo>^^^DEBUG: Validating server DB configuration...</echo>
-    <ant antfile="setup-db-${server.database}.xml"
+  	<if>
+  	 	<istrue value="${using.builtin.db}" />
+  	<then>
+    	<ant antfile="setup-db-${server.database}.xml"
          target="validate"/>
+  	</then>
+  	</if>
   </target>
 
   <target name="fail-if-webapp-port-used" if="server.webapp.port.isAlreadyUsed">
@@ -642,14 +647,6 @@ ${errMsg}
     <!-- Copy server control file to server's data dir -->
     <mkdir dir="${server.product.dir}/data"/>
 
-    <echo>^^^DEBUG: Copying server db-upgrade files...</echo>
-    <copy todir="${server.product.dir}/data">
-      <fileset dir="${install.dir}/data">
-        <include name="db-upgrade.xml"/>
-        <include name="common-dbsetup-typemap.xml"/>
-      </fileset>
-    </copy>
-
     <!-- Copy lib jars to server's lib dir -->
     <echo>^^^DEBUG: Copying server libs...</echo>
     <mkdir dir="${server.product.dir}/lib"/>
@@ -678,10 +675,14 @@ ${errMsg}
       </fileset>
     </copy>
 
-    <!-- Do DB-specific stuff -->
-    <echo>^^^INFO: Setting up server database...</echo>
-    <ant antfile="setup-db-${server.database}.xml" target="setup"/>
-
+  	<if>
+  	  	 <istrue value="${using.builtin.db}" />
+  	<then>
+    	<echo>^^^INFO: Setting up server database...</echo>
+    	<ant antfile="setup-db-${server.database}.xml" target="setup"/>
+	</then>
+  	</if>
+  		
     <antcall target="install-server-jre">
       <param name="destination" value="${server.product.dir}" />
     </antcall>
@@ -765,6 +766,8 @@ ${errMsg}
     </ant>
   </target>
 	
-	
+	<target name="subst-props">
+	    <substProps src="${conf-dir}/hq-server.conf"/>
+	  </target>
 
 </project>
