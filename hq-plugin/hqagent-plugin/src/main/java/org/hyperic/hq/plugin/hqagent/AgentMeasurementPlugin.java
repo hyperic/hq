@@ -59,6 +59,7 @@ public class AgentMeasurementPlugin
                MetricNotFoundException,
                MetricUnreachableException
     {
+        /*TODO replace:
         AgentDaemon agent;
 
         if((agent = AgentDaemon.getMainInstance()) == null){
@@ -78,7 +79,8 @@ public class AgentMeasurementPlugin
         } else {
             throw new MetricInvalidException("Invalid JMX domain '" + 
                                              metric.getDomainName() + "'");
-        }
+        }*/
+        return null;
     }
     
     private MetricValue getSigarValue(Metric metric)

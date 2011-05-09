@@ -38,6 +38,7 @@ import java.io.OutputStream;
  */
 
 public interface AgentServerHandler {
+ 
     /**
      * Get an array of strings with the commands that this handler
      * recognizes.
@@ -76,7 +77,7 @@ public interface AgentServerHandler {
      * @see #getCommandSet
      */
 
-    public AgentRemoteValue dispatchCommand(String cmd, AgentRemoteValue arg,
+    public AgentRemoteValue dispatchCommand(AgentService agentService, String cmd, AgentRemoteValue arg,
                                             InputStream inStream, 
                                             OutputStream outStream)
         throws AgentRemoteException;
@@ -87,10 +88,10 @@ public interface AgentServerHandler {
      * a plugin should setup all the internal resources it needs (like 
      * helper threads, etc.)
      * 
-     * @param agent The agent.
+     * @param agentService The agent.
      */
 
-    public void startup(AgentDaemon agent) 
+    public void startup(AgentService agentService)
         throws AgentStartException;
 
     /**

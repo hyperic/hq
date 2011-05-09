@@ -23,21 +23,11 @@
  *  USA.
  */
 
-package org.hyperic.hq.agent.server;
+package org.hyperic.hq.agent.spring;
 
-import org.hyperic.hq.agent.AgentCommand;
-import org.hyperic.hq.agent.AgentRemoteException;
-import org.hyperic.hq.agent.AgentRemoteValue;
-
-import java.io.InputStream;
-import java.io.OutputStream;
-
-
-public interface CommandDispatcher {
+/**
+ * @author Helena Edelson
+ */
+public interface OperationServiceCallback {
  
-    void addServerHandler(AgentServerHandler startedHandler);
-
-    /* TODO once remoting is removed from hyperic, these remote exceptions must be replaced */
-    AgentRemoteValue processRequest(AgentCommand agentCommand, InputStream inStream, OutputStream outStream) throws AgentRemoteException;
-    
 }

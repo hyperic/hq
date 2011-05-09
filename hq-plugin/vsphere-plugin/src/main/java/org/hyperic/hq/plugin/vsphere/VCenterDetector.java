@@ -26,26 +26,26 @@
 
 package org.hyperic.hq.plugin.vsphere;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.bizapp.agent.CommandsAPIInfo;
+import org.hyperic.hq.agent.bizapp.agent.ProviderInfo;
+import org.hyperic.hq.agent.server.AgentDaemon;
+import org.hyperic.hq.agent.server.AgentStorageProvider;
+import org.hyperic.hq.agent.server.ConfigStorage;
+import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.hqapi1.HQApi;
+import org.hyperic.hq.product.DaemonDetector;
+import org.hyperic.hq.product.PluginException;
+import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.timer.StopWatch;
+
 import java.io.IOException;
 import java.net.URI;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.agent.bizapp.agent.CommandsAPIInfo;
-import org.hyperic.hq.agent.server.AgentDaemon;
-import org.hyperic.hq.agent.server.AgentStorageProvider;
-import org.hyperic.hq.agent.server.ConfigStorage;
-import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.agent.bizapp.agent.ProviderInfo;
-import org.hyperic.hq.hqapi1.HQApi;
-import org.hyperic.hq.product.DaemonDetector;
-import org.hyperic.hq.product.PluginException;
-import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.timer.StopWatch;
 
 public class VCenterDetector extends DaemonDetector {
 
@@ -157,11 +157,11 @@ public class VCenterDetector extends DaemonDetector {
     public List getServerResources(ConfigResponse platformConfig) 
         throws PluginException {
     
-        final AgentDaemon agent = AgentDaemon.getMainInstance();
+        // TODO replace final AgentDaemon agent = AgentDaemon.getMainInstance();
         final StopWatch watch = new StopWatch();
         final boolean debug = _log.isDebugEnabled();
         if (debug) watch.markTimeBegin("discoverPlatforms");
-        discoverPlatforms(agent);
+        //discoverPlatforms(agent);
         if (debug) watch.markTimeEnd("discoverPlatforms");
         if (debug) _log.debug(watch);
         
@@ -175,8 +175,9 @@ public class VCenterDetector extends DaemonDetector {
         //XXX this method only gets called once a day by default
         //but we won't have the vSphere sdk config until the server
         //resource is configured.
-    	AgentDaemon agent = AgentDaemon.getMainInstance();
-        discoverPlatforms(agent, config);
+
+        // TODO replace AgentDaemon agent = AgentDaemon.getMainInstance();
+        //discoverPlatforms(agent, config);
         return super.discoverServices(config);
     }
 }

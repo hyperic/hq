@@ -25,13 +25,13 @@
 
 package org.hyperic.hq.agent.server;
 
+import org.hyperic.hq.agent.AgentConfig;
+import org.hyperic.util.thread.MultiRunnable;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
-
-import org.hyperic.hq.agent.AgentConfig;
-import org.hyperic.util.thread.MultiRunnable;
 
 public class AgentRunner 
     implements Runnable, MultiRunnable
@@ -71,7 +71,7 @@ public class AgentRunner
         
         try {
             AgentConfig cfg = AgentConfig.newInstance(p);
-            AgentDaemon.newInstance(cfg).start();
+            // TODO replace AgentDaemon.newInstance(cfg).start();
         } catch(Throwable e) {
             e.printStackTrace();
         }

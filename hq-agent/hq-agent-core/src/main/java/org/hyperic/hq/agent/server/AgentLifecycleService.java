@@ -40,10 +40,7 @@ import org.tanukisoftware.wrapper.WrapperManager;
 
 import javax.annotation.PreDestroy;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -173,8 +170,10 @@ public class AgentLifecycleService implements AgentService, SmartLifecycle {
             /* calls handler.startup() which registers each handler with agentTransportLifecycle in turn. */
             agentManager.startHandlers(this, serverHandlers, startedHandlers);
 
-            dispatcher.addServerHandlers(startedHandlers);
-
+            for(AgentServerHandler handler: startedHandlers) {
+                dispatcher.addServerHandler(handler);
+            }
+             
             /* The started handlers should have already registered with the  agent transport lifecycle */
             agentTransportLifecycle.startAgentTransport();
 
@@ -193,7 +192,7 @@ public class AgentLifecycleService implements AgentService, SmartLifecycle {
 
                 started.set(true);
 
-                listener.listen();
+                listener.listenLoop();
             }
             System.out.println("AgentLifecycleService - A problem occurred with the listener. Stopping the Agent");
 
@@ -431,20 +430,26 @@ public class AgentLifecycleService implements AgentService, SmartLifecycle {
 
             String pluginDir = bootProps.getProperty(AgentConfig.PROP_PDK_PLUGIN_DIR[0]);
 
-            Collection<PluginInfo> plugins = new ArrayList<PluginInfo>();
-            plugins.addAll(productPluginManager.registerPlugins(pluginDir));
-
-            plugins.addAll(productPluginManager.registerCustomPlugins(".."));
+             Collection<PluginInfo> excludes = new TreeSet<PluginInfo>(new Comparator<PluginInfo>() {
+                public int compare(PluginInfo p1, PluginInfo p2) {
+                    return p1.name.compareTo(p2.name);
+                }
+            });
+            Set<PluginInfo> plugins = new HashSet<PluginInfo>();
+            plugins.addAll(productPluginManager.registerPlugins(pluginDir, excludes));
+            plugins.addAll(excludes);
+            agentManager.scanLegacyCustomDir("..");
+            Collection<PluginInfo> fromDirs = productPluginManager.getAllPluginInfoDirectFromFileSystem(pluginDir);
+            plugins = agentManager.mergeByName(fromDirs, plugins);
             agentManager.sendPluginStatusToServer(plugins, storageProvider);
-
             logger.info("Product Plugin Manager initalized");
         } catch (Exception e) {
+            // an unexpected exception has occurred that was not handled log it and bail
             logger.error("Error initializing plugins ", e);
-            throw new AgentStartException("Unable to initialize plugin  manager: " + e.getMessage());
+            throw new AgentStartException("Unable to initialize plugin manager: " + e.getMessage());
         }
     }
-
-
+ 
     /**
      * @return The current agent bundle name.
      */
@@ -500,20 +505,18 @@ public class AgentLifecycleService implements AgentService, SmartLifecycle {
     }
 
     public String getNotifyAgentUp() {
-        return "AgentService.agentUp";
+        return NotificationConstants.AGENT_UP;
     }
 
     public String getNotifyAgentDown() {
-        return "AgentService.agentDown";
+        return NotificationConstants.AGENT_DOWN;
     }
 
     public String getNotifyAgentFailedStart() {
-        return "AgentService.agentFailedStart";
+        return NotificationConstants.AGENT_FAILED_START;
     }
 
     public String getCertDn() {
         return agentManager.getCertDn();
-    }
-
-
+    } 
 }

@@ -118,7 +118,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
             AgentRemoteValue configARV = AICommandsUtils.createArgForRuntimeDiscoveryConfig(0, 0, "RabbitMQ", null, cf);
             logger.debug("[runAutoDiscovery] configARV=" + configARV);
             AgentCommand ac = new AgentCommand(1, 1, "autoinv:pushRuntimeDiscoveryConfig", configARV);
-            AgentDaemon.getMainInstance().getCommandDispatcher().processRequest(ac, null, null);
+            // TODO replace: AgentDaemon.getMainInstance().getCommandDispatcher().processRequest(ac, null, null);
             logger.debug("[runAutoDiscovery] << OK");
         } catch (Exception ex) {
             logger.debug("[runAutoDiscovery]" + ex.getMessage(), ex);

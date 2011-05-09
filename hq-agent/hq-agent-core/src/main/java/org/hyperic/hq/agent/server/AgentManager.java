@@ -50,7 +50,6 @@ import java.io.PrintStream;
 import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 @Component
 public class AgentManager extends AgentMonitorSimple {
@@ -86,7 +85,41 @@ public class AgentManager extends AgentMonitorSimple {
         }
     }
 
+    protected void scanLegacyCustomDir(String startDir) {
+        File dir = new File(startDir).getAbsoluteFile();
+        while (dir != null) {
+            File customDir = new File(dir, "hq-plugins");
+            if (customDir.exists() && customDir.isDirectory()) {
+                File[] files = customDir.listFiles();
+                for (File file : files) {
+                    String name = file.getName();
+                    if (name.endsWith("-plugin.jar") || name.endsWith("-plugin.xml")) {
+                        logger.warn("WARNING - custom plugins on the agent are no longer supported.  " +
+                                    "Will not load plugin - " + name + ", instead add this plugin " +
+                                    "to the HQ Server via the Plugin Manager UI.");
+                    }
+                }
+                return;
+            }
+            dir = dir.getParentFile();
+        }
+    }
 
+    /** merge fromDirs into the plugins Collection keyed by pluginInfo.name and return plugins */
+    protected Set<PluginInfo> mergeByName(Collection<PluginInfo> fromDirs,
+                                        Set<PluginInfo> plugins) {
+        final Collection<String> pluginFiles = new HashSet<String>();
+        for (final PluginInfo info : plugins) {
+            pluginFiles.add(info.jar);
+        }
+        for (final PluginInfo info : fromDirs) {
+            if (!pluginFiles.contains(info.jar)) {
+                plugins.add(info);
+            }
+        }
+        return plugins;
+    }
+    
     /* TODO remove */
 
     protected void setProxy(AgentConfig config) {
@@ -271,6 +304,8 @@ public class AgentManager extends AgentMonitorSimple {
         return iface.getMonitorValues(monitorKeys);
     }
 
+
+
     /**
      * Server may be down or Provider may not be setup.
      * Either way we want to retry until the data is sent
@@ -278,14 +313,14 @@ public class AgentManager extends AgentMonitorSimple {
      * @param storageProvider the storage provider
      */
     protected void sendPluginStatusToServer(final Collection<PluginInfo> plugins, final AgentStorageProvider storageProvider) {
-        new Thread("PluginStatusSender") {
+         Thread thread = new Thread("PluginStatusSender") {
             public void run() {
                 while (true) {
                     try {
                         if (storageProvider == null) {
                             logger.debug("trying to send plugin status to the server but " +
                                     "provider has not been setup, will sleep 5 seconds and retry");
-                            TimeUnit.MILLISECONDS.sleep(5000);
+                            Thread.sleep(5000);
                             continue;
                         }
                         PlugininventoryCallbackClient client =
@@ -295,18 +330,20 @@ public class AgentManager extends AgentMonitorSimple {
                         client.sendPluginReportToServer();
                         logger.info("Successfully sent plugin status to server");
                         break;
-                    } catch (Exception e) {
+                     } catch (Exception e) {
                         logger.warn("could not send plugin status to server, will retry:  " + e);
                         logger.debug(e, e);
                     }
                     try {
-                        TimeUnit.MILLISECONDS.sleep(5000);
+                        Thread.sleep(5000);
                     } catch (InterruptedException e) {
                         logger.debug(e, e);
                     }
                 }
             }
-        }.start();
+        };
+        thread.setDaemon(true);
+        thread.start();
     }
 
     /**

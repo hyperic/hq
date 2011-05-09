@@ -25,19 +25,15 @@
 
 package org.hyperic.hq.agent.server;
 
-import org.hyperic.hq.agent.AgentCommand;
-import org.hyperic.hq.agent.AgentRemoteException;
-import org.hyperic.hq.agent.AgentRemoteValue;
+/**
+ * @author Helena Edelson
+ */
+public class NotificationConstants {
 
-import java.io.InputStream;
-import java.io.OutputStream;
+    public static final String AGENT_UP = "AgentService.agentUp";
 
+    public static final String AGENT_DOWN = "AgentService.agentDown";
 
-public interface CommandDispatcher {
- 
-    void addServerHandler(AgentServerHandler startedHandler);
+    public static final String AGENT_FAILED_START = "AgentService.agentFailedStart";
 
-    /* TODO once remoting is removed from hyperic, these remote exceptions must be replaced */
-    AgentRemoteValue processRequest(AgentCommand agentCommand, InputStream inStream, OutputStream outStream) throws AgentRemoteException;
-    
 }

@@ -23,21 +23,12 @@
  *  USA.
  */
 
-package org.hyperic.hq.agent.server;
+package org.hyperic.hq.agent.spring;
 
-import org.hyperic.hq.agent.AgentCommand;
-import org.hyperic.hq.agent.AgentRemoteException;
-import org.hyperic.hq.agent.AgentRemoteValue;
-
-import java.io.InputStream;
-import java.io.OutputStream;
+import org.springframework.context.annotation.Configuration;
 
 
-public interface CommandDispatcher {
- 
-    void addServerHandler(AgentServerHandler startedHandler);
-
-    /* TODO once remoting is removed from hyperic, these remote exceptions must be replaced */
-    AgentRemoteValue processRequest(AgentCommand agentCommand, InputStream inStream, OutputStream outStream) throws AgentRemoteException;
-    
+@Configuration
+public class SpringAgentConfiguration {
+    /* for rabbit-operation-service */
 }

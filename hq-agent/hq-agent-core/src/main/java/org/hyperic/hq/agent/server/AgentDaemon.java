@@ -25,48 +25,26 @@
 
 package org.hyperic.hq.agent.server;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.lang.reflect.Constructor;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.Vector;
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.hyperic.hq.agent.AgentAssertionException;
-import org.hyperic.hq.agent.AgentConfig;
-import org.hyperic.hq.agent.AgentConfigException;
-import org.hyperic.hq.agent.AgentMonitorValue;
-import org.hyperic.hq.agent.AgentStartupCallback;
-import org.hyperic.hq.agent.AgentUpgradeManager;
+import org.hyperic.hq.agent.*;
+import org.hyperic.hq.agent.bizapp.client.PlugininventoryCallbackClient;
+import org.hyperic.hq.agent.bizapp.client.StorageProviderFetcher;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorException;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorInterface;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorSimple;
-import org.hyperic.hq.agent.bizapp.client.PlugininventoryCallbackClient;
-import org.hyperic.hq.agent.bizapp.client.StorageProviderFetcher;
-import org.hyperic.hq.product.GenericPlugin;
-import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.PluginInfo;
-import org.hyperic.hq.product.PluginManager;
-import org.hyperic.hq.product.ProductPluginManager;
+import org.hyperic.hq.product.*;
 import org.hyperic.util.PluginLoader;
 import org.hyperic.util.security.SecurityUtil;
 import org.tanukisoftware.wrapper.WrapperManager;
+
+import java.io.*;
+import java.lang.reflect.Constructor;
+import java.util.*;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 
 /**
  * The main daemon which processes requests from clients.  The Agent has
@@ -440,7 +418,7 @@ public class AgentDaemon
         }
 
         // Dispatcher
-        this.dispatcher = new CommandDispatcher();
+        this.dispatcher = null; //replaced new CommandDispatcher();
 
         this.storageProvider = AgentDaemon.createStorageProvider(cfg);
 
@@ -795,6 +773,8 @@ public class AgentDaemon
             AgentServerHandler handler;
             
             handler = (AgentServerHandler) this.serverHandlers.get(i);
+            /*commenting out before removing this class.
+            Replaced by AgentService, method no longer compatible
             try {
                 handler.startup(this);
             } catch(AgentStartException exc){
@@ -804,7 +784,7 @@ public class AgentDaemon
                 logger.error("Unknown exception", exc);
                 throw new AgentStartException("Error starting plugin " +
                                               handler, exc);
-            }
+            }*/
             this.startedHandlers.add(handler);
         }
     }

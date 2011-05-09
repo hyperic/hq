@@ -5,22 +5,22 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ *
+ * Copyright (C) [2009-2010], VMware, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
- * it under the terms version 2 of the GNU General Public License as
- * published by the Free Software Foundation. This program is distributed
- * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
- * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- * PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- * USA.
+ *  it under the terms version 2 of the GNU General Public License as
+ *  published by the Free Software Foundation. This program is distributed
+ *  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ *  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ *  PARTICULAR PURPOSE. See the GNU General Public License for more
+ *  details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ *  USA.
  */
 
 package org.hyperic.hq.agent.server;
@@ -35,7 +35,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -53,18 +52,18 @@ public class RemotingCommandDispatcher implements CommandDispatcher {
 
     private Map<String, AgentServerHandler> commands = new ConcurrentHashMap<String, AgentServerHandler>();
 
+    private AgentService agentService;
+
     /**
      * Register a server handler with the dispatcher.  The server
      * handler will be queried as to what commands it knows about,
      * and that information will be saved locally.
-     * @param startedHandlers the handlers implementing the AgentServerHandler interface
+     * @param startedHandler the handler implementing the AgentServerHandler interface
      * @see AgentServerHandler
-     */ 
-    public void addServerHandlers(List<AgentServerHandler> startedHandlers) {
-        for (AgentServerHandler handler : startedHandlers) {
-            for (String command : handler.getCommandSet()) {
-                commands.put(command, handler);
-            }
+     */
+    public void addServerHandler(AgentServerHandler startedHandler) {
+        for (String command : startedHandler.getCommandSet()) {
+            commands.put(command, startedHandler);
         }
     }
 
@@ -90,7 +89,7 @@ public class RemotingCommandDispatcher implements CommandDispatcher {
                         .append(agentCommand.getCommandVersion()).append(" vs. ").append(apiInfo.getVersion()).toString());
             }
 
-            return agentServerHandler.dispatchCommand(agentCommand.getCommand(), agentCommand.getCommandArg(), inStream, outStream);
+            return agentServerHandler.dispatchCommand(agentService, agentCommand.getCommand(), agentCommand.getCommandArg(), inStream, outStream);
 
         }
         catch (AgentRemoteException exc) {
@@ -103,5 +102,9 @@ public class RemotingCommandDispatcher implements CommandDispatcher {
         catch (LinkageError err) {
             throw new AgentRemoteException(err.toString());
         }
+    }
+
+    public void setAgentService(AgentService agentService) {
+        this.agentService = agentService;
     }
 }

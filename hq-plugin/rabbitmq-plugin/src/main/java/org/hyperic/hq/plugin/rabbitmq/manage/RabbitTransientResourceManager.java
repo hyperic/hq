@@ -28,12 +28,13 @@ package org.hyperic.hq.plugin.rabbitmq.manage;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.bizapp.agent.client.HQApiCommandsClient;
-import org.hyperic.hq.agent.server.AgentDaemon;
 import org.hyperic.hq.agent.bizapp.agent.client.HQApiFactory;
+import org.hyperic.hq.agent.server.AgentService;
 import org.hyperic.hq.hqapi1.HQApi;
 import org.hyperic.hq.hqapi1.types.Resource;
 import org.hyperic.hq.hqapi1.types.ResourceConfig;
 import org.hyperic.hq.hqapi1.types.ResourcePrototype;
+import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServiceResource;
 
@@ -42,7 +43,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
 
 /**
  * RabbitTransientResourceManager deletes transient RabbitMQ services
@@ -59,11 +59,15 @@ public class RabbitTransientResourceManager implements TransientResourceManager 
     private HQApiCommandsClient commandsClient;
     private Properties props;
 
-    public RabbitTransientResourceManager(Properties props)
+    /* TODO replace agentDaemon with agentService */
+    public RabbitTransientResourceManager(Properties props) throws PluginException {
+        //todo 
+    }
+    public RabbitTransientResourceManager(AgentService agentService, Properties props)
             throws PluginException {
 
         this.props = props;
-        HQApi api = HQApiFactory.getHQApi(AgentDaemon.getMainInstance(), props);
+        HQApi api = HQApiFactory.getHQApi(agentService, props);
         this.commandsClient = new HQApiCommandsClient(api);
     }
 
