@@ -57,6 +57,7 @@
 		<constructor-arg ref="propertyPasswordEncryptor" />
 		<property name="locations">
 			<list>
+				<value>classpath:/hq-version.properties</value>
 				<value>classpath:/spring-jdbc.properties</value>
 				<value>classpath:/mail-config.properties</value>
 				<value>classpath:/quartz.properties</value>
@@ -78,6 +79,12 @@
 				<prop key="ha.node.cacheListener.port">45567</prop>
 				<prop key="ha.node.cacheProvider.port">45568</prop>
 				<prop key="ha.node.ipTTL">64</prop>
+				<prop key="server.admin.email">hqadmin@localhost</prop>
+				<prop key="server.webapp.baseurl">http://localhost:8080</prop>
+				<prop key="server.mail.host">127.0.0.1</prop>
+				<prop key="server.mail.sender">hqadmin@localhost</prop>
+				<prop key="server.multicast.addr"></prop>
+				<prop key="server.multicast.port"></prop>
 			</props>
 		</property>
 	</bean>
@@ -183,5 +190,22 @@
 		</value>
 		<value>org.hyperic.hq.plugin.mgmt.domain.Plugin</value>
 	</util:list>
+	
+	<bean id="liquibase" class="liquibase.integration.spring.SpringLiquibase" depends-on="dataSource">
+		<property name="dataSource" ref="dataSource" />
+		<property name="changeLog"
+			value="classpath:/data/liquibase-db-master.xml" />
+		<property name="changeLogParameters">
+			<map>
+				<entry key="server.admin.email" value="${server.admin.email}"/>
+				<entry key="server.webapp.baseurl" value="${server.webapp.baseurl}"/>
+				<entry key="server.mail.host" value="${server.mail.host}"/>
+				<entry key="server.mail.sender" value="${server.mail.sender}"/>
+				<entry key="server.multicast.addr" value="${server.multicast.addr}"/>
+				<entry key="server.multicast.port" value="${server.multicast.port}"/>
+				<entry key="hq.version" value="${version}"/>
+			</map>
+		</property>
+	</bean>
 
 </beans>
