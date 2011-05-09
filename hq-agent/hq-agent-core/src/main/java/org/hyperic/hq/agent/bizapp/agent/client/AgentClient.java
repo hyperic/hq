@@ -49,8 +49,6 @@ import org.hyperic.util.StringUtil;
 import org.hyperic.util.security.SecurityUtil;
 import org.springframework.context.ApplicationContext;
 import org.tanukisoftware.wrapper.WrapperManager;
-import sun.misc.Signal;
-import sun.misc.SignalHandler;
 
 import java.io.*;
 import java.net.*;
@@ -97,9 +95,6 @@ public class AgentClient {
     private static final String PROP_STARTUP_TIMEOUT = "agent.startupTimeOut";
     private static final String PROP_FQDN = "platform.fqdn";
 
-    private static final String AGENT_CLASS =
-            "org.hyperic.hq.agent.server.AgentDaemon";
-
     private static final int AGENT_STARTUP_TIMEOUT = (60 * 5) * 1000; // 5 min
     private static final int FORCE_SETUP = -42;
 
@@ -108,9 +103,7 @@ public class AgentClient {
     private AgentCommandsClient agtCommands;
     private CommandsClient camCommands;
     private AgentConfig config;
-    private String sslHandlerPkg;
-    private Log log;
-    private boolean nuking;
+    private Log log = LogFactory.getLog(AgentClient.class);
     private boolean redirectedOutputs = false;
 
     private static final AtomicBoolean running = new AtomicBoolean(false);
@@ -122,9 +115,7 @@ public class AgentClient {
     private AgentClient(AgentConfig config, SecureAgentConnection conn) {
         this.agtCommands = new LegacyAgentCommandsClientImpl(conn);
         this.camCommands = new CommandsClient(conn);
-        this.config = config;
-        this.log = LogFactory.getLog(AgentClient.class);
-        this.nuking = false;
+        this.config = config;  
     }
 
     private static void initialize(final AgentConfig config) throws ExecutionException, TimeoutException, InterruptedException {
@@ -947,37 +938,6 @@ public class AgentClient {
         } catch (Exception exc) {
             throw new AgentInvokeException("Unable to ping agent: " +
                     exc.getMessage());
-        }
-    }
-
-    private void nukeAgentAndDie() {
-        synchronized (this) {
-            if (this.nuking) {
-                return;
-            }
-
-            this.nuking = true;
-        }
-
-        try {
-            SYSTEM_ERR.println("Received interrupt while starting.  " +
-                    "Shutting agent down ...");
-            this.cmdDie(10);
-        } catch (Exception e) {
-        }
-
-        System.exit(-1);
-    }
-
-    private void handleSIGINT() {
-        try {
-            Signal.handle(new Signal("INT"), new SignalHandler() {
-                public void handle(Signal sig) {
-                    nukeAgentAndDie();
-                }
-            });
-        } catch (Exception e) {
-            // avoid "Signal already used by VM: SIGINT", e.g. ibm jdk
         }
     }
 

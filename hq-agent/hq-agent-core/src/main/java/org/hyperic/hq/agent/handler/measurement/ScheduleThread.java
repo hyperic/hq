@@ -105,7 +105,7 @@ public class ScheduleThread
     private long statNumMetricsScheduled = 0;
     private long statMaxFetchTime = Long.MIN_VALUE;
     private long statMinFetchTime = Long.MAX_VALUE;
-
+  /*SenderThread(Properties bootProps, AgentStorageProvider storage, MeasurementSchedule schedule)*/
     ScheduleThread(Sender sender, MeasurementValueGetter manager,
                    Properties config)
         throws AgentStartException
