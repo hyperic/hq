@@ -27,10 +27,8 @@
 package org.hyperic.hq.agent.handler.measurement;
 
 import junit.framework.TestCase;
-import org.hyperic.hq.agent.handler.measurement.ScheduleThread;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.measurement.agent.ScheduledMeasurement;
 import org.hyperic.hq.product.*;
 
 import java.util.Properties;
@@ -259,7 +257,7 @@ public class ScheduleThreadTest extends TestCase {
 
     }
 
-    public static class SimpleSender implements org.hyperic.hq.measurement.agent.server.Sender {
+    public static class SimpleSender implements Sender {
 
         public void processData(int dsnId, MetricValue data, int derivedID) {
         }

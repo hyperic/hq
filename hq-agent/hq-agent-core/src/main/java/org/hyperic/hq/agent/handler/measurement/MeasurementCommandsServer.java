@@ -33,7 +33,6 @@ import org.hyperic.hq.agent.bizapp.client.MeasurementCallbackClient;
 import org.hyperic.hq.agent.bizapp.client.StorageProviderFetcher;
 import org.hyperic.hq.agent.server.*;
 import org.hyperic.hq.measurement.agent.MeasurementCommandsAPI;
-import org.hyperic.hq.measurement.agent.ScheduledMeasurement;
 import org.hyperic.hq.measurement.agent.client.MeasurementCommandsClient;
 import org.hyperic.hq.measurement.agent.commands.*;
 import org.hyperic.hq.product.ConfigTrackPluginManager;

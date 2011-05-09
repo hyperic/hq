@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.hq.measurement.agent;
+package org.hyperic.hq.agent.handler.measurement;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

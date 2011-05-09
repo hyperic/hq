@@ -32,7 +32,6 @@ import org.hyperic.hq.agent.server.monitor.AgentMonitorException;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorSimple;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.measurement.agent.ScheduledMeasurement;
 import org.hyperic.hq.product.*;
 import org.hyperic.util.TimeUtil;
 import org.hyperic.util.collection.IntHashMap;
@@ -105,7 +104,7 @@ public class ScheduleThread
     private long statNumMetricsScheduled = 0;
     private long statMaxFetchTime = Long.MIN_VALUE;
     private long statMinFetchTime = Long.MAX_VALUE;
-  /*SenderThread(Properties bootProps, AgentStorageProvider storage, MeasurementSchedule schedule)*/
+
     ScheduleThread(Sender sender, MeasurementValueGetter manager,
                    Properties config)
         throws AgentStartException
