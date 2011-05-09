@@ -2521,10 +2521,10 @@ public class MeasurementBossImpl implements MeasurementBoss {
             measurementManager.findMetricIntervals(subject, aeids, tids);
             
         final Map<Integer, ProblemMetricInfo> probmap = new HashMap<Integer, ProblemMetricInfo>();
-        for (Integer aeidType : aeidsByType.keySet()) {
+       
             probmap.putAll(problemMetricManager.getProblemsByTemplate(
-                aeidType, eids, begin, end));
-        }
+                eids, begin, end));
+       
 
         for (Iterator<MeasurementTemplate> it = templates.iterator(); it.hasNext();) {
             MeasurementTemplate tmpl = it.next();

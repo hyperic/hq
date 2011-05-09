@@ -42,6 +42,7 @@ import org.hyperic.hq.authz.server.session.ResourceGroupSortField;
 import org.hyperic.hq.authz.server.session.ResourceTypeFactory;
 import org.hyperic.hq.authz.shared.ResourceGroupCreateInfo
 import org.hyperic.hq.agent.mgmt.domain.Agent;
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityID
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants
 import org.hyperic.hq.appdef.shared.ServerManager;
@@ -124,7 +125,7 @@ class ResourceCategory {
 	 */
 	static getAppdefType(Resource r) {
         def typeId = r.resourceType.id
-		return AppdefUtil.getAppdefType(Bootstrap.getBean(ResourceManager.class).findResourceTypeById(typeId))
+		return Bootstrap.getBean(AppdefConverter.class).getAppdefType(Bootstrap.getBean(ResourceManager.class).findResourceTypeById(typeId))
 	}
 	
 	static AppdefEntityID getEntityId(Resource r) {
@@ -182,7 +183,7 @@ class ResourceCategory {
     static Map getMetricsSummary(Resource r, AuthzSubject user, long begin, long end) {
        def mgr = SessionManager.instance
        def sessionId = mgr.put(user)
-       def aeids = [AppdefUtil.newAppdefEntityId(r)] as AppdefEntityID[]
+       def aeids = [Bootstrap.getBean(AppdefConverter.class).newAppdefEntityId(r)] as AppdefEntityID[]
        return Bootstrap.getBean(MeasurementBoss.class).findMetrics(sessionId,
            aeids,
            MeasurementConstants.FILTER_NONE,
@@ -445,7 +446,7 @@ class ResourceCategory {
     }
 	
 	static Resource getPlatform(Resource r) {
-		def aeid = AppdefUtil.newAppdefEntityId(r)
+		def aeid = Bootstrap.getBean(AppdefConverter.class).newAppdefEntityId(r)
 		def aeval = new AppdefEntityValue(aeid, authzMan.overlordPojo)
 		def plats = aeval.getAssociatedPlatforms(PageControl.PAGE_ALL);
 		def plat = plats[0]

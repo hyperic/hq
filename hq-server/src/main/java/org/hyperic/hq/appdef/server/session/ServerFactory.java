@@ -72,7 +72,7 @@ public class ServerFactory {
         serverType.setPlugin(pluginResourceTypeRepository.findNameByResourceType(serverResType.getId()));
         //TODO for types, we just fake out sort name for now.  Can't do setProperty on ResourceType
         serverType.setSortName(serverResType.getName().toUpperCase());
-        if(!(serverResType.getResourceTypesTo(RelationshipTypes.VIRTUAL).isEmpty())) {
+        if(serverResType.hasResourceTypesTo(RelationshipTypes.VIRTUAL)) {
             serverType.setVirtual(true);
         }else {
             serverType.setVirtual(false);

@@ -6,6 +6,9 @@ import javax.persistence.QueryHint;
 
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.MonitorableType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;
@@ -25,14 +28,43 @@ public interface MeasurementTemplateRepository extends JpaRepository<Measurement
     @Query("select t from MeasurementTemplate t " + "join fetch t.monitorableType mt "
            + "where mt.name=:type order by t.name")
     List<MeasurementTemplate> findByMonitorableTypeOrderByName(@Param("type") String type);
+    
+    @Transactional(readOnly = true)
+    @Query("select t from MeasurementTemplate t " + "join fetch t.monitorableType mt "
+           + "where mt.name=:type")
+    List<MeasurementTemplate> findByMonitorableType(@Param("type") String type, Sort sort);
+    
+    @Transactional(readOnly = true)
+    @Query("select t from MeasurementTemplate t " + "join fetch t.monitorableType mt "
+           + "where mt.name=:type")
+    Page<MeasurementTemplate> findByMonitorableType(@Param("type") String type, Pageable pageable);
 
     List<MeasurementTemplate> findByMonitorableTypeNameAndCategoryNameOrderByNameAsc(String type,
                                                                                      String category);
 
     @Transactional(readOnly = true)
     @Query("select t from MeasurementTemplate t " + "join fetch t.monitorableType mt "
-           + "where mt.name=:type " + "and t.defaultOn = true")
-    List<MeasurementTemplate> findByMonitorableTypeDefaultOn(@Param("type") String type);
+           + "where mt.name=:type " + "and t.defaultOn = :defaultOn")
+    List<MeasurementTemplate> findByMonitorableTypeAndDefaultOn(@Param("type") String type,
+                                                                @Param("defaultOn") boolean defaultOn);
+
+    @Transactional(readOnly = true)
+    @Query("select t from MeasurementTemplate t " + "join fetch t.monitorableType mt "
+           + "where mt.name=:type " + "and t.defaultOn = :defaultOn")
+    List<MeasurementTemplate> findByMonitorableTypeAndDefaultOn(@Param("type") String type,
+                                                                @Param("defaultOn") boolean defaultOn,
+                                                                Sort sort);
+    
+    @Transactional(readOnly = true)
+    @Query("select t from MeasurementTemplate t " + "join fetch t.monitorableType mt "
+           + "where mt.name=:type " + "and t.defaultOn = :defaultOn")
+    Page<MeasurementTemplate> findByMonitorableTypeAndDefaultOn(@Param("type") String type,
+                                                                @Param("defaultOn") boolean defaultOn,
+                                                                Pageable pageable);
 
     List<MeasurementTemplate> findByMonitorableType(MonitorableType monitorableType);
+
+    Page<MeasurementTemplate> findByDefaultOn(boolean defaultOn, Pageable pageable);
+
+    List<MeasurementTemplate> findByDefaultOn(boolean defaultOn, Sort sort);
 }

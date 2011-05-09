@@ -496,12 +496,12 @@ public class AppdefStatDAO {
             APPDEF_TYPE_GROUP, groupVo.getAppdefResourceTypeValue().getName()), groupVo
             .getEntityId(), ResourceTreeNode.CLUSTER);
         
-        if (group.getMembers().size() == 0) {
+        if (!(group.hasMembers())) {
             return new ResourceTreeNode[] { grpNode };
         }
         int entityType = groupVo.getGroupEntType();
 
-        Set<ResourceTreeNode> entitySet = new HashSet<ResourceTreeNode>(group.getMembers().size());
+        Set<ResourceTreeNode> entitySet = new HashSet<ResourceTreeNode>();
         for (Resource member: group.getMembers()) {
             AppdefEntityID resourceId = appdefConverter.newAppdefEntityId(member);
             entitySet

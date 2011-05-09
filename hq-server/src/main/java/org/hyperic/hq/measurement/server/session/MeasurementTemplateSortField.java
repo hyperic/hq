@@ -44,8 +44,8 @@ public abstract class MeasurementTemplateSortField
             return true;
         }
 
-        public String getSortString(String template) {
-            return template + ".name";
+        public String getSortString() {
+            return "name";
         }
     };
     
@@ -55,8 +55,6 @@ public abstract class MeasurementTemplateSortField
         super(MeasurementTemplateSortField.class, code, desc, localeProp,
               ResourceBundle.getBundle(BUNDLE));
     }
-    
-    public abstract String getSortString(String template);
     
     public static MeasurementTemplateSortField findByCode(int code) {
         return (MeasurementTemplateSortField)

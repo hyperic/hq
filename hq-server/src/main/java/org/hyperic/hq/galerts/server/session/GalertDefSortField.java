@@ -39,8 +39,8 @@ public abstract class GalertDefSortField
     public static final GalertDefSortField CTIME = 
         new GalertDefSortField(0, "CTime", "galertDef.sortField.ctime") 
     {
-        String getSortString(String def, String group, String escalation) {
-            return def + ".ctime";
+        public String getSortString() {
+            return "creationTime";
         }
 
         public boolean isSortable() {
@@ -51,44 +51,21 @@ public abstract class GalertDefSortField
     public static final GalertDefSortField MTIME = 
         new GalertDefSortField(1, "MTime", "galertDef.sortField.mtime") 
     {
-        String getSortString(String def, String group, String escalation) {
-            return def + ".mtime";
+        public String getSortString() {
+            return "modifiedTime";
         }
 
         public boolean isSortable() {
             return true;
         }
     };
-    
-    public static final GalertDefSortField NAME = 
-        new GalertDefSortField(2, "Name", "galertDef.sortField.name")
-    {
-        String getSortString(String def, String group, String escalation) {
-            return group + ".resource.name";
-        }
-
-        public boolean isSortable() {
-            return true;
-        }
-    };
-    
-    public static final GalertDefSortField ACTIVE = 
-        new GalertDefSortField(3, "Active", "galertDef.sortField.active")
-    {
-        String getSortString(String def, String group, String escalation) {
-            return def + ".active";
-        }
-
-        public boolean isSortable() {
-            return true;
-        }
-    };
+   
     
     public static final GalertDefSortField SEVERITY = 
         new GalertDefSortField(4, "Severity", "galertDef.sortField.severity")
     {
-        String getSortString(String def, String group, String escalation) {
-            return def + ".severityEnum";
+        public String getSortString() {
+            return "severity";
         }
 
         public boolean isSortable() {
@@ -96,23 +73,13 @@ public abstract class GalertDefSortField
         }
     };
 
-    public static final GalertDefSortField GROUP = 
-        new GalertDefSortField(5, "Group", "galertDef.sortField.group")
-    {
-        String getSortString(String def, String group, String escalation) {
-            return group + ".resource.name";
-        }
-
-        public boolean isSortable() {
-            return true;
-        }
-    };
+ 
 
     public static final GalertDefSortField ESCALATION = 
         new GalertDefSortField(6, "Escalation", "galertDef.sortField.escalation")
     {
-        String getSortString(String def, String group, String escalation) {
-            return escalation + ".name";
+        public String getSortString() {
+            return "escalation.name";
         }
 
         public boolean isSortable() {
@@ -123,8 +90,8 @@ public abstract class GalertDefSortField
     public static final GalertDefSortField LAST_FIRED = 
         new GalertDefSortField(7, "LastFired", "galertDef.sortField.lastFired")
     {
-        String getSortString(String def, String group, String escalation) {
-            return def + ".lastFired";
+        public String getSortString() {
+            return "lastFired";
         }
 
         public boolean isSortable() {
@@ -137,10 +104,6 @@ public abstract class GalertDefSortField
               ResourceBundle.getBundle(BUNDLE));
     }
     
-    /**
-     * Returns HQL which can be used to tack onto an HQL query, to sort
-     */
-    abstract String getSortString(String def, String group, String escalation);
     
     public static GalertDefSortField findByCode(int code) {
         return (GalertDefSortField)

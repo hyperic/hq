@@ -37,6 +37,10 @@
 			<artifactId>servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.easymock</groupId>
+			<artifactId>easymockclassextension</artifactId>
+		</dependency>
 	</dependencies>
 	
 	<build>

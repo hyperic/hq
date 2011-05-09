@@ -380,10 +380,10 @@ public class LatherDispatcherImpl implements LatherDispatcher {
                         }
                     }
                     //Add deprecated "virtual" servers so they have runtime AI enabled
-                    Set<Resource> virtualServers = platform.getResource().getResourcesFrom(RelationshipTypes.VIRTUAL);
-                    for(Resource virtualServer : virtualServers) {
+                    Set<Integer> virtualServers = platform.getResource().getResourceIdsFrom(RelationshipTypes.VIRTUAL);
+                    for(Integer virtualServer : virtualServers) {
                         ResourceRefreshZevent event = new ResourceRefreshZevent(overlord, 
-                            new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVER, virtualServer.getId()));
+                            new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVER, virtualServer));
                         zevents.add(event);
                     }
                     //Platform services (no longer children of virtual servers)

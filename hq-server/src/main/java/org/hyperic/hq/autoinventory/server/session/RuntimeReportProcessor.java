@@ -354,9 +354,9 @@ public class RuntimeReportProcessor {
         }
 
         List<Server> appdefServers = new ArrayList<Server>(appdefPlatform.getServers());
-        Set<Resource> virtualServerResources = appdefPlatform.getResource().getResourcesFrom(RelationshipTypes.VIRTUAL);
-        for(Resource virtualServerResource: virtualServerResources) {
-            appdefServers.add(serverManager.findServerById(virtualServerResource.getId()));
+        Set<Integer> virtualServerResources = appdefPlatform.getResource().getResourceIdsFrom(RelationshipTypes.VIRTUAL);
+        for(Integer virtualServerResource: virtualServerResources) {
+            appdefServers.add(serverManager.findServerById(virtualServerResource));
         }
 
         boolean foundAppdefServer = false;

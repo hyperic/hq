@@ -2,10 +2,14 @@ package org.hyperic.hq.appdef.server.session;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
+import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.inventory.domain.RelationshipTypes;
+import org.hyperic.hq.inventory.domain.Resource;
 
 public class Server
     extends AppdefResource {
@@ -23,8 +27,6 @@ public class Server
     private boolean wasAutodiscovered;
 
     private boolean servicesAutomanaged;
-
-    private Collection<Service> services = new HashSet<Service>();
 
     public Server() {
         super();
@@ -91,15 +93,14 @@ public class Server
     }
 
     public Collection<Service> getServices() {
-        return services;
+       Set<Service> services = new HashSet<Service>();
+       Set<Resource> serviceResources = getResource().getResourcesFrom(RelationshipTypes.SERVICE);
+       for(Resource service: serviceResources) {
+           services.add(Bootstrap.getBean(ServiceFactory.class).createService(service));
+       }
+       return services;
     }
     
-    public void addService(Service service) {
-        services.add(service);
-    }
-    
-  
-
     @Override
     public AppdefResourceType getAppdefResourceType() {
         return serverType;

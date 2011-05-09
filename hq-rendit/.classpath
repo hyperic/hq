@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry including="**/*.java" kind="src" path="src/main/java"/>
+	<classpathentry kind="src" path="src/test/groovy"/>
 	<classpathentry kind="src" path="src/main/groovy"/>
 	<classpathentry excluding="**/*.java" kind="src" path="src/main/resources"/>
 	<classpathentry kind="var" path="M2_REPO/javax/activation/activation/1.1/activation-1.1.jar" sourcepath="M2_REPO/javax/activation/activation/1.1/activation-1.1-sources.jar"/>
@@ -119,5 +120,7 @@
 	<classpathentry kind="var" path="M2_REPO/org/apache/zookeeper/zookeeper/3.3.2/zookeeper-3.3.2.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
+	<classpathentry kind="var" path="M2_REPO/org/springframework/data/spring-data-jpa/1.0.0.M2/spring-data-jpa-1.0.0.M2.jar" sourcepath="M2_REPO/org/springframework/data/spring-data-jpa/1.0.0.M2/spring-data-jpa-1.0.0.M2-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/easymock/easymockclassextension/2.4/easymockclassextension-2.4.jar" sourcepath="M2_REPO/org/easymock/easymockclassextension/2.4/easymockclassextension-2.4-sources.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

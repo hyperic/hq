@@ -32,6 +32,7 @@ import org.hyperic.hq.events.server.session.AlertDefinition
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.auth.domain.AuthzSubject
 import org.hyperic.hq.escalation.server.session.Escalation
+import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServiceManager;
@@ -94,9 +95,9 @@ class AlertDefinitionCategory {
     static AppdefResourceType getResourceType(AlertDefinition d) {
         def appdefId
         if (d.typeBased)
-            appdefId = AppdefUtil.newAppdefEntityId(((ResourceTypeAlertDefinition)d).getResourceType())
+            appdefId = Bootstrap.getBean(AppdefConverter.class).newAppdefEntityIdForType(((ResourceTypeAlertDefinition)d).getResourceType())
         else
-            appdefId = AppdefUtil.newAppdefEntityId(d.resource.type)
+            appdefId = Bootstrap.getBean(AppdefConverter.class).newAppdefEntityId(d.resource.type)
             
         if (appdefId.type == AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
             return Bootstrap.getBean(PlatformManager).findPlatformType(appdefId.id)

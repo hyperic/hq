@@ -43,8 +43,8 @@ public abstract class AlertDefSortField
             return true;
         }
 
-        String getSortString(String def, String resource) {
-            return def + ".name";
+        public String getSortString() {
+            return "name";
         }
     };
 
@@ -55,8 +55,8 @@ public abstract class AlertDefSortField
             return true;
         }
 
-        String getSortString(String def, String resource) {
-            return def + ".ctime";
+        public String getSortString() {
+            return "ctime";
         }
     };
 
@@ -67,8 +67,8 @@ public abstract class AlertDefSortField
             return true;
         }
         
-        String getSortString(String def, String resource) {
-            return def + ".mtime";
+        public String getSortString() {
+            return "mtime";
         }
     };
 
@@ -79,22 +79,11 @@ public abstract class AlertDefSortField
             return true;
         }
         
-        String getSortString(String def, String resource) {
-            return def + ".priority";
+        public String getSortString() {
+            return "priority";
         }
     };
 
-    public static final AlertDefSortField RESOURCE = 
-        new AlertDefSortField(4, "Resource", "alertDef.sortField.resource") 
-    {
-        public boolean isSortable() {
-            return true;
-        }
-        
-        String getSortString(String def, String resource) {
-            return resource + ".name";
-        }
-    };
 
     public static final AlertDefSortField ACTIVE = 
         new AlertDefSortField(5, "Active", "alertDef.sortField.active") 
@@ -103,8 +92,8 @@ public abstract class AlertDefSortField
             return true;
         }
         
-        String getSortString(String def, String resource) {
-            return def + ".active";
+        public String getSortString() {
+            return  "active";
         }
     };
 
@@ -115,8 +104,8 @@ public abstract class AlertDefSortField
             return true;
         }
         
-        String getSortString(String def, String resource) {
-            return def + ".alertDefinitionState.lastFired";
+        public String getSortString() {
+            return "alertDefinitionState.lastFired";
         }
     };
 
@@ -127,8 +116,8 @@ public abstract class AlertDefSortField
             return false;
         }
         
-        String getSortString(String def, String resource) {
-            return def + ".escalation.name";
+        public String getSortString() {
+            return "escalation.name";
         }
     };
 
@@ -136,8 +125,6 @@ public abstract class AlertDefSortField
         super(AlertDefSortField.class, code, desc, localeProp,
               ResourceBundle.getBundle(BUNDLE));
     }
-    
-    abstract String getSortString(String def, String resource);
     
     public static AlertDefSortField findByCode(int code) {
         return (AlertDefSortField)

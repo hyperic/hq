@@ -28,7 +28,6 @@ package org.hyperic.hq.measurement.server.session;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Set;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.measurement.ext.ProblemMetricInfo;
@@ -57,21 +56,14 @@ public class ProblemMetricManagerImpl implements ProblemMetricManager {
 
     
     public ProblemResourceInfo[] getProblemResources(long begin, long end,
-                                                     Set<AppdefEntityID> permitted,
                                                      PageControl pc) {
-        return new ProblemResourceInfo[0];
-    }
-
-    
-    public ProblemResourceInfo[] getProblemResourcesByTypeAndInstances(
-        int appdefType, int[] instanceIds, long begin, long end, PageControl pc) {
         return new ProblemResourceInfo[0];
     }
 
     @SuppressWarnings("unchecked")
     
     public Map<Integer, ProblemMetricInfo> getProblemsByTemplate(
-        int appdefType, Integer[] eids, long begin, long end) {
+        Integer[] eids, long begin, long end) {
         return Collections.emptyMap();
     }
 

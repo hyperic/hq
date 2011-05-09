@@ -43,8 +43,8 @@ public abstract class AuditSortField
             return true;
         }
 
-        String getSortString(String audit, String resource, String subject) {
-            return audit + ".startTime"; 
+        public String getSortString() {
+            return "startTime"; 
         }
     };
         
@@ -55,8 +55,8 @@ public abstract class AuditSortField
             return true;
         }
 
-        String getSortString(String audit, String resource, String subject) {
-            return audit + ".endTime"; 
+        public String getSortString() {
+            return "endTime"; 
         }
     };
 
@@ -67,8 +67,8 @@ public abstract class AuditSortField
             return true;
         }
         
-        String getSortString(String audit, String resource, String subject) {
-            return audit + ".importanceEnum"; 
+        public String getSortString() {
+            return "importance"; 
         }
     };
 
@@ -79,8 +79,8 @@ public abstract class AuditSortField
             return true;
         }
 
-        String getSortString(String audit, String resource, String subject) {
-            return audit + ".klazz"; 
+        public String getSortString() {
+            return "klazz"; 
         }
     };
 
@@ -91,22 +91,12 @@ public abstract class AuditSortField
             return true;
         }
 
-        String getSortString(String audit, String resource, String subject) {
-            return audit + ".purposeEnum"; 
+        public String getSortString() {
+            return "purpose"; 
         }
     };
 
-    public static final AuditSortField RESOURCE = 
-        new AuditSortField(5, "resource", "audit.sortField.resource") 
-    {
-        public boolean isSortable() {
-            return true;
-        }
-
-        String getSortString(String audit, String resource, String subject) {
-            return resource + ".sortName"; 
-        }
-    };
+   
 
     public static final AuditSortField SUBJECT = 
         new AuditSortField(6, "subject", "audit.sortField.subject") 
@@ -115,22 +105,11 @@ public abstract class AuditSortField
             return true;
         }
 
-        String getSortString(String audit, String resource, String subject) {
-            return subject + ".name"; 
+        public String getSortString() {
+            return "subject.name"; 
         }
     };
 
-    public static final AuditSortField DURATION = 
-        new AuditSortField(7, "duration", "audit.sortField.duration") 
-    {
-        public boolean isSortable() {
-            return true;
-        }
-
-        String getSortString(String audit, String resource, String subject) {
-            return audit + ".endTime - " + audit + ".startTime"; 
-        }
-    };
 
     public static final AuditSortField NATURE = 
         new AuditSortField(8, "nature", "audit.sortField.nature") 
@@ -139,8 +118,8 @@ public abstract class AuditSortField
             return true;
         }
 
-        String getSortString(String audit, String resource, String subject) {
-            return audit + ".natureEnum";
+        public String getSortString() {
+            return "nature";
         }
     };
 
@@ -148,9 +127,6 @@ public abstract class AuditSortField
         super(AuditSortField.class, code, desc, localeProp,
               ResourceBundle.getBundle(BUNDLE));
     }
-    
-    abstract String getSortString(String audit, String resource, 
-                                  String subject);
     
     public static AuditSortField findByCode(int code) {
         return (AuditSortField)

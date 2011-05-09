@@ -37,6 +37,9 @@ public class ResourceIntegrationTest {
 
     private Resource iceberg;
 
+    @Autowired
+    private MockMessagePublisher messagePublisher;
+
     private Resource produce;
 
     @Autowired
@@ -45,12 +48,9 @@ public class ResourceIntegrationTest {
     @Autowired
     private ResourceTypeDao resourceTypeDao;
 
-    private Resource traderJoes;
-
     private ResourceType store;
 
-    @Autowired
-    private MockMessagePublisher messagePublisher;
+    private Resource traderJoes;
 
     @Before
     public void initializeTestData() throws ApplicationException, NotFoundException {
@@ -75,6 +75,36 @@ public class ResourceIntegrationTest {
         traderJoes.relateTo(produce, RelationshipTypes.CONTAINS);
         produce.relateTo(iceberg, RelationshipTypes.CONTAINS);
         messagePublisher.clearReceivedEvents();
+    }
+
+    @Test
+    public void testAddAndGetConfig() {
+        Config product = new Config();
+        product.setType(store.getConfigType("Product"));
+        product.setValue("user", "bob");
+        traderJoes.addConfig(product);
+        Config config = traderJoes.getConfig("Product");
+        assertEquals("bob", config.getValue("user"));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testAddConfigInvalidType() {
+        Config measurement = new Config();
+        ConfigType measType = new ConfigType("Measurement");
+       
+        measType.persist();
+        measurement.setType(measType);
+        traderJoes.addConfig(measurement);
+    }
+
+    @Test
+    public void testCountResourcesFrom() {
+        assertEquals(1, produce.countResourcesFrom(RelationshipTypes.CONTAINS));
+    }
+
+    @Test
+    public void testCountResourcesFromNone() {
+        assertEquals(0, iceberg.countResourcesFrom(RelationshipTypes.CONTAINS));
     }
 
     @Test
@@ -112,16 +142,21 @@ public class ResourceIntegrationTest {
     }
 
     @Test
+    public void testGetConfigInvalidType() {
+        assertNull(traderJoes.getConfig("Measurement"));
+    }
+
+    @Test
+    public void testGetConfigNoConfig() {
+        assertNull(traderJoes.getConfig("Product"));
+    }
+
+    @Test
     public void testGetProperties() {
         traderJoes.setProperty("Address", "123 My Street");
         Map<String, Object> expected = new HashMap<String, Object>(1);
         expected.put("Address", "123 My Street");
         assertEquals(expected, traderJoes.getProperties());
-    }
-
-    @Test
-    public void testGetPropertiesNoneSet() {
-        assertTrue(traderJoes.getProperties().isEmpty());
     }
 
     @Test
@@ -134,6 +169,11 @@ public class ResourceIntegrationTest {
         Map<String, Object> expected = new HashMap<String, Object>(1);
         expected.put("Address", "123 My Street");
         assertEquals(expected, traderJoes.getProperties(false));
+    }
+
+    @Test
+    public void testGetPropertiesNoneSet() {
+        assertTrue(traderJoes.getProperties().isEmpty());
     }
 
     @Test
@@ -189,7 +229,7 @@ public class ResourceIntegrationTest {
         assertEquals(traderJoes, relationship.getFrom());
         assertEquals(produce, relationship.getTo());
     }
-
+    
     @Test
     public void testGetRelationshipsTo() {
         Set<ResourceRelationship> relationships = produce
@@ -199,7 +239,7 @@ public class ResourceIntegrationTest {
         assertEquals(traderJoes, relationship.getFrom());
         assertEquals(produce, relationship.getTo());
     }
-
+    
     @Test
     public void testGetRelationshipTo() {
         ResourceRelationship relationship = produce.getRelationshipTo(traderJoes,
@@ -213,22 +253,55 @@ public class ResourceIntegrationTest {
         assertEquals(iceberg, produce.getResourceFrom(RelationshipTypes.CONTAINS));
     }
 
+    @Test
+    public void testGetResourceFromByPropValue() {
+        iceberg.setProperty("pickDate", "today");
+        assertEquals(iceberg, produce.getResourceFrom(RelationshipTypes.CONTAINS,"pickDate","today"));
+    }
+
+    @Test
+    public void testGetResourceFromByPropValueNone() {
+        iceberg.setProperty("pickDate", "yesterday");
+        assertNull(produce.getResourceFrom(RelationshipTypes.CONTAINS,"pickDate","today"));
+    }
+
     @Test(expected = NotUniqueException.class)
     public void testGetResourceFromMultiple() {
         traderJoes.relateTo(iceberg, RelationshipTypes.CONTAINS);
         traderJoes.getResourceFrom(RelationshipTypes.CONTAINS);
     }
-
+    
     @Test
     public void testGetResourceFromNotRelated() {
         assertNull(iceberg.getResourceFrom(RelationshipTypes.CONTAINS));
     }
-
+    
+    @Test
+    public void testGetResourceIdsFrom() {
+        Set<Integer> expected = new HashSet<Integer>();
+        expected.add(iceberg.getId());
+        assertEquals(expected, produce.getResourceIdsFrom(RelationshipTypes.CONTAINS));
+    }
+    
     @Test
     public void testGetResourcesFrom() {
         Set<Resource> expected = new HashSet<Resource>();
         expected.add(iceberg);
         assertEquals(expected, produce.getResourcesFrom(RelationshipTypes.CONTAINS));
+    }
+    
+    @Test
+    public void testGetResourcesFromByPropValue() {
+        iceberg.setProperty("pickDate", "today");
+        Set<Resource> expected = new HashSet<Resource>();
+        expected.add(iceberg);
+        assertEquals(expected, produce.getResourcesFrom(RelationshipTypes.CONTAINS,"pickDate","today"));
+    }
+    
+    @Test
+    public void testGetResourcesFromByPropValueNone() {
+        iceberg.setProperty("pickDate", "yesterday");
+        assertTrue(produce.getResourcesFrom(RelationshipTypes.CONTAINS,"pickDate","today").isEmpty());
     }
 
     @Test
@@ -381,36 +454,6 @@ public class ResourceIntegrationTest {
     @Test(expected = IllegalArgumentException.class)
     public void testSetPropertyToNull() {
         traderJoes.setProperty("Address", null);
-    }
-
-    @Test
-    public void testAddAndGetConfig() {
-        Config product = new Config();
-        product.setType(store.getConfigType("Product"));
-        product.setValue("user", "bob");
-        traderJoes.addConfig(product);
-        Config config = traderJoes.getConfig("Product");
-        assertEquals("bob", config.getValue("user"));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testAddConfigInvalidType() {
-        Config measurement = new Config();
-        ConfigType measType = new ConfigType("Measurement");
-       
-        measType.persist();
-        measurement.setType(measType);
-        traderJoes.addConfig(measurement);
-    }
-
-    @Test
-    public void testGetConfigNoConfig() {
-        assertNull(traderJoes.getConfig("Product"));
-    }
-
-    @Test
-    public void testGetConfigInvalidType() {
-        assertNull(traderJoes.getConfig("Measurement"));
     }
     
     @Test

@@ -1,7 +1,6 @@
 package org.hyperic.hq.inventory.domain;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -9,15 +8,11 @@ import javax.validation.constraints.NotNull;
 
 import org.hyperic.hq.inventory.InvalidRelationshipException;
 import org.hyperic.hq.inventory.NotUniqueException;
+import org.hyperic.hq.inventory.data.ResourceTraverser;
 import org.hyperic.hq.inventory.events.CPropChangeEvent;
 import org.hyperic.hq.messaging.MessagePublisher;
 import org.neo4j.graphdb.DynamicRelationshipType;
-import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.NotFoundException;
-import org.neo4j.graphdb.ReturnableEvaluator;
-import org.neo4j.graphdb.StopEvaluator;
-import org.neo4j.graphdb.TraversalPosition;
-import org.neo4j.graphdb.Traverser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.data.graph.annotation.GraphProperty;
@@ -26,7 +21,6 @@ import org.springframework.data.graph.annotation.RelatedTo;
 import org.springframework.data.graph.core.Direction;
 import org.springframework.data.graph.neo4j.annotation.Indexed;
 import org.springframework.data.graph.neo4j.support.GraphDatabaseContext;
-import org.springframework.data.graph.neo4j.support.typerepresentation.SubReferenceNodeTypeRepresentationStrategy;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -71,6 +65,9 @@ public class Resource {
     @Indexed
     private String owner;
 
+    @Autowired
+    private transient ResourceTraverser resourceTraverser;
+
     @NotNull
     @Indexed
     @GraphProperty
@@ -110,25 +107,9 @@ public class Resource {
         configs.add(config);
     }
 
-    private Set<ResourceRelationship> convertRelationships(Resource entity,
-                                                           Iterable<org.neo4j.graphdb.Relationship> relationships) {
-        Set<ResourceRelationship> relations = new HashSet<ResourceRelationship>();
-        for (org.neo4j.graphdb.Relationship relationship : relationships) {
-            // Don't include Neo4J relationship b/w Node and its Java type
-            if (!relationship
-                .isType(SubReferenceNodeTypeRepresentationStrategy.INSTANCE_OF_RELATIONSHIP_TYPE)) {
-                Node node = relationship.getOtherNode(getPersistentState());
-                Class<?> otherEndType = graphDatabaseContext.getNodeTypeRepresentationStrategy()
-                    .getJavaType(node);
-                if (Resource.class.isAssignableFrom(otherEndType)) {
-                    if (entity == null || node.equals(entity.getPersistentState())) {
-                        relations.add(graphDatabaseContext.createEntityFromState(relationship,
-                            ResourceRelationship.class));
-                    }
-                }
-            }
-        }
-        return relations;
+    public int countResourcesFrom(String relationName) {
+        return resourceTraverser.countRelatedResources(this, relationName, Direction.OUTGOING,
+            false);
     }
 
     /**
@@ -138,25 +119,8 @@ public class Resource {
      *         {@link RelationshipTypes.CONTAINS} relationship)
      */
     public Set<Resource> getChildren(boolean recursive) {
-        Set<Resource> children = new HashSet<Resource>();
-        StopEvaluator stopEvaluator;
-        if (recursive) {
-            stopEvaluator = StopEvaluator.END_OF_GRAPH;
-        } else {
-            stopEvaluator = new StopEvaluator() {
-                public boolean isStopNode(TraversalPosition currentPos) {
-                    return currentPos.depth() >= 1;
-                }
-            };
-        }
-        Traverser relationTraverser = getPersistentState().traverse(Traverser.Order.BREADTH_FIRST,
-            stopEvaluator, ReturnableEvaluator.ALL_BUT_START_NODE,
-            DynamicRelationshipType.withName(RelationshipTypes.CONTAINS),
-            Direction.OUTGOING.toNeo4jDir());
-        for (Node related : relationTraverser) {
-            children.add(graphDatabaseContext.createEntityFromState(related, Resource.class));
-        }
-        return children;
+        return resourceTraverser.getRelatedResources(this, RelationshipTypes.CONTAINS,
+            Direction.OUTGOING, recursive);
     }
 
     /**
@@ -166,25 +130,8 @@ public class Resource {
      *         {@link RelationshipTypes.CONTAINS} relationship)
      */
     public Set<Integer> getChildrenIds(boolean recursive) {
-        Set<Integer> children = new HashSet<Integer>();
-        StopEvaluator stopEvaluator;
-        if (recursive) {
-            stopEvaluator = StopEvaluator.END_OF_GRAPH;
-        } else {
-            stopEvaluator = new StopEvaluator() {
-                public boolean isStopNode(TraversalPosition currentPos) {
-                    return currentPos.depth() >= 1;
-                }
-            };
-        }
-        Traverser relationTraverser = getPersistentState().traverse(Traverser.Order.BREADTH_FIRST,
-            stopEvaluator, ReturnableEvaluator.ALL_BUT_START_NODE,
-            DynamicRelationshipType.withName(RelationshipTypes.CONTAINS),
-            Direction.OUTGOING.toNeo4jDir());
-        for (Node related : relationTraverser) {
-            children.add((Integer) related.getProperty("id"));
-        }
-        return children;
+        return resourceTraverser.getRelatedResourceIds(this, RelationshipTypes.CONTAINS,
+            Direction.OUTGOING, recursive);
     }
 
     /**
@@ -300,30 +247,13 @@ public class Resource {
         }
     }
 
-    private Set<Resource> getRelatedResources(String relationName, Direction direction) {
-        Set<Resource> resources = new HashSet<Resource>();
-        Traverser relationTraverser = getPersistentState().traverse(Traverser.Order.BREADTH_FIRST,
-            new StopEvaluator() {
-                public boolean isStopNode(TraversalPosition currentPos) {
-                    return currentPos.depth() >= 1;
-                }
-            }, ReturnableEvaluator.ALL_BUT_START_NODE,
-            DynamicRelationshipType.withName(relationName), direction.toNeo4jDir());
-        for (Node related : relationTraverser) {
-            Resource resource = graphDatabaseContext.createEntityFromState(related, Resource.class);
-            resource.persist();
-            resources.add(resource);
-        }
-        return resources;
-    }
-
     /**
      * 
      * @return All the relationships this Resource is involved in (both Incoming
      *         and Outgoing)
      */
     public Set<ResourceRelationship> getRelationships() {
-        return convertRelationships(null, getPersistentState().getRelationships());
+        return resourceTraverser.getRelationships(this);
     }
 
     /**
@@ -336,10 +266,7 @@ public class Resource {
      */
     public Set<ResourceRelationship> getRelationships(Resource entity, String name,
                                                       Direction direction) {
-        return convertRelationships(
-            entity,
-            getPersistentState().getRelationships(DynamicRelationshipType.withName(name),
-                direction.toNeo4jDir()));
+        return resourceTraverser.getRelationships(this, entity, name, direction);
     }
 
     /**
@@ -349,10 +276,7 @@ public class Resource {
      *         Resource
      */
     public Set<ResourceRelationship> getRelationshipsFrom(String relationName) {
-        return convertRelationships(
-            null,
-            getPersistentState().getRelationships(DynamicRelationshipType.withName(relationName),
-                Direction.OUTGOING.toNeo4jDir()));
+        return resourceTraverser.getRelationships(this, relationName, Direction.OUTGOING);
     }
 
     /**
@@ -362,10 +286,7 @@ public class Resource {
      *         Resource
      */
     public Set<ResourceRelationship> getRelationshipsTo(String relationName) {
-        return convertRelationships(
-            null,
-            getPersistentState().getRelationships(DynamicRelationshipType.withName(relationName),
-                Direction.INCOMING.toNeo4jDir()));
+        return resourceTraverser.getRelationships(this, relationName, Direction.INCOMING);
     }
 
     /**
@@ -376,12 +297,7 @@ public class Resource {
      * @throw {@link NotUniqueException} If more than one relationship exists
      */
     public ResourceRelationship getRelationshipTo(Resource resource, String relationName) {
-        Set<ResourceRelationship> relations = convertRelationships(resource, getPersistentState()
-            .getRelationships(DynamicRelationshipType.withName(relationName)));
-        if (relations.isEmpty()) {
-            return null;
-        }
-        return relations.iterator().next();
+        return resourceTraverser.getRelationship(this, relationName, Direction.INCOMING);
     }
 
     /**
@@ -391,14 +307,30 @@ public class Resource {
      * @throws NotUniqueException If multiple relationships exist
      */
     public Resource getResourceFrom(String relationName) {
-        Set<Resource> resources = getRelatedResources(relationName, Direction.OUTGOING);
-        if (resources.isEmpty()) {
-            return null;
-        }
-        if (resources.size() > 1) {
-            throw new NotUniqueException();
-        }
-        return resources.iterator().next();
+        return resourceTraverser.getRelatedResource(this, relationName, Direction.OUTGOING, false);
+    }
+
+    /**
+     * 
+     * @param relationName The relationship name
+     * @param propertyName The property name to use for filtering endpoints
+     * @param propertyValue The property value to use for filtering endpoints
+     * @return A single related resource with the specified property name and
+     *         value
+     */
+    public Resource getResourceFrom(String relationName, String propertyName, Object propertyValue) {
+        return resourceTraverser.getRelatedResource(this, relationName, Direction.OUTGOING, false,
+            propertyName, propertyValue);
+    }
+
+    /**
+     * 
+     * @param relationName The relationship name
+     * @return The IDs of all related resources
+     */
+    public Set<Integer> getResourceIdsFrom(String relationName) {
+        return resourceTraverser.getRelatedResourceIds(this, relationName, Direction.OUTGOING,
+            false);
     }
 
     /**
@@ -407,7 +339,20 @@ public class Resource {
      * @return All end nodes of specified relationship
      */
     public Set<Resource> getResourcesFrom(String relationName) {
-        return getRelatedResources(relationName, Direction.OUTGOING);
+        return resourceTraverser.getRelatedResources(this, relationName, Direction.OUTGOING, false);
+    }
+
+    /**
+     * 
+     * @param relationName The relationship name
+     * @param propertyName The property name to use for filtering endpoints
+     * @param propertyValue The property value to use for filtering endpoints
+     * @return All related resources with the specified property name and value
+     */
+    public Set<Resource> getResourcesFrom(String relationName, String propertyName,
+                                          Object propertyValue) {
+        return resourceTraverser.getRelatedResources(this, relationName, Direction.OUTGOING, false,
+            propertyName, propertyValue);
     }
 
     /**
@@ -416,7 +361,7 @@ public class Resource {
      * @return All start nodes of specified relationship
      */
     public Set<Resource> getResourcesTo(String relationName) {
-        return getRelatedResources(relationName, Direction.INCOMING);
+        return resourceTraverser.getRelatedResources(this, relationName, Direction.INCOMING, false);
     }
 
     /**
@@ -426,14 +371,7 @@ public class Resource {
      * @throws NotUniqueException If multiple relationships exist
      */
     public Resource getResourceTo(String relationName) {
-        Set<Resource> resources = getRelatedResources(relationName, Direction.INCOMING);
-        if (resources.isEmpty()) {
-            return null;
-        }
-        if (resources.size() > 1) {
-            throw new NotUniqueException();
-        }
-        return resources.iterator().next();
+        return resourceTraverser.getRelatedResource(this, relationName, Direction.INCOMING, false);
     }
 
     public String getSortName() {
@@ -455,10 +393,8 @@ public class Resource {
      * @return true if the specified relationship is a child
      */
     public boolean hasChild(Resource resource, boolean recursive) {
-        if (getChildren(recursive).contains(resource)) {
-            return true;
-        }
-        return false;
+        return resourceTraverser.hasRelatedResource(this, resource, RelationshipTypes.CONTAINS,
+            Direction.OUTGOING, recursive);
     }
 
     public boolean isInAsyncDeleteState() {
@@ -474,19 +410,8 @@ public class Resource {
      *         Resource by Outgoing relationship
      */
     public boolean isRelatedTo(Resource resource, String relationName) {
-        Traverser relationTraverser = getPersistentState().traverse(Traverser.Order.BREADTH_FIRST,
-            new StopEvaluator() {
-                public boolean isStopNode(TraversalPosition currentPos) {
-                    return currentPos.depth() >= 1;
-                }
-            }, ReturnableEvaluator.ALL_BUT_START_NODE,
-            DynamicRelationshipType.withName(relationName), Direction.OUTGOING.toNeo4jDir());
-        for (Node related : relationTraverser) {
-            if (related.equals(resource.getPersistentState())) {
-                return true;
-            }
-        }
-        return false;
+        return resourceTraverser.hasRelatedResource(this, resource, relationName,
+            Direction.OUTGOING, false);
     }
 
     /**
@@ -564,7 +489,7 @@ public class Resource {
     @Transactional("neoTxManager")
     public void removeRelationships(Resource entity, String name, Direction direction) {
         for (ResourceRelationship relation : getRelationships(entity, name, direction)) {
-            relation.getPersistentState().delete();
+            relation.remove();
         }
     }
 
@@ -658,10 +583,14 @@ public class Resource {
         messagePublisher.publishMessage(MessagePublisher.EVENTS_TOPIC, event);
         return oldValue;
     }
-    
+
     @Transactional("neoTxManager")
     public Object setProperty(String key, Object value) {
-        return setProperty(key,value,false);
+        return setProperty(key, value, false);
+    }
+    
+    public void setResourceTraverser(ResourceTraverser resourceTraverser) {
+        this.resourceTraverser = resourceTraverser;
     }
 
     @Transactional("neoTxManager")

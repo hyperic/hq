@@ -88,6 +88,11 @@ class MetricHelper extends BaseHelper {
                      it.monitorableType.name ==~ regex 
                  }
              } else if (resourceType) {
+                 if (args.enabled == null) {
+                     return tmplMan.findTemplatesByMonitorableType(args.user,
+                                                               args.withPaging,
+                                                               resourceType)
+                 }
                  return tmplMan.findTemplatesByMonitorableType(args.user,
                                                                args.withPaging,
                                                                resourceType,

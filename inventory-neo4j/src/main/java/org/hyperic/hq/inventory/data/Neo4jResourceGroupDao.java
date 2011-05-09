@@ -41,6 +41,7 @@ public class Neo4jResourceGroupDao implements ResourceGroupDao {
     }
 
     public List<ResourceGroup> find(Integer firstResult, Integer maxResults) {
+      //TODO not efficient to create Resource objs for paging.  Better to page at Node level
         List<ResourceGroup> groups = new ArrayList<ResourceGroup>();
         Iterable<ResourceGroup> result = groupFinder.findAll();
         int currentPosition = 0;

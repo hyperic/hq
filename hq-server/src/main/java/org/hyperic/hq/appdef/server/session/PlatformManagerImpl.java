@@ -158,13 +158,9 @@ public class PlatformManagerImpl implements PlatformManager {
     
     private ServiceManager serviceManager;
     
-    private ServerFactory serverFactory;
-    
     private ResourceDao resourceDao;
     
     private ResourceTypeDao resourceTypeDao;
-    
-    private ServiceFactory serviceFactory;
    
 
     @Autowired
@@ -176,9 +172,9 @@ public class PlatformManagerImpl implements PlatformManager {
                                ZeventEnqueuer zeventManager,
                                ResourceAuditFactory resourceAuditFactory, PluginResourceTypeRepository pluginResourceTypeRepository,
                                ServerManager serverManager, PlatformFactory platformFactory,
-                               ServiceManager serviceManager, ServerFactory serverFactory,
+                               ServiceManager serviceManager,
                                ResourceDao resourceDao, ResourceTypeDao resourceTypeDao, 
-                               ManagedResourceRepository managedResourceRepository, ServiceFactory serviceFactory) {
+                               ManagedResourceRepository managedResourceRepository) {
         this.permissionManager = permissionManager;
         this.agentDAO = agentDAO;
         this.resourceManager = resourceManager;
@@ -191,24 +187,13 @@ public class PlatformManagerImpl implements PlatformManager {
         this.serverManager = serverManager;
         this.platformFactory = platformFactory;
         this.serviceManager = serviceManager;
-        this.serverFactory = serverFactory;
         this.resourceDao = resourceDao;
         this.resourceTypeDao  = resourceTypeDao;
         this.managedResourceRepository = managedResourceRepository;
-        this.serviceFactory = serviceFactory;
     }
     
     private Platform toPlatform(Resource resource) {
-        Platform platform = platformFactory.createPlatform(resource);
-        Set<Resource> servers = resource.getResourcesFrom(RelationshipTypes.SERVER);
-        for(Resource server: servers) {
-            platform.addServer(serverFactory.createServer(server));
-        }
-        Set<Resource> services = resource.getResourcesFrom(RelationshipTypes.SERVICE);
-        for(Resource service: services) {
-            platform.addService(serviceFactory.createService(service));
-        }
-        return platform;
+        return platformFactory.createPlatform(resource);
     }
 
     // TODO resolve circular dependency
@@ -277,7 +262,7 @@ public class PlatformManagerImpl implements PlatformManager {
         }
         Collections.sort(platformTypes, new Comparator<PlatformType>() {
             public int compare(PlatformType o1, PlatformType o2) {
-                return o1.getName().compareTo(o2.getName());
+                return o1.getSortName().compareTo(o2.getSortName());
             }
         });
         // valuePager converts local/remote interfaces to value objects
@@ -295,14 +280,23 @@ public class PlatformManagerImpl implements PlatformManager {
     public PageList<PlatformTypeValue> getViewablePlatformTypes(AuthzSubject subject, PageControl pc)
         throws PermissionException, NotFoundException {
 
-        // build the platform types from the visible list of platforms
-        Collection<Platform> platforms = getViewablePlatforms(subject, pc);
-
-        Collection<PlatformType> platTypes = filterResourceTypes(platforms);
-
+        // TODO build the platform types from the platforms the user is allowed to view
+        //Collection<PlatformType> platTypes = filterResourceTypes(platforms);
+        List<PlatformType> platformTypes = new ArrayList<PlatformType>();
+        Collection<ResourceType> resourceTypes = findAllPlatformResourceTypes();
+        for(ResourceType resourceType: resourceTypes) {
+            if(resourceType.hasResources()) {
+                platformTypes.add(platformFactory.createPlatformType(resourceType));
+            }
+        }
+        Collections.sort(platformTypes, new Comparator<PlatformType>() {
+            public int compare(PlatformType o1, PlatformType o2) {
+                return o1.getSortName().compareTo(o2.getSortName());
+            }
+        });
         // valuePager converts local/remote interfaces to value objects
         // as it pages through them.
-        return valuePager.seek(platTypes, pc);
+        return valuePager.seek(platformTypes, pc);
     }
 
     /**
@@ -397,16 +391,16 @@ public class PlatformManagerImpl implements PlatformManager {
 
   
    private void removeServers(AuthzSubject subject,Platform platform) throws PermissionException, VetoException {
-       Set<Resource> servers=resourceManager.findResourceById(platform.getId()).getResourcesFrom(RelationshipTypes.SERVER);
-       for(Resource server: servers) {
-           serverManager.removeServer(subject, server.getId());
+       Set<Integer> servers=resourceManager.findResourceById(platform.getId()).getResourceIdsFrom(RelationshipTypes.SERVER);
+       for(Integer server: servers) {
+           serverManager.removeServer(subject, server);
        }
    }
    
    private void removeServices(AuthzSubject subject,Platform platform) throws PermissionException, VetoException {
-       Set<Resource> services=resourceManager.findResourceById(platform.getId()).getResourcesFrom(RelationshipTypes.SERVICE);
-       for(Resource service: services) {
-           serviceManager.removeService(subject, service.getId());
+       Set<Integer> services=resourceManager.findResourceById(platform.getId()).getResourceIdsFrom(RelationshipTypes.SERVICE);
+       for(Integer service: services) {
+           serviceManager.removeService(subject, service);
        }
    }
    
@@ -619,12 +613,7 @@ public class PlatformManagerImpl implements PlatformManager {
     }
     
     public Set<Integer> getAllPlatformIds() {
-        Set<Integer> platformIds = new HashSet<Integer>();
-        Collection<Resource> platforms = getAllPlatforms();
-        for(Resource platform:platforms) {
-            platformIds.add(platform.getId());
-        }
-        return platformIds;
+        return resourceManager.findRootResource().getResourceIdsFrom(RelationshipTypes.PLATFORM);
     }
     
     private Set<Resource> findByCreationTime(long creationTime) {
@@ -659,13 +648,10 @@ public class PlatformManagerImpl implements PlatformManager {
         Collection<Resource> platforms = findByCreationTime(System.currentTimeMillis() - range);
         Set<Platform> plats = new HashSet<Platform>();
        
-        Collection<Integer> viewable = getViewablePlatformPKs(subject);
-        //and iterate over the list to remove any item not viewable
+        //TODO filter viewable
         for (Iterator<Resource> i = platforms.iterator(); i.hasNext();) {
             Resource platform = i.next();
-            if (viewable.contains(platform.getId())) {
-               plats.add(toPlatform(platform));
-            }
+            plats.add(toPlatform(platform));
         }
 
         // valuePager converts local/remote interfaces to value objects
@@ -717,27 +703,18 @@ public class PlatformManagerImpl implements PlatformManager {
     
     private Collection<Resource> getAllPlatforms() {
         return resourceManager.findRootResource().getResourcesFrom(RelationshipTypes.PLATFORM);
-        
     }
-    
+   
     private Resource findByFQDN(String fqdn) {
-        Collection<Resource> platforms = getAllPlatforms();
-        for(Resource platform: platforms) {
-            if(fqdn.equals(platform.getProperty(PlatformFactory.FQDN))) {
-                return platform;
-            }
-        }
-        return null;
+        return resourceManager.findRootResource().getResourceFrom(RelationshipTypes.PLATFORM,PlatformFactory.FQDN,fqdn);
     }
     
     private Collection<Resource> findByIpAddr(String address) {
         Set<Resource> platforms = new HashSet<Resource>();
         for(Resource platform: getAllPlatforms()) {
-            Set<Resource> ips = platform.getResourcesFrom(RelationshipTypes.IP);
-            for(Resource ip:ips) {
-                if(address.equals(ip.getProperty(PlatformFactory.IP_ADDRESS))) {
-                    platforms.add(platform);
-                }
+            Set<Resource> ips = platform.getResourcesFrom(RelationshipTypes.IP,PlatformFactory.IP_ADDRESS,address);
+            if(! ips.isEmpty()) {
+                platforms.add(platform);
             }
         }
         return platforms;
@@ -933,9 +910,10 @@ public class PlatformManagerImpl implements PlatformManager {
     private Resource getPhysPlatformByAgentToken(String agentToken) {
         try {
             Agent agent = agentManager.getAgent(agentToken);
-            Collection<Resource> platforms = getAllPlatforms();
-            for (Resource platform : platforms) {
-                if(agent.equals(managedResourceRepository.findAgentByResource(platform.getId()))) {
+            Collection<Integer> platforms = getAllPlatformIds();
+            for (Integer platformId : platforms) {
+                if(agent.equals(managedResourceRepository.findAgentByResource(platformId))) {
+                    Resource platform = resourceManager.findResourceById(platformId);
                     String platType = platform.getType().getName();
                     // need to check if the platform is not a platform device
                     if (PlatformDetector.isSupportedPlatform(platType)) {
@@ -1013,24 +991,19 @@ public class PlatformManagerImpl implements PlatformManager {
     @Transactional(readOnly = true)
     public Collection<Integer> getPlatformPksByAgentToken(AuthzSubject subject, String agentToken)
         throws PlatformNotFoundException {
-        Collection<Resource> platforms = findByAgentToken(agentToken);
-        if (platforms == null || platforms.size() == 0) {
+        Collection<Integer> platforms = findByAgentToken(agentToken);
+        if (platforms.size() == 0) {
             throw new PlatformNotFoundException("Platform with agent token " + agentToken +
                                                 " not found");
         }
-
-        Set<Integer> pks = new HashSet<Integer>();
-        for (Resource plat : platforms) {
-            pks.add(plat.getId());
-        }
-        return pks;
+        return platforms;
     }
     
-    private Collection<Resource> findByAgentToken(String agentToken) {
-        Set<Resource> agentPlatforms = new HashSet<Resource>();
-        Collection<Resource> platforms = getAllPlatforms();
-        for (Resource platform : platforms) {
-            if(agentToken.equals(managedResourceRepository.findAgentByResource(platform.getId()).getAgentToken())) {
+    private Set<Integer> findByAgentToken(String agentToken) {
+        Set<Integer> agentPlatforms = new HashSet<Integer>();
+        Set<Integer> platforms = getAllPlatformIds();
+        for (Integer platform : platforms) {
+            if(agentToken.equals(managedResourceRepository.findAgentByResource(platform).getAgentToken())) {
                 agentPlatforms.add(platform);
             }
         }
@@ -1153,12 +1126,7 @@ public class PlatformManagerImpl implements PlatformManager {
     public PageList<PlatformValue> getPlatformsByServers(AuthzSubject subject,
                                                          List<AppdefEntityID> sIDs)
         throws PlatformNotFoundException, PermissionException {
-        Set<Integer> authzPks;
-        try {
-            authzPks = new HashSet<Integer>(getViewablePlatformPKs(subject));
-        } catch (NotFoundException exc) {
-            return new PageList<PlatformValue>();
-        }
+       
 
         Integer[] ids = new Integer[sIDs.size()];
         int i = 0;
@@ -1168,12 +1136,10 @@ public class PlatformManagerImpl implements PlatformManager {
         }
 
         List<Resource> foundPlats = findByServers(ids);
-
+        //TODO filter platforms by viewable
         ArrayList<Platform> platforms = new ArrayList<Platform>();
         for (Resource platform : foundPlats) {
-            if (authzPks.contains(platform.getId())) {
-                platforms.add(toPlatform(platform));
-            }
+            platforms.add(toPlatform(platform));
         }
         return valuePager.seek(platforms, null);
     }
@@ -1206,12 +1172,11 @@ public class PlatformManagerImpl implements PlatformManager {
         // to authz in batches to find out which ones we are
         // allowed to return.
 
-        Collection<Resource> serviceCollection = appLocal.getMembers();
-        Iterator<Resource> it = serviceCollection.iterator();
+        Collection<Integer> serviceCollection = appLocal.getMemberIds();
+        Iterator<Integer> it = serviceCollection.iterator();
         while (it != null && it.hasNext()) {
-            Resource appService = it.next();
-            Integer serviceId = appService.getId();
-            PlatformValue pValue = getPlatformByService(subject, serviceId);
+            Integer appService = it.next();
+            PlatformValue pValue = getPlatformByService(subject, appService);
             // Fold duplicate platforms
             if (!platCollection.contains(pValue)) {
                 platCollection.add(pValue);
@@ -1222,85 +1187,12 @@ public class PlatformManagerImpl implements PlatformManager {
         // as it pages through them.
         return valuePager.seek(platCollection, pc);
     }
-
-    /**
-     * builds a list of resource types from the list of resources
-     * @param resources - {@link Collection} of {@link AppdefResource}
-     * @param {@link Collection} of {@link AppdefResourceType}
-     */
-    private Collection<PlatformType> filterResourceTypes(Collection<Platform> resources) {
-        final Set<PlatformType> resTypes = new HashSet<PlatformType>();
-        for (final Platform o : resources) {
-            resTypes.add(o.getPlatformType());
-            
-        }
-        final List<PlatformType> rtn = new ArrayList<PlatformType>(resTypes);
-        Collections.sort(rtn, new Comparator<PlatformType>() {
-            private String getName(PlatformType obj) {
-                return obj.getSortName();
-            }
-            public int compare(PlatformType o1, PlatformType o2) {
-                return getName(o1).compareTo(getName(o2));
-            }
-        });
-        return rtn;
-    }
-
-    private Collection<Integer> getViewablePlatformPKs(AuthzSubject who) throws PermissionException,
-        NotFoundException {
-        //TODO perm check
-        //OperationType op = getOperationByName(resourceManager
-          //  .findResourceTypeByName(AuthzConstants.platformResType),
-            //AuthzConstants.platformOpViewPlatform);
-        //return permissionManager.findOperationScopeBySubject(who, op.getId());
-        Collection<Resource> resources = getAllPlatforms();
-        Set<Integer> platformIds = new HashSet<Integer>();
-        for(Resource resource: resources) {
-           platformIds.add(resource.getId());
-        }
-        return platformIds;
-    }
-
-    /**
-     * Find an operation by name inside a ResourcetypeValue object
-     */
-    protected OperationType getOperationByName(org.hyperic.hq.inventory.domain.ResourceType rtV, String opName)
-        throws PermissionException {
-        OperationType op = rtV.getOperationType(opName);
-        if(op == null) {
-            throw new PermissionException("Operation: " + opName + " not valid for ResourceType: " +
-                                      rtV.getName());
-        }
-        return op;
-    }
-
-  
+    
     @Transactional(readOnly = true)
     public Integer[] getPlatformIds(AuthzSubject subject, Integer platTypeId)
         throws PermissionException {
         //TODO this was never guaranteed to be ordered, should return a Collection
-        try {
-
-            Collection<Resource> platforms = resourceManager.findResourceTypeById(platTypeId).getResources();
-            Collection<Integer> platIds = new ArrayList<Integer>();
-
-            // now get the list of PKs
-            Collection<Integer> viewable = getViewablePlatformPKs(subject);
-            // and iterate over the list to remove any item not in the
-            // viewable list
-            for (Resource platform : platforms) {
-
-                if (viewable.contains(platform.getId())) {
-                    // remove the item, user cant see it
-                    platIds.add(platform.getId());
-                }
-            }
-
-            return platIds.toArray(new Integer[0]);
-        } catch (NotFoundException e) {
-            // There are no viewable platforms
-            return new Integer[0];
-        }
+        return new ArrayList<Integer>(resourceManager.findResourceTypeById(platTypeId).getResourceIds()).toArray(new Integer[0]);
     }
     
     private Collection<Resource> findAllOrderName(boolean asc) {
@@ -1372,15 +1264,10 @@ public class PlatformManagerImpl implements PlatformManager {
                     throw new NotFoundException("Invalid sort attribute: " + attr);
             }
         }
-        // now get the list of PKs
-        Set<Integer> viewable = new HashSet<Integer>(getViewablePlatformPKs(whoami));
-        // and iterate over the List to remove any item not in the
-        // viewable list
+        // TODO filter by viewable
         Set<Platform> viewablePlatforms = new HashSet<Platform>();
         for (Resource platform : platforms) {
-            if (viewable.contains(platform.getId())) {
-                viewablePlatforms.add(toPlatform(platform));
-            }
+            viewablePlatforms.add(toPlatform(platform));
         }
         return viewablePlatforms;
     }
@@ -1463,12 +1350,9 @@ public class PlatformManagerImpl implements PlatformManager {
                     List<ResourceUpdatedZevent> events = new ArrayList<ResourceUpdatedZevent>();
                     events.add(new ResourceUpdatedZevent(subject, platform.getEntityId()));
                     for (Resource svr : plat.getResourcesFrom(RelationshipTypes.SERVER)) {
-
                         events.add(new ResourceUpdatedZevent(subject, AppdefEntityID.newServerID(svr.getId())));
-
-                        for (Resource svc : svr.getResourcesFrom(RelationshipTypes.SERVICE)) {
-
-                            events.add(new ResourceUpdatedZevent(subject, AppdefEntityID.newServiceID(svc.getId())));
+                        for (Integer svc : svr.getResourceIdsFrom(RelationshipTypes.SERVICE)) {
+                            events.add(new ResourceUpdatedZevent(subject, AppdefEntityID.newServiceID(svc)));
                         }
                     }
 
@@ -1780,8 +1664,8 @@ public class PlatformManagerImpl implements PlatformManager {
         return platform.getResourcesFrom(RelationshipTypes.SERVER);
     }
     
-    private Collection<Resource> getServices(Resource server) {
-        return server.getResourcesFrom(RelationshipTypes.SERVICE);
+    private Collection<Integer> getServiceIds(Resource server) {
+        return server.getResourceIdsFrom(RelationshipTypes.SERVICE);
     }
 
 
@@ -1790,12 +1674,10 @@ public class PlatformManagerImpl implements PlatformManager {
         eids.add(platform.getId());
         Collection<Resource> servers = getServers(platform);
         for (Resource server : servers) {
-
             eids.add(server.getId());
-            Collection<Resource> services = getServices(server);
-            for (Resource service : services) {
-
-                eids.add(service.getId());
+            Collection<Integer> services = getServiceIds(server);
+            for (Integer service : services) {
+                eids.add(service);
             }
         }
         AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(eids);
@@ -1878,14 +1760,12 @@ public class PlatformManagerImpl implements PlatformManager {
      */
     public Ip updateIp(Platform platform, String address, String netmask, String macAddress) {
         Resource resource = resourceManager.findResourceById(platform.getId());
-        Collection<Resource> ips = resource.getResourcesFrom(RelationshipTypes.IP);
-        for(Resource ip: ips) {
-            if(ip.getProperty(PlatformFactory.IP_ADDRESS).equals(address)) {
-                updateIp(ip,netmask,macAddress);
-                return platformFactory.createIp(ip);
-            }
+        Resource ip = resource.getResourceFrom(RelationshipTypes.IP,PlatformFactory.IP_ADDRESS,address);
+        if(ip == null) {
+            return null;
         }
-        return null;
+        updateIp(ip,netmask,macAddress);
+        return platformFactory.createIp(ip);    
     }
     
     private void updateIp(Resource ip, String netmask, String macAddress) {
@@ -1921,7 +1801,7 @@ public class PlatformManagerImpl implements PlatformManager {
         //TODO do we really need to order the Map?
         Map<String,Integer> counts = new LinkedHashMap<String,Integer>();
         for(ResourceType platformType: orderedPlatformTypes) {
-            counts.put(platformType.getName(),platformType.getResources().size());
+            counts.put(platformType.getName(),platformType.countResources());
         }
         return counts;
     }
@@ -1931,42 +1811,27 @@ public class PlatformManagerImpl implements PlatformManager {
      */
     @Transactional(readOnly = true)
     public Number getPlatformCount() {
-        return getAllPlatforms().size();
+        return resourceManager.findRootResource().countResourcesFrom(RelationshipTypes.PLATFORM);
     }
     
     public Collection<Platform> getPlatformsByType(AuthzSubject subject, String platformTypeName) throws PermissionException, InvalidAppdefTypeException {
-        try {
-            ResourceType ptype = resourceManager.findResourceTypeByName(platformTypeName);
-            if (ptype == null) {
-                return new HashSet<Platform>(0);
-            }
-           
-            Collection<Resource> resources = ptype.getResources();
-            Set<Platform> platforms = new HashSet<Platform>(resources.size());
-           
-            if (resources.size() == 0) {
-                // There are no viewable platforms
-                return platforms;
-            }
-            // now get the list of PKs
-            Collection<Integer> viewable = getViewablePlatformPKs(subject);
-            // and iterate over the List to remove any item not in the
-            // viewable list
-            for (Iterator<Resource> it = resources.iterator(); it.hasNext();) {
-                Resource platform = it.next();
-                if (!viewable.contains(platform.getId())) {
-                    // remove the item, user can't see it
-                    it.remove();
-                }
-            }
-            for(Resource resource: resources) {
-                platforms.add(toPlatform(resource));
-            }
-            return platforms;
-        } catch (NotFoundException e) {
-            // There are no viewable platforms
-            return new PageList<Platform>();
+        ResourceType ptype = resourceManager.findResourceTypeByName(platformTypeName);
+        if (ptype == null) {
+            return new HashSet<Platform>(0);
         }
+           
+        Collection<Resource> resources = ptype.getResources();
+        Set<Platform> platforms = new HashSet<Platform>(resources.size());
+           
+        if (resources.size() == 0) {
+            // There are no viewable platforms
+            return platforms;
+        }
+        // TODO filter viewable
+        for(Resource resource: resources) {
+            platforms.add(toPlatform(resource));
+        }
+        return platforms;
     }
 
     
@@ -1978,12 +1843,12 @@ public class PlatformManagerImpl implements PlatformManager {
     public ResourceTree getEntitiesForAgent(AuthzSubject subject, Agent agt)
         throws AgentNotFoundException, PermissionException {
 
-        Collection<Platform> plats  = new HashSet<Platform>();
-        Collection<Resource> resources = getAllPlatforms();
-        for(Resource resource: resources) {
-            Agent resourceAgent = managedResourceRepository.findAgentByResource(resource.getId());
+        Collection<Integer> plats  = new HashSet<Integer>();
+        Collection<Integer> resources = getAllPlatformIds();
+        for(Integer resource: resources) {
+            Agent resourceAgent = managedResourceRepository.findAgentByResource(resource);
             if(resourceAgent.equals(agt)) {
-                plats.add(toPlatform(resource));
+                plats.add(resource);
             }
         }
         if (plats.size() == 0) {
@@ -1991,8 +1856,8 @@ public class PlatformManagerImpl implements PlatformManager {
         }
         AppdefEntityID[] platIds = new AppdefEntityID[plats.size()];
         int i = 0;
-        for (Platform plat : plats) {
-            platIds[i] = AppdefEntityID.newPlatformID(plat.getId());
+        for (Integer plat : plats) {
+            platIds[i] = AppdefEntityID.newPlatformID(plat);
             i++;
         }
 

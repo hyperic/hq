@@ -26,19 +26,29 @@
 
 package org.hyperic.hq.control.server.session;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import junit.framework.TestCase;
 
-import org.easymock.EasyMock;
+import org.easymock.classextension.EasyMock;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.Service;
+import org.hyperic.hq.appdef.server.session.ServiceFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
+import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.inventory.data.ResourceTraverser;
+import org.hyperic.hq.inventory.domain.RelationshipTypes;
+import org.hyperic.hq.inventory.domain.Resource;
 import org.hyperic.hq.measurement.shared.TrackerManager;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.config.ConfigResponse;
+import org.springframework.data.graph.core.Direction;
+
 
 /**
  * Unit test of the {@link ServerRestartHandler}
@@ -58,11 +68,15 @@ public class ServerRestartHandlerTest
     private ConfigManager configManager;
 
     private TrackerManager trackerManager;
+    
+    private ServiceFactory serviceFactory;
+    
+    private ResourceTraverser resourceTraverser;
 
     private static final AppdefEntityID SERVER_ID = new AppdefEntityID(2, 3);
 
     private void replay() {
-        EasyMock.replay(autoInvManager, serverManager, configManager, trackerManager);
+        EasyMock.replay(autoInvManager, serverManager, configManager, trackerManager,serviceFactory,resourceTraverser);
     }
 
     public void setUp() throws Exception {
@@ -71,6 +85,9 @@ public class ServerRestartHandlerTest
         this.serverManager = EasyMock.createMock(ServerManager.class);
         this.configManager = EasyMock.createMock(ConfigManager.class);
         this.trackerManager = EasyMock.createMock(TrackerManager.class);
+        this.serviceFactory = EasyMock.createMock(ServiceFactory.class);
+        this.resourceTraverser = EasyMock.createMock(ResourceTraverser.class);
+        Bootstrap.setBean(ServiceFactory.class, serviceFactory);
         this.serverRestartHandler = new ServerRestartHandlerImpl(serverManager,
                                                              configManager,
                                                              autoInvManager,
@@ -84,11 +101,18 @@ public class ServerRestartHandlerTest
      */
     public void testRestartServer() throws Exception {
         Server server = new Server();
+        Resource serverRes = new Resource();
+        serverRes.setResourceTraverser(resourceTraverser);
+        server.setResource(serverRes);
         Service service = new Service();
         Integer serviceId = Integer.valueOf(889);
         service.setId(serviceId);
+        Resource serviceRes = new Resource();
         AppdefEntityID serviceEntityId = new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVICE, serviceId);
-        server.addService(service);
+        Set<Resource> services = new HashSet<Resource>();
+        services.add(serviceRes);
+        EasyMock.expect(resourceTraverser.getRelatedResources(serverRes, RelationshipTypes.SERVICE, Direction.OUTGOING, false)).andReturn(services);
+        EasyMock.expect(serviceFactory.createService(serviceRes)).andReturn(service);
         EasyMock.expect(serverManager.findServerById(SERVER_ID.getId())).andReturn(server);
         autoInvManager.toggleRuntimeScan(null, SERVER_ID, true);
         ConfigResponse response = new ConfigResponse();
@@ -114,11 +138,18 @@ public class ServerRestartHandlerTest
      */
     public void testRestartServerFailedAutoDiscovery() throws Exception {
         Server server = new Server();
+        Resource serverRes = new Resource();
+        serverRes.setResourceTraverser(resourceTraverser);
+        server.setResource(serverRes);
         Service service = new Service();
         Integer serviceId = Integer.valueOf(889);
         service.setId(serviceId);
         AppdefEntityID serviceEntityId = new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVICE, serviceId);
-        server.addService(service);
+        Resource serviceRes = new Resource();
+        Set<Resource> services = new HashSet<Resource>();
+        services.add(serviceRes);
+        EasyMock.expect(resourceTraverser.getRelatedResources(serverRes, RelationshipTypes.SERVICE, Direction.OUTGOING, false)).andReturn(services);
+        EasyMock.expect(serviceFactory.createService(serviceRes)).andReturn(service);
         EasyMock.expect(serverManager.findServerById(SERVER_ID.getId())).andReturn(server);
         autoInvManager.toggleRuntimeScan(null, SERVER_ID, true);
         EasyMock.expectLastCall().andThrow(new RuntimeException("No!"));
@@ -149,11 +180,18 @@ public class ServerRestartHandlerTest
      */
     public void testRestartServerFailedServerConfigLogTrackEnable() throws Exception {
         Server server = new Server();
+        Resource serverRes = new Resource();
+        serverRes.setResourceTraverser(resourceTraverser);
+        server.setResource(serverRes);
         Service service = new Service();
         Integer serviceId = Integer.valueOf(889);
         service.setId(serviceId);
         AppdefEntityID serviceEntityId = new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVICE, serviceId);
-        server.addService(service);
+        Resource serviceRes = new Resource();
+        Set<Resource> services = new HashSet<Resource>();
+        services.add(serviceRes);
+        EasyMock.expect(resourceTraverser.getRelatedResources(serverRes, RelationshipTypes.SERVICE, Direction.OUTGOING, false)).andReturn(services);
+        EasyMock.expect(serviceFactory.createService(serviceRes)).andReturn(service);
         ConfigResponse response = new ConfigResponse();
         EasyMock.expect(serverManager.findServerById(SERVER_ID.getId())).andReturn(server);
         autoInvManager.toggleRuntimeScan(null, SERVER_ID, true);
@@ -179,11 +217,18 @@ public class ServerRestartHandlerTest
      */
     public void testRestartServerFailedServiceConfigLogTrackEnable() throws Exception {
         Server server = new Server();
+        Resource serverRes = new Resource();
+        serverRes.setResourceTraverser(resourceTraverser);
+        server.setResource(serverRes);
         Service service = new Service();
         Integer serviceId = Integer.valueOf(889);
         service.setId(serviceId);
         AppdefEntityID serviceEntityId = new AppdefEntityID(AppdefEntityConstants.APPDEF_TYPE_SERVICE, serviceId);
-        server.addService(service);
+        Resource serviceRes = new Resource();
+        Set<Resource> services = new HashSet<Resource>();
+        services.add(serviceRes);
+        EasyMock.expect(resourceTraverser.getRelatedResources(serverRes, RelationshipTypes.SERVICE, Direction.OUTGOING, false)).andReturn(services);
+        EasyMock.expect(serviceFactory.createService(serviceRes)).andReturn(service);
         EasyMock.expect(serverManager.findServerById(SERVER_ID.getId())).andReturn(server);
         autoInvManager.toggleRuntimeScan(null, SERVER_ID, true);
 
@@ -203,7 +248,7 @@ public class ServerRestartHandlerTest
     }
 
     private void verify() {
-        EasyMock.verify(autoInvManager, serverManager, configManager, trackerManager);
+        EasyMock.verify(autoInvManager, serverManager, configManager, trackerManager,serviceFactory,resourceTraverser);
     }
 
 }

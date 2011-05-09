@@ -163,8 +163,8 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      * 
      */
     @Transactional(readOnly = true)
-    public Measurement getAvailMeasurement(Resource resource) {
-        return measurementRepository.findAvailabilityMeasurementByResource(resource.getId());
+    public Measurement getAvailMeasurement(Integer resource) {
+        return measurementRepository.findAvailabilityMeasurementByResource(resource);
     }
 
     /**
@@ -216,9 +216,9 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      * 
      */
     @Transactional(readOnly = true)
-    public List<Measurement> getAvailMeasurementChildren(Resource resource) {
-        final List<Integer> sList = Collections.singletonList(resource.getId());
-        List<Measurement> rtn = getAvailMeasurementChildren(sList).get(resource.getId());
+    public List<Measurement> getAvailMeasurementChildren(Integer resource) {
+        final List<Integer> sList = Collections.singletonList(resource);
+        List<Measurement> rtn = getAvailMeasurementChildren(sList).get(resource);
         if (rtn == null) {
             rtn = new ArrayList<Measurement>(0);
         }
@@ -262,9 +262,9 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
 
             for (MaintenanceEvent event : events) {
                 ResourceGroup group = groupManager.findResourceGroupById(event.getGroupId());
-                Collection<Resource> resources = groupManager.getMembers(group);
+                Collection<Integer> resources = group.getMemberIds();
 
-                for (Resource resource : resources) {
+                for (Integer resource : resources) {
                     List<Measurement> measurements = getAvailMeasurementChildren(
                         resource);
 

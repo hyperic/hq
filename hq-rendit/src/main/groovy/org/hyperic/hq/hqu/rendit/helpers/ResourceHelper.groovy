@@ -191,7 +191,11 @@ class ResourceHelper extends BaseHelper {
     }
     
     public Resource findById(id) {
-        return ResourceFactory.create(rman.findResourceById(id))
+        org.hyperic.hq.inventory.domain.Resource res = rman.findResourceById(id)
+        if(res == null) {
+            return null;
+        }
+        return ResourceFactory.create(res)
         
     }
     
@@ -219,11 +223,6 @@ class ResourceHelper extends BaseHelper {
             }
         } // TODO else we assume it's already a Resource 
         
-        
-        def pageInfo = args.withPaging
-        if (!pageInfo) {
-            pageInfo = PageInfo.getAll(ResourceSortField.NAME, true)
-        }
         //TODO used to take pageInfo into account
         return ResourceFactory.create(type.getResources())
     }

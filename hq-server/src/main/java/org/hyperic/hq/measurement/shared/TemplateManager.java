@@ -73,6 +73,18 @@ public interface TemplateManager {
      */
     public List<MeasurementTemplate> findTemplatesByMonitorableType(AuthzSubject user,String type)
         throws PermissionException;
+    
+    
+    List<MeasurementTemplate> findTemplatesByMonitorableType(AuthzSubject user,PageInfo pInfo, String type)
+        throws PermissionException;
+    
+    
+    List<MeasurementTemplate> findTemplates(AuthzSubject user, PageInfo pInfo,
+        boolean defaultOn) throws PermissionException;
+    
+    List<MeasurementTemplate> findTemplatesByMonitorableType(AuthzSubject user,
+        PageInfo pInfo, String type,
+        boolean defaultOn) throws PermissionException;
 
     /**
      * Look up a measurement templates for a monitorable type and category.

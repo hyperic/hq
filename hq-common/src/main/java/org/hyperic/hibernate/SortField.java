@@ -34,7 +34,7 @@ package org.hyperic.hibernate;
 public interface SortField {
     String getDescription();
 
-    String getValue();
+    String getSortString();
 
     boolean isSortable();
 }

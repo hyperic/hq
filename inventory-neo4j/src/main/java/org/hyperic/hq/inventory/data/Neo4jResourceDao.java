@@ -41,9 +41,24 @@ public class Neo4jResourceDao implements ResourceDao {
         return resourceFinder.count();
     }
 
+    @SuppressWarnings("unused")
+    public int countByIndexedProperty(String propertyName, Object propertyValue) {
+        int count = 0;
+        IndexHits<Node> indexHits = graphDatabaseContext.getIndex(Resource.class, null).query(
+            propertyName,propertyValue);
+        if (indexHits == null) {
+            return 0;
+        }
+        for (Node node : indexHits) {
+            count++;
+        }
+        return count;
+    }
+
     public List<Resource> find(Integer firstResult, Integer maxResults) {
         // TODO the root resource is not filtered out from DAO. Find a way to do
         // so?
+        //TODO not efficient to create Resource objs for paging.  Better to page at Node level
         List<Resource> resources = new ArrayList<Resource>();
         Iterable<Resource> result = resourceFinder.findAll();
         int currentPosition = 0;
@@ -70,7 +85,7 @@ public class Neo4jResourceDao implements ResourceDao {
         }
         return resources;
     }
-
+    
     public Resource findById(Integer id) {
         // TODO once id becomes a String, look up by indexed property. Using id
         // index doesn't work for some reason.
@@ -113,9 +128,7 @@ public class Neo4jResourceDao implements ResourceDao {
 
     // TODO Get rid of assumption that name is unique and use identifier
     public Resource findByName(String name) {
-        Resource resource = resourceFinder.findByPropertyValue("name", name);
-
-        return resource;
+        return resourceFinder.findByPropertyValue("name", name);
     }
 
     public Set<Resource> findByOwner(String owner) {

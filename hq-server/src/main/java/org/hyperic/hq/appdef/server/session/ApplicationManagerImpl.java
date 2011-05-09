@@ -496,23 +496,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
         //permissionManager.checkViewPermission(subject, app.getEntityId());
         return toApplication(app);
     }
-
-    /**
-     * Find an operation by name inside a ResourcetypeValue object
-     */
-    protected OperationType getOperationByName(ResourceType rtV, String opName)
-        throws PermissionException {
-        Collection<OperationType> ops = rtV.getOperationTypes();
-        for (OperationType op : ops) {
-
-            if (op.getName().equals(opName)) {
-                return op;
-            }
-        }
-        throw new PermissionException("Operation: " + opName + " not valid for ResourceType: " +
-                                      rtV.getName());
-    }
-   
+ 
     private AppService toAppService(Resource service) {
        AppService appService = new AppService();
        appService.setService(serviceFactory.createService(service));
@@ -538,12 +522,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
         }
         //TODO perm check
         //permissionManager.checkModifyPermission(subject, app.getEntityId());
-        for (Iterator<Resource> i = app.getMembers().iterator(); i.hasNext();) {
-                Resource appSvc = i.next();
-                AppdefEntityID anId = AppdefEntityID.newServiceID(appSvc.getId());
+        for (Iterator<Integer> i = app.getMemberIds().iterator(); i.hasNext();) {
+                Integer appSvc = i.next();
+                AppdefEntityID anId = AppdefEntityID.newServiceID(appSvc);
                 if (!entityIds.contains(anId)) {
                     try {
-                        removeAppService(subject, appId, appSvc.getId());
+                        removeAppService(subject, appId, appSvc);
                     } catch (ApplicationException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
@@ -608,8 +592,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
     private Collection<Application> findByServerIdOrderName(Integer id, boolean asc) {
         Set<Application> applications = new HashSet<Application>();
         Resource server = resourceManager.findResourceById(id);
-        Set<Resource> services = server.getResourcesFrom(RelationshipTypes.SERVICE);
-        for(Resource service: services) {
+        Set<Integer> services = server.getResourceIdsFrom(RelationshipTypes.SERVICE);
+        for(Integer service: services) {
            applications.addAll(findByService(service));
         }
         final List<Application> rtn = new ArrayList<Application>(applications);
@@ -634,12 +618,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
         return null;
     }
     
-    private Set<Application> findByService(Resource service) {
+    private Set<Application> findByService(Integer serviceId) {
         ResourceType appType = resourceManager.findResourceTypeByName(AppdefEntityConstants.APPDEF_NAME_APPLICATION);
         Set<Application> applications = new HashSet<Application>();
         for(Resource groupResource: appType.getResources()) {
             ResourceGroup group = (ResourceGroup)groupResource;
-            if(group.getMembers().contains(service)) {
+            if(group.isMember(serviceId)) {
                 applications.add(toApplication(group));
             }
         }
@@ -647,8 +631,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
     
     private Collection<Application> findByServiceIdOrderName(Integer id) {
-        Resource service = resourceManager.findResourceById(id);
-        final List<Application> rtn = new ArrayList<Application>(findByService(service));
+        final List<Application> rtn = new ArrayList<Application>(findByService(id));
         Collections.sort(rtn, new Comparator<Application>() {
             public int compare(Application o1, Application o2) {
                 return o1.getSortName().compareTo(o2.getSortName());
@@ -839,12 +822,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     }
     
     public Number getApplicationCount() {
-      return getAllApplications().size();
-    }
-    
-    private Set<Resource> getAllApplications() {
-        return resourceManager.findResourceTypeByName(AppdefEntityConstants.APPDEF_NAME_APPLICATION).
-            getResources();
+      return resourceManager.findResourceTypeByName(AppdefEntityConstants.APPDEF_NAME_APPLICATION).countResources();
     }
     
     public PageList<Resource> getAllApplicationResources(AuthzSubject subject, PageControl pc) {

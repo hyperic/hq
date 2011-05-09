@@ -124,5 +124,6 @@
 	<classpathentry kind="con" path="org.eclipse.ajdt.core.ASPECTJRT_CONTAINER"/>
 	<classpathentry kind="var" path="M2_REPO/org/hsqldb/hsqldb/2.1.0/hsqldb-2.1.0.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/hibernate/javax/persistence/hibernate-jpa-2.0-api/1.0.0.Final/hibernate-jpa-2.0-api-1.0.0.Final.jar" sourcepath="M2_REPO/org/hibernate/javax/persistence/hibernate-jpa-2.0-api/1.0.0.Final/hibernate-jpa-2.0-api-1.0.0.Final-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/hyperic/hq/hq-diagnostics/5.0.0.BUILD-SNAPSHOT/hq-diagnostics-5.0.0.BUILD-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

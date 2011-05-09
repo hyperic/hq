@@ -49,7 +49,7 @@ public abstract class AppdefResource extends AppdefNamedBean
         return _resource;
     }
 
-    protected void setResource(Resource resource) {
+    public void setResource(Resource resource) {
         _resource = resource;
     }
     

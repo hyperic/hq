@@ -26,18 +26,23 @@
 package org.hyperic.hq.grouping.server.session;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import org.hyperic.hq.appdef.shared.AppdefCompatGrpComparator;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.auth.domain.AuthzSubject;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
+import org.hyperic.hq.inventory.domain.ResourceGroup;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -59,12 +64,12 @@ public class GroupUtil {
                                              int[] orderSpec, PageControl pc)
         throws AppdefEntityNotFoundException, PermissionException,
                GroupNotCompatibleException {
-        List<AppdefEntityID> retVal;
-        AppdefGroupValue agv;
+       
         Comparator<AppdefEntityID> comparator;
-
-        agv = GroupUtil.getGroup(subject,entity,pc);
-        if ( !agv.isGroupCompat() ) {
+        ResourceGroup group  = Bootstrap.getBean(ResourceGroupManager.class).findResourceGroupById(entity.getId());
+        int groupEntType = (Integer)group.getProperty(ResourceGroupManagerImpl.GROUP_ENT_TYPE);
+        Set<Integer> members = group.getMemberIds();
+        if (! AppdefEntityConstants.isGroupCompat(AppdefEntityConstants.getAppdefGroupTypeInt(group.getType().getName())) ) {
             throw new GroupNotCompatibleException(entity);
         }
 
@@ -73,13 +78,15 @@ public class GroupUtil {
         } else {
             comparator = null;
         }
+        List<AppdefEntityID> entities = new ArrayList<AppdefEntityID>();
+        for (Integer entry: members) {
+            entities.add(new AppdefEntityID(groupEntType,entry) );
+        }
+        if (comparator !=null)
+            Collections.sort(entities,comparator);
 
-        retVal = agv.getAppdefGroupEntries(comparator);
-
-        if (retVal == null)
-            retVal = new ArrayList<AppdefEntityID>();
-
-        return retVal;
+        return new PageList<AppdefEntityID>(entities,members.size());
+        
     }
 
     public static List getGroupMembers(AuthzSubject subject,

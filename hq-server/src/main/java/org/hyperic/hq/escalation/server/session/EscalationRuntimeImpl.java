@@ -272,7 +272,9 @@ public class EscalationRuntimeImpl implements EscalationRuntime {
 
 			}
 		}
-		escalationStateRepository.deleteByIds(stateIds);
+		if(!stateIds.isEmpty()) {
+		    escalationStateRepository.deleteByIds(stateIds);
+		}
 	}
 
 	private void unscheduleEscalation_(Integer stateId) {

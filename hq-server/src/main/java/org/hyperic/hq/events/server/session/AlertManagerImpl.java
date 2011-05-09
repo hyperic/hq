@@ -530,7 +530,7 @@ public class AlertManagerImpl implements AlertManager,
             endTime = TimingVoodoo.roundUpTime(endTime, 60000);
         }
         AlertSortField sortField = (AlertSortField) pageInfo.getSort();
-        Sort sort = new Sort(pageInfo.isAscending()? Direction.ASC: Direction.DESC,sortField.getSortString("a", "d", "r"));
+        Sort sort = new Sort(pageInfo.isAscending()? Direction.ASC: Direction.DESC,sortField.getSortString());
         PageRequest pageRequest = new PageRequest(pageInfo.getPageNum(), pageInfo.getPageSize(), sort);
         Set<Integer> groupMembers = null;
         if(groupId != null) {

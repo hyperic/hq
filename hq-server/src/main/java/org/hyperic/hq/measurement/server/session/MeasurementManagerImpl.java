@@ -1169,11 +1169,11 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
      */
     public List<DataPoint> enableMeasurements(AuthzSubject admin,
                                               MaintenanceEvent event,
-                                              Collection<Resource> resources) {
+                                              Collection<Integer> resources) {
         final List<DataPoint> rtn = new ArrayList<DataPoint>(resources.size());
 
         AvailabilityManager am = getAvailabilityManager();
-        for (Resource resource : resources) {
+        for (Integer resource : resources) {
             // HQ-1653: Only disable/enable availability measurements
             // TODO: G (when AvailabilityManager is convered)
             List<Measurement> measurements = am.getAvailMeasurementChildren(resource);
@@ -1319,8 +1319,8 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     private String[] getTemplatesToCheck(AuthzSubject s, AppdefEntityID id)
         throws AppdefEntityNotFoundException, PermissionException {
         String mType = (new AppdefEntityValue(id, s)).getMonitorableType();
-        List<MeasurementTemplate> templates = measurementTemplateRepository.findByMonitorableTypeDefaultOn(
-            mType);
+        List<MeasurementTemplate> templates = measurementTemplateRepository.findByMonitorableTypeAndDefaultOn(
+            mType,true);
         List<String> dsnList = new ArrayList<String>(SAMPLE_SIZE);
         int idx = 0;
         int availIdx = -1;

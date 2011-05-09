@@ -75,7 +75,8 @@ public final class ClassicEscalationAlertType
     
     protected void setEscalation(Integer defId, Escalation escalation) {
         EscalationManager escMan = Bootstrap.getBean(EscalationManager.class);
-        AlertDefinition def = getDefMan().getByIdNoCheck(defId);
+        //TODO need to get Resource alert defs too
+        AlertDefinition def = getDefMan().getTypeDefByIdNoCheck(defId);
         // End any escalation we were previously doing.
         escMan.endEscalation(def);
             

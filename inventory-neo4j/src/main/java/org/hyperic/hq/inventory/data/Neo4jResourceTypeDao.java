@@ -31,6 +31,7 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
     }
 
     public List<ResourceType> find(Integer firstResult, Integer maxResults) {
+      //TODO not efficient to create ResourceType objs for paging.  Better to page at Node level
         List<ResourceType> resourceTypes = new ArrayList<ResourceType>();
         Iterable<ResourceType> result = resourceTypeFinder.findAll();
         int currentPosition = 0;
@@ -65,8 +66,7 @@ public class Neo4jResourceTypeDao implements ResourceTypeDao {
     }
 
     public ResourceType findByName(String name) {
-        ResourceType type = resourceTypeFinder.findByPropertyValue("name", name);
-        return type;
+        return resourceTypeFinder.findByPropertyValue("name", name);
     }
 
     @SuppressWarnings("unchecked")
