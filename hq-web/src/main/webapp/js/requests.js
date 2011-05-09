@@ -14,9 +14,9 @@
     var rtimer = null;
 
 
-    function showProblemResponse(originalRequest) {
+    function showProblemResponse(response, args) {
 
-        var probResp = eval("(" + originalRequest.responseText + ")");
+        var probResp = response;
         var mList = probResp.problems;
         var problemTable = document.getElementById('problemResourcesTable');
         var urlColon = ":"
@@ -120,8 +120,8 @@
         }
     }
 
-    function showRecentAlerts(originalRequest) {
-        var alertText = eval("(" + originalRequest.responseText + ")");
+    function showRecentAlerts(response, args) {
+        var alertText = response;
         var aList = alertText.criticalAlerts;
         var token = alertText.token;
         var alertTable;
@@ -266,9 +266,9 @@
         'Updated: ' + refreshTime();
     }
 
-    function showAvailSummary(originalRequest) {
+    function showAvailSummary(response, args) {
 
-        var availText = eval("(" + originalRequest.responseText + ")");
+        var availText = response;
         var availList = availText.availSummary;
         var browseUrl = $('browseUrl').href;
         var urlColon = ":";
@@ -479,9 +479,9 @@
         //Refresh in 60 seconds
     }
 
-    function showFavoriteResponse(originalRequest) {
+    function showFavoriteResponse(response, args) {
        
-        var faveText = eval('(' + originalRequest.responseText + ')');
+        var faveText = response;
         var fList = faveText.favorites;
         var table = document.getElementById('favoriteTable');
         $('modifiedFavoriteTime').innerHTML = 'Updated: ' + refreshTime();
