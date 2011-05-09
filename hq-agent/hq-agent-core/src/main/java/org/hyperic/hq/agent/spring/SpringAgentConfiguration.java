@@ -28,22 +28,5 @@ package org.hyperic.hq.agent.spring;
 //@Configuration
 public class SpringAgentConfiguration {
 
-    /* temporary */
-   /* @Autowired
-    private AgentManager agentManager;
-
-    @Autowired
-    private CommandDispatcher dispatcher;
-
-    @Autowired
-    private List<AgentServerHandler> serverHandlers;
-
-    @Bean
-    public AgentService agentService() {
-        AgentService as = new AgentLifecycleService(agentManager, dispatcher, serverHandlers);
-        System.out.println("created " + as);
-        return as;
-    }*/
-    
-    /* for rabbit-operation-service */
+   
 }

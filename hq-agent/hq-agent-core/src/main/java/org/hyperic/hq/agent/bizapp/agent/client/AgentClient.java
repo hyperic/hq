@@ -996,13 +996,11 @@ public class AgentClient {
         bootProps = this.config.getBootProperties();
 
         try {
-            int iSleepTime = getStartupTimeout(bootProps);
-
+            int iSleepTime = getStartupTimeout(bootProps); 
             startupSock = new ServerSocket(0);
             startupSock.setSoTimeout(iSleepTime);
         } catch (IOException exc) {
-            throw new AgentInvokeException("Unable to setup a socket to " +
-                    "listen for Agent startup: " +
+            throw new AgentInvokeException("Unable to setup a socket to listen for Agent startup: " +
                     exc.getMessage());
         }
 
@@ -1014,8 +1012,7 @@ public class AgentClient {
             throw new AgentInvokeException("Invalid notify up port: " + startupSock.getLocalPort());
         }
 
-        /*Thread t = new Thread(new AgentDaemon.RunnableAgent(this.config));
-        t.start();*/
+        /* new Thread(new AgentDaemon.RunnableAgent(this.config)).start(); */
         try {
             initialize(config);
             SYSTEM_OUT.println("- Agent thread running");
@@ -1024,13 +1021,12 @@ public class AgentClient {
             throw new AgentInvokeException(t.getMessage());
         }
 
-        /* Now comes the painful task of figuring out if the agent
-           started correctly. */
+        /* Has the agent started correctly */
         SYSTEM_OUT.println("- Verifying if agent is running...");
         this.verifyAgentRunning(startupSock);
         SYSTEM_OUT.println("- Agent is running");
 
-        // Ask the agent if they have a server setup
+        /* Ask the agent if they have a server setup */    
         try {
             providerInfo = this.camCommands.getProviderInfo();
         } catch (Exception exc) {

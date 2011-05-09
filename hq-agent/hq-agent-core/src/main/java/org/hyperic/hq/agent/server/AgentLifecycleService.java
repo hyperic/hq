@@ -184,13 +184,12 @@ public class AgentLifecycleService implements AgentService, SmartLifecycle {
             agentManager.sendNotification(getNotifyAgentUp(), "we're up");
 
             if (continuable.get()) {
-                System.out.println("AgentLifecycleService - Agent Listener started");
-
+                logger.info("AgentLifecycleService - Agent Listener started");
                 started.set(true);
-
                 listener.listenLoop();
             }
-            System.out.println("AgentLifecycleService - A problem occurred with the listener. Stopping the Agent");
+            
+            logger.info("AgentLifecycleService - A problem occurred with the listener. Stopping the Agent");
 
             listener.die();
 
