@@ -103,14 +103,14 @@ public final class CommandsAPIInfo
         
         ProviderInfo provider = new ProviderInfo(providerAddress, agentToken);
         
-        boolean isNewTransport = 
-            Boolean.valueOf(storage.getValue(PROP_IS_NEW_TRANSPORT)).booleanValue();
+        boolean isNewTransport =
+                Boolean.valueOf(storage.getValue(PROP_IS_NEW_TRANSPORT));
         
         if (isNewTransport) {
-            boolean unidirectional = 
-                Boolean.valueOf(storage.getValue(PROP_UNIDIRECTIONAL)).booleanValue();
-            int unidirectionalPort = 
-                Integer.valueOf(storage.getValue(PROP_UNIDIRECTIONAL_PORT)).intValue();
+            boolean unidirectional =
+                    Boolean.valueOf(storage.getValue(PROP_UNIDIRECTIONAL));
+            int unidirectionalPort =
+                    Integer.valueOf(storage.getValue(PROP_UNIDIRECTIONAL_PORT));
             provider.setNewTransport(unidirectional, unidirectionalPort);
         }
         

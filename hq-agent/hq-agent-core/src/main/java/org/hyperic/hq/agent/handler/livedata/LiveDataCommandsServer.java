@@ -29,7 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentAPIInfo;
 import org.hyperic.hq.agent.AgentRemoteException;
-import org.hyperic.hq.agent.AgentRemoteValue;
+import org.hyperic.hq.agent.AgentRemoteValue; 
 import org.hyperic.hq.agent.server.AgentServerHandler;
 import org.hyperic.hq.agent.server.AgentService;
 import org.hyperic.hq.agent.server.AgentStartException;
@@ -48,13 +48,15 @@ import java.io.OutputStream;
 public class LiveDataCommandsServer implements AgentServerHandler {
 
     private Log _log = LogFactory.getLog(LiveDataCommandsServer.class);
+
     private LiveDataPluginManager _manager;
 
     private LiveDataCommandsAPI _commands = new LiveDataCommandsAPI();
     
     private LiveDataCommandsService _liveDataCommandsService;
     
-
+    private AgentService agentService;
+    
     public String[] getCommandSet() {
         return LiveDataCommandsAPI.commandSet;
     }
@@ -63,14 +65,11 @@ public class LiveDataCommandsServer implements AgentServerHandler {
         return _commands;
     }
 
-    public AgentRemoteValue dispatchCommand(AgentService agentService, String cmd, AgentRemoteValue args,
-                                            InputStream inStream,
-                                            OutputStream outStream)
-        throws AgentRemoteException
-    {
+    public AgentRemoteValue dispatchCommand(String cmd, AgentRemoteValue args, InputStream inStream,
+                                            OutputStream outStream) throws AgentRemoteException {
+
         if (cmd.equals(LiveDataCommandsAPI.command_getData)) {
             LiveData_args res = new LiveData_args(args);
-                        
             return _liveDataCommandsService.getData(res);
         } else {
             throw new AgentRemoteException("Unexpected command: " + cmd);
@@ -78,7 +77,8 @@ public class LiveDataCommandsServer implements AgentServerHandler {
     }
 
     public void startup(AgentService agentService) throws AgentStartException {
-
+       this.agentService = agentService;
+        
         try {
             _manager = (LiveDataPluginManager)agentService.
                 getPluginManager(ProductPlugin.TYPE_LIVE_DATA);

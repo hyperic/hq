@@ -35,6 +35,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -50,7 +51,7 @@ public class RemotingCommandDispatcher implements CommandDispatcher {
 
     private Log log = LogFactory.getLog(this.getClass());
 
-    private Map<String, AgentServerHandler> commands = new ConcurrentHashMap<String, AgentServerHandler>();
+    private Map<String, AgentServerHandler> commandHandlers = new ConcurrentHashMap<String, AgentServerHandler>();
 
     private AgentService agentService;
 
@@ -58,12 +59,14 @@ public class RemotingCommandDispatcher implements CommandDispatcher {
      * Register a server handler with the dispatcher.  The server
      * handler will be queried as to what commands it knows about,
      * and that information will be saved locally.
-     * @param startedHandler the handler implementing the AgentServerHandler interface
+     * @param startedHandlers the handlers implementing the AgentServerHandler interface
      * @see AgentServerHandler
      */
-    public void addServerHandler(AgentServerHandler startedHandler) {
-        for (String command : startedHandler.getCommandSet()) {
-            commands.put(command, startedHandler);
+    public void addServerHandlers(List<AgentServerHandler> startedHandlers) {
+        for (AgentServerHandler handler : startedHandlers) {
+            for (String command : handler.getCommandSet()) {
+                commandHandlers.put(command, handler);
+            }
         }
     }
 
@@ -76,12 +79,12 @@ public class RemotingCommandDispatcher implements CommandDispatcher {
      * @throws AgentRemoteException indicating some error occurred dispatching the method.
      */
     public AgentRemoteValue processRequest(AgentCommand agentCommand, InputStream inStream, OutputStream outStream) throws AgentRemoteException {
-        if (commands.get(agentCommand.getCommand()) == null)
+        if (commandHandlers.get(agentCommand.getCommand()) == null)
             throw new AgentRemoteException("Unknown command, '" + agentCommand.getCommand() + "'");
 
         try {
 
-            AgentServerHandler agentServerHandler = commands.get(agentCommand.getCommand());
+            AgentServerHandler agentServerHandler = commandHandlers.get(agentCommand.getCommand());
             AgentAPIInfo apiInfo = agentServerHandler.getAPIInfo();
 
             if (!apiInfo.isCompatible(agentCommand.getCommandVersion())) {
@@ -89,7 +92,8 @@ public class RemotingCommandDispatcher implements CommandDispatcher {
                         .append(agentCommand.getCommandVersion()).append(" vs. ").append(apiInfo.getVersion()).toString());
             }
 
-            return agentServerHandler.dispatchCommand(agentService, agentCommand.getCommand(), agentCommand.getCommandArg(), inStream, outStream);
+            /* each handler is handed an instance of AgentService on startup() prior to this */
+            return agentServerHandler.dispatchCommand(agentCommand.getCommand(), agentCommand.getCommandArg(), inStream, outStream);
 
         }
         catch (AgentRemoteException exc) {

@@ -84,7 +84,7 @@ public class AgentManager extends AgentMonitorSimple {
             }
         }
     }
-
+ 
     protected void scanLegacyCustomDir(String startDir) {
         File dir = new File(startDir).getAbsoluteFile();
         while (dir != null) {
@@ -95,8 +95,8 @@ public class AgentManager extends AgentMonitorSimple {
                     String name = file.getName();
                     if (name.endsWith("-plugin.jar") || name.endsWith("-plugin.xml")) {
                         logger.warn("WARNING - custom plugins on the agent are no longer supported.  " +
-                                    "Will not load plugin - " + name + ", instead add this plugin " +
-                                    "to the HQ Server via the Plugin Manager UI.");
+                                "Will not load plugin - " + name + ", instead add this plugin " +
+                                "to the HQ Server via the Plugin Manager UI.");
                     }
                 }
                 return;
@@ -105,9 +105,11 @@ public class AgentManager extends AgentMonitorSimple {
         }
     }
 
-    /** merge fromDirs into the plugins Collection keyed by pluginInfo.name and return plugins */
+    /**
+     * merge fromDirs into the plugins Collection keyed by pluginInfo.name and return plugins
+     */
     protected Set<PluginInfo> mergeByName(Collection<PluginInfo> fromDirs,
-                                        Set<PluginInfo> plugins) {
+                                          Set<PluginInfo> plugins) {
         final Collection<String> pluginFiles = new HashSet<String>();
         for (final PluginInfo info : plugins) {
             pluginFiles.add(info.jar);
@@ -119,7 +121,7 @@ public class AgentManager extends AgentMonitorSimple {
         }
         return plugins;
     }
-    
+
     /* TODO remove */
 
     protected void setProxy(AgentConfig config) {
@@ -305,7 +307,6 @@ public class AgentManager extends AgentMonitorSimple {
     }
 
 
-
     /**
      * Server may be down or Provider may not be setup.
      * Either way we want to retry until the data is sent
@@ -313,7 +314,7 @@ public class AgentManager extends AgentMonitorSimple {
      * @param storageProvider the storage provider
      */
     protected void sendPluginStatusToServer(final Collection<PluginInfo> plugins, final AgentStorageProvider storageProvider) {
-         Thread thread = new Thread("PluginStatusSender") {
+        Thread thread = new Thread("PluginStatusSender") {
             public void run() {
                 while (true) {
                     try {
@@ -330,7 +331,7 @@ public class AgentManager extends AgentMonitorSimple {
                         client.sendPluginReportToServer();
                         logger.info("Successfully sent plugin status to server");
                         break;
-                     } catch (Exception e) {
+                    } catch (Exception e) {
                         logger.warn("could not send plugin status to server, will retry:  " + e);
                         logger.debug(e, e);
                     }

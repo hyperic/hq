@@ -746,33 +746,21 @@ public class AgentClient {
         /* Check to see if this agent already has a setup for a server.
            If it does, allow the user to re-register with the new IP address */
         if ((providerInfo = this.camCommands.getProviderInfo()) != null &&
-                providerInfo.getProviderAddress() != null &&
-                providerInfo.getAgentToken() != null) {
+                providerInfo.getProviderAddress() != null && providerInfo.getAgentToken() != null) {
             oldAgentToken = providerInfo.getAgentToken();
 
             boolean setupTokens;
 
-            SYSTEM_OUT.println("- Agent is already setup for " +
-                    PRODUCT + " @ " +
-                    providerInfo.getProviderAddress());
-            setupTokens =
-                    this.askYesNoQuestion("Would you like to re-setup the auth " +
-                            "tokens", false, QPROP_RESETUPTOK);
-            if (setupTokens == false) {
+            SYSTEM_OUT.println("- Agent is already setup for " + PRODUCT + " @ " + providerInfo.getProviderAddress());
+            setupTokens = this.askYesNoQuestion("Would you like to re-setup the auth tokens", false, QPROP_RESETUPTOK);
+            if (!setupTokens) {
                 // Here we basically just need to inform the server that the 
-                // agent with a given AgentToken will re-use that, but
-                // with a different IP address
-                SYSTEM_OUT.println("- Informing " + PRODUCT +
-                        " about agent setup changes");
+                // agent with a given AgentToken will re-use that, but with a different IP address
+                SYSTEM_OUT.println("- Informing " + PRODUCT + " about agent setup changes");
                 try {
                     response = bizapp.updateAgent(providerInfo.getAgentToken(),
-                            user, pword, agentIP,
-                            agentPort,
-                            isNewTransportAgent,
-                            unidirectional);
-                    if (response != null)
-                        SYSTEM_ERR.println("- Error updating agent: " +
-                                response);
+                            user, pword, agentIP, agentPort, isNewTransportAgent, unidirectional);
+                    if (response != null) SYSTEM_ERR.println("- Error updating agent: " + response);
                 } catch (Exception exc) {
                     SYSTEM_ERR.println("- Error updating agent: " +
                             exc.getMessage());
@@ -781,12 +769,10 @@ public class AgentClient {
                 if (providerInfo.isNewTransport() != isNewTransportAgent ||
                         providerInfo.isUnidirectional() != unidirectional) {
 
-                    ProviderInfo registeredProviderInfo =
-                            new ProviderInfo(provider, providerInfo.getAgentToken());
+                    ProviderInfo registeredProviderInfo = new ProviderInfo(provider, providerInfo.getAgentToken());
 
                     if (isNewTransportAgent) {
-                        registeredProviderInfo.setNewTransport(unidirectional,
-                                unidirectionalPort);
+                        registeredProviderInfo.setNewTransport(unidirectional, unidirectionalPort);
                     }
 
                     this.camCommands.setProviderInfo(registeredProviderInfo);
@@ -834,8 +820,7 @@ public class AgentClient {
             return;
         }
 
-        SYSTEM_OUT.println("- " + PRODUCT +
-                " gave us the following agent token");
+        SYSTEM_OUT.println("- " + PRODUCT + " gave us the following agent token");
         SYSTEM_OUT.println("    " + agentToken);
         SYSTEM_OUT.println("- Informing agent of new " + PRODUCT + " server");
 
@@ -846,6 +831,7 @@ public class AgentClient {
         }
 
         this.camCommands.setProviderInfo(registeredProviderInfo);
+
         SYSTEM_OUT.println("- Validating");
         providerInfo = this.camCommands.getProviderInfo();
 
@@ -996,7 +982,7 @@ public class AgentClient {
         bootProps = this.config.getBootProperties();
 
         try {
-            int iSleepTime = getStartupTimeout(bootProps); 
+            int iSleepTime = getStartupTimeout(bootProps);
             startupSock = new ServerSocket(0);
             startupSock.setSoTimeout(iSleepTime);
         } catch (IOException exc) {
@@ -1026,7 +1012,7 @@ public class AgentClient {
         this.verifyAgentRunning(startupSock);
         SYSTEM_OUT.println("- Agent is running");
 
-        /* Ask the agent if they have a server setup */    
+        /* Ask the agent if they have a server setup */
         try {
             providerInfo = this.camCommands.getProviderInfo();
         } catch (Exception exc) {

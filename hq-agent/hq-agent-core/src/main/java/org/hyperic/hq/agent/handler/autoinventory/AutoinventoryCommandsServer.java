@@ -33,7 +33,7 @@ import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentRemoteValue;
 import org.hyperic.hq.agent.bizapp.agent.CommandsAPIInfo;
 import org.hyperic.hq.agent.bizapp.client.AutoinventoryCallbackClient;
-import org.hyperic.hq.agent.bizapp.client.StorageProviderFetcher;
+import org.hyperic.hq.agent.bizapp.client.StorageProviderFetcher; 
 import org.hyperic.hq.agent.server.*;
 import org.hyperic.hq.autoinventory.*;
 import org.hyperic.hq.autoinventory.agent.AICommandsAPI;
@@ -50,9 +50,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 
 @Component
-public class AutoinventoryCommandsServer 
-    implements AgentServerHandler, AgentNotificationHandler, ScanListener 
-{
+public class AutoinventoryCommandsServer implements AgentServerHandler, AgentNotificationHandler, ScanListener  {
     // max sleep is 1 hour between attempts to send AI report to server.
     public static final long AIREPORT_MAX_SLEEP_WAIT = (60000 * 60);
 
@@ -74,6 +72,7 @@ public class AutoinventoryCommandsServer
 
     private AutoinventoryCallbackClient _client;
 
+    private AgentService agentService;
 
     public AgentAPIInfo getAPIInfo(){
         return _verAPI;
@@ -83,9 +82,8 @@ public class AutoinventoryCommandsServer
         return AICommandsAPI.commandSet;
     }
 
-    public AgentRemoteValue dispatchCommand(AgentService agentService, String cmd, AgentRemoteValue args,
-                                            InputStream in, OutputStream out)
-        throws AgentRemoteException {
+    public AgentRemoteValue dispatchCommand(String cmd, AgentRemoteValue args,
+                                            InputStream in, OutputStream out) throws AgentRemoteException {
 
         _log.debug("AICommandsServer: asked to invoke cmd=" + cmd);
 
@@ -149,8 +147,10 @@ public class AutoinventoryCommandsServer
     }
 
     public void startup (AgentService agentService) throws AgentStartException {
+        this.agentService = agentService;
+        
         try {
-            
+
             _storage = agentService.getStorageProvider();
             _client  = setupClient();
             _certDN  = _storage.getValue(agentService.getCertDn());
@@ -161,33 +161,23 @@ public class AutoinventoryCommandsServer
         AutoinventoryPluginManager pluginManager;
 
         try {
-            pluginManager = (AutoinventoryPluginManager)
-                agentService.getPluginManager(ProductPlugin.TYPE_AUTOINVENTORY);
+            pluginManager = (AutoinventoryPluginManager) agentService.getPluginManager(ProductPlugin.TYPE_AUTOINVENTORY);
         } catch (Exception e) {
-            throw new AgentStartException("Unable to get auto inventory " +
-                                          "plugin manager: " + 
-                                          e.getMessage());
+            throw new AgentStartException("Unable to get auto inventory plugin manager: " +  e.getMessage());
         }
 
-        // Initialize the runtime autodiscoverer
-        _rtAutodiscoverer = new RuntimeAutodiscoverer(this, _storage, 
-                                                      agentService, _client);
+        _rtAutodiscoverer = new RuntimeAutodiscoverer(this, _storage, agentService, _client);
 
-        // Fire up the scan manager
-        _scanManager = new ScanManager(this, _log, pluginManager,  
-                                      _rtAutodiscoverer);
+        _scanManager = new ScanManager(this, _log, pluginManager, _rtAutodiscoverer);
         
-        _aiCommandsService = new AICommandsService(pluginManager,
-                                                   _rtAutodiscoverer, 
-                                                   _scanManager);
+        _aiCommandsService = new AICommandsService(pluginManager, _rtAutodiscoverer, _scanManager);
         
         AgentTransportLifecycle agentTransportLifecycle;
         
         try {
             agentTransportLifecycle = agentService.getAgentTransportLifecycle();
         } catch (Exception e) {
-            throw new AgentStartException("Unable to get agent transport lifecycle: "+
-                                            e.getMessage());
+            throw new AgentStartException("Unable to get agent transport lifecycle: " + e.getMessage());
         }
         
         _log.info("Registering AI Commands Service with Agent Transport");
@@ -202,8 +192,7 @@ public class AutoinventoryCommandsServer
 
         // Do we have a provider?
         if ( CommandsAPIInfo.getProvider(_storage) == null ) {
-            agentService.registerNotifyHandler(this, 
-                                        CommandsAPIInfo.NOTIFY_SERVER_SET);
+            agentService.registerNotifyHandler(this, CommandsAPIInfo.NOTIFY_SERVER_SET);
         } else {
             _rtAutodiscoverer.triggerDefaultScan();
         }

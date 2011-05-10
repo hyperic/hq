@@ -31,7 +31,7 @@ import org.hyperic.hq.agent.AgentAPIInfo;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentRemoteValue;
 import org.hyperic.hq.agent.bizapp.client.ControlCallbackClient;
-import org.hyperic.hq.agent.bizapp.client.StorageProviderFetcher;
+import org.hyperic.hq.agent.bizapp.client.StorageProviderFetcher; 
 import org.hyperic.hq.agent.server.*;
 import org.hyperic.hq.control.agent.ControlCommandsAPI;
 import org.hyperic.hq.control.agent.client.ControlCommandsClient;
@@ -45,41 +45,42 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 @Component
-public class ControlCommandsServer 
-    implements AgentServerHandler
-{
+public class ControlCommandsServer implements AgentServerHandler {
     // possibly make this configurable at some point
     private static final String PROP_BACKUPDIR = "file_backup";
 
-    private ControlCommandsAPI    verAPI  = new ControlCommandsAPI();
-    private Log                   log = LogFactory.getLog(ControlCommandsServer.class);
-    private AgentStorageProvider  storage;        // Our storage provider
+    private ControlCommandsAPI verAPI = new ControlCommandsAPI();
+
+    private Log log = LogFactory.getLog(ControlCommandsServer.class);
+
+    private AgentStorageProvider storage;        // Our storage provider
+
     private ControlCommandsService controlCommandsService;
-   
-    public AgentAPIInfo getAPIInfo(){
+
+    private AgentService agentService;
+
+    public AgentAPIInfo getAPIInfo() {
         return this.verAPI;
     }
 
-    public String[] getCommandSet(){
+    public String[] getCommandSet() {
         return ControlCommandsAPI.commandSet;
     }
 
-    public AgentRemoteValue dispatchCommand(AgentService agentService, String cmd, AgentRemoteValue args,
-                                            InputStream in, OutputStream out)
-        throws AgentRemoteException 
-    {
+    public AgentRemoteValue dispatchCommand(String cmd, AgentRemoteValue args,
+                                            InputStream in, OutputStream out) throws AgentRemoteException {
         if (cmd.equals(this.verAPI.command_controlPluginAdd)) {
             ControlPluginAdd_args ca = new ControlPluginAdd_args(args);
 
             return this.controlPluginAdd(ca);
         } else if (cmd.equals(this.verAPI.command_controlPluginCommand)) {
-            ControlPluginCommand_args ca = 
-                new ControlPluginCommand_args(args);
+            ControlPluginCommand_args ca =
+                    new ControlPluginCommand_args(args);
 
             return this.controlPluginCommand(ca);
         } else if (cmd.equals(this.verAPI.command_controlPluginRemove)) {
             ControlPluginRemove_args ca =
-                new ControlPluginRemove_args(args);
+                    new ControlPluginRemove_args(args);
 
             return this.controlPluginRemove(ca);
         } else {
@@ -87,46 +88,45 @@ public class ControlCommandsServer
         }
     }
 
-    public void startup(AgentService agentService)
-        throws AgentStartException 
-    {
-  
+    public void startup(AgentService agentService) throws AgentStartException {
+        this.agentService = agentService;
+        
         try {
             this.storage = agentService.getStorageProvider();
         } catch (Exception e) {
             throw new AgentStartException("Unable to get storage " +
-                                          "provider: " + e.getMessage());
+                    "provider: " + e.getMessage());
         }
 
         // setup control manager
         ControlPluginManager controlManager;
         ControlCallbackClient client;
-        
+
         try {
-            controlManager = 
-                (ControlPluginManager)agentService.
-                    getPluginManager(ProductPlugin.TYPE_CONTROL);
+            controlManager =
+                    (ControlPluginManager) agentService.
+                            getPluginManager(ProductPlugin.TYPE_CONTROL);
 
             client = setupClient();
         } catch (Exception e) {
             // Problem loading the plugin jars
             throw new AgentStartException("Unable to load control jars: " +
-                                          e.getMessage());
+                    e.getMessage());
         }
-        
+
         controlCommandsService = new ControlCommandsService(controlManager, client);
-        
+
         AgentTransportLifecycle agentTransportLifecycle;
-        
+
         try {
             agentTransportLifecycle = agentService.getAgentTransportLifecycle();
         } catch (Exception e) {
-            throw new AgentStartException("Unable to get agent transport lifecycle: "+
-                                            e.getMessage());
+            throw new AgentStartException("Unable to get agent transport lifecycle: " +
+                    e.getMessage());
         }
-        
+
         log.info("Registering Control Commands Service with Agent Transport");
-        
+
         try {
             agentTransportLifecycle.registerService(ControlCommandsClient.class, controlCommandsService);
         } catch (Exception e) {
@@ -141,22 +141,20 @@ public class ControlCommandsServer
     }
 
     private ControlCallbackClient setupClient()
-        throws AgentStartException
-    {
+            throws AgentStartException {
         StorageProviderFetcher fetcher;
 
         fetcher = new StorageProviderFetcher(this.storage);
         return new ControlCallbackClient(fetcher);
     }
 
-    private ControlPluginAdd_result 
-        controlPluginAdd(ControlPluginAdd_args args)
-        throws AgentRemoteException
-    {
+    private ControlPluginAdd_result
+    controlPluginAdd(ControlPluginAdd_args args)
+            throws AgentRemoteException {
         ConfigResponse config = args.getConfigResponse();
         String name = args.getName();
         String type = args.getType();
-  
+
         controlCommandsService.controlPluginAdd(name, type, config);
 
         ControlPluginAdd_result result = new ControlPluginAdd_result();
@@ -165,32 +163,30 @@ public class ControlCommandsServer
     }
 
     private ControlPluginCommand_result
-        controlPluginCommand(ControlPluginCommand_args args)
-        throws AgentRemoteException
-    {
+    controlPluginCommand(ControlPluginCommand_args args)
+            throws AgentRemoteException {
         String pluginName = args.getPluginName();
         String pluginType = args.getPluginType();
         String id = args.getId();
         String pluginAction = args.getPluginAction();
         String[] pluginArgs = args.getArgs();
-        
-        controlCommandsService.controlPluginCommand(pluginName, 
-                                                    pluginType, 
-                                                    id, 
-                                                    pluginAction, 
-                                                    pluginArgs); 
-        
+
+        controlCommandsService.controlPluginCommand(pluginName,
+                pluginType,
+                id,
+                pluginAction,
+                pluginArgs);
+
         return new ControlPluginCommand_result();
     }
 
     private ControlPluginRemove_result
-        controlPluginRemove(ControlPluginRemove_args args)
-        throws AgentRemoteException
-    {
+    controlPluginRemove(ControlPluginRemove_args args)
+            throws AgentRemoteException {
         String pluginName = args.getPluginName();
 
         controlCommandsService.controlPluginRemove(pluginName);
-        
+
         return new ControlPluginRemove_result();
     }
 }

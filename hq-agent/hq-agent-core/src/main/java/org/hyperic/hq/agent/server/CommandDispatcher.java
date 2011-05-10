@@ -31,11 +31,12 @@ import org.hyperic.hq.agent.AgentRemoteValue;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 
 
 public interface CommandDispatcher {
  
-    void addServerHandler(AgentServerHandler startedHandler);
+    void addServerHandlers(List<AgentServerHandler> startedHandlers);
 
     /* TODO once remoting is removed from hyperic, these remote exceptions must be replaced */
     AgentRemoteValue processRequest(AgentCommand agentCommand, InputStream inStream, OutputStream outStream) throws AgentRemoteException;

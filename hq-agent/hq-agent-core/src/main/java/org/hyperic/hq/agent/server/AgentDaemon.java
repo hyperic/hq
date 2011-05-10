@@ -518,7 +518,7 @@ public class AgentDaemon
                     loadedHandler = 
                         this.handlerLoader.loadServerHandler(jarPath);
                     this.serverHandlers.add(loadedHandler);
-                    this.dispatcher.addServerHandler(loadedHandler);                        
+                    //this.dispatcher.addServerHandler(loadedHandler);                        
                 }
             } catch (Exception e) {
                 throw new AgentConfigException("Failed to load " +

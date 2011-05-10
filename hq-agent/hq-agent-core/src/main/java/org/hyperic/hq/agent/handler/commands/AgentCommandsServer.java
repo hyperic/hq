@@ -29,7 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.*;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
-import org.hyperic.hq.agent.commands.*;
+import org.hyperic.hq.agent.commands.*; 
 import org.hyperic.hq.agent.server.*;
 import org.springframework.stereotype.Component;
 
@@ -38,67 +38,68 @@ import java.io.OutputStream;
 import java.util.Map;
 
 /**
- * The server-side of the commands the Agent supports.  This object 
+ * The server-side of the commands the Agent supports.  This object
  * implements the appropriate interface to plugin to the Agent as
  * an AgentServerHandler.  It provides the server-side to what is
  * called from AgentCommandsClient.
  */
 
 @Component
-public class AgentCommandsServer 
-    implements AgentServerHandler
-{
-    private AgentCommandsAPI verAPI  = new AgentCommandsAPI();
-    private Log              log = LogFactory.getLog(this.getClass());
+public class AgentCommandsServer implements AgentServerHandler {
+
+    private AgentCommandsAPI verAPI = new AgentCommandsAPI();
+
+    private Log log = LogFactory.getLog(this.getClass());
+
     private AgentCommandsService agentCommandsService;
 
-    public AgentAPIInfo getAPIInfo(){
+    private AgentService agentService;
+    
+    public AgentAPIInfo getAPIInfo() {
         return this.verAPI;
     }
 
-    public String[] getCommandSet(){
+    public String[] getCommandSet() {
         return AgentCommandsAPI.commandSet;
     }
 
-    public AgentRemoteValue dispatchCommand(AgentService agentService, String cmd, AgentRemoteValue args,
-                                            InputStream inStream,
-                                            OutputStream outStream)
-        throws AgentRemoteException 
-    {
+    public AgentRemoteValue dispatchCommand(String cmd, AgentRemoteValue args,
+                                            InputStream inStream, OutputStream outStream) throws AgentRemoteException {
         if (log.isDebugEnabled()) log.debug("dispatching cmd=" + cmd);
-        if(cmd.equals(AgentCommandsAPI.command_ping)){
+        if (cmd.equals(AgentCommandsAPI.command_ping)) {
             new AgentPing_args(args);  // Just parse the args
 
             agentCommandsService.ping();
             return new AgentPing_result();
-        } else if(cmd.equals(AgentCommandsAPI.command_restart)){
+        } else if (cmd.equals(AgentCommandsAPI.command_restart)) {
             new AgentRestart_args(args);  // Just parse the args
             agentCommandsService.restart();
             return new AgentRestart_result();
-        } else if(cmd.equals(AgentCommandsAPI.command_upgrade)){
+        } else if (cmd.equals(AgentCommandsAPI.command_upgrade)) {
             AgentUpgrade_args upgradeArgs = new AgentUpgrade_args(args);  // Just parse the args
             String bundleFile = upgradeArgs.getBundleFile();
             String dest = upgradeArgs.getDestination();
             Map props = agentCommandsService.upgrade(bundleFile, dest);
-            
-            if (props.isEmpty()) return new AgentRestart_result(); // Fall back to what it used to do, if we have an empty map
-            
+
+            if (props.isEmpty())
+                return new AgentRestart_result(); // Fall back to what it used to do, if we have an empty map
+
             String version = (String) props.get(AgentUpgrade_result.VERSION);
             String bundleName = (String) props.get(AgentUpgrade_result.BUNDLE_NAME);
-            
+
             return new AgentUpgrade_result(version, bundleName);
-        } else if(cmd.equals(AgentCommandsAPI.command_die)){
+        } else if (cmd.equals(AgentCommandsAPI.command_die)) {
             new AgentDie_args(args);  // Just parse the args
             agentCommandsService.die();
             return new AgentDie_result();
-        } else if(cmd.equals(AgentCommandsAPI.command_receive_file)){
+        } else if (cmd.equals(AgentCommandsAPI.command_receive_file)) {
             AgentReceiveFileData_args aa =
-                new AgentReceiveFileData_args(args);
+                    new AgentReceiveFileData_args(args);
             agentCommandsService.agentSendFileData(aa, inStream);
-            return new AgentRemoteValue(); 
+            return new AgentRemoteValue();
         } else if (cmd.equals(AgentCommandsAPI.command_getCurrentAgentBundle)) {
-            String currentAgentBundle = 
-                agentCommandsService.getCurrentAgentBundle();
+            String currentAgentBundle =
+                    agentCommandsService.getCurrentAgentBundle();
             return new AgentBundle_result(currentAgentBundle);
         } else if (cmd.equals(AgentCommandsAPI.command_remove_file)) {
             AgentRemoveFileData_args a = new AgentRemoveFileData_args(args);
@@ -110,28 +111,30 @@ public class AgentCommandsServer
     }
 
     public void startup(AgentService agentService) throws AgentStartException {
-        AgentTransportLifecycle agentTransportLifecycle;
+        this.agentService = agentService;
         
+        AgentTransportLifecycle agentTransportLifecycle;
+
         try {
             agentTransportLifecycle = agentService.getAgentTransportLifecycle();
             agentCommandsService = new AgentCommandsService(agentService);
         } catch (Exception e) {
-            throw new AgentStartException("Unable to get agent transport lifecycle: "+
-                                            e.getMessage());
+            throw new AgentStartException("Unable to get agent transport lifecycle: " +
+                    e.getMessage());
         }
-                
+
         log.info("Registering Agent Commands Service with Agent Transport");
-        
+
         try {
             agentTransportLifecycle.registerService(AgentCommandsClient.class, agentCommandsService);
         } catch (Exception e) {
             throw new AgentStartException("Failed to register Agent Commands Service.", e);
         }
-        
+
         this.log.info("Agent commands started up");
     }
 
-    public void shutdown(){
+    public void shutdown() {
         this.log.info("Agent commands shut down");
     }
 

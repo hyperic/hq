@@ -53,41 +53,42 @@ import java.util.Map;
 public class MeasurementCommandsServer implements AgentServerHandler, AgentNotificationHandler {
     private static final long THREAD_JOIN_WAIT = 10 * 1000;
 
-    private MeasurementCommandsAPI   verAPI = new MeasurementCommandsAPI();
-    private Thread                   scheduleThread; // Thread of scheduler
-    private ScheduleThread           scheduleObject; // Our scheduler
-    private Thread                   senderThread;   // Thread of sender
-    private SenderThread             senderObject;   // Our sender
-    private AgentStorageProvider     storage;        // Agent storage
-    private Map                      validProps = Collections.synchronizedMap(new HashMap());
-    private AgentConfig        bootConfig;     // Agent boot config
-    private MeasurementSchedule      schedStorage;   // Schedule storage
+    private MeasurementCommandsAPI verAPI = new MeasurementCommandsAPI();
+    private Thread scheduleThread; // Thread of scheduler
+    private ScheduleThread scheduleObject; // Our scheduler
+    private Thread senderThread;   // Thread of sender
+    private SenderThread senderObject;   // Our sender
+    private AgentStorageProvider storage;        // Agent storage
+    private Map validProps = Collections.synchronizedMap(new HashMap());
+    private AgentConfig bootConfig;     // Agent boot config
+    private MeasurementSchedule schedStorage;   // Schedule storage
     private MeasurementPluginManager pluginManager;  // Plugin manager
-    private Log                      log = LogFactory.getLog(MeasurementCommandsServer.class);
+    private Log log = LogFactory.getLog(MeasurementCommandsServer.class);
 
     // Config and Log track
     private ConfigTrackPluginManager ctPluginManager;
-    private LogTrackPluginManager    ltPluginManager;
-    private Thread                   trackerThread;  // Config and Log tracker thread
-    private TrackerThread            trackerObject;  // Config and Log tracker object
-    
+    private LogTrackPluginManager ltPluginManager;
+    private Thread trackerThread;  // Config and Log tracker thread
+    private TrackerThread trackerObject;  // Config and Log tracker object
+
     private MeasurementCommandsService measurementCommandsService;
 
+    AgentService agentService;
+
     @PostConstruct
-    public void initialize(){
-        for(int i=0; i<this.verAPI.propSet.length; i++){ 
+    public void initialize() {
+        for (int i = 0; i < this.verAPI.propSet.length; i++) {
             validProps.put(this.verAPI.propSet[i], this);
         }
     }
 
-    private void spawnThreads(SenderThread senderObject, 
-                              ScheduleThread scheduleObject, 
+    private void spawnThreads(SenderThread senderObject,
+                              ScheduleThread scheduleObject,
                               TrackerThread trackerObject)
-        throws AgentStartException 
-    {
-        this.senderThread   = new Thread(senderObject, "SenderThread");
+            throws AgentStartException {
+        this.senderThread = new Thread(senderObject, "SenderThread");
         senderThread.setDaemon(true);
-        this.scheduleThread = new Thread(scheduleObject,"ScheduleThread");
+        this.scheduleThread = new Thread(scheduleObject, "ScheduleThread");
         scheduleThread.setDaemon(true);
         this.trackerThread = new Thread(trackerObject, "TrackerThread");
         this.trackerThread.setDaemon(true);
@@ -97,135 +98,133 @@ public class MeasurementCommandsServer implements AgentServerHandler, AgentNotif
         this.trackerThread.start();
     }
 
-    public AgentAPIInfo getAPIInfo(){
+    public AgentAPIInfo getAPIInfo() {
         return this.verAPI;
     }
 
-    public String[] getCommandSet(){
+    public String[] getCommandSet() {
         return MeasurementCommandsAPI.commandSet;
     }
 
-    public AgentRemoteValue dispatchCommand(AgentService agentService, String cmd, AgentRemoteValue args,
-                                            InputStream in, OutputStream out)
-        throws AgentRemoteException 
-    {
-        if(cmd.equals(this.verAPI.command_scheduleMeasurements)){            
-            ScheduleMeasurements_args sa = 
-                new ScheduleMeasurements_args(args);
+    public AgentRemoteValue dispatchCommand(String cmd, AgentRemoteValue args,
+                                            InputStream in, OutputStream out) throws AgentRemoteException {
+        if (cmd.equals(this.verAPI.command_scheduleMeasurements)) {
+            ScheduleMeasurements_args sa =
+                    new ScheduleMeasurements_args(args);
 
             measurementCommandsService.scheduleMeasurements(sa);
 
             return new ScheduleMeasurements_result();
-        } else if(cmd.equals(this.verAPI.command_unscheduleMeasurements)){
-            UnscheduleMeasurements_args sa = 
-                new UnscheduleMeasurements_args(args);
+        } else if (cmd.equals(this.verAPI.command_unscheduleMeasurements)) {
+            UnscheduleMeasurements_args sa =
+                    new UnscheduleMeasurements_args(args);
 
             measurementCommandsService.unscheduleMeasurements(sa);
-            
+
             return new UnscheduleMeasurements_result();
-        } else if(cmd.equals(this.verAPI.command_getMeasurements)){
-            GetMeasurements_args sa = 
-                new GetMeasurements_args(args);
+        } else if (cmd.equals(this.verAPI.command_getMeasurements)) {
+            GetMeasurements_args sa =
+                    new GetMeasurements_args(args);
 
             return measurementCommandsService.getMeasurements(sa);
-        } else if(cmd.equals(this.verAPI.command_setProperties)){
-            SetProperties_args sa = 
-                new SetProperties_args(args);
+        } else if (cmd.equals(this.verAPI.command_setProperties)) {
+            SetProperties_args sa =
+                    new SetProperties_args(args);
 
             measurementCommandsService.setProperties(sa);
-            
+
             return new SetProperties_result();
-        } else if(cmd.equals(this.verAPI.command_deleteProperties)){
-            DeleteProperties_args sa = 
-                new DeleteProperties_args(args);
+        } else if (cmd.equals(this.verAPI.command_deleteProperties)) {
+            DeleteProperties_args sa =
+                    new DeleteProperties_args(args);
 
             measurementCommandsService.deleteProperties(sa);
-            
+
             return new DeleteProperties_result();
-        } else if(cmd.equals(this.verAPI.command_trackAdd)) {
+        } else if (cmd.equals(this.verAPI.command_trackAdd)) {
             TrackPluginAdd_args ta = new TrackPluginAdd_args(args);
-            
+
             measurementCommandsService.addTrackPlugin(ta);
 
             return new TrackPluginAdd_result();
-        } else if(cmd.equals(this.verAPI.command_trackRemove)) {
+        } else if (cmd.equals(this.verAPI.command_trackRemove)) {
             TrackPluginRemove_args ta = new TrackPluginRemove_args(args);
 
             measurementCommandsService.removeTrackPlugin(ta);
-            
+
             return new TrackPluginRemove_result();
         } else {
             throw new AgentRemoteException("Unknown command: " + cmd);
         }
     }
 
-    public void startup(AgentService agentService)
-        throws AgentStartException 
-    {
+    public void startup(AgentService agentService) throws AgentStartException {
+        this.agentService = agentService;
+
         Iterator i;
 
         try {
-            this.storage      = agentService.getStorageProvider();
-            this.bootConfig   = agentService.getBootConfig();
+            this.storage = agentService.getStorageProvider();
+            this.bootConfig = agentService.getBootConfig();
             this.schedStorage = new MeasurementSchedule(this.storage, bootConfig.getBootProperties());
             logMeasurementSchedule(this.schedStorage);
-        } catch(AgentRunningException exc){
+        } catch (AgentRunningException exc) {
             throw new AgentAssertionException("Agent should be running here", exc);
         }
 
         try {
             this.pluginManager =
-                (MeasurementPluginManager)agentService.
-                getPluginManager(ProductPlugin.TYPE_MEASUREMENT);
+                    (MeasurementPluginManager) agentService.
+                            getPluginManager(ProductPlugin.TYPE_MEASUREMENT);
             this.ctPluginManager =
-                (ConfigTrackPluginManager)agentService.
-                getPluginManager(ProductPlugin.TYPE_CONFIG_TRACK);
+                    (ConfigTrackPluginManager) agentService.
+                            getPluginManager(ProductPlugin.TYPE_CONFIG_TRACK);
             this.ltPluginManager =
-                (LogTrackPluginManager)agentService.
-                getPluginManager(ProductPlugin.TYPE_LOG_TRACK);
+                    (LogTrackPluginManager) agentService.
+                            getPluginManager(ProductPlugin.TYPE_LOG_TRACK);
 
         } catch (Exception e) {
             throw new AgentStartException("Unable to get measurement " +
-                                          "plugin manager: " + 
-                                          e.getMessage());
+                    "plugin manager: " +
+                    e.getMessage());
         }
-        
+
         this.senderObject = new SenderThread(this.bootConfig.getBootProperties(),
-                                             this.storage, this.schedStorage);
-        
+                this.storage, this.schedStorage);
+
         this.scheduleObject = new ScheduleThread(this.senderObject,
-                                                 this.pluginManager,
-                                                 this.bootConfig.getBootProperties());
-        
+                this.pluginManager,
+                this.bootConfig.getBootProperties());
+
         this.trackerObject =
-            new TrackerThread(this.ctPluginManager,
-                              this.ltPluginManager,
-                              this.storage,
-                              this.bootConfig.getBootProperties());
-        
-        this.measurementCommandsService = 
-                new MeasurementCommandsService(this.storage, 
-                                               this.validProps,
-                                               this.schedStorage, 
-                                               this.pluginManager, 
-                                               this.ltPluginManager,
-                                               this.ctPluginManager,
-                                               this.scheduleObject);
-        
+                new TrackerThread(this.ctPluginManager,
+                        this.ltPluginManager,
+                        this.storage,
+                        this.bootConfig.getBootProperties());
+
+        this.measurementCommandsService =
+                new MeasurementCommandsService(this.storage,
+                        this.validProps,
+                        this.schedStorage,
+                        this.pluginManager,
+                        this.ltPluginManager,
+                        this.ctPluginManager,
+                        this.scheduleObject);
+
         AgentTransportLifecycle agentTransportLifecycle;
-        
+
         try {
             agentTransportLifecycle = agentService.getAgentTransportLifecycle();
         } catch (Exception e) {
-            throw new AgentStartException("Unable to get agent transport lifecycle: "+
-                                            e.getMessage());
+            throw new AgentStartException("Unable to get agent transport lifecycle: " +
+                    e.getMessage());
         }
-        
+
         log.info("Registering Measurement Commands Service with Agent Transport");
-        
+
         try {
-            agentTransportLifecycle.registerService(MeasurementCommandsClient.class, 
-                                           measurementCommandsService);
+            agentTransportLifecycle.registerService(MeasurementCommandsClient.class,
+                    measurementCommandsService);
         } catch (Exception e) {
             throw new AgentStartException("Failed to register Measurement Commands Service.", e);
         }
@@ -233,8 +232,8 @@ public class MeasurementCommandsServer implements AgentServerHandler, AgentNotif
         spawnThreads(this.senderObject, this.scheduleObject, this.trackerObject);
 
         i = this.schedStorage.getMeasurementList();
-        while(i.hasNext()){
-            ScheduledMeasurement meas = (ScheduledMeasurement)i.next();
+        while (i.hasNext()) {
+            ScheduledMeasurement meas = (ScheduledMeasurement) i.next();
             this.measurementCommandsService.scheduleMeasurement(meas);
         }
 
@@ -243,9 +242,9 @@ public class MeasurementCommandsServer implements AgentServerHandler, AgentNotif
 
         // If we have don't have a provider, register a handler until
         // we get one
-        if(CommandsAPIInfo.getProvider(this.storage) == null){
+        if (CommandsAPIInfo.getProvider(this.storage) == null) {
             agentService.registerNotifyHandler(this,
-                                        CommandsAPIInfo.NOTIFY_SERVER_SET);
+                    CommandsAPIInfo.NOTIFY_SERVER_SET);
         } else {
             this.startConfigPopulator();
         }
@@ -253,44 +252,43 @@ public class MeasurementCommandsServer implements AgentServerHandler, AgentNotif
         this.log.info("Measurement Commands Server started up");
     }
 
-    public void handleNotification(String msgClass, String msg){
+    public void handleNotification(String msgClass, String msg) {
         this.startConfigPopulator();
     }
 
-    private void startConfigPopulator(){
+    private void startConfigPopulator() {
         StorageProviderFetcher fetcher
-            = new StorageProviderFetcher(this.storage);
+                = new StorageProviderFetcher(this.storage);
         MeasurementCallbackClient client
-            = new MeasurementCallbackClient(fetcher);
+                = new MeasurementCallbackClient(fetcher);
         ConfigPopulateThread populator
-            = new ConfigPopulateThread(client, this.ltPluginManager,
-                                       this.ctPluginManager);
+                = new ConfigPopulateThread(client, this.ltPluginManager,
+                this.ctPluginManager);
         populator.setDaemon(true);
         populator.start();
     }
 
     private void interruptThread(Thread t)
-        throws InterruptedException
-    {
-        if(t.isAlive()){
+            throws InterruptedException {
+        if (t.isAlive()) {
             t.interrupt();
             t.join(THREAD_JOIN_WAIT);
-            
-            if(t.isAlive()){
+
+            if (t.isAlive()) {
                 this.log.warn(t.getName() + " did not die within the " +
-                              "timeout period.  Killing it");
+                        "timeout period.  Killing it");
                 t.stop();
             }
         }
     }
-    
+
     private void logMeasurementSchedule(MeasurementSchedule sched) {
-        if (this.log.isDebugEnabled()) { 
-            try {                
+        if (this.log.isDebugEnabled()) {
+            try {
                 Iterator scheduleIter = sched.getMeasurementList();
                 int scheduleSize = 0;
-                
-                while (scheduleIter.hasNext()) { 
+
+                while (scheduleIter.hasNext()) {
                     ScheduledMeasurement metric = (ScheduledMeasurement) scheduleIter.next();
                     if (metric != null) {
                         ScheduleThread.ParsedTemplate templ = ScheduleThread.getParsedTemplate(metric);
@@ -303,7 +301,7 @@ public class MeasurementCommandsServer implements AgentServerHandler, AgentNotif
                                 .append(", derivedId=").append(metric.getDerivedID())
                                 .append(", dsnId=").append(metric.getDsnID())
                                 .append(", dsn=").append(templ.metric.toDebugString());
-                    
+
                         this.log.debug(s.toString());
                     }
                 }
@@ -316,7 +314,7 @@ public class MeasurementCommandsServer implements AgentServerHandler, AgentNotif
         }
     }
 
-    public void shutdown(){
+    public void shutdown() {
         this.log.info("Measurement Commands Server shutting down");
         logMeasurementSchedule(this.schedStorage);
 
@@ -326,7 +324,7 @@ public class MeasurementCommandsServer implements AgentServerHandler, AgentNotif
         try {
             this.interruptThread(this.senderThread);
             this.interruptThread(this.scheduleThread);
-        } catch(InterruptedException exc){
+        } catch (InterruptedException exc) {
             // Someone wants us to die badly .... ok 
             this.log.warn("shutdown interrupted");
         }

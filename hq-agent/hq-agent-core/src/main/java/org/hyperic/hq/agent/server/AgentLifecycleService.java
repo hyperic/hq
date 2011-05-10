@@ -166,11 +166,9 @@ public class AgentLifecycleService implements AgentService, SmartLifecycle {
             /* calls handler.startup() which registers each handler with agentTransportLifecycle in turn. */
             agentManager.startHandlers(this, serverHandlers, startedHandlers);
 
-            for(AgentServerHandler handler: startedHandlers) {
-                dispatcher.addServerHandler(handler);
-            }
+            dispatcher.addServerHandlers(startedHandlers);
              
-            /* The started handlers should have already registered with the  agent transport lifecycle */
+            /* The started handlers should have already registered with the  agentTransportLifecycle */
             agentTransportLifecycle.startAgentTransport();
 
             listener.setup();
@@ -181,7 +179,7 @@ public class AgentLifecycleService implements AgentService, SmartLifecycle {
 
             logger.info("Agent started successfully");
 
-            agentManager.sendNotification(getNotifyAgentUp(), "we're up");
+            agentManager.sendNotification(getNotifyAgentUp(), "we are up");
 
             if (continuable.get()) {
                 logger.info("AgentLifecycleService - Agent Listener started");
@@ -271,10 +269,8 @@ public class AgentLifecycleService implements AgentService, SmartLifecycle {
             // Not much we can do
         }
 
-        if (agentTransportLifecycle != null) {
-            agentTransportLifecycle.stopAgentTransport();
-        }
-
+        if (agentTransportLifecycle != null) agentTransportLifecycle.stopAgentTransport();
+         
         logger.info("Agent shut down");
         Thread.currentThread().interrupt();
     }

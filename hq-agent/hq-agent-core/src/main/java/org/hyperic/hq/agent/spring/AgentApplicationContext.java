@@ -30,13 +30,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.server.AgentLifecycleService;
 import org.hyperic.hq.agent.server.AgentService;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 /**
- * todo: exceptions, logging
  * @author Helena Edelson
  */
 public final class AgentApplicationContext {
@@ -54,35 +52,44 @@ public final class AgentApplicationContext {
     public static void start() throws RuntimeException {
         if (running.get()) return;
 
+        logger.debug("Configuring Spring context.");
         try {
-            //ctx.register(SpringAgentConfiguration.class);
             ctx.scan(basePackages);
             ctx.registerShutdownHook();
             running.set(true);
             ctx.refresh();
+            logger.debug("Context configured.");
         }
         catch (UnsatisfiedDependencyException e) {
             // ignore - thrown from integration tests 
         }
-        catch (BeansException e) {
-            stop(); 
-            throw new RuntimeException(e);
-        }
-        catch (IllegalStateException e) {
+        catch (Throwable t) {
             stop();
-            throw new RuntimeException(e);
-        } 
+            throw new RuntimeException(t);
+        }
     }
 
-    public static AgentService getAgentService() { 
+    /**
+     * Not exposing the context - just a call
+     * to get the primary bean.
+     * @return
+     */
+    public static AgentService getAgentService() {
         return getBean(AgentLifecycleService.class);
     }
 
-    private static <T> T getBean(Class<T> requiredType) throws RuntimeException {
+    /**
+     * Returns a bean by type.
+     * @param type the type
+     * @param <T>
+     * @return the bean instance if it exists
+     * @throws RuntimeException if the type is not in context
+     */
+    private static <T> T getBean(Class<T> type) throws RuntimeException {
         if (!running.get()) throw new IllegalStateException("Application context is not running.");
 
         try {
-            return ctx.getBean(requiredType);
+            return ctx.getBean(type);
         } catch (NoSuchBeanDefinitionException e) {
             throw new RuntimeException(e);
         }

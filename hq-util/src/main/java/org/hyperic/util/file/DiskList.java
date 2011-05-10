@@ -25,26 +25,11 @@
 
 package org.hyperic.util.file;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.EOFException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-
-import java.util.ConcurrentModificationException;
-import java.util.Iterator;
-import java.util.TreeSet;
-import java.util.NoSuchElementException;
-import java.util.Random;
-import java.util.SortedSet;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.io.*;
+import java.util.*;
 
 /**
  * A DiskList is a representation of a list on disk.  The basic
@@ -133,7 +118,7 @@ public class DiskList {
 
         this.checkSize   = checkSize;
         this.checkPerc   = checkPerc;
-        this.log.debug("Setting max length for " + this.fileName +
+        log.debug("Setting max length for " + this.fileName +
                        " to " + maxLength + " bytes");
         this.maxLength   = maxLength;
 
@@ -141,6 +126,10 @@ public class DiskList {
         this.genFreeList(idxFile);
 
         this.closed    = false;
+    }
+
+    public boolean isClosed() {
+        return closed;
     }
 
     /**
@@ -170,7 +159,7 @@ public class DiskList {
         throws IOException
     {
         long lastData = this.dataFile.length()/this.recordSize;
-        long lastFree = ((Long)this.freeList.last()).longValue();
+        long lastFree = (Long) this.freeList.last();
 
         // Nothing we can do if the last block in the 
         // file is not free
@@ -200,7 +189,7 @@ public class DiskList {
         }
         
         long num = lastFree - firstFree + 1;
-        this.log.info("Deleted " + num * this.recordSize + 
+        log.info("Deleted " + num * this.recordSize +
                       " bytes from " + this.fileName + 
                       " (" + num  + " blocks)");
     }
@@ -246,7 +235,7 @@ public class DiskList {
                 prev = dIs.readLong(); 
                 next = dIs.readLong(); 
                 
-                if(used == false){
+                if(!used){
                     this.freeList.add(new Long(idx));
                 } else {
                     if(prev == -1)
@@ -257,7 +246,6 @@ public class DiskList {
                 }
             }
         } catch(FileNotFoundException exc){
-            return;
         } finally {
             try {if(fIs != null)fIs.close();} catch(IOException exc){}
         }
@@ -300,7 +288,7 @@ public class DiskList {
 
             try {
                 firstFreeL = (Long)this.freeList.first();
-                firstFree = firstFreeL.longValue();
+                firstFree = firstFreeL;
                 this.freeList.remove(firstFreeL);
             } catch(NoSuchElementException exc){
                 // Else we're adding to the end
@@ -334,7 +322,7 @@ public class DiskList {
         }
 
         if (this.dataFile.length() > this.maxLength) {
-            this.log.error("Maximum file size for data file: " +
+            log.error("Maximum file size for data file: " +
                            this.fileName + " reached (" +
                            this.maxLength + " bytes), truncating.");
             deleteAllRecords();
@@ -390,9 +378,9 @@ public class DiskList {
             try {
                 this.indexFile.setLength(0);
             } catch(IOException exc){
-                this.log.error("IOException while truncating file " + idxFileName);
-                if (this.log.isDebugEnabled()) {
-                    this.log.debug(exc);
+                log.error("IOException while truncating file " + idxFileName);
+                if (log.isDebugEnabled()) {
+                    log.debug(exc);
                 }
                 sExc = exc;
             }
@@ -400,9 +388,9 @@ public class DiskList {
             try {
                 this.dataFile.setLength(0);
             } catch(IOException exc){
-                this.log.error("IOException while truncating file " + fileName);
-                if (this.log.isDebugEnabled()) {
-                    this.log.debug(exc);
+                log.error("IOException while truncating file " + fileName);
+                if (log.isDebugEnabled()) {
+                    log.debug(exc);
                 }
                 if(sExc != null){
                     sExc = exc;
@@ -476,7 +464,7 @@ public class DiskList {
             this.indexFile.seek(recNo * IDX_REC_LEN);
             this.indexFile.writeBoolean(false);
 
-            this.freeList.add(new Long(recNo));
+            this.freeList.add(recNo);
         }
 
         long length = this.dataFile.length();
@@ -505,9 +493,9 @@ public class DiskList {
         try {
             this.dataFile.close();
         } catch(IOException exc){
-            this.log.error("IOException while closing file " + fileName);
-            if (this.log.isDebugEnabled()) {
-                this.log.debug(exc);
+            log.error("IOException while closing file " + fileName);
+            if (log.isDebugEnabled()) {
+                log.debug(exc);
             }
             sExc = exc; 
         }
@@ -515,9 +503,9 @@ public class DiskList {
         try {
             this.indexFile.close();
         } catch(IOException exc){
-            this.log.error("IOException while closing file " + idxFileName);
-            if (this.log.isDebugEnabled()) {
-                this.log.debug(exc);
+            log.error("IOException while closing file " + idxFileName);
+            if (log.isDebugEnabled()) {
+                log.debug(exc);
             }
             if(sExc == null){
                 sExc = exc;
