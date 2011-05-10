@@ -451,8 +451,10 @@ public interface AgentManager {
      * 1) plugins not on the reporting agent will be pushed
      * 2) plugins on the agent where their md5 checksums differ will be pushed
      * 3) plugins on the agent but not on the server, or in a deleted state, will be removed
+     * @return agentId associated with arg if the agent is to be restarted or null if none exists
+     * or it is determined if the agent will not be restarted
      */
-    public void updateAgentPluginStatus(PluginReport_args arg);
+    public Integer updateAgentPluginStatus(PluginReport_args arg);
 
     /**
      * queues the {@link PluginReport_args} obj into a background queue.  Eventually calls

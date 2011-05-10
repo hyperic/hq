@@ -167,7 +167,11 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                 for (final PluginStatusZevent zevent : events) {
                     final Runnable runner = new Runnable() {
                         public void run() {
-                            am.updateAgentPluginStatus(zevent.getPluginReport());
+                            final Integer agentId = am.updateAgentPluginStatus(zevent.getPluginReport());
+                            // want to check in after transaction is committed
+                            if (agentId != null) {
+                                agentPluginSyncRestartThrottle.checkinAfterRestart(agentId);
+                            }
                         }
                     };
                     try {
@@ -1289,24 +1293,23 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
 // XXX needs javadoc!
 // TODO May not want to pass around the lather PluginReport_args object to hide the comm layer from
 // the business logic
-    public void updateAgentPluginStatus(PluginReport_args arg) {
+    public Integer updateAgentPluginStatus(PluginReport_args arg) {
         @SuppressWarnings("unchecked")
         final Map<String, String> stringVals = arg.getStringVals();
         final boolean debug = log.isDebugEnabled();
         Agent agent = null;
+        boolean canRestartAgent = false;
         try {
             final String agentToken = stringVals.get(PluginReport_args.AGENT_TOKEN);
             if (debug) log.debug(stringVals);
             agent = getAgent(agentToken);
             if (agent == null) {
-                return;
+                return null;
             }
-            boolean canRestartAgent = false;
             if (canRestartAgent(agent, arg.getStringLists().toString())) {
+                // only set canRestartAgent if plugins from the last run to this run have changed
+                // on the agent side.
                 canRestartAgent = true;
-                // only check in if plugins from the last run to this run have changed on the
-                // agent side.
-                agentPluginSyncRestartThrottle.checkinAfterRestart(agent.getId());
             } else {
                 if (debug) log.debug("agent=" + agent + " has no updates and plugins haven't " +
                                      "been modified since the last checkin, ignoring");
@@ -1339,6 +1342,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                 agent.setLastPluginInventoryCheckin(System.currentTimeMillis());
             }
         }
+        // only return agentId if canRestartAgent == true
+        return (agent != null && canRestartAgent) ? agent.getId() : null;
     }
 
     private boolean canRestartAgent(Agent agent, String stringLists) {
@@ -1542,7 +1547,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         return agentPluginStatusDAO.getNumAutoUpdatingAgents();
     }
 
-    @Transactional(readOnly=true)
+    @Transactional(readOnly=false)
     public void syncAllAgentPlugins() {
         final boolean debug = log.isDebugEnabled();
         if (!pluginManager.isPluginSyncEnabled()) {
