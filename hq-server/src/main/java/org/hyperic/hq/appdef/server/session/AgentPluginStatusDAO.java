@@ -379,8 +379,14 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
 
     @SuppressWarnings("unchecked")
     public Collection<Plugin> getOrphanedPlugins() {
-        final String hql =
-            "from Plugin where deleted = '1' and path not in (select fileName from AgentPluginStatus)";
+        final String hql = new StringBuilder(200)
+            .append("from Plugin p where deleted = '1' and not exists (")
+            .append("    select 1 from AgentPluginStatus s")
+          	.append("    join s.agent a")
+          	.append("    join a.platforms pl")
+          	.append("    where s.fileName = p.path")
+          	.append(")")
+            .toString();
         return getSession().createQuery(hql).list();
     }
 
