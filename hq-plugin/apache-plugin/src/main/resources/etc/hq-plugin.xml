@@ -746,7 +746,6 @@
 
     <config type="control" platform="Win32">
       <option name="service_name"
-              default="Apache2"
               description="Apache Service Name"/>
     </config>
 
@@ -876,7 +875,6 @@ ExtendedStatus On
 
     <config type="control" platform="Win32">
       <option name="service_name"
-              default="Apache2"
               description="Apache Service Name"/>
     </config>
 

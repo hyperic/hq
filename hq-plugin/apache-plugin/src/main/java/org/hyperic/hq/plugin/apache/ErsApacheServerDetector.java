@@ -32,8 +32,11 @@ import java.util.List;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.RegistryServerDetector;
+import org.hyperic.hq.product.Win32ControlPlugin;
 
 import org.hyperic.sigar.win32.RegistryKey;
+import org.hyperic.sigar.win32.Service;
+import org.hyperic.sigar.win32.Win32Exception;
 import org.hyperic.util.config.ConfigResponse;
 
 public class ErsApacheServerDetector
@@ -62,6 +65,7 @@ public class ErsApacheServerDetector
     public List getServerList(String installpath)
         throws PluginException {
 
+        getLog().debug("[getServerList] installpath="+installpath);
         File serversDir = new File(installpath, "servers");
         File[] serverList = serversDir.listFiles();
         List servers;
@@ -79,12 +83,14 @@ public class ErsApacheServerDetector
                 continue;
             }
             String serverRoot = serverList[i].getAbsolutePath();
-            String serverName = serverList[i].getName();
-            if (!new File(serverRoot, getDefaultPidFile()).exists()) {
+            File pidFile=new File(serverRoot, getDefaultPidFile());
+            if (!pidFile.exists()) {
                 //filters non-apache servers (i.e. tomcat) and
                 //unused servers, such as "default1.3"
+                getLog().debug("[getServerList] pidFile ("+pidFile+") not found.");
                 continue;
             }
+            String serverName = serverList[i].getName();
             
             ServerResource server = createServerResource(serverRoot);
             String name = server.getName();
@@ -96,17 +102,45 @@ public class ErsApacheServerDetector
             server.setIdentifier(getAIID(serverRoot));
 
             if (configureServer(server, null)) {
+                if (isWin32()) {
+                    ConfigResponse cf = new ConfigResponse();
+                    String sname = getWindowsServiceName(serverName);
+                    if (sname != null) {
+                        cf.setValue(Win32ControlPlugin.PROP_SERVICENAME, sname);
+                        setControlConfig(server, cf);
+                    }
+                }
+                getLog().debug("[getServerList] serverRoot="+serverRoot+" serverName="+serverName+" OK");
                 servers.add(server);
+            }else{
+                getLog().debug("[getServerList] serverRoot="+serverRoot+" serverName="+serverName+" no configured");
             }
         }
 
         return servers;
     }
 
+    @Override
     protected String getWindowsServiceName() {
-        return
-            "Covalent" + getPlatformName() + "ApacheERS" +
-            getTypeInfo().getVersion();
+        return null;
+    }
+
+    protected String getWindowsServiceName(String serverName) {
+        String name =  "ERS"+serverName+"httpsd";
+        try {
+            List services = Service.getServiceNames();
+            if (!services.contains(name)) {
+                name = "Covalent" + getPlatformName() + "ApacheERS" + getTypeInfo().getVersion();
+                if (!services.contains(name)) {
+                    name = null;
+                }
+            }
+        } catch (Win32Exception ex) {
+            getLog().debug("[getWindowsServiceName] " + ex.getMessage(), ex);
+            name = null;
+        }
+        getLog().debug("[getWindowsServiceName] name=" + name);
+        return name;
     }
 
     public List getServerResources(ConfigResponse platformConfig) throws PluginException {

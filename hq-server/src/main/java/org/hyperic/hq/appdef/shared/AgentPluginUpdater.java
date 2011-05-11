@@ -40,14 +40,18 @@ public interface AgentPluginUpdater {
      *  of {@link Plugin}
      * @param removeMap {@link Map} of {@link Integer} = agentId to {@link Collection}
      *  of {@link String} = plugin filename or {@link Plugin}.getPath()
+     * @param restartAgents instructs the mechanism to restart the associated agents which are
+     * passed in via updateMap and removeMap.  If true all associated {@link AgentPluginStatus}
+     * objs will be changed to SYNC_IN_PROGRESS or else, if false, SYNC_FAILURE
      */
     public void queuePluginTransfer(final Map<Integer, Collection<Plugin>> updateMap,
-                                    final Map<Integer, Collection<String>> removeMap);
+                                    final Map<Integer, Collection<String>> removeMap,
+                                    boolean restartAgents);
 
     /**
      * queues a plugin for removal from the the specified agent and removes the associated
      * {@link AgentPluginStatus} object
      */
-    public void queuePluginRemoval(Integer agentId, Collection<String> pluginFileNames);
+    public void queuePluginRemoval(Map<Integer, Collection<String>> agentToFileNames);
 
 }

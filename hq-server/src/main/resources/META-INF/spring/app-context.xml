@@ -86,6 +86,7 @@
 				<prop key="ha.node.cacheProvider.port">45568</prop>
 				<prop key="ha.node.ipTTL">64</prop>
                 <prop key="server.pluginsync.enabled">true</prop>
+                <prop key="server.custom.plugin.dir"></prop>
 			</props>
 		</property>
 	</bean>
@@ -169,6 +170,11 @@
 	    <value>org.hyperic.hq.measurement.server.session.MonitorableType</value>
 	</util:list>
 
+	<util:list id="preregisterZevents">
+		<value>org.hyperic.hq.measurement.server.session.MeasurementZevent</value>
+		<value>org.hyperic.hq.zevents.HeartBeatZevent</value>
+	</util:list>
+	
 	<bean id="transactionManager"
 		class="org.springframework.orm.hibernate3.HibernateTransactionManager"
 		p:defaultTimeout="900">
@@ -240,7 +246,13 @@
 		<bean class="org.hyperic.hq.bizapp.server.action.integrate.OpenNMSAction" />
 	</util:list>
 	
-	<task:scheduler id="scheduler" />
+	<task:scheduler id="scheduler" pool-size="8"/>
+	
+	<bean class="org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler" id="concurrentStatsScheduler" p:poolSize="8">
+		<property name="threadFactory">
+			<bean class="org.hyperic.hq.stats.ConcurrentStatsCollectorThreadFactory"/>
+		</property>
+	</bean>
 	
 	<!--  Executor that ControlManager uses to run tasks that wait for control action results -->
 	<task:executor id="controlExecutor" pool-size="1-5" queue-capacity="500" rejection-policy="CALLER_RUNS"/>

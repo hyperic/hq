@@ -41,6 +41,8 @@ public class Agent extends AppdefBean {
     private AgentType _agentType;
     private Collection _platforms;
     private Collection _pluginStatuses;
+    private long lastPluginInventoryCheckin;
+    private String pluginInventoryChecksum;
 
     public Agent() {
     }
@@ -174,16 +176,32 @@ public class Agent extends AppdefBean {
     }
 
     public String toString() {
-        StringBuffer str = new StringBuffer("{");
+        StringBuffer str = new StringBuffer(64);
 
-        str.append("address=").append(getAddress()).append(" ")
-           .append("port=").append(getPort()).append(" ")
-           .append("authToken=").append(getAuthToken()).append(" ");
+        str.append("{id=").append(getId()).append(" ")
+           .append("address=").append(getAddress()).append(" ")
+           .append("port=").append(getPort()).append("}");
         return(str.toString());
     }
     
     public boolean allowContainerManagedLastModifiedTime() {
         return false;
+    }
+
+    public long getLastPluginInventoryCheckin() {
+        return lastPluginInventoryCheckin;
+    }
+
+    public void setLastPluginInventoryCheckin(long lastPluginInventoryCheckin) {
+        this.lastPluginInventoryCheckin = lastPluginInventoryCheckin;
+    }
+
+    public String getPluginInventoryChecksum() {
+        return pluginInventoryChecksum;
+    }
+
+    public void setPluginInventoryChecksum(String pluginInventoryChecksum) {
+        this.pluginInventoryChecksum = pluginInventoryChecksum;
     }
 
 }

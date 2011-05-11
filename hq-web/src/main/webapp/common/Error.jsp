@@ -1,6 +1,7 @@
 <%@ page language="java" %>
 <%@ page isErrorPage="true" %>
 <%@ page import="javax.servlet.ServletException" %>
+<%@ page import="org.springframework.web.util.HtmlUtils" %>
 <%@ page import="org.hyperic.util.StringUtil" %>
 <%@ page import="org.hyperic.hq.auth.shared.SessionTimeoutException" %>
 <%@ page import="org.hyperic.hq.auth.shared.SessionNotFoundException" %>
@@ -88,14 +89,14 @@ if (root != null &&
 
 <c:catch> 
   <c:if test="${not empty exception}">
-  	<div id="exception<%=randomNum%>" style="display:none;"><%=StringUtil.getStackTrace(exception)%></div>
+  	<div id="exception<%=randomNum%>" style="display:none;"><%=HtmlUtils.htmlEscape(StringUtil.getStackTrace(exception))%></div>
 	<c:if test="${not empty root}"> 
-    	<div id="root<%=randomNum%>" style="display:none;"><%=StringUtil.getStackTrace(root)%></div>
+    	<div id="root<%=randomNum%>" style="display:none;"><%=HtmlUtils.htmlEscape(StringUtil.getStackTrace(root))%></div>
    	</c:if> 
   </c:if> 
 </c:catch>
 
-<link rel=stylesheet href="<html:rewrite page="/css/"/>win.css" type="text/css">
+<link rel=stylesheet href="<html:rewrite page="/css/win.css"/>" type="text/css">
 <script type="text/javascript">
 /*--- start declaration/initialization ---*/
 var exDiv = document.getElementById("exception<%= randomNum %>");
@@ -128,7 +129,7 @@ document.write(
 "<td>\n" + 
 "<table width='100%' cellpadding='0' cellspacing='0' border='0'>\n" + 
 "	<tr>\n" + 
-"		<td class='ErrorBlock'><img src='<html:rewrite page="/images/"/>tt_error.gif' width='10' height='11' hspace='5' border='0'/></td>\n" + 
+"		<td class='ErrorBlock'><img src='<html:rewrite page="/images/tt_error.gif"/>' width='10' height='11' hspace='5' border='0'/></td>\n" + 
 "       <td class='ErrorBlock' width='100%'><fmt:message key="errors.jsp.problem"/> <a href='javascript:displayStackTrace<%= randomNum %>()'><fmt:message key="errors.jsp.ClickHere"/></a> <fmt:message key="errors.jsp.ToSee"/></td>\n" +
 "	</tr>\n" +
 "</table>\n" + 
@@ -156,7 +157,7 @@ function displayStackTrace<%= randomNum %>() {
 	"    <tr>\n" + 
 	"      <td class='BlockContent'><blockquote>\n" + exText<%= randomNum %> + "</blockquote></td>\n" + 
 	"    </tr>\n" + 
-	"		 <tr><td class='BlockBottomLine'><img src='<html:rewrite page="/images/"/>spacer.gif' width='1' height='1' border='0'></td></tr>\n" + 
+	"		 <tr><td class='BlockBottomLine'><img src='<html:rewrite page="/images/spacer.gif"/>' width='1' height='1' border='0'></td></tr>\n" + 
 	"    <tr>\n" + 
 	<c:if test="${not empty root}">
 	"      <td>\n" + 
@@ -168,7 +169,7 @@ function displayStackTrace<%= randomNum %>() {
 	"    <tr>\n" + 
 	"      <td class='BlockContent'><blockquote>\n" + rootText<%= randomNum %> + "</blockquote></td>\n" + 
 	"    </tr>\n" + 
-	"		 <tr><td class='BlockBottomLine'><img src='<html:rewrite page="/images/"/>spacer.gif' width='1' height='1' border='0'></td></tr>" +
+	"		 <tr><td class='BlockBottomLine'><img src='<html:rewrite page="/images/spacer.gif"/>' width='1' height='1' border='0'></td></tr>" +
 	</c:if>
     );
 
@@ -179,7 +180,7 @@ function displayStackTrace<%= randomNum %>() {
 	"            <b>"+ errorText<%= randomNum %> +"</b>\n" + 
 	"        </td>\n" + 
 	"    </tr>\n" + 
-	"	 <tr><td class='BlockBottomLine'><img src='<html:rewrite page="/images/"/>spacer.gif' width='1' height='1' border='0'></td></tr>\n");
+	"	 <tr><td class='BlockBottomLine'><img src='<html:rewrite page="/images/spacer.gif"/>' width='1' height='1' border='0'></td></tr>\n");
 	}
 
 	errorPopup.document.write(

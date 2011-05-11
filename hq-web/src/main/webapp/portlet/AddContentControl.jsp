@@ -52,6 +52,19 @@
   }
 </script>
 
+<script type="text/javascript">
+  // Check if a valid portlet has been selected. NOTE: The function name must be unique, since it's included
+  // more than once on the same rendered page.
+  function isDivAddContents<c:out value="${wide}" />PortletValid() {
+    portlet = document.getElementById('addContentsPortlet<c:out value="${wide}" />').getElementsByTagName("select")[0].value
+    if (portlet == "bad") { // this is default setting, which must not be allowed through
+      return false
+    } else {
+      return true
+    }
+  }
+</script>
+
 <c:choose>
 <c:when test="${not empty availablePortlets }">
   <div id="addContentsPortlet<c:out value="${wide}"/>" class="effectsPortlet">
@@ -61,7 +74,7 @@
 </c:otherwise>
 </c:choose>
 <c:set var="selectedDashboardId" value="${sessionScope['.user.dashboard.selected.id']}"/>
-<form method="POST" action="/app/dashboard/<c:out value="${selectedDashboardId}" />/portlets">
+<form method="POST" action="<html:rewrite page="/app/dashboard/${selectedDashboardId}/portlets" />" onsubmit="return isDivAddContents<c:out value='${wide}' />PortletValid()">
 	<html:hidden property="wide" value="${wide}"/>
   	<table cellpadding="0" cellspacing="0" border="0" width="100%">
     <tr valign="top">
@@ -76,8 +89,10 @@
     <tr>
       <td valign="center">
         <select name="portlet">
-          <option value="bad" SELECTED><fmt:message key="dash.home.AddContent.select"/></option>
-          <c:forEach var="portlet" items="${availablePortlets}" >                                                
+          <option value="bad" SELECTED>
+						<fmt:message key="dash.home.AddContent.select" />
+					</option>
+					<c:forEach var="portlet" items="${availablePortlets}" >                                                
              <option value="<c:out value="${portlet}"/>"><fmt:message key="${portlet}" /></option>
           </c:forEach>           
         </select>

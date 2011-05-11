@@ -30,7 +30,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -47,7 +46,6 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConfig;
-import org.hyperic.hq.common.LicenseManager;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.product.pluginxml.PluginData;
 import org.hyperic.sigar.OperatingSystem;
@@ -55,8 +53,6 @@ import org.hyperic.util.PluginLoader;
 import org.hyperic.util.PluginLoaderException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.security.MD5;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * This class is a manager for ProductPlugin implementations and is also a
@@ -715,22 +711,6 @@ public class ProductPluginManager
         }
     }
 
-    public Collection<PluginInfo> registerCustomPlugins(String startDir, Collection<PluginInfo> excludes) {
-        // check startDir and higher for hq-plugins
-        File dir = new File(startDir).getAbsoluteFile();
-        
-        while (dir != null) {
-            File customPluginDir = new File(dir, "hq-plugins");
-            
-            if (customPluginDir.exists()) {
-                return registerPlugins(customPluginDir.toString(), excludes);
-            }
-            
-            dir = dir.getParentFile();
-        }
-        return Collections.emptyList();
-    }
-
     private File[] listPlugins(File dir) {
         File[] plugins = dir.listFiles();
         return plugins;
@@ -750,6 +730,25 @@ public class ProductPluginManager
         } else {
             return msg;
         }
+    }
+    
+    public Collection<PluginInfo> getAllPluginInfoDirectFromFileSystem(String path) {
+        final Collection<PluginInfo> rtn = new ArrayList<PluginInfo>();
+        final List<String> dirs = StringUtil.explode(path, File.pathSeparator);
+        for (final String d : dirs) {
+            final File dir = new File(d);
+            if (!dir.exists() || !dir.isDirectory()) {
+                continue;
+            }
+            File[] plugins = dir.listFiles();
+            for (File plugin : plugins) {
+                String name = plugin.getName();
+                if (name.endsWith("-plugin.jar") || name.endsWith("-plugin.xml")) {
+                    rtn.add(new PluginInfo(plugin, "NONE"));
+                }
+            }
+        }
+        return rtn;
     }
 
     public Collection<PluginInfo> registerPlugins(String path, Collection<PluginInfo> excludes) {
@@ -932,23 +931,6 @@ public class ProductPluginManager
                     throw new PluginException("Malformed name for: " + jarName);
                 }
             }
-
-            // Check with LicenseManager
-            try {
-                Class<?> c = Class.forName("com.hyperic.hq.license.LicenseManager");
-                Method getInstance = c.getMethod("instance", null);
-                LicenseManager mgr = (LicenseManager) getInstance.invoke(null, null);
-                if (!mgr.isPluginEnabled(pluginName)) {
-                    if (DEBUG_LIFECYCLE) {
-                        log.debug("Skipping " + pluginName + " (in license.exclude)");
-                    }
-                    return null;
-                }
-
-            } catch (Exception e) {
-                // Don't validate against LicenseManager then
-            }
-
             if (data.getName() == null) {
                 data.setName(pluginName);
             }

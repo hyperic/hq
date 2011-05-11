@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.hibernate.Hibernate;
+import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.SessionFactory;
 import org.hibernate.type.IntegerType;
@@ -141,6 +142,7 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
             .append("    from EAM_PLUGIN p ")
             .append("    join EAM_AGENT_PLUGIN_STATUS st on p.md5 = st.md5 ")
             .append("    where st.agent_id = s.agent_id and s.md5 = st.md5 ")
+            .append("    and p.deleted = '0' ")
             .append(")")
             .toString();
         final SQLQuery query = getSession().createSQLQuery(sql);
@@ -162,7 +164,7 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
 			.append("WHERE not exists ( ")
 			.append("    SELECT 1 FROM EAM_AGENT_PLUGIN_STATUS s ")
 			.append("    WHERE a.id = s.agent_id and s.plugin_name = p.name ")
-			.append(")")
+			.append(") and p.deleted = '0'")
 			.toString();
         return getSession().createSQLQuery(sql)
                            .addScalar("id", Hibernate.INTEGER)
@@ -178,7 +180,7 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
 			.append("where not exists (")
 			.append("    select 1 from EAM_AGENT_PLUGIN_STATUS ")
 			.append("    where agent_id = :agentId and plugin_name = p.name")
-			.append(")")
+			.append(") and p.deleted = '0'")
             .toString();
         return getSession().createSQLQuery(sql)
                            .addScalar("id", Hibernate.INTEGER)
@@ -186,9 +188,9 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
                            .list();
     }
 
-    @SuppressWarnings("unchecked")
     public Map<String, AgentPluginStatus> getStatusByAgentId(Integer agentId) {
         final String hql = "from AgentPluginStatus where agent.id = :agentId";
+        @SuppressWarnings("unchecked")
         final Collection<AgentPluginStatus> list =
             getSession().createQuery(hql)
                         .setParameter("agentId", agentId)
@@ -197,6 +199,30 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
             new HashMap<String, AgentPluginStatus>(list.size());
         for (final AgentPluginStatus status : list) {
             rtn.put(status.getPluginName(), status);
+        }
+        return rtn;
+    }
+
+    public Map<Integer, Map<String, AgentPluginStatus>> getStatusByAgentIds(Collection<Integer> agentIds) {
+        if (agentIds == null || agentIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        final String hql = "from AgentPluginStatus where agent.id in (:agentIds)";
+        @SuppressWarnings("unchecked")
+        final Collection<AgentPluginStatus> list =
+            getSession().createQuery(hql)
+                        .setParameterList("agentIds", agentIds, new IntegerType())
+                        .list();
+        final Map<Integer, Map<String, AgentPluginStatus>> rtn =
+            new HashMap<Integer, Map<String, AgentPluginStatus>>(list.size());
+        for (final AgentPluginStatus status : list) {
+            final Integer agentId = status.getAgent().getId();
+            Map<String, AgentPluginStatus> map = rtn.get(status.getAgent().getId());
+            if (map == null) {
+                map = new HashMap<String, AgentPluginStatus>();
+                rtn.put(agentId, map);
+            }
+            map.put(status.getPluginName(), status);
         }
         return rtn;
     }
@@ -261,7 +287,8 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
     public Map<Agent, Collection<AgentPluginStatus>> getPluginsToRemoveFromAgents() {
         final String hql = new StringBuilder(64)
             .append("select s.id FROM EAM_AGENT_PLUGIN_STATUS s ")
-            .append("where not exists (select 1 from EAM_PLUGIN p where p.name = s.plugin_name)")
+            .append("where not exists (")
+            .append("select 1 from EAM_PLUGIN p where p.name = s.plugin_name and p.deleted = '0')")
             .toString();
         @SuppressWarnings("unchecked")
         final List<Integer> list =
@@ -321,6 +348,46 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
             rtn.put(agent, status);
         }
         return rtn;
+    }
+
+    public Map<String, Long> getFileNameCounts(Collection<String> pluginFileNames) {
+        if (pluginFileNames != null && pluginFileNames.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        String where = "";
+        if (pluginFileNames != null) {
+            where = "where fileName in (:filenames)";
+        }
+        final String hql =
+            "select fileName, count(*) from AgentPluginStatus " + where + " group by fileName";
+        final Query query = getSession().createQuery(hql);
+        if (pluginFileNames != null) {
+            query.setParameterList("filenames", pluginFileNames);
+        }
+        @SuppressWarnings("unchecked")
+        final List<Object[]> list = query.list();
+        final Map<String, Long> rtn = new HashMap<String, Long>(list.size());
+        for (final Object[] obj : list) {
+            rtn.put((String) obj[0], ((Number) obj[1]).longValue());
+        }
+        return rtn;
+    }
+
+    public Map<String, Long> getFileNameCounts() {
+        return getFileNameCounts(null);
+    }
+
+    @SuppressWarnings("unchecked")
+    public Collection<Plugin> getOrphanedPlugins() {
+        final String hql = new StringBuilder(200)
+            .append("from Plugin p where deleted = '1' and not exists (")
+            .append("    select 1 from AgentPluginStatus s")
+          	.append("    join s.agent a")
+          	.append("    join a.platforms pl")
+          	.append("    where s.fileName = p.path")
+          	.append(")")
+            .toString();
+        return getSession().createQuery(hql).list();
     }
 
 }

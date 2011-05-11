@@ -285,15 +285,18 @@ hyperic.widget.search = function(dojo, /*Object*/ urls, /*number*/ minStrLenth, 
         if(this.searchBox.value.length >= this.minStrLen){
             this.searchStarted();
             hqDojo.xhrGet({
-                url: this.searchURL+'?q='+string, 
+                url: this.searchURL,
+                content: {
+                	q: string
+                },
                 handleAs: "json",
                 headers: { 
                 	"Content-Type": "application/json" 
                 },
                 timeout: 5000, 
                 load: function(response, args) {
-                	var resURL = resourceURL + "?eid=";
-    	            var usrURL = userURL + "?mode=view&u=";
+                	var resURL = resourceURL + ((resourceURL.indexOf("?") == -1) ? "?" : "&") + "eid=";
+    	            var usrURL = userURL + ((userURL.indexOf("?") == -1) ? "?" : "&") + "mode=view&u=";
     	            var template = "<li class='type'><a href='link' title='fullname'>text<\/a><\/li>";
     	            var count = 0;
     	            var res = "";
@@ -366,8 +369,8 @@ hyperic.widget.search = function(dojo, /*Object*/ urls, /*number*/ minStrLenth, 
 };
 
 function loadSearchData(response, evt) {
-	var resURL = resourceURL+"?eid=";
-    var usrURL = userURL +"?mode=view&u=";
+	var resURL = resourceURL + ((resourceURL.indexOf("?") == -1) ? "?" : "&") + "eid=";
+    var usrURL = userURL + ((userURL.indexOf("?") == -1) ? "?" : "&") + "mode=view&u=";
     var template = "<li class='type'><a href='link' title='fullname'>text<\/a><\/li>";
     var count = 0;
     var res = "";
@@ -1595,7 +1598,9 @@ hyperic.dashboard.chartWidget = function(args) {
     var portletName = args.portletName;
     var portletLabel = args.title;
     var baseUrl = args.url;
-
+    var chartUrl = args.chartUrl;
+    var ctypeChartUrl = args.ctypeChartUrl;
+    
     that.sheets = {};
     that.sheets.loading = hqDojo.query('.loading',node)[0];
     that.sheets.error_loading = hqDojo.query('.error_loading',node)[0];
@@ -1826,8 +1831,9 @@ hyperic.dashboard.chartWidget = function(args) {
         var chartId = that.currentChartId;
         var chartIndex = that.chartselect.select.selectedIndex;
         if(confirm('Remove ' + that.charts[chartId].name + ' from saved charts?')) {
+        	var urlToUse = chartUrl.replace("{rid}", that.charts[chartId].rid).replace("{mtid}", that.charts[chartId].mtid);
             hqDojo.xhrPost( {
-                url: baseUrl + "/chart/" + that.charts[chartId].rid + "/" + that.charts[chartId].mtid + "/",
+                url: urlToUse,
                 content: {
             		"_method" : "DELETE" // need to work around issue using PUT directly
             	},
@@ -2149,15 +2155,15 @@ hyperic.dashboard.chartWidget = function(args) {
     	
     	that._fetchingChart = true;
     	
-    	var chartUrl = baseUrl + "/chart/" + that.charts[chart].rid + "/" + that.charts[chart].mtid + "/";
+    	var urlToUse = unescape(chartUrl).replace("{rid}", that.charts[chart].rid).replace("{mtid}", that.charts[chart].mtid);
     	var ctype = that.charts[chart].ctype;
     	
     	if (ctype != null) {
-    		chartUrl += ctype + "/";
+    		urlToUse = unescape(ctypeChartUrl).replace("{rid}", that.charts[chart].rid).replace("{mtid}", that.charts[chart].mtid).replace("{ctype}", ctype);
     	}
     
     	return hqDojo.xhrGet( {
-            url: chartUrl,
+            url: urlToUse,
             handleAs: 'json',
             headers: { "Content-Type": "application/json"},
             preventCache: true,
@@ -2755,7 +2761,6 @@ hyperic.dashboard.summaryWidget.prototype = hyperic.dashboard.widget;
 
 hyperic.group_manager = function(args) {
 	var that = this;
-	var baseUrl = args.url;
 	
 	that.dialogs = {};
 	that.message_area = {};
@@ -2860,8 +2865,6 @@ hyperic.group_manager = function(args) {
 		var entityType = eidArray[0].split(":")[0];
 		var myForm = document.AddToExistingGroupForm;
 		
-		myForm.action = "/resource/hub/RemoveResource.do";
-		myForm.method = "POST";
 		myForm.removeChild(myForm.eid);
 				
 		var a = new Array(eidArray.length+2);
@@ -2952,7 +2955,7 @@ hyperic.group_manager = function(args) {
 								'Please wait. Processing your request...');
 
 		hqDojo.xhrPost( {
-            url: baseUrl + "association",
+            url: args.postUrl,
             content: {
 				eid: formArray.eid.split(","),
 				groupId: formArray.group.toString().split(",")
@@ -2978,7 +2981,7 @@ hyperic.group_manager = function(args) {
 	
 	that.getGroupsNotContaining = function(eids) {    
 		hqDojo.xhrPost( {
-            url: baseUrl + "associations",
+            url: args.associationsUrl,
             content: {
 				eid: eids,
 				"_method": "PUT"
@@ -3867,11 +3870,9 @@ hyperic.maintenance_schedule = function(args) {
     	// validate with updated constraints
     	if(that.dialog.validate())
         {
-            var args = that.dialog.getValues();
-
     	    // create unix epoch datetime in GMT timezone
-            from_datetime = (args.from_date.getTime() + args.from_time.getTime() - args.from_time.getTimezoneOffset() * 60000);
-            to_datetime = (args.to_date.getTime() + args.to_time.getTime() - args.to_time.getTimezoneOffset() * 60000);
+            var from_datetime = (that.inputs.from_date.getValue().getTime() + that.inputs.from_time.getValue().getTime() - that.inputs.from_time.getValue().getTimezoneOffset() * 60000);
+            var to_datetime = (that.inputs.to_date.getValue().getTime() + that.inputs.to_time.getValue().getTime() - that.inputs.to_time.getValue().getTimezoneOffset() * 60000);
 
             return hqDojo.xhrPost( {
                 url: baseUrl + "/schedule",

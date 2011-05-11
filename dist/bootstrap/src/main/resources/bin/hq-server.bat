@@ -72,6 +72,19 @@ if "%COMMAND%" == "" (
     shift
 )
 
+rem Check that the correct version of java is being used.
+set REQUIRED_VERSION_STRING=1.6
+"%JAVA_HOME%/bin/java" -version 2> tmp_java_version.txt
+set /p JAVA_VERSION= < tmp_java_version.txt
+del tmp_java_version.txt
+set JAVA_VERSION=%JAVA_VERSION:~14,3%
+set REQUIRED_VERSION=%REQUIRED_VERSION_STRING:~0,3%
+if %JAVA_VERSION% LSS %REQUIRED_VERSION% (
+  echo Java version must be at least %REQUIRED_VERSION_STRING%
+  pause
+  goto :eof
+)
+
 rem
 rem Find the wrapper.conf
 rem

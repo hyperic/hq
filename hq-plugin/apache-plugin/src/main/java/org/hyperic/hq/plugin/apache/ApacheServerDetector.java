@@ -347,6 +347,10 @@ public class ApacheServerDetector
             server.setCustomProperties(cprops);
         }
 
+        getLog().debug("[configureServer] snmpConfigExists=" + snmpConfigExists
+                + " this.discoverModSnmp=" + this.discoverModSnmp
+                + "this.discoverModStatus="+this.discoverModStatus);
+        
         if (snmpConfigExists || this.discoverModSnmp) {
             if (!snmpConfigExists) {
                 log.debug(snmpConfig +
@@ -558,8 +562,9 @@ public class ApacheServerDetector
         Properties props = new Properties();
 
         if (isWin32()) {
-            props.setProperty(Win32ControlPlugin.PROP_SERVICENAME,
-                              getWindowsServiceName());
+            String sname=getWindowsServiceName();
+            if(sname!=null)
+                props.setProperty(Win32ControlPlugin.PROP_SERVICENAME,sname);
             return new ConfigResponse(props);
         }
         else {

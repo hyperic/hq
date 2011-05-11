@@ -73,4 +73,12 @@ public class FileDataResult implements java.io.Serializable {
     public double getTxRate() {
         return (double)(this.sendBytes/1024)/getSendTimeSeconds();
     }
+    
+    public String toString() {
+        return new StringBuilder()
+            .append(fileName).append(":")
+            .append(sendBytes).append(":")
+            .append(sendTime)
+            .toString();
+    }
 }

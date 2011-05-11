@@ -33,12 +33,14 @@ import java.io.PrintStream;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.Vector;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
@@ -56,8 +58,6 @@ import org.hyperic.hq.agent.AgentUpgradeManager;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorException;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorInterface;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorSimple;
-import org.hyperic.hq.bizapp.client.AgentCallbackClient;
-import org.hyperic.hq.bizapp.client.AgentCallbackClientException;
 import org.hyperic.hq.bizapp.client.PlugininventoryCallbackClient;
 import org.hyperic.hq.bizapp.client.StorageProviderFetcher;
 import org.hyperic.hq.product.GenericPlugin;
@@ -695,12 +695,17 @@ public class AgentDaemon
             pluginDir = 
                 bootProps.getProperty(AgentConfig.PROP_PDK_PLUGIN_DIR[0]);
 
-            Collection<PluginInfo> excludes = new ArrayList<PluginInfo>();
-            Collection<PluginInfo> plugins = new ArrayList<PluginInfo>();
+            Collection<PluginInfo> excludes = new TreeSet<PluginInfo>(new Comparator<PluginInfo>() {
+                public int compare(PluginInfo p1, PluginInfo p2) {
+                    return p1.name.compareTo(p2.name);
+                }
+            });
+            Set<PluginInfo> plugins = new HashSet<PluginInfo>();
             plugins.addAll(this.ppm.registerPlugins(pluginDir, excludes));
-            //check .. and higher for hq-plugins
-            plugins.addAll(this.ppm.registerCustomPlugins("..", excludes));
             plugins.addAll(excludes);
+            scanLegacyCustomDir("..");
+            Collection<PluginInfo> fromDirs = ppm.getAllPluginInfoDirectFromFileSystem(pluginDir);
+            plugins = mergeByName(fromDirs, plugins);
             sendPluginStatusToServer(plugins);
             
             logger.info("Product Plugin Manager initalized");
@@ -711,6 +716,41 @@ public class AgentDaemon
             throw new AgentStartException("Unable to initialize plugin " +
                                           "manager: " + e.getMessage());
         }
+    }
+
+    private void scanLegacyCustomDir(String startDir) {
+        File dir = new File(startDir).getAbsoluteFile();
+        while (dir != null) {
+            File customDir = new File(dir, "hq-plugins");
+            if (customDir.exists() && customDir.isDirectory()) {
+                File[] files = customDir.listFiles();
+                for (File file : files) {
+                    String name = file.getName();
+                    if (name.endsWith("-plugin.jar") || name.endsWith("-plugin.xml")) {
+                        logger.warn("WARNING - custom plugins on the agent are no longer supported.  " +
+                                    "Will not load plugin - " + name + ", instead add this plugin " +
+                                    "to the HQ Server via the Plugin Manager UI.");
+                    }
+                }
+                return;
+            }
+            dir = dir.getParentFile();
+        }
+    }
+
+    /** merge fromDirs into the plugins Collection keyed by pluginInfo.name and return plugins */
+    private Set<PluginInfo> mergeByName(Collection<PluginInfo> fromDirs,
+                                        Set<PluginInfo> plugins) {
+        final Collection<String> pluginFiles = new HashSet<String>();
+        for (final PluginInfo info : plugins) {
+            pluginFiles.add(info.jar);
+        }
+        for (final PluginInfo info : fromDirs) {
+            if (!pluginFiles.contains(info.jar)) {
+                plugins.add(info);
+            }
+        }
+        return plugins;
     }
 
     private void sendPluginStatusToServer(final Collection<PluginInfo> plugins) {

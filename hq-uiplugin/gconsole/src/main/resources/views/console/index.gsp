@@ -31,14 +31,14 @@
     </fieldset>
 </div>
 <script type="text/javascript">
+document.navTabCat = "Admin";
+
 hqDojo.ready(function() {
-	document.navTabCat = "Admin";
-	
 	hqDojo.connect(hqDojo.byId("executeLink"), "onclick", function(e) {
 		hqDojo.byId('timeStatus').innerHTML = '... executing';
 		
 		hqDojo.xhrPost({
-    		url: "<%= urlFor(action:"execute") %>",
+    		url: "<%= urlFor(action:"execute", encodeUrl:true) %>",
 	    	handleAs: "json-comment-filtered",
     		content: {
         		code:   hqDojo.byId("code").value

@@ -1344,7 +1344,7 @@ public class AppdefBossImpl implements AppdefBoss {
             log.warn("AppdefEntityId=" + aeid + " is not associated with a Resource");
             return new AppdefEntityID[0];
         }
-        AppdefEntityID[] removed = resourceManager.removeResourcePerms(subject, res, false, removeAllVirtual);
+        AppdefEntityID[] removed = resourceManager.removeResourceAndRelatedResources(subject, res, false, removeAllVirtual);
         Map<Integer, List<AppdefEntityID>> agentCache = null;
 
         final Integer id = aeid.getId();

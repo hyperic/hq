@@ -1,9 +1,3 @@
-var _qualifyURL = function (url) {
-	var a = document.createElement('img');
-    a.src = url;
-    return a.src;
-};
-
 //INIT
 var SimileAjax = {
 	loaded:                 true,
@@ -12,7 +6,7 @@ var SimileAjax = {
 	params:                 { bundle:"true" }
 };
 SimileAjax.Platform = new Object();
-SimileAjax.urlPrefix = _qualifyURL('/');
+SimileAjax.urlPrefix = '/';
 //SIMILE AJAX - LOAD ORDER 1 of 3
 
 
@@ -3451,7 +3445,7 @@ window.Timeline = new Object();
 window.Timeline.DateTime = window.SimileAjax.DateTime
 Timeline.serverLocale = "en";
 Timeline.clientLocale = "en";
-Timeline.urlPrefix = _qualifyURL('/');
+Timeline.urlPrefix = '/';
 
 /* decorators.js */
 Timeline.SpanHighlightDecorator=function(A){this._unit=("unit" in A)?A.unit:SimileAjax.NativeDateUnit;

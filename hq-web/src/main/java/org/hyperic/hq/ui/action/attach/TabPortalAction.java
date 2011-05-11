@@ -51,7 +51,7 @@ public class TabPortalAction
     public ActionForward list(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                               HttpServletResponse response) throws Exception {
 
-        setResource(request);
+        setResource(request, response);
         Portal portal = Portal.createPortal("attachment.title", ".tab.Views");
         portal.setDialog(false);
         request.setAttribute(Constants.PORTAL_KEY, portal);

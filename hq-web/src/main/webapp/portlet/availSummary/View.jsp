@@ -33,7 +33,9 @@
 
 <tiles:importAttribute name="portlet"/>
 
-<html:link page="/ResourceHub.do?ff=" linkName="browseUrl" styleId="browseUrl" style="visibility:hidden;"></html:link>
+<html:link action="/ResourceHub" linkName="browseUrl" styleId="browseUrl" style="visibility:hidden;">
+	<html:param name="ff" value="{ff}"/> 
+</html:link>
 
 <script type="text/javascript">
 	function requestAvailSummary${portlet.token}() {
@@ -85,7 +87,7 @@
         <tbody>
         	<tr class="ListRow">
         		<td class="ListCell">
-                	<c:url var="path" value="/" />
+                	<c:url var="path" value="/images/4.0/icons/properties.gif" />
                 	<fmt:message key="dash.home.add.resources.to.display">
                   		<fmt:param value="${path}"/>
                 	</fmt:message>

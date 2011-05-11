@@ -29,9 +29,11 @@ package org.hyperic.hq.hqu.rendit.helpers
 
 import org.hyperic.hq.appdef.shared.AIPlatformValue
 import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.appdef.shared.AIQApprovalException
 import org.hyperic.hq.appdef.shared.AIQueueConstants
 import org.hyperic.hq.appdef.shared.AIQueueManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject
+import org.hyperic.hq.autoinventory.AIServer
 import org.hyperic.util.pager.PageControl
 
 /**
@@ -73,6 +75,16 @@ class AutodiscoveryHelper extends BaseHelper {
     public AIPlatformValue findById(int id) {
         aiqMan.findAIPlatformById(user, id)
     }
+
+    /**
+     * Find an AIServer by id.
+     * @param id The id to look up.
+     * @return A {@link AIServerValue} with the given id or null if a
+     * queued server with the given id does not exist.
+     */
+    public AIServer findServerById(int id) {
+    	aiqMan.findAIServerById(user, id)
+    }
     
     /**
      * Approve the platform with the given fqdn.
@@ -94,6 +106,28 @@ class AutodiscoveryHelper extends BaseHelper {
         List ipIds = platform.AIIpValues.id
 
         aiqMan.processQueue(user, platformIds, serverIds, ipIds,
+                            AIQueueConstants.Q_DECISION_APPROVE)
+    }
+    
+    /**
+     * Approve the server.
+     * @param server The server to approve
+     * @return A List of {@link org.hyperic.hq.appdef.server.session.AppdefResource}s
+     * that were created as a result of processing the queue.
+     */
+    public List approve(AIServer server) throws AIQApprovalException {
+        // Only approve servers that are not marked ignored
+        if (server.ignored) {
+        	throw new AIQApprovalException("Cannot approve an ignored server")
+        }
+        
+        List platformIds = []
+        List serverIds = []
+        
+        serverIds.add(server.id)
+        platformIds.add(server.getAIPlatform().id)
+
+        aiqMan.processQueue(user, platformIds, serverIds, null,
                             AIQueueConstants.Q_DECISION_APPROVE)
     }
 }

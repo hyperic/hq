@@ -58,6 +58,15 @@ public interface ZeventEnqueuer {
     boolean registerEventClass(Class eventClass);
 
     /**
+     * Register a list of event classes. These classes must be registered prior to
+     * attempting to listen to individual event types.
+     * 
+     * @param eventClasses a list of event classes to register
+     * @return false if an event class is already registered
+     */
+    boolean registerEventClass(List<String> eventClasses);
+
+    /**
      * Enqueue events if the current running transaction successfully commits.
      * @see #enqueueEvents(List)
      */

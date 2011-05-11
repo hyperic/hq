@@ -87,7 +87,7 @@ public class VisibilityPortalAction
                                        HttpServletResponse response) throws Exception {
 
         // XXX: what if we have multiple parents?
-        setResource(request);
+        setResource(request, response);
         findServersHealths(request);
 
         super.currentHealth(mapping, form, request, response);
@@ -102,7 +102,7 @@ public class VisibilityPortalAction
                                          HttpServletResponse response) throws Exception {
 
         // XXX: what if we have multiple parents?
-        setResource(request);
+        setResource(request, response);
         findServersHealths(request);
 
         super.resourceMetrics(mapping, form, request, response);
@@ -115,7 +115,7 @@ public class VisibilityPortalAction
 
     public ActionForward performance(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                      HttpServletResponse response) throws Exception {
-        setResource(request);
+        setResource(request, response);
 
         super.performance(mapping, form, request, response);
 

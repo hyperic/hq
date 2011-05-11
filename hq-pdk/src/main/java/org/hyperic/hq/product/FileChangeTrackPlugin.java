@@ -159,7 +159,7 @@ public class FileChangeTrackPlugin extends ConfigFileTrackPlugin{
         final String configPath = folderConfig.getPath();
         String path = replaceSysVariables(configPath);
         final boolean isAbsolute = path.charAt(1) == ':' || path.charAt(0) == '/' || path.startsWith("~/"); 
-        final String basePath = isAbsolute ? "" : path+ File.separator ;
+        final String basePath = isAbsolute ? "" : installDir+ File.separator ;
         dto.setPath(basePath + folderConfig.getPath());
         dto.setFilter(folderConfig.getFilter());
         dto.setRecursive(folderConfig.isRecursive());

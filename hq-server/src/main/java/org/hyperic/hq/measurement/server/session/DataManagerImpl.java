@@ -1380,7 +1380,7 @@ public class DataManagerImpl implements DataManager {
             } else {
                 rtn.add(val.getHighLowMetricValue());
             }
-            start += windowSize;
+            tmp += windowSize;
         }
         return rtn;
     }

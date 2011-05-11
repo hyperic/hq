@@ -31,10 +31,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatus;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatusEnum;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.product.Plugin;
 
 public interface PluginManager {
@@ -114,23 +114,14 @@ public interface PluginManager {
                                               Collection<Plugin> plugins);
 
     /**
-     * Updates all the {@link AgentPluginStatus} objects associated with the agentId to the
-     * specified status
-     * @param status - {@link AgentPluginStatusEnum}
-     * @param agentId - id associated with the {@link Agent} object
-     * @param pluginFileNames - {@link Collection} of {@link String} = pluginFileName
-     */
-    void updateAgentPluginStatusByFileNameInNewTran(AgentPluginStatusEnum status, Integer agentId,
-                                                    Collection<String> pluginFileNames);
-
-    /**
      * Removes all plugins specified by the pluginFilenames collection
      * @param subj
      * @param pluginFileNames
-     * @throws PermissionException
+     * @throws PluginDeployException - if plugins can't be deployed, most likely cause here is
+     * permission issues in the hq filesystem
      */
     void removePlugins(AuthzSubject subj, Collection<String> pluginFileNames)
-    throws PermissionException;
+    throws PluginDeployException;
 
     /**
      * Removes all {@link AgentPluginStatus} objects associated with the agentId and pluginFileNames
@@ -183,5 +174,26 @@ public interface PluginManager {
      * @return parent dir of user.dir/hq-plugins/ basically, /cwd/../hq-plugins/
      */
     File getCustomPluginDir();
+
+    /**
+     * updates {@link AgentPluginStatus} objs with the lastSyncStatus of "from" to "to"
+     */
+    void updateAgentPluginSyncStatus(Integer agentId, AgentPluginStatusEnum from,
+                                     AgentPluginStatusEnum to);
+
+    /**
+     * Updates all the {@link AgentPluginStatus} objects associated with the agentId to the
+     * specified status
+     * @param status - {@link AgentPluginStatusEnum}
+     * @param agenttoPlugins = {@link Map} of {@link Integer} = agentId to {@link Collection}
+     * of {@link Plugin}s.  May be null
+     * @param agenttoFileNames = {@link Map} of {@link Integer} = agentId to {@link Collection}
+     * of {@link String}s = filename.  May be null
+     */
+    void updateAgentPluginSyncStatus(AgentPluginStatusEnum status,
+                                     Map<Integer, Collection<Plugin>> agentToPlugins,
+                                     Map<Integer, Collection<String>> agentToFileNames);
+
+    void removeOrphanedPluginsInNewTran() throws PluginDeployException;
 
 }

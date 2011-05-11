@@ -16,16 +16,9 @@
         if (mList && mList.length > 0) {
 
             var tbody = problemTable.getElementsByTagName('tbody')[0];
-            var browser = BrowserDetect.browser;
 
-            if (browser == "Safari") {
-                for (var i = tbody.childNodes.length; i > 1; i--) {
+            for (var i = tbody.childNodes.length - 1; i > 1; i--) {
                 tbody.removeChild(tbody.childNodes[i]);
-                }
-            } else {
-                for (var i = tbody.childNodes.length - 1; i > 1; i--) {
-                tbody.removeChild(tbody.childNodes[i]);
-                }
             }
         
             for (var i = 0; i < mList.length; i++) {
@@ -100,7 +93,7 @@
             for (var i = 0; i < mList.length; i++) {
                 if(mList[i].resourceName)
                 {
-                    problemTable.rows[i+1].cells[0].innerHTML = getShortLink(mList[i].resourceName, maxResourceNameSize, resUrl + mList[i].resourceType + urlColon + mList[i].resourceId);
+                    problemTable.rows[i+1].cells[0].innerHTML = getShortLink(mList[i].resourceName, maxResourceNameSize, unescape(resUrl).replace("{eid}", mList[i].resourceType + urlColon + mList[i].resourceId));
                 }
             }
         } else {
@@ -191,7 +184,7 @@
                 if (aList[i].cTime && aList[i].appdefKey && aList[i].alertId) {
                     td2.appendChild(alertAnchor);
                     alertAnchor.appendChild(document.createTextNode(aList[i].cTime));
-                    alertAnchor.setAttribute('href', (alertUrl + aList[i].appdefKey + urlAmp + aList[i].alertId));
+                    alertAnchor.setAttribute('href', unescape(alertUrl).replace("{eid}", aList[i].appdefKey + urlAmp + aList[i].alertId));
                 }
 
                 tr.appendChild(td3);
@@ -279,18 +272,9 @@
         	hqDojo.style(noAvailTable, "display", "");
         } else {
             var tbody = availTable.getElementsByTagName('tbody')[0];
-            var browser = BrowserDetect.browser;
             
-            if (browser == "Safari") {
-
-            for (var i = tbody.childNodes.length; i > 1; i--) {
+            for (var i = tbody.childNodes.length - 1; i > 1; i--) {
                 tbody.removeChild(tbody.childNodes[i]);
-                }
-            } else {
-
-             for (var i = tbody.childNodes.length - 1; i > 1; i--) {
-                tbody.removeChild(tbody.childNodes[i]);
-                 }
             }
 
             for (var i = 0; i < availList.length; i++) {
@@ -314,7 +298,7 @@
 
                 td1.appendChild(newanchor);
                 newanchor.appendChild(document.createTextNode(availList[i].resourceTypeName));
-                newanchor.setAttribute('href', (browseUrl + availList[i].appdefType + urlParams + availList[i].appdefType + urlColon + availList[i].appdefTypeId));
+                newanchor.setAttribute('href', unescape(browseUrl).replace("{ff}", availList[i].appdefType + urlParams + availList[i].appdefType + urlColon + availList[i].appdefTypeId));
                 tr.appendChild(td2);
                 tr.appendChild(td3);
 
@@ -381,16 +365,9 @@
 
         if (metricTable && metricValues.values) {
             var tbody = metricTable.getElementsByTagName('tbody')[0];
-            var browser = BrowserDetect.browser;
             
-            if (browser == "Safari") {
-                for (var a = tbody.childNodes.length; a > 0; a--) {
+            for (var a = tbody.childNodes.length - 1; a > 0; a--) {
                 tbody.removeChild(tbody.childNodes[a]);
-                }
-            } else {
-                for (var a = tbody.childNodes.length - 1; a > 0; a--) {
-                tbody.removeChild(tbody.childNodes[a]);
-                }
             }
 
             // Create table headers
@@ -433,7 +410,7 @@
 
             for (i = 0; i < metricValues.values.length; i++) {
                 if (metricValues.values[i].resourceName) {
-                    metricTable.rows[i+1].cells[0].innerHTML = getShortLink(metricValues.values[i].resourceName,maxResourceNameSize,resUrl + metricValues.values[i].resourceTypeId + urlColon + metricValues.values[i].resourceId);
+                    metricTable.rows[i+1].cells[0].innerHTML = getShortLink(metricValues.values[i].resourceName,maxResourceNameSize,unescape(resUrl).replace("{eid}", metricValues.values[i].resourceTypeId + urlColon + metricValues.values[i].resourceId));
                 }
             }
 
@@ -483,7 +460,6 @@
                     var td6 = document.createElement('td');
                     var urlColon = ":"
                     var resUrl = hqDojo.byId('viewResUrl').href;
-
 
                     tbody.appendChild(tr);
 
@@ -547,9 +523,6 @@
                     } else {
                         td5.innerHTML = "0";
                     }
-
-
-
                 }
 
                 // find the 'Resource Name' header cell and figure out it's displayed width.
@@ -558,7 +531,7 @@
                 for (i = 0; i < fList.length; i++) {
                     
                     if (fList[i].resourceName && fList[i].resourceId && fList[i].resourceTypeId) {
-                        table.rows[i+1].cells[0].innerHTML = getShortLink(fList[i].resourceName,maxResourceNameSize,resUrl + fList[i].resourceTypeId + urlColon + fList[i].resourceId);
+                        table.rows[i+1].cells[0].innerHTML = getShortLink(fList[i].resourceName,maxResourceNameSize,unescape(resUrl).replace("{eid}", fList[i].resourceTypeId + urlColon + fList[i].resourceId));
                     } else {
                         table.rows[i+1].cells[0].innerHTML = "&nbsp;";
                     }

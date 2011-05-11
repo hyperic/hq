@@ -54,6 +54,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.AIHistory;
+import org.hyperic.hq.autoinventory.AIServer;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.DuplicateAIScanNameException;
 import org.hyperic.hq.autoinventory.ScanConfigurationCore;
@@ -358,8 +359,13 @@ public class AIBossImpl implements AIBoss {
         SessionTimeoutException {
 
         AuthzSubject subject = sessionManager.getSubject(sessionID);
+        AIServer aiserver = aiQueueManager.findAIServerById(subject, serverID);
+        
+        if (aiserver == null) {
+            return null;
+        }
 
-        return aiQueueManager.findAIServerById(subject, serverID);
+        return aiserver.getAIServerValue();
     }
 
     /**

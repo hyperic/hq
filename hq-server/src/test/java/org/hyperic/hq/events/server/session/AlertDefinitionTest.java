@@ -141,6 +141,25 @@ public class AlertDefinitionTest extends TestCase {
                     def.isAvailability(up));
     }
     
+    public void testIsAvailabilityUpValidConditionName() {
+    	testIsAvailabilityValidConditionName(MeasurementConstants.CAT_AVAILABILITY);
+    	testIsAvailabilityValidConditionName("Server Availability");
+    }
+    
+    private void testIsAvailabilityValidConditionName(String conditionName) {
+        AlertDefinition def = new AlertDefinition();
+        AlertCondition cond = new AlertCondition();
+        
+        cond.setName(conditionName);
+        cond.setComparator(EQUALS_COMPARATOR);
+        cond.setThreshold(MeasurementConstants.AVAIL_UP);
+        def.addCondition(cond);
+        
+        assertTrue("The condition name is '" + conditionName
+        				+ "'. It must contain " + MeasurementConstants.CAT_AVAILABILITY,
+                    def.isAvailability(true));        
+    }
+    
     public void testIsAvailabilityUpInvalidConditionName() {
         testIsAvailabilityInvalidConditionName(true);
     }
@@ -151,11 +170,12 @@ public class AlertDefinitionTest extends TestCase {
     
     private void testIsAvailabilityInvalidConditionName(boolean up) {
         AlertDefinition def = new AlertDefinition();
-        
         AlertCondition cond = new AlertCondition();
-        cond.setName(MeasurementConstants.CAT_THROUGHPUT);
         
-        assertFalse(MeasurementConstants.CAT_AVAILABILITY + " is the only valid condition name",
+        cond.setName(MeasurementConstants.CAT_THROUGHPUT);
+        def.addCondition(cond);
+        
+        assertFalse("The condition name must contain " + MeasurementConstants.CAT_AVAILABILITY,
                     def.isAvailability(up));
     }
     

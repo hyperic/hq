@@ -28,6 +28,7 @@ package org.hyperic.hq.ui.taglib.display;
 import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.JspException;
 
 import org.apache.commons.logging.Log;

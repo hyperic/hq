@@ -9,7 +9,12 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+
 import javax.servlet.http.HttpSession;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatus;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatusEnum;
@@ -25,7 +30,7 @@ import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.product.shared.PluginDeployException;
 import org.hyperic.hq.product.shared.PluginManager;
-import org.hyperic.hq.product.shared.ProductManager;
+import org.hyperic.hq.ui.KeyConstants;
 import org.hyperic.hq.web.BaseController;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,25 +44,23 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 @Controller
 @RequestMapping("/admin/managers/plugin")
 public class PluginManagerController extends BaseController implements ApplicationContextAware {
     private static final Log log = LogFactory.getLog(PluginManagerController.class);
-    private ApplicationContext applicationContext;
-    private ProductManager productManager;
+    
+    private static final String HELP_PAGE_MAIN = "Administration.Plugin.Manager";
+    
     private PluginManager pluginManager;
     private AgentManager agentManager;
-    private AuthzBoss authzBoss;
+    private ApplicationContext applicationContext;
     SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy hh:mm aa zzz");
 
     
     @Autowired
     public PluginManagerController(AppdefBoss appdefBoss, AuthzBoss authzBoss, 
-            ProductManager productManager, PluginManager pluginManager,
-            AgentManager agentManager) {
+            PluginManager pluginManager, AgentManager agentManager) {
         super(appdefBoss, authzBoss);
         this.pluginManager = pluginManager;
         this.agentManager = agentManager;
@@ -66,93 +69,151 @@ public class PluginManagerController extends BaseController implements Applicati
     @RequestMapping(method = RequestMethod.GET)
     public String index(Model model) {
         model.addAttribute("pluginSummaries", getPluginSummaries());
-        model.addAttribute("allAgentCount",agentManager.getNumAutoUpdatingAgents());
+        model.addAttribute("info",getAgentInfo());
         model.addAttribute("mechanismOn", pluginManager.isPluginSyncEnabled());
         if (pluginManager.isPluginSyncEnabled()){
             model.addAttribute("instruction", "admin.managers.plugin.instructions");
         }else{
             model.addAttribute("instruction", "admin.managers.plugin.mechanism.off");
         }
+        model.addAttribute("customDir", pluginManager.getCustomPluginDir().getAbsolutePath());
+        model.addAttribute(KeyConstants.PAGE_TITLE_KEY, HELP_PAGE_MAIN);
         return "admin/managers/plugin";
     }
     
     @RequestMapping(method = RequestMethod.GET, value="/list", headers="Accept=application/json")
     public @ResponseBody List<Map<String, Object>> getPluginSummaries() {
         List<Map<String, Object>> pluginSummaries = new ArrayList<Map<String,Object>>();
+        List<Map<String, Object>> inProgressPluginSummaries = new ArrayList<Map<String,Object>>();
+        List<Map<String, Object>> finalPluginSummaries = new ArrayList<Map<String,Object>>();
         List<Plugin> plugins =  pluginManager.getAllPlugins();
         
+        if(plugins!=null){
+            Comparator<Plugin> sortByPluginName = new Comparator<Plugin>() {
+                public int compare(Plugin o1, Plugin o2) {
+                    return o1.getName().compareTo(o2.getName());
+                }
+            };
+           
+            Collections.sort(plugins, sortByPluginName);
         
-        Comparator<Plugin> sortByPluginName = new Comparator<Plugin>() {
-            public int compare(Plugin o1, Plugin o2) {
-                return o1.getName().compareTo(o2.getName());
-            }
-        };
-        
-        Collections.sort(plugins, sortByPluginName);
-        
-        
-        Map<Integer, Map<AgentPluginStatusEnum, Integer>> allPluginStatus = 
-            pluginManager.getPluginRollupStatus();
-        
-        for (Plugin plugin : plugins) {
-            int pluginId = plugin.getId();
-            Map<String, Object> pluginSummary = new HashMap<String, Object>();
-            Map<AgentPluginStatusEnum, Integer> pluginStatus = 
-                allPluginStatus.get(pluginId);
+            Map<Integer, Map<AgentPluginStatusEnum, Integer>> allPluginStatus = 
+                pluginManager.getPluginRollupStatus();
             
-            pluginSummary.put("id", pluginId);
-            pluginSummary.put("name", plugin.getName());
-            pluginSummary.put("jarName", plugin.getPath());
-            pluginSummary.put("initialDeployDate", formatter.format(plugin.getCreationTime()));
-            int successAgentCount =0;
-            int errorAgentCount =0;
-            int inProgressAgentCount =0;
-            
-            if (pluginStatus!=null){
-                successAgentCount = pluginStatus.get(AgentPluginStatusEnum.SYNC_SUCCESS);
-                errorAgentCount = pluginStatus.get(AgentPluginStatusEnum.SYNC_FAILURE);
-                inProgressAgentCount = pluginStatus.get(AgentPluginStatusEnum.SYNC_IN_PROGRESS);
+            for (Plugin plugin : plugins) {
+                int pluginId = plugin.getId();
+                Map<String, Object> pluginSummary = new HashMap<String, Object>();
+                Map<AgentPluginStatusEnum, Integer> pluginStatus = 
+                    allPluginStatus.get(pluginId);
+                
+                pluginSummary.put("id", pluginId);
+                pluginSummary.put("name", plugin.getName());
+                pluginSummary.put("jarName", plugin.getPath());
+                pluginSummary.put("initialDeployDate", formatter.format(plugin.getCreationTime()));
+                int successAgentCount =0;
+                int errorAgentCount =0;
+                int inProgressAgentCount =0;
+                
+                if (pluginStatus!=null){
+                    successAgentCount = pluginStatus.get(AgentPluginStatusEnum.SYNC_SUCCESS);
+                    errorAgentCount = pluginStatus.get(AgentPluginStatusEnum.SYNC_FAILURE);
+                    inProgressAgentCount = pluginStatus.get(AgentPluginStatusEnum.SYNC_IN_PROGRESS);
+                }
+                int allAgentCount = successAgentCount + errorAgentCount +inProgressAgentCount;
+                boolean isInProgress = false;
+                if (inProgressAgentCount>0){
+                    isInProgress = true;
+                }
+                
+                pluginSummary.put("inProgressAgentCount", inProgressAgentCount);
+                pluginSummary.put("allAgentCount",allAgentCount);
+                pluginSummary.put("successAgentCount",successAgentCount);
+                pluginSummary.put("errorAgentCount",errorAgentCount);
+                pluginSummary.put("inProgress",isInProgress);
+                pluginSummary.put("updatedDate", formatter.format(plugin.getModifiedTime()));
+                pluginSummary.put("version", plugin.getVersion());   
+                pluginSummary.put("disabled", plugin.isDisabled());
+                pluginSummary.put("deleted", plugin.isDeleted());
+                if(errorAgentCount>0){
+                    finalPluginSummaries.add(pluginSummary);
+                }else if(inProgressAgentCount>0){
+                    inProgressPluginSummaries.add(pluginSummary);
+                }else{
+                    pluginSummaries.add(pluginSummary);
+                }
             }
-            int allAgentCount = successAgentCount + errorAgentCount +inProgressAgentCount;
-            boolean isInProgress = false;
-            if (inProgressAgentCount>0){
-                isInProgress = true;
-            }
-            
-            pluginSummary.put("inProgressAgentCount", inProgressAgentCount);
-            pluginSummary.put("allAgentCount",allAgentCount);
-            pluginSummary.put("successAgentCount",successAgentCount);
-            pluginSummary.put("errorAgentCount",errorAgentCount);
-            pluginSummary.put("inProgress",isInProgress);
-            pluginSummary.put("updatedDate", formatter.format(plugin.getModifiedTime()));
-            pluginSummary.put("version", plugin.getVersion());   
-            pluginSummary.put("disabled", plugin.isDisabled());
-            pluginSummaries.add(pluginSummary);
+            finalPluginSummaries.addAll(inProgressPluginSummaries);
+            finalPluginSummaries.addAll(pluginSummaries);
         }
 
-        return pluginSummaries;
+        return finalPluginSummaries;
     }
     
     @RequestMapping(method = RequestMethod.GET, value="/info", headers="Accept=application/json")
     public @ResponseBody Map<String, Object> getAgentInfo() {
         Map<String, Object> info = new HashMap<String,Object>();
+        int agentErrorCount=0;
+        List<Agent> allAgents = agentManager.getAgents();
+        if (allAgents != null){
+            for (Agent agent : allAgents){
+                Collection<AgentPluginStatus> pluginStatus = agent.getPluginStatuses(); 
+                for (AgentPluginStatus status : pluginStatus){
+                    String lastSyncStatus = status.getLastSyncStatus();
+                    if (lastSyncStatus == null) {
+                        continue;
+                    }
+                    AgentPluginStatusEnum e = AgentPluginStatusEnum.valueOf(lastSyncStatus);
+                    if (e == AgentPluginStatusEnum.SYNC_FAILURE){
+                        agentErrorCount++;
+                        break;
+                    }
+                }
+            }
+        }
+        info.put("agentErrorCount", agentErrorCount);
         info.put("allAgentCount", agentManager.getNumAutoUpdatingAgents());
         return info;
     }
 
+    @RequestMapping(method = RequestMethod.GET, value="/agent/summary", headers="Accept=application/json")
+    public @ResponseBody List<String> getAgentStatusSummary() {
+        List<String> agentNames = new ArrayList<String>();
+        List<Agent> allAgents = agentManager.getAgents();
+        for (Agent agent : allAgents){
+            Collection<AgentPluginStatus> pluginStatus = agent.getPluginStatuses(); 
+            for(AgentPluginStatus status:pluginStatus){
+                String lastSyncStatus = status.getLastSyncStatus();
+                if (lastSyncStatus == null) {
+                    continue;
+                }
+                AgentPluginStatusEnum e =AgentPluginStatusEnum.valueOf(lastSyncStatus);
+                if (e == AgentPluginStatusEnum.SYNC_FAILURE){
+                    agentNames.add(getAgentName(agent));
+                    break;
+                }
+            }
+        }
+        return agentNames;
+    }    
+    
     @RequestMapping(method = RequestMethod.GET, value="/status/{pluginId}", headers="Accept=application/json")
-    public @ResponseBody List<Map<String, Object>> getAgentStatus(@PathVariable int pluginId, @RequestParam("searchWord") String searchWord) {
+    public @ResponseBody List<Map<String, Object>> getAgentStatus(@PathVariable int pluginId, 
+        @RequestParam("searchWord") String searchWord) {
         Collection<AgentPluginStatus> errorAgentStatusList = 
             pluginManager.getStatusesByPluginId(pluginId, AgentPluginStatusEnum.SYNC_FAILURE);
 
-        
         List<Map<String,Object>> resultAgents = new ArrayList<Map<String,Object>>();
-        for(AgentPluginStatus errorAgentStatus: errorAgentStatusList){
+        for (AgentPluginStatus errorAgentStatus : errorAgentStatusList){
             String agentName = getAgentName(errorAgentStatus.getAgent());
-            if("".equals(searchWord) || agentName.contains(searchWord)){
+            if ("".equals(searchWord) || agentName.contains(searchWord)){
                 Map<String,Object> errorAgent = new HashMap<String,Object>();
                 errorAgent.put("agentName", agentName); 
-                errorAgent.put("syncDate", formatter.format(errorAgentStatus.getLastSyncAttempt()));
+                if(errorAgentStatus.getLastSyncAttempt()!=0){
+                    errorAgent.put("syncDate", formatter.format(errorAgentStatus.getLastSyncAttempt())); 
+                }else{
+                    errorAgent.put("syncDate", "");
+                }
+                
                 errorAgent.put("status", "error");
                 resultAgents.add(errorAgent);
             }
@@ -165,12 +226,15 @@ public class PluginManagerController extends BaseController implements Applicati
             if("".equals(searchWord) || agentName.contains(searchWord)){
                 Map<String,Object> inProgressAgent = new HashMap<String,Object>();
                 inProgressAgent.put("agentName", agentName); 
-                inProgressAgent.put("syncDate", formatter.format(inProgressAgentStatus.getLastSyncAttempt()));
+                if(inProgressAgentStatus.getLastSyncAttempt()!=0){
+                    inProgressAgent.put("syncDate", formatter.format(inProgressAgentStatus.getLastSyncAttempt()));
+                }else{
+                    inProgressAgent.put("syncDate", "");
+                }
                 inProgressAgent.put("status", "inProgress");
                 resultAgents.add(inProgressAgent);
             }
         }     
-
         return resultAgents;
     }
     
@@ -181,9 +245,11 @@ public class PluginManagerController extends BaseController implements Applicati
      */
     private String getAgentName(Agent agent){
         Collection <Platform> platforms = agent.getPlatforms();
-        for (Platform platform: platforms){
-            if(PlatformDetector.isSupportedPlatform(platform.getPlatformType().getName())){
-                return platform.getFqdn();
+        if(platforms!=null){
+            for (Platform platform: platforms){
+                if(PlatformDetector.isSupportedPlatform(platform.getPlatformType().getName())){
+                    return platform.getFqdn();
+                }
             }
         }
         return agent.getAddress();
@@ -211,6 +277,8 @@ public class PluginManagerController extends BaseController implements Applicati
             log.error(e,e);
         } catch (PermissionException e) {
             log.error(e,e);
+        } catch (PluginDeployException e) {
+            log.error(e,e);
         }
         
         return "error";
@@ -223,7 +291,8 @@ public class PluginManagerController extends BaseController implements Applicati
         List<String> filename = new ArrayList<String>() ;
         AuthzSubject subject;
         Map<String, byte[]> pluginInfo = new HashMap<String, byte[]>();
-
+        String[] messageParams = new String[3];
+        
         try{
             for (int i= 0 ; i<plugins.length;i++){
                 MultipartFile plugin = plugins[i];
@@ -257,17 +326,22 @@ public class PluginManagerController extends BaseController implements Applicati
             log.error(e,e);
             messageKey = "admin.managers.plugin.message.io.failure";
         } catch (PluginDeployException e){
+            messageKey = e.getMessage();
+            Map<Integer, String> param = e.getParameters();
+            
+            if(param!=null){
+                for(int i = 0; i<param.size();i++){
+                    messageParams[i]=param.get(i);
+                }
+            }
             log.error(e,e);
-            messageKey = "admin.managers.plugin.message.io.failure";
         }
-
+        model.addAttribute("params", messageParams);
         model.addAttribute("success", success);
         model.addAttribute("messageKey", messageKey);
         
         return "admin/managers/plugin/upload/status";
     }
-    
-    
     
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;

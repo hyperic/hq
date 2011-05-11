@@ -1394,6 +1394,14 @@ select {
 	cursor: pointer;
 }
 
+.widget .enable_alert_btn {
+	cursor: pointer;
+}
+
+.widget .disable_alert_btn {
+	cursor: pointer;
+}
+
 .widget .last_updated {
 	position: absolute;
 	right: 10px;
@@ -2573,7 +2581,7 @@ span.returnToLink {
 }
 
 .dijitArrowButtonInner {
-	border: 0;
+	border: 0 !important;
 }
 
 .maintenanceLink a {

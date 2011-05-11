@@ -57,11 +57,12 @@ public class ConfigTrackPluginManager extends TrackEventPluginManager {
         fileMonitor.setAppDataDir(f.getAbsolutePath());
         final String maxDiffSize = getProperty("hq.plugins.configmon.maxdiff");
         long size = -1;
-        try{
-            size = Long.valueOf(maxDiffSize).longValue();
-        } catch (NumberFormatException e) {
-            log.error(e.getMessage(), e);
-        }
+        if (maxDiffSize != null && maxDiffSize.length() > 0)
+            try{
+                size = Long.valueOf(maxDiffSize).longValue();
+            } catch (NumberFormatException e) {
+                log.error(e.getMessage(), e);
+            }
         if (size >= 0)
             fileMonitor.setMaxDiffSize(size);
 

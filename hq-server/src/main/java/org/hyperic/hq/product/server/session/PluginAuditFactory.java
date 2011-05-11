@@ -27,6 +27,7 @@
 package org.hyperic.hq.product.server.session;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
@@ -68,21 +69,28 @@ public class PluginAuditFactory {
 
     public PluginAudit deployAudit(String pluginName, long start, long end) {
         AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
+        Resource res = resourceManager.getResourceById(AuthzConstants.authzHQSystem);
+        if (res == null || res.isInAsyncDeleteState()) {
+            return null;
+        }
         String msg = MSGS.format("auditMsg.plugin.deploy", pluginName);
-        PluginAudit res = new PluginAudit(resourceManager.findResourceById(AuthzConstants.authzHQSystem), overlord,
-            PLUGIN_DEPLOYED, AuditImportance.HIGH, AuditNature.CREATE, msg, start, end);
+        PluginAudit audit = new PluginAudit(res, overlord, PLUGIN_DEPLOYED, AuditImportance.HIGH,
+                                            AuditNature.CREATE, msg, start, end);
 
-        auditManager.saveAudit(res);
-        return res;
+        auditManager.saveAudit(audit);
+        return audit;
     }
 
     public PluginAudit updateAudit(String pluginName, long start, long end) {
         AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
+        Resource res = resourceManager.getResourceById(AuthzConstants.authzHQSystem);
+        if (res == null || res.isInAsyncDeleteState()) {
+            return null;
+        }
         String msg = MSGS.format("auditMsg.plugin.update", pluginName);
-        PluginAudit res = new PluginAudit(resourceManager.findResourceById(AuthzConstants.authzHQSystem), overlord,
-            PLUGIN_UPDATED, AuditImportance.HIGH, AuditNature.UPDATE, msg, start, end);
-
-        auditManager.saveAudit(res);
-        return res;
+        PluginAudit audit = new PluginAudit(res, overlord, PLUGIN_UPDATED, AuditImportance.HIGH,
+                                            AuditNature.UPDATE, msg, start, end);
+        auditManager.saveAudit(audit);
+        return audit;
     }
 }

@@ -220,6 +220,7 @@ public class AgentScheduleSynchronizer {
             return;
         }
         final AgentDataTransferJob job = new AgentDataTransferJob() {
+            private Collection<AppdefEntityID> aeids;
             public String getJobDescription() {
                 if (schedule) {
                     return "Agent Schedule Job";
@@ -231,7 +232,6 @@ public class AgentScheduleSynchronizer {
                 return agentId;
             }
             public void execute() {
-                Collection<AppdefEntityID> aeids = null;
                 final Map<Integer, Collection<AppdefEntityID>> aeidMap =
                     (schedule) ? scheduleAeids : unscheduleAeids;
                 synchronized (aeidMap) {
@@ -240,6 +240,9 @@ public class AgentScheduleSynchronizer {
                 if (aeids != null && !aeids.isEmpty()) {
                     runSchedule(schedule, agentId, aeids);
                 }
+            }
+            public void onFailure() {
+                log.warn("could not schedule aeids=" + aeids + " to agentId=" + agentId);
             }
         };
         if (schedule) {

@@ -26,5 +26,5 @@
 package org.hyperic.hq.common;
 
 public interface LicenseManager {
-    public boolean isPluginEnabled(String name);
+
 }

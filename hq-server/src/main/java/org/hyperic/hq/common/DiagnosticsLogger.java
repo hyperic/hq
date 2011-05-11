@@ -27,12 +27,16 @@ package org.hyperic.hq.common;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 
 /**
@@ -47,8 +51,8 @@ public class DiagnosticsLogger implements Runnable {
 
     private Log log = LogFactory.getLog(DiagnosticsLogger.class);
 
-    // The actual diagnostic thread
-    private Thread diagnosticThread;
+   
+    private TaskScheduler taskScheduler;
 
     // List of DiagnosticObjects, may want to convert to a Map if we ever
     // want to allow objects to be removed from the DiagnosticThread at
@@ -56,27 +60,21 @@ public class DiagnosticsLogger implements Runnable {
     private List<DiagnosticObject> diagnosticObjects = new ArrayList<DiagnosticObject>();
 
     // How often the thread prints info
-    private long interval = Long.getLong("org.hq.diagnostic.interval", 1000 * 60 * 10).longValue(); // 10
-                                                                                                     // minutes
-
+    private long interval = Long.getLong("org.hq.diagnostic.interval", 1000 * 60 * 10).longValue(); // 10 minutes
+    
+    @Autowired
+    public DiagnosticsLogger(@Value("#{scheduler}")TaskScheduler taskScheduler) {
+        this.taskScheduler = taskScheduler;
+    }
+    
     public long getInterval() {
         return interval;
     }
 
     @PostConstruct
     public void startThread() {
-        diagnosticThread = new Thread(this);
-        diagnosticThread.setDaemon(true);
-        diagnosticThread.start();
-    }
-
-    /**
-     * Set the interval at which the DiagnosticThread will print status info
-     * @param interval The interval in milliseconds. XXX -- Technically, access
-     *        to interval should be synchronized
-     */
-    public void setInterval(long interval) {
-        this.interval = interval;
+        //Run the Diagnostics Logger every interval, starting one interval from now
+        taskScheduler.scheduleAtFixedRate(this, new Date(System.currentTimeMillis() + interval),interval);
     }
 
     public void addDiagnosticObject(DiagnosticObject o) {
@@ -93,27 +91,19 @@ public class DiagnosticsLogger implements Runnable {
 
     public void run() {
         log.info("Starting Diagnostic Thread (interval=" + interval + " ms)");
-
-        while (true) {
-            try {
-                Thread.sleep(interval);
+        try {
                 log.info("--- DIAGNOSTICS ---");
-                synchronized (diagnosticObjects) {
-                    for(DiagnosticObject o: diagnosticObjects) {
-                        try {
-                            log.info("[" + o + "] " + o.getShortStatus());
-                        } catch (Throwable e) {
-                            log.error("Error in diagnostics: " + e, e);
+                 synchronized (diagnosticObjects) {
+                        for(DiagnosticObject o: diagnosticObjects) {
+                            try {
+                                log.info("[" + o + "] " + o.getShortStatus());
+                            } catch (Throwable e) {
+                                log.error("Error in diagnostics: " + e, e);
+                            }
                         }
-                    }
-                }
-
-            } catch (InterruptedException e) {
-                log.warn("Diagnostic thread interrupted, shutting down.");
-                break;
-            } catch (Exception e) {
+                 }
+        } catch (Exception e) {
                 log.warn("Error encountered while collecting diagnostics", e);
-            }
         }
     }
 }

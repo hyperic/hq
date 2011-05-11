@@ -46,6 +46,9 @@ import org.hyperic.hq.product.ProductPlugin
 import org.hyperic.hq.product.PluginNotFoundException
 import org.hyperic.util.config.ConfigResponse
 
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
+
 /**
  * This class provides a layer of abstraction needed to get properties
  * from various subsystems (such as custom props, product configs, etc.)
@@ -66,7 +69,9 @@ class ResourceConfig {
     private static svrMan    = Bootstrap.getBean(ServerManager.class)
     private static svcMan    = Bootstrap.getBean(ServiceManager.class)
     private static agentMan = Bootstrap.getBean(AgentManager.class)
-     
+
+    Log log = LogFactory.getLog(this.getClass())
+
     /**
      * *_FIELD_KEYS provides a mapping of string names onto closures which
      * allow us to set/get them easily.
@@ -284,15 +289,12 @@ class ResourceConfig {
             }
         }
         
-        println "Changed fields for ${appdefHandler.targetForSet(resource)}"
-        println "Fields = ${changedFields}"
         if (changedFields.size() > 0) {
             def targetForSet = appdefHandler.targetForSet(resource)
             changedFields.each { key, newVal ->
                 appdefHandler.fields[key]['set'](targetForSet, newVal)
             }
-            
-            println "Saving target ${targetForSet.name}: ${targetForSet}"
+            log.info("Saving changed fields for ${targetForSet} fields = ${changedFields}")
             appdefHandler.saveSetTarget(subject, targetForSet)
         }
         

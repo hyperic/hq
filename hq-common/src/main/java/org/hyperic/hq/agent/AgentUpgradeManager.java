@@ -40,6 +40,7 @@ import org.tanukisoftware.wrapper.WrapperManager;
 public class AgentUpgradeManager {
     
     public static final String UPDATED_PLUGIN_EXTENSION = "-update";
+    public static final String REMOVED_PLUGIN_EXTENSION = "-remove";
     
     /**
      * Request a JVM restart if in Java Service Wrapper mode
@@ -159,29 +160,50 @@ public class AgentUpgradeManager {
      * @return a List of updated plugins or an empty list if no plugins were updated
      * @throws IOException if failed to update a plugin
      */
-    public static List updatePlugins(Properties bootProps) throws IOException {
-        List updatedPlugins = new ArrayList();
+    public static List<String> updatePlugins(Properties bootProps) throws IOException {
+        List<String> updatedPlugins = new ArrayList<String>();
         String tmpDir = bootProps.getProperty(AgentConfig.PROP_TMPDIR[0]);
         String pluginsDir = bootProps.getProperty(AgentConfig.PROP_PDK_PLUGIN_DIR[0]);
         String[] children = new File(tmpDir).list();
         if (children != null) {
+            // we want to remove all plugins, then update
+            // this is just in case there are duplicates
             for (int i=0; i<children.length; i++) {
-                // only update plugins marked for update
+                if (children[i].indexOf(REMOVED_PLUGIN_EXTENSION) > 0) {
+                    removePlugin(children[i], tmpDir, pluginsDir, updatedPlugins);
+                }
+            }
+            for (int i=0; i<children.length; i++) {
                 if (children[i].indexOf(UPDATED_PLUGIN_EXTENSION) > 0) {
-                    String fileName = StringUtil.remove(children[i], UPDATED_PLUGIN_EXTENSION);
-                    File tmpJar = new File(tmpDir + "/" + children[i]);
-                    File targetJar = new File(pluginsDir + "/" + fileName);
-                    boolean rslt = FileUtil.safeFileMove(tmpJar, targetJar);
-                    if (!rslt) {
-                        throw new IOException("Failed to update plugin: " + fileName);
-                    } 
-                    else {
-                        updatedPlugins.add(fileName);
-                    }
+                    movePlugin(children[i], tmpDir, pluginsDir, updatedPlugins);
                 }
             }
         }
         return updatedPlugins;
+    }
+
+    private static void removePlugin(String child, String tmpDir, String pluginsDir,
+                                     List<String> updatedPlugins) {
+        String fileName = StringUtil.remove(child, REMOVED_PLUGIN_EXTENSION);
+        File tmpJar = new File(tmpDir + "/" + child);
+        File targetJar = new File(pluginsDir + "/" + fileName);
+        targetJar.delete();
+        tmpJar.delete();
+    }
+
+    private static void movePlugin(String child, String tmpDir, String pluginsDir,
+                                   List<String> updatedPlugins)
+    throws IOException {
+        String fileName = StringUtil.remove(child, UPDATED_PLUGIN_EXTENSION);
+        File tmpJar = new File(tmpDir + "/" + child);
+        File targetJar = new File(pluginsDir + "/" + fileName);
+        boolean rslt = FileUtil.safeFileMove(tmpJar, targetJar);
+        if (!rslt) {
+            throw new IOException("Failed to update plugin: " + fileName);
+        } 
+        else {
+            updatedPlugins.add(fileName);
+        }
     }
     
 }

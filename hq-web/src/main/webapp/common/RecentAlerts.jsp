@@ -32,24 +32,31 @@
 <% response.setHeader("Cache-Control","no-store");%>
 <% response.setDateHeader("Expires",-1);%>
 <hq:recentAlerts var="recentAlerts" sizeVar="recentAlertsSize" maxAlerts="2"/>
-  <span id="recentAlertsText">
-<c:choose>
-  <c:when test="${recentAlertsSize > 0}">
-    <ul class="boxy">
-      <c:forEach var="alert" varStatus="status" items="${recentAlerts}">
-        <c:set var="datetime"><hq:dateFormatter value="${alert.ctime}" showDate="true"/></c:set>
-        <c:url var="alertUrl" value="/alerts/Alerts.do">
-          <c:param name="mode" value="viewAlert"/>
-        </c:url>
-        <li class="MastheadContent"><html:link href="${alertUrl}&amp;eid=${alert.type}:${alert.rid}&amp;a=${alert.id}" styleClass="MastheadLink" title="${datetime}"><hq:dateFormatter value="${alert.ctime}" showDate="false"/></html:link>
-        <fmt:message key="common.label.Dash"/>
-        <%--<c:out value="${alert.resourceName}"/><fmt:message key="common.label.Colon"/>--%>
-        <abbr title="<fmt:message key="common.label.Resource"/> <c:out value="${alert.resourceName}"/>; <fmt:message key="common.label.Alert"/> <c:out value="${alert.name}"/>"><c:out value="${alert.name}"/></abbr></li>
-      </c:forEach>
-    </ul>
-  </c:when>
-  <c:otherwise>
-    <span class="MastheadContent" style="color: #FFF;"><fmt:message key="header.NoRecentAlerts"/></span>
-  </c:otherwise>
-</c:choose>
-  </span>
+<span id="recentAlertsText">
+	<c:choose>
+  		<c:when test="${recentAlertsSize > 0}">
+    		<ul class="boxy">
+      			<c:forEach var="alert" varStatus="status" items="${recentAlerts}">
+        			<c:set var="datetime"><hq:dateFormatter value="${alert.ctime}" showDate="true"/></c:set>
+        			<c:url var="alertUrl" value="/alerts/Alerts.do">
+          				<c:param name="mode" value="viewAlert"/>
+          				<c:param name="eid" value="${alert.type}:${alert.rid}"/>
+          				<c:param name="a" value="${alert.id}"/>
+        			</c:url>
+        			<li class="MastheadContent">
+        				<html:link href="${alertUrl}" styleClass="MastheadLink" title="${datetime}">
+        					<hq:dateFormatter value="${alert.ctime}" showDate="false"/>
+        				</html:link>
+        				<fmt:message key="common.label.Dash"/>
+        				<abbr title="<fmt:message key="common.label.Resource"/> ${alert.resourceName}; <fmt:message key="common.label.Alert"/> ${alert.name}">
+        					${alert.name}
+        				</abbr>
+        			</li>
+	      		</c:forEach>
+    		</ul>
+  		</c:when>
+  		<c:otherwise>
+    		<span class="MastheadContent" style="color: #FFF;"><fmt:message key="header.NoRecentAlerts"/></span>
+  		</c:otherwise>
+	</c:choose>
+</span>

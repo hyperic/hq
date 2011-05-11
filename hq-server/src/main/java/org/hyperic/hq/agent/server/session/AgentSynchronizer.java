@@ -28,6 +28,7 @@ package org.hyperic.hq.agent.server.session;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -45,6 +46,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.server.session.AgentPluginSyncRestartThrottle;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
@@ -74,13 +76,16 @@ public class AgentSynchronizer implements DiagnosticObject {
     private final AtomicLong executorNum = new AtomicLong(0);
     private ConcurrentStatsCollector concurrentStatsCollector;
     private AuthzSubject overlord;
+    private AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle;
 
     @Autowired
     public AgentSynchronizer(ConcurrentStatsCollector concurrentStatsCollector,
                              DiagnosticsLogger diagnosticsLogger,
+                             AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle,
                              AuthzSubjectManager authzSubjectManager) {
         this.concurrentStatsCollector = concurrentStatsCollector;
         this.overlord = authzSubjectManager.getOverlordPojo();
+        this.agentPluginSyncRestartThrottle = agentPluginSyncRestartThrottle;
         diagnosticsLogger.addDiagnosticObject(this);
     }
     
@@ -196,7 +201,19 @@ public class AgentSynchronizer implements DiagnosticObject {
         final Thread thread = new Thread(name) {
             public void run() {
                 if (agentIsAlive(job)) {
-                    job.execute();
+                    try {
+                        job.execute();
+                    } catch (Throwable e) {
+                        job.onFailure();
+                        if (isInRestartState(job.getAgentId())) {
+                            log.warn("received error while trying to communicate with agentId=" +
+                                job.getAgentId() + " while it is restarting.  job=" +
+                                getJobInfo(job) + ": " + e);
+                            log.debug(e,e);
+                        } else {
+                            log.error(e,e);
+                        }
+                    }
                     return;
                 }
                 AvailabilityManager availabilityManager = Bootstrap.getBean(AvailabilityManager.class);
@@ -222,7 +239,11 @@ public class AgentSynchronizer implements DiagnosticObject {
                     }
                 } else {
                     log.warn("Could not ping agent in order to run job " + getJobInfo(job));
+                    job.onFailure();
                 }
+            }
+            private boolean isInRestartState(int agentId) {
+                return agentPluginSyncRestartThrottle.getAgentIdsInRestartState().containsKey(agentId);
             }
         };
         thread.start();
@@ -261,9 +282,9 @@ public class AgentSynchronizer implements DiagnosticObject {
             final String desc = job.getJobDescription() + ", agentId=" + job.getAgentId();
             final Integer runs = fullDiagInfo.get(desc);
             if (runs == null) {
-                shortDiagInfo.put(desc, 1);
+                fullDiagInfo.put(desc, 1);
             } else {
-                shortDiagInfo.put(desc, runs+1);
+                fullDiagInfo.put(desc, (runs+1));
             }
         }
         synchronized(shortDiagInfo) {
@@ -272,33 +293,41 @@ public class AgentSynchronizer implements DiagnosticObject {
             if (runs == null) {
                 shortDiagInfo.put(desc, 1);
             } else {
-                shortDiagInfo.put(desc, runs+1);
+                shortDiagInfo.put(desc, (runs+1));
             }
         }
     }
 
     public String getStatus() {
-        Map<String, Integer> diags = null;
-        synchronized(fullDiagInfo) {
-            diags = new HashMap<String, Integer>(fullDiagInfo);
-        }
-        final StringBuilder buf = new StringBuilder();
-        buf.append("\nAgent Synchronizer Diagnostics (job desc - number of executes):\n");
-        for (final Entry<String, Integer> entry : diags.entrySet()) {
-            buf.append("    ").append(entry.getKey()).append(" - ")
-                              .append(entry.getValue()).append("\n");
-        }
-        return buf.toString();
+        return getStatus(fullDiagInfo);
     }
 
     public String getShortStatus() {
+        return getStatus(shortDiagInfo);
+    }
+    
+    private String getStatus(Map<String, Integer> diag) {
         Map<String, Integer> diags = null;
-        synchronized(shortDiagInfo) {
-            diags = new HashMap<String, Integer>(shortDiagInfo);
+        synchronized(diag) {
+            diags = new HashMap<String, Integer>(diag);
         }
         final StringBuilder buf = new StringBuilder();
-        buf.append("\nAgent Synchronizer Diagnostics (job desc - number of executes):\n");
-        for (final Entry<String, Integer> entry : diags.entrySet()) {
+        buf.append("\nTop 10 - Agent Synchronizer Diagnostics (job desc - number of executes):\n");
+        final List<Entry<String, Integer>> diagList =
+            new ArrayList<Entry<String, Integer>>(diags.entrySet());
+        Collections.sort(diagList, new Comparator<Entry<String, Integer>>() {
+            public int compare(Entry<String, Integer> e1, Entry<String, Integer> e2) {
+                if (e1 == e2) {
+                    return 0;
+                }
+                return e2.getValue().compareTo(e1.getValue());
+            }
+        });
+        int i=0;
+        for (final Entry<String, Integer> entry : diagList) {
+            if (i++ >= 10) {
+                break;
+            }
             buf.append("    ").append(entry.getKey()).append(" - ")
                               .append(entry.getValue()).append("\n");
         }

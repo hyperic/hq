@@ -34,7 +34,10 @@
 <tiles:importAttribute name="portlet"/>
 
 <c:set var="widgetInstanceName" value="alerts"/>
-<html:link page="/alerts/Alerts.do?mode=viewAlert&eid=" linkName="viewAlertUrl" styleId="viewAlertUrl" style="visibility:hidden;"></html:link>
+<html:link action="/alerts/Alerts" linkName="viewAlertUrl" styleId="viewAlertUrl" style="visibility:hidden;">
+	<html:param name="mode" value="viewAlert"/>
+	<html:param name="eid" value="{eid}"/>
+</html:link>
 <script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
 
 <script type="text/javascript">
@@ -95,7 +98,7 @@
 	</tiles:insert>
 
   	<!-- JSON available at /dashboard/ViewCriticalAlerts.do -->
-  	<html:form styleId="${widgetInstanceName}${portlet.token}_FixForm" method="POST" action="/alerts/RemoveAlerts.do">
+  	<html:form styleId="${widgetInstanceName}${portlet.token}_FixForm" method="POST" action="/alerts/RemoveAlerts">
   		<html:hidden property="output" value="json" />
   		<table width="100%" cellpadding="0" cellspacing="0" border="0" id="<c:out value="${tableName}"/>" class="portletLRBorder">
      		<thead>
@@ -129,7 +132,7 @@
     			</tr>
          		<tr class="ListRow" id="<c:out value="ackInstruction${portlet.token}"/>" style="display: none;">
            			<td class="ListCell" colspan="6" align="right" style="font-style: italic;">
-              			<c:url var="path" value="/"/>
+              			<c:url var="path" value="/images/icon_ack.gif"/>
             			<fmt:message key="dash.settings.criticalAlerts.ack.instruction">
                 			<fmt:param value="${path}"/>
               			</fmt:message>

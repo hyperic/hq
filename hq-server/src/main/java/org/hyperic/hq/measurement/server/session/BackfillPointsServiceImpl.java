@@ -26,12 +26,18 @@
 package org.hyperic.hq.measurement.server.session;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.appdef.server.session.AgentDAO;
+import org.hyperic.hq.appdef.server.session.AgentPluginSyncRestartThrottle;
+import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionManager;
@@ -62,22 +68,42 @@ public class BackfillPointsServiceImpl implements BackfillPointsService {
     private AvailabilityManager availabilityManager;
     private PermissionManager permissionManager;
     private AvailabilityCache availabilityCache;
+    private AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle;
+    private AgentDAO agentDAO;
 
     @Autowired
     public BackfillPointsServiceImpl(AvailabilityManager availabilityManager,
                                      PermissionManager permissionManager,
+                                     AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle,
+                                     AgentDAO agentDAO,
                                      AvailabilityCache availabilityCache) {
         this.availabilityManager = availabilityManager;
         this.permissionManager = permissionManager;
         this.availabilityCache = availabilityCache;
+        this.agentPluginSyncRestartThrottle = agentPluginSyncRestartThrottle;
+        this.agentDAO = agentDAO;
     }
 
     public Map<Integer, DataPoint> getBackfillPoints(long current) {
         Map<Integer, ResourceDataPoint> downPlatforms = getDownPlatforms(current);
+        removeRestartingAgents(downPlatforms);
         return getBackfillPts(downPlatforms, current);
     }
 
-  
+    private void removeRestartingAgents(Map<Integer, ResourceDataPoint> backfillData) {
+        final Set<Integer> agentIds = agentPluginSyncRestartThrottle.getAgentIdsInRestartState().keySet();
+        final boolean debug = log.isDebugEnabled();
+        for (final Integer agentId : agentIds) {
+            final Agent agent = agentDAO.get(agentId);
+            final Collection<Platform> platforms = agent.getPlatforms();
+            for (final Platform platform : platforms) {
+                if (debug) log.debug("removing platformId=" + platform.getId() +
+                                     " since its agentId=" + agentId + " is in restart state");
+                backfillData.remove(platform.getResource().getId());
+            }
+        }
+    }
+
     private Map<Integer, ResourceDataPoint> getDownPlatforms(long timeInMillis) {
         final boolean debug = log.isDebugEnabled();
         final List<Measurement> platformResources = availabilityManager.getPlatformResources();
