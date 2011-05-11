@@ -754,7 +754,7 @@
     		class="org.hyperic.hq.product.FileChangeTrackPlugin">
       <monitored>
         <folder path="C:\Windows\system32\inetsrv" recursive="false" filter="metabase.xml"/>
-        <folder path="wwwroot" recursive="true" filter=".*.xml|.*.jar|.*.dll|.*.aspx|.*.asp|.*.js|.*.vbs|.*.ini"/>
+        <folder path="wwwroot" recursive="true" filter=".*.xml|.*.jar|.*.dll|.*.aspx|.*.asp|.*.js|.*.vbs|.*.ini|.*.conf|.*.properties"/>
       </monitored>
     </plugin>
     <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="true" />

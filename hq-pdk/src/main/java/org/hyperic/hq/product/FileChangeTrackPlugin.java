@@ -156,12 +156,38 @@ public class FileChangeTrackPlugin extends ConfigFileTrackPlugin{
         if (folderConfig == null)
             return null;
         final FolderDto dto = new FolderDto();
-        final String path = folderConfig.getPath();
-        final boolean isAbsolute = path.charAt(1) == ':' || path.charAt(0) == '/'; 
+        final String configPath = folderConfig.getPath();
+        String path = replaceSysVariables(configPath);
+        final boolean isAbsolute = path.charAt(1) == ':' || path.charAt(0) == '/' || path.startsWith("~/"); 
         final String basePath = isAbsolute ? "" : path+ File.separator ;
         dto.setPath(basePath + folderConfig.getPath());
         dto.setFilter(folderConfig.getFilter());
         dto.setRecursive(folderConfig.isRecursive());
         return dto;
     } 
+    
+    private String replaceSysVariables(String path){
+        StringBuffer convertedPath = new StringBuffer();
+        if (path.contains("*")){
+            String[] arr = path.split("\\*");
+            if (arr != null && arr.length >0){
+                int index;
+                if (path.startsWith("*")){
+                    index = 0;
+                } else{
+                    convertedPath.append(arr[0]);
+                    index = 1;
+                }
+
+                for (;index<arr.length;index=index+2){
+                    final String sysProp = System.getProperty(arr[index]);
+                    convertedPath.append(sysProp);
+                    if (index+1<arr.length)
+                        convertedPath.append(arr[index+1]);
+                }
+                return convertedPath.toString();
+            }
+        }
+        return path;
+    }
 }

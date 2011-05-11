@@ -893,12 +893,13 @@
         </service>
         
 	<filter name="conf" value=".*\.xml|.*\.cfg|.*\.properties|.*\.ini|.*\.conf|.*\.config"/>
-    <filter name="code" value=".*\.jar|.*\.war|.*\.ear|.*\.dll|.*\.class|.*\.jsp|.*\.asp|.*\.aspx|.*\.php|.*\.pl|.*\.vb|.*\.vbs|.*\.js|.*\.py|.*\.pyc|.*\.cgi"/>    
+    <filter name="code" value=".*\.jar|.*\.dll|.*\.class|.*\.jsp|.*\.asp|.*\.aspx|.*\.php|.*\.pl|.*\.vb|.*\.vbs|.*\.js|.*\.py|.*\.pyc|.*\.cgi"/>    
     <plugin type="config_track"
     		class="org.hyperic.hq.product.FileChangeTrackPlugin">
       <monitored>
         <folder path="server/all/conf" recursive="true" filter="${conf}"/>
         <folder path="server/default/conf" recursive="true" filter="${conf}"/>
+        <folder path="server/default/deploy" recursive="true" filter="${code}|${conf}"/>
         <folder path="server/minimal/conf" recursive="true" filter="${conf}"/>
         <folder path="server/standard/conf" recursive="true" filter="${conf}"/>
         <folder path="server/web/conf" recursive="true" filter="${conf}"/>

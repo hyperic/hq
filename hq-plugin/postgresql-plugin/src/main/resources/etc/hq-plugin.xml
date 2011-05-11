@@ -260,6 +260,17 @@
             class="org.hyperic.hq.product.ConfigFileTrackPlugin"/-->
          
     <plugin type="config_track"
+    		platform="unix"
+            class="org.hyperic.hq.product.FileChangeTrackPlugin">
+            <monitored>
+            	<folder path="data" recursive="false" filter=".*\.conf"/>
+            	<!-- system variable PGDATA -->
+            	<folder path="*PGDATA*" recursive="false" filter=".*\.conf"/>
+            </monitored>
+    </plugin>
+
+    <plugin type="config_track"
+    		platform="win32"
             class="org.hyperic.hq.product.FileChangeTrackPlugin">
             <monitored>
             	<folder path="data" recursive="false" filter=".*\.conf"/>

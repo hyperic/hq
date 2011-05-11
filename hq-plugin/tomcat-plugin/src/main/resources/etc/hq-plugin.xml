@@ -187,7 +187,7 @@
             	<folder path="conf" recursive="true" filter=".*.properties|.*.xml|.*.policy"/>
             	<folder path="bin" recursive="false" filter=".*.bat|.*.xml|.*.sh"/>
             	<folder path="lib" recursive="false" filter=".*.jar"/>
-            	<folder path="webapps" recursive="true" filter=".*\.jar|.*\.war|.*\.ear|.*\.dll|.*\.class|.*\.jsp|.*\.php|.*\.pl|.*\.js|.*\.py|.*\.pyc|.*\.cgi"/>
+            	<folder path="webapps" recursive="true" filter=".*\.jar|.*\.dll|.*\.class|.*\.jsp|.*\.php|.*\.pl|.*\.js|.*\.py|.*\.pyc|.*\.cgi"/>
             </monitored>
     </plugin>
      <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="true" />
