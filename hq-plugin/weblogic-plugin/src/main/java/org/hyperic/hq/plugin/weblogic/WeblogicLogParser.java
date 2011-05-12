@@ -79,7 +79,7 @@ public class WeblogicLogParser {
             return field.substring(1);
         }
         else {
-            return field.substring(1, ix);
+            return field.substring(1, ix+1);
         }
     }
     
@@ -97,7 +97,8 @@ public class WeblogicLogParser {
             if (++i >= 9) {
                 String field =
                     line.substring(matcher.end(), line.length());
-                list.add(field);
+                //adding the space to satisfy the lastIndexOf search for the message in nextField().
+                list.add(field + " ");
                 break;
             }
         }
