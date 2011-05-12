@@ -146,31 +146,31 @@
 
     <!-- To debug Plugin Manager related issues change the following from INFO to DEBUG -->
     <logger name="org.hyperic.hq.appdef.server.session.PluginSyncJob">
-        <level value="DEBUG" />
+        <level value="INFO" />
     </logger>
     <logger name="org.hyperic.hq.appdef.server.session.AgentRemovePluginJob">
-        <level value="DEBUG" />
+        <level value="INFO" />
     </logger>
     <logger name="org.hyperic.hq.appdef.server.session.AgentPluginStatus">
-        <level value="DEBUG" />
+        <level value="INFO" />
     </logger>
     <logger name="org.hyperic.hq.appdef.server.session.AgentPluginStatusEnum">
-        <level value="DEBUG" />
+        <level value="INFO" />
     </logger>
     <logger name="org.hyperic.hq.appdef.server.session.AgentPluginStatusDAO">
-        <level value="DEBUG" />
+        <level value="INFO" />
     </logger>
     <logger name="org.hyperic.hq.appdef.server.session.AgentPluginSyncRestartThrottle">
-        <level value="DEBUG" />
+        <level value="INFO" />
     </logger>
     <logger name="org.hyperic.hq.appdef.server.session.AgentManagerImpl">
-        <level value="DEBUG" />
+        <level value="INFO" />
     </logger>
     <logger name="org.hyperic.hq.appdef.server.session.AgentPluginUpdaterImpl">
-        <level value="DEBUG" />
+        <level value="INFO" />
     </logger>
     <logger name="org.hyperic.hq.product.server.session.PluginManagerImpl">
-        <level value="DEBUG" />
+        <level value="INFO" />
     </logger>
 
     <!-- To debug availability issues change the following from INFO to DEBUG -->
