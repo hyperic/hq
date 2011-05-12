@@ -76,27 +76,6 @@
 			<artifactId>hq-product</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-       <!-- <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-beans</artifactId>
-            <version>${spring-framework.version}</version>
-            <classifier>agent</classifier>
-			<type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <version>${spring-framework.version}</version>
-            <classifier>agent</classifier>
-			<type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-            <version>${spring-framework.version}</version>
-            <classifier>agent</classifier>
-			<type>zip</type>
-        </dependency>-->
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-util</artifactId>
