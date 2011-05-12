@@ -356,10 +356,15 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
         }
         String where = "";
         if (pluginFileNames != null) {
-            where = "where fileName in (:filenames)";
+            where = "where s.fileName in (:filenames)";
         }
-        final String hql =
-            "select fileName, count(*) from AgentPluginStatus " + where + " group by fileName";
+        final String hql = new StringBuilder(256)
+            .append("select s.fileName, count(*) from AgentPluginStatus s ")
+            .append("join s.agent a ")
+            .append("join a.platforms p ")
+            .append(where)
+            .append(" group by s.fileName")
+            .toString();
         final Query query = getSession().createQuery(hql);
         if (pluginFileNames != null) {
             query.setParameterList("filenames", pluginFileNames);
