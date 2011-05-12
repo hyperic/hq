@@ -29,16 +29,25 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.server.session.AgentSynchronizer;
 import org.hyperic.hq.appdef.shared.AgentPluginUpdater;
+import org.hyperic.hq.common.shared.TransactionRetry;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.product.shared.PluginManager;
+import org.hyperic.hq.zevents.Zevent;
+import org.hyperic.hq.zevents.ZeventListener;
+import org.hyperic.hq.zevents.ZeventManager;
+import org.hyperic.hq.zevents.ZeventPayload;
+import org.hyperic.hq.zevents.ZeventSourceId;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -55,14 +64,37 @@ implements AgentPluginUpdater, ApplicationContextAware {
     private AgentSynchronizer agentSynchronizer;
     private PluginManager pluginManager;
     private ApplicationContext ctx;
+    private TransactionRetry transactionRetry;
     
     @Autowired
     public AgentPluginUpdaterImpl(AgentSynchronizer agentSynchronizer,
-                                  PluginManager pluginManager) {
+                                  PluginManager pluginManager,
+                                  TransactionRetry transactionRetry) {
         this.agentSynchronizer = agentSynchronizer;
         this.pluginManager = pluginManager;
+        this.transactionRetry = transactionRetry;
+    }
+    
+    @PostConstruct
+    public void postConstruct() {
+        ZeventManager.getInstance().addBufferedListener(PluginQueuedZevent.class,
+            new ZeventListener<PluginQueuedZevent>() {
+                public void processEvents(List<PluginQueuedZevent> events) {
+                    for (final PluginQueuedZevent event : events) {
+                        final Runnable runner = new Runnable() {
+                            public void run() {
+                                pluginManager.updateAgentPluginSyncStatus(
+                                    event.getStatus(), event.getUpdateMap(), event.getRemoveMap());
+                            }
+                        };
+                        transactionRetry.runTransaction(runner, 3, 1000);
+                    }
+                }
+            }
+        );
     }
 
+    @Transactional(readOnly=true)
     public void queuePluginTransfer(Map<Integer, Collection<Plugin>> updateMap,
                                     Map<Integer, Collection<String>> removeMap,
                                     boolean restartAgents) {
@@ -75,11 +107,11 @@ implements AgentPluginUpdater, ApplicationContextAware {
             removeMap = Collections.emptyMap();
         }
         if (restartAgents) {
-            pluginManager.updateAgentPluginSyncStatus(
-                AgentPluginStatusEnum.SYNC_IN_PROGRESS, updateMap, removeMap);
+            ZeventManager.getInstance().enqueueEventAfterCommit(
+                new PluginQueuedZevent(AgentPluginStatusEnum.SYNC_IN_PROGRESS, updateMap, removeMap));
         } else {
-            pluginManager.updateAgentPluginSyncStatus(
-                AgentPluginStatusEnum.SYNC_FAILURE, updateMap, removeMap);
+            ZeventManager.getInstance().enqueueEventAfterCommit(
+                new PluginQueuedZevent(AgentPluginStatusEnum.SYNC_FAILURE, updateMap, removeMap));
         }
         final Set<Integer> agentIds = new HashSet<Integer>();
         agentIds.addAll(updateMap.keySet());
@@ -147,6 +179,30 @@ implements AgentPluginUpdater, ApplicationContextAware {
 
     private boolean isDisabled() {
         return !pluginManager.isPluginSyncEnabled();
+    }
+
+    private class PluginQueuedZevent extends Zevent {
+        private AgentPluginStatusEnum status;
+        private Map<Integer, Collection<Plugin>> updateMap;
+        private Map<Integer, Collection<String>> removeMap;
+        @SuppressWarnings("serial")
+        private PluginQueuedZevent(AgentPluginStatusEnum status,
+                                   Map<Integer, Collection<Plugin>> updateMap,
+                                   Map<Integer, Collection<String>> removeMap) {
+            super(new ZeventSourceId() {}, new ZeventPayload() {});
+            this.status = status;
+            this.updateMap = updateMap;
+            this.removeMap = removeMap;
+        }
+        private AgentPluginStatusEnum getStatus() {
+            return status;
+        }
+        private Map<Integer, Collection<Plugin>> getUpdateMap() {
+            return updateMap;
+        }
+        private Map<Integer, Collection<String>> getRemoveMap() {
+            return removeMap;
+        }
     }
 
 }
