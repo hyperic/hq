@@ -149,7 +149,7 @@ __ll__
 ${eula.text}
 __ll__
 	</echo>
-    <input message="Do accept the terms of the agreement?"
+    <input message="Do you accept the terms of the agreement?"
            validargs="y,n"
            addproperty="license.accepted" />
 	<condition property="do.abort">
