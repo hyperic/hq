@@ -28,7 +28,8 @@ package org.hyperic.hq.operation.rabbit;
 import com.rabbitmq.client.Address;
 import com.rabbitmq.client.ConnectionFactory;
 import org.hyperic.hq.operation.rabbit.connection.ConnectionStatus;
-import org.hyperic.hq.operation.rabbit.connection.SingleConnectionFactory;
+import org.hyperic.hq.operation.rabbit.connection.RabbitConnectionFactory;
+import org.hyperic.hq.operation.rabbit.connection.SecureRabbitConnectionFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,32 +38,28 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.AbstractApplicationContext;
 
-import java.io.IOException;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class RabbitDetectorTest {
     public final Address[] validCluster = new Address[]{
-            new Address("localhost", ConnectionFactory.DEFAULT_AMQP_PORT)
-    };
+            new Address("localhost", ConnectionFactory.DEFAULT_AMQP_PORT)};
 
     public final Address[] invalidCluster = new Address[]{
             new Address("localhost", ConnectionFactory.DEFAULT_AMQP_PORT),
-            new Address("localhost", ConnectionFactory.DEFAULT_AMQP_PORT + 1)
-    };
+            new Address("localhost", ConnectionFactory.DEFAULT_AMQP_PORT + 1)};
 
-    private SingleConnectionFactory validConfigFactory;
+    private RabbitConnectionFactory valid;
 
-    private SingleConnectionFactory invalidConfigFactory;
+    private SecureRabbitConnectionFactory invalid;
 
     private AbstractApplicationContext ctx;
 
     @Before
     public void prepare() {
         ctx = new AnnotationConfigApplicationContext(Config.class);
-        validConfigFactory = ctx.getBean("validConfigFactory", SingleConnectionFactory.class);
-        invalidConfigFactory = ctx.getBean("invalidConfigFactory", SingleConnectionFactory.class);
+        valid = ctx.getBean(RabbitConnectionFactory.class);
+        invalid = ctx.getBean(SecureRabbitConnectionFactory.class);
     }
 
     @After
@@ -72,17 +69,14 @@ public class RabbitDetectorTest {
 
     @Test
     public void failSuccess() {
-        ConnectionStatus cs = validConfigFactory.activeOnStartup(validCluster);
+        ConnectionStatus cs = valid.isActive(validCluster);
         assertTrue(cs.isActive());
 
-        ConnectionStatus cs1 = invalidConfigFactory.activeOnStartup(invalidCluster);
+        ConnectionStatus cs1 = invalid.isActive(invalidCluster);
         assertFalse(cs1.isActive());
 
-        try {
-            new SingleConnectionFactory("invalid", "user").newConnection();
-        } catch (IOException e) {
-            
-        }
+        ///invalidConfigFactory.newConnection();
+
         ctx.destroy();
     }
 
@@ -90,13 +84,13 @@ public class RabbitDetectorTest {
     public static class Config {
 
         @Bean
-        public SingleConnectionFactory validConfigFactory() {
-            return new SingleConnectionFactory();
+        public RabbitConnectionFactory valid() {
+            return new RabbitConnectionFactory();
         }
 
         @Bean
-        public SingleConnectionFactory invalidConfigFactory() {
-            return new SingleConnectionFactory("invalid", "user");
+        public SecureRabbitConnectionFactory invalid() {
+            return new SecureRabbitConnectionFactory("invalid", "user");
         }
     }
 }

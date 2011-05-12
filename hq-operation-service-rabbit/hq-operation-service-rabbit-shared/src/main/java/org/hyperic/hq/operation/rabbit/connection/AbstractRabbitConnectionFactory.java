@@ -28,11 +28,14 @@ package org.hyperic.hq.operation.rabbit.connection;
 import com.rabbitmq.client.Address;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.PossibleAuthenticationFailureException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.PreDestroy;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -64,15 +67,15 @@ abstract class AbstractRabbitConnectionFactory extends ConnectionFactory {
      * @param password
      */
     public AbstractRabbitConnectionFactory(String username, String password) {
-        super();
+        this();
         setUsername(username);
-        setPassword(password); 
+        setPassword(password);
     }
  
     @PreDestroy
     final void closeConnection() {
-        synchronized (this.monitor) {
-            for (Connection connection : this.connections.values()) {
+        synchronized (monitor) {
+            for (Connection connection : connections.values()) {
                 try {
                     connection.close();
                 } catch (Exception e) {
@@ -91,8 +94,8 @@ abstract class AbstractRabbitConnectionFactory extends ConnectionFactory {
     public final Connection newConnection(Address[] addrs) throws IOException {
         List<Address> addressList = Arrays.asList(addrs);
 
-        synchronized (this.monitor) {
-            Connection connection = this.connections.get(addressList);
+        synchronized (monitor) {
+            Connection connection = connections.get(addressList);
 
             if (connection == null) {
                 logger.debug("Creating a new connection.");
@@ -108,5 +111,34 @@ abstract class AbstractRabbitConnectionFactory extends ConnectionFactory {
     }
 
     protected abstract Connection createConnection(Address[] addrs) throws IOException;
- 
+
+    /**
+     * Essentially a ping to see if a broker can be reached.
+     * @param addrs an address array of ip/port to connect to
+     * @return ConnectionStatus with throwable reason if not
+     * and a boolean active - true if we could connect.
+     */
+    public ConnectionStatus isActive(Address[] addrs) {
+        Throwable reason = null;
+        boolean active = false;
+
+        try {
+            Connection c = newConnection(addrs);
+            active = c != null && c.isOpen();
+        } catch (Throwable e) {
+            reason = e;
+            translate(e, addrs);
+        }
+        return new ConnectionStatus(reason, active);
+    }
+
+    private void translate(Throwable error, Address[] addrs) {
+        if (error instanceof PossibleAuthenticationFailureException) {
+            logger.error("can not connect with credentials: " + getUsername() + ":" + getPassword());
+        } else if (error instanceof ConnectException) {
+            logger.error("can not connect with at least one of the following: " + StringUtils.arrayToCommaDelimitedString(addrs));
+        } else {
+            logger.error(error.getMessage());
+        }
+    }
 }

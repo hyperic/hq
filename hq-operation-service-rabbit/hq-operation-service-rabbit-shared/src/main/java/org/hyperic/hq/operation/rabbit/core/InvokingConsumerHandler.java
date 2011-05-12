@@ -92,9 +92,7 @@ public class InvokingConsumerHandler implements MessageHandler {
         }
     }
 
-    private Object invoke(QueueingConsumer.Delivery delivery) {
-        //TODO move invokers up to registry: MethodInvoker methodInvoker = operationHandlers.get(getOperationName());
-
+    private Object invoke(QueueingConsumer.Delivery delivery) {     
         try {
             return methodInvoker.invoke(delivery);
         }

@@ -4,7 +4,7 @@ import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.GetResponse;
 import com.rabbitmq.client.QueueingConsumer;
-import org.hyperic.hq.operation.rabbit.connection.SingleConnectionFactory;
+import org.hyperic.hq.operation.rabbit.connection.RabbitConnectionFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -23,7 +23,7 @@ public class AtomicTests {
 
     @Before
     public void prepare() throws IOException {
-        this.channel = new SingleConnectionFactory().newConnection().createChannel();
+        this.channel = new RabbitConnectionFactory().newConnection().createChannel();
         channel.exchangeDeclare("agent", "direct", false);
         this.agentQueue = channel.queueDeclare().getQueue();
         channel.queueBind(agentQueue, "agent", "ping");

@@ -25,19 +25,18 @@
 
 package org.hyperic.hq.rabbit;
 
-import org.hyperic.hq.bizapp.server.operations.RegisterAgentService;
-import org.hyperic.hq.operation.rabbit.connection.SingleConnectionFactory;
+import org.hyperic.hq.operation.rabbit.connection.RabbitConnectionFactory;
 import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertNotNull;
+
 public class CrossModuleConnectionTest extends BaseInfrastructureTest {
 
+   
     @Autowired
-    private RegisterAgentService registerAgentService;
-
-    @Autowired
-    private SingleConnectionFactory connectionFactory;
+    private RabbitConnectionFactory connectionFactory;
 
     @Test
     public void foo() {

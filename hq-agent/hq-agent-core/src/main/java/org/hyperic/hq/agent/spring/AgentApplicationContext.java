@@ -43,7 +43,7 @@ public final class AgentApplicationContext {
 
     private static final AtomicBoolean running = new AtomicBoolean(false);
 
-    /* add: org.hyperic.hq.operation.rabbit */
+    //RabbitOperationServiceConfiguration
     private static final String[] basePackages = {"org.hyperic.hq.agent"};
 
     private static final AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
@@ -79,7 +79,7 @@ public final class AgentApplicationContext {
     }
 
     /**
-     * Returns a bean by type.
+     * Returns a bean by type. On the agent there are no prototypes.
      * @param type the type
      * @param <T>
      * @return the bean instance if it exists

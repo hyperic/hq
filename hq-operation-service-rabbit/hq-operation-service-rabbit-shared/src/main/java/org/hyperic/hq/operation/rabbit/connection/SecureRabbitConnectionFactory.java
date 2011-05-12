@@ -23,11 +23,34 @@
  *  USA.
  */
 
-package org.hyperic.hq.agent.spring;
+package org.hyperic.hq.operation.rabbit.connection;
+
+import com.rabbitmq.client.Address;
+import com.rabbitmq.client.Connection;
+
+import java.io.IOException;
 
 /**
+ * This factory is used for authenticated communication -
+ * The server passes each agent the connection data.
  * @author Helena Edelson
  */
-public interface OperationServiceCallback {
- 
+public class SecureRabbitConnectionFactory extends AbstractRabbitConnectionFactory {
+
+
+    /**
+     * Creates an instance of ConnectionFactory with enforced credentials
+     * for authenticated agent operations.
+     * @param username
+     * @param password
+     */
+    public SecureRabbitConnectionFactory(String username, String password) {
+        super(username, password);
+    }
+
+
+    @Override
+    protected Connection createConnection(Address[] addrs) throws IOException {
+        return null;
+    }
 }
