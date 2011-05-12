@@ -6,11 +6,7 @@
 	<parent>
 		<groupId>org.hyperic.hq</groupId>
 		<artifactId>hq-parent</artifactId>
-<<<<<<< HEAD
 		<version>4.5.2.BUILD-SNAPSHOT</version>
-=======
-		<version>4.5.1.4.BUILD-SNAPSHOT</version>
->>>>>>> 4.5.1.4.ALPHA
 	</parent>
 
 	<groupId>org.hyperic.hq.dist</groupId>
