@@ -31,6 +31,7 @@ import java.util.Date;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AgentManager;
+import org.hyperic.hq.common.shared.TransactionRetry;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,11 +51,15 @@ public class AgentPluginStartupSync implements ApplicationContextAware,
     private ApplicationContext ctx;
     private AgentManager agentManager;
     private TaskScheduler taskScheduler;
+    private TransactionRetry transactionRetry;
 
     @Autowired
-    public AgentPluginStartupSync(AgentManager agentManager, @Value("#{scheduler}")TaskScheduler taskScheduler) {
+    public AgentPluginStartupSync(AgentManager agentManager,
+                                  TransactionRetry transactionRetry,
+                                  @Value("#{scheduler}")TaskScheduler taskScheduler) {
         this.agentManager = agentManager;
         this.taskScheduler = taskScheduler;
+        this.transactionRetry = transactionRetry;
     }
 
     public void setApplicationContext(ApplicationContext ctx) throws BeansException {
@@ -69,7 +74,12 @@ public class AgentPluginStartupSync implements ApplicationContextAware,
             public void run() {
                 try {
                     log.info("starting agent plugin sync");
-                    agentManager.syncAllAgentPlugins();
+                    final Runnable runner = new Runnable() {
+                        public void run() {
+                            agentManager.syncAllAgentPlugins();
+                        }
+                    };
+                    transactionRetry.runTransaction(runner, 3, 1000);
                     log.info("agent plugin sync complete");
                 } catch (Throwable t) {
                     log.error("error running plugin sync to agents", t);

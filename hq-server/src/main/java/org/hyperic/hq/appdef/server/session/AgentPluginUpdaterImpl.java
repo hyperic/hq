@@ -40,7 +40,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.server.session.AgentSynchronizer;
 import org.hyperic.hq.appdef.shared.AgentPluginUpdater;
-import org.hyperic.hq.common.shared.TransactionRetry;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.product.shared.PluginManager;
 import org.hyperic.hq.zevents.Zevent;
@@ -64,55 +63,33 @@ implements AgentPluginUpdater, ApplicationContextAware {
     private AgentSynchronizer agentSynchronizer;
     private PluginManager pluginManager;
     private ApplicationContext ctx;
-    private TransactionRetry transactionRetry;
+    private ZeventManager zeventManager;
     
     @Autowired
     public AgentPluginUpdaterImpl(AgentSynchronizer agentSynchronizer,
                                   PluginManager pluginManager,
-                                  TransactionRetry transactionRetry) {
+                                  ZeventManager zeventManager) {
         this.agentSynchronizer = agentSynchronizer;
         this.pluginManager = pluginManager;
-        this.transactionRetry = transactionRetry;
+        this.zeventManager = zeventManager;
     }
-    
+
     @PostConstruct
     public void postConstruct() {
-        ZeventManager.getInstance().addBufferedListener(PluginQueuedZevent.class,
-            new ZeventListener<PluginQueuedZevent>() {
-                public void processEvents(List<PluginQueuedZevent> events) {
-                    for (final PluginQueuedZevent event : events) {
-                        final Runnable runner = new Runnable() {
-                            public void run() {
-                                pluginManager.updateAgentPluginSyncStatus(
-                                    event.getStatus(), event.getUpdateMap(), event.getRemoveMap());
-                            }
-                        };
-                        transactionRetry.runTransaction(runner, 3, 1000);
+        zeventManager.addBufferedListener(PluginStatusUpdatedZevent.class,
+            new ZeventListener<PluginStatusUpdatedZevent>() {
+                public void processEvents(List<PluginStatusUpdatedZevent> events) {
+                    for (final PluginStatusUpdatedZevent event : events) {
+                        queueJobs(event.restartAgents(), event.getUpdateMap(), event.getRemoveMap());
                     }
                 }
             }
         );
     }
 
-    @Transactional(readOnly=true)
-    public void queuePluginTransfer(Map<Integer, Collection<Plugin>> updateMap,
-                                    Map<Integer, Collection<String>> removeMap,
-                                    boolean restartAgents) {
-        if (isDisabled()) {
-            return;
-        }
-        if (updateMap == null) {
-            updateMap = Collections.emptyMap();
-        } if (removeMap == null) {
-            removeMap = Collections.emptyMap();
-        }
-        if (restartAgents) {
-            ZeventManager.getInstance().enqueueEventAfterCommit(
-                new PluginQueuedZevent(AgentPluginStatusEnum.SYNC_IN_PROGRESS, updateMap, removeMap));
-        } else {
-            ZeventManager.getInstance().enqueueEventAfterCommit(
-                new PluginQueuedZevent(AgentPluginStatusEnum.SYNC_FAILURE, updateMap, removeMap));
-        }
+    private void queueJobs(boolean restartAgents,
+                           Map<Integer, Collection<Plugin>> updateMap,
+                           Map<Integer, Collection<String>> removeMap) {
         final Set<Integer> agentIds = new HashSet<Integer>();
         agentIds.addAll(updateMap.keySet());
         agentIds.addAll(removeMap.keySet());
@@ -140,6 +117,35 @@ implements AgentPluginUpdater, ApplicationContextAware {
             job.restartAgent(restartAgents);
             agentSynchronizer.addAgentJob(job);
         }
+    }
+
+    @Transactional(readOnly=false)
+    public void queuePluginTransfer(Map<Integer, Collection<Plugin>> updates,
+                                    Map<Integer, Collection<String>> removes,
+                                    boolean restartAgents) {
+        if (isDisabled()) {
+            return;
+        }
+        @SuppressWarnings("unchecked")
+        final Map<Integer, Collection<Plugin>> updateMap =
+            (updates == null) ? Collections.EMPTY_MAP : updates;
+        @SuppressWarnings("unchecked")
+        final Map<Integer, Collection<String>> removeMap =
+            (removes == null) ? Collections.EMPTY_MAP : removes;
+        if (restartAgents) {
+            pluginManager.updateAgentPluginSyncStatus(
+                AgentPluginStatusEnum.SYNC_IN_PROGRESS, updateMap, removeMap);
+        } else {
+            pluginManager.updateAgentPluginSyncStatus(
+                AgentPluginStatusEnum.SYNC_FAILURE, updateMap, removeMap);
+        }
+        // want jobs to get added to the agentSynchronizer after commit to ensure that we don't
+        // have agents restarting and updating status before the status is updated as a result
+        // of the updateAgentPluginSyncStatus() call. If the queuing was not called this way we
+        // could have agents sitting in the "IN-PROGRESS" state indefinitely because they were
+        // updated out of order
+        zeventManager.enqueueEventAfterCommit(
+            new PluginStatusUpdatedZevent(restartAgents, updateMap, removeMap));
     }
 
     private void removeDuplicates(Collection<Plugin> plugins, Collection<String> toRemove) {
@@ -181,21 +187,21 @@ implements AgentPluginUpdater, ApplicationContextAware {
         return !pluginManager.isPluginSyncEnabled();
     }
 
-    private class PluginQueuedZevent extends Zevent {
-        private AgentPluginStatusEnum status;
+    private class PluginStatusUpdatedZevent extends Zevent {
         private Map<Integer, Collection<Plugin>> updateMap;
         private Map<Integer, Collection<String>> removeMap;
+        private boolean restartAgents;
         @SuppressWarnings("serial")
-        private PluginQueuedZevent(AgentPluginStatusEnum status,
-                                   Map<Integer, Collection<Plugin>> updateMap,
-                                   Map<Integer, Collection<String>> removeMap) {
+        private PluginStatusUpdatedZevent(boolean restartAgents,
+                                          Map<Integer, Collection<Plugin>> updateMap,
+                                          Map<Integer, Collection<String>> removeMap) {
             super(new ZeventSourceId() {}, new ZeventPayload() {});
-            this.status = status;
             this.updateMap = updateMap;
             this.removeMap = removeMap;
+            this.restartAgents = restartAgents;
         }
-        private AgentPluginStatusEnum getStatus() {
-            return status;
+        public boolean restartAgents() {
+            return restartAgents;
         }
         private Map<Integer, Collection<Plugin>> getUpdateMap() {
             return updateMap;
