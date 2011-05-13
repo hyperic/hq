@@ -69,7 +69,6 @@ public class PluginManagerControllerTest extends BaseControllerTest {
     private AgentManager mockAgentManager;
     private AppdefBoss mockAppdefBoss;
     private AuthzBoss mockAuthzBoss;
-    private HttpServletRequest mockHttpServletRequest;
     private static SimpleDateFormat format;
     private static Date date1 = new Date();
     private static Date date2 = new Date();
@@ -92,7 +91,6 @@ public class PluginManagerControllerTest extends BaseControllerTest {
         mockAgentManager = createMock(AgentManager.class);
         mockAppdefBoss = getMockAppdefBoss();
         mockAuthzBoss = getMockAuthzBoss();
-        mockHttpServletRequest = createMock(HttpServletRequest.class);
         pluginManagerController = new PluginManagerController(mockAppdefBoss, mockAuthzBoss, 
             mockPluginManager, mockAgentManager);
 
@@ -326,7 +324,9 @@ public class PluginManagerControllerTest extends BaseControllerTest {
         expect(mockPluginManager.getStatusesByPluginId(3, AgentPluginStatusEnum.SYNC_FAILURE)).andStubReturn(getErrorAgentStatusList());
         expect(mockPluginManager.getStatusesByPluginId(3, AgentPluginStatusEnum.SYNC_IN_PROGRESS)).andStubReturn(getInProgressAgentStatusList());
         replay(mockPluginManager);
-        List<Map<String, Object>> result = pluginManagerController.getAgentStatus(3, "");
+        
+        List<Map<String, Object>> result = pluginManagerController.getAgentStatus(3, "","inprogress");
+        assertEquals("result should be 1",1,result.size());
     }
     
     @Test
@@ -334,7 +334,7 @@ public class PluginManagerControllerTest extends BaseControllerTest {
         expect(mockPluginManager.getStatusesByPluginId(3, AgentPluginStatusEnum.SYNC_FAILURE)).andStubReturn(getErrorAgentStatusList());
         expect(mockPluginManager.getStatusesByPluginId(3, AgentPluginStatusEnum.SYNC_IN_PROGRESS)).andStubReturn(getInProgressAgentStatusList());
         replay(mockPluginManager);
-        List<Map<String, Object>> result =  pluginManagerController.getAgentStatus(3, "xx");
+        List<Map<String, Object>> result =  pluginManagerController.getAgentStatus(3, "xx","inprogress");
         
         assertEquals("result should be empty",0,result.size());
     }   

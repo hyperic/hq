@@ -176,15 +176,19 @@
 		color:#777777;
 		font-weight: bold;
 	}
-	.agentStatusSpan,
+	.agentStatusProgressSpan,
+	.agentStatusFailSpan,
 	#agentFailure,
 	.helpLink{
 		color: #0066CC;
 		font-weight: bold;
 		height:9px;
 	}
-	.agentStatusSpan:focus,
-	.agentStatusSpan:hover,
+
+	.agentStatusProgressSpan:focus,
+	.agentStatusProgressSpan:hover,
+	.agentStatusFailSpan:focus,
+	.agentStatusFailSpan:hover,
 	#agentFailure:focus,
 	#agentFailure:hover,
 	.helpLink:focus,

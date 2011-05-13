@@ -198,43 +198,32 @@ public class PluginManagerController extends BaseController implements Applicati
     
     @RequestMapping(method = RequestMethod.GET, value="/status/{pluginId}", headers="Accept=application/json")
     public @ResponseBody List<Map<String, Object>> getAgentStatus(@PathVariable int pluginId, 
-        @RequestParam("searchWord") String searchWord) {
-        Collection<AgentPluginStatus> errorAgentStatusList = 
-            pluginManager.getStatusesByPluginId(pluginId, AgentPluginStatusEnum.SYNC_FAILURE);
-
+        @RequestParam("searchWord") String searchWord, @RequestParam("status") String status) {
         List<Map<String,Object>> resultAgents = new ArrayList<Map<String,Object>>();
-        for (AgentPluginStatus errorAgentStatus : errorAgentStatusList){
-            String agentName = getAgentName(errorAgentStatus.getAgent());
+        Collection<AgentPluginStatus> agentStatusList ;
+        
+        if("error".equals(status)){
+            agentStatusList = pluginManager.getStatusesByPluginId(pluginId, AgentPluginStatusEnum.SYNC_FAILURE);
+        }else if("inprogress".equals(status)){
+            agentStatusList = pluginManager.getStatusesByPluginId(pluginId, AgentPluginStatusEnum.SYNC_IN_PROGRESS);
+        }else{
+            return resultAgents;
+        }
+        
+        for (AgentPluginStatus agentStatus : agentStatusList){
+            String agentName = getAgentName(agentStatus.getAgent());
             if ("".equals(searchWord) || agentName.contains(searchWord)){
                 Map<String,Object> errorAgent = new HashMap<String,Object>();
                 errorAgent.put("agentName", agentName); 
-                if(errorAgentStatus.getLastSyncAttempt()!=0){
-                    errorAgent.put("syncDate", formatter.format(errorAgentStatus.getLastSyncAttempt())); 
+                if(agentStatus.getLastSyncAttempt()!=0){
+                    errorAgent.put("syncDate", formatter.format(agentStatus.getLastSyncAttempt())); 
                 }else{
                     errorAgent.put("syncDate", "");
                 }
-                
-                errorAgent.put("status", "error");
+                errorAgent.put("status", status);
                 resultAgents.add(errorAgent);
             }
         }
-        
-        Collection<AgentPluginStatus> inProgressAgentStatusList = 
-            pluginManager.getStatusesByPluginId(pluginId, AgentPluginStatusEnum.SYNC_IN_PROGRESS);
-        for(AgentPluginStatus inProgressAgentStatus: inProgressAgentStatusList){
-            String agentName = getAgentName(inProgressAgentStatus.getAgent());
-            if("".equals(searchWord) || agentName.contains(searchWord)){
-                Map<String,Object> inProgressAgent = new HashMap<String,Object>();
-                inProgressAgent.put("agentName", agentName); 
-                if(inProgressAgentStatus.getLastSyncAttempt()!=0){
-                    inProgressAgent.put("syncDate", formatter.format(inProgressAgentStatus.getLastSyncAttempt()));
-                }else{
-                    inProgressAgent.put("syncDate", "");
-                }
-                inProgressAgent.put("status", "inProgress");
-                resultAgents.add(inProgressAgent);
-            }
-        }     
         return resultAgents;
     }
     
