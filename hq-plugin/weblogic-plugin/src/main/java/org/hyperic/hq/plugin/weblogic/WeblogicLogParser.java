@@ -79,7 +79,7 @@ public class WeblogicLogParser {
             return field.substring(1);
         }
         else {
-            return field.substring(1, ix+1);
+            return field.substring(1, ix);
         }
     }
     
@@ -87,7 +87,7 @@ public class WeblogicLogParser {
         if (!line.startsWith("####")) {
             return null;
         }
-        line = line.substring(4);
+        line = line.substring(4) + " ";
 
         List list = new ArrayList();
         Matcher matcher = getPattern().matcher(line);
@@ -97,8 +97,7 @@ public class WeblogicLogParser {
             if (++i >= 9) {
                 String field =
                     line.substring(matcher.end(), line.length());
-                //adding the space to satisfy the lastIndexOf search for the message in nextField().
-                list.add(field + " ");
+                list.add(field);
                 break;
             }
         }
