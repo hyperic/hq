@@ -206,7 +206,8 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             
             if (dataDownEndTime == MAX_AVAIL_TIMESTAMP) {
                 dataDownEndTime = System.currentTimeMillis();
-            } else if (dataDownEndTime > rangeEnd){
+            } 
+            if (dataDownEndTime > rangeEnd){
                 // use range end if the data down end time is greater than the end range.
                 dataDownEndTime = rangeEnd;
             }
