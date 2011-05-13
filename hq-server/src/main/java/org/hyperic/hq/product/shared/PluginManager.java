@@ -196,4 +196,6 @@ public interface PluginManager {
 
     void removeOrphanedPluginsInNewTran() throws PluginDeployException;
 
+    Map<Integer, AgentPluginStatus> getStatusesByAgentId(AgentPluginStatusEnum ... keys);
+
 }

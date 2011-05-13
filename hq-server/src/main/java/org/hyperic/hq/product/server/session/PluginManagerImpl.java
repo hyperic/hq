@@ -313,11 +313,11 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         rtn.addAll(agentPluginSyncRestartThrottle.getQueuedAgentIds());
         return rtn;
     }
-    
+
     public Map<Integer, Long> getAgentIdsInRestartState() {
         return agentPluginSyncRestartThrottle.getAgentIdsInRestartState();
     }
-    
+
     // XXX currently if one plugin validation fails all will fail.  Probably want to deploy the
     // plugins that are valid and return error status if any fail.
     public void deployPluginIfValid(AuthzSubject subj, Map<String, byte[]> pluginInfo)
@@ -552,6 +552,15 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
             return Collections.emptyList();
         }
         return agentPluginStatusDAO.getPluginStatusByFileName(plugin.getPath(), Arrays.asList(keys));
+    }
+    
+    public Map<Integer, AgentPluginStatus> getStatusesByAgentId(AgentPluginStatusEnum ... keys) {
+        final Map<Integer, AgentPluginStatus> rtn = new HashMap<Integer, AgentPluginStatus>();
+        final List<AgentPluginStatus> statuses = agentPluginStatusDAO.getPluginStatusByAgent(keys);
+        for (final AgentPluginStatus status : statuses) {
+            rtn.put(status.getAgent().getId(), status);
+        }
+        return rtn;
     }
     
     public boolean isPluginSyncEnabled() {
