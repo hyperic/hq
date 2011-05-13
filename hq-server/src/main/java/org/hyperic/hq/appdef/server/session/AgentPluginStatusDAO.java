@@ -230,8 +230,11 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
     @SuppressWarnings("unchecked")
     public Collection<AgentPluginStatus> getPluginStatusByFileName(String fileName,
                                                       Collection<AgentPluginStatusEnum> statuses) {
-        final String hql =
-            "from AgentPluginStatus where fileName = :fileName and lastSyncStatus in (:statuses)";
+        final String hql = new StringBuilder(128)
+            .append("from AgentPluginStatus s ")
+            .append("where s.fileName = :fileName and s.lastSyncStatus in (:statuses) ")
+            .append("and exists (select 1 from Platform p where p.agent.id = s.agent.id)")
+            .toString();
         Collection<String> vals = new ArrayList<String>(statuses.size());
         for (final AgentPluginStatusEnum s : statuses) {
             vals.add(s.toString());
@@ -393,6 +396,23 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
           	.append(")")
             .toString();
         return getSession().createQuery(hql).list();
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<AgentPluginStatus> getPluginStatusByAgent(AgentPluginStatusEnum ... keys) {
+        final List<String> vals = new ArrayList<String>(keys.length);
+        for (AgentPluginStatusEnum key : keys) {
+            vals.add(key.toString());
+        }
+        final String hql = new StringBuilder(128)
+            .append("from AgentPluginStatus s ")
+            .append("where exists (select 1 from Platform p where p.agent.id = s.agent.id) ")
+            .append("and s.lastSyncStatus in (:statuses)")
+            .toString();
+        return getSession()
+            .createQuery(hql)
+            .setParameterList("statuses", vals, new StringType())
+            .list();
     }
 
 }

@@ -79,11 +79,13 @@
 					    </c:if>
 					    
 					    <c:if test="${pluginSummary.inProgressAgentCount>0 ||pluginSummary.errorAgentCount>0 }">
-					    	<span id="${pluginSummary.name}_${pluginSummary.id}" class="agentStatusSpan">				    	
+					    	<span id="${pluginSummary.name}_${pluginSummary.id}" class="agentStatusProgressSpan">				    	
 							<c:if test="${pluginSummary.inProgressAgentCount>0}">
 						        ${pluginSummary.inProgressAgentCount}&nbsp;
 						        <img id="${pluginSummary.name}_${pluginSummary.id}" alt="in progress" class="inProgressIcon" src="<spring:url value="/static/images/alert.png"/>"/>&nbsp;&nbsp;
 						   	</c:if>	
+						   	</span>
+						   	<span id="${pluginSummary.name}_${pluginSummary.id}" class="agentStatusFailSpan">
 						   	<c:if test="${pluginSummary.errorAgentCount>0}">	   		
 					   			${pluginSummary.errorAgentCount}&nbsp;
 					   			<img id="${pluginSummary.name}_${pluginSummary.id}" alt="failure" class="errorIcon" src="<spring:url value="/static/images/icon_available_red.gif"/>"/>
@@ -160,6 +162,7 @@
 	</div>
 	<input type="hidden" id="pluginId"/>
 	<input type ="hidden" id="pluginName"/>
+	<input type="hidden" id="status"/>
 	
 	<ul id="agentList"></ul>
 	
@@ -292,13 +295,16 @@
 				label: "<fmt:message key='admin.managers.Plugin.tip.icon.error' />. <fmt:message key='admin.managers.Plugin.tip.icon.click' />"
 			});		
 		});
-		function seeStatusDetail(pluginId){
+		function seeStatusDetail(pluginId,status){
 			hqDijit.byId("showStatusPanelDialog").show();
 			var agentListUl = hqDojo.byId("agentList");
 			var searchWord = hqDojo.byId("searchText").value;
-			var statusDetailUrl = "/app/admin/managers/plugin/status/{pluginId}?searchWord={keyword}";//"<c:url value='/app/admin/managers/plugin/status/{pluginId}?searchWord={keyword}'/>";
+			
+			var statusDetailUrl = "/app/admin/managers/plugin/status/{pluginId}?searchWord={keyword}&status={status}";//"<c:url value='/app/admin/managers/plugin/status/{pluginId}?searchWord={keyword}'/>";
+			
 			statusDetailUrl = statusDetailUrl.replace("{pluginId}",pluginId);
 			statusDetailUrl = statusDetailUrl.replace("{keyword}",searchWord);
+			statusDetailUrl = statusDetailUrl.replace("{status}",status);
 			
 			var xhrArgs = {
 					preventCache:true,
@@ -374,7 +380,8 @@
 		 
 		hqDojo.connect(hqDojo.byId("searchText"),"onkeyup",function(e){
 			var pluginId = hqDojo.byId("pluginId").value;
-			seeStatusDetail(pluginId,hqDojo.byId("searchText").value);			
+			var status = hqDojo.byId("status").value;
+			seeStatusDetail(pluginId,hqDojo.byId("searchText").value,status);			
 		});
 		
 		var agentSummaryDialog = new hqDijit.Dialog({
@@ -399,14 +406,26 @@
 		});
 
 		hqDojo.behavior.add({
-			".agentStatusSpan":{
+			".agentStatusProgressSpan":{
 				onclick: function(evt){
 					var anchor = evt.target.id.indexOf("_");
 					var pluginId = evt.target.id.substr(anchor+1,evt.target.id.length);
 					var pluginName = evt.target.id.substr(0,anchor);
 					hqDojo.byId("pluginName").value=pluginName;
 					hqDojo.byId("pluginId").value=pluginId;
-					seeStatusDetail(pluginId);
+					hqDojo.byId("status").value="inprogress";
+					seeStatusDetail(pluginId,"inprogress");
+				}
+			},
+			".agentStatusFailSpan":{
+				onclick: function(evt){
+					var anchor = evt.target.id.indexOf("_");
+					var pluginId = evt.target.id.substr(anchor+1,evt.target.id.length);
+					var pluginName = evt.target.id.substr(0,anchor);
+					hqDojo.byId("pluginName").value=pluginName;
+					hqDojo.byId("pluginId").value=pluginId;
+					hqDojo.byId("status").value="error";
+					seeStatusDetail(pluginId,"error");
 				}
 			},
 			"#agentFailure":{
@@ -724,30 +743,35 @@
            	    				statusSpan.innerHTML+="&nbsp;&nbsp;&nbsp;";
                 			}
                 			if (summary.inProgressAgentCount>0 || summary.errorAgentCount > 0){
-                				var errorAgentSpan = hqDojo.create("span",{
+                				var inProgressAgentSpan = hqDojo.create("span",{
         	        				"id":summary.name+"_"+summary.id,
-            	    				"class":"agentStatusSpan"
+            	    				"class":"agentStatusProgressSpan"
                 					}, statusSpan);
-	                		if (summary.inProgressAgentCount>0) {
-	                		    errorAgentSpan.innerHTML+=summary.inProgressAgentCount+"&nbsp;";
-    	           				hqDojo.create("img",{
-        	       					"src": "<spring:url value="/images/4.0/icons/alert.png"/>",
-        	       					"alt": "in progress",
-        	       					"class": "inProgressIcon",
-        	       					"id":summary.name+"_"+summary.id
-	        	       			}, errorAgentSpan);
-	        	       			errorAgentSpan.innerHTML+="&nbsp;&nbsp;&nbsp;";
-                			}			
-	                		if (summary.errorAgentCount > 0) {
-                				errorAgentSpan.innerHTML+= summary.errorAgentCount+"&nbsp;";
-                				hqDojo.create("img",{
-                					"src": "<spring:url value="/images/icon_available_red.gif"/>",
-                					"alt": "failure",
-                					"class": "errorIcon",
-                					"id":summary.name+"_"+summary.id
-                				}, errorAgentSpan);
-                				errorAgentSpan.innerHTML+="</img>";
-                			}
+		                		if (summary.inProgressAgentCount>0) {
+		                		    inProgressAgentSpan.innerHTML+=summary.inProgressAgentCount+"&nbsp;";
+    		           				hqDojo.create("img",{
+        		       					"src": "<spring:url value="/images/4.0/icons/alert.png"/>",
+        	    	   					"alt": "in progress",
+        	       						"class": "inProgressIcon",
+        	       						"id":summary.name+"_"+summary.id
+	        	       				}, inProgressAgentSpan);
+	        	       				inProgressAgentSpan.innerHTML+="&nbsp;&nbsp;&nbsp;";
+	                			}	
+    	            			var errorAgentSpan = hqDojo.create("span",{
+        		        			"id":summary.name+"_"+summary.id,
+            		    			"class":"agentStatusFailSpan"
+                					}, statusSpan);
+                						
+	                			if (summary.errorAgentCount > 0) {
+                					errorAgentSpan.innerHTML+= summary.errorAgentCount+"&nbsp;";
+                					hqDojo.create("img",{
+                						"src": "<spring:url value="/images/icon_available_red.gif"/>",
+                						"alt": "failure",
+            	    					"class": "errorIcon",
+               		 					"id":summary.name+"_"+summary.id
+                					}, errorAgentSpan);
+                					errorAgentSpan.innerHTML+="</img>";
+                				}
                 			
                 			}
                 		}
