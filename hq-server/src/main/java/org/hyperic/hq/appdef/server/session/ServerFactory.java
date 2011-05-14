@@ -63,15 +63,14 @@ public class ServerFactory {
     
     public ServerType createServerType(ResourceType serverResType) {
         ServerType serverType = new ServerType();
-        //TODO?
+        //TODO set ctime and mtime
         //serverType.setCreationTime(creationTime)
         //serverType.setModifiedTime();
         serverType.setDescription(serverResType.getDescription());
         serverType.setId(serverResType.getId());
         serverType.setName(serverResType.getName());
         serverType.setPlugin(pluginResourceTypeRepository.findNameByResourceType(serverResType.getId()));
-        //TODO for types, we just fake out sort name for now.  Can't do setProperty on ResourceType
-        serverType.setSortName(serverResType.getName().toUpperCase());
+        serverType.setSortName(serverResType.getSortName());
         if(serverResType.hasResourceTypesTo(RelationshipTypes.VIRTUAL)) {
             serverType.setVirtual(true);
         }else {

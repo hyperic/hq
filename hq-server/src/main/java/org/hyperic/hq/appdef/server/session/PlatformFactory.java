@@ -73,9 +73,7 @@ public class PlatformFactory {
         platformType.setName(resourceType.getName());
         platformType.setPlugin(pluginResourceTypeRepository.findNameByResourceType(resourceType
             .getId()));
-        // TODO for types, we just fake out sort name for now. Can't do
-        // setProperty on ResourceType
-        platformType.setSortName(resourceType.getName().toUpperCase());
+        platformType.setSortName(resourceType.getSortName());
         return platformType;
     }
 

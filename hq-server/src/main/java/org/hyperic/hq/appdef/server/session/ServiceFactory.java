@@ -58,16 +58,14 @@ public class ServiceFactory {
 
     public ServiceType createServiceType(ResourceType resourceType) {
         ServiceType serviceType = new ServiceType();
-        // TODO
+        // TODO set ctime and mtime
         // serviceType.setCreationTime(creationTime);
         // serviceType.setModifiedTime(modifiedTime);
         serviceType.setDescription(resourceType.getDescription());
         serviceType.setId(resourceType.getId());
         serviceType.setName(resourceType.getName());
         serviceType.setPlugin(pluginResourceTypeRepository.findNameByResourceType(resourceType.getId()));
-        // TODO for types, we just fake out sort name for now. Can't do
-        // setProperty on ResourceType
-        serviceType.setSortName(resourceType.getName().toUpperCase());
+        serviceType.setSortName(resourceType.getSortName());
         return serviceType;
     }
 }

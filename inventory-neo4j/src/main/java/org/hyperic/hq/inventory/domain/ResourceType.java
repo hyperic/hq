@@ -59,6 +59,11 @@ public class ResourceType {
     @RelatedTo(type = RelationshipTypes.IS_A, direction = Direction.INCOMING, elementClass = Resource.class)
     private Set<Resource> resources;
 
+    @NotNull
+    @Indexed
+    @GraphProperty
+    private String sortName;
+
     public ResourceType() {
     }
 
@@ -68,6 +73,9 @@ public class ResourceType {
      */
     public ResourceType(String name) {
         this.name = name;
+        // Strip out all special chars b/c Lucene can't sort tokenized
+        // Strings
+        this.sortName = name.toUpperCase().replaceAll("\\W", "");
     }
 
     /**
@@ -77,6 +85,9 @@ public class ResourceType {
      */
     public ResourceType(String name, String description) {
         this.name = name;
+        // Strip out all special chars b/c Lucene can't sort tokenized
+        // Strings
+        this.sortName = name.toUpperCase().replaceAll("\\W", "");
         this.description = description;
     }
 
@@ -382,6 +393,10 @@ public class ResourceType {
         return getRelatedResourceTypes(relationName, org.neo4j.graphdb.Direction.INCOMING);
     }
 
+    public String getSortName() {
+        return sortName;
+    }
+
     private Traverser getTraverser(String relationName, org.neo4j.graphdb.Direction direction) {
         return getPersistentState().traverse(Traverser.Order.BREADTH_FIRST, new StopEvaluator() {
             public boolean isStopNode(TraversalPosition currentPos) {
@@ -543,6 +558,11 @@ public class ResourceType {
      */
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    @Transactional("neoTxManager")
+    public void setSortName(String sortName) {
+        this.sortName = sortName;
     }
 
     public String toString() {
