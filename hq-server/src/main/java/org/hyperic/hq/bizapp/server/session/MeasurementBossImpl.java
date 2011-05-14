@@ -2322,7 +2322,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
         throws AppdefEntityNotFoundException, PermissionException {
         List<AppdefEntityID> res = new ArrayList<AppdefEntityID>();
 
-        //TODO
+        //TODO implement Autogroup w/new inventory model
 //        Resource proto = resourceManager.findResourcePrototype(ctype);
 //
 //        if (proto == null) {

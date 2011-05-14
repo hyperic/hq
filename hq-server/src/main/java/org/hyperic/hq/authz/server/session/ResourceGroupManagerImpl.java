@@ -443,7 +443,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         retVal.setGroupEntResType((Integer)g.getProperty(GROUP_ENT_RES_TYPE));
         retVal.setTotalSize(g.countMembers());
         retVal.setSubject(subj);
-        //TODO don't have these at the moment
+        //TODO don't have ctime and mtime at the moment
         //retVal.setMTime(new Long(g.getMtime()));
         //retVal.setCTime(new Long(g.getCtime()));
         retVal.setModifiedBy(g.getModifiedBy());
@@ -521,7 +521,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
           ResourceType prototype,
           Collection<ResourceGroup> excludeGroups,
           org.hyperic.hibernate.PageInfo pInfo, boolean inclusive) {
-        //TODO
+        //TODO Impl below
 //        ResourceGroupSortField sort = (ResourceGroupSortField) pInfo.getSort();
 //        String hql = "from ResourceGroup g where g.system = false and ";
 //        

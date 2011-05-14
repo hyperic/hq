@@ -75,7 +75,7 @@ public class AuditManagerImpl implements AuditManager, ApplicationListener<Appli
     }
 
     private void saveRecursively(Audit a) {
-        //TODO
+        //TODO re-enable auditing
         //auditDao.save(a);
 
         if (log.isDebugEnabled()) {
@@ -118,7 +118,7 @@ public class AuditManagerImpl implements AuditManager, ApplicationListener<Appli
      * 
      */
     public void popAll() {
-        //TODO
+        //TODO re-enable auditing
 //        Audit a = getCurrentAudit();
 //        long now = System.currentTimeMillis();
 //
@@ -152,7 +152,7 @@ public class AuditManagerImpl implements AuditManager, ApplicationListener<Appli
      * 
      */
     public void popContainer(boolean allowEmpty) {
-        //TODO
+        //TODO re-enable auditing
 //        Audit a = getCurrentAudit();
 //
 //        if (a == null) {
@@ -231,18 +231,18 @@ public class AuditManagerImpl implements AuditManager, ApplicationListener<Appli
     public List<Audit> find(AuthzSubject me, PageInfo pInfo, long startTime, long endTime,
                             AuditImportance minImportance, AuditPurpose purpose,
                             AuthzSubject target, String klazz) {
-        //TODO
+        //TODO re-enable auditing
         //return auditDao.find(pInfo, me, startTime, endTime, minImportance, purpose, target, klazz);
         return new ArrayList<Audit>();
     }
 
     private void handleResourceDelete(Resource r) {
-        //TODO
+        //TODO re-enable auditing
         //auditDao.handleResourceDelete(r);
     }
 
     private void handleSubjectDelete(AuthzSubject s) {
-        //TODO
+        //TODO re-enable auditing
         //auditDao.handleSubjectDelete(s);
     }
     

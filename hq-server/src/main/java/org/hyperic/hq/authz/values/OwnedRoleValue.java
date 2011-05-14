@@ -301,7 +301,7 @@ public class OwnedRoleValue {
         idHasBeenSet = true;
         //TODO operations?
         //this.OperationValues = otherValue.OperationValues;
-        //TODO 
+        //TODO set owner
         //this.setOwner(parent.getResource().getOwner());
     }
 

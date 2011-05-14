@@ -395,7 +395,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     private void setDependencyTree(Application a, DependencyTree newTree) {
         log.debug("Setting dependency tree for application: " + a.getName());
        
-        //TODO
+        //TODO removed notion of "AppService". Build a tree of application resources instead?
         // List nodes = newTree.getNodes();
 //       
 //        for (int i = 0; i < nodes.size(); i++) {
