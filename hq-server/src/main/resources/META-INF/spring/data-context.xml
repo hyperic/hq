@@ -44,7 +44,7 @@
 	<bean class="org.springframework.orm.jpa.JpaTransactionManager"
 		id="transactionManager">
 		<property name="entityManagerFactory" ref="entityManagerFactory" />
-		<!--  TODO re-enable SPR-8086 is resolved -->
+		<!-- TODO re-enable SPR-8086 is resolved -->
 		<!-- <property name="defaultTimeout" value="${server.transaction.timeout}"/> -->
 	</bean>
 
@@ -53,7 +53,7 @@
 		id="entityManagerFactory" depends-on="neo4jNodeBacking,neo4jRelationshipBacking,liquibase">
 		<property name="persistenceUnitName" value="production" />
 		<property name="dataSource" ref="dataSource" />
-		<property name="persistenceProvider" ref="persistenceProvider"/>
+		<property name="persistenceProvider" ref="persistenceProvider" />
 		<property name="persistenceUnitManager">
 			<bean
 				class="org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager">
@@ -61,10 +61,25 @@
 			</bean>
 		</property>
 		<property name="jpaVendorAdapter">
-			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"/>
+			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter" />
+		</property>
+		<property name="jpaProperties">
+			<bean class="org.springframework.beans.factory.config.PropertiesFactoryBean" p:ignoreResourceNotFound="true">
+				<property name="properties">
+					<props>
+						<prop key="hibernate.connection.driver_class">${server.database-driver}</prop>
+						<prop key="hibernate.connection.url">${server.database-url}</prop>
+						<prop key="hibernate.connection.username">${server.database-user}</prop>
+						<prop key="hibernate.connection.password">${server.database-password}</prop>
+						<prop key="hibernate.dialect">${server.hibernate.dialect}</prop>
+						<prop key="hibernate.show_sql">${hibernate.show_sql}</prop>
+					</props>
+				</property>
+				<property name="localOverride" value="true" />
+			</bean>
 		</property>
 	</bean>
-	
+
 	<bean id="persistenceProvider" class="org.hyperic.hibernate.HibernateConfigHolder" />
 
 	<bean class="org.springframework.orm.jpa.JpaTemplate">
@@ -72,7 +87,7 @@
 	</bean>
 
 	<jpa:repositories base-package="org.hyperic.hq.**.data" />
-	
+
 	<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter"
 		lazy-init="false">
 		<property name="beans">
@@ -82,5 +97,5 @@
 			</map>
 		</property>
 	</bean>
-	
+
 </beans>
