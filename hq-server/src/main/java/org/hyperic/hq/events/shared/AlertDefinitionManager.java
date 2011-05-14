@@ -138,7 +138,7 @@ public interface AlertDefinitionManager {
     /**
      * Returns the {@link AlertDefinition}s using the passed
      */
-    public Collection<ResourceAlertDefinition> getUsing(Escalation e);
+    public  Collection<AlertDefinition> getUsing(Escalation e);
 
     /**
      * Remove alert definitions

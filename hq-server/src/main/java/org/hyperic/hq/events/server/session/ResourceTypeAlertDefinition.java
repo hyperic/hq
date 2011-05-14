@@ -6,24 +6,18 @@ import java.util.Collection;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
-import javax.persistence.Version;
+import javax.persistence.PrimaryKeyJoinColumn;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
-import org.hibernate.annotations.Parameter;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 
-@Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
+@PrimaryKeyJoinColumn(name = "DEF_ID", referencedColumnName = "ID")
 @Entity
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class ResourceTypeAlertDefinition
@@ -40,37 +34,13 @@ public class ResourceTypeAlertDefinition
     @OrderBy("id")
     private Collection<AlertCondition> conditions = new ArrayList<AlertCondition>();
 
-    @Id
-    @GeneratedValue(generator = "combo")
-    @GenericGenerator(name = "combo", parameters = { @Parameter(name = "sequence", value = "EAM_RES_TYPE_ALERT_DEFINITION_ID_SEQ") }, 
-        strategy = "org.hyperic.hibernate.id.ComboGenerator")
-    @Column(name = "ID", nullable = false)
-    private Integer id;
-
     @Column
     @Index(name = "ALERT_DEF_RES_TYPE_ID_IDX")
     private Integer resourceType;
-
-    @Column(name = "VERSION_COL", nullable = false)
-    @Version
-    private Long version;
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        ResourceTypeAlertDefinition other = (ResourceTypeAlertDefinition) obj;
-        if (id == null) {
-            if (other.id != null)
-                return false;
-        } else if (!id.equals(other.id))
-            return false;
-        return true;
-    }
+    
+    @OneToMany(mappedBy = "resourceTypeAlertDefinition")
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    private Collection<ResourceAlertDefinition> resourceAlertDefs = new ArrayList<ResourceAlertDefinition>();
 
     @Override
     Collection<Action> getActionsBag() {
@@ -88,12 +58,12 @@ public class ResourceTypeAlertDefinition
         return conditions;
     }
 
-    public Integer getId() {
-        return id;
+    public Collection<ResourceAlertDefinition> getResourceAlertDefs() {
+        return resourceAlertDefs;
     }
 
     public Integer getResource() {
-        // TODO
+        // TODO this method should be moved from AlertDefinition to ResourceAlertDef.  N/A here.
         throw new UnsupportedOperationException();
     }
 
@@ -101,28 +71,8 @@ public class ResourceTypeAlertDefinition
         return resourceType;
     }
 
-    public Long getVersion() {
-        return version;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
-        return result;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
     public void setResourceType(Integer resourceType) {
         this.resourceType = resourceType;
-    }
-
-    public void setVersion(Long version) {
-        this.version = version;
     }
 
 }

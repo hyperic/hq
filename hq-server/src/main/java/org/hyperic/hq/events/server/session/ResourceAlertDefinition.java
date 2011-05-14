@@ -7,31 +7,25 @@ import java.util.Collections;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
-import javax.persistence.Version;
+import javax.persistence.PrimaryKeyJoinColumn;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-import org.hibernate.annotations.Parameter;
 import org.hyperic.hq.appdef.shared.AppdefConverter;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 
-@Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
+@PrimaryKeyJoinColumn(name = "DEF_ID", referencedColumnName = "ID")
 @Entity
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class ResourceAlertDefinition
@@ -42,7 +36,7 @@ public class ResourceAlertDefinition
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     private Collection<Action> actionsBag = new ArrayList<Action>();
 
-    @OneToOne(mappedBy = "alertDefinition",cascade=CascadeType.ALL)
+    @OneToOne(mappedBy = "alertDefinition", cascade = CascadeType.ALL)
     private AlertDefinitionState alertDefinitionState;
 
     @OneToMany(cascade = CascadeType.ALL)
@@ -50,13 +44,6 @@ public class ResourceAlertDefinition
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     @OrderBy("id")
     private Collection<AlertCondition> conditionsBag = new ArrayList<AlertCondition>();
-
-    @Id
-    @GeneratedValue(generator = "combo")
-    @GenericGenerator(name = "combo", parameters = { @Parameter(name = "sequence", value = "EAM_RES_ALERT_DEFINITION_ID_SEQ") }, 
-        strategy = "org.hyperic.hibernate.id.ComboGenerator")
-    @Column(name = "ID", nullable = false)
-    private Integer id;
 
     @Column(name = "RESOURCE_ID")
     @Index(name = "ALERT_DEF_RES_ID_IDX")
@@ -69,10 +56,6 @@ public class ResourceAlertDefinition
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Collection<RegisteredTrigger> triggersBag = new ArrayList<RegisteredTrigger>();
-
-    @Column(name = "VERSION_COL")
-    @Version
-    private Long version;
 
     void addTrigger(RegisteredTrigger t) {
         triggersBag.add(t);
@@ -88,23 +71,6 @@ public class ResourceAlertDefinition
         triggersBag.clear();
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        ResourceAlertDefinition other = (ResourceAlertDefinition) obj;
-        if (id == null) {
-            if (other.id != null)
-                return false;
-        } else if (!id.equals(other.id))
-            return false;
-        return true;
-    }
-
     Collection<Action> getActionsBag() {
         return actionsBag;
     }
@@ -115,7 +81,8 @@ public class ResourceAlertDefinition
 
     public AlertDefinitionValue getAlertDefinitionValue() {
         AlertDefinitionValue value = super.getAlertDefinitionValue();
-        AppdefEntityID appdefId = Bootstrap.getBean(AppdefConverter.class).newAppdefEntityId(resource);
+        AppdefEntityID appdefId = Bootstrap.getBean(AppdefConverter.class).newAppdefEntityId(
+            resource);
         value.setAppdefId(appdefId.getId());
         value.setAppdefType(appdefId.getType());
         value.removeAllTriggers();
@@ -123,7 +90,7 @@ public class ResourceAlertDefinition
             value.addTrigger(t.getRegisteredTriggerValue());
         }
         value.cleanTrigger();
-        if(resourceTypeAlertDefinition != null) {
+        if (resourceTypeAlertDefinition != null) {
             value.setParentId(resourceTypeAlertDefinition.getId());
         }
         return value;
@@ -131,10 +98,6 @@ public class ResourceAlertDefinition
 
     public Collection<AlertCondition> getConditionsBag() {
         return conditionsBag;
-    }
-
-    public Integer getId() {
-        return id;
     }
 
     /**
@@ -160,18 +123,6 @@ public class ResourceAlertDefinition
         return triggersBag;
     }
 
-    public Long getVersion() {
-        return version;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
-        return result;
-    }
-
     void removeTrigger(RegisteredTrigger t) {
         triggersBag.remove(t);
     }
@@ -188,10 +139,6 @@ public class ResourceAlertDefinition
         conditionsBag = conditions;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
     void setLastFired(long lastFired) {
         getAlertDefinitionState().setLastFired(lastFired);
     }
@@ -206,10 +153,6 @@ public class ResourceAlertDefinition
 
     void setTriggersBag(Collection<RegisteredTrigger> triggers) {
         triggersBag = triggers;
-    }
-
-    public void setVersion(Long version) {
-        this.version = version;
     }
 
 }

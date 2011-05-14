@@ -90,6 +90,7 @@ import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
+import org.hyperic.hq.events.server.session.ResourceAlertDefinition;
 import org.hyperic.hq.events.server.session.ResourceTypeAlertDefinition;
 import org.hyperic.hq.events.server.session.TriggersCreatedZevent;
 import org.hyperic.hq.events.shared.ActionManager;
@@ -422,8 +423,9 @@ public class EventsBossImpl implements EventsBoss {
         AlertDefinition ad = alertDefinitionManager.getByIdAndCheck(subject, adid);
         alertdefs.add(ad);
 
-        // TODO children for ResourceType alerts?
-        //alertdefs.addAll(ad.getChildren());
+        if(ad instanceof ResourceTypeAlertDefinition) {
+            alertdefs.addAll(((ResourceTypeAlertDefinition)ad).getResourceAlertDefs());
+        }
 
         Action root = null;
 

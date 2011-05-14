@@ -75,8 +75,8 @@ public final class ClassicEscalationAlertType
     
     protected void setEscalation(Integer defId, Escalation escalation) {
         EscalationManager escMan = Bootstrap.getBean(EscalationManager.class);
-        //TODO need to get Resource alert defs too
-        AlertDefinition def = getDefMan().getTypeDefByIdNoCheck(defId);
+        
+        AlertDefinition def = getDefMan().getByIdNoCheck(defId);
         // End any escalation we were previously doing.
         escMan.endEscalation(def);
             
@@ -84,16 +84,14 @@ public final class ClassicEscalationAlertType
         long mtime = System.currentTimeMillis();
         def.setMtime(mtime);
 
-        //TODO children?
-        //Collection children = def.getChildren();
-//        for (Iterator it = children.iterator(); it.hasNext(); ) {
-//            def = (AlertDefinition) it.next();
-//            // End any escalation we were previously doing.
-//            escMan.endEscalation(def);
-//                
-//            def.setEscalation(escalation);
-//            def.setMtime(mtime);
-//        }
+        if(def instanceof ResourceTypeAlertDefinition) {
+        for (ResourceAlertDefinition child: ((ResourceTypeAlertDefinition) def).getResourceAlertDefs() ) {
+            // End any escalation we were previously doing.
+            escMan.endEscalation(child);
+            def.setEscalation(escalation);
+            def.setMtime(mtime);
+        }
+        }
     }
 
     protected void changeAlertState(Escalatable esc, AuthzSubject who,

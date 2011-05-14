@@ -50,32 +50,6 @@ public class ResourceAlertDefinitionRepositoryIntegrationTest {
     }
 
     @Test
-    public void testFindByEscalation() {
-        Escalation escalation = new Escalation("Escalation1", "Important", true, 1l, true, true);
-        entityManager.persist(escalation);
-        int resource2 = 555;
-        ResourceAlertDefinition alertdef2 = new ResourceAlertDefinition();
-        alertdef2.setName("High Heap");
-        alertdef2.setResource(resource1);
-        alertdef2.setEscalation(escalation);
-        resourceAlertDefinitionRepository.save(alertdef2);
-        ResourceAlertDefinition alertdef = new ResourceAlertDefinition();
-        alertdef.setName("High CPU");
-        alertdef.setResource(resource1);
-        alertdef.setResourceTypeAlertDefinition(parentdef);
-        resourceAlertDefinitionRepository.save(alertdef);
-        ResourceAlertDefinition alertdef3 = new ResourceAlertDefinition();
-        alertdef3.setName("High CPU");
-        alertdef3.setResource(resource2);
-        alertdef3.setEscalation(escalation);
-        resourceAlertDefinitionRepository.save(alertdef3);
-        List<ResourceAlertDefinition> expected = new ArrayList<ResourceAlertDefinition>();
-        expected.add(alertdef2);
-        expected.add(alertdef3);
-        assertEquals(expected, resourceAlertDefinitionRepository.findByEscalation(escalation));
-    }
-
-    @Test
     public void testFindByResource() {
         int resource2 = 555;
         ResourceAlertDefinition alertdef2 = new ResourceAlertDefinition();
@@ -118,17 +92,6 @@ public class ResourceAlertDefinitionRepositoryIntegrationTest {
     public void testFindByResourceAndResourceTypeAlertDefinitionNotFound() {
         assertNull(resourceAlertDefinitionRepository.findByResourceAndResourceTypeAlertDefinition(
             resource1, parentdef.getId()));
-    }
-
-    @Test
-    public void testIsEnabled() {
-        ResourceAlertDefinition alertdef2 = new ResourceAlertDefinition();
-        alertdef2.setName("High Heap");
-        alertdef2.setResource(resource1);
-        alertdef2.setActiveStatus(true);
-        alertdef2.setEnabledStatus(true);
-        resourceAlertDefinitionRepository.save(alertdef2);
-        assertTrue(resourceAlertDefinitionRepository.isEnabled(alertdef2.getId()));
     }
 
     @Test

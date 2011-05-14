@@ -14,14 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 public interface ResourceAlertDefinitionRepository extends
     JpaRepository<ResourceAlertDefinition, Integer>, ResourceAlertDefinitionRepositoryCustom {
 
-    List<ResourceAlertDefinition> findByEscalation(Escalation escalation);
-
     List<ResourceAlertDefinition> findByResource(Integer resource, Sort sort);
 
     ResourceAlertDefinition findByResourceAndResourceTypeAlertDefinition(Integer resource,
                                                                          Integer typeAlertDefId);
-
-    @Transactional(readOnly = true)
-    @Query("select d.enabled from ResourceAlertDefinition d where d.id = :alertDefId")
-    boolean isEnabled(@Param("alertDefId") Integer alertDefId);
 }

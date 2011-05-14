@@ -22,10 +22,20 @@ import java.util.Collection;
 import java.util.Collections;
 
 import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.MappedSuperclass;
+import javax.persistence.Table;
+import javax.persistence.Version;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
 import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
@@ -35,11 +45,12 @@ import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
-import org.hyperic.hq.events.shared.AlertValue;
 import org.hyperic.hq.measurement.MeasurementConstants;
 
-
-@MappedSuperclass
+@Entity
+@Table(name = "EAM_ALERT_DEFINITION")
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@Inheritance(strategy = InheritanceType.JOINED)
 abstract public class AlertDefinition implements AlertDefinitionInterface, PerformsEscalations,
     ContainerManagedTimestampTrackable, Serializable {
 
@@ -71,6 +82,12 @@ abstract public class AlertDefinition implements AlertDefinitionInterface, Perfo
     @Column(name = "FREQUENCY_TYPE", nullable = false)
     private int frequencyType;
 
+    @Id
+    @GeneratedValue(generator = "combo")
+    @GenericGenerator(name = "combo", parameters = { @Parameter(name = "sequence", value = "EAM_ALERT_DEFINITION_ID_SEQ") }, strategy = "org.hyperic.hibernate.id.ComboGenerator")
+    @Column(name = "ID", nullable = false)
+    private Integer id;
+
     @Column(name = "MTIME", nullable = false)
     private long mtime;
 
@@ -85,6 +102,10 @@ abstract public class AlertDefinition implements AlertDefinitionInterface, Perfo
 
     @Column(name = "TRANGE")
     private Long range;
+
+    @Column(name = "VERSION_COL")
+    @Version
+    private Long version;
 
     @Column(name = "WILL_RECOVER", nullable = false)
     private boolean willRecover;
@@ -139,15 +160,27 @@ abstract public class AlertDefinition implements AlertDefinitionInterface, Perfo
         return res;
     }
 
-    Alert createAlert(AlertValue val) {
-        Alert res = new Alert(this, val);
-        return res;
-    }
-
     AlertCondition createCondition(AlertConditionValue condVal, RegisteredTrigger trigger) {
         AlertCondition res = new AlertCondition(condVal, trigger);
         getConditionsBag().add(res);
         return res;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        AlertDefinition other = (AlertDefinition) obj;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        return true;
     }
 
     public Collection<Action> getActions() {
@@ -228,6 +261,10 @@ abstract public class AlertDefinition implements AlertDefinitionInterface, Perfo
         return frequencyType;
     }
 
+    public Integer getId() {
+        return id;
+    }
+
     public long getMtime() {
         return mtime;
     }
@@ -249,6 +286,18 @@ abstract public class AlertDefinition implements AlertDefinitionInterface, Perfo
      */
     public AlertSeverity getSeverity() {
         return AlertSeverity.findByCode(getPriority());
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        return result;
     }
 
     /**
@@ -274,9 +323,9 @@ abstract public class AlertDefinition implements AlertDefinitionInterface, Perfo
 
         // ignore multi-conditional alert definitions
         if (getConditions().size() == 1) {
-            for ( AlertCondition cond : getConditions()) {
-                if (cond != null
-                    && MeasurementConstants.CAT_AVAILABILITY.equalsIgnoreCase(cond.getName())) {
+            for (AlertCondition cond : getConditions()) {
+                if (cond != null &&
+                    MeasurementConstants.CAT_AVAILABILITY.equalsIgnoreCase(cond.getName())) {
                     if ("=".equals(cond.getComparator())) {
                         if (up) {
                             if (cond.getThreshold() == MeasurementConstants.AVAIL_UP) {
@@ -303,16 +352,16 @@ abstract public class AlertDefinition implements AlertDefinitionInterface, Perfo
                         }
                     } else if ("<".equals(cond.getComparator())) {
                         if (!up) {
-                            if (cond.getThreshold() <= MeasurementConstants.AVAIL_UP
-                                && cond.getThreshold() > MeasurementConstants.AVAIL_DOWN) {
+                            if (cond.getThreshold() <= MeasurementConstants.AVAIL_UP &&
+                                cond.getThreshold() > MeasurementConstants.AVAIL_DOWN) {
                                 isAvail = true;
                                 break;
                             }
                         }
                     } else if (">".equals(cond.getComparator())) {
                         if (up) {
-                            if (cond.getThreshold() >= MeasurementConstants.AVAIL_DOWN
-                                && cond.getThreshold() < MeasurementConstants.AVAIL_UP) {
+                            if (cond.getThreshold() >= MeasurementConstants.AVAIL_DOWN &&
+                                cond.getThreshold() < MeasurementConstants.AVAIL_UP) {
                                 isAvail = true;
                                 break;
                             }
@@ -448,6 +497,10 @@ abstract public class AlertDefinition implements AlertDefinitionInterface, Perfo
         this.frequencyType = frequencyType;
     }
 
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
     void setMtime(long mtime) {
         this.mtime = mtime;
     }
@@ -468,6 +521,10 @@ abstract public class AlertDefinition implements AlertDefinitionInterface, Perfo
         this.range = range;
     }
 
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
     void setWillRecover(boolean willRecover) {
         this.willRecover = willRecover;
     }
@@ -475,10 +532,8 @@ abstract public class AlertDefinition implements AlertDefinitionInterface, Perfo
     public String toString() {
         return "alertDef [" + this.getName() + "]";
     }
-    
+
     public boolean willRecover() {
         return willRecover;
     }
-
-
 }

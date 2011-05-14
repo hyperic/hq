@@ -117,15 +117,14 @@ public class Alert implements AlertInterface, Serializable {
     public Alert() {
     }
 
-    protected Alert(AlertDefinition def, AlertValue val) {
+    protected Alert(ResourceAlertDefinition def, AlertValue val) {
         val.cleanConditionLog();
         val.cleanActionLog();
 
         // Now just set the entire value object
         setAlertValue(val);
 
-        // TODO
-        setAlertDefinition((ResourceAlertDefinition) def);
+        setAlertDefinition(def);
     }
 
     private void addActionLog(AlertActionLog aal) {
@@ -290,8 +289,7 @@ public class Alert implements AlertInterface, Serializable {
         AlertConditionLogRepository aclDao = Bootstrap.getBean(AlertConditionLogRepository.class);
 
         setFixed(false);
-        // TODO
-        setAlertDefinition((ResourceAlertDefinition) def);
+        setAlertDefinition( def);
         setCtime(val.getCtime());
 
         for (Iterator<AlertConditionLogValue> i = val.getAddedConditionLogs().iterator(); i

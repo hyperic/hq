@@ -278,6 +278,51 @@
 			</column>
 		</createTable>
 	</changeSet>
+	<changeSet author="hqdb" id="createAlertDefTable">
+		<createTable tableName="EAM_ALERT_DEFINITION">
+			<column name="ID" type="INT">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="ACTIVE" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="CONTROL_FILTERED" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="COUNTER" type="BIGINT" />
+			<column name="CTIME" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="DELETED" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="DESCRIPTION" type="VARCHAR(250)" />
+			<column name="ENABLED" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="FREQUENCY_TYPE" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="MTIME" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="NAME" type="VARCHAR(255)">
+				<constraints nullable="false" />
+			</column>
+			<column name="NOTIFY_FILTERED" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="PRIORITY" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="TRANGE" type="BIGINT" />
+			<column name="VERSION_COL" type="BIGINT" />
+			<column name="WILL_RECOVER" type="BIT">
+				<constraints nullable="false" />
+			</column>
+			<column name="ESCALATION_ID" type="INT" />
+		</createTable>
+	</changeSet>
 	<changeSet author="hqdb" id="createAuditTable">
 		<createTable tableName="EAM_AUDIT">
 			<column defaultValue="" name="KLAZZ" type="VARCHAR(255)">
@@ -1324,7 +1369,8 @@
 				<constraints nullable="false" />
 			</column>
 		</createTable>
-		<createIndex indexName="ROLE_NAME" tableName="EAM_ROLE" unique="true">
+		<createIndex indexName="ROLE_NAME" tableName="EAM_ROLE"
+			unique="true">
 			<column name="NAME" />
 		</createIndex>
 	</changeSet>
@@ -2215,106 +2261,31 @@
 	</changeSet>
 	<changeSet author="hqdb" id="createResAlertDefTable">
 		<createTable tableName="ResourceAlertDefinition">
-			<column name="ID" type="INT">
-				<constraints nullable="false" primaryKey="true" />
-			</column>
-			<column name="ACTIVE" type="BIT">
-				<constraints nullable="false" />
-			</column>
-			<column name="CONTROL_FILTERED" type="BIT">
-				<constraints nullable="false" />
-			</column>
-			<column name="COUNTER" type="BIGINT" />
-			<column name="CTIME" type="BIGINT">
-				<constraints nullable="false" />
-			</column>
-			<column name="DELETED" type="BIT">
-				<constraints nullable="false" />
-			</column>
-			<column name="DESCRIPTION" type="VARCHAR(250)" />
-			<column name="ENABLED" type="BIT">
-				<constraints nullable="false" />
-			</column>
-			<column name="FREQUENCY_TYPE" type="INT">
-				<constraints nullable="false" />
-			</column>
-			<column name="MTIME" type="BIGINT">
-				<constraints nullable="false" />
-			</column>
-			<column defaultValue="" name="NAME" type="VARCHAR(255)">
-				<constraints nullable="false" />
-			</column>
-			<column name="NOTIFY_FILTERED" type="BIT">
-				<constraints nullable="false" />
-			</column>
-			<column name="PRIORITY" type="INT">
-				<constraints nullable="false" />
-			</column>
-			<column name="TRANGE" type="BIGINT" />
-			<column name="WILL_RECOVER" type="BIT">
-				<constraints nullable="false" />
-			</column>
 			<column name="RESOURCE_ID" type="INT" />
-			<column name="VERSION_COL" type="BIGINT" />
-			<column name="ESCALATION_ID" type="INT" />
 			<column name="resourceTypeAlertDefinition_ID" type="INT" />
+			<column name="DEF_ID" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="resourceTypeAlertDefinition_DEF_ID" type="INT" />
 		</createTable>
 		<createIndex indexName="ALERT_DEF_RES_ID_IDX" tableName="ResourceAlertDefinition"
 			unique="false">
 			<column name="RESOURCE_ID" />
 		</createIndex>
+		<addPrimaryKey columnNames="DEF_ID" tableName="ResourceAlertDefinition" />
 	</changeSet>
 	<changeSet author="hqdb" id="createResTypeAlertDefTable">
 		<createTable tableName="ResourceTypeAlertDefinition">
-			<column name="ID" type="INT">
-				<constraints nullable="false" primaryKey="true" />
-			</column>
-			<column name="ACTIVE" type="BIT">
-				<constraints nullable="false" />
-			</column>
-			<column name="CONTROL_FILTERED" type="BIT">
-				<constraints nullable="false" />
-			</column>
-			<column name="COUNTER" type="BIGINT" />
-			<column name="CTIME" type="BIGINT">
-				<constraints nullable="false" />
-			</column>
-			<column name="DELETED" type="BIT">
-				<constraints nullable="false" />
-			</column>
-			<column name="DESCRIPTION" type="VARCHAR(250)" />
-			<column name="ENABLED" type="BIT">
-				<constraints nullable="false" />
-			</column>
-			<column name="FREQUENCY_TYPE" type="INT">
-				<constraints nullable="false" />
-			</column>
-			<column name="MTIME" type="BIGINT">
-				<constraints nullable="false" />
-			</column>
-			<column defaultValue="" name="NAME" type="VARCHAR(255)">
-				<constraints nullable="false" />
-			</column>
-			<column name="NOTIFY_FILTERED" type="BIT">
-				<constraints nullable="false" />
-			</column>
-			<column name="PRIORITY" type="INT">
-				<constraints nullable="false" />
-			</column>
-			<column name="TRANGE" type="BIGINT" />
-			<column name="WILL_RECOVER" type="BIT">
-				<constraints nullable="false" />
-			</column>
 			<column name="resourceType" type="INT" />
-			<column name="VERSION_COL" type="BIGINT">
+			<column name="DEF_ID" type="INT">
 				<constraints nullable="false" />
 			</column>
-			<column name="ESCALATION_ID" type="INT" />
 		</createTable>
 		<createIndex indexName="ALERT_DEF_RES_TYPE_ID_IDX"
 			tableName="ResourceTypeAlertDefinition" unique="false">
 			<column name="resourceType" />
 		</createIndex>
+		<addPrimaryKey columnNames="DEF_ID" tableName="ResourceTypeAlertDefinition" />
 	</changeSet>
 	<changeSet author="hqdb" id="createActionParentFK">
 		<addForeignKeyConstraint baseColumnNames="PARENT_ID"
@@ -2342,13 +2313,6 @@
 			baseTableName="EAM_AIQ_SERVER" constraintName="FK60C6C4E71BFF8500"
 			deferrable="false" initiallyDeferred="false" onDelete="CASCADE"
 			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_AIQ_PLATFORM"
-			referencesUniqueColumn="false" />
-	</changeSet>
-	<changeSet author="hqdb" id="createAlertDefFK">
-		<addForeignKeyConstraint baseColumnNames="ALERT_DEFINITION_ID"
-			baseTableName="EAM_ALERT" constraintName="FKE5B216AEB5626424"
-			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
-			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="ResourceAlertDefinition"
 			referencesUniqueColumn="false" />
 	</changeSet>
 	<changeSet author="hqdb" id="createAlertActionLogActionFK">
@@ -2391,13 +2355,6 @@
 			baseTableName="EAM_ALERT_CONDITION_LOG" constraintName="FKD1647E0F2EAA2A9F"
 			deferrable="false" initiallyDeferred="false" onDelete="CASCADE"
 			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_ALERT_CONDITION"
-			referencesUniqueColumn="false" />
-	</changeSet>
-	<changeSet author="hqdb" id="createAlertDefStateFK">
-		<addForeignKeyConstraint baseColumnNames="ALERT_DEFINITION_ID"
-			baseTableName="EAM_ALERT_DEF_STATE" constraintName="FKF0E90746B5626424"
-			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
-			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="ResourceAlertDefinition"
 			referencesUniqueColumn="false" />
 	</changeSet>
 	<changeSet author="hqdb" id="createAuditParentFK">
@@ -2639,13 +2596,6 @@
 			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_MEASUREMENT"
 			referencesUniqueColumn="false" />
 	</changeSet>
-	<changeSet author="hqdb" id="createRegTriggerAlertDefFK">
-		<addForeignKeyConstraint baseColumnNames="ALERT_DEFINITION_ID"
-			baseTableName="EAM_REGISTERED_TRIGGER" constraintName="FK4A8354A9B5626424"
-			deferrable="false" initiallyDeferred="false" onDelete="CASCADE"
-			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="ResourceAlertDefinition"
-			referencesUniqueColumn="false" />
-	</changeSet>
 	<changeSet author="hqdb" id="createResourceAuxLogFK">
 		<addForeignKeyConstraint baseColumnNames="AUX_LOG_ID"
 			baseTableName="EAM_RESOURCE_AUX_LOGS" constraintName="FK859D15ED997CFC6"
@@ -2828,20 +2778,6 @@
 			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_ACTION"
 			referencesUniqueColumn="false" />
 	</changeSet>
-	<changeSet author="hqdb" id="createResourceAlertDefAlertDefFK">
-		<addForeignKeyConstraint baseColumnNames="ALERTDEF_ID"
-			baseTableName="RESOURCE_ALERTDEF_ACTIONS" constraintName="FK1563EBD8331E8A31"
-			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
-			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="ResourceAlertDefinition"
-			referencesUniqueColumn="false" />
-	</changeSet>
-	<changeSet author="hqdb" id="createResourceAlertDefCondsFK">
-		<addForeignKeyConstraint baseColumnNames="ALERTDEF_ID"
-			baseTableName="RESOURCE_ALERTDEF_CONDS" constraintName="FKAB2CD72C331E8A31"
-			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
-			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="ResourceAlertDefinition"
-			referencesUniqueColumn="false" />
-	</changeSet>
 	<changeSet author="hqdb" id="createResourceAlertDefCondsCondFK">
 		<addForeignKeyConstraint baseColumnNames="COND_ID"
 			baseTableName="RESOURCE_ALERTDEF_CONDS" constraintName="FKAB2CD72CAF08D738"
@@ -2856,22 +2792,6 @@
 			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_ACTION"
 			referencesUniqueColumn="false" />
 	</changeSet>
-	<changeSet author="hqdb" id="createResTypeAlertDefActionDefFK">
-		<addForeignKeyConstraint baseColumnNames="ALERTDEF_ID"
-			baseTableName="RESOURCE_TYPE_ALERTDEF_ACTIONS" constraintName="FKEC4AACBB484A7717"
-			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
-			onUpdate="NO ACTION" referencedColumnNames="ID"
-			referencedTableName="ResourceTypeAlertDefinition"
-			referencesUniqueColumn="false" />
-	</changeSet>
-	<changeSet author="hqdb" id="createResTypeAlertDefCondsFK">
-		<addForeignKeyConstraint baseColumnNames="ALERTDEF_ID"
-			baseTableName="RESOURCE_TYPE_ALERTDEF_CONDS" constraintName="FKB98474CF484A7717"
-			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
-			onUpdate="NO ACTION" referencedColumnNames="ID"
-			referencedTableName="ResourceTypeAlertDefinition"
-			referencesUniqueColumn="false" />
-	</changeSet>
 	<changeSet author="hqdb" id="createResTypeAlertDefCondCondsFK">
 		<addForeignKeyConstraint baseColumnNames="COND_ID"
 			baseTableName="RESOURCE_TYPE_ALERTDEF_CONDS" constraintName="FKB98474CFAF08D738"
@@ -2879,26 +2799,84 @@
 			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_ALERT_CONDITION"
 			referencesUniqueColumn="false" />
 	</changeSet>
-	<changeSet author="hqdb" id="createResAlertDefEscalationFK">
+	<changeSet author="hqdb" id="createAlertResAlertDefFK">
+		<addForeignKeyConstraint baseColumnNames="ALERT_DEFINITION_ID"
+			baseTableName="EAM_ALERT" constraintName="FKE5B216AEB5626424"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="DEF_ID"
+			referencedTableName="ResourceAlertDefinition" referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createAlertDefStateFK">
+		<addForeignKeyConstraint baseColumnNames="ALERT_DEFINITION_ID"
+			baseTableName="EAM_ALERT_DEF_STATE" constraintName="FKF0E90746B5626424"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="DEF_ID"
+			referencedTableName="ResourceAlertDefinition" referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createAlertDefEscalationFK">
 		<addForeignKeyConstraint baseColumnNames="ESCALATION_ID"
-			baseTableName="ResourceAlertDefinition" constraintName="FKF9AB05C15029EFD7"
+			baseTableName="EAM_ALERT_DEFINITION" constraintName="FK975407845029EFD7"
 			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_ESCALATION"
 			referencesUniqueColumn="false" />
 	</changeSet>
-	<changeSet author="hqdb" id="createResAlertDefTypeDefFK">
-		<addForeignKeyConstraint baseColumnNames="resourceTypeAlertDefinition_ID"
-			baseTableName="ResourceAlertDefinition" constraintName="FKF9AB05C173D42D19"
+	<changeSet author="hqdb" id="createResAlertDefTriggerFK">
+		<addForeignKeyConstraint baseColumnNames="ALERT_DEFINITION_ID"
+			baseTableName="EAM_REGISTERED_TRIGGER" constraintName="FK4A8354A9B5626424"
+			deferrable="false" initiallyDeferred="false" onDelete="CASCADE"
+			onUpdate="NO ACTION" referencedColumnNames="DEF_ID"
+			referencedTableName="ResourceAlertDefinition" referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createResAlertDefActionFK">
+		<addForeignKeyConstraint baseColumnNames="ALERTDEF_ID"
+			baseTableName="RESOURCE_ALERTDEF_ACTIONS" constraintName="FK1563EBD8331E8A31"
 			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
-			onUpdate="NO ACTION" referencedColumnNames="ID"
+			onUpdate="NO ACTION" referencedColumnNames="DEF_ID"
+			referencedTableName="ResourceAlertDefinition" referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createResAlertDefCondFK">
+		<addForeignKeyConstraint baseColumnNames="ALERTDEF_ID"
+			baseTableName="RESOURCE_ALERTDEF_CONDS" constraintName="FKAB2CD72C331E8A31"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="DEF_ID"
+			referencedTableName="ResourceAlertDefinition" referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createActionResTypeAlertDefFK">
+		<addForeignKeyConstraint baseColumnNames="ALERTDEF_ID"
+			baseTableName="RESOURCE_TYPE_ALERTDEF_ACTIONS" constraintName="FKEC4AACBB484A7717"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="DEF_ID"
 			referencedTableName="ResourceTypeAlertDefinition"
 			referencesUniqueColumn="false" />
 	</changeSet>
-	<changeSet author="hqdb" id="createResTypeAlertDefEscalationFK">
-		<addForeignKeyConstraint baseColumnNames="ESCALATION_ID"
-			baseTableName="ResourceTypeAlertDefinition" constraintName="FKD0174A275029EFD7"
+	<changeSet author="hqdb" id="createResTypeAlertDefCondFK">
+		<addForeignKeyConstraint baseColumnNames="ALERTDEF_ID"
+			baseTableName="RESOURCE_TYPE_ALERTDEF_CONDS" constraintName="FKB98474CF484A7717"
 			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
-			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_ESCALATION"
+			onUpdate="NO ACTION" referencedColumnNames="DEF_ID"
+			referencedTableName="ResourceTypeAlertDefinition"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createResAlertDefFK">
+		<addForeignKeyConstraint baseColumnNames="DEF_ID"
+			baseTableName="ResourceAlertDefinition" constraintName="FKF9AB05C12FAEC3"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_ALERT_DEFINITION"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createResAlertTypeDefFK">
+		<addForeignKeyConstraint baseColumnNames="resourceTypeAlertDefinition_DEF_ID"
+			baseTableName="ResourceAlertDefinition" constraintName="FKF9AB05C19DE3A793"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="DEF_ID"
+			referencedTableName="ResourceTypeAlertDefinition"
+			referencesUniqueColumn="false" />
+	</changeSet>
+	<changeSet author="hqdb" id="createResTypeAlertDefFK">
+		<addForeignKeyConstraint baseColumnNames="DEF_ID"
+			baseTableName="ResourceTypeAlertDefinition" constraintName="FKD0174A272FAEC3"
+			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_ALERT_DEFINITION"
 			referencesUniqueColumn="false" />
 	</changeSet>
 </databaseChangeLog>
