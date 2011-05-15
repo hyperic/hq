@@ -628,6 +628,7 @@ ${errMsg}
     <echo>^^^INFO: Creating server configuration files...</echo>
     <property name="conf-dir" value="${server.product.dir}/conf"/>
     <antcall target="copy-license"/>
+  	<crypto value="${server.admin.password}" property="server.admin.password.encrypted" />
     <antcall target="generate-hq-server-conf"/>
 
     <property name="tomcat.home"
@@ -765,9 +766,5 @@ ${errMsg}
       <property name="tomcat.home" value="${tomcat.home}"/>
     </ant>
   </target>
-	
-	<target name="subst-props">
-	    <substProps src="${conf-dir}/hq-server.conf"/>
-	  </target>
 
 </project>

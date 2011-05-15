@@ -85,6 +85,7 @@
 				<prop key="server.mail.sender">hqadmin@localhost</prop>
 				<prop key="server.multicast.addr"></prop>
 				<prop key="server.multicast.port"></prop>
+				<prop key="server.admin.password">XfLzwfNQujo/CxxaYX3OCg==</prop>
 			</props>
 		</property>
 	</bean>

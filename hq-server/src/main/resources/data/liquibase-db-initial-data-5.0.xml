@@ -20,7 +20,7 @@
 
 	<changeSet author="hqdb" id="insertHqadminUser">
 		<sql>INSERT INTO EAM_PRINCIPAL (PASSWORD,PRINCIPAL,id,VERSION_COL)
-			VALUES ('XfLzwfNQujo/CxxaYX3OCg==','hqadmin','1',0)</sql>
+			VALUES ('${server.admin.password}','hqadmin','1',0)</sql>
 		<sql>INSERT INTO EAM_SUBJECT
 			(DSN,EMAIL_ADDRESS,FACTIVE,FIRST_NAME,FSYSTEM,HTML_EMAIL,ID,LAST_NAME,NAME,VERSION_COL)
 			VALUES
