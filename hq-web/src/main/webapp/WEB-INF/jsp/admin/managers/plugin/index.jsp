@@ -176,6 +176,7 @@
 </div>
 <div id="agentSummaryPanel" style="visibility:hidden;">
 	<div>
+	<img id="summaryLoadingIcon" src="<spring:url value="/static/images/ajax-loader-blue.gif"/>" alt="loading"/>
 	<ul id="agentSummaryList"></ul>
 	</div>
 	<a href="#" class="cancelLink"><fmt:message key="admin.managers.plugin.button.close" /></a>
@@ -340,6 +341,7 @@
 		}
 		
 		function seeAgentSummary(){
+			hqDojo.style("summaryLoadingIcon","display","block");
 			hqDijit.byId("agentSummaryPanelDialog").show();
 		
 			var agentUl = hqDojo.byId("agentSummaryList");
@@ -353,12 +355,14 @@
 							});			
 							agentUl.appendChild(li);
 						});
+						hqDojo.style("summaryLoadingIcon","display","none");
 					},
 					handleAs: "json",
 					headers: { 
      	               	"Content-Type": "application/json",
     	            	"Accept": "application/json"
         	        }	
+        	        
 			};
 			hqDojo.xhrGet(xhrArgs);
 		}
