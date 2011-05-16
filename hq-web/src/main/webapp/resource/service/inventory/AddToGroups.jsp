@@ -30,19 +30,20 @@
   USA.
  --%>
 
-<script src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	<script src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
+	<script  src="<html:rewrite page="/js/addRemoveWidget.js"/>" type="text/javascript"></script>
+</c:set>
 <link rel=stylesheet href="<html:rewrite page="/css/win.css"/>" type="text/css">
 <%-- end vit: delete this block --%>
-
-<script  src="<html:rewrite page="/js/addRemoveWidget.js"/>" type="text/javascript"></script>
 <c:set var="widgetInstanceName" value="editService"/>
-
-<script type="text/javascript">
-var pageData = new Array();
-initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-</script>
-
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	var pageData = new Array();
+	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+</c:set>
 <form>
 
 <!--  SELECT & ADD -->

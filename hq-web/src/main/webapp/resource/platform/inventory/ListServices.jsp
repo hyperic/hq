@@ -100,13 +100,15 @@
 </c:url>
 
 <c:url var="fsAction" value="${selfAction}"/>
-
-<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
-<script type="text/javascript">
-initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-<c:out value="wp"/> = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-</script>
-
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+</c:set>
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+	<c:out value="wp"/> = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+</c:set>
 <html:form action="/resource/platform/inventory/RemoveServices">
 <input type="hidden" name="rid" value="<c:out value="${Resource.id}"/>"/>
 <input type="hidden" name="type" value="1"/>

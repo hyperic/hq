@@ -42,7 +42,9 @@
 	</tiles:insert>
 
   	<!-- JSON available at /dashboard/ViewResourceHealth.do -->
-	<script type="text/javascript">
+	<c:set var="jsScript" scope="request">
+		${jsScript}
+		
 		function requestFavoriteResources() {
 			hqDojo.xhrGet({
 				url: "<html:rewrite action="/dashboard/ViewResourceHealth"/>",
@@ -58,7 +60,7 @@
 		hqDojo.ready(function() {
 			requestFavoriteResources();
 		});
-	</script>
+	</c:set>
 
  	<table width="100%" border="0" cellspacing="0" cellpadding="0" id="favoriteTable" class="portletLRBorder">
  		<tbody>

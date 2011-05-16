@@ -4,13 +4,15 @@
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 
-<script type="text/javascript">
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	<script src="<html:rewrite page="/js/pageLayout.js"/>" type="text/javascript"></script>
+</c:set>
+<c:set var="jsScript" scope="request">
+	${jsScript}
 	var noDelete = true;
-</script>
-<script src="<html:rewrite page="/js/pageLayout.js"/>" type="text/javascript"></script>
-<script type="text/javascript">
 	var imagePath = "/images/";
-</script>
+</c:set>
 
 <!--  GENERAL PROPERTIES TITLE -->
 <tiles:insert definition=".header.tab">

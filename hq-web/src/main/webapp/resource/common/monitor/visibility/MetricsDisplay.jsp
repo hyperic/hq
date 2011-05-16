@@ -42,13 +42,16 @@
 <tiles:importAttribute name="useConfigure" ignore="true"/>
 <tiles:importAttribute name="useCheckboxes" ignore="true"/>
 <tiles:importAttribute name="favorites" ignore="true"/>
-
-<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+</c:set>
 <c:set var="mdsWidget" value="metricsDisplaySummary"/>
-<script type="text/javascript">
-initializeWidgetProperties('<c:out value="${mdsWidget}"/>');
-mdsWidgetProps = getWidgetProperties('<c:out value="${mdsWidget}"/>');
-</script>
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	initializeWidgetProperties('<c:out value="${mdsWidget}"/>');
+	mdsWidgetProps = getWidgetProperties('<c:out value="${mdsWidget}"/>');
+</c:set>
 <hq:constant 
     classname="org.hyperic.hq.measurement.MeasurementConstants" 
     symbol="CAT_AVAILABILITY" var="availability" />
@@ -116,28 +119,27 @@ sometimes we don't want any left side buttons or checkboxes at all
         </td>
 <c:if test="${useCurrent && not MetricsDisplayForm.readOnly}">
         <td align="right" nowrap>
-        <script type="text/javascript">
-        <!--
-          var metricsUpdater;
-          hqDojo.ready( function() {
-            var ctype = null;
-            <c:if test="${not empty childResourceType}">
-              ctype = '<c:out value="${ctype}"/>';
-            </c:if>
-            
-            // arguments: eid, ctype, localized messages
-            // XXX TODO FIXME: messages should not be passed around, should be using dojo i18n lib instead.
-            metricsUpdater = new hyperic.MetricsUpdater('<c:out value="${eid}"/>',ctype,{
-              '0' : '<fmt:message key="OFF"/>',
-              '60' : '<fmt:message key="resource.common.monitor.visibility.MetricRefresh.60"/>',
-              '120' : '<fmt:message key="resource.common.monitor.visibility.MetricRefresh.120"/>',
-              '300' : '<fmt:message key="resource.common.monitor.visibility.MetricRefresh.300"/>',
-              'LastUpdated': '<fmt:message key="resource.common.monitor.visibility.LastUpdated"/>'
-            });
-            metricsUpdater.update();
-          });
-          -->
-        </script>
+        <c:set var="jsScript" scope="request">
+			${jsScript}
+	          var metricsUpdater;
+	          hqDojo.ready( function() {
+	            var ctype = null;
+	            <c:if test="${not empty childResourceType}">
+	              ctype = '<c:out value="${ctype}"/>';
+	            </c:if>
+	            
+	            // arguments: eid, ctype, localized messages
+	            // XXX TODO FIXME: messages should not be passed around, should be using dojo i18n lib instead.
+	            metricsUpdater = new hyperic.MetricsUpdater('<c:out value="${eid}"/>',ctype,{
+	              '0' : '<fmt:message key="OFF"/>',
+	              '60' : '<fmt:message key="resource.common.monitor.visibility.MetricRefresh.60"/>',
+	              '120' : '<fmt:message key="resource.common.monitor.visibility.MetricRefresh.120"/>',
+	              '300' : '<fmt:message key="resource.common.monitor.visibility.MetricRefresh.300"/>',
+	              'LastUpdated': '<fmt:message key="resource.common.monitor.visibility.LastUpdated"/>'
+	            });
+	            metricsUpdater.update();
+	          });
+	   	</c:set>
         <span id="CurrentValuesLabel">
           <fmt:message key="resource.common.monitor.visibility.MetricRefreshLabel"/>
         </span>
@@ -357,7 +359,8 @@ sometimes we don't want any left side buttons or checkboxes at all
 </table>
 
 <c:if test="${useCheckboxes}">
-<script type="text/javascript">
-  clearIfAnyChecked('m');
-</script>
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	clearIfAnyChecked('m');
+</c:set>
 </c:if>

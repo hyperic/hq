@@ -36,7 +36,10 @@
 <tiles:importAttribute name="showOptions" ignore="true"/>
 
 <c:if test="${showProblems}">
-  <script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+	<c:set var="jsIncludes" scope="request">
+		${jsIncludes}
+  		<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+  	</c:set>
 </c:if>
 
 <hq:constant

@@ -30,8 +30,10 @@
   USA.
  --%>
 
-<script src="<html:rewrite page="/js/control_ControlActionProperties.js"/>" type="text/javascript"></script>
-
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	<script src="<html:rewrite page="/js/control_ControlActionProperties.js"/>" type="text/javascript"></script>
+</c:set>
 <!--  GENERAL PROPERTIES TITLE -->
 <tiles:insert definition=".header.tab">
   <tiles:put name="tabKey" value="resource.group.Control.Properties.Tab"/>
@@ -103,6 +105,7 @@
 </table>
 </div>
 <!--  /  -->
-<script  type="text/javascript">
-  document.getElementById("configFile").style.display = "none";
-</script>
+<c:set var="jsScript" scope="request">
+	${jsScript}
+  	document.getElementById("configFile").style.display = "none";
+</c:set>

@@ -33,13 +33,12 @@
   USA.
  --%>
 
-
-<script type="text/javascript">
+<c:set var="jsScript" scope="request">
+	${jsScript}
     // Overwrite highlight/unhighlight functions
     function highlight(e) {}
     function unhighlight(e) {}
-</script>
-
+</c:set>
 <!-- MINI-CHARTS -->
 <tiles:useAttribute id="list" name="Resources" classname="java.util.List"/>
 

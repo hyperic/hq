@@ -75,7 +75,8 @@
 	</form>
 </div>
 
-<script type="text/javascript">
+<c:set var="jsScript" scope="request">
+	${jsScript}
 	hqDojo.require("dijit.dijit");
     hqDojo.require("dijit.Dialog");
 
@@ -94,4 +95,4 @@
         	return false; 
         };
     }
-</script>
+</c:set>

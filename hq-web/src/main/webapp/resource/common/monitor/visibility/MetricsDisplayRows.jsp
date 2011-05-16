@@ -31,9 +31,10 @@
   USA.
  --%>
 
-
-<script src="<html:rewrite page="/js/effects.js"/>"	type="text/javascript"></script>
-
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	<script src="<html:rewrite page="/js/effects.js"/>"	type="text/javascript"></script>
+</c:set>
 <tiles:importAttribute name="rows" />
 <tiles:importAttribute name="useChart" />
 <tiles:importAttribute name="category" />

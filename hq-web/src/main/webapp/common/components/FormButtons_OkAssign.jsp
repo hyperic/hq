@@ -38,16 +38,17 @@
 <tiles:importAttribute name="okAssignBtn" ignore="true"/>
 <tiles:importAttribute name="okAssignOnly" ignore="true"/>
 
-<script  type="text/javascript">
-  var isButtonClicked = false;
+<c:set var="jsScript" scope="request">
+	${jsScript}
+  	var isButtonClicked = false;
 
-  function checkSubmit() {
-    if (isButtonClicked) {
-      alert('<fmt:message key="error.PreviousRequestEtc"/>');
-      return false;
-    }
-  }  
-</script>
+  	function checkSubmit() {
+    	if (isButtonClicked) {
+      		alert('<fmt:message key="error.PreviousRequestEtc"/>');
+      		return false;
+    	}
+  	}  
+</c:set>
 
 <!-- FORM BUTTONS -->
 <table width="100%" cellpadding="0" cellspacing="0" border="0" class="buttonTable">

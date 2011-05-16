@@ -32,19 +32,23 @@
   USA.
  --%>
 
-
-<script  src="<html:rewrite page="/js/addRemoveWidget.js"/>" type="text/javascript">
-</script>
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	
+	<script  src="<html:rewrite page="/js/addRemoveWidget.js"/>" type="text/javascript"></script>
+</c:set>
 
 <tiles:importAttribute name="noFilter" ignore="true"/>
 
 <c:set var="widgetInstanceName" value="addResources"/>
 
-<script type="text/javascript">
-var pageData = new Array();
-initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-</script>
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	
+	var pageData = new Array();
+	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+</c:set>
 
 <c:url var="selfAction" value="/Admin.do" context="/dashboard">
   <c:param name="mode" value="${param.mode}"/>

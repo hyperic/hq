@@ -51,8 +51,10 @@
 </c:otherwise>
 </c:choose>
 
-<script type="text/javascript">
-hqDojo.ready(function(){
-    hqDojo.byId("SubTabTarget").innerHTML = hqDojo.byId("SubTabSource").innerHTML;
-});
-</script>
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	
+	hqDojo.ready(function(){
+    	hqDojo.byId("SubTabTarget").innerHTML = hqDojo.byId("SubTabSource").innerHTML;
+	});
+</c:set>

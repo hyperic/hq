@@ -100,14 +100,15 @@
     <c:param name="scs" value="${param.scs}"/>
   </c:if>
 </c:url>
-
-
-
-<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
-<script type="text/javascript">
-initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-widgetPropertiesListServices = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-</script>
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+</c:set>
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+	widgetPropertiesListServices = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+</c:set>
 
 <html:form action="/resource/application/inventory/RemoveServices">
 <html:hidden property="rid" value="${Resource.id}"/>

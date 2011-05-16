@@ -30,15 +30,17 @@
   USA.
  --%>
 
-
-<script  src=<html:rewrite page="/js/addRemoveWidget.js"/> type="text/javascript"></script>
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	<script  src=<html:rewrite page="/js/addRemoveWidget.js"/> type="text/javascript"></script>
+</c:set>
 <c:set var="widgetInstanceName" value="dependenciesAddRemove"/>
-
-<script type="text/javascript">
-var pageData = new Array();
-initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-</script>
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	var pageData = new Array();
+	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+</c:set>
 
 <form>
 

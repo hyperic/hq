@@ -41,9 +41,10 @@
 	<c:param name="type" value="${param.type}"/>
 </c:url>
 <c:set var="formName" value="PlatformAutoDiscoveryForm"/>
-
-<script src="<html:rewrite page="/js/checkAll.js"/>" type="text/javascript"></script>
-
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	<script src="<html:rewrite page="/js/checkAll.js"/>" type="text/javascript"></script>
+</c:set>
 <!--  GENERAL PROPERTIES TITLE -->
 
 <tiles:insert definition=".header.tab">

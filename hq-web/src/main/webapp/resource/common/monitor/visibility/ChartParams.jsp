@@ -129,8 +129,7 @@
       page="/images/spacer.gif" width="1" height="1" border="0"/></td>
   </tr>
 </table>
-<script  type="text/javascript">
-<!--
+<c:set var="jsScript" scope="request">
+	${jsScript}
 	document.forms["ViewChartForm"].elements["showValuesCB"].focus();
-// -->
-</script>
+</c:set>

@@ -34,10 +34,10 @@
   <c:set var="form" value="${MetricDisplayRangeForm}"/>
 </c:if>
 
-<script type="text/javascript">
-var pageData = new Array();
-</script>
-
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	var pageData = new Array();
+</c:set>
 <html:form action="/resource/common/monitor/visibility/MetricDisplayRange">
 
 <tiles:insert definition=".page.title.resource.generic">

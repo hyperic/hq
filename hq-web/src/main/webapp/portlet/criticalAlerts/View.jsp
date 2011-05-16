@@ -38,9 +38,13 @@
 	<html:param name="mode" value="viewAlert"/>
 	<html:param name="eid" value="{eid}"/>
 </html:link>
-<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
-
-<script type="text/javascript">
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	<script src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+</c:set>
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	
 	var pageData = new Array();
 	var _hqu_<c:out value="${widgetInstanceName}${portlet.token}"/>_refreshTimeout;
 	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
@@ -78,7 +82,7 @@
 	
 		_hqu_<c:out value="${widgetInstanceName}${portlet.token}"/>_autoRefresh();
 	});
-</script>
+</c:set>
 <c:set var="rssUrl" value="/rss/ViewCriticalAlerts.rss"/>
 <div class="effectsPortlet">
 	<!-- Content Block  -->
@@ -155,10 +159,12 @@
           		</tr>
       		</tfoot>
   		</table>
-  		<script type="text/javascript">
+  		<c:set var="jsScript" scope="request">
+  			${jsScript}
+  			
   			if (hqDojo.byId("HQAlertCenterDialog") == null) {
   				document.write('<div id="HQAlertCenterDialog" style="display:none;"></div>');
   			}
-  		</script>
+  		</c:set>
   	</html:form>
 </div>

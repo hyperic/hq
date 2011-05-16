@@ -37,14 +37,18 @@
 <hq:constant symbol="NUM_APPSVC_DEPENDEES_ATTR" var="DependeePageSize" />
 <hq:constant symbol="NUM_APPSVC_DEPENDERS_ATTR" var="DependerPageSize" />
 <c:set var="widgetInstanceName" value="listServices"/>
-<script type="text/javascript">
-var pageData = new Array();
-</script>
-<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
-<script type="text/javascript">
-initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-widgetPropertiesListServices = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-</script>
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+</c:set>
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	
+	var pageData = new Array();
+	
+	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+	widgetPropertiesListServices = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+</c:set>
 <c:url var="selfAction" value="/resource/application/Inventory.do">
 	<c:param name="mode" value="listServiceDependencies"/>
 	<c:param name="appSvcId" value="${appSvcCurrent.id}"/>

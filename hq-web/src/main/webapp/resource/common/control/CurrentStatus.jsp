@@ -80,8 +80,9 @@
    </c:url>
    <c:set var="statusMsg"><c:out value="${statusMsg}"/>&nbsp;<html:link href="${detailsLink}"><fmt:message key="resource.group.ControlStatus.Link.Details"/></html:link></c:set>
   </c:if>
-  <script type="text/javascript" language="JavaScript1.2">
-<!--
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	
     hyperic.updateControlStatus = function (){
       setTimeout( "hyperic.updateControlStatus()", 5000 );
 
@@ -124,8 +125,7 @@
     hqDojo.ready( function() {
         hyperic.updateControlStatus();
     });
-  -->
-  </script>
+  </c:set>
  </c:when>
  <c:when test="${controlStatus eq 'Failed'}">
   <c:set var="statusImage" value="/images/status_error.gif"/>

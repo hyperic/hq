@@ -47,10 +47,11 @@
 <c:if test="${checkboxes}">
 	<c:set var="widgetInstanceName" value="hostResources"/>
 
-  	<script type="text/javascript">
+  	<c:set var="jsScript" scope="request">
+		${jsScript}
     	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
     	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-  	</script>
+  	</c:set>
 </c:if>
 
 <c:forEach var="summary" items="${summaries}" varStatus="status">

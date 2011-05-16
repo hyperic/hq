@@ -34,12 +34,11 @@
   USA.
  --%>
 
-<script src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
-
-<script src="<html:rewrite page="/js/serviceInventory_ConfigProperties.js"/>" type="text/javascript"></script>
-<script type="text/javascript">
-
-</script>
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	<script src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
+	<script src="<html:rewrite page="/js/serviceInventory_ConfigProperties.js"/>" type="text/javascript"></script>
+</c:set>
 
 <hq:constant
     classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 

@@ -49,9 +49,10 @@
 <tiles:insert definition=".header.tab">
   <tiles:put name="tabKey" value="alert.config.props.Syslog.Title"/>
 </tiles:insert>
-
-<script  src="<html:rewrite page='/js/alertConfigFunctions.js'/>" type="text/javascript"></script>
-
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	<script  src="<html:rewrite page='/js/alertConfigFunctions.js'/>" type="text/javascript"></script>
+</c:set>
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr valign="top">
     <td width="20%" class="BlockLabel">

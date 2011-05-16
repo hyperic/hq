@@ -31,7 +31,9 @@
  --%>
 
 <tiles:insert page="/admin/config/AdminHomeNav.jsp"/>
-<script type="text/Javascript">
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	
     function changeHighlight(elem) {
            elem.previousSibling.style.display = "";
            elem.parentNode.style.backgroundColor = "#dbe3f5";
@@ -42,7 +44,7 @@
     function hideCreateButton() {
         hqDojo.byId('createButton').style.display = "none";
     }
-</script>
+</c:set>
 <table width="100%" cellpadding="0" cellspacing="10">
 <tr>
 <td width="30%" valign="top" id="escalationsList">
@@ -82,7 +84,9 @@
 </c:if>
 </span>
 
-<script langugage="text/Javascript">
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	
 function showEscRows(originalRequest) {
   var escJson = eval( '( { "escalations": ' + originalRequest.responseText + ' })' );
 
@@ -166,7 +170,7 @@ function showEscRows(originalRequest) {
   hqDojo.ready(initEscalationSchemes);
 
   var reloadScheme = true;
-</script>
+</c:set>
 
 
 <br/>

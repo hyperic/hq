@@ -92,8 +92,10 @@
     <fmt:message var="resourceTypeTitle" key="resource.hub.filter.service" />
   </c:when>
 </c:choose>
-
-<script src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	<script src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
+</c:set>
 <link rel=stylesheet href="<html:rewrite page="/css/win.css"/>" type="text/css">
 <c:choose>
   <c:when test="${Resource.entityId.type == platformType}">

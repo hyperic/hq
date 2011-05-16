@@ -114,9 +114,10 @@
   --%>
 <tiles:importAttribute name="showIntervalControls" ignore="true"/>
 
-<script type="text/javascript">
+<c:set var="jsScript" scope="request">
+  ${jsScript}
   var goButtonLink;
-</script>
+</c:set>
 
 <c:if test="${not empty addToListParamName && not empty addToListParamValue}">
 	<c:url var="addToListUrl" value="${addToListUrl}">

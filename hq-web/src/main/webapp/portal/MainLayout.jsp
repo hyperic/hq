@@ -44,7 +44,9 @@
 				</c:if>
 			</fmt:message>
 		</title>
-		<script type="text/javascript">
+		<c:set var="jsScript" scope="request">
+			${jsScript}
+			
         	var onloads = [];
 
             function initOnloads() {
@@ -61,7 +63,7 @@
 	        hqDojo.ready(function() {
             	initOnloads();
             });
-	    </script>
+	    </c:set>
 	</head>
 	<body style="background-color: #FFFFFF;" class="tundra" debug="true">
 		<tiles:insert attribute="header" />

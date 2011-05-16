@@ -32,7 +32,9 @@
   USA.
  --%>
 
-<script type="text/javascript">
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	
     function getUpdateStatus(opt) {
         if (opt == "<fmt:message key="header.Acknowledge"/>") {
         	var postData = { update: true};
@@ -46,7 +48,6 @@
         		}
        		});
         }
-      
     }
     
     var resourceURL = '<html:rewrite action="/Resource" />';
@@ -64,7 +65,6 @@
         refreshAlerts();
     });
     
-    <!--
     var refreshCount = 0;
                                                                                   
 	function refreshAlerts() {
@@ -102,9 +102,7 @@
 			 }		 
 		}
     }
-    
-    //-->
-      </script>
+</c:set>
     <div id="header">
     <div id="headerLogo" title="Home" onclick="location.href='<html:rewrite action="/Dashboard" />'">&nbsp;</div>
     <div id="navTabContainer">
@@ -141,7 +139,9 @@
         	<a href="<html:rewrite page="/Admin.do" />"><fmt:message key="header.admin"/></a>
         </div>
     </div>
-    <script type="text/javascript">
+    <c:set var="jsScript" scope="request">
+    	${jsScript}
+    	
 	    hqDojo.ready(function() {
 	    	var menu = hqDojo.byId("navTabContainer");
 	    	
@@ -157,7 +157,7 @@
 	    		hqDojo.removeClass(e.currentTarget, "over")
 	    	});
 	    });
-    </script>
+    </c:set>
     <div class="ajaxLoading" style="display:none;" id="loading">
         <html:img page="/images/4.0/icons/ajax-loader.gif" border="0" width="16" height="16"/>
     </div>
@@ -180,7 +180,9 @@
  	 		</div>
  	 	</form>
  	</div>
-	<script type="text/javascript">
+	<c:set var="jsScript" scope="request">
+		${jsScript}
+		
 		hqDojo.require("dijit.dijit");
  	 	hqDojo.require("dijit.Dialog");
  	 		
@@ -195,7 +197,7 @@
  	 		title: "<fmt:message key="header.dialog.title.update" />"
  			}, hqDojo.byId('update'));
  	 	});
- 	</script>
+ 	</c:set>
  	<a id="updateLink" href="javascript:updateDialog.show()">
  		<img src="<html:rewrite page="/images/transmit2.gif" />" align="absMiddle" border="0" />                        
  	</a>

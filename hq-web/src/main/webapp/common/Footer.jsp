@@ -27,9 +27,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-<script src="<html:rewrite page="/js/effects.js"/>" type="text/javascript"></script>
-<script src="<html:rewrite page="/js/footer.js"/>" type="text/javascript"></script>
-
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
 	<tr>
 		<td class="FooterBold" nowrap="nowrap" style="padding-left: 30px;" width="20%"><tiles:insert definition=".footer.current.time" /></td>
@@ -75,7 +72,12 @@
   </table>
 </div>
 
-<script type="text/javascript">
+${jsIncludes}
+<script src="<html:rewrite page="/js/effects.js"/>" type="text/javascript"></script>
+<script src="<html:rewrite page="/js/footer.js"/>" type="text/javascript"></script>
+<script>
+	${jsScript}
+	
 	hqDojo.require("dijit.dijit");
   	hqDojo.require("dijit.Dialog");
 

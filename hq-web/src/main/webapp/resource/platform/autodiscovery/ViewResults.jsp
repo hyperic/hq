@@ -30,10 +30,10 @@
  --%>
 
 
-<script type="text/javascript">
-var pageData = new Array();
-</script>
-
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	var pageData = new Array();
+</c:set>
 <c:set var="name" value="${AIPlatform.name}"/>
 <c:if test="${not empty Resource}">
     <c:set var="name" value="${Resource.name}"/>

@@ -37,14 +37,17 @@
 <c:if test="${empty TheControlForm}">
  <c:set var="TheControlForm" value="${requestScope[\"org.apache.struts.taglib.html.BEAN\"]}"/>
 </c:if>
-<script src="<html:rewrite page="/js/schedule.js"/>" type="text/javascript"></script>
-<script  type="text/javascript">
- var imagePath = "/images/";
- var jsPath = "/js/";
- var cssPath = "/css/";
- 
- var isMonitorSchedule = false;
-</script>
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	<script src="<html:rewrite page="/js/schedule.js"/>" type="text/javascript"></script>
+</c:set>
+<c:set var="jsScript" scope="request">
+	${jsScript}
+ 	var imagePath = "/images/";
+ 	var jsPath = "/js/";
+ 	var cssPath = "/css/";
+ 	var isMonitorSchedule = false;
+</c:set>
 
 <!--  SCHEDULE TITLE -->
 <tiles:insert definition=".header.tab">
@@ -158,11 +161,13 @@
 						</html:select>
 						/
 						<html:select property="startYear" styleId="startYear" onchange="turnOnRecurrence(true); toggleRadio('startTime', 1);">
-							<script  type="text/javascript">
+							<c:set var="jsScript" scope="request">
+								${jsScript}
+								
 								for (i=0; i<SEL_NUMYEARS; i++) {
 									document.writeln("<option value=\"" + yearArr[i] + "\">" + yearArr[i] + "</option>");
 								}
-							</script>
+							</c:set>
 						</html:select>
 					</td>
 					<td><html:link href="#" onclick="cal('startMonth', 'startDay', 'startYear'); return false;"><html:img page="/images/schedule_iconCal.gif" width="19" height="17" hspace="5" border="0"/></html:link></td>
@@ -395,11 +400,13 @@
 									</html:select>
 									/
 									<html:select property="endYear" styleId="endYear" onchange="toggleRadio('endTime', 1);">
-									<script  type="text/javascript">
+									<c:set var="jsScript" scope="request">
+										${jsScript}
+										
 										for (i=0; i<SEL_NUMYEARS; i++) {
 											document.writeln("<option value=\"" + yearArr[i] + "\">" + yearArr[i] + "</option>");
 										}
-									</script>
+									</c:set>
 									</html:select>
 								</td>
 								<td><html:link href="#" onclick="cal('endMonth', 'endDay', 'endYear'); return false;"><html:img page="/images/schedule_iconCal.gif" width="19" height="17"  hspace="5" border="0"/></html:link></td>
@@ -423,21 +430,22 @@
 </table>
 <!--  /  -->
 
-<script  type="text/javascript">
-<c:choose>
- <c:when test="${param.mode eq 'edit'}">
- init(<c:out escapeXml="false" value="${TheControlForm.startMonth}"/>, <c:out escapeXml="false" value="${TheControlForm.startDay}"/>, <c:out escapeXml="false" value="${TheControlForm.startYear}"/>, <c:out escapeXml="false" value="${TheControlForm.endMonth}"/>, <c:out escapeXml="false" value="${TheControlForm.endDay}"/>, <c:out escapeXml="false" value="${TheControlForm.endYear}"/>, <c:out escapeXml="false" value="\"${TheControlForm.recurInterval}\""/>);
- </c:when>
- <c:otherwise>
- <%-- an error occurred, for a 'new' mode. still init the select boxes. --%>
- <logic:messagesPresent> 
-  init(<c:out escapeXml="false" value="${TheControlForm.startMonth}"/>, <c:out escapeXml="false" value="${TheControlForm.startDay}"/>, <c:out escapeXml="false" value="${TheControlForm.startYear}"/>, <c:out escapeXml="false" value="${TheControlForm.endMonth}"/>, <c:out escapeXml="false" value="${TheControlForm.endDay}"/>, <c:out escapeXml="false" value="${TheControlForm.endYear}"/>, <c:out escapeXml="false" value="\"${TheControlForm.recurInterval}\""/>);
- </logic:messagesPresent>
- <logic:messagesNotPresent> 
-  init();
- </logic:messagesNotPresent>
- </c:otherwise>
-</c:choose>
-  toggleRecurrence("startTime");
-</script>
-
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	
+	<c:choose>
+ 		<c:when test="${param.mode eq 'edit'}">
+ 			init(<c:out escapeXml="false" value="${TheControlForm.startMonth}"/>, <c:out escapeXml="false" value="${TheControlForm.startDay}"/>, <c:out escapeXml="false" value="${TheControlForm.startYear}"/>, <c:out escapeXml="false" value="${TheControlForm.endMonth}"/>, <c:out escapeXml="false" value="${TheControlForm.endDay}"/>, <c:out escapeXml="false" value="${TheControlForm.endYear}"/>, <c:out escapeXml="false" value="\"${TheControlForm.recurInterval}\""/>);
+ 		</c:when>
+ 		<c:otherwise>
+ 			<%-- an error occurred, for a 'new' mode. still init the select boxes. --%>
+ 			<logic:messagesPresent> 
+  				init(<c:out escapeXml="false" value="${TheControlForm.startMonth}"/>, <c:out escapeXml="false" value="${TheControlForm.startDay}"/>, <c:out escapeXml="false" value="${TheControlForm.startYear}"/>, <c:out escapeXml="false" value="${TheControlForm.endMonth}"/>, <c:out escapeXml="false" value="${TheControlForm.endDay}"/>, <c:out escapeXml="false" value="${TheControlForm.endYear}"/>, <c:out escapeXml="false" value="\"${TheControlForm.recurInterval}\""/>);
+ 			</logic:messagesPresent>
+ 			<logic:messagesNotPresent> 
+  				init();
+ 			</logic:messagesNotPresent>
+ 		</c:otherwise>
+	</c:choose>
+  	toggleRecurrence("startTime");
+</c:set>

@@ -55,14 +55,16 @@
 	<c:param name="rid" value="${Resource.id}"/>
 	<c:param name="type" value="${Resource.entityId.type}"/>
 </c:url>
-
-<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
-<script  type="text/javascript">
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+</c:set>
+<c:set var="jsScript" scope="request">
+	${jsScript}
   var pageData = new Array();
   initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
   widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-</script>
-
+</c:set>
 <c:set var="entityId" value="${Resource.entityId}"/>
 <tiles:insert definition=".page.title.resource.group">
   <tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />

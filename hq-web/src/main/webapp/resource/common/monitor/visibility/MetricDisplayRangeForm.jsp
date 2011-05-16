@@ -58,16 +58,17 @@
     <c:set var="endYear" value="${MetricDisplayRangeForm.endYear}"/>
   </c:otherwise>
 </c:choose>
-
-<script src="<html:rewrite page="/js/schedule.js"/>" type="text/javascript"></script>
-<script src="<html:rewrite page="/js/monitorSchedule.js"/>" type="text/javascript"></script>
-<script  type="text/javascript">
- var jsPath = "<html:rewrite page="/js/"/>";
- var cssPath = "<html:rewrite page="/css/"/>";
- 
- var isMonitorSchedule = true;
-</script>
-
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	<script src="<html:rewrite page="/js/schedule.js"/>" type="text/javascript"></script>
+	<script src="<html:rewrite page="/js/monitorSchedule.js"/>" type="text/javascript"></script>
+</c:set>
+<c:set var="jsScript" scope="request">
+	${jsScript}
+ 	var jsPath = "<html:rewrite page="/js/"/>";
+ 	var cssPath = "<html:rewrite page="/css/"/>";
+ 	var isMonitorSchedule = true;
+</c:set>
 <tiles:insert definition=".portlet.error"/>
 
 <table border="0" cellspacing="0" cellpadding="0">

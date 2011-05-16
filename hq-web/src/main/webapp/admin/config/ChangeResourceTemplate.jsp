@@ -31,19 +31,21 @@
  --%>
 
 <tiles:insert page="/admin/config/AdminHomeNav.jsp"/>
- <script  type="text/javascript">
-     function onMouseRow(el) {
-             el.style.background="#a6c2e7";
-         }
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	
+	function onMouseRow(el) {
+    	el.style.background="#a6c2e7";
+    }
 
-         function offMouseRowEven(el) {
-             el.style.background="#F2F4F7";
-         }
+    function offMouseRowEven(el) {
+    	el.style.background="#F2F4F7";
+    }
 
-         function offMouseRowOdd(el) {
-             el.style.background="#EBEDF2";
-         }
-</script>
+    function offMouseRowOdd(el) {
+        el.style.background="#EBEDF2";
+    }
+</c:set>
 
 <table width="100%" cellpadding="0" cellspacing="0" border="0" id="listTable">
 <!-- PLATFORM CONTENTS -->

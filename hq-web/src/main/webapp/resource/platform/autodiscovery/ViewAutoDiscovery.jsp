@@ -29,12 +29,14 @@
   USA.
  --%>
 
-
-<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
-<script type="text/javascript">
-var pageData = new Array();
-</script>
-
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+</c:set>
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	var pageData = new Array();
+</c:set>
 <c:set var="entityId" value="${Resource.entityId}"/>
 <c:set var="selfAction" value="/resource/platform/AutoDiscovery.do?mode=view&rid=${Resource.id}&type=${entityId.type}"/>
 

@@ -104,8 +104,12 @@
 						</div>
 					</div>
 				</div>
-				<script src="<html:rewrite page="/js/addtodashboard.js" />"></script>
-				<script type="text/javascript">
+				<c:set var="jsIncludes" scope="request">
+					${jsIncludes}
+					<script src="<html:rewrite page="/js/addtodashboard.js" />"></script>
+				</c:set>
+				<c:set var="jsScript" scope="request">
+					${jsScript}
 				    hqDojo.ready(function() {
 					    var config = {
 					    	title : "<fmt:message key='resource.common.quickFavorites.addToMultipleDashboards' />",
@@ -123,7 +127,7 @@
 					    
 					    AddToDashboard.initDialog(config);
 					});
-				</script>
+				</c:set>
     		</c:otherwise>
     	</c:choose>
   	</c:otherwise> 

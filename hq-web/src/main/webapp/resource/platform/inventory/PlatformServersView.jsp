@@ -36,11 +36,11 @@
 <tiles:importAttribute name="selfAction"/>
 
 <c:set var="widgetInstanceName" value="listPlatformServers"/>
-<script type="text/javascript">
-initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-serversWidgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-</script>
-
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+	serversWidgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+</c:set>
 <c:url var="listNewUrl" value="/resource/server/Inventory.do">
 	<c:param name="mode" value="new"/>
 	<c:param name="rid" value="${platform.id}"/>

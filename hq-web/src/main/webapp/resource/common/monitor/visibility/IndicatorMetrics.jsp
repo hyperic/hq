@@ -168,20 +168,21 @@
 		</c:forEach>
 
 		<c:if test="${count > 7}">
-			<div id="metricsDiv" class="scrollable"><script
-				type="text/javascript">
-      function setMetricsHeight() {
-        var metricsDiv = hqDojo.byId('metricsDiv');
-        var bottom = overlay.findPosY(hqDojo.byId('timetop'));
-        var top = overlay.findPosY(metricsDiv);
-
-        metricsDiv.style.height = (bottom - top) + 'px';
-      }
-
-      hqDojo.ready(function() {
-    	  setMetricsHeight();
-      });
-    </script>
+			<div id="metricsDiv" class="scrollable">
+				<c:set var="jsScript" scope="request">
+					${jsScript}
+				      function setMetricsHeight() {
+				        var metricsDiv = hqDojo.byId('metricsDiv');
+				        var bottom = overlay.findPosY(hqDojo.byId('timetop'));
+				        var top = overlay.findPosY(metricsDiv);
+				
+				        metricsDiv.style.height = (bottom - top) + 'px';
+				      }
+				
+				      hqDojo.ready(function() {
+				    	  setMetricsHeight();
+				      });
+				</c:set>
 		</c:if>
 
 		<table width="100%" border="0" cellpadding="1" cellspacing="0">

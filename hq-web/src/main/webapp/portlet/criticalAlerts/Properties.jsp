@@ -42,37 +42,39 @@
     	<c:param name="token" value="${param.token}"/>
   	</c:if>
 </c:url>
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	
+	<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+</c:set>
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	var pageData = new Array();
+	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');  
+	var help = '<hq:help/>';
 
-<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
-<script type="text/javascript">
-var pageData = new Array();
-initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');  
-var help = '<hq:help/>';
-</script>
-<script type="text/javascript">
-/***********************************************/
-/* Disable "Enter" key in Form script- By Nurul Fadilah(nurul@REMOVETHISvolmedia.com)
-/* This notice must stay intact for use
-/* Visit http://www.dynamicdrive.com/ for full source code
-/***********************************************/
-
-function handleEnter (field, event) {
-		var keyCode = event.keyCode ? event.keyCode : event.which ? event.which : event.charCode;
-		if (keyCode == 13) {
-			var i;
-			for (i = 0; i < field.form.elements.length; i++)
-				if (field == field.form.elements[i])
-					break;
-			//i = (i + 1) % field.form.elements.length;
-			//field.form.elements[i].focus();
-			return false;
+	/***********************************************/
+	/* Disable "Enter" key in Form script- By Nurul Fadilah(nurul@REMOVETHISvolmedia.com)
+	/* This notice must stay intact for use
+	/* Visit http://www.dynamicdrive.com/ for full source code
+	/***********************************************/
+	
+	function handleEnter (field, event) {
+			var keyCode = event.keyCode ? event.keyCode : event.which ? event.which : event.charCode;
+			if (keyCode == 13) {
+				var i;
+				for (i = 0; i < field.form.elements.length; i++)
+					if (field == field.form.elements[i])
+						break;
+				//i = (i + 1) % field.form.elements.length;
+				//field.form.elements[i].focus();
+				return false;
+			}
+			else
+			return true;
 		}
-		else
-		return true;
-	}
-
-</script>
+</c:set>
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr class="PageTitle"> 
     <td rowspan="99"><html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/></td>

@@ -37,7 +37,9 @@
 	<html:param name="ff" value="{ff}"/> 
 </html:link>
 
-<script type="text/javascript">
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	
 	function requestAvailSummary${portlet.token}() {
 		hqDojo.xhrGet({
 			url: "<html:rewrite action="/dashboard/ViewAvailSummary" />",
@@ -54,7 +56,7 @@
 	hqDojo.ready(function() {
 		requestAvailSummary${portlet.token}();
 	});
-</script>
+</c:set>
 
 <div class="effectsPortlet">
 	<tiles:insert definition=".header.tab">

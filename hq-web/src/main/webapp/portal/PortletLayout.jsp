@@ -34,92 +34,95 @@
 <link rel="shortcut icon" href="<html:rewrite page="/images/4.0/icons/favicon.ico"/>"/>
 <link rel="stylesheet" href="<html:rewrite page="/css/win.css"/>" type="text/css"/>
 <link rel="stylesheet" href="<html:rewrite page="/css/HQ_40.css"/>" type="text/css"/>
-
-<script type="text/javascript">
-djConfig.parseOnLoad = true;
-djConfig.baseUrl = '/static/js/dojo/1.5/dojo/';
-</script>
-<script src="<html:rewrite page='/static/js/dojo/1.5/dojo/dojo.js'/>" type="text/javascript"></script>
-<script type="text/javascript">
-    var imagePath = "/images/";
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	<script type="text/javascript">
+		djConfig.parseOnLoad = true;
+		djConfig.baseUrl = '/static/js/dojo/1.5/dojo/';
+	</script>
+	<script src="<html:rewrite page='/static/js/dojo/1.5/dojo/dojo.js'/>" type="text/javascript"></script>
+	<script src="<html:rewrite page='/js/prototype.js'/>" type="text/javascript"></script>
+	<script src="<html:rewrite page='/js/popup.js'/>" type="text/javascript"></script>
+	<script src="<html:rewrite page='/js/requests.js'/>" type="text/javascript"></script>
+	<script src="<html:rewrite page='/js/diagram.js'/>" type="text/javascript"></script>
+	<script src="<html:rewrite page='/js/functions.js'/>" type="text/javascript"></script>
+	<script src="<html:rewrite page='/js/lib/lib.js'/>" type="text/javascript"></script>
+	<script src="<html:rewrite page='/js/lib/charts.js'/>" type="text/javascript"></script>
+</c:set>
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	
+	var imagePath = "/images/";
     hqDojo.require('dojo.date');
-</script>
-<script src="<html:rewrite page='/js/prototype.js'/>" type="text/javascript"></script>
-<script src="<html:rewrite page='/js/popup.js'/>" type="text/javascript"></script>
-<script src="<html:rewrite page='/js/requests.js'/>" type="text/javascript"></script>
-<script src="<html:rewrite page='/js/diagram.js'/>" type="text/javascript"></script>
-<script src="<html:rewrite page='/js/functions.js'/>" type="text/javascript"></script>
-<script src="<html:rewrite page='/js/lib/lib.js'/>" type="text/javascript"></script>
-<script src="<html:rewrite page='/js/lib/charts.js'/>" type="text/javascript"></script>
-<script type="text/javascript">
-var onloads = [];
-	function initOnloads() {
-    	if (arguments.callee.done) return;
-        
-        arguments.callee.done = true;
-        
-        if(typeof(_timer)!="undefined") clearInterval(_timer);
-        
-        for ( var i = 0 ; i < onloads.length ; i++ )
-        	onloads[i]();
-    };
-
-	function refreshPortlets() {
 	
-	    var problemPortlet = hqDojo.byId('problemResourcesTable');
-	    var favoritePortlet = hqDojo.byId('favoriteTable');
+	var onloads = [];
+		function initOnloads() {
+	    	if (arguments.callee.done) return;
+	        
+	        arguments.callee.done = true;
+	        
+	        if(typeof(_timer)!="undefined") clearInterval(_timer);
+	        
+	        for ( var i = 0 ; i < onloads.length ; i++ )
+	        	onloads[i]();
+	};
 	
-	    var nodes = document.getElementsByTagName('table');
-	    var getRecentForm = document.getElementsByTagName('form')
-	
-	    for (i = 0; i < nodes.length; i++) {
-	        if (/metricTable/.test(nodes[i].id)) {
-	            //alert('in metric table')
-	            var metricTblId = nodes[i].id;
-	            var getId = metricTblId.split('_');
-	            var metricIdPart = getId[1];
-	
-	            if (metricIdPart) {
-	                var metricIdToken = '_' + metricIdPart;
-	
-	                setInterval("requestMetricsResponse" + metricIdToken + "()", 30000);
-	            } else {
-	                setInterval("requestMetricsResponse()", 30000);
-	            }
-	        }
-	    }
-	
-	
-	    for (i = 0; i < nodes.length; i++) {
-	        if (/availTable/.test(nodes[i].id)) {
-	            // alert('in avail table')
-	            var availTblId = nodes[i].id;
-	            var getId = availTblId.split('_');
-	            var availIdPart = getId[1];
-	
-	            if (availIdPart) {
-	                var availIdToken = '_' + availIdPart;
-	
-	                setInterval("requestAvailSummary" + availIdToken + "()", 30000);
-	            } else {
-	                setInterval("requestAvailSummary()", 30000);
-	            }
-	        }
-	    }
-	
-	    if (problemPortlet) {
-	        setInterval("requestProblemResponse()", 30000);
-	    }
-	
-	    if (favoritePortlet) {
-	        setInterval("requestFavoriteResources()", 30000);
-	    }
-	}
-	
-	hqDojo.ready(function() {
-		refreshPortlets();
-	});
-</script>
+		function refreshPortlets() {
+		
+		    var problemPortlet = hqDojo.byId('problemResourcesTable');
+		    var favoritePortlet = hqDojo.byId('favoriteTable');
+		
+		    var nodes = document.getElementsByTagName('table');
+		    var getRecentForm = document.getElementsByTagName('form')
+		
+		    for (i = 0; i < nodes.length; i++) {
+		        if (/metricTable/.test(nodes[i].id)) {
+		            //alert('in metric table')
+		            var metricTblId = nodes[i].id;
+		            var getId = metricTblId.split('_');
+		            var metricIdPart = getId[1];
+		
+		            if (metricIdPart) {
+		                var metricIdToken = '_' + metricIdPart;
+		
+		                setInterval("requestMetricsResponse" + metricIdToken + "()", 30000);
+		            } else {
+		                setInterval("requestMetricsResponse()", 30000);
+		            }
+		        }
+		    }
+		
+		
+		    for (i = 0; i < nodes.length; i++) {
+		        if (/availTable/.test(nodes[i].id)) {
+		            // alert('in avail table')
+		            var availTblId = nodes[i].id;
+		            var getId = availTblId.split('_');
+		            var availIdPart = getId[1];
+		
+		            if (availIdPart) {
+		                var availIdToken = '_' + availIdPart;
+		
+		                setInterval("requestAvailSummary" + availIdToken + "()", 30000);
+		            } else {
+		                setInterval("requestAvailSummary()", 30000);
+		            }
+		        }
+		    }
+		
+		    if (problemPortlet) {
+		        setInterval("requestProblemResponse()", 30000);
+		    }
+		
+		    if (favoritePortlet) {
+		        setInterval("requestFavoriteResources()", 30000);
+		    }
+		}
+		
+		hqDojo.ready(function() {
+			refreshPortlets();
+		});
+</c:set>
 <html:link action="/Resource" linkName="viewResUrl" styleId="viewResUrl" style="display:none;">
 	<html:param name="eid" value=""/>
 </html:link>

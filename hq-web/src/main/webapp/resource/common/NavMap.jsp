@@ -36,7 +36,10 @@
 
    <c:choose>
       <c:when test="${xlib}">
-<script src="<html:rewrite page="/js/effects.js"/>" type="text/javascript"></script>
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	<script src="<html:rewrite page="/js/effects.js"/>" type="text/javascript"></script>
+</c:set>
 <c:set var="imageWidth" value="800"/>
 <div class="navMap" onclick="toggleDiagram('diagramdiv');">
 <hq:navMap areasVar="mapAreas" areasSizeVar="mapAreasSize" imageWidth="${imageWidth}"/>

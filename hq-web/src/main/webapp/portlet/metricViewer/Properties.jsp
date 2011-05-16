@@ -40,16 +40,20 @@
  		<c:param name="token" value="${param.token}"/>
  	</c:if>
 </c:url>
-<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
-<script type="text/javascript">
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+</c:set>
+<c:set var="jsScript" scope="request">
+	${jsScript}
+
 	var pageData = new Array();
 
 	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 
 	var help = '<hq:help/>';
-</script>
-<script type="text/javascript">
+
 	/***********************************************/
 	/* Disable "Enter" key in Form script- By Nurul Fadilah(nurul@REMOVETHISvolmedia.com)
 	/* This notice must stay intact for use
@@ -90,7 +94,7 @@
 	hqDojo.ready(function() {
 		selectValidOption();
 	});
-</script>
+</c:set>
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr class="PageTitle">
     <td rowspan="99"><html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/></td>

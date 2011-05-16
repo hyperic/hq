@@ -88,9 +88,10 @@
   	</c:choose>
 </c:if>
  
-<script  type="text/javascript">
+<c:set var="jsScript" scope="request">
+	${jsScript}
 	var help = "<hq:help/>";
-</script>
+</c:set>
 
 <c:if test="${not empty eid}">
 	<div id="breadcrumbContainer">

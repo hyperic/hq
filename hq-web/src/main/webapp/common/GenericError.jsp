@@ -39,10 +39,16 @@
 <title><fmt:message key="error.Error.Title"/></title>
 <link rel=stylesheet href="<html:rewrite page="/css/win.css"/>" type="text/css">
 <link rel=stylesheet href="<html:rewrite page="HQ_40.css"/>" type="text/css">
-<script  src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
-<script  type="text/javascript">
-  var help = "<hq:help/>";
-</script>
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	
+	<script  src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
+</c:set>
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	
+  	var help = "<hq:help/>";
+</c:set>
 </head>
 <body class="exception" style="background-color:#EEEEEE">
 <br>
@@ -147,53 +153,55 @@ catch (ClassCastException ce) {
   	<% } %> 
 </c:catch>
 
-<script type="text/javascript">
-/*--- start declaration/initialization ---*/
-var exDiv = document.getElementById("exception");
-
-if (exDiv!=null) {
-    exDiv.style.display = "none";
-    var exText = exDiv.innerHTML;
-}
-else
-    var exText = "";
-
-var rootDiv = document.getElementById("root");
-if (rootDiv!=null) {
-    rootDiv.style.display = "none";
-    var rootText = rootDiv.innerHTML;
-}
-else
-    var rootText = "";
-
-var errorDiv = document.getElementById("errorMessage");
-if (errorDiv!=null) {
-    errorDiv.style.display = "none";
-    var errorText = errorDiv.innerHTML;
-}
-else
-    var errorText= "";
-/*--- end declaration/initialization ---*/
-
-var link = document.getElementById("stacktrace_link");
-var display = document.getElementById("display");
-
-function displayStackTrace() {
-  display.innerHTML = '<table width="100%" cellpadding="4" cellspacing="0" border="0"><tr><td class="BlockTitle" width="100%"><fmt:message key="error.Error.Exception"/></td></tr><tr><td>' + exText + '</td></tr></table>';
-
-  if (rootText.length > 0) {
-    display.innerHTML += '<table width="100%" cellpadding="4" cellspacing="0" border="0"><tr><td class="BlockTitle" width="100%"><fmt:message key="error.Error.RootCause"/></td></tr><tr><td>' + rootText + '</td></tr></table>';
-  }
-
-  link.innerHTML = '<html:link href="javascript:hideStackTrace()"><fmt:message key="error.Error.HideStackTraceLink"/></html:link>';
-}
-
-function hideStackTrace() {
-  display.innerHTML = "";
-
-  link.innerHTML = '<html:link href="javascript:displayStackTrace()"><fmt:message key="error.Error.StackTraceHereLink"/></html:link>';
-}
-</script>
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	
+	/*--- start declaration/initialization ---*/
+	var exDiv = document.getElementById("exception");
+	
+	if (exDiv!=null) {
+	    exDiv.style.display = "none";
+	    var exText = exDiv.innerHTML;
+	}
+	else
+	    var exText = "";
+	
+	var rootDiv = document.getElementById("root");
+	if (rootDiv!=null) {
+	    rootDiv.style.display = "none";
+	    var rootText = rootDiv.innerHTML;
+	}
+	else
+	    var rootText = "";
+	
+	var errorDiv = document.getElementById("errorMessage");
+	if (errorDiv!=null) {
+	    errorDiv.style.display = "none";
+	    var errorText = errorDiv.innerHTML;
+	}
+	else
+	    var errorText= "";
+	/*--- end declaration/initialization ---*/
+	
+	var link = document.getElementById("stacktrace_link");
+	var display = document.getElementById("display");
+	
+	function displayStackTrace() {
+	  display.innerHTML = '<table width="100%" cellpadding="4" cellspacing="0" border="0"><tr><td class="BlockTitle" width="100%"><fmt:message key="error.Error.Exception"/></td></tr><tr><td>' + exText + '</td></tr></table>';
+	
+	  if (rootText.length > 0) {
+	    display.innerHTML += '<table width="100%" cellpadding="4" cellspacing="0" border="0"><tr><td class="BlockTitle" width="100%"><fmt:message key="error.Error.RootCause"/></td></tr><tr><td>' + rootText + '</td></tr></table>';
+	  }
+	
+	  link.innerHTML = '<html:link href="javascript:hideStackTrace()"><fmt:message key="error.Error.HideStackTraceLink"/></html:link>';
+	}
+	
+	function hideStackTrace() {
+	  display.innerHTML = "";
+	
+	  link.innerHTML = '<html:link href="javascript:displayStackTrace()"><fmt:message key="error.Error.StackTraceHereLink"/></html:link>';
+	}
+</c:set>
 </div>
 </body>
 </html>
