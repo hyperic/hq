@@ -31,12 +31,14 @@
   USA.
  --%>
 
-
-<script  src="<html:rewrite page="/js/popup.js"/>" type="text/javascript"></script>
-<script type="text/javascript">
-var pageData = new Array();
-</script>
-
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	<script  src="<html:rewrite page="/js/popup.js"/>" type="text/javascript"></script>
+</c:set>
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	var pageData = new Array();
+</c:set>
 <tiles:importAttribute name="IsPlatformService" ignore="true"/>
 
 <c:set var="entityId" value="${Resource.entityId}"/>

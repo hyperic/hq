@@ -36,18 +36,17 @@
 <tiles:importAttribute name="noReset" ignore="true"/>
 <tiles:importAttribute name="noCancel" ignore="true"/>
 
-<script  type="text/javascript">
-  var isButtonClicked = false;
+<c:set var="jsScript" scope="request">
+	${jsScript}
+  	var isButtonClicked = false;
   
-  function checkSubmit() {
-    if (isButtonClicked) {
-      alert('<fmt:message key="error.PreviousRequestEtc"/>');
-      return false;
-    }
-  }
-</script>
+  	function checkSubmit() {
+    	if (isButtonClicked) {
+      		alert('<fmt:message key="error.PreviousRequestEtc"/>');
+      		return false;
+    	}
+  	}
 
-<script>
 	hqDojo.ready(function() {
 		<c:if test="${empty cancelOnly}">
 			// it is possible for this template to be used multiple times
@@ -80,7 +79,7 @@
 			});
 		</c:if>
 	});
-</script>
+</c:set>
 
 <!-- FORM BUTTONS -->
 <div class="formButtonContainer">

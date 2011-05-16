@@ -36,13 +36,14 @@
 <c:url var="selfUrl" value="${selfAction}"/>
 
 <c:if test="${scanstate.startTime > 0 && !scanstate.isDone }"> <!-- there's a scan -->
- <script type="text/javascript">
-   function changeUrl(newUrl) {
-    window.location.href = newUrl;
-   }
-
-   setTimeout("changeUrl('<c:out value="${selfUrl}" escapeXml="false"/>')", 30000);   
- </script>
+ 	<c:set var="jsScript" scope="request">
+		${jsScript}
+	   function changeUrl(newUrl) {
+	    window.location.href = newUrl;
+	   }
+	
+	   setTimeout("changeUrl('<c:out value="${selfUrl}" escapeXml="false"/>')", 30000);   
+	</c:set>
 </c:if>
 <!--  CURRENT STATUS TITLE -->
 <tiles:insert definition=".header.tab">

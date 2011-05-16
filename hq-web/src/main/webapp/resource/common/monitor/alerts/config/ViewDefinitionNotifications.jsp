@@ -73,15 +73,17 @@
 	  	<tiles:put name="viewEscalationUrl" beanName="viewEscalationUrl"/>
 	  	<tiles:put name="viewOpenNMSUrl" beanName="viewOpenNMSUrl"/>
 	</tiles:insert>
-	
-	<script src="<html:rewrite page='/js/listWidget.js'/>" type="text/javascript"></script>
+	<c:set var="jsIncludes" scope="request">
+		${jsIncludes}
+		<script src="<html:rewrite page='/js/listWidget.js'/>" type="text/javascript"></script>
+	</c:set>
 	<c:set var="widgetInstanceName" value="list"/>
-	<script type="text/javascript">
+	<c:set var="jsScript" scope="request">
+		${jsScript}
 		var pageData = new Array();
 		initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 		widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-	</script>
-	
+	</c:set>
 	<c:choose>
 		<c:when test="${not empty formAction}">
 			<!-- FORM -->

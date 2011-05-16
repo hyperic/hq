@@ -31,14 +31,18 @@
  --%>
 
 <c:set var="selectedDashboardId" value="${sessionScope['.user.dashboard.selected.id']}"/>
-
-<script src="<html:rewrite page='/js/dash.js' />" type="text/javascript"></script>
-<script src="<html:rewrite page='/js/scriptaculous.js' />" type="text/javascript"></script>
-<script src="<html:rewrite page='/js/requests.js' />" type="text/javascript" id="requests"></script>
-<script src="<html:rewrite page='/js/dashboard.js' />" type="text/javascript"></script>
-<script src="<html:rewrite page='/js/effects.js' />" type="text/javascript"></script>
-
-<script type="text/javascript">
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	
+	<script src="<html:rewrite page='/js/dash.js' />" type="text/javascript"></script>
+	<script src="<html:rewrite page='/js/scriptaculous.js' />" type="text/javascript"></script>
+	<script src="<html:rewrite page='/js/requests.js' />" type="text/javascript" id="requests"></script>
+	<script src="<html:rewrite page='/js/dashboard.js' />" type="text/javascript"></script>
+	<script src="<html:rewrite page='/js/effects.js' />" type="text/javascript"></script>
+</c:set>
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	
 	if (top != self){
 	    top.location.href = self.document.location;
 	}
@@ -140,7 +144,7 @@
 	hqDojo.ready(function() {
 		refreshPortlets();
 	});
-</script>
+</c:set>
 <html:link action="/Resource" linkName="viewResUrl" styleId="viewResUrl" style="display:none;">
 	<html:param name="eid" value="{eid}"/>
 </html:link>
@@ -286,7 +290,9 @@
 								</tr>
 							</table>
 					
-							<script type="text/javascript">
+							<c:set var="jsScript" scope="request">
+								${jsScript}
+								
 						        // -----------
 						        // XXX:
 						        // This should be rewritten using dojo 1.1 dnd.move package
@@ -307,7 +313,7 @@
 			                    	},
 			               			constraint: 'vertical'
 				               	});
-				      		</script>
+				      		</c:set>
 				      	</c:if> 
 				      	<c:choose>
 							<c:when test="${narrow eq 'true'}">
@@ -319,11 +325,13 @@
 						</c:choose> 
 					<%=divEnd%> 
 				
-					<script type="text/javascript">
+					<c:set var="jsScript" scope="request">
+						${jsScript}
+						
 						if (!Prototype.Browser.IE) {
 		        			resizeToCorrectWidth();
 		      			}
-		    		</script>
+		    		</c:set>
 		    	</td>
 			</c:forEach>
 		</tr>

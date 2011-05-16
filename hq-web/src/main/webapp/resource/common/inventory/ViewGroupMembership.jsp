@@ -39,11 +39,11 @@
 
 <bean:define id="groupCount" name="groups" property="totalSize"/>
 <c:set var="widgetInstanceName" value="listServerGroups"/>
-<script type="text/javascript">
-initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-groupsWidgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-</script>
-
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+	groupsWidgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+</c:set>
 <c:url var="addToListUrl" value="/resource/${resource.entityId.typeName}/Inventory.do">
 	<c:param name="mode" value="addGroups"/>
 	<c:param name="rid" value="${resource.id}"/>

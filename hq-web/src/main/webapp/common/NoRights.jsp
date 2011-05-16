@@ -37,10 +37,14 @@
 <head>
 <title><fmt:message key="securityAlert.SecurityAlert.Title"/></title>
 <link rel=stylesheet href="<html:rewrite page="/css/win.css"/>" type="text/css">
-<script  src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
-<script  type="text/javascript">
-  var help = "<hq:help/>";
-</script>
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	
+	<script  src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
+</c:set>
+<c:set var="jsScript" scope="request">
+  	var help = "<hq:help/>";
+</c:set>
 </head>
 
 <body>

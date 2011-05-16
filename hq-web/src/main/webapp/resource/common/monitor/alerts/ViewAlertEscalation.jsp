@@ -94,7 +94,8 @@
 		</c:if>
 	</table>
 
-	<script type="text/javascript">
+	<c:set var="jsScript" scope="request">
+		${jsScript}
   		var isButtonClicked = false;
   
   		function checkSubmit() {
@@ -109,5 +110,5 @@
   	  	if (escalationSpan != null) {
 	  		escalationSpan.appendChild(hyperic.form.createEscalationPauseOptions({id: "pauseTimeSel", name: "pauseTime"}, <c:out value="${escalation.maxPauseTime}"/>));
   		}
-	</script>
+	</c:set>
 </c:if>

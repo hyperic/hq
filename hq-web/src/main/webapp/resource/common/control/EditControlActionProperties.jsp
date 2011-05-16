@@ -45,9 +45,10 @@
 <c:set var="formBean" value="${requestScope[\"org.apache.struts.taglib.html.BEAN\"]}"/>
 <c:set var="instance" value="${requestScope[\"org.apache.struts.action.mapping.instance\"]}"/>
 <c:set var="formName" value="${instance.name}"/>
-
-<script src="<html:rewrite page="/js/control_ControlActionProperties.js"/>" type="text/javascript"></script>
-
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	<script src="<html:rewrite page="/js/control_ControlActionProperties.js"/>" type="text/javascript"></script>
+</c:set>
 <!--  GENERAL PROPERTIES CONTENTS -->
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
  <tr valign="top">

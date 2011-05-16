@@ -87,7 +87,8 @@
   </tr>
 </table>
 
-<script type="text/javascript">
+<c:set var="jsScript" scope="request">
+	${jsScript}
 	var advancedDialog = null;
 	
 	hqDojo.ready(function(){
@@ -101,4 +102,4 @@
         
         hqDojo.place(hqDojo.byId('advancedDisplay'), hqDojo.byId('advancedContainer'), "last");
   	});
-</script>
+</c:set>

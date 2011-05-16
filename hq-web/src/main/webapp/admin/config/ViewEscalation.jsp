@@ -30,12 +30,18 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-<script  src='<html:rewrite page="/js/scriptaculous.js"/>' type="text/javascript"></script>
-<script src='<html:rewrite page="/js/dashboard.js"/>' type="text/javascript"></script>
-<script src='<html:rewrite page="/js/effects.js"/>' type="text/javascript"></script>
-<script src='<html:rewrite page="/js/popup.js"/>' type="text/javascript"></script>
-<script src='<html:rewrite page="/js/window.js"/>' type="text/javascript"></script>
-<script type="text/javascript">
+
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	<script src='<html:rewrite page="/js/scriptaculous.js"/>' type="text/javascript"></script>
+	<script src='<html:rewrite page="/js/dashboard.js"/>' type="text/javascript"></script>
+	<script src='<html:rewrite page="/js/effects.js"/>' type="text/javascript"></script>
+	<script src='<html:rewrite page="/js/popup.js"/>' type="text/javascript"></script>
+	<script src='<html:rewrite page="/js/window.js"/>' type="text/javascript"></script>
+</c:set>
+<c:set var="jsScript" scope="request"
+	${jsScript}
+	
 	document.toggleSubmit = function(e){
 		if(e && e.keyCode == 13){
 	        saveEscalation();
@@ -1291,7 +1297,7 @@
 	    new Ajax.Request(url, {method: 'post', parameters: pars, onComplete: updateEscView, onFailure: reportError});
 	    document.EscalationForm.reset();
 	}
-</script>
+</c:set>
 <html:form action="/alerts/ConfigEscalation" method="GET">
     <html:hidden property="mode"/>
     <c:choose>
@@ -1575,12 +1581,14 @@
 </tbody>
 </table>
 
-<script type="text/javascript">
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	
   var escalationSpan = hqDojo.byId("AlertEscalationOption");
   if (escalationSpan != null) {
 	  escalationSpan.appendChild(hyperic.form.createEscalationPauseOptions({id: "maxWaitTime", name: "maxWaitTime", className:"maxWaitTime"}));
   }
-</script>
+</c:set>
 
 <div id="usersList" style="display:none;">
     <div class="ListHeader">Select Users</div>

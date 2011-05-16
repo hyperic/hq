@@ -54,12 +54,13 @@
 </c:choose>
 
 <c:if test="${checkboxes}">
-  <c:set var="widgetInstanceName" value="childResources"/>
+  	<c:set var="widgetInstanceName" value="childResources"/>
 
-  <script type="text/javascript">
-    initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-    widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-  </script>
+	<c:set var="jsScript" scope="request">
+		${jsScript}
+    	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+    	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+  	</c:set>
 </c:if>
 
 <hq:constant classname="org.hyperic.hq.bizapp.shared.uibeans.UIConstants"

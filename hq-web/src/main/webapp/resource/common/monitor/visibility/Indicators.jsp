@@ -46,7 +46,8 @@
 	<tiles:put name="tabListName" beanName="tabListName" />
 </tiles:insert>
 
-<script type="text/javascript">
+<c:set var="jsScript" scope="request">
+	${jsScript}
 	<c:url var="baseUrl" value="/resource/common/monitor/visibility/IndicatorCharts.do">
 		<c:param name="eid" value="${eid}"/>
 	</c:url>
@@ -88,7 +89,7 @@
 	    
 	    hqDojo.byId('viewname').style.display = "none";
 	}
-</script>
+</c:set>
 
 <html:form action="/resource/common/monitor/visibility/IndicatorCharts"
 	       method="GET" onsubmit="this.view.disabled=false">

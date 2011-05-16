@@ -33,7 +33,9 @@
 
 <tiles:importAttribute name="portlet"/>
 
-<script type="text/javascript">
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	
 	function requestMetricsResponse${portlet.token}() {
 	    hqDojo.xhrGet({
 			url: "<html:rewrite action="/dashboard/ViewMetricViewer" />",
@@ -49,7 +51,7 @@
 	hqDojo.ready(function() {
 		requestMetricsResponse${portlet.token}();
 	});
-</script>
+</c:set>
 
 <div class="effectsPortlet">
 <tiles:insert definition=".header.tab">

@@ -34,12 +34,12 @@
 
 
 <c:set var="chbtWidget" value="currentHealthByType"/>
-<script type="text/javascript">
-initializeWidgetProperties('<c:out value="${chbtWidget}"/>');
-chbtWidgetProps = getWidgetProperties('<c:out value="${chbtWidget}"/>');
-chbtWidgetProps['subGroup'] = 'chbtListMember';
-</script>
-
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	initializeWidgetProperties('<c:out value="${chbtWidget}"/>');
+	chbtWidgetProps = getWidgetProperties('<c:out value="${chbtWidget}"/>');
+	chbtWidgetProps['subGroup'] = 'chbtListMember';
+</c:set>
 <tiles:importAttribute name="summaries" ignore="true"/>
 <tiles:importAttribute name="childResourceType" ignore="true"/>
 <tiles:importAttribute name="memberTypeLabel" ignore="true"/>
@@ -120,6 +120,7 @@ chbtWidgetProps['subGroup'] = 'chbtListMember';
 </c:choose>
 
 <input type="hidden" id="privateChildResource">
-<script type="text/javascript">
-  testCheckboxes("ToggleButtonsCompare", '<c:out value="${chbtWidget}"/>', "privateChildResource", "chbtListMember");
-</script>
+<c:set var="jsScript" scope="request">
+	${jsScript}
+  	testCheckboxes("ToggleButtonsCompare", '<c:out value="${chbtWidget}"/>', "privateChildResource", "chbtListMember");
+</c:set>

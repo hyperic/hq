@@ -58,20 +58,22 @@
     symbol="CONTROL_ENABLED_ATTR" var="CONST_CONTROLLABLE" /> 
 
 <c:set var="canControl" value="${requestScope[CONST_CONTROLLABLE]}"/>
-
-<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+</c:set>
 <c:set var="widgetInstanceName" value="listAlertDefinitions"/>
-<script  type="text/javascript">
-function setActiveInactive() {
-    document.RemoveConfigForm.setActiveInactive.value='y';
-    document.RemoveConfigForm.submit();
-}
-
-var pageData = new Array();
-initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-</script>
-
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	function setActiveInactive() {
+	    document.RemoveConfigForm.setActiveInactive.value='y';
+	    document.RemoveConfigForm.submit();
+	}
+	
+	var pageData = new Array();
+	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+</c:set>
 <c:set var="entityId" value="${Resource.entityId}"/>
 <c:url var="pnAction" value="/alerts/Config.do">
   <c:param name="mode" value="list"/>

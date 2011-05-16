@@ -3,7 +3,7 @@
 <%@ page errorPage="/common/Error.jsp" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
-
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -33,43 +33,48 @@
 <link rel="shortcut icon" href="<html:rewrite page="/images/4.0/icons/favicon.ico"/>"/>
 <link rel="stylesheet" href="<html:rewrite page="/css/win.css"/>" type="text/css"/>
 <link rel="stylesheet" href="<html:rewrite page="/css/HQ_40.css"/>" type="text/css"/>
-<script type="text/javascript">
-	var djConfig = {};
-	djConfig.parseOnLoad = true;
-	djConfig.baseUrl = '/static/js/dojo/1.5/dojo/';
-	djConfig.scopeMap = [ [ "dojo", "hqDojo" ], [ "dijit", "hqDijit" ], [ "dojox", "hqDojox" ] ];
-</script>
-
-<!--[if IE]>
-<script type="text/javascript">
-	// since dojo has trouble when it comes to using relative urls + ssl, we
-	// use this workaorund to provide absolute urls.
-	function qualifyURL(url) {
-		var a = document.createElement('img');
-	    a.src = url;
-	    return a.src;
-	}
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
 	
-	djConfig.modulePaths = {
-	    "dojo": qualifyURL("/static/js/dojo/1.5/dojo"),
-	    "dijit":  qualifyURL("/static/js/dojo/1.5/dijit"),
-	    "dojox":  qualifyURL("/static/js/dojo/1.5/dojox")
-  	};
-</script>
-<![endif]-->
+	<script>
+		var djConfig = {};
+		djConfig.parseOnLoad = true;
+		djConfig.baseUrl = '/static/js/dojo/1.5/dojo/';
+		djConfig.scopeMap = [ [ "dojo", "hqDojo" ], [ "dijit", "hqDijit" ], [ "dojox", "hqDojox" ] ];
+	</script>	
+	
+	<!--[if IE]>
+	<script type="text/javascript">
+		// since dojo has trouble when it comes to using relative urls + ssl, we
+		// use this workaorund to provide absolute urls.
+		function qualifyURL(url) {
+			var a = document.createElement('img');
+		    a.src = url;
+		    return a.src;
+		}
+		
+		djConfig.modulePaths = {
+		    "dojo": qualifyURL("/static/js/dojo/1.5/dojo"),
+		    "dijit":  qualifyURL("/static/js/dojo/1.5/dijit"),
+		    "dojox":  qualifyURL("/static/js/dojo/1.5/dojox")
+	  	};
+	</script>
+	<![endif]-->
+	
+	<script src="<html:rewrite page='/static/js/dojo/1.5/dojo/dojo.js'/>" type="text/javascript"></script>
+	<script src="<html:rewrite page='/js/prototype.js'/>" type="text/javascript"></script>
+	<script src="<html:rewrite page='/js/popup.js'/>" type="text/javascript"></script>
+	<script src="<html:rewrite page='/js/diagram.js'/>" type="text/javascript"></script>
+	<script src="<html:rewrite page='/js/functions.js'/>" type="text/javascript"></script>
+	<script src="<html:rewrite page='/js/lib/lib.js'/>" type="text/javascript"></script>
+	<script src="<html:rewrite page='/js/lib/charts.js'/>" type="text/javascript"></script>
+</c:set>
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	
+	var imagePath = "/images/";
+	hqDojo.require('dojo.date');
 
-<script src="<html:rewrite page='/static/js/dojo/1.5/dojo/dojo.js'/>" type="text/javascript"></script>
-<script type="text/javascript">
-    var imagePath = "/images/";
-    hqDojo.require('dojo.date');
-</script>
-<script src="<html:rewrite page='/js/prototype.js'/>" type="text/javascript"></script>
-<script src="<html:rewrite page='/js/popup.js'/>" type="text/javascript"></script>
-<script src="<html:rewrite page='/js/diagram.js'/>" type="text/javascript"></script>
-<script src="<html:rewrite page='/js/functions.js'/>" type="text/javascript"></script>
-<script src="<html:rewrite page='/js/lib/lib.js'/>" type="text/javascript"></script>
-<script src="<html:rewrite page='/js/lib/charts.js'/>" type="text/javascript"></script>
-<script type="text/javascript">
 	hyperic.data.escalation = {};
 	hyperic.data.escalation.pauseSelect = document.createElement("select");
 	hyperic.data.escalation.pauseSelect.options[0] = new Option("5 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>", "300000");
@@ -86,4 +91,4 @@
 	hyperic.data.escalation.pauseSelect.options[11] = new Option("48 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/>", "172800000");
 	hyperic.data.escalation.pauseSelect.options[12] = new Option("72 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/>", "259200000");
 	hyperic.data.escalation.pauseSelect.options[13] = new Option("<fmt:message key="alert.config.props.CB.Enable.UntilFixed"/>", "<%= Long.MAX_VALUE %>");
-</script>
+</c:set>

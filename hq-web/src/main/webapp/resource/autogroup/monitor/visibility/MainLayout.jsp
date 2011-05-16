@@ -32,11 +32,14 @@
   USA.
  --%>
 
-
-<script  src="<html:rewrite page="/js/popup.js"/>" type="text/javascript"></script>
-<script type="text/javascript">
-var pageData = new Array();
-</script>
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	<script  src="<html:rewrite page="/js/popup.js"/>" type="text/javascript"></script>
+</c:set>
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	var pageData = new Array();
+</c:set>
 
 <c:set var="eid" value="${Resource.entityId.appdefKey}"/>
 <c:set var="view" value="${param.view}"/>

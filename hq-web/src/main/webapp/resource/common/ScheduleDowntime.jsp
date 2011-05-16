@@ -62,75 +62,73 @@
 	</div>
 </div>
 
-<script type="text/javascript">
-//<![CDATA[
-hqDojo.require("dijit.dijit");
-hqDojo.require("dijit.form.Button");
-hqDojo.require("dijit.form.DateTextBox");
-hqDojo.require("dijit.form.TimeTextBox");
-hqDojo.require("dijit.Dialog");
-hqDojo.require("dojo.date");
-
-hyperic.data.maintenance_schedule = {};
-hyperic.data.maintenance_schedule.label = {
-	schedule : "<fmt:message key="resource.group.MaintenanceWindow.Schedule"/>",
-	reschedule : "<fmt:message key="resource.group.MaintenanceWindow.Reschedule"/>",
-	cancel : "<fmt:message key="resource.group.MaintenanceWindow.Cancel"/>",
-	clear : "<fmt:message key="resource.group.MaintenanceWindow.Clear"/>",
-	time : "<fmt:message key="resource.group.MaintenanceWindow.Time"/>"
-};
-hyperic.data.maintenance_schedule.message = {
-	success : "<fmt:message key="resource.group.MaintenanceWindow.confirm.Updated"/>",
-	currentSchedule : "<fmt:message key="resource.group.MaintenanceWindow.status.CurrentSchedule"/>",
-	noSchedule : "<fmt:message key="resource.group.MaintenanceWindow.status.NoSchedule"/>",
-	runningSchedule : "<fmt:message key="resource.group.MaintenanceWindow.status.RunningSchedule"/>"
-};
-hyperic.data.maintenance_schedule.error = {
-	serverError : "<fmt:message key="resource.group.MaintenanceWindow.error.ServerError"/>",
-	datePattern : "<fmt:message key="resource.group.MaintenanceWindow.error.DatePattern"/>",
-	startDateRange : "<fmt:message key="resource.group.MaintenanceWindow.error.StartDateRange"/>",
-	endDateRange : "<fmt:message key="resource.group.MaintenanceWindow.error.EndDateRange"/>",
-	startTimeRange : "<fmt:message key="resource.group.MaintenanceWindow.error.StartTimeRange"/>",
-	endTimeRange : "<fmt:message key="resource.group.MaintenanceWindow.error.EndTimeRange"/>",
-	timePattern : "<fmt:message key="resource.group.MaintenanceWindow.error.TimePattern"/>"
-};
-
-var maintenance_<c:out value="${resource.id}"/> = null;
-
-// create Tools menu item after "Add to Group"
-var eeAddToGroupMenuElement = document.getElementById("AddToGroupMenuLink");
-
-if (eeAddToGroupMenuElement) {
-	var downtimeLinkBreak = document.createElement("br");
-	var downtimeLinkImg = document.createElement("img");
-	downtimeLinkImg.border = '0';
-	downtimeLinkImg.width = '11';
-	downtimeLinkImg.height = '9';
-	downtimeLinkImg.src = '/images/title_arrow.gif';
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	hqDojo.require("dijit.dijit");
+	hqDojo.require("dijit.form.Button");
+	hqDojo.require("dijit.form.DateTextBox");
+	hqDojo.require("dijit.form.TimeTextBox");
+	hqDojo.require("dijit.Dialog");
+	hqDojo.require("dojo.date");
 	
-	var downtimeLink = document.createElement("a");
-	var downtimeLinkText = document.createTextNode('<fmt:message key="resource.group.MaintenanceWindow.Title"/>');
-	downtimeLink.setAttribute('href', '#');
-	downtimeLink.onclick = function() {
-		maintenance_<c:out value='${resource.id}'/>.getSchedule();
+	hyperic.data.maintenance_schedule = {};
+	hyperic.data.maintenance_schedule.label = {
+		schedule : "<fmt:message key="resource.group.MaintenanceWindow.Schedule"/>",
+		reschedule : "<fmt:message key="resource.group.MaintenanceWindow.Reschedule"/>",
+		cancel : "<fmt:message key="resource.group.MaintenanceWindow.Cancel"/>",
+		clear : "<fmt:message key="resource.group.MaintenanceWindow.Clear"/>",
+		time : "<fmt:message key="resource.group.MaintenanceWindow.Time"/>"
 	};
-	downtimeLink.appendChild(downtimeLinkText);
-	downtimeLink.appendChild(downtimeLinkImg);
+	hyperic.data.maintenance_schedule.message = {
+		success : "<fmt:message key="resource.group.MaintenanceWindow.confirm.Updated"/>",
+		currentSchedule : "<fmt:message key="resource.group.MaintenanceWindow.status.CurrentSchedule"/>",
+		noSchedule : "<fmt:message key="resource.group.MaintenanceWindow.status.NoSchedule"/>",
+		runningSchedule : "<fmt:message key="resource.group.MaintenanceWindow.status.RunningSchedule"/>"
+	};
+	hyperic.data.maintenance_schedule.error = {
+		serverError : "<fmt:message key="resource.group.MaintenanceWindow.error.ServerError"/>",
+		datePattern : "<fmt:message key="resource.group.MaintenanceWindow.error.DatePattern"/>",
+		startDateRange : "<fmt:message key="resource.group.MaintenanceWindow.error.StartDateRange"/>",
+		endDateRange : "<fmt:message key="resource.group.MaintenanceWindow.error.EndDateRange"/>",
+		startTimeRange : "<fmt:message key="resource.group.MaintenanceWindow.error.StartTimeRange"/>",
+		endTimeRange : "<fmt:message key="resource.group.MaintenanceWindow.error.EndTimeRange"/>",
+		timePattern : "<fmt:message key="resource.group.MaintenanceWindow.error.TimePattern"/>"
+	};
 	
-	var eeToolsMenuElement = eeAddToGroupMenuElement.parentNode;
-	eeToolsMenuElement.insertBefore(downtimeLinkBreak, eeAddToGroupMenuElement.nextSibling);
-	eeToolsMenuElement.insertBefore(downtimeLink, downtimeLinkBreak.nextSibling);
-}
-
-hqDojo.ready(function(){
-    maintenance_<c:out value="${resource.id}"/> = new hyperic.maintenance_schedule({
-        "title": "<fmt:message key="resource.group.MaintenanceWindow.Title"/>", 
-        "appdefentityId": "<c:out value="${resource.entityId}"/>", 
-        "resourceName": "<c:out value="${resource.name}"/>",
-        "url": "/app/resource/<c:out value='${resource.entityId}' />/downtime"
-    });
-});
-//]]>
-</script>
-
+	var maintenance_<c:out value="${resource.id}"/> = null;
+	
+	// create Tools menu item after "Add to Group"
+	var eeAddToGroupMenuElement = document.getElementById("AddToGroupMenuLink");
+	
+	if (eeAddToGroupMenuElement) {
+		var downtimeLinkBreak = document.createElement("br");
+		var downtimeLinkImg = document.createElement("img");
+		downtimeLinkImg.border = '0';
+		downtimeLinkImg.width = '11';
+		downtimeLinkImg.height = '9';
+		downtimeLinkImg.src = '/images/title_arrow.gif';
+		
+		var downtimeLink = document.createElement("a");
+		var downtimeLinkText = document.createTextNode('<fmt:message key="resource.group.MaintenanceWindow.Title"/>');
+		downtimeLink.setAttribute('href', '#');
+		downtimeLink.onclick = function() {
+			maintenance_<c:out value='${resource.id}'/>.getSchedule();
+		};
+		downtimeLink.appendChild(downtimeLinkText);
+		downtimeLink.appendChild(downtimeLinkImg);
+		
+		var eeToolsMenuElement = eeAddToGroupMenuElement.parentNode;
+		eeToolsMenuElement.insertBefore(downtimeLinkBreak, eeAddToGroupMenuElement.nextSibling);
+		eeToolsMenuElement.insertBefore(downtimeLink, downtimeLinkBreak.nextSibling);
+	}
+	
+	hqDojo.ready(function(){
+	    maintenance_<c:out value="${resource.id}"/> = new hyperic.maintenance_schedule({
+	        "title": "<fmt:message key="resource.group.MaintenanceWindow.Title"/>", 
+	        "appdefentityId": "<c:out value="${resource.entityId}"/>", 
+	        "resourceName": "<c:out value="${resource.name}"/>",
+	        "url": "/app/resource/<c:out value='${resource.entityId}' />/downtime"
+	    });
+	});
+</c:set>
 </c:if>

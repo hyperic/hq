@@ -35,20 +35,23 @@
 
 
 <tiles:importAttribute name="BaselineValue" ignore="true"/>
-<script src="<html:rewrite page="/js/schedule.js"/>" type="text/javascript"></script>
-<script  type="text/javascript">
-var imagePath="/images/";
-var jsPath="<html:rewrite page="/js/"/>";
-var cssPath="<html:rewrite page="/css/"/>";
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	<script src="<html:rewrite page="/js/schedule.js"/>" type="text/javascript"></script>
+</c:set>
+<c:set var="jsScript" scope="request">
+	${jsScript}
 
-var isMonitorSchedule = false;
-</script>
-<script type="text/javascript">
-function recalc() {
-document.EditMetricBaselineForm.recalc.value='y';
-document.EditMetricBaselineForm.submit();
-}
-</script>
+	var imagePath="/images/";
+	var jsPath="<html:rewrite page="/js/"/>";
+	var cssPath="<html:rewrite page="/css/"/>";
+	var isMonitorSchedule = false;
+
+	function recalc() {
+		document.EditMetricBaselineForm.recalc.value='y';
+		document.EditMetricBaselineForm.submit();
+	}
+</c:set>
 <link rel=stylesheet href="<html:rewrite page="/css/win.css"/>" type="text/css">
 <%-- end vit: delete this block --%>
 
@@ -134,12 +137,14 @@ document.EditMetricBaselineForm.submit();
 		<option value="31">31</option>
 		</html:select>&nbsp;/&nbsp;
 		<html:select property="startYear" styleId="startYear" styleClass="logo">
-		    <script  type="text/javascript">
+		    <c:set var="jsScript" scope="request">
+		    	${jsScript}
+		    	
 		        for (i=0; i<SEL_NUMYEARS; i++) {
-                var startYear =  document.getElementById('startYear');
-                startYear.options[i] = new Option(yearArr[i], yearArr[i]);
-			}
-		    </script>
+                	var startYear =  document.getElementById('startYear');
+                	startYear.options[i] = new Option(yearArr[i], yearArr[i]);
+				}
+		    </c:set>
 		</html:select>&nbsp;<html:link href="#" onclick="cal('startMonth','startDay','startYear');"><html:img page="/images/schedule_iconCal.gif" width="19" height="17" alt="" border="0"/></html:link>
 		&nbsp;@&nbsp;
 		<input name="startHour" styleId="startHour" size="2" maxlength="2" value="08">&nbsp;:&nbsp;<input name="startMin" styleId="styleMin" size="2" maxlength="2" value="00">&nbsp;
@@ -208,12 +213,14 @@ document.EditMetricBaselineForm.submit();
 		<option value="31">31</option>
 		</html:select>&nbsp;/&nbsp;
 		<html:select property="endYear" styleId="endYear"> 
-		    <script  type="text/javascript">
+		    <c:set var="jsScript" scope="request">
+		    	${jsScript}
+		    	
 		        for (i=0; i<SEL_NUMYEARS; i++) {
-                var endYear =  document.getElementById('endYear');
-                endYear.options[i] = new Option(yearArr[i], yearArr[i]);
-			}
-		    </script>
+                	var endYear =  document.getElementById('endYear');
+                	endYear.options[i] = new Option(yearArr[i], yearArr[i]);
+				}
+		    </c:set>
 		</html:select>&nbsp;<html:link href="#" onclick="cal('endMonth','endDay','endYear');"><html:img page="/images/schedule_iconCal.gif" width="19" height="17" alt="" border="0"/></html:link>
 		&nbsp;@&nbsp;
 		<input name="endHour" styleId="endHour" size="2" maxlength="2" value="08">&nbsp;:&nbsp;<input name="endMin" styleId="endMin" size="2" maxlength="2" value="00">&nbsp;

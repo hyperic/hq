@@ -31,9 +31,10 @@
   USA.
  --%>
 
-<script type="text/javascript">
-  var help = "<hq:help/>";
-</script>
+<c:set var="jsScript" scope="request">
+	${jsScript}
+  	var help = "<hq:help/>";
+</c:set>
 
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr class="PageTitle"> 

@@ -67,15 +67,17 @@
     <c:param name="sc" value="${param.sc}"/>
   </c:if>
 </c:url>
-        
-<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+</c:set>
 <c:set var="widgetInstanceName" value="listAutoDiscoverySchedule"/>
-<script type="text/javascript">
-var pageData = new Array();
-initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-</script>
-
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	var pageData = new Array();
+	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+</c:set>
 <c:set var="entityId" value="${Resource.entityId}"/>
 
 <html:form action="/resource/platform/autodiscovery/RemoveSchedule">

@@ -50,19 +50,17 @@
     classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants"
     symbol="APPDEF_TYPE_GROUP_COMPAT_SVC" var="CONST_COMPAT_SVC" />
 
-
-<script  src="<html:rewrite page="/js/addRemoveWidget.js"/>" type="text/javascript">
-</script>
-
-
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	<script  src="<html:rewrite page="/js/addRemoveWidget.js"/>" type="text/javascript"></script>
+</c:set>
 <c:set var="widgetInstanceName" value="addResources"/>
-
-<script type="text/javascript">
-var pageData = new Array();
-initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-</script>
-
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	var pageData = new Array();
+	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+</c:set>
 <c:url var="selfPnaAction" value="/resource/group/Inventory.do">
   <c:param name="mode" value="addResources"/>
   <c:param name="rid" value="${Resource.id}"/>
@@ -314,8 +312,8 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
     <c:param name="nameFilter" value="${param.nameFilter}"/>
   </c:if>
 </c:url>
-
-<script type="text/javascript"> <!--
+<c:set var="jsScript" scope="request">
+	${jsScript}
     function applyNameFilter() {
         goToLocationSelfAndElement(
                 'nameFilter',
@@ -323,9 +321,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
                 '<c:out value="${selfPnFilterNameAction}" escapeXml="false"/>');
         return false;
     }
-// -->
-</script>
-
+</c:set>
 <!--  SELECT & ADD -->
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
 <!--  SELECT & ADD -->

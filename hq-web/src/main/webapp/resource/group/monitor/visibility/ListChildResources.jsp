@@ -45,37 +45,37 @@
   <c:set var="mode" value="currentHealth"/>
 </c:if>
 
-<script type="text/javascript">
-  <c:set var="widgetInstanceName" value="childResources"/>
-  <c:set var="listMembersName" value="groupMembers"/>
+<c:set var="jsScript" scope="request">
+	${jsScript}
+  	<c:set var="widgetInstanceName" value="childResources"/>
+  	<c:set var="listMembersName" value="groupMembers"/>
 
-  initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-  widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+  	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+  	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 
-<c:if test="${empty params.eids && not virtual}">
-  function checkAllBoxes() {
-    var check = true;
-    for (var i = 0; i < document.forms[0].elements.length; i++) {
-      if (document.forms[0].elements[i].name == 'eids' &&
-        document.forms[0].elements[i].checked)
-        check = false;
-    }
-
-    if (check) {
-      for (var i = 0; i < document.forms[0].elements.length; i++) {
-        if (document.forms[0].elements[i].name == 'eids' ||
-            document.forms[0].elements[i].name == 'groupMembersAll')
-            document.forms[0].elements[i].checked = true;
-      }
-    }
-  }
-
-  	hqDojo.ready(function() {
-  		checkAllBoxes();
-  	});
-</c:if>
-</script>
-
+	<c:if test="${empty params.eids && not virtual}">
+	  function checkAllBoxes() {
+	    var check = true;
+	    for (var i = 0; i < document.forms[0].elements.length; i++) {
+	      if (document.forms[0].elements[i].name == 'eids' &&
+	        document.forms[0].elements[i].checked)
+	        check = false;
+	    }
+	
+	    if (check) {
+	      for (var i = 0; i < document.forms[0].elements.length; i++) {
+	        if (document.forms[0].elements[i].name == 'eids' ||
+	            document.forms[0].elements[i].name == 'groupMembersAll')
+	            document.forms[0].elements[i].checked = true;
+	      }
+	    }
+	  }
+	
+	  	hqDojo.ready(function() {
+	  		checkAllBoxes();
+	  	});
+	</c:if>
+</c:set>
 <c:if test="${empty childResourcesHealthKey}">
   <c:set var="childResourcesHealthKey" value="resource.service.monitor.visibility.MembersTab"/>
 </c:if>

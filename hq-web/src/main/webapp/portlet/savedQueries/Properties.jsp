@@ -37,20 +37,21 @@
 <c:url var="selfAction" value="/dashboard/Admin.do">
 	<c:param name="mode" value="savedQueries"/>
 </c:url>
-
-<script  src="<html:rewrite page="/js/prototype.js"/>" type="text/javascript"></script>
-<script  src="<html:rewrite page="/js/scriptaculous.js"/>" type="text/javascript"></script>
-<script type="text/javascript">
-  var help = "<hq:help/>";
-</script>
-
-<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
 <c:set var="widgetInstanceName" value="listRoles"/>
-<script type="text/javascript">
-var pageData = new Array();
-initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-</script>
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	<script  src="<html:rewrite page="/js/prototype.js"/>" type="text/javascript"></script>
+	<script  src="<html:rewrite page="/js/scriptaculous.js"/>" type="text/javascript"></script>
+	<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+</c:set>
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	
+	var help = "<hq:help/>";
+	var pageData = new Array();
+	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+</c:set>
 
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr class="PageTitle"> 
@@ -106,13 +107,6 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
         </li>
         </c:forEach>
       </ul>
-
-      <script type="text/javascript">
-      <!--
-        Sortable.create("qryOrd",
-          {dropOnEmpty:true,containment:["qryOrd"],constraint:false});
-      -->
-      </script>
           <c:choose>
              <c:when test="${not sessionScope.modifyDashboard}">
              </c:when>

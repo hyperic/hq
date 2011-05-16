@@ -39,71 +39,6 @@
 <META Http-Equiv="Expires" Content="0">
 
 <link rel=stylesheet href="<html:rewrite page="/css/win.css"/>" type="text/css">
-<script type="text/javascript">
-	var djConfig = {};
-	djConfig.parseOnLoad = true;
-	djConfig.baseUrl = '/static/js/dojo/1.5/dojo/';
-	djConfig.scopeMap = [ [ "dojo", "hqDojo" ], [ "dijit", "hqDijit" ], [ "dojox", "hqDojox" ] ];
-</script>
-<!--[if IE]>
-<script type="text/javascript">
-	// since dojo has trouble when it comes to using relative urls + ssl, we
-	// use this workaorund to provide absolute urls.
-	function qualifyURL(url) {
-		var a = document.createElement('img');
-	    a.src = url;
-	    return a.src;
-	}
-			
-	djConfig.modulePaths = {
-	    "dojo": qualifyURL("/static/js/dojo/1.5/dojo"),
-	    "dijit":  qualifyURL("/static/js/dojo/1.5/dijit"),
-	    "dojox":  qualifyURL("/static/js/dojo/1.5/dojox")
-  	};
-</script>
-<![endif]-->
-<script src="<html:rewrite page='/static/js/dojo/1.5/dojo/dojo.js'/>" type="text/javascript"></script>
-<script src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
-<script src="<html:rewrite page="/js/prototype.js"/>" type="text/javascript"></script>
-<script src="<html:rewrite page="/js/effects.js"/>" type="text/javascript"></script>
-<script src="<html:rewrite page="/js/lib/lib.js"/>" type="text/javascript"></script>
-
-<script type="text/javascript">
-var indicatorCharts = new Array();
-
-<c:forEach var="metric" varStatus="status" items="${chartDataKeys}">
-   <c:choose>
-     <c:when test="${xlib}">
-     		indicatorCharts[indicatorCharts.length] = {
-     	     		"entityId" : "<c:out value="${metric.entityId}" />",
-     	     		"entityType" : "<c:out value="${metric.entityId.type}" />",
-
-     			    <c:if test="${not empty metric.childType}">
-     	     		"ctype" : "<c:out value="${metric.childType}" />",
-     			    </c:if>
-     			    
-     	     		"metricId" : "<c:out value="${metric.templateId}" />",
-     	     		"metricLabel" : "<c:out value="${metric.label}"/>",
-     	     		"metricSource" : "<c:out value="${metric.metricSource}"/>",
-     	     		"minMetric" : "<c:out value="${metric.minMetric.valueFmt}"/>",
-     	     		"avgMetric" : "<c:out value="${metric.avgMetric.valueFmt}"/>",
-     	     		"maxMetric" : "<c:out value="${metric.maxMetric.valueFmt}"/>",
-     	     		"unitUnits" : "<c:out value="${metric.unitUnits}"/>",
-     	     		"unitScale" : "<c:out value="${metric.unitScale}"/>",
-     	     		"index" : "<c:out value="${status.index}"/>",
-     	     		"timeToken" : "<c:out value="${IndicatorViewsForm.timeToken}"/>"     	     		
-     		};
-     </c:when>
-     <c:otherwise>
-			indicatorCharts[indicatorCharts.length] = {
-					"error" : "<fmt:message key="error.NoXLibInstalled"/>"
-			};
-     </c:otherwise>
-   </c:choose>
-	   
-</c:forEach>
-
-</script>
 </head>
 
 <body style="background-color: #DBE3F5;">
@@ -127,34 +62,92 @@ var indicatorCharts = new Array();
 
 <ul id="root" class="boxy">
 </ul>
-
+	<script type="text/javascript">
+		var djConfig = {};
+		djConfig.parseOnLoad = true;
+		djConfig.baseUrl = '/static/js/dojo/1.5/dojo/';
+		djConfig.scopeMap = [ [ "dojo", "hqDojo" ], [ "dijit", "hqDijit" ], [ "dojox", "hqDojox" ] ];
+	</script>
+	<!--[if IE]>
+	<script type="text/javascript">
+		// since dojo has trouble when it comes to using relative urls + ssl, we
+		// use this workaorund to provide absolute urls.
+		function qualifyURL(url) {
+			var a = document.createElement('img');
+		    a.src = url;
+		    return a.src;
+		}
+				
+		djConfig.modulePaths = {
+		    "dojo": qualifyURL("/static/js/dojo/1.5/dojo"),
+		    "dijit":  qualifyURL("/static/js/dojo/1.5/dijit"),
+		    "dojox":  qualifyURL("/static/js/dojo/1.5/dojox")
+	  	};
+	</script>
+	<![endif]-->
+	<script src="<html:rewrite page='/static/js/dojo/1.5/dojo/dojo.js'/>" type="text/javascript"></script>
+	<script src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
+	<script src="<html:rewrite page="/js/prototype.js"/>" type="text/javascript"></script>
+	<script src="<html:rewrite page="/js/effects.js"/>" type="text/javascript"></script>
+	<script src="<html:rewrite page="/js/lib/lib.js"/>" type="text/javascript"></script>
+	<script>
+		var indicatorCharts = new Array();
+	
+		<c:forEach var="metric" varStatus="status" items="${chartDataKeys}">
+		   <c:choose>
+		     <c:when test="${xlib}">
+		     		indicatorCharts[indicatorCharts.length] = {
+		     	     		"entityId" : "<c:out value="${metric.entityId}" />",
+		     	     		"entityType" : "<c:out value="${metric.entityId.type}" />",
+		
+		     			    <c:if test="${not empty metric.childType}">
+		     	     		"ctype" : "<c:out value="${metric.childType}" />",
+		     			    </c:if>
+		     			    
+		     	     		"metricId" : "<c:out value="${metric.templateId}" />",
+		     	     		"metricLabel" : "<c:out value="${metric.label}"/>",
+		     	     		"metricSource" : "<c:out value="${metric.metricSource}"/>",
+		     	     		"minMetric" : "<c:out value="${metric.minMetric.valueFmt}"/>",
+		     	     		"avgMetric" : "<c:out value="${metric.avgMetric.valueFmt}"/>",
+		     	     		"maxMetric" : "<c:out value="${metric.maxMetric.valueFmt}"/>",
+		     	     		"unitUnits" : "<c:out value="${metric.unitUnits}"/>",
+		     	     		"unitScale" : "<c:out value="${metric.unitScale}"/>",
+		     	     		"index" : "<c:out value="${status.index}"/>",
+		     	     		"timeToken" : "<c:out value="${IndicatorViewsForm.timeToken}"/>"     	     		
+		     		};
+		     </c:when>
+		     <c:otherwise>
+					indicatorCharts[indicatorCharts.length] = {
+							"error" : "<fmt:message key="error.NoXLibInstalled"/>"
+					};
+		     </c:otherwise>
+		   </c:choose>
+			   
+		</c:forEach>
+		var props = { 
+				  "name" : "MyIndicatorChartsManager",
+				  "view" : "<c:out value="${IndicatorViewsForm.view}"/>",
+				  "eid" : "<c:out value="${eid}"/>",
+				  "baseUrl" : "/resource/common/monitor/visibility/IndicatorCharts.do",
+				  "displaySize" : <c:out value="${IndicatorViewsForm.displaySize}"/>
+		  };
+		
+		  <c:if test="${not empty ctype}">
+		  props.ctype = "<c:out value="${ctype}"/>";
+		  </c:if>
+		
+		  props.labels = {
+				  "low" : "<fmt:message key="resource.common.monitor.visibility.LowTH"/>",
+				  "avg" : "<fmt:message key="resource.common.monitor.visibility.AvgTH"/>",
+				  "peak" : "<fmt:message key="resource.common.monitor.visibility.PeakTH"/>"
+		  }
+		  
+		  var MyIndicatorChartsManager = new hyperic.indicator_charts_manager(props, indicatorCharts);
+		
+		  <c:if test="${not empty chartDataKeys}">
+		  MyIndicatorChartsManager.loadChart(0);
+		  </c:if>
+	</script>
 </body>
-
-<script type="text/javascript">
-  var props = { 
-		  "name" : "MyIndicatorChartsManager",
-		  "view" : "<c:out value="${IndicatorViewsForm.view}"/>",
-		  "eid" : "<c:out value="${eid}"/>",
-		  "baseUrl" : "/resource/common/monitor/visibility/IndicatorCharts.do",
-		  "displaySize" : <c:out value="${IndicatorViewsForm.displaySize}"/>
-  };
-
-  <c:if test="${not empty ctype}">
-  props.ctype = "<c:out value="${ctype}"/>";
-  </c:if>
-
-  props.labels = {
-		  "low" : "<fmt:message key="resource.common.monitor.visibility.LowTH"/>",
-		  "avg" : "<fmt:message key="resource.common.monitor.visibility.AvgTH"/>",
-		  "peak" : "<fmt:message key="resource.common.monitor.visibility.PeakTH"/>"
-  }
-  
-  var MyIndicatorChartsManager = new hyperic.indicator_charts_manager(props, indicatorCharts);
-
-  <c:if test="${not empty chartDataKeys}">
-  MyIndicatorChartsManager.loadChart(0);
-  </c:if>
-</script>
-
 </html>
 

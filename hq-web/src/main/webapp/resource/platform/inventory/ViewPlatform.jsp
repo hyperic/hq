@@ -29,12 +29,14 @@
   USA.
  --%>
 
-
-<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
-<script type="text/javascript">
-var pageData = new Array();
-</script>
-
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+</c:set>
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	var pageData = new Array();
+</c:set>
 <c:set var="entityId" value="${Resource.entityId}"/>
 <c:set var="selfAction" value="/resource/platform/Inventory.do?mode=view&eid=${entityId}"/>
 <c:if test="${not empty param.eid && not empty param.resourceType && param.resourceType != -1}">
@@ -233,8 +235,8 @@ var pageData = new Array();
 </div>
 </div>
 
-<script type="text/javascript">
-  clearIfAnyChecked();
-</script>
-
+<c:set var="jsScript" scope="request">
+	${jsScript}
+  	clearIfAnyChecked();
+</c:set>
 <tiles:insert definition=".page.footer"/>

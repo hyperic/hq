@@ -37,15 +37,17 @@
 <tiles:importAttribute name="availableServicesCount"/>
 <tiles:importAttribute name="pendingServices"/>
 <tiles:importAttribute name="pendingServicesCount"/>
-
-<script  src="<html:rewrite page="/js/addRemoveWidget.js"/>" type="text/javascript"></script>
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	<script  src="<html:rewrite page="/js/addRemoveWidget.js"/>" type="text/javascript"></script>
+</c:set>
 <c:set var="widgetInstanceName" value="addServices"/>
-
-<script type="text/javascript">
-var pageData = new Array();
-initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-</script>
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	var pageData = new Array();
+	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+</c:set>
 
 <c:url var="selfJscAction" value="/resource/application/Inventory.do">
   <c:param name="mode" value="addServices"/>
@@ -248,7 +250,9 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   </c:if>
 </c:url>
 
-<script type="text/javascript"> <!--
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	
     function applyNameFilter() {
         goToLocationSelfAndElement(
                 'nameFilter',
@@ -256,8 +260,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
                 '<c:out value="${selfJscAction}" escapeXml="false"/>');
         return false;
     }
-// -->
-</script>
+</c:set>
 
 <!--  SELECT & ADD -->
 <table width="100%" cellpadding="0" cellspacing="0" border="0">

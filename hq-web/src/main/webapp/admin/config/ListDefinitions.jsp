@@ -31,11 +31,14 @@
   USA.
  --%>
 
-
-<script src="<html:rewrite page="/js/listWidget.js"/>"
-	type="text/javascript"></script>
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	<script src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+</c:set>
 <c:set var="widgetInstanceName" value="listAlerts" />
-<script type="text/javascript">
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	
 	var pageData = new Array();
 
 	initializeWidgetProperties('${widgetInstanceName}');
@@ -46,7 +49,7 @@
     	document.RemoveConfigForm.setActiveInactive.value='y';
     	document.RemoveConfigForm.submit();
 	}
-</script>
+</c:set>
 
 <hq:pageSize var="pageSize" />
 

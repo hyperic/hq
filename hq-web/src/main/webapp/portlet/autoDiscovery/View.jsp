@@ -43,49 +43,51 @@
   <tiles:put name="portletName" beanName="portletName" />
 </tiles:insert>
 
-<script language="JavaScript1.2">
-// If the user has checked a server but not its platform, check the platform
-function setImportCheckboxes (cbform) {
-  var pcChecked = false;
-  for (var i=0; i<cbform.elements.length; i++) {
-    if (cbform.elements[i].name == 'platformsToProcess') {
-      pcChecked = cbform.elements[i].checked;
-      continue;
-    }
-
-    if (cbform.elements[i].name == 'serversToProcess' && 
-        cbform.elements[i].checked) {
-        cbform.elements[i].checked = pcChecked;
-    }
-  }
-}
-function setRemoveCheckboxes (cbform) {
-  var pc;
-  for (var i=0; i<cbform.elements.length; i++) {
-    if (cbform.elements[i].name == 'platformsToProcess') {
-      pc = cbform.elements[i];
-      continue;
-    }
-    /*
-    if (cbform.elements[i].name == 'serversToProcess' && 
-        pc.checked && !cbform.elements[i].checked) {
-		return confirm("Warning: removing a platform will automatically remove all of its servers.\n\nClick OK to proceed.");
-    }
-    */
-  }
-  return true;
-}
-function addInventory() {
-    var formValue = '<hq:constant classname="org.hyperic.hq.appdef.shared.AIQueueConstants" symbol="Q_DECISION_APPROVE"/>';
-    AIQueueForm.queueAction.value = formValue;
-}
-
-function skipResources() {
-    var formValue = '<hq:constant classname="org.hyperic.hq.appdef.shared.AIQueueConstants" symbol="Q_DECISION_IGNORE"/>';
-    if(!setRemoveCheckboxes(AIQueueForm)) return false;
-    AIQueueForm.queueAction.value = formValue; 
-}
-</script>
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	
+	// If the user has checked a server but not its platform, check the platform
+	function setImportCheckboxes (cbform) {
+	  var pcChecked = false;
+	  for (var i=0; i<cbform.elements.length; i++) {
+	    if (cbform.elements[i].name == 'platformsToProcess') {
+	      pcChecked = cbform.elements[i].checked;
+	      continue;
+	    }
+	
+	    if (cbform.elements[i].name == 'serversToProcess' && 
+	        cbform.elements[i].checked) {
+	        cbform.elements[i].checked = pcChecked;
+	    }
+	  }
+	}
+	function setRemoveCheckboxes (cbform) {
+	  var pc;
+	  for (var i=0; i<cbform.elements.length; i++) {
+	    if (cbform.elements[i].name == 'platformsToProcess') {
+	      pc = cbform.elements[i];
+	      continue;
+	    }
+	    /*
+	    if (cbform.elements[i].name == 'serversToProcess' && 
+	        pc.checked && !cbform.elements[i].checked) {
+			return confirm("Warning: removing a platform will automatically remove all of its servers.\n\nClick OK to proceed.");
+	    }
+	    */
+	  }
+	  return true;
+	}
+	function addInventory() {
+	    var formValue = '<hq:constant classname="org.hyperic.hq.appdef.shared.AIQueueConstants" symbol="Q_DECISION_APPROVE"/>';
+	    AIQueueForm.queueAction.value = formValue;
+	}
+	
+	function skipResources() {
+	    var formValue = '<hq:constant classname="org.hyperic.hq.appdef.shared.AIQueueConstants" symbol="Q_DECISION_IGNORE"/>';
+	    if(!setRemoveCheckboxes(AIQueueForm)) return false;
+	    AIQueueForm.queueAction.value = formValue; 
+	}
+</c:set>
 
 <tiles:insert definition=".portlet.error"/>
 

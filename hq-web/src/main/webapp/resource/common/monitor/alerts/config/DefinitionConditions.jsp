@@ -38,9 +38,10 @@
 <tiles:insert definition=".header.tab">
 <tiles:put name="tabKey" value="alert.config.props.CondBox"/>
 </tiles:insert>
-
-<script  src="<html:rewrite page='/js/alertConfigFunctions.js'/>" type="text/javascript"></script>
-
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	<script  src="<html:rewrite page='/js/alertConfigFunctions.js'/>" type="text/javascript"></script>
+</c:set>
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <logic:messagesPresent property="condition[0].trigger">
   <tr>

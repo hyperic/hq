@@ -32,20 +32,22 @@
   USA.
  --%>
 
-
-<script  src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
-<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	<script  src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
+	<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
+</c:set>
 <c:set var="widgetInstanceName" value="listResources"/>
-<script type="text/javascript">
-var pageData = new Array();
-var FOO = "chart";
-var LIST  = "list"; 
-var imagePath = "/images/";
-
-initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-</script>
-
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	var pageData = new Array();
+	var FOO = "chart";
+	var LIST  = "list"; 
+	var imagePath = "/images/";
+	
+	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
+</c:set>
 <hq:constant var="PLATFORM"
     classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
     symbol="APPDEF_TYPE_PLATFORM"/>
@@ -307,25 +309,26 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 
 <c:choose>
   <c:when test="${ResourceHubForm.view == LIST}">
-    <script type="text/javascript">
-      function refreshAvail() {
-        var now = new Date()
-    <c:forEach var="resource" items="${AllResources}">
-        <c:out value="document.avail${resource.entityId.id}.src"/> =
-          '<html:rewrite page="/resource/Availability"/>?timeout=30000&eid=' +
-          '<c:out value="${resource.entityId.appdefKey}"/>#' + now.valueOf();
-    </c:forEach>
-        setAvailRefresh()
-      }
-      
-      function setAvailRefresh() {
-        setTimeout( "refreshAvail()", 60*1000 );
-      }
-      
-      hqDojo.ready(function() {
-    	  setAvailRefresh();
-      });
-    </script>
+    <c:set var="jsScript" scope="request">
+		${jsScript}
+      	function refreshAvail() {
+	        var now = new Date()
+	    <c:forEach var="resource" items="${AllResources}">
+	        <c:out value="document.avail${resource.entityId.id}.src"/> =
+	          '<html:rewrite page="/resource/Availability"/>?timeout=30000&eid=' +
+	          '<c:out value="${resource.entityId.appdefKey}"/>#' + now.valueOf();
+	    </c:forEach>
+	        setAvailRefresh()
+	      }
+	      
+	      function setAvailRefresh() {
+	        setTimeout( "refreshAvail()", 60*1000 );
+	      }
+	      
+	      hqDojo.ready(function() {
+	    	  setAvailRefresh();
+	      });
+	</c:set>
     <c:choose>
     <c:when test="${empty Indicators || empty AllResources}">
     <display:table items="${AllResources}" var="resource" action="${sAction}" width="100%" cellspacing="0" cellpadding="0">
@@ -518,6 +521,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 <tiles:insert definition=".resource.common.addToGroup"/>
 <tiles:insert definition=".page.footer"/>
 
-<script type="text/javascript">
-  clearIfAnyChecked();
-</script>
+<c:set var="jsScript" scope="request">
+	${jsScript}
+  	clearIfAnyChecked();
+</c:set>

@@ -33,7 +33,10 @@
 
 <tiles:importAttribute name="showIQSettings" ignore="true"/>
 
-<script src="<html:rewrite page="/js/functions.js" />" type="text/javascript"></script>
+<c:set var="jsIncludes" scope="request">
+	${jsIncludes}
+	<script src="<html:rewrite page="/js/functions.js" />" type="text/javascript"></script>
+</c:set>
 <link rel=stylesheet href="<html:rewrite page="/css/win.css" />" type="text/css">
 
 <hq:constant

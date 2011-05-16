@@ -3,7 +3,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
-
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -30,7 +30,9 @@
  --%>
 
 
-<script  type="text/javascript">
+<c:set var="jsScript" scope="request">
+	${jsScript}
+	
 	function checkGroup() {
 	  	if (document.ResourceHubForm.ff.selectedIndex == 4) {
 	    	document.ResourceHubForm.g.value = 2;
@@ -38,7 +40,7 @@
 	    	document.ResourceHubForm.g.value = 1;
 	  	}
 	}
-</script>
+</c:set>
 <div class="effectsPortlet">
 	<!-- Content Block Title -->
 	<tiles:insert definition=".header.tab">

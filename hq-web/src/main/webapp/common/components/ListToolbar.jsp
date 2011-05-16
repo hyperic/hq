@@ -51,9 +51,10 @@
 <tiles:importAttribute name="defaultSortColumn"/>
 <tiles:importAttribute name="goButtonLink" ignore="true"/>
 
-<script type="text/javascript">
-  var goButtonLink;
-</script>
+<c:set var="jsScript" scope="request">
+	${jsScript}
+  	var goButtonLink;
+</c:set>
 
 <c:choose>
   <c:when test="${not empty listNewParamName && not empty listNewParamValue}">
@@ -102,18 +103,19 @@
         </td>
         <td><html:img page="/images/spacer.gif" width="10" height="1" alt="" border="0"/></td>
         <td width="100%"><html:link href="#" styleId="goButtonLink"><html:img page="/images/dash-button_go-arrow_gray.gif" width="23" height="17" alt="" border="0" styleId="goButtonImg"/></html:link></td>
-        <script type="text/javascript">
-          goButtonLink = "<c:out value="${goButtonLink}"/>";
+        <c:set var="jsScript" scope="request">
+        	${jsScript}
+          	goButtonLink = "<c:out value="${goButtonLink}"/>";
           
-          hideDiv("goButtonDiv");
+          	hideDiv("goButtonDiv");
   
-          var checkboxesArr = document.getElementsByName("definitions");
-          var numCheckboxes = checkboxesArr.length;
+          	var checkboxesArr = document.getElementsByName("definitions");
+          	var numCheckboxes = checkboxesArr.length;
           
-          if (numCheckboxes > 0) {
-            showDiv("goButtonDiv");
-          }
-        </script>
+          	if (numCheckboxes > 0) {
+            	showDiv("goButtonDiv");
+          	}
+        </c:set>
       </tr>
     </table>
   </div>
