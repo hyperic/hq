@@ -205,6 +205,7 @@
 				<entry key="server.multicast.addr" value="${server.multicast.addr}"/>
 				<entry key="server.multicast.port" value="${server.multicast.port}"/>
 				<entry key="hq.version" value="${version}"/>
+				<entry key="server.admin.password" value="${server.admin.password}"/>
 			</map>
 		</property>
 	</bean>
