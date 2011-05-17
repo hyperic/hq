@@ -62,7 +62,7 @@ public class AvailabilityDataRLE implements Serializable {
     @JoinColumn(name = "MEASUREMENT_ID", nullable = false, insertable = false, updatable = false)
     private Measurement measurement;
 
-    @Column(name = "STARTTIME", nullable = false, insertable = false, updatable = false)
+    @Column(name = "STARTIME", nullable = false, insertable = false, updatable = false)
     private long startime;
 
     public AvailabilityDataRLE() {
