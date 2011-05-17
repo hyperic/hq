@@ -11,7 +11,7 @@
 				<constraints nullable="false" />
 			</column>
 			<column name="CONFIG" type="LONGBLOB" />
-			<column name="DELETED" type="BIT">
+			<column name="DELETED" type="BOOLEAN">
 				<constraints nullable="false" />
 			</column>
 			<column name="VERSION_COL" type="BIGINT">
@@ -19,6 +19,7 @@
 			</column>
 			<column name="PARENT_ID" type="INT" />
 		</createTable>
+		<createSequence sequenceName="EAM_ACTION_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createAgentTable">
 		<createTable tableName="EAM_AGENT">
@@ -40,7 +41,7 @@
 			<column name="PORT" type="INT">
 				<constraints nullable="false" />
 			</column>
-			<column name="UNIDIRECTIONAL" type="BIT">
+			<column name="UNIDIRECTIONAL" type="BOOLEAN">
 				<constraints nullable="false" />
 			</column>
 			<column name="VERSION_COL" type="BIGINT">
@@ -52,6 +53,7 @@
 			unique="true">
 			<column name="AGENTTOKEN" />
 		</createIndex>
+		<createSequence sequenceName="EAM_AGENT_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createAgentTypeTable">
 		<createTable tableName="EAM_AGENT_TYPE">
@@ -69,6 +71,7 @@
 			unique="true">
 			<column name="NAME" />
 		</createIndex>
+		<createSequence sequenceName="EAM_AGENT_TYPE_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createAIQIpTable">
 		<createTable tableName="EAM_AIQ_IP">
@@ -80,7 +83,7 @@
 			</column>
 			<column name="CTIME" type="BIGINT" />
 			<column name="DIFF" type="BIGINT" />
-			<column name="IGNORED" type="BIT" />
+			<column name="IGNORED" type="BOOLEAN" />
 			<column name="MAC_ADDRESS" type="VARCHAR(64)" />
 			<column name="MTIME" type="BIGINT" />
 			<column name="NETMASK" type="VARCHAR(64)" />
@@ -95,6 +98,7 @@
 			<column name="AIQ_PLATFORM_ID" />
 			<column name="ADDRESS" />
 		</createIndex>
+		<createSequence sequenceName="EAM_AIQ_IP_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createAIQPlatformTable">
 		<createTable tableName="EAM_AIQ_PLATFORM">
@@ -119,7 +123,7 @@
 				<constraints nullable="false" />
 			</column>
 			<column name="GATEWAY" type="VARCHAR(64)" />
-			<column name="IGNORED" type="BIT" />
+			<column name="IGNORED" type="BOOLEAN" />
 			<column name="LASTAPPROVED" type="BIGINT" />
 			<column name="LOCATION" type="VARCHAR(100)" />
 			<column name="MEASUREMENT_CONFIG" type="LONGBLOB" />
@@ -152,6 +156,7 @@
 			unique="true">
 			<column name="NAME" />
 		</createIndex>
+		<createSequence sequenceName="EAM_AIQ_PLATFORM_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createAIQServerTable">
 		<createTable tableName="EAM_AIQ_SERVER">
@@ -165,7 +170,7 @@
 			<column name="CUSTOM_PROPERTIES" type="LONGBLOB" />
 			<column name="DESCRIPTION" type="VARCHAR(300)" />
 			<column name="DIFF" type="BIGINT" />
-			<column name="IGNORED" type="BIT" />
+			<column name="IGNORED" type="BOOLEAN" />
 			<column name="INSTALLPATH" type="VARCHAR(255)" />
 			<column name="MEASUREMENT_CONFIG" type="LONGBLOB" />
 			<column name="MTIME" type="BIGINT" />
@@ -177,11 +182,11 @@
 			<column defaultValue="" name="SERVERTYPENAME" type="VARCHAR(200)">
 				<constraints nullable="false" />
 			</column>
-			<column name="SERVICESAUTOMANAGED" type="BIT" />
+			<column name="SERVICESAUTOMANAGED" type="BOOLEAN" />
 			<column name="VERSION_COL" type="BIGINT">
 				<constraints nullable="false" />
 			</column>
-			<column name="VIRTUAL" type="BIT" />
+			<column name="VIRTUAL" type="BOOLEAN" />
 			<column name="AIQ_PLATFORM_ID" type="INT" />
 		</createTable>
 		<createIndex indexName="AIQ_SERVER_UNIQUE" tableName="EAM_AIQ_SERVER"
@@ -193,6 +198,7 @@
 			unique="false">
 			<column name="NAME" />
 		</createIndex>
+		<createSequence sequenceName="EAM_AIQ_SERVER_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createAlertTable">
 		<createTable tableName="EAM_ALERT">
@@ -202,7 +208,7 @@
 			<column name="CTIME" type="BIGINT">
 				<constraints nullable="false" />
 			</column>
-			<column name="FIXED" type="BIT">
+			<column name="FIXED" type="BOOLEAN">
 				<constraints nullable="false" />
 			</column>
 			<column name="VERSION_COL" type="BIGINT">
@@ -216,6 +222,7 @@
 			unique="false">
 			<column name="CTIME" />
 		</createIndex>
+		<createSequence sequenceName="EAM_ALERT_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createAlertActionLogTable">
 		<createTable tableName="EAM_ALERT_ACTION_LOG">
@@ -235,6 +242,7 @@
 			<column name="ALERT_ID" type="INT" />
 			<column name="SUBJECT_ID" type="INT" />
 		</createTable>
+		<createSequence sequenceName="EAM_ALERT_ACTION_LOG_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createAlertConditionTable">
 		<createTable tableName="EAM_ALERT_CONDITION">
@@ -245,10 +253,10 @@
 			<column name="MEASUREMENT_ID" type="INT" />
 			<column name="NAME" type="VARCHAR(100)" />
 			<column name="OPTION_STATUS" type="VARCHAR(25)" />
-			<column name="REQUIRED" type="BIT">
+			<column name="REQUIRED" type="BOOLEAN">
 				<constraints nullable="false" />
 			</column>
-			<column name="THRESHOLD" type="DOUBLE" />
+			<column name="THRESHOLD" type="DOUBLE PRECISION" />
 			<column name="TYPE" type="INT">
 				<constraints nullable="false" />
 			</column>
@@ -257,6 +265,7 @@
 			</column>
 			<column name="TRIGGER_ID" type="INT" />
 		</createTable>
+		<createSequence sequenceName="EAM_ALERT_CONDITION_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createAlertConditionLogTable">
 		<createTable tableName="EAM_ALERT_CONDITION_LOG">
@@ -267,6 +276,7 @@
 			<column name="ALERT_ID" type="INT" />
 			<column name="CONDITION_ID" type="INT" />
 		</createTable>
+		<createSequence sequenceName="EAM_ALERT_CONDITION_LOG_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createAlertDefStateTable">
 		<createTable tableName="EAM_ALERT_DEF_STATE">
@@ -283,21 +293,21 @@
 			<column name="ID" type="INT">
 				<constraints nullable="false" primaryKey="true" />
 			</column>
-			<column name="ACTIVE" type="BIT">
+			<column name="ACTIVE" type="BOOLEAN">
 				<constraints nullable="false" />
 			</column>
-			<column name="CONTROL_FILTERED" type="BIT">
+			<column name="CONTROL_FILTERED" type="BOOLEAN">
 				<constraints nullable="false" />
 			</column>
 			<column name="COUNTER" type="BIGINT" />
 			<column name="CTIME" type="BIGINT">
 				<constraints nullable="false" />
 			</column>
-			<column name="DELETED" type="BIT">
+			<column name="DELETED" type="BOOLEAN">
 				<constraints nullable="false" />
 			</column>
 			<column name="DESCRIPTION" type="VARCHAR(250)" />
-			<column name="ENABLED" type="BIT">
+			<column name="ENABLED" type="BOOLEAN">
 				<constraints nullable="false" />
 			</column>
 			<column name="FREQUENCY_TYPE" type="INT">
@@ -309,7 +319,7 @@
 			<column name="NAME" type="VARCHAR(255)">
 				<constraints nullable="false" />
 			</column>
-			<column name="NOTIFY_FILTERED" type="BIT">
+			<column name="NOTIFY_FILTERED" type="BOOLEAN">
 				<constraints nullable="false" />
 			</column>
 			<column name="PRIORITY" type="INT">
@@ -317,11 +327,12 @@
 			</column>
 			<column name="TRANGE" type="BIGINT" />
 			<column name="VERSION_COL" type="BIGINT" />
-			<column name="WILL_RECOVER" type="BIT">
+			<column name="WILL_RECOVER" type="BOOLEAN">
 				<constraints nullable="false" />
 			</column>
 			<column name="ESCALATION_ID" type="INT" />
 		</createTable>
+		<createSequence sequenceName="EAM_ALERT_DEFINITION_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createAuditTable">
 		<createTable tableName="EAM_AUDIT">
@@ -346,7 +357,7 @@
 			</column>
 			<column name="NEW_VAL" type="VARCHAR(1000)" />
 			<column name="OLD_VAL" type="VARCHAR(1000)" />
-			<column name="ORIGINAL" type="BIT">
+			<column name="ORIGINAL" type="BOOLEAN">
 				<constraints nullable="false" />
 			</column>
 			<column name="PURPOSE" type="INT">
@@ -370,6 +381,7 @@
 			unique="false">
 			<column name="RESOURCE_ID" />
 		</createIndex>
+		<createSequence sequenceName="EAM_AUDIT_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createAIHistoryTable">
 		<createTable tableName="EAM_AUTOINV_HISTORY">
@@ -400,7 +412,7 @@
 			<column name="MESSAGE" type="VARCHAR(500)" />
 			<column name="SCANDESC" type="VARCHAR(200)" />
 			<column name="SCANNAME" type="VARCHAR(100)" />
-			<column name="SCHEDULED" type="BIT">
+			<column name="SCHEDULED" type="BOOLEAN">
 				<constraints nullable="false" />
 			</column>
 			<column name="STARTTIME" type="BIGINT">
@@ -420,6 +432,7 @@
 			unique="false">
 			<column name="SCANNAME" />
 		</createIndex>
+		<createSequence sequenceName="EAM_AUTOINV_HISTORY_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createAIScheduleTable">
 		<createTable tableName="EAM_AUTOINV_SCHEDULE">
@@ -474,6 +487,7 @@
 			unique="true">
 			<column name="TRIGGERNAME" />
 		</createIndex>
+		<createSequence sequenceName="EAM_AUTOINV_SCHEDULE_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createCalendarTable">
 		<createTable tableName="EAM_CALENDAR">
@@ -491,6 +505,7 @@
 			unique="true">
 			<column name="NAME" />
 		</createIndex>
+		<createSequence sequenceName="EAM_CALENDAR_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createCalendarEntryTable">
 		<createTable tableName="EAM_CALENDAR_ENT">
@@ -504,6 +519,7 @@
 				<constraints nullable="false" />
 			</column>
 		</createTable>
+		<createSequence sequenceName="EAM_CALENDAR_ENT_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createCalendarWeekTable">
 		<createTable tableName="EAM_CALENDAR_WEEK">
@@ -529,7 +545,7 @@
 			<column name="DEFAULT_PROPVALUE" type="VARCHAR(300)" />
 			<column name="PROPKEY" type="VARCHAR(80)" />
 			<column name="PREFIX" type="VARCHAR(80)" />
-			<column name="FREAD_ONLY" type="BIT" />
+			<column name="FREAD_ONLY" type="BOOLEAN" />
 			<column name="PROPVALUE" type="VARCHAR(300)" />
 			<column name="VERSION_COL" type="BIGINT">
 				<constraints nullable="false" />
@@ -540,6 +556,7 @@
 			<column name="PREFIX" />
 			<column name="PROPKEY" />
 		</createIndex>
+		<createSequence sequenceName="EAM_CONFIG_PROPS_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createControlHistoryTable">
 		<createTable tableName="EAM_CONTROL_HISTORY">
@@ -563,7 +580,7 @@
 			<column name="RESOURCE_ID" type="INT">
 				<constraints nullable="false" />
 			</column>
-			<column name="SCHEDULED" type="BIT">
+			<column name="SCHEDULED" type="BOOLEAN">
 				<constraints nullable="false" />
 			</column>
 			<column name="STARTTIME" type="BIGINT">
@@ -583,6 +600,7 @@
 			tableName="EAM_CONTROL_HISTORY" unique="false">
 			<column name="STARTTIME" />
 		</createIndex>
+		<createSequence sequenceName="EAM_CONTROL_HISTORY_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createControlScheduleTable">
 		<createTable tableName="EAM_CONTROL_SCHEDULE">
@@ -627,6 +645,7 @@
 			unique="true">
 			<column name="TRIGGERNAME" />
 		</createIndex>
+		<createSequence sequenceName="EAM_CONTROL_SCHEDULE_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createCrispoTable">
 		<createTable tableName="EAM_CRISPO">
@@ -637,6 +656,7 @@
 				<constraints nullable="false" />
 			</column>
 		</createTable>
+		<createSequence sequenceName="EAM_CRISPO_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createCrispoArrayTable">
 		<createTable tableName="EAM_CRISPO_ARRAY">
@@ -668,6 +688,7 @@
 				<constraints nullable="false" />
 			</column>
 		</createTable>
+		<createSequence sequenceName="EAM_CRISPO_OPT_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createDashConfigTable">
 		<createTable tableName="EAM_DASH_CONFIG">
@@ -689,6 +710,7 @@
 			<column name="USER_ID" type="INT" />
 			<column name="ROLE_ID" type="INT" />
 		</createTable>
+		<createSequence sequenceName="EAM_DASH_CONFIG_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createEscalationTable">
 		<createTable tableName="EAM_ESCALATION">
@@ -708,13 +730,13 @@
 			<column defaultValue="" name="NAME" type="VARCHAR(200)">
 				<constraints nullable="false" />
 			</column>
-			<column name="NOTIFY_ALL" type="BIT">
+			<column name="NOTIFY_ALL" type="BOOLEAN">
 				<constraints nullable="false" />
 			</column>
-			<column name="ALLOW_PAUSE" type="BIT">
+			<column name="ALLOW_PAUSE" type="BOOLEAN">
 				<constraints nullable="false" />
 			</column>
-			<column name="FREPEAT" type="BIT">
+			<column name="FREPEAT" type="BOOLEAN">
 				<constraints nullable="false" />
 			</column>
 			<column name="VERSION_COL" type="BIGINT">
@@ -725,6 +747,7 @@
 			unique="true">
 			<column name="NAME" />
 		</createIndex>
+		<createSequence sequenceName="EAM_ESCALATION_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createEscalationActionTable">
 		<createTable tableName="EAM_ESCALATION_ACTION">
@@ -777,6 +800,7 @@
 			<column name="ALERT_DEF_ID" />
 			<column name="ALERT_TYPE" />
 		</createIndex>
+		<createSequence sequenceName="EAM_ESCALATION_STATE_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createEventLogTable">
 		<createTable tableName="EAM_EVENT_LOG">
@@ -807,6 +831,7 @@
 			unique="false">
 			<column name="RESOURCE_ID" />
 		</createIndex>
+		<createSequence sequenceName="EAM_EVENT_LOG_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createExecStrategyTable">
 		<createTable tableName="EAM_EXEC_STRATEGIES">
@@ -829,6 +854,7 @@
 				<constraints nullable="false" />
 			</column>
 		</createTable>
+		<createSequence sequenceName="EAM_EXEC_STRATEGIES_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createExecStrategyTypesTable">
 		<createTable tableName="EAM_EXEC_STRATEGY_TYPES">
@@ -842,6 +868,7 @@
 				<constraints nullable="false" />
 			</column>
 		</createTable>
+		<createSequence sequenceName="EAM_EXEC_STRATEGY_TYPES_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createGalertActionLogTable">
 		<createTable tableName="EAM_GALERT_ACTION_LOG">
@@ -863,6 +890,7 @@
 			</column>
 			<column name="SUBJECT_ID" type="INT" />
 		</createTable>
+		<createSequence sequenceName="EAM_GALERT_ACTION_LOG_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createGalertAuxLogTable">
 		<createTable tableName="EAM_GALERT_AUX_LOGS">
@@ -889,6 +917,7 @@
 			</column>
 			<column name="PARENT" type="INT" />
 		</createTable>
+		<createSequence sequenceName="EAM_GALERT_AUX_LOGS_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createGalertDefTable">
 		<createTable tableName="EAM_GALERT_DEFS">
@@ -898,11 +927,11 @@
 			<column name="CTIME" type="BIGINT">
 				<constraints nullable="false" />
 			</column>
-			<column name="DELETED" type="BIT">
+			<column name="DELETED" type="BOOLEAN">
 				<constraints nullable="false" />
 			</column>
 			<column name="DESCR" type="VARCHAR(255)" />
-			<column name="ENABLED" type="BIT">
+			<column name="ENABLED" type="BOOLEAN">
 				<constraints nullable="false" />
 			</column>
 			<column name="GROUP_ID" type="INT">
@@ -927,13 +956,14 @@
 			tableName="EAM_GALERT_DEFS" unique="false">
 			<column name="GROUP_ID" />
 		</createIndex>
+		<createSequence sequenceName="EAM_GALERT_DEFS_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createGalertLogTable">
 		<createTable tableName="EAM_GALERT_LOGS">
 			<column name="ID" type="INT">
 				<constraints nullable="false" primaryKey="true" />
 			</column>
-			<column name="FIXED" type="BIT">
+			<column name="FIXED" type="BOOLEAN">
 				<constraints nullable="false" />
 			</column>
 			<column defaultValue="" name="LONG_REASON" type="VARCHAR(2048)">
@@ -959,6 +989,7 @@
 			tableName="EAM_GALERT_LOGS" unique="false">
 			<column name="TIMESTAMP" />
 		</createIndex>
+		<createSequence sequenceName="EAM_GALERT_LOGS_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createGtriggerTypesTable">
 		<createTable tableName="EAM_GTRIGGER_TYPES">
@@ -972,6 +1003,7 @@
 				<constraints nullable="false" />
 			</column>
 		</createTable>
+		<createSequence sequenceName="EAM_GTRIGGER_TYPES_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createGtriggerTable">
 		<createTable tableName="EAM_GTRIGGERS">
@@ -994,6 +1026,7 @@
 				<constraints nullable="false" />
 			</column>
 		</createTable>
+		<createSequence sequenceName="EAM_GTRIGGERS_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createMeasurementTable">
 		<createTable tableName="EAM_MEASUREMENT">
@@ -1003,7 +1036,7 @@
 			<column defaultValue="" name="DSN" type="VARCHAR(2048)">
 				<constraints nullable="false" />
 			</column>
-			<column name="ENABLED" type="BIT">
+			<column name="ENABLED" type="BOOLEAN">
 				<constraints nullable="false" />
 			</column>
 			<column name="COLL_INTERVAL" type="BIGINT">
@@ -1033,6 +1066,7 @@
 			<column name="RESOURCE_ID" />
 			<column name="TEMPLATE_ID" />
 		</createIndex>
+		<createSequence sequenceName="EAM_MEASUREMENT_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createMeasurementBaselineTable">
 		<createTable tableName="EAM_MEASUREMENT_BL">
@@ -1042,10 +1076,10 @@
 			<column name="COMPUTE_TIME" type="BIGINT">
 				<constraints nullable="false" />
 			</column>
-			<column name="MAX_EXPECTED_VAL" type="DOUBLE" />
-			<column name="MEAN" type="DOUBLE" />
-			<column name="MIN_EXPECTED_VAL" type="DOUBLE" />
-			<column name="USER_ENTERED" type="BIT">
+			<column name="MAX_EXPECTED_VAL" type="DOUBLE PRECISION" />
+			<column name="MEAN" type="DOUBLE PRECISION" />
+			<column name="MIN_EXPECTED_VAL" type="DOUBLE PRECISION" />
+			<column name="USER_ENTERED" type="BOOLEAN">
 				<constraints nullable="false" />
 			</column>
 			<column name="VERSION_COL" type="BIGINT">
@@ -1058,6 +1092,7 @@
 			<column name="COMPUTE_TIME" />
 			<column name="MEASUREMENT_ID" />
 		</createIndex>
+		<createSequence sequenceName="EAM_MEASUREMENT_BL_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createMeasurementCatTable">
 		<createTable tableName="EAM_MEASUREMENT_CAT">
@@ -1075,6 +1110,7 @@
 			unique="true">
 			<column name="NAME" />
 		</createIndex>
+		<createSequence sequenceName="EAM_MEASUREMENT_CAT_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createMeasurementData1DTable">
 		<createTable tableName="EAM_MEASUREMENT_DATA_1D">
@@ -1150,10 +1186,10 @@
 			<column name="DEFAULT_INTERVAL" type="BIGINT">
 				<constraints nullable="false" />
 			</column>
-			<column name="DEFAULT_ON" type="BIT">
+			<column name="DEFAULT_ON" type="BOOLEAN">
 				<constraints nullable="false" />
 			</column>
-			<column name="DESIGNATE" type="BIT">
+			<column name="DESIGNATE" type="BOOLEAN">
 				<constraints nullable="false" />
 			</column>
 			<column name="MTIME" type="BIGINT">
@@ -1185,6 +1221,7 @@
 			unique="false">
 			<column name="DESIGNATE" />
 		</createIndex>
+		<createSequence sequenceName="EAM_MEASUREMENT_TEMPL_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createMetricAuxLogTable">
 		<createTable tableName="EAM_METRIC_AUX_LOGS">
@@ -1204,6 +1241,7 @@
 				<constraints nullable="false" />
 			</column>
 		</createTable>
+		<createSequence sequenceName="EAM_METRIC_AUX_LOG_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createMetricProbTable">
 		<createTable tableName="EAM_METRIC_PROB">
@@ -1245,6 +1283,7 @@
 			unique="false">
 			<column name="NAME" />
 		</createIndex>
+		<createSequence sequenceName="EAM_MONITORABLE_TYPE_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createNumbersTable">
 		<createTable tableName="EAM_NUMBERS">
@@ -1270,6 +1309,7 @@
 			unique="false">
 			<column name="RESOURCE_TYPE_ID" />
 		</createIndex>
+		<createSequence sequenceName="EAM_OPERATION_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createPluginTable">
 		<createTable tableName="EAM_PLUGIN">
@@ -1296,6 +1336,7 @@
 			unique="true">
 			<column name="NAME" />
 		</createIndex>
+		<createSequence sequenceName="EAM_PLUGIN_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createPrincipalTable">
 		<createTable tableName="EAM_PRINCIPAL">
@@ -1316,6 +1357,7 @@
 			unique="true">
 			<column name="PRINCIPAL" />
 		</createIndex>
+		<createSequence sequenceName="EAM_PRINCIPAL_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createRegTriggerTable">
 		<createTable tableName="EAM_REGISTERED_TRIGGER">
@@ -1334,6 +1376,7 @@
 			</column>
 			<column name="ALERT_DEFINITION_ID" type="INT" />
 		</createTable>
+		<createSequence sequenceName="EAM_REGISTERED_TRIGGER_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createResAuxLogTable">
 		<createTable tableName="EAM_RESOURCE_AUX_LOGS">
@@ -1353,6 +1396,7 @@
 				<constraints nullable="false" />
 			</column>
 		</createTable>
+		<createSequence sequenceName="EAM_RESOURCE_AUX_LOG_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createRoleTable">
 		<createTable tableName="EAM_ROLE">
@@ -1364,7 +1408,7 @@
 				<constraints nullable="false" />
 			</column>
 			<column name="SORT_NAME" type="VARCHAR(100)" />
-			<column name="FSYSTEM" type="BIT" />
+			<column name="FSYSTEM" type="BOOLEAN" />
 			<column name="VERSION_COL" type="BIGINT">
 				<constraints nullable="false" />
 			</column>
@@ -1373,6 +1417,7 @@
 			unique="true">
 			<column name="NAME" />
 		</createIndex>
+		<createSequence sequenceName="EAM_ROLE_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createRoleCalendarTable">
 		<createTable tableName="EAM_ROLE_CALENDAR">
@@ -1396,6 +1441,7 @@
 			<column name="CALENDAR_ID" />
 			<column name="CALTYPE" />
 		</createIndex>
+		<createSequence sequenceName="EAM_ROLE_CALENDAR_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createRoleOpMapTable">
 		<createTable tableName="EAM_ROLE_OPERATION_MAP">
@@ -1427,7 +1473,7 @@
 			<column name="ID" type="INT">
 				<constraints nullable="false" primaryKey="true" />
 			</column>
-			<column name="FACTIVE" type="BIT">
+			<column name="FACTIVE" type="BOOLEAN">
 				<constraints nullable="false" />
 			</column>
 			<column name="DEPARTMENT" type="VARCHAR(100)" />
@@ -1436,7 +1482,7 @@
 			</column>
 			<column name="EMAIL_ADDRESS" type="VARCHAR(100)" />
 			<column name="FIRST_NAME" type="VARCHAR(100)" />
-			<column name="HTML_EMAIL" type="BIT">
+			<column name="HTML_EMAIL" type="BOOLEAN">
 				<constraints nullable="false" />
 			</column>
 			<column name="LAST_NAME" type="VARCHAR(100)" />
@@ -1446,7 +1492,7 @@
 			<column name="PHONE_NUMBER" type="VARCHAR(100)" />
 			<column name="SMS_ADDRESS" type="VARCHAR(100)" />
 			<column name="SORT_NAME" type="VARCHAR(100)" />
-			<column name="FSYSTEM" type="BIT">
+			<column name="FSYSTEM" type="BOOLEAN">
 				<constraints nullable="false" />
 			</column>
 			<column name="VERSION_COL" type="BIGINT">
@@ -1459,6 +1505,7 @@
 			<column name="NAME" />
 			<column name="DSN" />
 		</createIndex>
+		<createSequence sequenceName="EAM_SUBJECT_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createSubjectRoleMapTable">
 		<createTable tableName="EAM_SUBJECT_ROLE_MAP">
@@ -1524,6 +1571,7 @@
 				<constraints nullable="false" />
 			</column>
 		</createTable>
+		<createSequence sequenceName="EAM_UI_ATTACHMENT_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createUIPluginTable">
 		<createTable tableName="EAM_UI_PLUGIN">
@@ -1544,6 +1592,7 @@
 			unique="true">
 			<column name="NAME" />
 		</createIndex>
+		<createSequence sequenceName="EAM_UI_PLUGIN_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createUIViewTable">
 		<createTable tableName="EAM_UI_VIEW">
@@ -1570,6 +1619,7 @@
 			unique="true">
 			<column name="PATH" />
 		</createIndex>
+		<createSequence sequenceName="EAM_UI_VIEW_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createUIViewAdminTable">
 		<createTable tableName="EAM_UI_VIEW_ADMIN">
@@ -1597,7 +1647,7 @@
 			<column name="ID" type="INT">
 				<constraints nullable="false" primaryKey="true" />
 			</column>
-			<column name="IGNORED" type="BIT">
+			<column name="IGNORED" type="BOOLEAN">
 				<constraints nullable="false" />
 			</column>
 			<column name="REPORT" type="VARCHAR(4000)" />
@@ -1608,13 +1658,14 @@
 				<constraints nullable="false" />
 			</column>
 		</createTable>
+		<createSequence sequenceName="EAM_UPDATE_STATUS_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createAvailDataRLETable">
 		<createTable tableName="HQ_AVAIL_DATA_RLE">
-			<column name="STARTTIME" type="BIGINT">
+			<column name="STARTIME" type="BIGINT">
 				<constraints nullable="false" />
 			</column>
-			<column name="AVAILVAL" type="DOUBLE">
+			<column name="AVAILVAL" type="DOUBLE PRECISION">
 				<constraints nullable="false" />
 			</column>
 			<column name="ENDTIME" type="BIGINT">
@@ -1624,7 +1675,7 @@
 				<constraints nullable="false" />
 			</column>
 		</createTable>
-		<addPrimaryKey columnNames="MEASUREMENT_ID, STARTTIME"
+		<addPrimaryKey columnNames="MEASUREMENT_ID, STARTIME"
 			tableName="HQ_AVAIL_DATA_RLE" />
 		<createIndex indexName="AVAIL_RLE_ENDTIME_VAL_IDX"
 			tableName="HQ_AVAIL_DATA_RLE" unique="false">
@@ -1984,6 +2035,7 @@
 			unique="false">
 			<column name="RESOURCE_ID" />
 		</createIndex>
+		<createSequence sequenceName="MANAGED_RESOURCES_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createPluginResTypeTable">
 		<createTable tableName="PLUGIN_RESOURCE_TYPES">
@@ -2002,6 +2054,7 @@
 			<column name="PLUGIN_NAME" />
 			<column name="RESOURCE_TYPE_ID" />
 		</createIndex>
+		<createSequence sequenceName="PLUGIN_RESOURCE_TYPES_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createQrtzBlobTriggersTable">
 		<createTable tableName="QRTZ_BLOB_TRIGGERS">
@@ -2053,7 +2106,7 @@
 			<column defaultValue="" name="INSTANCE_NAME" type="VARCHAR(200)">
 				<constraints nullable="false" />
 			</column>
-			<column name="IS_VOLATILE" type="BIT">
+			<column name="IS_VOLATILE" type="BOOLEAN">
 				<constraints nullable="false" />
 			</column>
 			<column name="JOB_GROUP" type="VARCHAR(200)" />
@@ -2061,11 +2114,11 @@
 			<column name="PRIORITY" type="INT">
 				<constraints nullable="false" />
 			</column>
-			<column name="REQUESTS_RECOVERY" type="BIT" />
+			<column name="REQUESTS_RECOVERY" type="BOOLEAN" />
 			<column defaultValue="" name="STATE" type="VARCHAR(16)">
 				<constraints nullable="false" />
 			</column>
-			<column name="IS_STATEFUL" type="BIT" />
+			<column name="IS_STATEFUL" type="BOOLEAN" />
 			<column defaultValue="" name="TRIGGER_GROUP" type="VARCHAR(200)">
 				<constraints nullable="false" />
 			</column>
@@ -2083,20 +2136,20 @@
 				<constraints nullable="false" />
 			</column>
 			<column name="DESCRIPTION" type="VARCHAR(250)" />
-			<column name="IS_DURABLE" type="BIT">
+			<column name="IS_DURABLE" type="BOOLEAN">
 				<constraints nullable="false" />
 			</column>
-			<column name="IS_VOLATILE" type="BIT">
+			<column name="IS_VOLATILE" type="BOOLEAN">
 				<constraints nullable="false" />
 			</column>
 			<column defaultValue="" name="JOB_CLASS_NAME" type="VARCHAR(250)">
 				<constraints nullable="false" />
 			</column>
 			<column name="JOB_DATA" type="BLOB" />
-			<column name="REQUESTS_RECOVERY" type="BIT">
+			<column name="REQUESTS_RECOVERY" type="BOOLEAN">
 				<constraints nullable="false" />
 			</column>
-			<column name="IS_STATEFUL" type="BIT">
+			<column name="IS_STATEFUL" type="BOOLEAN">
 				<constraints nullable="false" />
 			</column>
 		</createTable>
@@ -2192,7 +2245,7 @@
 			<column name="CALENDAR_NAME" type="VARCHAR(200)" />
 			<column name="DESCRIPTION" type="VARCHAR(250)" />
 			<column name="END_TIME" type="BIGINT" />
-			<column name="IS_VOLATILE" type="BIT">
+			<column name="IS_VOLATILE" type="BOOLEAN">
 				<constraints nullable="false" />
 			</column>
 			<column name="JOB_DATA" type="BLOB" />
