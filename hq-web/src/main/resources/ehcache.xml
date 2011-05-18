@@ -87,6 +87,12 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
+  <cache name="MeasurementTemplate.findByMonitorableType"
+         maxElementsInMemory="1000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.measurement.server.session.MonitorableType"
          maxElementsInMemory="1000"
          eternal="true"
@@ -124,6 +130,12 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="Measurement.findByTemplateForInstance"
+         maxElementsInMemory="10000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+   <cache name="Measurement.findMeasurements"
          maxElementsInMemory="10000"
          eternal="true"
          timeToIdleSeconds="0"

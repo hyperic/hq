@@ -27,6 +27,8 @@ public interface MeasurementTemplateRepository extends JpaRepository<Measurement
     @Transactional(readOnly = true)
     @Query("select t from MeasurementTemplate t " + "join fetch t.monitorableType mt "
            + "where mt.name=:type order by t.name")
+    @QueryHints({ @QueryHint(name = "org.hibernate.cacheable", value = "true"),
+                 @QueryHint(name = "org.hibernate.cacheRegion", value = "MeasurementTemplate.findByMonitorableType") })
     List<MeasurementTemplate> findByMonitorableTypeOrderByName(@Param("type") String type);
     
     @Transactional(readOnly = true)
