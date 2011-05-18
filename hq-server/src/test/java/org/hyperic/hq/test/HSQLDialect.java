@@ -64,8 +64,7 @@ public class HSQLDialect
     }
 
     public boolean usesSequenceGenerator() {
-        // TODO Auto-generated method stub
-        return false;
+        return true;
     }
 
     public boolean supportsPLSQL() {

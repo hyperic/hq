@@ -19,7 +19,7 @@
 			</column>
 			<column name="PARENT_ID" type="INT" />
 		</createTable>
-		<createSequence sequenceName="EAM_ACTION_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_ACTION_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createAgentTable">
 		<createTable tableName="EAM_AGENT">
@@ -53,7 +53,7 @@
 			unique="true">
 			<column name="AGENTTOKEN" />
 		</createIndex>
-		<createSequence sequenceName="EAM_AGENT_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_AGENT_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createAgentTypeTable">
 		<createTable tableName="EAM_AGENT_TYPE">
@@ -71,7 +71,7 @@
 			unique="true">
 			<column name="NAME" />
 		</createIndex>
-		<createSequence sequenceName="EAM_AGENT_TYPE_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_AGENT_TYPE_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createAIQIpTable">
 		<createTable tableName="EAM_AIQ_IP">
@@ -98,7 +98,7 @@
 			<column name="AIQ_PLATFORM_ID" />
 			<column name="ADDRESS" />
 		</createIndex>
-		<createSequence sequenceName="EAM_AIQ_IP_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_AIQ_IP_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createAIQPlatformTable">
 		<createTable tableName="EAM_AIQ_PLATFORM">
@@ -156,7 +156,7 @@
 			unique="true">
 			<column name="NAME" />
 		</createIndex>
-		<createSequence sequenceName="EAM_AIQ_PLATFORM_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_AIQ_PLATFORM_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createAIQServerTable">
 		<createTable tableName="EAM_AIQ_SERVER">
@@ -198,7 +198,7 @@
 			unique="false">
 			<column name="NAME" />
 		</createIndex>
-		<createSequence sequenceName="EAM_AIQ_SERVER_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_AIQ_SERVER_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createAlertTable">
 		<createTable tableName="EAM_ALERT">
@@ -222,7 +222,7 @@
 			unique="false">
 			<column name="CTIME" />
 		</createIndex>
-		<createSequence sequenceName="EAM_ALERT_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_ALERT_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createAlertActionLogTable">
 		<createTable tableName="EAM_ALERT_ACTION_LOG">
@@ -242,7 +242,7 @@
 			<column name="ALERT_ID" type="INT" />
 			<column name="SUBJECT_ID" type="INT" />
 		</createTable>
-		<createSequence sequenceName="EAM_ALERT_ACTION_LOG_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_ALERT_ACTION_LOG_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createAlertConditionTable">
 		<createTable tableName="EAM_ALERT_CONDITION">
@@ -265,7 +265,7 @@
 			</column>
 			<column name="TRIGGER_ID" type="INT" />
 		</createTable>
-		<createSequence sequenceName="EAM_ALERT_CONDITION_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_ALERT_CONDITION_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createAlertConditionLogTable">
 		<createTable tableName="EAM_ALERT_CONDITION_LOG">
@@ -276,7 +276,7 @@
 			<column name="ALERT_ID" type="INT" />
 			<column name="CONDITION_ID" type="INT" />
 		</createTable>
-		<createSequence sequenceName="EAM_ALERT_CONDITION_LOG_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_ALERT_CONDITION_LOG_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createAlertDefStateTable">
 		<createTable tableName="EAM_ALERT_DEF_STATE">
@@ -332,7 +332,7 @@
 			</column>
 			<column name="ESCALATION_ID" type="INT" />
 		</createTable>
-		<createSequence sequenceName="EAM_ALERT_DEFINITION_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_ALERT_DEFINITION_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createAuditTable">
 		<createTable tableName="EAM_AUDIT">
@@ -381,7 +381,7 @@
 			unique="false">
 			<column name="RESOURCE_ID" />
 		</createIndex>
-		<createSequence sequenceName="EAM_AUDIT_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_AUDIT_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createAIHistoryTable">
 		<createTable tableName="EAM_AUTOINV_HISTORY">
@@ -432,7 +432,7 @@
 			unique="false">
 			<column name="SCANNAME" />
 		</createIndex>
-		<createSequence sequenceName="EAM_AUTOINV_HISTORY_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_AUTOINV_HISTORY_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createAIScheduleTable">
 		<createTable tableName="EAM_AUTOINV_SCHEDULE">
@@ -487,7 +487,7 @@
 			unique="true">
 			<column name="TRIGGERNAME" />
 		</createIndex>
-		<createSequence sequenceName="EAM_AUTOINV_SCHEDULE_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_AUTOINV_SCHEDULE_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createCalendarTable">
 		<createTable tableName="EAM_CALENDAR">
@@ -505,7 +505,7 @@
 			unique="true">
 			<column name="NAME" />
 		</createIndex>
-		<createSequence sequenceName="EAM_CALENDAR_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_CALENDAR_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createCalendarEntryTable">
 		<createTable tableName="EAM_CALENDAR_ENT">
@@ -519,7 +519,7 @@
 				<constraints nullable="false" />
 			</column>
 		</createTable>
-		<createSequence sequenceName="EAM_CALENDAR_ENT_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_CALENDAR_ENT_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createCalendarWeekTable">
 		<createTable tableName="EAM_CALENDAR_WEEK">
@@ -556,7 +556,7 @@
 			<column name="PREFIX" />
 			<column name="PROPKEY" />
 		</createIndex>
-		<createSequence sequenceName="EAM_CONFIG_PROPS_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_CONFIG_PROPS_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createControlHistoryTable">
 		<createTable tableName="EAM_CONTROL_HISTORY">
@@ -600,7 +600,7 @@
 			tableName="EAM_CONTROL_HISTORY" unique="false">
 			<column name="STARTTIME" />
 		</createIndex>
-		<createSequence sequenceName="EAM_CONTROL_HISTORY_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_CONTROL_HISTORY_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createControlScheduleTable">
 		<createTable tableName="EAM_CONTROL_SCHEDULE">
@@ -645,7 +645,7 @@
 			unique="true">
 			<column name="TRIGGERNAME" />
 		</createIndex>
-		<createSequence sequenceName="EAM_CONTROL_SCHEDULE_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_CONTROL_SCHEDULE_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createCrispoTable">
 		<createTable tableName="EAM_CRISPO">
@@ -656,7 +656,7 @@
 				<constraints nullable="false" />
 			</column>
 		</createTable>
-		<createSequence sequenceName="EAM_CRISPO_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_CRISPO_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createCrispoArrayTable">
 		<createTable tableName="EAM_CRISPO_ARRAY">
@@ -688,7 +688,7 @@
 				<constraints nullable="false" />
 			</column>
 		</createTable>
-		<createSequence sequenceName="EAM_CRISPO_OPT_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_CRISPO_OPT_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createDashConfigTable">
 		<createTable tableName="EAM_DASH_CONFIG">
@@ -710,7 +710,7 @@
 			<column name="USER_ID" type="INT" />
 			<column name="ROLE_ID" type="INT" />
 		</createTable>
-		<createSequence sequenceName="EAM_DASH_CONFIG_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_DASH_CONFIG_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createEscalationTable">
 		<createTable tableName="EAM_ESCALATION">
@@ -747,7 +747,7 @@
 			unique="true">
 			<column name="NAME" />
 		</createIndex>
-		<createSequence sequenceName="EAM_ESCALATION_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_ESCALATION_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createEscalationActionTable">
 		<createTable tableName="EAM_ESCALATION_ACTION">
@@ -800,7 +800,7 @@
 			<column name="ALERT_DEF_ID" />
 			<column name="ALERT_TYPE" />
 		</createIndex>
-		<createSequence sequenceName="EAM_ESCALATION_STATE_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_ESCALATION_STATE_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createEventLogTable">
 		<createTable tableName="EAM_EVENT_LOG">
@@ -831,7 +831,7 @@
 			unique="false">
 			<column name="RESOURCE_ID" />
 		</createIndex>
-		<createSequence sequenceName="EAM_EVENT_LOG_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_EVENT_LOG_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createExecStrategyTable">
 		<createTable tableName="EAM_EXEC_STRATEGIES">
@@ -854,7 +854,7 @@
 				<constraints nullable="false" />
 			</column>
 		</createTable>
-		<createSequence sequenceName="EAM_EXEC_STRATEGIES_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_EXEC_STRATEGIES_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createExecStrategyTypesTable">
 		<createTable tableName="EAM_EXEC_STRATEGY_TYPES">
@@ -868,7 +868,7 @@
 				<constraints nullable="false" />
 			</column>
 		</createTable>
-		<createSequence sequenceName="EAM_EXEC_STRATEGY_TYPES_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_EXEC_STRATEGY_TYPES_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createGalertActionLogTable">
 		<createTable tableName="EAM_GALERT_ACTION_LOG">
@@ -890,7 +890,7 @@
 			</column>
 			<column name="SUBJECT_ID" type="INT" />
 		</createTable>
-		<createSequence sequenceName="EAM_GALERT_ACTION_LOG_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_GALERT_ACTION_LOG_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createGalertAuxLogTable">
 		<createTable tableName="EAM_GALERT_AUX_LOGS">
@@ -917,7 +917,7 @@
 			</column>
 			<column name="PARENT" type="INT" />
 		</createTable>
-		<createSequence sequenceName="EAM_GALERT_AUX_LOGS_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_GALERT_AUX_LOGS_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createGalertDefTable">
 		<createTable tableName="EAM_GALERT_DEFS">
@@ -956,7 +956,7 @@
 			tableName="EAM_GALERT_DEFS" unique="false">
 			<column name="GROUP_ID" />
 		</createIndex>
-		<createSequence sequenceName="EAM_GALERT_DEFS_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_GALERT_DEFS_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createGalertLogTable">
 		<createTable tableName="EAM_GALERT_LOGS">
@@ -989,7 +989,7 @@
 			tableName="EAM_GALERT_LOGS" unique="false">
 			<column name="TIMESTAMP" />
 		</createIndex>
-		<createSequence sequenceName="EAM_GALERT_LOGS_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_GALERT_LOGS_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createGtriggerTypesTable">
 		<createTable tableName="EAM_GTRIGGER_TYPES">
@@ -1003,7 +1003,7 @@
 				<constraints nullable="false" />
 			</column>
 		</createTable>
-		<createSequence sequenceName="EAM_GTRIGGER_TYPES_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_GTRIGGER_TYPES_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createGtriggerTable">
 		<createTable tableName="EAM_GTRIGGERS">
@@ -1026,7 +1026,7 @@
 				<constraints nullable="false" />
 			</column>
 		</createTable>
-		<createSequence sequenceName="EAM_GTRIGGERS_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_GTRIGGERS_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createMeasurementTable">
 		<createTable tableName="EAM_MEASUREMENT">
@@ -1066,7 +1066,7 @@
 			<column name="RESOURCE_ID" />
 			<column name="TEMPLATE_ID" />
 		</createIndex>
-		<createSequence sequenceName="EAM_MEASUREMENT_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_MEASUREMENT_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createMeasurementBaselineTable">
 		<createTable tableName="EAM_MEASUREMENT_BL">
@@ -1092,7 +1092,7 @@
 			<column name="COMPUTE_TIME" />
 			<column name="MEASUREMENT_ID" />
 		</createIndex>
-		<createSequence sequenceName="EAM_MEASUREMENT_BL_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_MEASUREMENT_BL_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createMeasurementCatTable">
 		<createTable tableName="EAM_MEASUREMENT_CAT">
@@ -1110,7 +1110,7 @@
 			unique="true">
 			<column name="NAME" />
 		</createIndex>
-		<createSequence sequenceName="EAM_MEASUREMENT_CAT_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_MEASUREMENT_CAT_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createMeasurementData1DTable">
 		<createTable tableName="EAM_MEASUREMENT_DATA_1D">
@@ -1221,7 +1221,7 @@
 			unique="false">
 			<column name="DESIGNATE" />
 		</createIndex>
-		<createSequence sequenceName="EAM_MEASUREMENT_TEMPL_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_MEASUREMENT_TEMPL_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createMetricAuxLogTable">
 		<createTable tableName="EAM_METRIC_AUX_LOGS">
@@ -1241,7 +1241,7 @@
 				<constraints nullable="false" />
 			</column>
 		</createTable>
-		<createSequence sequenceName="EAM_METRIC_AUX_LOG_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_METRIC_AUX_LOG_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createMetricProbTable">
 		<createTable tableName="EAM_METRIC_PROB">
@@ -1283,7 +1283,7 @@
 			unique="false">
 			<column name="NAME" />
 		</createIndex>
-		<createSequence sequenceName="EAM_MONITORABLE_TYPE_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_MONITORABLE_TYPE_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createNumbersTable">
 		<createTable tableName="EAM_NUMBERS">
@@ -1309,7 +1309,7 @@
 			unique="false">
 			<column name="RESOURCE_TYPE_ID" />
 		</createIndex>
-		<createSequence sequenceName="EAM_OPERATION_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_OPERATION_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createPluginTable">
 		<createTable tableName="EAM_PLUGIN">
@@ -1336,7 +1336,7 @@
 			unique="true">
 			<column name="NAME" />
 		</createIndex>
-		<createSequence sequenceName="EAM_PLUGIN_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_PLUGIN_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createPrincipalTable">
 		<createTable tableName="EAM_PRINCIPAL">
@@ -1357,7 +1357,7 @@
 			unique="true">
 			<column name="PRINCIPAL" />
 		</createIndex>
-		<createSequence sequenceName="EAM_PRINCIPAL_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_PRINCIPAL_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createRegTriggerTable">
 		<createTable tableName="EAM_REGISTERED_TRIGGER">
@@ -1376,7 +1376,7 @@
 			</column>
 			<column name="ALERT_DEFINITION_ID" type="INT" />
 		</createTable>
-		<createSequence sequenceName="EAM_REGISTERED_TRIGGER_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_REGISTERED_TRIGGER_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createResAuxLogTable">
 		<createTable tableName="EAM_RESOURCE_AUX_LOGS">
@@ -1396,7 +1396,7 @@
 				<constraints nullable="false" />
 			</column>
 		</createTable>
-		<createSequence sequenceName="EAM_RESOURCE_AUX_LOG_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_RESOURCE_AUX_LOG_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createRoleTable">
 		<createTable tableName="EAM_ROLE">
@@ -1417,7 +1417,7 @@
 			unique="true">
 			<column name="NAME" />
 		</createIndex>
-		<createSequence sequenceName="EAM_ROLE_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_ROLE_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createRoleCalendarTable">
 		<createTable tableName="EAM_ROLE_CALENDAR">
@@ -1441,7 +1441,7 @@
 			<column name="CALENDAR_ID" />
 			<column name="CALTYPE" />
 		</createIndex>
-		<createSequence sequenceName="EAM_ROLE_CALENDAR_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_ROLE_CALENDAR_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createRoleOpMapTable">
 		<createTable tableName="EAM_ROLE_OPERATION_MAP">
@@ -1505,7 +1505,7 @@
 			<column name="NAME" />
 			<column name="DSN" />
 		</createIndex>
-		<createSequence sequenceName="EAM_SUBJECT_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_SUBJECT_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createSubjectRoleMapTable">
 		<createTable tableName="EAM_SUBJECT_ROLE_MAP">
@@ -1571,7 +1571,7 @@
 				<constraints nullable="false" />
 			</column>
 		</createTable>
-		<createSequence sequenceName="EAM_UI_ATTACHMENT_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_UI_ATTACHMENT_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createUIPluginTable">
 		<createTable tableName="EAM_UI_PLUGIN">
@@ -1592,7 +1592,7 @@
 			unique="true">
 			<column name="NAME" />
 		</createIndex>
-		<createSequence sequenceName="EAM_UI_PLUGIN_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_UI_PLUGIN_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createUIViewTable">
 		<createTable tableName="EAM_UI_VIEW">
@@ -1619,7 +1619,7 @@
 			unique="true">
 			<column name="PATH" />
 		</createIndex>
-		<createSequence sequenceName="EAM_UI_VIEW_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_UI_VIEW_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createUIViewAdminTable">
 		<createTable tableName="EAM_UI_VIEW_ADMIN">
@@ -1658,7 +1658,7 @@
 				<constraints nullable="false" />
 			</column>
 		</createTable>
-		<createSequence sequenceName="EAM_UPDATE_STATUS_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="EAM_UPDATE_STATUS_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createAvailDataRLETable">
 		<createTable tableName="HQ_AVAIL_DATA_RLE">
@@ -2035,7 +2035,7 @@
 			unique="false">
 			<column name="RESOURCE_ID" />
 		</createIndex>
-		<createSequence sequenceName="MANAGED_RESOURCES_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="MANAGED_RESOURCES_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createPluginResTypeTable">
 		<createTable tableName="PLUGIN_RESOURCE_TYPES">
@@ -2054,7 +2054,7 @@
 			<column name="PLUGIN_NAME" />
 			<column name="RESOURCE_TYPE_ID" />
 		</createIndex>
-		<createSequence sequenceName="PLUGIN_RESOURCE_TYPES_ID_SEQ"/>
+		<createSequence startValue="200" sequenceName="PLUGIN_RESOURCE_TYPES_ID_SEQ"/>
 	</changeSet>
 	<changeSet author="hqdb" id="createQrtzBlobTriggersTable">
 		<createTable tableName="QRTZ_BLOB_TRIGGERS">
