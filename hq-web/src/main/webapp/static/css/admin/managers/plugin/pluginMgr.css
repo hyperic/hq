@@ -277,7 +277,7 @@
 		float:right;
 	}
 	.fileToUploadClose{
-		background: url("/static/images/dash_movecontent_del-on.gif") no-repeat scroll 5px center #FFFFFF
+		background: url("/static/images/dash_movecontent_del-on.gif") no-repeat scroll 5px center #FFFFFF;
 	}
 	#afterSelectFileInstruction{
 		text-align:center;
@@ -285,8 +285,9 @@
 	}
 	.mechanismOffInstruction{
 		background:yellow; 
-	}	
-	#loadingIcon{
+	}
+	#loadingIcon,
+	#summaryLoadingIcon{
 		width:15px;
 	}
 	.infoIcon{

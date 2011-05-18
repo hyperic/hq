@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -153,23 +154,12 @@ public class PluginManagerController extends BaseController implements Applicati
     public @ResponseBody Map<String, Object> getAgentInfo() {
         Map<String, Object> info = new HashMap<String,Object>();
         int agentErrorCount=0;
-        List<Agent> allAgents = agentManager.getAgents();
-        if (allAgents != null){
-            for (Agent agent : allAgents){
-                Collection<AgentPluginStatus> pluginStatus = agent.getPluginStatuses(); 
-                for (AgentPluginStatus status : pluginStatus){
-                    String lastSyncStatus = status.getLastSyncStatus();
-                    if (lastSyncStatus == null) {
-                        continue;
-                    }
-                    AgentPluginStatusEnum e = AgentPluginStatusEnum.valueOf(lastSyncStatus);
-                    if (e == AgentPluginStatusEnum.SYNC_FAILURE){
-                        agentErrorCount++;
-                        break;
-                    }
-                }
-            }
+        Map<Integer, AgentPluginStatus> failureAgents = pluginManager.getStatusesByAgentId(AgentPluginStatusEnum.SYNC_FAILURE);
+        
+        if(failureAgents!=null && failureAgents.size()>0){
+            agentErrorCount = failureAgents.size();
         }
+       
         info.put("agentErrorCount", agentErrorCount);
         info.put("allAgentCount", agentManager.getNumAutoUpdatingAgents());
         return info;
@@ -178,21 +168,17 @@ public class PluginManagerController extends BaseController implements Applicati
     @RequestMapping(method = RequestMethod.GET, value="/agent/summary", headers="Accept=application/json")
     public @ResponseBody List<String> getAgentStatusSummary() {
         List<String> agentNames = new ArrayList<String>();
-        List<Agent> allAgents = agentManager.getAgents();
-        for (Agent agent : allAgents){
-            Collection<AgentPluginStatus> pluginStatus = agent.getPluginStatuses(); 
-            for(AgentPluginStatus status:pluginStatus){
-                String lastSyncStatus = status.getLastSyncStatus();
-                if (lastSyncStatus == null) {
-                    continue;
-                }
-                AgentPluginStatusEnum e =AgentPluginStatusEnum.valueOf(lastSyncStatus);
-                if (e == AgentPluginStatusEnum.SYNC_FAILURE){
-                    agentNames.add(getAgentName(agent));
-                    break;
-                }
-            }
+        
+        Map<Integer, AgentPluginStatus> failureAgents = pluginManager.getStatusesByAgentId(AgentPluginStatusEnum.SYNC_FAILURE);
+        Iterator it = failureAgents.entrySet().iterator();
+        while(it.hasNext()){
+            Map.Entry<Integer, AgentPluginStatus> pairs = (Map.Entry<Integer, AgentPluginStatus>) it.next();
+            AgentPluginStatus status = pairs.getValue();
+            agentNames.add(getAgentName(status.getAgent()));
         }
+       
+        Collections.sort(agentNames);
+        
         return agentNames;
     }    
     
