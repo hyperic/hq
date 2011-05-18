@@ -14,6 +14,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.Table;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -28,6 +29,7 @@ import org.hyperic.hq.events.shared.AlertDefinitionValue;
 @PrimaryKeyJoinColumn(name = "DEF_ID", referencedColumnName = "ID")
 @Entity
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@Table(name="RESOURCE_ALERT_DEFINITION")
 public class ResourceAlertDefinition
     extends AlertDefinition {
 

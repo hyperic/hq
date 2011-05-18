@@ -2313,7 +2313,7 @@
 		</createTable>
 	</changeSet>
 	<changeSet author="hqdb" id="createResAlertDefTable">
-		<createTable tableName="ResourceAlertDefinition">
+		<createTable tableName="RESOURCE_ALERT_DEFINITION">
 			<column name="RESOURCE_ID" type="INT" />
 			<column name="resourceTypeAlertDefinition_ID" type="INT" />
 			<column name="DEF_ID" type="INT">
@@ -2321,24 +2321,24 @@
 			</column>
 			<column name="resourceTypeAlertDefinition_DEF_ID" type="INT" />
 		</createTable>
-		<createIndex indexName="ALERT_DEF_RES_ID_IDX" tableName="ResourceAlertDefinition"
+		<createIndex indexName="ALERT_DEF_RES_ID_IDX" tableName="RESOURCE_ALERT_DEFINITION"
 			unique="false">
 			<column name="RESOURCE_ID" />
 		</createIndex>
-		<addPrimaryKey columnNames="DEF_ID" tableName="ResourceAlertDefinition" />
+		<addPrimaryKey columnNames="DEF_ID" tableName="RESOURCE_ALERT_DEFINITION" />
 	</changeSet>
 	<changeSet author="hqdb" id="createResTypeAlertDefTable">
-		<createTable tableName="ResourceTypeAlertDefinition">
-			<column name="resourceType" type="INT" />
+		<createTable tableName="RESOURCE_TYPE_ALERT_DEFINITION">
+			<column name="RESOURCE_TYPE" type="INT" />
 			<column name="DEF_ID" type="INT">
 				<constraints nullable="false" />
 			</column>
 		</createTable>
 		<createIndex indexName="ALERT_DEF_RES_TYPE_ID_IDX"
-			tableName="ResourceTypeAlertDefinition" unique="false">
-			<column name="resourceType" />
+			tableName="RESOURCE_TYPE_ALERT_DEFINITION" unique="false">
+			<column name="RESOURCE_TYPE" />
 		</createIndex>
-		<addPrimaryKey columnNames="DEF_ID" tableName="ResourceTypeAlertDefinition" />
+		<addPrimaryKey columnNames="DEF_ID" tableName="RESOURCE_TYPE_ALERT_DEFINITION" />
 	</changeSet>
 	<changeSet author="hqdb" id="createActionParentFK">
 		<addForeignKeyConstraint baseColumnNames="PARENT_ID"
@@ -2857,14 +2857,14 @@
 			baseTableName="EAM_ALERT" constraintName="FKE5B216AEB5626424"
 			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="DEF_ID"
-			referencedTableName="ResourceAlertDefinition" referencesUniqueColumn="false" />
+			referencedTableName="RESOURCE_ALERT_DEFINITION" referencesUniqueColumn="false" />
 	</changeSet>
 	<changeSet author="hqdb" id="createAlertDefStateFK">
 		<addForeignKeyConstraint baseColumnNames="ALERT_DEFINITION_ID"
 			baseTableName="EAM_ALERT_DEF_STATE" constraintName="FKF0E90746B5626424"
 			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="DEF_ID"
-			referencedTableName="ResourceAlertDefinition" referencesUniqueColumn="false" />
+			referencedTableName="RESOURCE_ALERT_DEFINITION" referencesUniqueColumn="false" />
 	</changeSet>
 	<changeSet author="hqdb" id="createAlertDefEscalationFK">
 		<addForeignKeyConstraint baseColumnNames="ESCALATION_ID"
@@ -2878,28 +2878,28 @@
 			baseTableName="EAM_REGISTERED_TRIGGER" constraintName="FK4A8354A9B5626424"
 			deferrable="false" initiallyDeferred="false" onDelete="CASCADE"
 			onUpdate="NO ACTION" referencedColumnNames="DEF_ID"
-			referencedTableName="ResourceAlertDefinition" referencesUniqueColumn="false" />
+			referencedTableName="RESOURCE_ALERT_DEFINITION" referencesUniqueColumn="false" />
 	</changeSet>
 	<changeSet author="hqdb" id="createResAlertDefActionFK">
 		<addForeignKeyConstraint baseColumnNames="ALERTDEF_ID"
 			baseTableName="RESOURCE_ALERTDEF_ACTIONS" constraintName="FK1563EBD8331E8A31"
 			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="DEF_ID"
-			referencedTableName="ResourceAlertDefinition" referencesUniqueColumn="false" />
+			referencedTableName="RESOURCE_ALERT_DEFINITION" referencesUniqueColumn="false" />
 	</changeSet>
 	<changeSet author="hqdb" id="createResAlertDefCondFK">
 		<addForeignKeyConstraint baseColumnNames="ALERTDEF_ID"
 			baseTableName="RESOURCE_ALERTDEF_CONDS" constraintName="FKAB2CD72C331E8A31"
 			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="DEF_ID"
-			referencedTableName="ResourceAlertDefinition" referencesUniqueColumn="false" />
+			referencedTableName="RESOURCE_ALERT_DEFINITION" referencesUniqueColumn="false" />
 	</changeSet>
 	<changeSet author="hqdb" id="createActionResTypeAlertDefFK">
 		<addForeignKeyConstraint baseColumnNames="ALERTDEF_ID"
 			baseTableName="RESOURCE_TYPE_ALERTDEF_ACTIONS" constraintName="FKEC4AACBB484A7717"
 			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="DEF_ID"
-			referencedTableName="ResourceTypeAlertDefinition"
+			referencedTableName="RESOURCE_TYPE_ALERT_DEFINITION"
 			referencesUniqueColumn="false" />
 	</changeSet>
 	<changeSet author="hqdb" id="createResTypeAlertDefCondFK">
@@ -2907,27 +2907,27 @@
 			baseTableName="RESOURCE_TYPE_ALERTDEF_CONDS" constraintName="FKB98474CF484A7717"
 			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="DEF_ID"
-			referencedTableName="ResourceTypeAlertDefinition"
+			referencedTableName="RESOURCE_TYPE_ALERT_DEFINITION"
 			referencesUniqueColumn="false" />
 	</changeSet>
 	<changeSet author="hqdb" id="createResAlertDefFK">
 		<addForeignKeyConstraint baseColumnNames="DEF_ID"
-			baseTableName="ResourceAlertDefinition" constraintName="FKF9AB05C12FAEC3"
+			baseTableName="RESOURCE_ALERT_DEFINITION" constraintName="FKF9AB05C12FAEC3"
 			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_ALERT_DEFINITION"
 			referencesUniqueColumn="false" />
 	</changeSet>
 	<changeSet author="hqdb" id="createResAlertTypeDefFK">
 		<addForeignKeyConstraint baseColumnNames="resourceTypeAlertDefinition_DEF_ID"
-			baseTableName="ResourceAlertDefinition" constraintName="FKF9AB05C19DE3A793"
+			baseTableName="RESOURCE_ALERT_DEFINITION" constraintName="FKF9AB05C19DE3A793"
 			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="DEF_ID"
-			referencedTableName="ResourceTypeAlertDefinition"
+			referencedTableName="RESOURCE_TYPE_ALERT_DEFINITION"
 			referencesUniqueColumn="false" />
 	</changeSet>
 	<changeSet author="hqdb" id="createResTypeAlertDefFK">
 		<addForeignKeyConstraint baseColumnNames="DEF_ID"
-			baseTableName="ResourceTypeAlertDefinition" constraintName="FKD0174A272FAEC3"
+			baseTableName="RESOURCE_TYPE_ALERT_DEFINITION" constraintName="FKD0174A272FAEC3"
 			deferrable="false" initiallyDeferred="false" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="EAM_ALERT_DEFINITION"
 			referencesUniqueColumn="false" />
