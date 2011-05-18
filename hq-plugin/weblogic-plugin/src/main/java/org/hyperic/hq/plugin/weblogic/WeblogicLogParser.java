@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -38,11 +39,16 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class WeblogicLogParser {
 
-    private Pattern pattern = null;
-    private DateFormat dateFormat =
-        DateFormat.getDateTimeInstance(2, 0, Locale.getDefault());
+   private Pattern pattern = null;
+    private static final Log LOG = LogFactory.getLog(WeblogicLogParser.class.getName());
+    private static final String FORMAT_PROPERTY = "weblogic.parser.datetime.format";
+    private final String DATE_FORMAT = System.getProperty(FORMAT_PROPERTY, "MMMM d, yyyy h:mm:ss a z");
+    private DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT,Locale.getDefault());
 
     class Entry {
         long time;
@@ -108,7 +114,11 @@ public class WeblogicLogParser {
         try {
             entry.time = this.dateFormat.parse(timestamp).getTime();
         } catch (ParseException e) {
-            entry.time = 0;
+            LOG.warn("Unable to match log timestamp (" + timestamp +
+                      ") with the current date format (" + DATE_FORMAT +
+                      "). Adjust the formatter property (" + FORMAT_PROPERTY +
+                      ") to get accurate timestamp results. Using current time until format is fixed.");
+            entry.time = System.currentTimeMillis();
         }
 
         entry.level = nextField(it);
