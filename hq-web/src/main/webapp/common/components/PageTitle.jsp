@@ -287,7 +287,7 @@
 									        <fmt:message key="resource.hub.Search"/>
 									    </div>
 									    <div class="filterBoxFields">
-            								<html:text property="keywords" size="15" maxlength="40" onfocus="this.select();" value="${initSearchVal}"/>
+            								<html:text property="keywords" size="15" maxlength="40" onfocus="this.value='';" value="${initSearchVal}"/>
 								            <c:choose>
 								                <c:when test="${empty allTypesKey}">
 								                    <html:hidden property="ft" value=""/>&nbsp;
