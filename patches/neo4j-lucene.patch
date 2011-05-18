@@ -1,0 +1,37 @@
+From 0f21a372dc8072a5566529bcadb207dddadc3359 Mon Sep 17 00:00:00 2001
+From: Jennifer Hickey <jennifer.hickey@springsource.com>
+Date: Mon, 16 May 2011 17:56:11 -0700
+Subject: [PATCH] Patch for HQ-3592 ClosedChannelException issue
+
+---
+ .../neo4j/index/impl/lucene/LuceneDataSource.java  |    7 ++++++-
+ 1 files changed, 6 insertions(+), 1 deletions(-)
+
+diff --git a/lucene-index/src/main/java/org/neo4j/index/impl/lucene/LuceneDataSource.java b/lucene-index/src/main/java/org/neo4j/index/impl/lucene/LuceneDataSource.java
+index 5fa5b43..ec4b42d 100644
+--- a/lucene-index/src/main/java/org/neo4j/index/impl/lucene/LuceneDataSource.java
++++ b/lucene-index/src/main/java/org/neo4j/index/impl/lucene/LuceneDataSource.java
+@@ -54,6 +54,7 @@ import org.apache.lucene.search.TopDocs;
+ import org.apache.lucene.search.TopFieldCollector;
+ import org.apache.lucene.store.Directory;
+ import org.apache.lucene.store.FSDirectory;
++import org.apache.lucene.store.MMapDirectory;
+ import org.neo4j.graphdb.Node;
+ import org.neo4j.graphdb.PropertyContainer;
+ import org.neo4j.graphdb.Relationship;
+@@ -463,7 +464,11 @@ public class LuceneDataSource extends LogBackedXaDataSource
+     static Directory getDirectory( String storeDir,
+             IndexIdentifier identifier ) throws IOException
+     {
+-        return FSDirectory.open( getFileDirectory( storeDir, identifier) );
++        MMapDirectory dir=new MMapDirectory(getFileDirectory( storeDir, identifier), null);
++        if(MMapDirectory.UNMAP_SUPPORTED) {
++            dir.setUseUnmap(true);
++        }
++        return dir;
+     }
+     
+     static TopFieldCollector scoringCollector( Sort sorting, int n ) throws IOException
+-- 
+1.6.4.4
+
