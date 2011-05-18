@@ -405,6 +405,12 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
+   <cache name="org.hyperic.hq.events.server.session.ResourceTypeAlertDefinition.resourceAlertDefs"
+         maxElementsInMemory="5000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>      
    <cache name="org.hyperic.hq.events.server.session.ResourceTypeAlertDefinition.actions"
          maxElementsInMemory="5000"
          eternal="true"

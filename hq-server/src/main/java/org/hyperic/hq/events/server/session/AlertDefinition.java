@@ -32,8 +32,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
 import org.hyperic.hibernate.ContainerManagedTimestampTrackable;
@@ -49,7 +47,6 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 
 @Entity
 @Table(name = "EAM_ALERT_DEFINITION")
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @Inheritance(strategy = InheritanceType.JOINED)
 abstract public class AlertDefinition implements AlertDefinitionInterface, PerformsEscalations,
     ContainerManagedTimestampTrackable, Serializable {
