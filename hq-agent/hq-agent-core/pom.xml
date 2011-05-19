@@ -21,10 +21,20 @@
             <artifactId>hq-operations</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
+        </dependency> 
+        <dependency>
+            <groupId>org.hyperic.hq.operation.rabbit</groupId>
+            <artifactId>hq-operation-service-rabbit-annotation</artifactId>
+            <version>${project.version}</version>
+        </dependency> 
+        <dependency>
+            <groupId>org.hyperic.hq.operation.rabbit</groupId>
+            <artifactId>hq-operation-service-rabbit-util</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.hyperic.hq</groupId>
-            <artifactId>hq-operation-service</artifactId>
+            <groupId>org.hyperic.hq.operation.rabbit</groupId>
+            <artifactId>hq-operation-service-rabbit-shared</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
@@ -39,13 +49,7 @@
                 </exclusion>
             </exclusions>
             <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.hyperic.hq.operation.rabbit</groupId>
-            <artifactId>hq-operation-service-rabbit-shared</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
+        </dependency>         
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-beans</artifactId>
@@ -53,10 +57,6 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.hyperic.hq</groupId>

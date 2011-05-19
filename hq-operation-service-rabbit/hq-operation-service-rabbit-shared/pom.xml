@@ -35,7 +35,7 @@
 
     <artifactId>hq-operation-service-rabbit-shared</artifactId>
     <packaging>jar</packaging>
-    <name>Hyperic Rabbit Operation Service Implementation</name>
+    <name>Hyperic Rabbit Operation Service</name>
 
     <dependencies>
         <!-- Temporary-->
@@ -56,6 +56,16 @@
             <artifactId>hq-operations</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
+        </dependency> 
+        <dependency>
+            <groupId>org.hyperic.hq.operation.rabbit</groupId>
+            <artifactId>hq-operation-service-rabbit-annotation</artifactId>
+            <version>${project.version}</version>
+        </dependency> 
+        <dependency>
+            <groupId>org.hyperic.hq.operation.rabbit</groupId>
+            <artifactId>hq-operation-service-rabbit-util</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.rabbitmq</groupId>
@@ -85,6 +95,10 @@
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
             <artifactId>jackson-mapper-asl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId> 
         </dependency>
     </dependencies>
 
