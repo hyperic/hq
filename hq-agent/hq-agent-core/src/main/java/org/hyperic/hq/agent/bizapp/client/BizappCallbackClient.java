@@ -38,9 +38,7 @@ import org.hyperic.hq.bizapp.shared.lather.UpdateAgent_result;
 import org.hyperic.hq.bizapp.shared.lather.UserIsValid_args;
 import org.hyperic.hq.bizapp.shared.lather.UserIsValid_result;
 
-public class BizappCallbackClient 
-    extends AgentCallbackClient
-{
+public class BizappCallbackClient extends AgentCallbackClient {
     private final Log log = LogFactory.getLog(BizappCallbackClient.class);
     
     public BizappCallbackClient(ProviderFetcher fetcher, AgentConfig config){

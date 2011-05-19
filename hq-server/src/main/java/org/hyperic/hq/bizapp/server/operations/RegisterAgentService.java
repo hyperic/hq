@@ -35,6 +35,6 @@ import org.hyperic.hq.operation.RegisterAgentResponse;
  */
 public interface RegisterAgentService {
      
-    RegisterAgentResponse registerAgentRequest(RegisterAgentRequest registerAgentRequest) throws AgentConnectionException, PermissionException;
+    RegisterAgentResponse registration(RegisterAgentRequest registerAgentRequest) throws AgentConnectionException, PermissionException;
 
 }

@@ -85,11 +85,10 @@ public class RegisterAgentServiceImpl implements RegisterAgentService {
         this.zeventManager = zeventManager;
         this.serverOperationServiceValidator = serverOperationServiceValidator;
     }
-    
  
-    @OperationEndpoint(exchange = "to.server", routingKey = "request.register", binding = "request.*", responseExchange = "to.agent", responseRoutingKey = "response.register")
-    public RegisterAgentResponse registerAgentRequest(RegisterAgentRequest registerAgent) throws AgentConnectionException, PermissionException {
-
+    @OperationEndpoint(requestBinding = "hq.request.registration", routing = "hq.registration.response")
+    public RegisterAgentResponse registration(RegisterAgentRequest registerAgent) throws AgentConnectionException, PermissionException {
+        logger.debug("\nRegisterAgentService endpoint received request=" + registerAgent);
         try {
             checkUserCanManageAgent(registerAgent);
         } catch (PermissionException e) {
