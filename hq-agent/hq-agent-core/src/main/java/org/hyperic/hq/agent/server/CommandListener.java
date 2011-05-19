@@ -81,7 +81,7 @@ public class CommandListener
         this.listener   = null;
     }
 
-    void setConnectionListener(AgentConnectionListener listener)
+    void setConnectionListener(final AgentConnectionListener listener)
         throws AgentRunningException
     {
         if(this.running == true){
@@ -89,6 +89,15 @@ public class CommandListener
                                             "running");
         }
         this.listener = listener;
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                try {
+                    if (listener != null) listener.cleanup();
+                } catch (Throwable e) {
+                    logger.error("could not close socket connection: " + e,e);
+                }
+            }
+        });
     }
 
     /**
