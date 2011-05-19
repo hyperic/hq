@@ -1499,15 +1499,15 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     public void syncPluginToAgents(String filename) {
         final Plugin plugin = pluginDAO.getByFilename(filename);
         if (plugin == null) {
-            log.error("attempted to initite plugin transfer of " + filename + " but plugin " +
+            log.error("attempted to initiate plugin transfer of " + filename + " but plugin " +
                       "does not exist in HQ");
             return;
         } else if (plugin.isDisabled()) {
-            log.error("attempted to initite plugin transfer of " + filename + " but plugin " +
+            log.error("attempted to initiate plugin transfer of " + filename + " but plugin " +
                       "is disabled in HQ");
             return;
         } else if (plugin.isDeleted()) {
-            log.error("attempted to initite plugin transfer of " + filename + " but plugin " +
+            log.error("attempted to initiate plugin transfer of " + filename + " but plugin " +
                       "is marked as deleted in HQ");
             return;
         }
