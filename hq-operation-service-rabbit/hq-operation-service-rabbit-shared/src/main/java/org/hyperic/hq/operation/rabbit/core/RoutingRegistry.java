@@ -24,8 +24,6 @@
  */
 package org.hyperic.hq.operation.rabbit.core;
 
-import org.hyperic.hq.operation.rabbit.util.OperationToRoutingMapping;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 

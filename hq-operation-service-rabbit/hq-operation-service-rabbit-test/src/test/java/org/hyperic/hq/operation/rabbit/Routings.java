@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static org.hyperic.hq.operation.rabbit.util.BindingConstants.OPERATION_PREFIX;
+import static org.hyperic.hq.operation.rabbit.util.Routing.OPERATION_PREFIX;
 
 
 @Ignore("TODO remove - deprecated")

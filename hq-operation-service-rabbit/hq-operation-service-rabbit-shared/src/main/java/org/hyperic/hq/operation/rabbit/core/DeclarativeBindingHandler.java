@@ -35,6 +35,7 @@ import org.hyperic.hq.operation.rabbit.connection.ChannelTemplate;
 import org.hyperic.hq.operation.rabbit.util.MessageConstants;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Helena Edelson
@@ -51,24 +52,84 @@ public class DeclarativeBindingHandler implements BindingHandler {
         this.channelTemplate = new ChannelTemplate(connectionFactory);
     }
 
+    public void declareExchange(final String exchange) throws ChannelException {
+        channelTemplate.execute(new ChannelCallback<Boolean>() {
+            public Boolean doInChannel(Channel channel) throws ChannelException {
+                try {
+                    synchronized (monitor) {
+                        channel.exchangeDeclare(exchange, MessageConstants.SHARED_EXCHANGE_TYPE, true, false, null);
+                        logger.debug("created exchange=" + exchange);
+                        return true;
+                    }
+                } catch (IOException e) {
+                    throw new ChannelException("Could not create queue: " + e.getCause());
+                }
+            }
+        });
+    }
+
+    public void declareQueue(final String operationName) throws ChannelException {
+        channelTemplate.execute(new ChannelCallback<Boolean>() {
+            public Boolean doInChannel(Channel channel) throws ChannelException {
+                try {
+                    synchronized (monitor) {
+                        channel.queueDeclare(operationName, true, false, false, null);
+                        logger.debug("created queue=" + operationName);
+                        return true;
+                    }
+                } catch (IOException e) {
+                    throw new ChannelException("Could not create queue: " + e.getCause());
+                }
+            }
+        });
+    }
+
+    /**
+     * Declares a queue, an exchange, and binds the queue to the exchange
+     * @param destination:   the name of the exchange to which messages flow across the binding
+     * @param source:        the name of the exchange from which messages flow across the binding
+     * @param bindingPattern the binding pattern to use
+     * @throws ChannelException if an error occurs
+     */ 
+    public void declareExchangesAndBind(final String destination, final String source, final String bindingPattern) throws ChannelException {
+        channelTemplate.execute(new ChannelCallback<Boolean>() {
+            public Boolean doInChannel(Channel channel) throws ChannelException {
+                try {
+                    synchronized (monitor) {
+                        channel.exchangeDeclare(destination, MessageConstants.SHARED_EXCHANGE_TYPE, true, false, null);
+                        channel.exchangeDeclare(source, MessageConstants.SHARED_EXCHANGE_TYPE, true, false, null);
+                        channel.exchangeBind(destination, source, bindingPattern);
+                        logger.debug("created destination exchange=" + destination + " bound to source exchange=" + source + " with pattern=" + bindingPattern);
+                        return true;
+                    }
+                } catch (IOException e) {
+                    throw new ChannelException("Could not bind " + destination + " exchange to " + source + " exchange: " + e.getCause());
+                }
+            }
+        });
+    }
+
     /**
      * Declare and bind components
      * Queues declared are durable, exclusive, non-auto-delete
      * @param operation the operaton meta-data
      */
     public void declareAndBind(final String operation, final String exchange, final String bindingPattern) throws ChannelException {
-        channelTemplate.execute(new ChannelCallback<String>() {
-            public String doInChannel(Channel channel) throws ChannelException {
+        channelTemplate.execute(new ChannelCallback<Boolean>() {
+            public Boolean doInChannel(Channel channel) throws ChannelException {
                 try {
                     synchronized (monitor) {
                         channel.exchangeDeclare(operation, MessageConstants.SHARED_EXCHANGE_TYPE, true, false, null);
+                        TimeUnit.MILLISECONDS.sleep(1000);
                         String queueName = channel.queueDeclare(operation, true, false, false, null).getQueue();
                         channel.queueBind(queueName, exchange, bindingPattern);
                         logger.debug("created queue=" + queueName + " bound to exchange=" + exchange + " with pattern=" + bindingPattern);
-                        return null;
+                        return true;
                     }
                 } catch (IOException e) {
                     throw new ChannelException("Could not bind " + operation + " queue to " + exchange + " exchange: " + e.getCause());
+                } catch (InterruptedException e) {
+                    throw new ChannelException(e.getCause());
                 }
             }
         });

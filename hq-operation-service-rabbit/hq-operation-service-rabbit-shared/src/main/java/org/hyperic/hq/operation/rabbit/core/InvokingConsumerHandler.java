@@ -47,7 +47,7 @@ import java.lang.reflect.Method;
 public class InvokingConsumerHandler implements MessageHandler {
 
     private final Log logger = LogFactory.getLog(this.getClass());
- 
+
     /**
      * The operation name
      */
@@ -68,10 +68,10 @@ public class InvokingConsumerHandler implements MessageHandler {
         this.methodInvoker = new MethodInvoker(method, endpoint);
         this.method = method;
         this.endpoint = endpoint;
-        this.responseExchange = method.getAnnotation(OperationEndpoint.class).responseExchange();
-        this.responseRoutingKey = method.getAnnotation(OperationEndpoint.class).responseRoutingKey();
+        this.responseExchange = method.getAnnotation(OperationEndpoint.class).response();
+        this.responseRoutingKey = method.getAnnotation(OperationEndpoint.class).routing();
     }
- 
+
     /**
      * Delegates conversion of the request data and invokes the method on the endpoint.
      * If the method invoked is not a void return, publishes the response.
@@ -79,20 +79,12 @@ public class InvokingConsumerHandler implements MessageHandler {
      * @param channel  the channel to use
      */
     public void handle(QueueingConsumer.Delivery delivery, Channel channel) throws Exception {
-        if (delivery.getBody().length <= 0) return;
+        Object response = invoke(delivery);
 
-        if (!delivery.getEnvelope().getExchange().equalsIgnoreCase(responseExchange)
-                && !delivery.getEnvelope().getRoutingKey().equalsIgnoreCase(responseRoutingKey)) {
-
-            //channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
-
-            Object response = invoke(delivery);
-
-            publishResponse(channel, response);
-        }
+        publishResponse(channel, response);
     }
 
-    private Object invoke(QueueingConsumer.Delivery delivery) {     
+    private Object invoke(QueueingConsumer.Delivery delivery) {
         try {
             return methodInvoker.invoke(delivery);
         }
@@ -109,13 +101,12 @@ public class InvokingConsumerHandler implements MessageHandler {
      * assemble and publish the response.
      * @param response the result of invoking the handler method
      * @param channel  the channel to use
-     * @throws org.hyperic.hq.operation.rabbit.connection.ChannelException
+     * @throws com.vmware.vcib.operation.rabbit.connection.ChannelException
      *          if an error occurs while publishing the response
      */
     protected void publishResponse(Channel channel, Object response) throws ChannelException {
-
-        if (response != null && responseExchange != null && responseRoutingKey != null) {
-            logger.debug(channel + " publishing response to " + responseExchange + " with " + responseRoutingKey);
+        if ((response != null && !responseRoutingKey.isEmpty())) {
+            logger.debug("publishing response '" + response + "' to " + responseExchange);
 
             if (channel == null || !channel.isOpen()) {
                 rabbitTemplate.publish(channel, responseExchange, responseRoutingKey, response, null);
@@ -143,7 +134,6 @@ public class InvokingConsumerHandler implements MessageHandler {
             return method.invoke(instance, converter.extractRequest(delivery));
         }
     }
-
 
     @Override
     public String toString() {

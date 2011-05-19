@@ -50,7 +50,7 @@
         <constructor-arg index="2" ref="rabbitErrorHandler"/>
     </bean>
 
-    <bean id="operationToRoutingKeyRegistry" class="org.hyperic.hq.operation.rabbit.core.OperationToRoutingKeyRegistry">
+    <bean id="operationToRoutingKeyRegistry" class="org.hyperic.hq.operation.rabbit.core.OperationToRoutingRegistry">
         <constructor-arg index="0" ref="rabbitConnectionFactory"/>
     </bean>
 

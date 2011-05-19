@@ -28,8 +28,6 @@ public class RabbitMessageListener {
 
     private final Log logger = LogFactory.getLog(this.getClass());
 
-    private final ConnectionFactory connectionFactory;
-
     private final Semaphore cancellationLock = new Semaphore(0);
 
     private final ChannelTemplate channelTemplate;
@@ -52,34 +50,28 @@ public class RabbitMessageListener {
 
     private volatile Executor taskExecutor = new SimpleAsyncTaskExecutor();
 
-    protected final AtomicBoolean read = new AtomicBoolean(true);
-
     private final MessageHandler handler;
 
     private volatile Connection sharedConnection;
 
-    private volatile boolean running = false;
+    private AtomicBoolean running = new AtomicBoolean(false);
 
     private final Object monitor = new Object();
 
     private volatile int prefetchCount = 10;
 
-    public RabbitMessageListener(ConnectionFactory connectionFactory, Object endpoint,
-                                          Method method, ErrorHandler errorHandler) {
-
-        this.connectionFactory = connectionFactory;
+    public RabbitMessageListener(ConnectionFactory connectionFactory, Object endpoint, Method method, ErrorHandler errorHandler) {
         this.channelTemplate = new ChannelTemplate(connectionFactory);
         this.handler = new InvokingConsumerHandler(connectionFactory, endpoint, method);
-        this.queueName = extractQueue(method);
+        this.queueName = method.getName();
         this.errorHandler = errorHandler;
         initialize();
-        logger.info("created listener for endpoint=" + endpoint + " to invoke handle method=" + method.getName());
     }
 
 
     @Override
     public String toString() {
-        return new StringBuilder("connectionFactory=").append(connectionFactory).append(" queueName=").append(queueName)
+        return new StringBuilder("queue=").append(queueName)
                 .append(" sharedConnection=").append(sharedConnection).append(" consumers=")
                 .append(consumers).append(" messageListener=").append(handler)
                 .append(" workerQueues=").append(StringUtils.arrayToCommaDelimitedString(workerQueues)).toString();
@@ -90,16 +82,15 @@ public class RabbitMessageListener {
     }
 
     public void initialize() {
-        Assert.notNull(connectionFactory, "ConnectionFactory must not be null.");
+        Assert.notNull(channelTemplate, "Error creating ChannelTemplate - check the connection factory, credentials, broker.");
+        Assert.notNull(errorHandler, "No ErrorHandler has been set.");
 
         try {
-            synchronized (monitor) {
-                running = true;
-            }
+            running.set(true);
 
             if (sharedConnection == null) {
                 sharedConnection = channelTemplate.createConnection();
-                logger.debug("established a shared " + sharedConnection);
+                logger.debug("established a shared connection " + sharedConnection);
             }
             initializeConsumers();
         }
@@ -111,187 +102,142 @@ public class RabbitMessageListener {
     }
 
     private void initializeConsumers() throws IOException {
-        synchronized (this.consumersMonitor) {
-            if (this.consumers == null) {
+        synchronized (consumersMonitor) {
+            if (consumers == null) {
                 this.channels = new HashSet<Channel>(concurrentConsumers);
                 this.consumers = new HashSet<QueueingConsumer>(concurrentConsumers);
 
                 for (int i = 0; i < concurrentConsumers; i++) {
                     Channel channel = channelTemplate.createChannel();
                     QueueingConsumer consumer = createQueueingConsumer(channel);
-
                     channels.add(channel);
                     consumers.add(consumer);
                 }
-                cancellationLock.release(consumers.size());
+                //cancellationLock.release(consumers.size());
             }
         }
 
         for (QueueingConsumer consumer : consumers) {
-            taskExecutor.execute(new AsyncConsumer(consumer, receiveTimeout));
+            taskExecutor.execute(new ConsumingRunnable(consumer, receiveTimeout));
         }
     }
 
-    protected QueueingConsumer createQueueingConsumer(final Channel channel) throws IOException {
+    /* TODO worker queues */
+
+    private QueueingConsumer createQueueingConsumer(final Channel channel) throws IOException {
         QueueingConsumer consumer = new QueueingConsumer(channel);
-
-        channel.basicQos(prefetchCount);
-        /* TODO workerQueues... */
-        channel.basicConsume(queueName, true, consumer);
- 
+        //channel.basicQos(prefetchCount);
+        channel.basicConsume(queueName, false, consumer);
         return consumer;
-    }
-
-    public String extractQueue(Method method) {
-        String queue = method.getAnnotation(OperationEndpoint.class).queue();
-        return hasValue(queue) ? queue : method.getName();
-    }
-
-    private boolean hasValue(String entry) {
-        return entry != null && entry.length() > 0;
     }
 
     public void setConcurrentConsumers(int concurrentConsumers) {
         this.concurrentConsumers = concurrentConsumers;
     }
 
-    public void setReceiveTimeout(long receiveTimeout) {
-        this.receiveTimeout = receiveTimeout;
-    }
-
     /**
-	 * Stop the shared Connection, and close this container.
+     * Stop the shared Connection, and close this container.
      * Notify all invoker tasks and stop the shared Connection, if any.
-	 */
-    @PreDestroy
-	protected void stop() {
-        if (!this.isRunning()) return;
+     */
+    protected void stop() {
+        if (!running.get()) return;
 
-		synchronized (monitor) {
-			running = false; 
-		}
+        running.set(false);
 
-        try {
-			cancellationLock.acquire(consumers.size());
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-		}
+        /*try {
+            cancellationLock.acquire(consumers.size());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }*/
 
-		synchronized (consumersMonitor) {
-			try {
-				for (Channel channel : this.channels) {
+        synchronized (consumersMonitor) {
+            try {
+                for (Channel channel : channels) {
                     channelTemplate.releaseResources(channel);
-				} 
+                }
                 channelTemplate.closeConnection(sharedConnection);
-
-			} finally {
-				cancellationLock.release(consumers.size());
-			}
+            } finally {
+                cancellationLock.release(consumers.size());
+            }
 
             sharedConnection = null;
             consumers = null;
-			channels = null;
-		}
-	}
-
-
-    /**
-	 * Determine whether this container is currently running,
-	 * that is, whether it has been started and not stopped yet
-     * @return true if running
-     */
-    private boolean isRunning() {
-        synchronized (monitor) {
-            return (running);
+            channels = null;
         }
     }
 
-    private class AsyncConsumer implements Runnable {
+
+    /**
+     * Determine whether this container is currently running,
+     * that is, whether it has been started and not stopped yet
+     * @return true if running
+     */
+    private boolean isRunning() {
+        return running.get();
+    }
+
+    private class ConsumingRunnable implements Runnable {
 
         private QueueingConsumer consumer;
 
         private long receiveTimeout;
 
-        public AsyncConsumer(QueueingConsumer consumer, long receiveTimeout) {
+        public ConsumingRunnable(QueueingConsumer consumer, long receiveTimeout) {
             this.consumer = consumer;
             this.receiveTimeout = receiveTimeout;
         }
 
         public void run() {
-
             try {
-                cancellationLock.acquire();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                return;
-            }
-            try {
-                while (isRunning()) {
+                while (running.get()) {
                     try {
                         consume();
-                        read.set(true);
                     } catch (Exception e) {
-                        // Continue
+                        //continue
                     }
                 }
             } catch (InterruptedException e) {
-                logger.debug("Consumer thread interrupted, processing stopped.");
-                Thread.currentThread().interrupt();
+                //Thread.currentThread().interrupt();
             } catch (ShutdownSignalException e) {
                 logger.debug("Consumer received ShutdownSignal, processing stopped.");
             } catch (Throwable t) {
                 logger.debug("Consumer received fatal exception, processing stopped.", t);
-            } finally {
-                Channel channel = consumer.getChannel();
-                /* TODO
-                logger.debug("Closing consumer on " + channel);
-                channel.basicCancel(consumer.getConsumerTag());  */
-
-                channelTemplate.releaseResources(channel);
-                cancellationLock.release();
             }
         }
 
-        private boolean consume() throws Throwable {
+        private void consume() throws Throwable {
             Channel channel = consumer.getChannel();
+            QueueingConsumer.Delivery delivery = null;
 
-            while (read.get()) {
-                QueueingConsumer.Delivery delivery = consumer.nextDelivery(receiveTimeout);
-                if (delivery == null) return true;
-
-                logger.debug("consume = " + delivery.getEnvelope().getExchange() + ", " + delivery.getEnvelope().getRoutingKey());
-
-                if (delivery.getBody().length > 0) {
-                    invokeListener(channel, delivery);
-                    
-                    read.set(false);
+            try {
+                delivery = consumer.nextDelivery();//receiveTimeout
+                if (delivery != null && delivery.getBody().length > 0) {
+                    /* temporary output */
+                    System.out.println("\ndelivery on queue=" + queueName + ": " + new String(delivery.getBody()) + "\n");
+                    handle(channel, delivery);
+                    channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
                 }
+
+            } catch (Throwable t) {
+                logger.error("Unable to handle message", t.getCause());
+                if (delivery != null) channel.basicReject(delivery.getEnvelope().getDeliveryTag(), true);
+            } finally {
+                channel.basicCancel(consumer.getConsumerTag());
+                channelTemplate.releaseResources(channel);
             }
-            read.set(true);
-            return true;
         }
     }
 
-    private void invokeListener(Channel channel, QueueingConsumer.Delivery delivery) throws Exception {
-        if (!isRunning()) throw new IllegalStateException("rejecting message - listener has stopped: " + delivery.getEnvelope());
-
+    private void handle(Channel channel, QueueingConsumer.Delivery delivery) throws Exception {
+        if (!isRunning()) throw new IllegalStateException("rejecting message - listener has stopped.");
         try {
             handler.handle(delivery, channel);
-        }
-        catch (Throwable t) {
+        } catch (Throwable t) {
             handleListenerException(t);
         }
     }
 
     private void handleListenerException(Throwable e) {
-        if (isRunning()) {
-            if (errorHandler != null) {
-                errorHandler.handleError(e);
-            } else {
-                logger.warn("Execution failed and no ErrorHandler has been set.", e);
-            }
-        } else {
-            logger.debug("Listener exception after container shutdown", e);
-        }
+        if (isRunning()) errorHandler.handleError(e);
     }
 }

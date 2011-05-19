@@ -38,11 +38,11 @@ import java.io.IOException;
 public final class RabbitConnectionFactory extends AbstractRabbitConnectionFactory {
 
     public RabbitConnectionFactory() {
-       super();
+        super();
     }
-    
+
     @Override
     protected Connection createConnection(Address[] addrs) throws IOException {
         return super.doNewConnection(addrs);
-    } 
+    }
 }

@@ -80,6 +80,13 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
         this.convertTo = convertTo;
     }
 
+    @PreDestroy
+    public void close() {
+        synchronized (monitor) {
+            read.set(false);
+            channelTemplate.releaseResources(channel);
+        }
+    }
 
     /**
      * Publishes a message
@@ -95,10 +102,10 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
     /**
      * Publishes a message with the given channel
      * @param channelToUse the channel to use
-     * @param exchange   the exchange name to use
-     * @param routingKey The routing key to use
-     * @param data       the data to send
-     * @param props      AMQP properties
+     * @param exchange     the exchange name to use
+     * @param routingKey   The routing key to use
+     * @param data         the data to send
+     * @param props        AMQP properties
      */
     public void publish(Channel channelToUse, String exchange, String routingKey, Object data, AMQP.BasicProperties props) {
         final byte[] bytes = converter.write(data).getBytes(MessageConstants.CHARSET);
@@ -148,7 +155,7 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
      * @throws IOException
      */
     private Object consume(String queueName, AMQP.BasicProperties props) throws IOException {
-        logger.debug("consuming from queueName=" + queueName);
+        logger.debug("consuming from queue=" + queueName);
 
         QueueingConsumer consumer = new QueueingConsumer(channel);
 
@@ -178,13 +185,5 @@ public class SimpleRabbitTemplate implements RabbitTemplate {
             }
         }
         return null;   // if timeout exceeded
-    }
-
-    @PreDestroy
-    void close() {
-        synchronized (monitor) {
-            read.set(false);
-            channelTemplate.releaseResources(channel);
-        }
     }
 }

@@ -71,7 +71,7 @@ abstract class AbstractRabbitConnectionFactory extends ConnectionFactory {
         setUsername(username);
         setPassword(password);
     }
- 
+
     @PreDestroy
     final void closeConnection() {
         synchronized (monitor) {
@@ -116,7 +116,7 @@ abstract class AbstractRabbitConnectionFactory extends ConnectionFactory {
      * Essentially a ping to see if a broker can be reached.
      * @param addrs an address array of ip/port to connect to
      * @return ConnectionStatus with throwable reason if not
-     * and a boolean active - true if we could connect.
+     *         and a boolean active - true if we could connect.
      */
     public ConnectionStatus isActive(Address[] addrs) {
         Throwable reason = null;

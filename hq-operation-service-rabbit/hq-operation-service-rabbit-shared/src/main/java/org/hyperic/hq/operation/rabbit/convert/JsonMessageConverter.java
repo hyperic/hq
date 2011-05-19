@@ -46,7 +46,7 @@ public class JsonMessageConverter implements MessageConverter {
     private final Method method;
 
     private final PropertiesConverter propertiesConverter;
- 
+
     public JsonMessageConverter(Method method) {
         this.method = method;
         this.converter = new JsonObjectMappingConverter();
@@ -56,32 +56,30 @@ public class JsonMessageConverter implements MessageConverter {
     /**
      * Extracts the data from the delivery object consumed
      * @return the converted data from the byte[]
-     * @throws org.hyperic.hq.operation.ConversionException if an error occurred in the conversion
+     * @throws ConversionException if an error occurred in the conversion
      */
     public Object extractRequest(QueueingConsumer.Delivery delivery) throws ConversionException {
         Object response;
 
         try {
             String json = new String(delivery.getBody(), MessageConstants.CHARSET);
-            logger.info("extracting " + json);
+            logger.debug("extracting " + json);
             response = converter.read(json, method.getParameterTypes()[0]);
         }
         catch (Exception e) {
             throw new ConversionException("Failed to convert json-based Message content", e);
         }
 
-        if (response == null) {
-            response = delivery.getBody();
-        }
+        if (response == null) response = delivery.getBody();
         return response;
     }
 
     /* not started yet */
+
     public Object buildResponse(Object object, QueueingConsumer.Delivery delivery) throws ConversionException {
         final byte[] bytes = converter.write(object).getBytes(MessageConstants.CHARSET);
-
         propertiesConverter.convertProperties(delivery);
-         
         return null;
-    } 
+    }
+
 }

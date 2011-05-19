@@ -31,7 +31,6 @@ import org.hyperic.hq.operation.OperationFailedException;
 import org.hyperic.hq.operation.OperationService;
 import org.hyperic.hq.operation.rabbit.connection.ChannelException;
 import org.hyperic.hq.operation.rabbit.convert.PropertiesConverter;
-import org.hyperic.hq.operation.rabbit.util.OperationToRoutingMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -61,7 +60,7 @@ public class AnnotatedOperationService implements OperationService {
      */
     @Autowired
     public AnnotatedOperationService(RabbitTemplate rabbitTemplate, RoutingRegistry routingRegistry,
-        Converter<Object, String> converter) {
+                                     Converter<Object, String> converter) {
         this.rabbitTemplate = rabbitTemplate;
         this.routingRegistry = routingRegistry;
         this.converter = converter;
@@ -69,7 +68,6 @@ public class AnnotatedOperationService implements OperationService {
     }
 
     /**
-     * TODO test Envelope envelope = createEnvelope(operationName, data);
      * Performs an operation by operation name
      * Delegates handling to the RabbitTemplate for handling.
      * @param operationName the operation name
@@ -79,24 +77,21 @@ public class AnnotatedOperationService implements OperationService {
      *
      */
     public Object perform(String operationName, Object data, Class<? extends Annotation> annotation) throws OperationFailedException {
-
         try {
             OperationToRoutingMapping mapping = routingRegistry.map(operationName, annotation);
 
-            if (mapping.operationReturnsVoid()) {
+            asynchronousSend(mapping, data);
+            return null;
+            /*if (mapping.operationReturnsVoid()) {
                 asynchronousSend(mapping, data);
                 return null;
             } else {
                 return synchronousSend(mapping, data);
-            }
+            }*/
 
         } catch (ChannelException e) {
             throw new OperationFailedException(e.getMessage(), e.getCause());
-        } /*catch (OperationNotSupportedException e) {
-            *//* temporary to handle agent pre-spring test
-            return synchronousSend(new OperationToRoutingMapping("to.server", "request.register", "agent",
-                    RegisterAgentResponse.class, OperationDispatcher.class), data);*//*
-        }*/
+        }
     }
 
     /**
@@ -105,22 +100,20 @@ public class AnnotatedOperationService implements OperationService {
      * @param data    the operation data
      */
     private void asynchronousSend(OperationToRoutingMapping mapping, Object data) {
-        rabbitTemplate.publish(mapping.getExchangeName(), mapping.getRoutingKey(), data, null);
+        rabbitTemplate.publish(mapping.getExchange(), mapping.getRoutingKey(), data, null);
     }
 
     /**
      * Sends a message
-     * </p>
-     * Most if not all of Hyperic's current API is synchronous.
-     * Most of those need to be migrated to async to improve performance,
-     * and leverage the new messaging architecture.
      * @param mapping the routing data
      * @param data    the operation data
      * @return returns the Object from the receiver
      */
     private Object synchronousSend(OperationToRoutingMapping mapping, Object data) {
-        return rabbitTemplate.publishAndReceive(
-                mapping.getQueueName(), mapping.getExchangeName(), mapping.getRoutingKey(), data, mapping.getReturnType(), null);
-    }
+        Object response = rabbitTemplate.publishAndReceive(
+                mapping.getQueue(), mapping.getExchange(), mapping.getRoutingKey(), data, mapping.getTransformType(), null);
 
+        rabbitTemplate.close();
+        return response;
+    } 
 }

@@ -27,16 +27,14 @@ package org.hyperic.hq.operation.rabbit.core;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Pointcut;
 import org.hyperic.hq.operation.OperationFailedException;
 import org.hyperic.hq.operation.OperationService;
 import org.hyperic.hq.operation.rabbit.annotation.OperationDispatcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.lang.reflect.Method;
 
 /**
  * Executes when a matched method execution returns normally
@@ -44,38 +42,30 @@ import java.lang.reflect.Method;
  */
 @Aspect
 @Component
-public class AnnotatedDispatcherAspect {
+public class AnnotatedDispatcherAspect implements OperationDispatcherService {
 
-    private final Log logger = LogFactory.getLog(this.getClass());
+        private final Log logger = LogFactory.getLog(this.getClass());
 
-    private final OperationService operationService;
- 
-    @Autowired
-    public AnnotatedDispatcherAspect(OperationService operationService) {
-        this.operationService = operationService;
-    }
+        private final OperationService operationService;
 
-    @Pointcut("execution(* *.hyperic.hq..*.*(..)) @annotation(dispatcher)")
-    public void operationDispatcherMethod() {
-    }
+        @Autowired
+        public AnnotatedDispatcherAspect(OperationService operationService) {
+            this.operationService = operationService;
+        }
 
-    /**   
-     * Dispatches data to the messaging system by operation name
-     * and data payload. Delegates handling to the OperationService.
-     * @param dispatcher the operation dispatch meta-data
-     * @param object   the data to send
-     * @throws org.hyperic.hq.operation.OperationFailedException if an error occurs in execution
-     */
-    @AfterReturning(pointcut = "@annotation(dispatcher)", returning = "object", argNames = "object,dispatcher") //,pjp
-    public void dispatch(Object object, OperationDispatcher dispatcher) throws OperationFailedException {
-       // not using but not ready to delete
-    }
-  
-    private boolean operationHasReturnType(Method method) {
-        return !void.class.equals(method.getReturnType());
-    }
+        /**
+         * Executes when a matched method execution returns successfully,
+         * dispatching data to the Rabbit Operation Service
+         * @param dispatcher the @OperationDispatcher decorating a pointcut method
+         * @param jp the AspectJ JoinPoint
+         * @param object the pointcut method's return value
+         * @throws OperationFailedException
+         * if an error occurs in execution
+         */
+        @AfterReturning(pointcut = "@annotation(dispatcher)", returning = "object", argNames = "jp, object, dispatcher")
+        public void dispatch(JoinPoint jp, Object object, OperationDispatcher dispatcher) throws OperationFailedException {
+            operationService.perform(jp.getSignature().getName(), object, OperationDispatcher.class);
+            logger.debug("performed operation=" + jp.getSignature().getName() + " on " + object + " dispatcher=" + dispatcher);
+        }
 
-    public Object dispatch(String operationName, Object data) throws OperationFailedException {
-        return operationService.perform(operationName, data, OperationDispatcher.class);
-    }
 }

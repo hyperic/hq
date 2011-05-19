@@ -28,10 +28,12 @@ package org.hyperic.hq.operation.rabbit.core;
 import org.hyperic.hq.operation.OperationDiscoverer;
 import org.hyperic.hq.operation.OperationDiscoveryException;
 import org.hyperic.hq.operation.OperationRegistry;
+import org.hyperic.hq.operation.rabbit.annotation.Operation;
 import org.hyperic.hq.operation.rabbit.annotation.OperationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 /**
@@ -48,16 +50,22 @@ public class AnnotatedOperationDiscoverer implements OperationDiscoverer {
     }
 
     /**
-     * Discovers, evaluates, validates and registers candidates
+     * Load-time discovery of candidates. Delegates to the OperationRegistry
+     * for full registration.
      * @param candidate the dispatcher candidate class
-     * @throws org.hyperic.hq.operation.OperationDiscoveryException
+     * @throws OperationDiscoveryException
      */
     public void discover(Object candidate) throws OperationDiscoveryException {
         Class<?> candidateClass = candidate.getClass();
         if (candidateClass.isAnnotationPresent(OperationService.class)) {
             for (Method method : candidateClass.getDeclaredMethods()) {
-                operationRegistry.register(method, candidate);
+                for (Annotation a : method.getAnnotations()) {
+                    if (a.annotationType().isAnnotationPresent(Operation.class)) {
+                        if (!method.isAccessible()) method.setAccessible(true);
+                        operationRegistry.register(method, candidate);
+                    }
+                }
             }
         }
-    } 
+    }
 }

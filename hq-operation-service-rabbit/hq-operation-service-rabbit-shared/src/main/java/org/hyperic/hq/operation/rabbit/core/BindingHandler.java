@@ -31,7 +31,40 @@ import org.hyperic.hq.operation.rabbit.connection.ChannelException;
  * @author Helena Edelson
  */
 public interface BindingHandler {
- 
-    void declareAndBind(final String operationName, final String exchangeName, final String bindingPattern) throws ChannelException;
-    
+
+    /**
+     * Declares an exchange for a publisher
+     * @param exchange
+     * @throws ChannelException
+     */
+    void declareExchange(String exchange) throws ChannelException;
+
+    /**
+     * Declares a queue by operationName for endpoints that
+     * simply receive off a queue and do not generate a response.
+     * @param operation the method name of the operation
+     * @throws ChannelException if an error occurs
+     */
+    void declareQueue(String operation) throws ChannelException;
+
+    /**
+     * Declares a queue, a source exchange, a destination exchange and binds the
+     * destination to the source exchange, then binds the destination exchange
+     * to the queue
+     * @param destination:   the name of the exchange to which messages flow across the binding
+     * @param source:        the name of the exchange from which messages flow across the binding
+     * @param bindingPattern the binding pattern to use
+     * @throws ChannelException if an error occurs
+     */
+    void declareExchangesAndBind(String destination, String source, String bindingPattern) throws ChannelException;
+
+    /**
+     * Declares a queue, an exchange, and binds the queue to the exchange
+     * @param operationName  the method name of the operation
+     * @param exchangeName   the exchange name to use
+     * @param bindingPattern the binding pattern to use
+     * @throws ChannelException if an error occurs
+     */
+    void declareAndBind(String operationName, String exchangeName, String bindingPattern) throws ChannelException;
+
 }

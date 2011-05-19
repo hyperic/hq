@@ -27,14 +27,16 @@ package org.hyperic.hq.operation.rabbit.core;
 import com.rabbitmq.client.ConnectionFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.operation.OperationDiscoveryException;
+import org.hyperic.hq.operation.OperationRegistrationException;
 import org.hyperic.hq.operation.OperationRegistry;
+import org.hyperic.hq.operation.rabbit.annotation.OperationDispatcher;
 import org.hyperic.hq.operation.rabbit.annotation.OperationEndpoint;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ErrorHandler;
 
 import javax.annotation.PreDestroy;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -47,40 +49,85 @@ public class AnnotatedOperationRegistry implements OperationRegistry {
 
     private final Log logger = LogFactory.getLog(this.getClass());
 
-    private final Map<String, RabbitMessageListener> handlers = new ConcurrentHashMap<String, RabbitMessageListener>();
+    private final Map<String, RabbitMessageListener> endpoints = new ConcurrentHashMap<String, RabbitMessageListener>();
 
-    private final RoutingRegistry routingRegistry;
+    private final Map<String, Object> dispatchers = new ConcurrentHashMap<String, Object>();
+
+    private final RoutingRegistry registry;
 
     private final ErrorHandler errorHandler;
 
     private final ConnectionFactory connectionFactory;
 
     @Autowired
-    public AnnotatedOperationRegistry(ConnectionFactory connectionFactory,
-        RoutingRegistry routingRegistry, ErrorHandler errorHandler) {
+    public AnnotatedOperationRegistry(ConnectionFactory connectionFactory, RoutingRegistry registry,
+                                      ErrorHandler errorHandler) {
         this.connectionFactory = connectionFactory;
-        this.routingRegistry = routingRegistry;
+        this.registry = registry;
         this.errorHandler = errorHandler;
     }
 
-    /**
-     * Registers an candidate and its annotated operation methods
-     * @param method  The method
-     * @param candidate The instance to invoke the method on
-     * @throws OperationDiscoveryException if an exception occurs
-     */
-    public void register(Method method, Object candidate) throws OperationDiscoveryException {
-        routingRegistry.register(method);
 
-        if (method.isAnnotationPresent(OperationEndpoint.class)) { 
-            handlers.put(method.getName(), new RabbitMessageListener(connectionFactory, candidate, method, errorHandler));
-        }
-    }
- 
     @PreDestroy
     public void destroy() throws Exception {
-        for (Map.Entry<String, RabbitMessageListener> entry : handlers.entrySet()) {
+        for (Map.Entry<String, RabbitMessageListener> entry : endpoints.entrySet()) {
             entry.getValue().stop();
         }
     }
+
+    /**
+     * Registers an candidate and its annotated operation methods.
+     * Re-validate because initial validation is done in load-time by the discoverer,
+     * however we want to support runtime registration in which case validation
+     * must exist here.
+     * @param method    The method
+     * @param candidate The instance to invoke the method on
+     * @throws OperationRegistrationException if the operation is already registered
+     *                                        which will alert the developer to change the candidate method name to a unique one
+     */
+    public void register(Method method, Object candidate) throws OperationRegistrationException {
+
+        if (method.isAnnotationPresent(OperationEndpoint.class)) {
+            validateRoutingsSupported(method, method.getAnnotation(OperationEndpoint.class).getClass());
+            validateParameterTypes(method, candidate);
+            validateSupported(method.getName(), endpoints);
+            /*if (!method.getAnnotation(OperationEndpoint.class).responseBinding().isEmpty())
+                validateReturnType(method, candidate);  */
+            registry.register(method);
+            endpoints.put(method.getName(), new RabbitMessageListener(connectionFactory, candidate, method, errorHandler));
+            logger.info(String.format("Registered '%s' on '%s'", method.getAnnotation(OperationEndpoint.class), candidate.getClass()));
+        }
+        else if (method.isAnnotationPresent(OperationDispatcher.class)) {
+            validateRoutingsSupported(method, method.getAnnotation(OperationDispatcher.class).getClass());
+            validateReturnType(method, candidate);
+            validateSupported(method.getName(), dispatchers);
+            registry.register(method);
+            dispatchers.put(method.getName(), candidate);
+            logger.info(String.format("Registered '%s' on '%s'",method.getAnnotation(OperationDispatcher.class), candidate.getClass()));
+        }
+    }
+
+    private void validateSupported(String operation, Map mappings) {
+        if (mappings.containsKey(operation)) throw new OperationRegistrationException(operation);
+    }
+
+    private void validateRoutingsSupported(Method method, Class<? extends Annotation> annotation) throws OperationRegistrationException {
+        if ((registry.supports(method.getName(), annotation)))
+            throw new OperationRegistrationException(
+                    String.format("Illegal method name: '%s' already supports an '%s' operation.", method, annotation.getSimpleName()));
+    }
+
+
+    private void validateParameterTypes(Method method, Object candidate) throws OperationRegistrationException {
+        if (method.getParameterTypes().length != 1) throw new OperationRegistrationException(
+                String.format("Illegal operation: method '%s' on '%s' must have one parameter.", method, candidate));
+    }
+
+
+    private void validateReturnType(Method method, Object candidate) throws OperationRegistrationException {
+        if (void.class.equals(method.getReturnType())) throw new OperationRegistrationException(
+                String.format("Illegal operation: method '%s' on '%s' must have a non-void return type.", method, candidate));
+    }
+
+
 }
