@@ -6,7 +6,7 @@
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 
 <div id="headerLogo">
-	<a href="<html:rewrite action="/Dashboard" />">
+	<a href="<spring:url value="/Dashboard.do" />">
 		<img alt="<fmt:message key="header.Dashboard" />" src="<spring:url value="/static/images/hqlogo.jpg"/>" border="0" />
 	</a>
 </div>
@@ -31,7 +31,7 @@
 		<sec:authorize access="hasRole('ROLE_HQ_USER')">
 			<li>
 				<span><fmt:message key="header.Welcome"/></span>
-				<a href="<html:rewrite action="/admin/user/UserAdmin" />?mode=view&u=${sessionScope.webUser.id}">
+				<a href="<spring:url value="/admin/user/UserAdmin.do?mode=view&u=${sessionScope.webUser.id}"/>">
 	            	${sessionScope.webUser.firstName}
 				</a>
 			</li>
@@ -64,23 +64,23 @@
     <div id="headerTabs">
 		<ul>
 			<li id="dashboardTab" class="tab">
-				<a href="<html:rewrite action="/Dashboard" />">
+				<a href="<spring:url value="/Dashboard.do" />">
 					<fmt:message key="header.dashboard"/>
 				</a>
 			</li>
 	        <li id="resourceTab" class="tab">
-	        	<a href="<html:rewrite action="/ResourceHub" />">
+	        	<a href="<spring:url value="/ResourceHub.do" />">
 	        		<fmt:message key="header.resources"/>
 	        	</a>
 	           	<ul class="root">
 	               	<li>
-	               		<a href="<html:rewrite action="/ResourceHub" />">
+	               		<a href="<spring:url value="/ResourceHub.do" />">
 	               			<fmt:message key="header.Browse"/>
 	               		</a>
 	               	</li>
 	                <c:forEach var="attachment" items="${mastheadResourceAttachments}">
 					<li>
- 						<a href="<html:rewrite page="/mastheadAttach.do?typeId=${attachment.attachment.id}"/>">${attachment.HTML}</a>
+ 						<a href="<spring:url value="/mastheadAttach.do?typeId=${attachment.attachment.id}"/>">${attachment.HTML}</a>
  					</li>
 					</c:forEach>
 	               	<li class="subMenu">
@@ -90,7 +90,7 @@
   								<c:when test="${not empty resources}">
   									<c:forEach var="resource" items="${resources}">
     									<li>
-    										<a href="<html:rewrite page="/Resource.do?eid=${resource.key}"/>">${resource.value.name}</a>
+    										<a href="<spring:url value="/Resource.do?eid=${resource.key}"/>">${resource.value.name}</a>
     									</li>
   									</c:forEach>
   								</c:when>
@@ -112,13 +112,13 @@
 					</c:if>
 					<c:forEach var="attachment" items="${mastheadTrackerAttachments}">
 					<li>
- 						<a href="<html:rewrite page="/mastheadAttach.do?typeId=${attachment.attachment.id}"/>">${attachment.HTML}</a>
+ 						<a href="<spring:url page="/mastheadAttach.do?typeId=${attachment.attachment.id}"/>">${attachment.HTML}</a>
  					</li>
 					</c:forEach>
 				</ul>
 	        </li>
 		    <li id="adminTab" class="tab">
-		    	<a href="<html:rewrite action="/Admin" />">
+		    	<a href="<spring:url value="/Admin.do" />">
 		    		<fmt:message key="header.admin"/>
 		    	</a>
 		   	</li>
@@ -148,13 +148,13 @@
 	    hqDojo.require("dijit.dijit");
     	hqDojo.require("dijit.Dialog");
    	 	
-    	var resourceURL = '<html:rewrite action="/Resource" />';
-		var userURL = '<html:rewrite action="/admin/user/UserAdmin" />';
+    	var resourceURL = '<spring:url value="/Resource.do" />';
+		var userURL = '<spring:url value="/admin/user/UserAdmin.do" />';
     	var searchWidget = new hyperic.widget.search(hqDojo, { search: '<spring:url value="/app/search" />' }, 3, { keyCode: 83, ctrl: true });
     	var refreshCount = 0;
     	var refreshAlerts = function() {
       		hqDojo.xhrGet({
-	    	  	url: "<html:rewrite page="/common/RecentAlerts.jsp"/>",
+	    	  	url: "<spring:url page="/common/RecentAlerts.jsp"/>",
 	    	  	load: function(response, args) {
 	    	        hqDojo.style("headerAlerts", {
 	    	        	"display": "",
@@ -220,7 +220,7 @@
     			hqDojo.connect(hqDojo.byId("updateAcknowledgementButton"), "onclick", function(e) {
         			if (this.value == "<fmt:message key="header.Acknowledge"/>") {
             	        hqDojo.xhrPost({
-                	 	 	url: "<html:rewrite action="/Dashboard" />",
+                	 	 	url: "<spring:url value="/Dashboard.do" />",
                  		 	content: { 
                  		 		update: true 
                  		 	},
