@@ -105,6 +105,11 @@
 	        <li id="analyzeTab" class="tab">
 				<a><fmt:message key="header.analyze"/></a>
 				<ul class="root">
+					<c:if test="${not empty eeItems}">
+						<c:forEach var="eeItem" items="${eeItems}">
+						     <li><a href="<spring:url value="${eeItem.pagePath}"/>"><fmt:message key="${eeItem.messageKey}"/></a></li>
+						</c:forEach>
+					</c:if>
 					<c:forEach var="attachment" items="${mastheadTrackerAttachments}">
 					<li>
  						<a href="<html:rewrite page="/mastheadAttach.do?typeId=${attachment.attachment.id}"/>">${attachment.HTML}</a>
