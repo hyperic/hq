@@ -145,6 +145,7 @@
 		<servlet-name>ServletRedirector</servlet-name>
 		<servlet-name>JspRedirector</servlet-name>
 		<servlet-name>lather</servlet-name>
+		<servlet-name>webapp</servlet-name>
 		<url-pattern>*.jsp</url-pattern>
 	</filter-mapping>
 
