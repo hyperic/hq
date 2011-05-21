@@ -25,7 +25,22 @@
 
 package org.hyperic.hq.bizapp.shared.lather;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 public class CommandInfo {
+
+    private static final Set<String> secureCommands = new HashSet<String>();
+
+    public CommandInfo() {
+        this.secureCommands.addAll(Arrays.asList(CommandInfo.SECURE_COMMANDS));
+    }
+
+    public static Set<String> getSecureCommands() {
+        return secureCommands;
+    }
+
     public static final String CMD_PING                    = "ping";
     public static final String CMD_USERISVALID             = "userIsValid";
     public static final String CMD_MEASUREMENT_GET_SERVER_TIME =
@@ -60,5 +75,4 @@ public class CommandInfo {
         CMD_CONTROL_GET_PLUGIN_CONFIG,
         CMD_CONTROL_SEND_COMMAND_RESULT,
     };
-
 }

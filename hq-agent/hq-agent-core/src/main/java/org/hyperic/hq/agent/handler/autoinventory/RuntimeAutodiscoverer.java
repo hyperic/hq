@@ -30,7 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentRemoteValue;
 import org.hyperic.hq.agent.bizapp.client.AgentCallbackException;
-import org.hyperic.hq.agent.bizapp.client.AutoinventoryCallbackClient;
+import org.hyperic.hq.agent.bizapp.client.AutoinventoryCallback;
 import org.hyperic.hq.agent.server.*;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
@@ -63,7 +63,7 @@ class RuntimeAutodiscoverer implements RuntimeScanner {
 
     private AutoinventoryCommandsServer _aicmd;
     private AgentService agentService;
-    private AutoinventoryCallbackClient _client;
+    private AutoinventoryCallback _;
     private AutoinventoryPluginManager  _apm;
     private ConfigStorage _storage, _serviceStorage;
 
@@ -83,7 +83,7 @@ class RuntimeAutodiscoverer implements RuntimeScanner {
     public RuntimeAutodiscoverer (AutoinventoryCommandsServer aicmd,
                                   AgentStorageProvider storageProvider,
                                   AgentService agentService,
-                                  AutoinventoryCallbackClient client) 
+                                  AutoinventoryCallback client)
     {
         _aicmd = aicmd;
         _storage = new ConfigStorage(storageProvider, STORAGE_KEYLIST, 
@@ -92,7 +92,7 @@ class RuntimeAutodiscoverer implements RuntimeScanner {
         _serviceStorage = new ConfigStorage(storageProvider, SERVICE_KEYLIST, 
                                             SERVICE_PREFIX);
         this.agentService = agentService;
-        _client = client;
+        _ = client;
         try {
             _apm = (AutoinventoryPluginManager) agentService.getPluginManager(ProductPlugin.TYPE_AUTOINVENTORY);
         } catch (AgentRunningException are) {
@@ -289,7 +289,7 @@ class RuntimeAutodiscoverer implements RuntimeScanner {
                     _log.debug("Sending RuntimeReport: " +
                               compositeReport.simpleSummary());
                 }
-                _client.aiSendRuntimeReport(compositeReport);
+                _.aiSendRuntimeReport(compositeReport);
             } catch(AgentCallbackException e) {
                 if(_log.isDebugEnabled()) {
                     _log.error(errMsg + e, e);

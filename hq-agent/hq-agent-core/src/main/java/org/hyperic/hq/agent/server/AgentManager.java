@@ -34,7 +34,6 @@ import org.hyperic.hq.agent.AgentConfigException;
 import org.hyperic.hq.agent.AgentMonitorValue;
 import org.hyperic.hq.agent.AgentUpgradeManager;
 import org.hyperic.hq.agent.bizapp.client.PlugininventoryCallback;
-import org.hyperic.hq.agent.bizapp.client.StorageProviderFetcher;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorInterface;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorSimple;
 import org.hyperic.hq.product.GenericPlugin;
@@ -69,7 +68,9 @@ public class AgentManager extends AgentMonitorSimple {
     }
 
 
-    protected void startHandlers(AgentService agentService, List<AgentServerHandler> serverHandlers, List<AgentServerHandler> startedHandlers) throws AgentStartException {
+    protected void startServerHandlers(AgentService agentService, List<AgentServerHandler> serverHandlers,
+           List<AgentServerHandler> startedHandlers) throws AgentStartException, AgentRunningException {
+
         for (AgentServerHandler serverHandler : serverHandlers) {
             try {
                 serverHandler.startup(agentService);
@@ -84,7 +85,7 @@ public class AgentManager extends AgentMonitorSimple {
             }
         }
     }
- 
+
     protected void scanLegacyCustomDir(String startDir) {
         File dir = new File(startDir).getAbsoluteFile();
         while (dir != null) {
@@ -312,8 +313,10 @@ public class AgentManager extends AgentMonitorSimple {
      * Either way we want to retry until the data is sent
      * @param plugins         the collection of plugins
      * @param storageProvider the storage provider
+     * @param callback PlugininventoryCallback
      */
-    protected void sendPluginStatusToServer(final Collection<PluginInfo> plugins, final AgentStorageProvider storageProvider) {
+    protected void sendPluginStatusToServer(final Collection<PluginInfo> plugins, final AgentStorageProvider storageProvider,
+            final PlugininventoryCallback callback) {
         Thread thread = new Thread("PluginStatusSender") {
             public void run() {
                 while (true) {
@@ -323,12 +326,12 @@ public class AgentManager extends AgentMonitorSimple {
                                     "provider has not been setup, will sleep 5 seconds and retry");
                             Thread.sleep(5000);
                             continue;
-                        }
-                        PlugininventoryCallback client =
-                                new PlugininventoryCallback(new StorageProviderFetcher(storageProvider), plugins);
+                        } 
+                        //PlugininventoryCallback client = new PlugininventoryCallback(new StorageProviderFetcher(storageProvider), plugins);
+                        callback.initializePlugins(plugins);
                         logger.info("Sending plugin status to server");
 
-                        client.sendPluginReportToServer();
+                        callback.sendPluginReportToServer();
                         logger.info("Successfully sent plugin status to server");
                         break;
                     } catch (Exception e) {

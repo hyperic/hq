@@ -23,14 +23,16 @@
  * USA.
  */
 
-package org.hyperic.hq.agent;
+package org.hyperic.hq.agent.bizapp.client;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.AgentConfig;
+import org.hyperic.hq.agent.AgentConfigException;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * A callback class that notifies the starting entity (most likely the agent 

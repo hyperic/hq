@@ -30,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.*;
 import org.hyperic.hq.agent.bizapp.agent.*;
 import org.hyperic.hq.agent.bizapp.agent.commands.*;
+import org.hyperic.hq.agent.bizapp.client.AgentStartupCallback;
 import org.hyperic.hq.agent.server.*;
 import org.hyperic.util.exec.Execute;
 import org.hyperic.util.exec.ExecuteWatchdog;
@@ -60,9 +61,54 @@ public class CommandsServer implements AgentServerHandler, TokenStorer, AgentNot
     private String tokenFile;
     private String keystoreFile;
     private String keyAlg;
-    private AgentStartupCallback agentStartupCallback;
+    private AgentStartupCallback callback;
 
     private AgentService agentService;
+
+    public void startup(AgentService agentService) throws AgentStartException {
+        this.agentService = agentService;
+
+        try {
+
+            this.callback = new AgentStartupCallback(agentService.getBootConfig());
+            agentService.registerNotifyHandler(this, agentService.getNotifyAgentUp());
+            agentService.registerNotifyHandler(this, agentService.getNotifyAgentFailedStart());
+        }
+        catch (AgentConfigException e) {
+            this.log.warn("Failure to find startup " +
+                    "reporting port in sys properties");
+        }
+        catch (IOException e) {
+            throw new AgentStartException("Wrapped Exception", e);
+        }
+
+        try {
+            SSLConnectionListener listener;
+            KeyManager[] keyManagers;
+            AgentConfig cfg;
+            Properties bootConfig;
+            KeyStore keystore;
+
+            cfg = agentService.getBootConfig();
+            this.tokenFile = cfg.getTokenFile();
+            this.setupTokenManager(cfg);
+            bootConfig = cfg.getBootProperties();
+            this.storage = agentService.getStorageProvider();
+            this.keystoreFile =
+                    bootConfig.getProperty(AgentConfig.PROP_KEYSTORE[0]);
+            this.keyAlg =
+                    bootConfig.getProperty("agent.keyalg", "RSA");
+            keystore = this.loadKeyStore();
+            keyManagers = this.getKeyManagers(keystore);
+            listener = new SSLConnectionListener(cfg, keyManagers,
+                    this.tokenManager);
+            agentService.setConnectionListener(listener);
+        } catch (AgentRunningException exc) {
+            throw new AgentStartException("Unable to initialize SSL: " +
+                    exc.getMessage());
+        }
+        this.log.info("Commands Server started up");
+    }
 
     public AgentAPIInfo getAPIInfo() {
         return this.verAPI;
@@ -78,7 +124,7 @@ public class CommandsServer implements AgentServerHandler, TokenStorer, AgentNot
             return this.createToken(new CreateToken_args(args));
         } else if (cmd.equals(CommandsAPIInfo.command_getServer)) {
             return this.getServer(new GetServer_args(args));
-        } else if (cmd.equals(CommandsAPIInfo.command_setServer)) { 
+        } else if (cmd.equals(CommandsAPIInfo.command_setServer)) {
             return this.setServer(agentService, new SetServer_args(args));
         } else {
             throw new AgentRemoteException("Unknown command: " + cmd);
@@ -146,14 +192,14 @@ public class CommandsServer implements AgentServerHandler, TokenStorer, AgentNot
         res = new SetServer_result();
 
         agentService.sendNotification(CommandsAPIInfo.NOTIFY_SERVER_SET, provider.getProviderAddress());
-        
+
         return res;
     }
 
     private GetServer_result getServer(GetServer_args args) {
         GetServer_result res = new GetServer_result();
         res.setProvider(CommandsAPIInfo.getProvider(this.storage));
- 
+
         return res;
     }
 
@@ -345,60 +391,15 @@ public class CommandsServer implements AgentServerHandler, TokenStorer, AgentNot
     public void handleNotification(String msgClass, String msg) {
         this.log.debug("handling notification: " + msgClass + ":" + msg);
 
-        if (this.agentStartupCallback != null) {
+        if (this.callback != null) {
             this.log.debug("calling back to agent");
             if (msgClass.equals(NotificationConstants.AGENT_UP)) {
-                this.agentStartupCallback.onAgentStartup(true);
+                this.callback.onAgentStartup(true);
             } else if (msgClass.equals(NotificationConstants.AGENT_FAILED_START)) {
-                this.agentStartupCallback.onAgentStartup(false);
+                this.callback.onAgentStartup(false);
             }
         }
 
-    }
-
-    public void startup(AgentService agentService) throws AgentStartException {
-        this.agentService = agentService;
-        
-        try {
-
-            this.agentStartupCallback = new AgentStartupCallback(agentService.getBootConfig());
-            agentService.registerNotifyHandler(this, agentService.getNotifyAgentUp());
-            agentService.registerNotifyHandler(this, agentService.getNotifyAgentFailedStart());
-        }
-        catch (AgentConfigException e) {
-            this.log.warn("Failure to find startup " +
-                    "reporting port in sys properties");
-        }
-        catch (IOException e) {
-            throw new AgentStartException("Wrapped Exception", e);
-        }
-
-        try {
-            SSLConnectionListener listener;
-            KeyManager[] keyManagers;
-            AgentConfig cfg;
-            Properties bootConfig;
-            KeyStore keystore;
-
-            cfg = agentService.getBootConfig();
-            this.tokenFile = cfg.getTokenFile();
-            this.setupTokenManager(cfg);
-            bootConfig = cfg.getBootProperties();
-            this.storage = agentService.getStorageProvider();
-            this.keystoreFile =
-                    bootConfig.getProperty(AgentConfig.PROP_KEYSTORE[0]);
-            this.keyAlg =
-                    bootConfig.getProperty("agent.keyalg", "RSA");
-            keystore = this.loadKeyStore();
-            keyManagers = this.getKeyManagers(keystore);
-            listener = new SSLConnectionListener(cfg, keyManagers,
-                    this.tokenManager);
-            agentService.setConnectionListener(listener);
-        } catch (AgentRunningException exc) {
-            throw new AgentStartException("Unable to initialize SSL: " +
-                    exc.getMessage());
-        }
-        this.log.info("Commands Server started up");
     }
 
     public void shutdown() {

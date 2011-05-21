@@ -40,8 +40,10 @@ public class BizappCallback extends AgentCallback {
     public BizappCallback(){}
 
     public BizappCallback(ProviderFetcher fetcher, AgentConfig config){
-        super(fetcher);
-         
+        //super(fetcher);
+        super();
+        initialize(fetcher);
+        
         if (config.isProxyServerSet()) {
             log.info("Setting proxy server: host="+config.getProxyIp()+ "; port="+config.getProxyPort());
             System.setProperty(AgentConfig.PROP_LATHER_PROXYHOST, config.getProxyIp());

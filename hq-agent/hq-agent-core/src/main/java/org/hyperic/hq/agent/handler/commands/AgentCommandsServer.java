@@ -29,7 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.*;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
-import org.hyperic.hq.agent.commands.*; 
+import org.hyperic.hq.agent.commands.*;
 import org.hyperic.hq.agent.server.*;
 import org.springframework.stereotype.Component;
 
@@ -54,7 +54,31 @@ public class AgentCommandsServer implements AgentServerHandler {
     private AgentCommandsService agentCommandsService;
 
     private AgentService agentService;
-    
+
+    public void startup(AgentService agentService) throws AgentStartException {
+        this.agentService = agentService;
+
+        AgentTransportLifecycle agentTransportLifecycle;
+
+        try {
+            agentTransportLifecycle = agentService.getAgentTransportLifecycle();
+            agentCommandsService = new AgentCommandsService(agentService);
+        } catch (Exception e) {
+            throw new AgentStartException("Unable to get agent transport lifecycle: " +
+                    e.getMessage());
+        }
+
+        log.info("Registering Agent Commands Service with Agent Transport");
+
+        try {
+            agentTransportLifecycle.registerService(AgentCommandsClient.class, agentCommandsService);
+        } catch (Exception e) {
+            throw new AgentStartException("Failed to register Agent Commands Service.", e);
+        }
+
+        this.log.info("Agent commands started up");
+    }
+
     public AgentAPIInfo getAPIInfo() {
         return this.verAPI;
     }
@@ -108,30 +132,6 @@ public class AgentCommandsServer implements AgentServerHandler {
         } else {
             throw new AgentAssertionException("Unknown command '" + cmd + "'");
         }
-    }
-
-    public void startup(AgentService agentService) throws AgentStartException {
-        this.agentService = agentService;
-        
-        AgentTransportLifecycle agentTransportLifecycle;
-
-        try {
-            agentTransportLifecycle = agentService.getAgentTransportLifecycle();
-            agentCommandsService = new AgentCommandsService(agentService);
-        } catch (Exception e) {
-            throw new AgentStartException("Unable to get agent transport lifecycle: " +
-                    e.getMessage());
-        }
-
-        log.info("Registering Agent Commands Service with Agent Transport");
-
-        try {
-            agentTransportLifecycle.registerService(AgentCommandsClient.class, agentCommandsService);
-        } catch (Exception e) {
-            throw new AgentStartException("Failed to register Agent Commands Service.", e);
-        }
-
-        this.log.info("Agent commands started up");
     }
 
     public void shutdown() {

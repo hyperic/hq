@@ -30,7 +30,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.*;
 import org.hyperic.hq.agent.bizapp.agent.CommandsAPIInfo;
 import org.hyperic.hq.agent.bizapp.client.MeasurementCallback;
-import org.hyperic.hq.agent.bizapp.client.StorageProviderFetcher;
 import org.hyperic.hq.agent.server.*;
 import org.hyperic.hq.measurement.agent.MeasurementCommandsAPI;
 import org.hyperic.hq.measurement.agent.client.MeasurementCommandsClient;
@@ -39,6 +38,7 @@ import org.hyperic.hq.product.ConfigTrackPluginManager;
 import org.hyperic.hq.product.LogTrackPluginManager;
 import org.hyperic.hq.product.MeasurementPluginManager;
 import org.hyperic.hq.product.ProductPlugin;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -73,7 +73,15 @@ public class MeasurementCommandsServer implements AgentServerHandler, AgentNotif
 
     private MeasurementCommandsService measurementCommandsService;
 
+    private MeasurementCallback callback;
+
     AgentService agentService;
+
+    @Autowired
+    public MeasurementCommandsServer(MeasurementCallback callback) {
+        super();
+        this.callback = callback;
+    }
 
     @PostConstruct
     public void initialize() {
@@ -81,6 +89,94 @@ public class MeasurementCommandsServer implements AgentServerHandler, AgentNotif
             validProps.put(this.verAPI.propSet[i], this);
         }
     }
+
+
+    public void startup(AgentService agentService) throws AgentStartException {
+        this.agentService = agentService;
+
+        Iterator i;
+
+        try {
+            this.storage = agentService.getStorageProvider();
+            callback.initialize(agentService.getProviderFetcher());
+            this.bootConfig = agentService.getBootConfig();
+            this.schedStorage = new MeasurementSchedule(this.storage, bootConfig.getBootProperties());
+            logMeasurementSchedule(this.schedStorage);
+        } catch (AgentRunningException exc) {
+            throw new AgentAssertionException("Agent should be running here", exc);
+        }
+
+        try {
+            this.pluginManager = (MeasurementPluginManager) agentService.getPluginManager(ProductPlugin.TYPE_MEASUREMENT);
+            this.ctPluginManager = (ConfigTrackPluginManager) agentService.getPluginManager(ProductPlugin.TYPE_CONFIG_TRACK);
+            this.ltPluginManager = (LogTrackPluginManager) agentService.getPluginManager(ProductPlugin.TYPE_LOG_TRACK);
+
+        } catch (Exception e) {
+            throw new AgentStartException("Unable to get measurement plugin manager: " + e.getMessage());
+        }
+
+        this.senderObject = new SenderThread(this.bootConfig.getBootProperties(), this.storage, this.schedStorage, callback);
+
+        this.scheduleObject = new ScheduleThread(this.senderObject, this.pluginManager, this.bootConfig.getBootProperties());
+
+        this.trackerObject = new TrackerThread(this.ctPluginManager, this.ltPluginManager, this.storage, 
+                this.bootConfig.getBootProperties(), callback);
+
+        this.measurementCommandsService = new MeasurementCommandsService(this.storage, this.validProps, this.schedStorage,
+                this.pluginManager, this.ltPluginManager, this.ctPluginManager, this.scheduleObject);
+
+        AgentTransportLifecycle agentTransportLifecycle;
+
+        try {
+            agentTransportLifecycle = agentService.getAgentTransportLifecycle();
+        } catch (Exception e) {
+            throw new AgentStartException("Unable to get agent transport lifecycle: " + e.getMessage());
+        }
+
+        log.info("Registering Measurement Commands Service with Agent Transport");
+
+        try {
+            agentTransportLifecycle.registerService(MeasurementCommandsClient.class,
+                    measurementCommandsService);
+        } catch (Exception e) {
+            throw new AgentStartException("Failed to register Measurement Commands Service.", e);
+        }
+
+        spawnThreads(this.senderObject, this.scheduleObject, this.trackerObject);
+
+        i = this.schedStorage.getMeasurementList();
+        while (i.hasNext()) {
+            ScheduledMeasurement meas = (ScheduledMeasurement) i.next();
+            this.measurementCommandsService.scheduleMeasurement(meas);
+        }
+
+        agentService.registerMonitor("camMetric.schedule", this.scheduleObject);
+        agentService.registerMonitor("camMetric.sender", this.senderObject);
+
+        // If we have don't have a provider, register a handler until
+        // we get one
+        if (CommandsAPIInfo.getProvider(this.storage) == null) {
+            agentService.registerNotifyHandler(this,
+                    CommandsAPIInfo.NOTIFY_SERVER_SET);
+        } else {
+            this.startConfigPopulator();
+        }
+
+        this.log.info("Measurement Commands Server started up");
+    }
+
+    public void handleNotification(String msgClass, String msg) {
+        this.startConfigPopulator();
+    }
+
+    private void startConfigPopulator() {
+       /* StorageProviderFetcher fetcher = new StorageProviderFetcher(this.storage);
+        MeasurementCallback client = new MeasurementCallback(fetcher);*/
+        ConfigPopulateThread populator = new ConfigPopulateThread(callback, this.ltPluginManager, this.ctPluginManager);
+        populator.setDaemon(true);
+        populator.start();
+    }
+
 
     private void spawnThreads(SenderThread senderObject,
                               ScheduleThread scheduleObject,
@@ -106,8 +202,7 @@ public class MeasurementCommandsServer implements AgentServerHandler, AgentNotif
         return MeasurementCommandsAPI.commandSet;
     }
 
-    public AgentRemoteValue dispatchCommand(String cmd, AgentRemoteValue args,
-                                            InputStream in, OutputStream out) throws AgentRemoteException {
+    public AgentRemoteValue dispatchCommand(String cmd, AgentRemoteValue args, InputStream in, OutputStream out) throws AgentRemoteException {
         if (cmd.equals(this.verAPI.command_scheduleMeasurements)) {
             ScheduleMeasurements_args sa =
                     new ScheduleMeasurements_args(args);
@@ -156,116 +251,6 @@ public class MeasurementCommandsServer implements AgentServerHandler, AgentNotif
         } else {
             throw new AgentRemoteException("Unknown command: " + cmd);
         }
-    }
-
-    public void startup(AgentService agentService) throws AgentStartException {
-        this.agentService = agentService;
-
-        Iterator i;
-
-        try {
-            this.storage = agentService.getStorageProvider();
-            this.bootConfig = agentService.getBootConfig();
-            this.schedStorage = new MeasurementSchedule(this.storage, bootConfig.getBootProperties());
-            logMeasurementSchedule(this.schedStorage);
-        } catch (AgentRunningException exc) {
-            throw new AgentAssertionException("Agent should be running here", exc);
-        }
-
-        try {
-            this.pluginManager =
-                    (MeasurementPluginManager) agentService.
-                            getPluginManager(ProductPlugin.TYPE_MEASUREMENT);
-            this.ctPluginManager =
-                    (ConfigTrackPluginManager) agentService.
-                            getPluginManager(ProductPlugin.TYPE_CONFIG_TRACK);
-            this.ltPluginManager =
-                    (LogTrackPluginManager) agentService.
-                            getPluginManager(ProductPlugin.TYPE_LOG_TRACK);
-
-        } catch (Exception e) {
-            throw new AgentStartException("Unable to get measurement " +
-                    "plugin manager: " +
-                    e.getMessage());
-        }
-
-        this.senderObject = new SenderThread(this.bootConfig.getBootProperties(),
-                this.storage, this.schedStorage);
-
-        this.scheduleObject = new ScheduleThread(this.senderObject,
-                this.pluginManager,
-                this.bootConfig.getBootProperties());
-
-        this.trackerObject =
-                new TrackerThread(this.ctPluginManager,
-                        this.ltPluginManager,
-                        this.storage,
-                        this.bootConfig.getBootProperties());
-
-        this.measurementCommandsService =
-                new MeasurementCommandsService(this.storage,
-                        this.validProps,
-                        this.schedStorage,
-                        this.pluginManager,
-                        this.ltPluginManager,
-                        this.ctPluginManager,
-                        this.scheduleObject);
-
-        AgentTransportLifecycle agentTransportLifecycle;
-
-        try {
-            agentTransportLifecycle = agentService.getAgentTransportLifecycle();
-        } catch (Exception e) {
-            throw new AgentStartException("Unable to get agent transport lifecycle: " +
-                    e.getMessage());
-        }
-
-        log.info("Registering Measurement Commands Service with Agent Transport");
-
-        try {
-            agentTransportLifecycle.registerService(MeasurementCommandsClient.class,
-                    measurementCommandsService);
-        } catch (Exception e) {
-            throw new AgentStartException("Failed to register Measurement Commands Service.", e);
-        }
-
-        spawnThreads(this.senderObject, this.scheduleObject, this.trackerObject);
-
-        i = this.schedStorage.getMeasurementList();
-        while (i.hasNext()) {
-            ScheduledMeasurement meas = (ScheduledMeasurement) i.next();
-            this.measurementCommandsService.scheduleMeasurement(meas);
-        }
-
-        agentService.registerMonitor("camMetric.schedule", this.scheduleObject);
-        agentService.registerMonitor("camMetric.sender", this.senderObject);
-
-        // If we have don't have a provider, register a handler until
-        // we get one
-        if (CommandsAPIInfo.getProvider(this.storage) == null) {
-            agentService.registerNotifyHandler(this,
-                    CommandsAPIInfo.NOTIFY_SERVER_SET);
-        } else {
-            this.startConfigPopulator();
-        }
-
-        this.log.info("Measurement Commands Server started up");
-    }
-
-    public void handleNotification(String msgClass, String msg) {
-        this.startConfigPopulator();
-    }
-
-    private void startConfigPopulator() {
-        StorageProviderFetcher fetcher
-                = new StorageProviderFetcher(this.storage);
-        MeasurementCallback client
-                = new MeasurementCallback(fetcher);
-        ConfigPopulateThread populator
-                = new ConfigPopulateThread(client, this.ltPluginManager,
-                this.ctPluginManager);
-        populator.setDaemon(true);
-        populator.start();
     }
 
     private void interruptThread(Thread t)

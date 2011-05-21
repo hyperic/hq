@@ -29,7 +29,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.bizapp.client.AgentCallbackException;
 import org.hyperic.hq.agent.bizapp.client.MeasurementCallback;
-import org.hyperic.hq.agent.bizapp.client.StorageProviderFetcher;
 import org.hyperic.hq.agent.server.AgentStartException;
 import org.hyperic.hq.agent.server.AgentStorageException;
 import org.hyperic.hq.agent.server.AgentStorageProvider;
@@ -61,26 +60,22 @@ class TrackerThread implements Runnable {
     private int                maxEventBatchSize = MAX_EVENT_BATCHSIZE;
     
     private AgentStorageProvider      storage;
-    private MeasurementCallback client;
+    private MeasurementCallback callback;
 
     private ConfigTrackPluginManager  ctManager;
     private LogTrackPluginManager     ltManager;
 
     private Log log;
         
-    TrackerThread(ConfigTrackPluginManager ctManager, 
-                  LogTrackPluginManager ltManager, 
-                  AgentStorageProvider storage,
-                  Properties bootProps)
-        throws AgentStartException
-    {
+    TrackerThread(ConfigTrackPluginManager ctManager, LogTrackPluginManager ltManager,  AgentStorageProvider storage,
+                  Properties bootProps, MeasurementCallback callback) throws AgentStartException {
         this.ctManager   = ctManager;
         this.ltManager   = ltManager;
         this.storage     = storage;
         this.shouldDie   = false;
         this.myThread    = null;
         this.interrupter = new Object();
-        this.client      = setupClient();
+        this.callback      = callback;
         this.waitTime    = TrackEventPluginManager.DEFAULT_INTERVAL;
         this.log         = LogFactory.getLog(TrackerThread.class);
         String info = bootProps.getProperty(CONFIGTRACK_LISTNAME);
@@ -123,14 +118,10 @@ class TrackerThread implements Runnable {
         }
     }
  
-    private MeasurementCallback setupClient()
-        throws AgentStartException 
-    {
-        StorageProviderFetcher fetcher;
-
-        fetcher = new StorageProviderFetcher(this.storage);
+    /*private MeasurementCallback setupClient() throws AgentStartException {
+        StorageProviderFetcher fetcher = new StorageProviderFetcher(this.storage);
         return new MeasurementCallback(fetcher);
-    }
+    }*/
 
     private void flushEvents(LinkedList events, String dListName)
     {
@@ -237,9 +228,9 @@ class TrackerThread implements Runnable {
             
             try {
                 if (dListName.equals(LOGTRACK_LISTNAME)) {
-                    this.client.trackSendLog(report);
+                    this.callback.trackSendLog(report);
                 } else if (dListName.equals(CONFIGTRACK_LISTNAME)) {
-                    this.client.trackSendConfigChange(report);
+                    this.callback.trackSendConfigChange(report);
                 } else {
                     throw new IllegalArgumentException("Unknown DList name");
                 }

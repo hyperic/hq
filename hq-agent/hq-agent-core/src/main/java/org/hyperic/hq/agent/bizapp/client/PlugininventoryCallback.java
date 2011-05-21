@@ -13,12 +13,18 @@ public class PlugininventoryCallback extends AgentCallback {
 
     private PluginReport_args args;
 
-    public PlugininventoryCallback() {}
+    /*public PlugininventoryCallback() {}
 
     public PlugininventoryCallback(ProviderFetcher fetcher, Collection<PluginInfo> plugins) {
         super(fetcher);
         this.args = new PluginReport_args(plugins);
         String agentToken = fetcher.getProvider().getAgentToken();
+        args.setAgentToken(agentToken);
+    }*/
+
+    public void initializePlugins(Collection<PluginInfo> plugins) {
+        this.args = new PluginReport_args(plugins);
+        String agentToken = providerFetcher.getProvider().getAgentToken();
         args.setAgentToken(agentToken);
     }
     

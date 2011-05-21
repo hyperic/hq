@@ -29,7 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentAPIInfo;
 import org.hyperic.hq.agent.AgentRemoteException;
-import org.hyperic.hq.agent.AgentRemoteValue; 
+import org.hyperic.hq.agent.AgentRemoteValue;
 import org.hyperic.hq.agent.server.AgentServerHandler;
 import org.hyperic.hq.agent.server.AgentService;
 import org.hyperic.hq.agent.server.AgentStartException;
@@ -52,11 +52,46 @@ public class LiveDataCommandsServer implements AgentServerHandler {
     private LiveDataPluginManager _manager;
 
     private LiveDataCommandsAPI _commands = new LiveDataCommandsAPI();
-    
+
     private LiveDataCommandsService _liveDataCommandsService;
-    
+
     private AgentService agentService;
-    
+
+    public void startup(AgentService agentService) throws AgentStartException {
+        this.agentService = agentService;
+
+        try {
+            _manager = (LiveDataPluginManager) agentService.
+                    getPluginManager(ProductPlugin.TYPE_LIVE_DATA);
+        } catch (Exception e) {
+            throw new AgentStartException("Unable to load live data manager",
+                    e);
+        }
+
+        _liveDataCommandsService = new LiveDataCommandsService(_manager);
+
+        AgentTransportLifecycle agentTransportLifecycle;
+
+        try {
+            agentTransportLifecycle = agentService.getAgentTransportLifecycle();
+        } catch (Exception e) {
+            throw new AgentStartException("Unable to get agent transport lifecycle: " +
+                    e.getMessage());
+        }
+
+        _log.info("Registering Live Data Commands Service with Agent Transport");
+
+        try {
+            agentTransportLifecycle.registerService(LiveDataCommandsClient.class,
+                    _liveDataCommandsService);
+        } catch (Exception e) {
+            throw new AgentStartException("Failed to register Live Data Commands Service.", e);
+        }
+
+
+        _log.info("Live Data Commands Server started up");
+    }
+
     public String[] getCommandSet() {
         return LiveDataCommandsAPI.commandSet;
     }
@@ -74,41 +109,6 @@ public class LiveDataCommandsServer implements AgentServerHandler {
         } else {
             throw new AgentRemoteException("Unexpected command: " + cmd);
         }
-    }
-
-    public void startup(AgentService agentService) throws AgentStartException {
-       this.agentService = agentService;
-        
-        try {
-            _manager = (LiveDataPluginManager)agentService.
-                getPluginManager(ProductPlugin.TYPE_LIVE_DATA);
-        } catch (Exception e) {
-            throw new AgentStartException("Unable to load live data manager",
-                                          e);
-        }
-        
-        _liveDataCommandsService = new LiveDataCommandsService(_manager);
-        
-        AgentTransportLifecycle agentTransportLifecycle;
-        
-        try {
-            agentTransportLifecycle = agentService.getAgentTransportLifecycle();
-        } catch (Exception e) {
-            throw new AgentStartException("Unable to get agent transport lifecycle: "+
-                                            e.getMessage());
-        }
-        
-        _log.info("Registering Live Data Commands Service with Agent Transport");
-        
-        try {
-            agentTransportLifecycle.registerService(LiveDataCommandsClient.class, 
-                                           _liveDataCommandsService);
-        } catch (Exception e) {
-            throw new AgentStartException("Failed to register Live Data Commands Service.", e);
-        }
- 
-        
-        _log.info("Live Data Commands Server started up");
     }
 
     public void shutdown() {

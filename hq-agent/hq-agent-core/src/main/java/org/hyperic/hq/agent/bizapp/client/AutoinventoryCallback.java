@@ -35,13 +35,13 @@ import org.hyperic.hq.bizapp.shared.lather.CommandInfo;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AutoinventoryCallbackClient extends AgentCallback {
+public class AutoinventoryCallback extends AgentCallback {
 
-    public AutoinventoryCallbackClient() {}
+    /*public AutoinventoryCallback() {}
     
-    public AutoinventoryCallbackClient(ProviderFetcher fetcher){
+    public AutoinventoryCallback(ProviderFetcher fetcher){
         super(fetcher);
-    }
+    }*/
 
     public void aiSendReport(ScanState state) throws AgentCallbackException {
         ProviderInfo provider = this.getProvider();

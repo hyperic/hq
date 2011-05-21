@@ -31,7 +31,6 @@ import org.hyperic.hq.agent.AgentAPIInfo;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentRemoteValue;
 import org.hyperic.hq.agent.bizapp.client.ControlCallback;
-import org.hyperic.hq.agent.bizapp.client.StorageProviderFetcher; 
 import org.hyperic.hq.agent.server.*;
 import org.hyperic.hq.control.agent.ControlCommandsAPI;
 import org.hyperic.hq.control.agent.client.ControlCommandsClient;
@@ -39,6 +38,7 @@ import org.hyperic.hq.control.agent.commands.*;
 import org.hyperic.hq.product.ControlPluginManager;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.config.ConfigResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
@@ -57,7 +57,58 @@ public class ControlCommandsServer implements AgentServerHandler {
 
     private ControlCommandsService controlCommandsService;
 
+    private ControlCallback callback;
+
     private AgentService agentService;
+
+    @Autowired
+    public ControlCommandsServer(ControlCallback callback) {
+        super();
+        this.callback = callback;
+    }
+
+    public void startup(AgentService agentService) throws AgentStartException {
+        this.agentService = agentService;
+
+        try {
+            this.storage = agentService.getStorageProvider();
+            callback.initialize(agentService.getProviderFetcher());
+        } catch (Exception e) {
+            throw new AgentStartException("Unable to get storage " +
+                    "provider: " + e.getMessage());
+        }
+
+        ControlPluginManager controlManager;
+        try {
+            controlManager = (ControlPluginManager) agentService.getPluginManager(ProductPlugin.TYPE_CONTROL);
+
+            //client = setupClient();
+        } catch (Exception e) {
+            // Problem loading the plugin jars
+            throw new AgentStartException("Unable to load control jars: " + e.getMessage());
+        }
+
+        this.controlCommandsService = new ControlCommandsService(controlManager, callback);
+
+        AgentTransportLifecycle agentTransportLifecycle;
+
+        try {
+            agentTransportLifecycle = agentService.getAgentTransportLifecycle();
+        } catch (Exception e) {
+            throw new AgentStartException("Unable to get agent transport lifecycle: " + e.getMessage());
+        }
+
+        log.info("Registering Control Commands Service with Agent Transport");
+
+        try {
+            agentTransportLifecycle.registerService(ControlCommandsClient.class, controlCommandsService);
+        } catch (Exception e) {
+            throw new AgentStartException("Failed to register Control Commands Service.", e);
+        }
+
+        this.log.info("Control Commands Server started up");
+    }
+
 
     public AgentAPIInfo getAPIInfo() {
         return this.verAPI;
@@ -88,65 +139,15 @@ public class ControlCommandsServer implements AgentServerHandler {
         }
     }
 
-    public void startup(AgentService agentService) throws AgentStartException {
-        this.agentService = agentService;
-        
-        try {
-            this.storage = agentService.getStorageProvider();
-        } catch (Exception e) {
-            throw new AgentStartException("Unable to get storage " +
-                    "provider: " + e.getMessage());
-        }
-
-        // setup control manager
-        ControlPluginManager controlManager;
-        ControlCallback client;
-
-        try {
-            controlManager =
-                    (ControlPluginManager) agentService.
-                            getPluginManager(ProductPlugin.TYPE_CONTROL);
-
-            client = setupClient();
-        } catch (Exception e) {
-            // Problem loading the plugin jars
-            throw new AgentStartException("Unable to load control jars: " +
-                    e.getMessage());
-        }
-
-        controlCommandsService = new ControlCommandsService(controlManager, client);
-
-        AgentTransportLifecycle agentTransportLifecycle;
-
-        try {
-            agentTransportLifecycle = agentService.getAgentTransportLifecycle();
-        } catch (Exception e) {
-            throw new AgentStartException("Unable to get agent transport lifecycle: " +
-                    e.getMessage());
-        }
-
-        log.info("Registering Control Commands Service with Agent Transport");
-
-        try {
-            agentTransportLifecycle.registerService(ControlCommandsClient.class, controlCommandsService);
-        } catch (Exception e) {
-            throw new AgentStartException("Failed to register Control Commands Service.", e);
-        }
-
-        this.log.info("Control Commands Server started up");
-    }
 
     public void shutdown() {
         this.log.info("Control Commands Server shut down");
     }
 
-    private ControlCallback setupClient()
-            throws AgentStartException {
-        StorageProviderFetcher fetcher;
-
-        fetcher = new StorageProviderFetcher(this.storage);
+    /*private ControlCallback setupClient() throws AgentStartException {
+        StorageProviderFetcher fetcher = new StorageProviderFetcher(this.storage);
         return new ControlCallback(fetcher);
-    }
+    }*/
 
     private ControlPluginAdd_result
     controlPluginAdd(ControlPluginAdd_args args)

@@ -32,8 +32,7 @@ import org.hyperic.hq.agent.AgentAssertionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentRemoteValue;
 import org.hyperic.hq.agent.bizapp.agent.CommandsAPIInfo;
-import org.hyperic.hq.agent.bizapp.client.AutoinventoryCallbackClient;
-import org.hyperic.hq.agent.bizapp.client.StorageProviderFetcher; 
+import org.hyperic.hq.agent.bizapp.client.AutoinventoryCallback;
 import org.hyperic.hq.agent.server.*;
 import org.hyperic.hq.autoinventory.*;
 import org.hyperic.hq.autoinventory.agent.AICommandsAPI;
@@ -42,6 +41,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.product.AutoinventoryPluginManager;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.StringUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
@@ -59,7 +59,7 @@ public class AutoinventoryCommandsServer implements AgentServerHandler, AgentNot
     
     private AICommandsAPI               _verAPI = new AICommandsAPI();
 
-    private AgentStorageProvider        _storage;        
+    private AgentStorageProvider storage;
     private Log                         _log = LogFactory.getLog(AutoinventoryCommandsServer.class);              
     private RuntimeAutodiscoverer       _rtAutodiscoverer;
     private AICommandsService _aiCommandsService;
@@ -68,11 +68,72 @@ public class AutoinventoryCommandsServer implements AgentServerHandler, AgentNot
     protected String _certDN;
 
     private ScanManager _scanManager;
+
     private ScanState   _lastCompletedDefaultScanState;
 
-    private AutoinventoryCallbackClient _client;
+    private AutoinventoryCallback callback;
 
     private AgentService agentService;
+
+    @Autowired
+    public AutoinventoryCommandsServer(AutoinventoryCallback callback) {
+        super();
+        this.callback = callback;
+    }
+
+    public void startup (AgentService agentService) throws AgentStartException {
+        this.agentService = agentService;
+
+        try { 
+            storage = agentService.getStorageProvider();
+            callback.initialize(agentService.getProviderFetcher());
+            //callback = setupClient();
+            _certDN  = storage.getValue(agentService.getCertDn());
+        } catch(AgentRunningException exc){
+            throw new AgentAssertionException("Agent should be running here");
+        }
+
+        AutoinventoryPluginManager pluginManager;
+
+        try {
+            pluginManager = (AutoinventoryPluginManager) agentService.getPluginManager(ProductPlugin.TYPE_AUTOINVENTORY);
+        } catch (Exception e) {
+            throw new AgentStartException("Unable to get auto inventory plugin manager: " +  e.getMessage());
+        }
+
+        _rtAutodiscoverer = new RuntimeAutodiscoverer(this, storage, agentService, callback);
+
+        _scanManager = new ScanManager(this, _log, pluginManager, _rtAutodiscoverer);
+
+        _aiCommandsService = new AICommandsService(pluginManager, _rtAutodiscoverer, _scanManager);
+
+        AgentTransportLifecycle agentTransportLifecycle;
+
+        try {
+            agentTransportLifecycle = agentService.getAgentTransportLifecycle();
+        } catch (Exception e) {
+            throw new AgentStartException("Unable to get agent transport lifecycle: " + e.getMessage());
+        }
+
+        _log.info("Registering AI Commands Service with Agent Transport");
+
+        try {
+            agentTransportLifecycle.registerService(AICommandsClient.class, _aiCommandsService);
+        } catch (Exception e) {
+            throw new AgentStartException("Failed to register AI Commands Service.", e);
+        }
+
+        _scanManager.startup();
+
+        // Do we have a provider?
+        if ( CommandsAPIInfo.getProvider(storage) == null ) {
+            agentService.registerNotifyHandler(this, CommandsAPIInfo.NOTIFY_SERVER_SET);
+        } else {
+            _rtAutodiscoverer.triggerDefaultScan();
+        }
+
+        _log.info("Autoinventory Commands Server started up");
+    }
 
     public AgentAPIInfo getAPIInfo(){
         return _verAPI;
@@ -146,59 +207,7 @@ public class AutoinventoryCommandsServer implements AgentServerHandler, AgentNot
         }
     }
 
-    public void startup (AgentService agentService) throws AgentStartException {
-        this.agentService = agentService;
-        
-        try {
 
-            _storage = agentService.getStorageProvider();
-            _client  = setupClient();
-            _certDN  = _storage.getValue(agentService.getCertDn());
-        } catch(AgentRunningException exc){
-            throw new AgentAssertionException("Agent should be running here");
-        }
-        
-        AutoinventoryPluginManager pluginManager;
-
-        try {
-            pluginManager = (AutoinventoryPluginManager) agentService.getPluginManager(ProductPlugin.TYPE_AUTOINVENTORY);
-        } catch (Exception e) {
-            throw new AgentStartException("Unable to get auto inventory plugin manager: " +  e.getMessage());
-        }
-
-        _rtAutodiscoverer = new RuntimeAutodiscoverer(this, _storage, agentService, _client);
-
-        _scanManager = new ScanManager(this, _log, pluginManager, _rtAutodiscoverer);
-        
-        _aiCommandsService = new AICommandsService(pluginManager, _rtAutodiscoverer, _scanManager);
-        
-        AgentTransportLifecycle agentTransportLifecycle;
-        
-        try {
-            agentTransportLifecycle = agentService.getAgentTransportLifecycle();
-        } catch (Exception e) {
-            throw new AgentStartException("Unable to get agent transport lifecycle: " + e.getMessage());
-        }
-        
-        _log.info("Registering AI Commands Service with Agent Transport");
-        
-        try {
-            agentTransportLifecycle.registerService(AICommandsClient.class, _aiCommandsService);
-        } catch (Exception e) {
-            throw new AgentStartException("Failed to register AI Commands Service.", e);
-        }    
-                
-        _scanManager.startup();
-
-        // Do we have a provider?
-        if ( CommandsAPIInfo.getProvider(_storage) == null ) {
-            agentService.registerNotifyHandler(this, CommandsAPIInfo.NOTIFY_SERVER_SET);
-        } else {
-            _rtAutodiscoverer.triggerDefaultScan();
-        }
-                        
-        _log.info("Autoinventory Commands Server started up");
-    }
 
     public void handleNotification(String msgClass, String msg) {
         if (msgClass.equals(CommandsAPIInfo.NOTIFY_SERVER_SET)) {
@@ -231,12 +240,10 @@ public class AutoinventoryCommandsServer implements AgentServerHandler, AgentNot
         _log.info("Autoinventory Commands Server shut down");
     }
 
-    private AutoinventoryCallbackClient setupClient() { 
-        StorageProviderFetcher fetcher =
-            new StorageProviderFetcher(_storage);
-
-        return new AutoinventoryCallbackClient(fetcher);
-    }
+    /*private AutoinventoryCallback setupClient() {
+        StorageProviderFetcher fetcher = new StorageProviderFetcher(storage);
+        return new AutoinventoryCallback(fetcher);
+    }*/
 
     /**
      * This is where we report our autoinventory-detected data to
@@ -303,7 +310,7 @@ public class AutoinventoryCommandsServer implements AgentServerHandler, AgentNot
                     /*+ "\nWITH SERVERS=" + StringUtil.iteratorToString(scanState.getAllServers(null).iterator())*/);
 
                 }
-                _client.aiSendReport(scanState);
+                callback.aiSendReport(scanState);
                 _log.info("Autoinventory report " + 
                          "successfully sent to server.");
                 break;

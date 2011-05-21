@@ -92,6 +92,7 @@ public class SpringAgentTest extends BaseInfrastructureTest {
                 AgentClient.main(new String[]{"die", "5000"});
             }
         });
-        TimeUnit.MILLISECONDS.sleep(10000); 
+        
+        TimeUnit.MILLISECONDS.sleep(10000);
     }
 }

@@ -30,7 +30,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.bizapp.agent.CommandsAPIInfo;
 import org.hyperic.hq.agent.bizapp.client.AgentCallbackException;
 import org.hyperic.hq.agent.bizapp.client.MeasurementCallback;
-import org.hyperic.hq.agent.bizapp.client.StorageProviderFetcher;
 import org.hyperic.hq.agent.server.AgentStartException;
 import org.hyperic.hq.agent.server.AgentStorageException;
 import org.hyperic.hq.agent.server.AgentStorageProvider;
@@ -77,7 +76,7 @@ public class SenderThread
 
     private volatile boolean                   shouldDie;
     private          Log                       log;
-    private MeasurementCallback client;
+    private MeasurementCallback callback;
     private          AgentStorageProvider      storage;
     private          String                    agentToken;
     private          LinkedList                transitionQueue;
@@ -97,15 +96,12 @@ public class SenderThread
     private long stat_totBatchSendTime   = 0;
     private long stat_totMetricsSent     = 0;
 
-    SenderThread(Properties bootProps, AgentStorageProvider storage,
-                 MeasurementSchedule schedule)
-        throws AgentStartException 
-    {
+    SenderThread(Properties bootProps, AgentStorageProvider storage, MeasurementSchedule schedule, MeasurementCallback callback) throws AgentStartException {
         String sMetricDup, sMaxBatchSize, sMetricDebug;
         this.log             = LogFactory.getLog(SenderThread.class);
         this.shouldDie       = false;
         this.storage         = storage;
-        this.client          = setupClient();
+        this.callback          = callback;
         this.transitionQueue = new LinkedList();
         this.metricDebug     = new HashSet();
         this.schedule        = schedule;
@@ -172,14 +168,10 @@ public class SenderThread
                       this.maxBatchSize);
     }
 
-    private MeasurementCallback setupClient()
-        throws AgentStartException 
-    {
-        StorageProviderFetcher fetcher;
-
-        fetcher = new StorageProviderFetcher(this.storage);
+    /*private MeasurementCallback setupClient() throws AgentStartException  {
+        StorageProviderFetcher fetcher = new StorageProviderFetcher(this.storage);
         return new MeasurementCallback(fetcher);
-    }
+    }*/
 
     void die(){
         this.shouldDie = true; 
@@ -438,7 +430,7 @@ public class SenderThread
             report.setClientIdList(clientIds);
             report.setSRNList(srnList);
             batchStart = System.currentTimeMillis();
-            serverTime= this.client.measurementSendReport(report);
+            serverTime= this.callback.measurementSendReport(report);
             batchEnd = System.currentTimeMillis();
 
             // Compute offset from server (will include network latency)

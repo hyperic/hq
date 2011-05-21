@@ -35,11 +35,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class ControlCallback extends AgentCallback {
 
-    public ControlCallback() {}
+    /*public ControlCallback() {}
     
     public ControlCallback(ProviderFetcher fetcher){
-        super(fetcher, CommandInfo.SECURE_COMMANDS);
-    }
+        super(fetcher);
+    }*/
 
     public byte[] controlGetPluginConfiguration(String name) throws AgentCallbackException {
         ProviderInfo provider = this.getProvider();

@@ -36,38 +36,30 @@ import org.hyperic.lather.client.LatherHTTPClient;
 
 import java.io.IOException;
 import java.net.ConnectException;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 
 /**
  * Central place for communication back to the server. 
  */
 public abstract class AgentCallback {
+
     private static final int TIMEOUT_CONN = 30 * 1000;
 
     private static final int TIMEOUT_DATA = 5 * 60 * 1000;
 
     private static final Log log = LogFactory.getLog(AgentCallback.class.getName());
 
-    private ProviderFetcher providerFetcher;
+    private final Set<String> secureCommands = CommandInfo.getSecureCommands();
 
-    private Set<String> secureCommands = new HashSet<String>();
+    protected ProviderFetcher providerFetcher;
+  
+    /*public AgentCallback(ProviderFetcher providerFetcher) {
+        this.secureCommands.addAll(Arrays.asList(CommandInfo.SECURE_COMMANDS));
+        initialize(providerFetcher);
+    }*/
 
-    public AgentCallback() {
-        this(null, CommandInfo.SECURE_COMMANDS);
-    }
 
-    public AgentCallback(ProviderFetcher providerFetcher) {
-        this(providerFetcher, CommandInfo.SECURE_COMMANDS);
-    }
-
-    public AgentCallback(ProviderFetcher providerFetcher, String[] secureCommands) {
-        this.secureCommands.addAll(Arrays.asList(secureCommands));
-        this.providerFetcher = providerFetcher;
-    }
-
-    public void setProviderFetcher(ProviderFetcher providerFetcher) {
+    public void initialize(ProviderFetcher providerFetcher) {
         this.providerFetcher = providerFetcher;
     }
 
@@ -131,8 +123,7 @@ public abstract class AgentCallback {
         addr = provider.getProviderAddress();
 
         if(this.secureCommands.contains(methodName)){
-            final String agentToken = provider.getAgentToken();
-
+            final String agentToken = provider.getAgentToken(); 
             ((SecureAgentLatherValue)args).setAgentToken(agentToken);
         }
 

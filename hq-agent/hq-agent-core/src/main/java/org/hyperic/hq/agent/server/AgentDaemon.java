@@ -30,8 +30,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.hyperic.hq.agent.*;
+import org.hyperic.hq.agent.bizapp.client.AgentStartupCallback;
 import org.hyperic.hq.agent.bizapp.client.PlugininventoryCallback;
-import org.hyperic.hq.agent.bizapp.client.StorageProviderFetcher;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorException;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorInterface;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorSimple;
@@ -744,8 +744,7 @@ public class AgentDaemon
                             Thread.sleep(5000);
                             continue;
                         }
-                        PlugininventoryCallback client = new PlugininventoryCallback(
-                            new StorageProviderFetcher(provider), plugins);
+                        PlugininventoryCallback client = null; //new PlugininventoryCallback(new StorageProviderFetcher(provider), plugins);
                         logger.info("Sending plugin status to server");
                         client.sendPluginReportToServer();
                         logger.info("Successfully sent plugin status to server");

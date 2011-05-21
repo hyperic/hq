@@ -27,7 +27,11 @@ package org.hyperic.hq.agent.server;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.agent.*;
+import org.hyperic.hq.agent.AgentConfig;
+import org.hyperic.hq.agent.AgentConfigException;
+import org.hyperic.hq.agent.AgentMonitorValue;
+import org.hyperic.hq.agent.AgentUpgradeManager;
+import org.hyperic.hq.agent.bizapp.client.*;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorInterface;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginInfo;
@@ -41,6 +45,7 @@ import org.tanukisoftware.wrapper.WrapperManager;
 import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -59,6 +64,8 @@ public class AgentLifecycleService implements AgentService, SmartLifecycle {
 
     private AgentStorageProvider storageProvider;
 
+    private ProviderFetcher providerFetcher;
+
     private CommandListener listener;
 
     private AgentTransportLifecycle agentTransportLifecycle;
@@ -66,6 +73,8 @@ public class AgentLifecycleService implements AgentService, SmartLifecycle {
     private List<AgentServerHandler> serverHandlers = new ArrayList<AgentServerHandler>();
 
     private List<AgentServerHandler> startedHandlers = new ArrayList<AgentServerHandler>();
+
+    private Map<Class<?extends AgentCallback>, AgentCallback> callbacks = new ConcurrentHashMap<Class<?extends AgentCallback>, AgentCallback>();
 
     private AgentConfig bootConfig;
 
@@ -88,13 +97,17 @@ public class AgentLifecycleService implements AgentService, SmartLifecycle {
      * @param serverHandlers the server handlers (pre-started)
      */
     @Autowired
-    public AgentLifecycleService(AgentManager agentManager, CommandDispatcher dispatcher, List<AgentServerHandler> serverHandlers) { 
+    public AgentLifecycleService(AgentManager agentManager, CommandDispatcher dispatcher,
+                                 List<AgentServerHandler> serverHandlers, List<?extends AgentCallback> callbacks) {
         this.serverHandlers.addAll(serverHandlers);
         this.agentManager = agentManager;
         this.dispatcher = dispatcher;
         this.listener = new CommandListener(dispatcher);
+        for (AgentCallback acc: callbacks) {
+            this.callbacks.put(acc.getClass(), acc);
+        }
     }
-
+ 
     public void start(final AgentConfig config) {
         Thread agent = new Thread(new RunnableAgent(config), agentThread);
         agent.start();
@@ -150,6 +163,8 @@ public class AgentLifecycleService implements AgentService, SmartLifecycle {
         }
 
         try {
+            /* The order of each of these calls is important. Some assertion/handling of the
+            * order and state of the process should be added at some point. */
             Properties bootProps = bootConfig.getBootProperties();
 
             agentManager.doInitialCleanup(bootProps);
@@ -162,12 +177,12 @@ public class AgentLifecycleService implements AgentService, SmartLifecycle {
             this.agentTransportLifecycle = agentManager.loadAgentTransportInSeparateClassloader(this);
 
             startPluginManagers();
-
+            
             /* calls handler.startup() which registers each handler with agentTransportLifecycle in turn. */
-            agentManager.startHandlers(this, serverHandlers, startedHandlers);
+            agentManager.startServerHandlers(this, serverHandlers, startedHandlers);
 
             dispatcher.addServerHandlers(startedHandlers);
-             
+
             /* The started handlers should have already registered with the  agentTransportLifecycle */
             agentTransportLifecycle.startAgentTransport();
 
@@ -335,6 +350,7 @@ public class AgentLifecycleService implements AgentService, SmartLifecycle {
 
             System.out.println("- Initializing the Agent");
             storageProvider = agentManager.createStorageProvider(config);
+            providerFetcher = new StorageProviderFetcher(storageProvider);
             agentManager.addProviderCertificate(storageProvider);
             listener.setConnectionListener(new DefaultConnectionListener(config));
             agentManager.setProxy(config); // remove when remoting is removed
@@ -414,6 +430,9 @@ public class AgentLifecycleService implements AgentService, SmartLifecycle {
     }
 
     private void startPluginManagers() throws AgentStartException {
+        PlugininventoryCallback pc = (PlugininventoryCallback) mapAgentCallback(PlugininventoryCallback.class);
+        pc.initialize(providerFetcher);
+        
         try {
             Properties bootProps = bootConfig.getBootProperties();
             productPluginManager = new ProductPluginManager(bootProps);
@@ -432,7 +451,7 @@ public class AgentLifecycleService implements AgentService, SmartLifecycle {
             agentManager.scanLegacyCustomDir("..");
             Collection<PluginInfo> fromDirs = productPluginManager.getAllPluginInfoDirectFromFileSystem(pluginDir);
             plugins = agentManager.mergeByName(fromDirs, plugins);
-            agentManager.sendPluginStatusToServer(plugins, storageProvider);
+            agentManager.sendPluginStatusToServer(plugins, storageProvider, pc);
             logger.info("Product Plugin Manager initalized");
         } catch (Exception e) {
             // an unexpected exception has occurred that was not handled log it and bail
@@ -457,6 +476,10 @@ public class AgentLifecycleService implements AgentService, SmartLifecycle {
     public AgentStorageProvider getStorageProvider() throws AgentRunningException {
         if (!running.get()) throw new AgentRunningException("Storage cannot be retrieved if the Agent is not running");
         return storageProvider;
+    }
+
+    public AgentCallback mapAgentCallback(Class<?extends AgentCallback> callback) {
+        return callbacks.get(callback);
     }
 
     /**
@@ -489,6 +512,10 @@ public class AgentLifecycleService implements AgentService, SmartLifecycle {
      */
     public AgentConfig getBootConfig() {
         return bootConfig;
+    }
+
+    public ProviderFetcher getProviderFetcher() {
+        return providerFetcher;
     }
 
     public void sendNotification(String msgClass, String message) {

@@ -42,11 +42,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class MeasurementCallback extends AgentCallback {
 
-    public MeasurementCallback() {}
+    /*public MeasurementCallback() {}
     
     public MeasurementCallback(ProviderFetcher fetcher){
         super(fetcher);
-    }
+    }*/
 
     /**
      * Returns the current server time
@@ -66,8 +66,7 @@ public class MeasurementCallback extends AgentCallback {
         }
     }
 
-    private void trackSend(String cmd, TrackEventReport report)
-        throws AgentCallbackException {
+    private void trackSend(String cmd, TrackEventReport report) throws AgentCallbackException {
         TrackSend_args args = new TrackSend_args();
         ProviderInfo provider = this.getProvider();
 
@@ -77,37 +76,25 @@ public class MeasurementCallback extends AgentCallback {
         this.invokeLatherCall(provider, cmd, args);
     }
 
-    public void trackSendLog(TrackEventReport report)
-        throws AgentCallbackException {
+    public void trackSendLog(TrackEventReport report) throws AgentCallbackException {
         this.trackSend(CommandInfo.CMD_TRACK_SEND_LOG, report);
     }
 
-    public void trackSendConfigChange(TrackEventReport report)
-        throws AgentCallbackException {
+    public void trackSendConfigChange(TrackEventReport report) throws AgentCallbackException {
         this.trackSend(CommandInfo.CMD_TRACK_SEND_CONFIG_CHANGE, report);
     }
 
-    public MeasurementConfigList getMeasurementConfigs()
-        throws AgentCallbackException
-    {
-        MeasurementGetConfigs_result res;
-        MeasurementGetConfigs_args args;
-        ProviderInfo provider;
+    public MeasurementConfigList getMeasurementConfigs() throws AgentCallbackException {
+        ProviderInfo provider = this.getProvider();
 
-        provider = this.getProvider();
+        MeasurementGetConfigs_args args = new MeasurementGetConfigs_args();
 
-        args = new MeasurementGetConfigs_args();
-
-        res = (MeasurementGetConfigs_result)
-            this.invokeLatherCall(provider,
-                                  CommandInfo.CMD_MEASUREMENT_GET_CONFIGS,
-                                  args);
+        MeasurementGetConfigs_result res = (MeasurementGetConfigs_result) this.invokeLatherCall(provider,
+                                            CommandInfo.CMD_MEASUREMENT_GET_CONFIGS, args);
         try {
             return res.getConfigs();
         } catch(LatherRemoteException exc){
-            throw new
-                    AgentCallbackException("Error getting plugin " +
-                                             "configs: " + exc.getMessage());
+            throw new AgentCallbackException("Error getting plugin configs: " + exc.getMessage());
         }
     }
 }

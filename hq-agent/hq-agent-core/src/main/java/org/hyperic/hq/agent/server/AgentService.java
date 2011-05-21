@@ -28,6 +28,8 @@ package org.hyperic.hq.agent.server;
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.agent.AgentException;
 import org.hyperic.hq.agent.AgentMonitorValue;
+import org.hyperic.hq.agent.bizapp.client.AgentCallback;
+import org.hyperic.hq.agent.bizapp.client.ProviderFetcher;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorInterface;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginManager;
@@ -50,6 +52,10 @@ public interface AgentService extends AgentMonitorInterface {
     AgentConfig getBootConfig();
 
     String getCurrentAgentBundle();
+
+    ProviderFetcher getProviderFetcher();
+
+    AgentCallback mapAgentCallback(Class<?extends AgentCallback> callback);
 
     void sendNotification(String msgClass, String message);
 

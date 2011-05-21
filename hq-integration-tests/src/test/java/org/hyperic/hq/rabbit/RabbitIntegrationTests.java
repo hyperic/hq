@@ -93,7 +93,7 @@ public class RabbitIntegrationTests extends BaseInfrastructureTest {
 
     
     /* not migrated yet */
-    private AutoinventoryCallbackClient autoinventoryClient;
+    private AutoinventoryCallback autoinventory;
 
     private ControlCallback control;
 
