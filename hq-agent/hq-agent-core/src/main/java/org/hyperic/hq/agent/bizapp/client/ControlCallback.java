@@ -30,45 +30,30 @@ import org.hyperic.hq.bizapp.shared.lather.CommandInfo;
 import org.hyperic.hq.bizapp.shared.lather.ControlGetPluginConfig_args;
 import org.hyperic.hq.bizapp.shared.lather.ControlGetPluginConfig_result;
 import org.hyperic.hq.bizapp.shared.lather.ControlSendCommandResult_args;
+import org.springframework.stereotype.Component;
 
-public class ControlCallback
-    extends AgentCallback
-{
+@Component
+public class ControlCallback extends AgentCallback {
+
+    public ControlCallback() {}
+    
     public ControlCallback(ProviderFetcher fetcher){
         super(fetcher, CommandInfo.SECURE_COMMANDS);
     }
 
-    public byte[] controlGetPluginConfiguration(String name)
-        throws AgentCallbackException
-    {
-        ControlGetPluginConfig_result res;
-        ControlGetPluginConfig_args args;
-        ProviderInfo provider;
-
-        provider = this.getProvider();
-
-        args = new ControlGetPluginConfig_args();
+    public byte[] controlGetPluginConfiguration(String name) throws AgentCallbackException {
+        ProviderInfo provider = this.getProvider();
+        ControlGetPluginConfig_args args = new ControlGetPluginConfig_args();
         args.setPluginName(name);
         args.setMerge(true);
-
-        res = (ControlGetPluginConfig_result)this.invokeLatherCall(provider,
-                                     CommandInfo.CMD_CONTROL_GET_PLUGIN_CONFIG,
-                                     args);
-
+        ControlGetPluginConfig_result res = (ControlGetPluginConfig_result)this.invokeLatherCall(provider, CommandInfo.CMD_CONTROL_GET_PLUGIN_CONFIG, args);
         return res.getConfig();
     }
 
-    public void controlSendCommandResult(String pluginName, int id, int result,
-                                         long startTime, long endTime, 
-                                         String message)
-        throws AgentCallbackException
-    {
-        ControlSendCommandResult_args args;
-        ProviderInfo provider;
-
-        provider = this.getProvider();
-
-        args = new ControlSendCommandResult_args();
+    public void controlSendCommandResult(String pluginName, int id, int result, long startTime, long endTime, String message)
+        throws AgentCallbackException {
+        ProviderInfo provider = this.getProvider();
+        ControlSendCommandResult_args args = new ControlSendCommandResult_args();
         args.setName(pluginName);
         args.setId(id);
         args.setResult(result);
@@ -76,8 +61,6 @@ public class ControlCallback
         args.setEndTime(endTime);
         args.setMessage(message);
 
-        this.invokeLatherCall(provider, 
-                              CommandInfo.CMD_CONTROL_SEND_COMMAND_RESULT,
-                              args);
+        this.invokeLatherCall(provider, CommandInfo.CMD_CONTROL_SEND_COMMAND_RESULT, args);
     }
 }

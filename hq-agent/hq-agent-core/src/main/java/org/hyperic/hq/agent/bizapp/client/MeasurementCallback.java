@@ -37,9 +37,13 @@ import org.hyperic.hq.bizapp.shared.lather.TrackSend_args;
 import org.hyperic.hq.measurement.data.MeasurementReport;
 import org.hyperic.hq.measurement.data.TrackEventReport;
 import org.hyperic.hq.measurement.shared.MeasurementConfigList;
+import org.springframework.stereotype.Component;
 
+@Component
 public class MeasurementCallback extends AgentCallback {
 
+    public MeasurementCallback() {}
+    
     public MeasurementCallback(ProviderFetcher fetcher){
         super(fetcher);
     }
@@ -47,27 +51,18 @@ public class MeasurementCallback extends AgentCallback {
     /**
      * Returns the current server time
      */
-    public long measurementSendReport(MeasurementReport report)
-        throws AgentCallbackException
-    {
-        MeasurementSendReport_args args;
-        MeasurementSendReport_result res;
-        ProviderInfo provider;
-
-        provider = this.getProvider();
-        args = new MeasurementSendReport_args();
+    public long measurementSendReport(MeasurementReport report) throws AgentCallbackException {
+        ProviderInfo provider = this.getProvider();
+        MeasurementSendReport_args args = new MeasurementSendReport_args();
         args.setReport(report);
 
-        res = (MeasurementSendReport_result)
-            this.invokeLatherCall(provider, 
-                                  CommandInfo.CMD_MEASUREMENT_SEND_REPORT,
-                                  args);
+        MeasurementSendReport_result res = (MeasurementSendReport_result)
+            this.invokeLatherCall(provider,  CommandInfo.CMD_MEASUREMENT_SEND_REPORT, args);
 
         try {
             return res.getTime();
         } catch (LatherRemoteException exc) {
-            throw new AgentCallbackException("Unable to get return " +
-                                                   "value from send report");
+            throw new AgentCallbackException("Unable to get return value from send report");
         }
     }
 

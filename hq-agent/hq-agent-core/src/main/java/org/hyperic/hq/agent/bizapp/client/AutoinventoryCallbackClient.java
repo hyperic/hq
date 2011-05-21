@@ -32,36 +32,27 @@ import org.hyperic.hq.autoinventory.ScanState;
 import org.hyperic.hq.bizapp.shared.lather.AiSendReport_args;
 import org.hyperic.hq.bizapp.shared.lather.AiSendRuntimeReport_args;
 import org.hyperic.hq.bizapp.shared.lather.CommandInfo;
+import org.springframework.stereotype.Component;
 
-public class AutoinventoryCallbackClient 
-    extends AgentCallback
-{
+@Component
+public class AutoinventoryCallbackClient extends AgentCallback {
+
+    public AutoinventoryCallbackClient() {}
+    
     public AutoinventoryCallbackClient(ProviderFetcher fetcher){
         super(fetcher);
     }
 
-    public void aiSendReport(ScanState state) 
-        throws AgentCallbackException
-    {
-        AiSendReport_args args;
-        ProviderInfo provider;
-
-        provider = this.getProvider();
-
-        args = new AiSendReport_args(state.getCore());
+    public void aiSendReport(ScanState state) throws AgentCallbackException {
+        ProviderInfo provider = this.getProvider();
+        AiSendReport_args args = new AiSendReport_args(state.getCore());
         this.invokeLatherCall(provider, CommandInfo.CMD_AI_SEND_REPORT, args);
     }
 
-    public void aiSendRuntimeReport(CompositeRuntimeResourceReport report) 
-        throws AutoinventoryException, AgentCallbackException
-    {
-        AiSendRuntimeReport_args args;
-        ProviderInfo provider;
-        
-        provider = this.getProvider();
-        args = new AiSendRuntimeReport_args(report);
-
-        this.invokeLatherCall(provider, CommandInfo.CMD_AI_SEND_RUNTIME_REPORT,
-                              args);
+    public void aiSendRuntimeReport(CompositeRuntimeResourceReport report)
+            throws AutoinventoryException, AgentCallbackException {
+        ProviderInfo provider = this.getProvider();
+        AiSendRuntimeReport_args args = new AiSendRuntimeReport_args(report);
+        this.invokeLatherCall(provider, CommandInfo.CMD_AI_SEND_RUNTIME_REPORT, args);
     }
 }

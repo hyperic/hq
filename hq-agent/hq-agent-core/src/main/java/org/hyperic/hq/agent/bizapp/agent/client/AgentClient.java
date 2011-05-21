@@ -150,8 +150,7 @@ public class AgentClient {
     }
 
 
-    private long cmdPing(int numAttempts)
-            throws AgentConnectionException, AgentRemoteException {
+    private long cmdPing(int numAttempts) throws AgentConnectionException, AgentRemoteException {
         AgentConnectionException lastExc;
 
         lastExc = new AgentConnectionException("Failed to connect to agent");
@@ -173,8 +172,7 @@ public class AgentClient {
         throw lastExc;
     }
 
-    private void cmdStatus()
-            throws AgentConnectionException, AgentRemoteException {
+    private void cmdStatus() throws AgentConnectionException, AgentRemoteException {
         ProviderInfo pInfo;
         String address;
         String currentAgentBundle;
@@ -232,8 +230,7 @@ public class AgentClient {
 
     }
 
-    private void cmdDie(int waitTime)
-            throws AgentConnectionException, AgentRemoteException {
+    private void cmdDie(int waitTime) throws AgentConnectionException, AgentRemoteException {
         try {
             destroy();
             this.agtCommands.die();
@@ -264,17 +261,13 @@ public class AgentClient {
         throw new AgentRemoteException("Unable to kill agent within timeout");
     }
 
-
-    private void cmdRestart()
-            throws AgentConnectionException, AgentRemoteException {
+    private void cmdRestart() throws AgentConnectionException, AgentRemoteException {
         try {
             this.agtCommands.restart();
         } catch (AgentConnectionException exc) {
-            throw new AgentConnectionException("Unable to connect to agent: " +
-                    "already dead?");
+            throw new AgentConnectionException("Unable to connect to agent: already dead?");
         } catch (AgentRemoteException exc) {
-            throw new AgentRemoteException("Error making remote agent call: " +
-                    exc.getMessage());
+            throw new AgentRemoteException("Error making remote agent call: " + exc.getMessage());
         }
     }
 
@@ -284,9 +277,7 @@ public class AgentClient {
         }
     }
 
-    private String askQuestion(String question, String def, boolean invis,
-                               String questionProp)
-            throws IOException {
+    private String askQuestion(String question, String def, boolean invis, String questionProp) throws IOException {
         BufferedReader in;
         String res, bootProp;
 
@@ -335,19 +326,14 @@ public class AgentClient {
         }
     }
 
-    private String askQuestion(String question, String def,
-                               String questionProp)
-            throws IOException {
+    private String askQuestion(String question, String def, String questionProp) throws IOException {
         return this.askQuestion(question, def, false, questionProp);
     }
 
-    private boolean askYesNoQuestion(String question, boolean def,
-                                     String questionProp)
-            throws IOException, AutoQuestionException {
+    private boolean askYesNoQuestion(String question, boolean def, String questionProp) throws IOException, AutoQuestionException {
         boolean isAuto;
 
-        isAuto = this.config.getBootProperties().getProperty(questionProp) !=
-                null;
+        isAuto = this.config.getBootProperties().getProperty(questionProp) != null;
 
         while (true) {
             String res;
@@ -372,13 +358,10 @@ public class AgentClient {
         }
     }
 
-
-    private int askIntQuestion(String question, int def, String questionProp)
-            throws IOException, AutoQuestionException {
+    private int askIntQuestion(String question, int def, String questionProp) throws IOException, AutoQuestionException {
         boolean isAuto;
 
-        isAuto = this.config.getBootProperties().getProperty(questionProp) !=
-                null;
+        isAuto = this.config.getBootProperties().getProperty(questionProp) != null;
 
         while (true) {
             String res;
@@ -399,13 +382,9 @@ public class AgentClient {
         }
     }
 
-    private BizappCallback testProvider(String provider)
-            throws AgentCallbackException {
-        StaticProviderFetcher fetcher;
-        BizappCallback res;
-
-        fetcher = new StaticProviderFetcher(new ProviderInfo(provider, "no-auth"));
-        res = new BizappCallback(fetcher, config);
+    private BizappCallback testProvider(String provider) throws AgentCallbackException {        
+        StaticProviderFetcher fetcher = new StaticProviderFetcher(new ProviderInfo(provider, "no-auth"));
+        BizappCallback res = new BizappCallback(fetcher, config);
         res.bizappPing();
         return res;
     }

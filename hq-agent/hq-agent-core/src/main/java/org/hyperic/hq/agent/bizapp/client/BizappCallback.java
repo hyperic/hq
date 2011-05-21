@@ -27,56 +27,35 @@ package org.hyperic.hq.agent.bizapp.client;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.agent.bizapp.agent.ProviderInfo;
-import org.hyperic.lather.NullLatherValue;
 import org.hyperic.hq.agent.AgentConfig;
-import org.hyperic.hq.bizapp.shared.lather.CommandInfo;
-import org.hyperic.hq.bizapp.shared.lather.RegisterAgent_args;
-import org.hyperic.hq.bizapp.shared.lather.RegisterAgent_result;
-import org.hyperic.hq.bizapp.shared.lather.UpdateAgent_args;
-import org.hyperic.hq.bizapp.shared.lather.UpdateAgent_result;
-import org.hyperic.hq.bizapp.shared.lather.UserIsValid_args;
-import org.hyperic.hq.bizapp.shared.lather.UserIsValid_result;
+import org.hyperic.hq.agent.bizapp.agent.ProviderInfo;
+import org.hyperic.hq.bizapp.shared.lather.*;
+import org.hyperic.lather.NullLatherValue;
+import org.springframework.stereotype.Component;
 
+@Component
 public class BizappCallback extends AgentCallback {
     private final Log log = LogFactory.getLog(BizappCallback.class);
-    
+
+    public BizappCallback(){}
+
     public BizappCallback(ProviderFetcher fetcher, AgentConfig config){
         super(fetcher);
-        
-        // configure lather proxy settings
+         
         if (config.isProxyServerSet()) {
-            log.info("Setting proxy server: host="+config.getProxyIp()+
-                    "; port="+config.getProxyPort()); 
-            System.setProperty(AgentConfig.PROP_LATHER_PROXYHOST, 
-                               config.getProxyIp());
-            System.setProperty(AgentConfig.PROP_LATHER_PROXYPORT, 
-                               String.valueOf(config.getProxyPort()));
+            log.info("Setting proxy server: host="+config.getProxyIp()+ "; port="+config.getProxyPort());
+            System.setProperty(AgentConfig.PROP_LATHER_PROXYHOST, config.getProxyIp());
+            System.setProperty(AgentConfig.PROP_LATHER_PROXYPORT, String.valueOf(config.getProxyPort()));
         }
-        
     }
 
-    public void bizappPing()
-        throws AgentCallbackException
-    {
-        ProviderInfo provider;
-
-        provider = this.getProvider();
-        this.invokeLatherCall(provider, CommandInfo.CMD_PING, 
-                              NullLatherValue.INSTANCE);
+    public void bizappPing() throws AgentCallbackException {
+        invokeLatherCall(getProvider(), CommandInfo.CMD_PING, NullLatherValue.INSTANCE);
     }
 
-    public boolean userIsValid(String user, String pword)
-        throws AgentCallbackException
-    {
-        UserIsValid_result res;
-        ProviderInfo provider;
-
-        provider = this.getProvider();
-
-        res = (UserIsValid_result)this.invokeLatherCall(provider, 
-                                            CommandInfo.CMD_USERISVALID,
-                                            new UserIsValid_args(user, pword));
+    public boolean userIsValid(String user, String pword) throws AgentCallbackException {
+        UserIsValid_result res = (UserIsValid_result)this.invokeLatherCall(getProvider(),
+                                 CommandInfo.CMD_USERISVALID, new UserIsValid_args(user, pword));
         return res.isValid();
     }
 

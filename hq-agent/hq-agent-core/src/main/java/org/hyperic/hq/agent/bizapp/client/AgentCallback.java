@@ -25,10 +25,6 @@
 
 package org.hyperic.hq.agent.bizapp.client;
 
-import java.io.IOException;
-import java.net.ConnectException;
-import java.util.HashSet;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.bizapp.agent.ProviderInfo;
@@ -38,66 +34,58 @@ import org.hyperic.lather.LatherRemoteException;
 import org.hyperic.lather.LatherValue;
 import org.hyperic.lather.client.LatherHTTPClient;
 
+import java.io.IOException;
+import java.net.ConnectException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Central place for communication back to the server. 
  */
 public abstract class AgentCallback {
     private static final int TIMEOUT_CONN = 30 * 1000;
+
     private static final int TIMEOUT_DATA = 5 * 60 * 1000;
 
-    private static final Log log = 
-        LogFactory.getLog(AgentCallback.class.getName());
+    private static final Log log = LogFactory.getLog(AgentCallback.class.getName());
 
-    private ProviderFetcher fetcher;        // Storage of provider info
-    private HashSet         secureCommands; // Secure commands
+    private ProviderFetcher providerFetcher;
 
-    public AgentCallback(ProviderFetcher fetcher,
-                               String[] secureCommands) {
+    private Set<String> secureCommands = new HashSet<String>();
 
-        this.fetcher         = fetcher;
-        this.resetProvider();
-
-        this.secureCommands = new HashSet();
-        for(int i=0; i<secureCommands.length; i++){
-            this.secureCommands.add(secureCommands[i]);
-        }
-
-    }
-    public AgentCallback(ProviderFetcher fetcher){
-        this(fetcher, CommandInfo.SECURE_COMMANDS);
+    public AgentCallback() {
+        this(null, CommandInfo.SECURE_COMMANDS);
     }
 
-    void resetProvider(){
+    public AgentCallback(ProviderFetcher providerFetcher) {
+        this(providerFetcher, CommandInfo.SECURE_COMMANDS);
+    }
+
+    public AgentCallback(ProviderFetcher providerFetcher, String[] secureCommands) {
+        this.secureCommands.addAll(Arrays.asList(secureCommands));
+        this.providerFetcher = providerFetcher;
+    }
+
+    public void setProviderFetcher(ProviderFetcher providerFetcher) {
+        this.providerFetcher = providerFetcher;
     }
 
     /**
      * Get the most up-to-date information about what our provider is, 
      * from the storage provider.
-     *
      * @return the string provider (such as jnp:stuff or http:otherstuff)
      */
-    protected ProviderInfo getProvider()
-        throws AgentCallbackException
-    {
-        ProviderInfo val = this.fetcher.getProvider();
+    protected ProviderInfo getProvider() throws AgentCallbackException {
+        ProviderInfo val = this.providerFetcher.getProvider();
         
-        if(val == null){
-            final String msg = "Unable to communicate with server -- " +
-                               "provider not yet setup";
+        if (val == null){
+            final String msg = "Unable to communicate with server -- provider not yet setup";
             throw new AgentCallbackException(msg);
         }
         return val;
     }
-
-    /**
-     * Check to see if a particular provider URL is valid (i.e. something
-     * that we know about && can process.
-     */
-    public static boolean isValidProviderURL(String provider){
-        return provider.startsWith("http:") ||
-            provider.startsWith("https:");
-    }
-
+ 
     /**
      * Generate a provider URL given a host and port.  This routine 
      * adds in the prefix (such as http:, etc.) as well as the URL
@@ -107,9 +95,7 @@ public abstract class AgentCallback {
      * @param port Port to use for provider.  If it is -1, the default
      *             port will be used.
      */
-    public static String getDefaultProviderURL(String host, int port,
-                                               boolean secure)
-    {
+    public static String getDefaultProviderURL(String host, int port, boolean secure) {
         String proto;
 
         if(port == -1){
@@ -117,9 +103,7 @@ public abstract class AgentCallback {
         }
 
         proto = secure ? "https" : "http";
-
-        return proto + "://" + host + ":" + port +
-            "/lather";
+        return proto + "://" + host + ":" + port + "/lather";
     }
     
     /**
