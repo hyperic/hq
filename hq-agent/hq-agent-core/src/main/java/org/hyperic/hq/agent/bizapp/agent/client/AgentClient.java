@@ -149,6 +149,83 @@ public class AgentClient {
         }
     }
 
+    private BizappCallback testProvider(String provider) throws AgentCallbackException {
+        StaticProviderFetcher fetcher = new StaticProviderFetcher(new ProviderInfo(provider, "no-auth"));
+        BizappCallback res = new BizappCallback();
+        res.initialize(fetcher, config);
+        res.bizappPing();
+        return res;
+    }
+
+    /**
+     * Test the connection information.
+     */
+    private BizappCallback getConnection(String provider,
+                                               boolean secure)
+            throws AutoQuestionException, AgentCallbackException {
+        BizappCallback bizapp;
+        Properties bootP = this.config.getBootProperties();
+        long start = System.currentTimeMillis();
+
+        while (true) {
+            String sec = secure ? "secure" : "insecure";
+            SYSTEM_OUT.print("- Testing " + sec + " connection ... ");
+
+            try {
+                bizapp = this.testProvider(provider);
+                SYSTEM_OUT.println("Success");
+                return bizapp;
+            } catch (AgentCallbackException exc) {
+                String msg = exc.getMessage();
+                if (msg.indexOf("is still starting") != -1) {
+                    SYSTEM_ERR.println("HQ is still starting " +
+                            "(retrying in 10 seconds)");
+                    try {
+                        Thread.sleep(10 * 1000);
+                    } catch (InterruptedException e) {
+                    }
+                    // Try again
+                    continue;
+                }
+
+                // Check for configured server timeout
+                String propTimeout = bootP.getProperty(QPROP_TIMEOUT);
+                if (propTimeout != null) {
+                    long timeout;
+                    try {
+                        timeout = Integer.parseInt(propTimeout) * 1000;
+                    } catch (NumberFormatException nfe) {
+                        // If the timeout is improperly configured,
+                        // bail out
+                        throw new AutoQuestionException("Mis-configured" +
+                                QPROP_TIMEOUT +
+                                "property: " +
+                                propTimeout);
+                    }
+
+                    SYSTEM_ERR.println("Failure (retrying in 10 seconds)");
+                    if (start + timeout > System.currentTimeMillis()) {
+                        try {
+                            Thread.sleep(10 * 1000);
+                        } catch (InterruptedException ie) {
+                        }
+                        // Try again
+                        continue;
+                    }
+                }
+
+                SYSTEM_ERR.println("Failure");
+
+                if (bootP.getProperty(QPROP_IPADDR) != null ||
+                        bootP.getProperty(QPROP_PORT) != null ||
+                        bootP.getProperty(QPROP_SSLPORT) != null) {
+                    throw new AutoQuestionException("Unable to connect to " +
+                            PRODUCT);
+                }
+                throw exc;
+            }
+        }
+    }
 
     private long cmdPing(int numAttempts) throws AgentConnectionException, AgentRemoteException {
         AgentConnectionException lastExc;
@@ -382,82 +459,6 @@ public class AgentClient {
         }
     }
 
-    private BizappCallback testProvider(String provider) throws AgentCallbackException {        
-        StaticProviderFetcher fetcher = new StaticProviderFetcher(new ProviderInfo(provider, "no-auth"));
-        BizappCallback res = new BizappCallback(fetcher, config);
-        res.bizappPing();
-        return res;
-    }
-
-    /**
-     * Test the connection information.
-     */
-    private BizappCallback getConnection(String provider,
-                                               boolean secure)
-            throws AutoQuestionException, AgentCallbackException {
-        BizappCallback bizapp;
-        Properties bootP = this.config.getBootProperties();
-        long start = System.currentTimeMillis();
-
-        while (true) {
-            String sec = secure ? "secure" : "insecure";
-            SYSTEM_OUT.print("- Testing " + sec + " connection ... ");
-
-            try {
-                bizapp = this.testProvider(provider);
-                SYSTEM_OUT.println("Success");
-                return bizapp;
-            } catch (AgentCallbackException exc) {
-                String msg = exc.getMessage();
-                if (msg.indexOf("is still starting") != -1) {
-                    SYSTEM_ERR.println("HQ is still starting " +
-                            "(retrying in 10 seconds)");
-                    try {
-                        Thread.sleep(10 * 1000);
-                    } catch (InterruptedException e) {
-                    }
-                    // Try again
-                    continue;
-                }
-
-                // Check for configured server timeout
-                String propTimeout = bootP.getProperty(QPROP_TIMEOUT);
-                if (propTimeout != null) {
-                    long timeout;
-                    try {
-                        timeout = Integer.parseInt(propTimeout) * 1000;
-                    } catch (NumberFormatException nfe) {
-                        // If the timeout is improperly configured,
-                        // bail out
-                        throw new AutoQuestionException("Mis-configured" +
-                                QPROP_TIMEOUT +
-                                "property: " +
-                                propTimeout);
-                    }
-
-                    SYSTEM_ERR.println("Failure (retrying in 10 seconds)");
-                    if (start + timeout > System.currentTimeMillis()) {
-                        try {
-                            Thread.sleep(10 * 1000);
-                        } catch (InterruptedException ie) {
-                        }
-                        // Try again
-                        continue;
-                    }
-                }
-
-                SYSTEM_ERR.println("Failure");
-
-                if (bootP.getProperty(QPROP_IPADDR) != null ||
-                        bootP.getProperty(QPROP_PORT) != null ||
-                        bootP.getProperty(QPROP_SSLPORT) != null) {
-                    throw new AutoQuestionException("Unable to connect to " +
-                            PRODUCT);
-                }
-                throw exc;
-            }
-        }
-    }
 
     private static int getCpuCount() throws SigarException {
         Sigar sigar = new Sigar();
@@ -511,12 +512,9 @@ public class AgentClient {
         if (providerInfo == null) {
             this.cmdSetup();
         }
-
     }
 
-    private void cmdSetup()
-            throws AgentConnectionException, AgentRemoteException, IOException,
-            AutoQuestionException {
+    private void cmdSetup() throws AgentConnectionException, AgentRemoteException, IOException, AutoQuestionException {
         BizappCallback bizapp;
         InetAddress localHost;
         CreateToken_result tokenRes;
@@ -543,15 +541,10 @@ public class AgentClient {
 
         SYSTEM_OUT.println("[ Running agent setup ]");
 
-        // FIXME - For now we will only setup the new transport if the 
-        // unidirectional agent is available (since currently we don't 
-        // have a bidirectional agent). Once we have a bidirectional 
-        // agent, we should always ask if agent communications should 
-        // use the new transport.
-
-//        isNewTransportAgent = askYesNoQuestion("Should Agent communications to " + 
-//                PRODUCT + " use the new transport ", 
-//                false, QPROP_NEWTRANSPORT);   
+        // FIXME - For now we will only setup the new transport if the unidirectional agent is available (since currently we don't
+        // have a bidirectional agent). Once we have a bidirectional agent, we should always ask if agent communications should
+        // use the new transport. 
+        // isNewTransportAgent = askYesNoQuestion("Should Agent communications to " + PRODUCT + " use the new transport ",  false, QPROP_NEWTRANSPORT);
 
         if (isUnidirectionalAgentSupported()) {
             unidirectional = askYesNoQuestion("Should Agent communications to " +
@@ -567,31 +560,14 @@ public class AgentClient {
         int port;
 
         while (true) {
-            host = this.askQuestion("What is the " + PRODUCT +
-                    " server IP address",
-                    null, QPROP_IPADDR);
-
-            secure = askYesNoQuestion("Should Agent communications " +
-                    "to " + PRODUCT + " always " +
-                    "be secure",
-                    false, QPROP_SECURE);
-            if (secure) {
-                // Always secure.  Ask for SSL port and verify
-                port = this.askIntQuestion("What is the " + PRODUCT +
-                        " server SSL port",
-                        7443, QPROP_SSLPORT);
-                provider = AgentCallback.getDefaultProviderURL(host,
-                        port,
-                        true);
-            } else {
-                // Never secure.  Only ask for non-ssl port and verify
-                port = this.askIntQuestion("What is the " + PRODUCT +
-                        " server port    ",
-                        7080, QPROP_PORT);
-
-                provider = AgentCallback.getDefaultProviderURL(host,
-                        port,
-                        false);
+            host = this.askQuestion("What is the " + PRODUCT + " server IP address", null, QPROP_IPADDR);
+            secure = askYesNoQuestion("Should Agent communications to " + PRODUCT + " always be secure", false, QPROP_SECURE);
+            if (secure) {  // Always secure.  Ask for SSL port and verify
+                port = this.askIntQuestion("What is the " + PRODUCT + " server SSL port", 7443, QPROP_SSLPORT);
+                provider = AgentCallback.getDefaultProviderURL(host, port, true);
+            } else { // Never secure.  Only ask for non-ssl port and verify
+                port = this.askIntQuestion("What is the " + PRODUCT + " server port    ", 7080, QPROP_PORT);
+                provider = AgentCallback.getDefaultProviderURL(host, port, false);
             }
 
             try {
@@ -615,22 +591,14 @@ public class AgentClient {
 
             if (secure) {
                 unidirectionalPort = port;
-            } else {
-                // unidirectional only uses secure communication. Ask for SSL port and verify
+            } else { // unidirectional only uses secure communication. Ask for SSL port and verify
                 while (true) {
-                    unidirectionalPort = this.askIntQuestion("What is the " + PRODUCT +
-                            " server SSL port for unidirectional communications",
-                            7443, QPROP_SSLPORT);
-
-                    // The unidirectional transport is not hosted via the 
-                    // Lather servlet, but this is ok, since the 
-                    // undirectional servlet is in the same container as 
-                    // the Lather servlet. We are just testing connectivity 
-                    // to the servlet container here.
-                    String unidirectionalProvider =
-                            AgentCallback.getDefaultProviderURL(host,
-                                    unidirectionalPort,
-                                    true);
+                    unidirectionalPort = this.askIntQuestion("What is the " + PRODUCT + " server SSL port " +
+                            "for unidirectional communications", 7443, QPROP_SSLPORT);
+                    // The unidirectional transport is not hosted via the Lather servlet, but this is ok, since the
+                    // undirectional servlet is in the same container as  the Lather servlet. We are just testing
+                    // connectivity to the servlet container here.
+                    String unidirectionalProvider = AgentCallback.getDefaultProviderURL(host, unidirectionalPort, true);
                     try {
                         getConnection(unidirectionalProvider, true);
                     } catch (AgentCallbackException e) {
@@ -643,24 +611,18 @@ public class AgentClient {
         }
 
         while (true) {
-            user = this.askQuestion("What is your " + PRODUCT +
-                    " login", "hqadmin",
-                    QPROP_LOGIN);
-            pword = this.askQuestion("What is your " + PRODUCT +
-                    " password", null, true,
-                    QPROP_PWORD);
+            user = this.askQuestion("What is your " + PRODUCT + " login", "hqadmin", QPROP_LOGIN);
+            pword = this.askQuestion("What is your " + PRODUCT + " password", null, true, QPROP_PWORD);
             try {
                 if (bizapp.userIsValid(user, pword))
                     break;
             } catch (AgentCallbackException exc) {
-                SYSTEM_ERR.println("Error validating user: " +
-                        exc.getMessage());
+                SYSTEM_ERR.println("Error validating user: " + exc.getMessage());
                 return;
             }
 
             SYSTEM_ERR.println("- Invalid username/password");
-            if (bootP.getProperty(QPROP_LOGIN) != null ||
-                    bootP.getProperty(QPROP_PWORD) != null) {
+            if (bootP.getProperty(QPROP_LOGIN) != null || bootP.getProperty(QPROP_PWORD) != null) {
                 throw new AutoQuestionException("Invalid username/password");
             }
         }
@@ -675,9 +637,7 @@ public class AgentClient {
                 question = "What IP should " + PRODUCT + " use to contact the agent";
             }
 
-            agentIP = this.askQuestion(question,
-                    getDefaultIpAddress(),
-                    QPROP_AGENTIP);
+            agentIP = this.askQuestion(question, getDefaultIpAddress(), QPROP_AGENTIP);
 
             // Attempt to resolve, as a safeguard
             try {
@@ -692,22 +652,14 @@ public class AgentClient {
         if (!unidirectional) {
             while (true) {
                 int listenPort = this.config.getListenPort();
-                agentPort = this.askIntQuestion("What port should " + PRODUCT +
-                        " use to contact the agent",
-                        listenPort,
-                        QPROP_AGENTPORT);
+                agentPort = this.askIntQuestion("What port should " + PRODUCT + " use to contact the agent", listenPort, QPROP_AGENTPORT);
                 if (agentPort < 1 || agentPort > 65535) {
                     SYSTEM_ERR.println("- Invalid port");
                 } else {
                     if (agentPort != listenPort) {
-                        SYSTEM_ERR.println("- To setup agent port to " +
-                                agentPort + "," +
-                                " Stop the agent," +
-                                " Update agent properties" +
-                                " for agent.listenPort and start" +
-                                " the agent again");
-                        SYSTEM_OUT.println("- Now Agent uses the default port:"
-                                + listenPort);
+                        SYSTEM_ERR.println("- To setup agent port to " + agentPort +
+                                ", Stop the agent,  Update agent properties for agent.listenPort and start the agent again");
+                        SYSTEM_OUT.println("- Now Agent uses the default port: " + listenPort);
                         agentPort = listenPort;
                     }
                     break;
@@ -715,14 +667,12 @@ public class AgentClient {
             }
         }
 
-        // The old agent token may be needed if re-registering an existing agent 
-        // but changing from non-unidirectional to unidirectional transport. 
-        // In this case, the agent port will change, so we will need to lookup 
+        // The old agent token may be needed if re-registering an existing agent but changing from non-unidirectional
+        // to unidirectional transport. In this case, the agent port will change, so we will need to lookup
         // the agent by the old agent token instead of agent IP and port.
         String oldAgentToken = null;
 
-        /* Check to see if this agent already has a setup for a server.
-           If it does, allow the user to re-register with the new IP address */
+        /* Check to see if this agent already has a setup for a server. If it does, allow the user to re-register with the new IP address */
         if ((providerInfo = this.camCommands.getProviderInfo()) != null &&
                 providerInfo.getProviderAddress() != null && providerInfo.getAgentToken() != null) {
             oldAgentToken = providerInfo.getAgentToken();
@@ -736,26 +686,19 @@ public class AgentClient {
                 // agent with a given AgentToken will re-use that, but with a different IP address
                 SYSTEM_OUT.println("- Informing " + PRODUCT + " about agent setup changes");
                 try {
-                    response = bizapp.updateAgent(providerInfo.getAgentToken(),
-                            user, pword, agentIP, agentPort, isNewTransportAgent, unidirectional);
+                    response = bizapp.updateAgent(providerInfo.getAgentToken(), user, pword, agentIP, agentPort, isNewTransportAgent, unidirectional);
                     if (response != null) SYSTEM_ERR.println("- Error updating agent: " + response);
                 } catch (Exception exc) {
-                    SYSTEM_ERR.println("- Error updating agent: " +
-                            exc.getMessage());
+                    SYSTEM_ERR.println("- Error updating agent: " + exc.getMessage());
                 }
 
-                if (providerInfo.isNewTransport() != isNewTransportAgent ||
-                        providerInfo.isUnidirectional() != unidirectional) {
-
+                if (providerInfo.isNewTransport() != isNewTransportAgent || providerInfo.isUnidirectional() != unidirectional) {
                     ProviderInfo registeredProviderInfo = new ProviderInfo(provider, providerInfo.getAgentToken());
-
                     if (isNewTransportAgent) {
                         registeredProviderInfo.setNewTransport(unidirectional, unidirectionalPort);
                     }
-
                     this.camCommands.setProviderInfo(registeredProviderInfo);
                 }
-
                 return;
             }
         }
@@ -764,8 +707,7 @@ public class AgentClient {
         try {
             InetAddress.getByName(host);
         } catch (UnknownHostException exc) {
-            SYSTEM_ERR.println("Unable to resolve provider (strange): " +
-                    exc.getMessage());
+            SYSTEM_ERR.println("Unable to resolve provider (strange): " + exc.getMessage());
             return;
         }
         tokenRes = this.camCommands.createToken(new CreateToken_args());
@@ -776,21 +718,15 @@ public class AgentClient {
         SYSTEM_OUT.println("- Registering agent with " + PRODUCT);
         RegisterAgentResult result;
         try {
-            result = bizapp.registerAgent(oldAgentToken,
-                    user, pword,
-                    tokenRes.getToken(),
-                    agentIP, agentPort,
-                    ProductProperties.getVersion(),
-                    getCpuCount(), isNewTransportAgent,
-                    unidirectional);
+            result = bizapp.registerAgent(oldAgentToken, user, pword, tokenRes.getToken(), agentIP, agentPort,
+                    ProductProperties.getVersion(), getCpuCount(), isNewTransportAgent, unidirectional);
             response = result.response;
             if (!response.startsWith("token:")) {
                 SYSTEM_ERR.println("- Unable to register agent: " + response);
                 return;
             }
 
-            // Else the bizapp responds with the token that the agent needs
-            // to use to contact it
+            // Else the bizapp responds with the token that the agent needs to use to contact it
             agentToken = response.substring("token:".length());
         } catch (Exception exc) {
             exc.printStackTrace(SYSTEM_ERR);
@@ -802,8 +738,7 @@ public class AgentClient {
         SYSTEM_OUT.println("    " + agentToken);
         SYSTEM_OUT.println("- Informing agent of new " + PRODUCT + " server");
 
-        ProviderInfo registeredProviderInfo = new ProviderInfo(provider, agentToken);
-
+        ProviderInfo registeredProviderInfo = new ProviderInfo(provider, agentToken); 
         if (isNewTransportAgent) {
             registeredProviderInfo.setNewTransport(unidirectional, unidirectionalPort);
         }
@@ -813,18 +748,13 @@ public class AgentClient {
         SYSTEM_OUT.println("- Validating");
         providerInfo = this.camCommands.getProviderInfo();
 
-        if (providerInfo == null ||
-                providerInfo.getProviderAddress().equals(provider) == false ||
-                providerInfo.getAgentToken().equals(agentToken) == false) {
+        if (providerInfo == null || !providerInfo.getProviderAddress().equals(provider) ||
+                !providerInfo.getAgentToken().equals(agentToken)) {
             if (providerInfo == null) {
-                SYSTEM_ERR.println(" - Failure - Agent is reporting no " +
-                        "" + PRODUCT + " provider information");
+                SYSTEM_ERR.println(" - Failure - Agent is reporting no  " + PRODUCT + " provider information");
             } else {
-                SYSTEM_ERR.println("- Failure - Agent is using " +
-                        PRODUCT + " server '" +
-                        providerInfo.getProviderAddress() +
-                        "' with token '" +
-                        providerInfo.getAgentToken() + "'");
+                SYSTEM_ERR.println("- Failure - Agent is using " + PRODUCT + " server '" + providerInfo.getProviderAddress() +
+                        "' with token '" + providerInfo.getAgentToken() + "'");
             }
 
         } else {
@@ -833,13 +763,10 @@ public class AgentClient {
             if (providerInfo.isNewTransport()) {
                 String unidirectionalPortString = "";
                 if (providerInfo.isUnidirectional()) {
-                    unidirectionalPortString = ", port=" +
-                            providerInfo.getUnidirectionalPort();
+                    unidirectionalPortString = ", port=" + providerInfo.getUnidirectionalPort();
                 }
 
-                SYSTEM_OUT.println("- Agent using new transport, unidirectional=" +
-                        providerInfo.isUnidirectional() +
-                        unidirectionalPortString);
+                SYSTEM_OUT.println("- Agent using new transport, unidirectional=" + providerInfo.isUnidirectional() + unidirectionalPortString);
             }
         }
 
