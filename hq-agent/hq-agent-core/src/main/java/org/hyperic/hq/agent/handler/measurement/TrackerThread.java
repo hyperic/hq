@@ -27,8 +27,8 @@ package org.hyperic.hq.agent.handler.measurement;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.agent.bizapp.client.AgentCallbackClientException;
-import org.hyperic.hq.agent.bizapp.client.MeasurementCallbackClient;
+import org.hyperic.hq.agent.bizapp.client.AgentCallbackException;
+import org.hyperic.hq.agent.bizapp.client.MeasurementCallback;
 import org.hyperic.hq.agent.bizapp.client.StorageProviderFetcher;
 import org.hyperic.hq.agent.server.AgentStartException;
 import org.hyperic.hq.agent.server.AgentStorageException;
@@ -61,7 +61,7 @@ class TrackerThread implements Runnable {
     private int                maxEventBatchSize = MAX_EVENT_BATCHSIZE;
     
     private AgentStorageProvider      storage;
-    private MeasurementCallbackClient client;
+    private MeasurementCallback client;
 
     private ConfigTrackPluginManager  ctManager;
     private LogTrackPluginManager     ltManager;
@@ -123,13 +123,13 @@ class TrackerThread implements Runnable {
         }
     }
  
-    private MeasurementCallbackClient setupClient()
+    private MeasurementCallback setupClient()
         throws AgentStartException 
     {
         StorageProviderFetcher fetcher;
 
         fetcher = new StorageProviderFetcher(this.storage);
-        return new MeasurementCallbackClient(fetcher);
+        return new MeasurementCallback(fetcher);
     }
 
     private void flushEvents(LinkedList events, String dListName)
@@ -245,7 +245,7 @@ class TrackerThread implements Runnable {
                 }
                 
                 this.log.debug("Completed sending report to server");            
-            } catch (AgentCallbackClientException e) {
+            } catch (AgentCallbackException e) {
                 this.log.error("Error sending report to server: " + e);
                 succeeded = false;
             }            

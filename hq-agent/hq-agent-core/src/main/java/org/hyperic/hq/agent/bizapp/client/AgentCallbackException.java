@@ -27,21 +27,21 @@ package org.hyperic.hq.agent.bizapp.client;
 
 import org.hyperic.util.NestedException;
 
-public class AgentCallbackClientException extends NestedException {
+public class AgentCallbackException extends NestedException {
 
-    public AgentCallbackClientException () {
+    public AgentCallbackException() {
         super();
     }
 
-    public AgentCallbackClientException (String s) {
+    public AgentCallbackException(String s) {
         super(s);
     }
 
-    public AgentCallbackClientException (Throwable t) {
+    public AgentCallbackException(Throwable t) {
         super(t.getMessage(), t);
     }
 
-    public AgentCallbackClientException (String s, Throwable t) {
+    public AgentCallbackException(String s, Throwable t) {
         super(s, t);
     }
 }

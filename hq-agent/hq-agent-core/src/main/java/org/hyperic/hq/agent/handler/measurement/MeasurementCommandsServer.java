@@ -29,7 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.*;
 import org.hyperic.hq.agent.bizapp.agent.CommandsAPIInfo;
-import org.hyperic.hq.agent.bizapp.client.MeasurementCallbackClient;
+import org.hyperic.hq.agent.bizapp.client.MeasurementCallback;
 import org.hyperic.hq.agent.bizapp.client.StorageProviderFetcher;
 import org.hyperic.hq.agent.server.*;
 import org.hyperic.hq.measurement.agent.MeasurementCommandsAPI;
@@ -259,8 +259,8 @@ public class MeasurementCommandsServer implements AgentServerHandler, AgentNotif
     private void startConfigPopulator() {
         StorageProviderFetcher fetcher
                 = new StorageProviderFetcher(this.storage);
-        MeasurementCallbackClient client
-                = new MeasurementCallbackClient(fetcher);
+        MeasurementCallback client
+                = new MeasurementCallback(fetcher);
         ConfigPopulateThread populator
                 = new ConfigPopulateThread(client, this.ltPluginManager,
                 this.ctPluginManager);

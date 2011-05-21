@@ -2,7 +2,7 @@ package org.hyperic.hq.rabbit;
 
 
 import org.hyperic.hq.agent.*;
-import org.hyperic.hq.agent.bizapp.client.BizappCallbackClient;
+import org.hyperic.hq.agent.bizapp.client.BizappCallback;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,7 +14,7 @@ import java.util.Map;
  */
 public class BenchmarkClient {
 
-    private BizappCallbackClient bcc;
+    private BizappCallback bcc;
 
    
     public BenchmarkClient(String host, int port) throws AgentConfigException {

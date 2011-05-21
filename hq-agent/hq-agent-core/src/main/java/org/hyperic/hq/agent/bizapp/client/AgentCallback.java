@@ -41,17 +41,17 @@ import org.hyperic.lather.client.LatherHTTPClient;
 /**
  * Central place for communication back to the server. 
  */
-public abstract class AgentCallbackClient {
+public abstract class AgentCallback {
     private static final int TIMEOUT_CONN = 30 * 1000;
     private static final int TIMEOUT_DATA = 5 * 60 * 1000;
 
     private static final Log log = 
-        LogFactory.getLog(AgentCallbackClient.class.getName());
+        LogFactory.getLog(AgentCallback.class.getName());
 
     private ProviderFetcher fetcher;        // Storage of provider info
     private HashSet         secureCommands; // Secure commands
 
-    public AgentCallbackClient(ProviderFetcher fetcher,
+    public AgentCallback(ProviderFetcher fetcher,
                                String[] secureCommands) {
 
         this.fetcher         = fetcher;
@@ -63,7 +63,7 @@ public abstract class AgentCallbackClient {
         }
 
     }
-    public AgentCallbackClient(ProviderFetcher fetcher){
+    public AgentCallback(ProviderFetcher fetcher){
         this(fetcher, CommandInfo.SECURE_COMMANDS);
     }
 
@@ -77,14 +77,14 @@ public abstract class AgentCallbackClient {
      * @return the string provider (such as jnp:stuff or http:otherstuff)
      */
     protected ProviderInfo getProvider()
-        throws AgentCallbackClientException
+        throws AgentCallbackException
     {
         ProviderInfo val = this.fetcher.getProvider();
         
         if(val == null){
             final String msg = "Unable to communicate with server -- " +
                                "provider not yet setup";
-            throw new AgentCallbackClientException(msg);
+            throw new AgentCallbackException(msg);
         }
         return val;
     }
@@ -139,7 +139,7 @@ public abstract class AgentCallbackClient {
     protected LatherValue invokeLatherCall(ProviderInfo provider,
                                            String methodName,
                                            LatherValue args)
-        throws AgentCallbackClientException
+        throws AgentCallbackException
     {
         LatherHTTPClient client;
         String addr;
@@ -162,7 +162,7 @@ public abstract class AgentCallbackClient {
                 exc.getMessage();
         
             this.log.debug(eMsg);
-            throw new AgentCallbackClientException(eMsg);
+            throw new AgentCallbackException(eMsg);
         } catch(IOException exc){
             String msg = exc.getMessage();
 
@@ -176,10 +176,10 @@ public abstract class AgentCallbackClient {
                     eMsg = "IO error: " + exc.getMessage();
                     this.log.debug(eMsg);
                 }
-                throw new AgentCallbackClientException(eMsg);
+                throw new AgentCallbackException(eMsg);
             }
             this.log.debug("IO error", exc);
-            throw new AgentCallbackClientException("IO error: " +
+            throw new AgentCallbackException("IO error: " +
                                                    exc.getMessage());
         } catch(LatherRemoteException exc){
             String eMsg;
@@ -194,7 +194,7 @@ public abstract class AgentCallbackClient {
                 this.log.debug(eMsg);
             } 
 
-            throw new AgentCallbackClientException(eMsg, exc);
+            throw new AgentCallbackException(eMsg, exc);
         }
     }
 }

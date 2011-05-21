@@ -7,18 +7,18 @@ import org.hyperic.hq.bizapp.shared.lather.CommandInfo;
 import org.hyperic.hq.bizapp.shared.lather.PluginReport_args;
 import org.hyperic.hq.product.PluginInfo;
 
-public class PlugininventoryCallbackClient extends AgentCallbackClient {
+public class PlugininventoryCallback extends AgentCallback {
 
     private final PluginReport_args args;
 
-    public PlugininventoryCallbackClient(ProviderFetcher fetcher, Collection<PluginInfo> plugins) {
+    public PlugininventoryCallback(ProviderFetcher fetcher, Collection<PluginInfo> plugins) {
         super(fetcher);
         args = new PluginReport_args(plugins);
         String agentToken = fetcher.getProvider().getAgentToken();
         args.setAgentToken(agentToken);
     }
     
-    public void sendPluginReportToServer() throws AgentCallbackClientException {
+    public void sendPluginReportToServer() throws AgentCallbackException {
         ProviderInfo provider = getProvider();
         invokeLatherCall(provider, CommandInfo.CMD_PLUGIN_SEND_REPORT, args);
     }

@@ -29,7 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentRemoteValue;
-import org.hyperic.hq.agent.bizapp.client.AgentCallbackClientException;
+import org.hyperic.hq.agent.bizapp.client.AgentCallbackException;
 import org.hyperic.hq.agent.bizapp.client.AutoinventoryCallbackClient;
 import org.hyperic.hq.agent.server.*;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -290,7 +290,7 @@ class RuntimeAutodiscoverer implements RuntimeScanner {
                               compositeReport.simpleSummary());
                 }
                 _client.aiSendRuntimeReport(compositeReport);
-            } catch(AgentCallbackClientException e) {
+            } catch(AgentCallbackException e) {
                 if(_log.isDebugEnabled()) {
                     _log.error(errMsg + e, e);
                 } else {

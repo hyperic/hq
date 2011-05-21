@@ -38,10 +38,10 @@ import org.hyperic.hq.bizapp.shared.lather.UpdateAgent_result;
 import org.hyperic.hq.bizapp.shared.lather.UserIsValid_args;
 import org.hyperic.hq.bizapp.shared.lather.UserIsValid_result;
 
-public class BizappCallbackClient extends AgentCallbackClient {
-    private final Log log = LogFactory.getLog(BizappCallbackClient.class);
+public class BizappCallback extends AgentCallback {
+    private final Log log = LogFactory.getLog(BizappCallback.class);
     
-    public BizappCallbackClient(ProviderFetcher fetcher, AgentConfig config){
+    public BizappCallback(ProviderFetcher fetcher, AgentConfig config){
         super(fetcher);
         
         // configure lather proxy settings
@@ -57,7 +57,7 @@ public class BizappCallbackClient extends AgentCallbackClient {
     }
 
     public void bizappPing()
-        throws AgentCallbackClientException
+        throws AgentCallbackException
     {
         ProviderInfo provider;
 
@@ -67,7 +67,7 @@ public class BizappCallbackClient extends AgentCallbackClient {
     }
 
     public boolean userIsValid(String user, String pword)
-        throws AgentCallbackClientException
+        throws AgentCallbackException
     {
         UserIsValid_result res;
         ProviderInfo provider;
@@ -104,7 +104,7 @@ public class BizappCallbackClient extends AgentCallbackClient {
                                              int cpuCount, 
                                              boolean isNewTransportAgent, 
                                              boolean unidirectional)
-        throws AgentCallbackClientException
+        throws AgentCallbackException
     {
         RegisterAgent_result res;
         RegisterAgent_args args;
@@ -140,7 +140,7 @@ public class BizappCallbackClient extends AgentCallbackClient {
                               String agentIp, int agentPort, 
                               boolean isNewTransportAgent, 
                               boolean unidirectional)
-        throws AgentCallbackClientException
+        throws AgentCallbackException
     {
         UpdateAgent_result res;
         UpdateAgent_args args;

@@ -38,9 +38,9 @@ import org.hyperic.hq.measurement.data.MeasurementReport;
 import org.hyperic.hq.measurement.data.TrackEventReport;
 import org.hyperic.hq.measurement.shared.MeasurementConfigList;
 
-public class MeasurementCallbackClient extends AgentCallbackClient {
+public class MeasurementCallback extends AgentCallback {
 
-    public MeasurementCallbackClient(ProviderFetcher fetcher){
+    public MeasurementCallback(ProviderFetcher fetcher){
         super(fetcher);
     }
 
@@ -48,7 +48,7 @@ public class MeasurementCallbackClient extends AgentCallbackClient {
      * Returns the current server time
      */
     public long measurementSendReport(MeasurementReport report)
-        throws AgentCallbackClientException
+        throws AgentCallbackException
     {
         MeasurementSendReport_args args;
         MeasurementSendReport_result res;
@@ -66,13 +66,13 @@ public class MeasurementCallbackClient extends AgentCallbackClient {
         try {
             return res.getTime();
         } catch (LatherRemoteException exc) {
-            throw new AgentCallbackClientException("Unable to get return " +
+            throw new AgentCallbackException("Unable to get return " +
                                                    "value from send report");
         }
     }
 
     private void trackSend(String cmd, TrackEventReport report)
-        throws AgentCallbackClientException {
+        throws AgentCallbackException {
         TrackSend_args args = new TrackSend_args();
         ProviderInfo provider = this.getProvider();
 
@@ -83,17 +83,17 @@ public class MeasurementCallbackClient extends AgentCallbackClient {
     }
 
     public void trackSendLog(TrackEventReport report)
-        throws AgentCallbackClientException {
+        throws AgentCallbackException {
         this.trackSend(CommandInfo.CMD_TRACK_SEND_LOG, report);
     }
 
     public void trackSendConfigChange(TrackEventReport report)
-        throws AgentCallbackClientException {
+        throws AgentCallbackException {
         this.trackSend(CommandInfo.CMD_TRACK_SEND_CONFIG_CHANGE, report);
     }
 
     public MeasurementConfigList getMeasurementConfigs()
-        throws AgentCallbackClientException
+        throws AgentCallbackException
     {
         MeasurementGetConfigs_result res;
         MeasurementGetConfigs_args args;
@@ -110,8 +110,8 @@ public class MeasurementCallbackClient extends AgentCallbackClient {
         try {
             return res.getConfigs();
         } catch(LatherRemoteException exc){
-            throw new 
-                AgentCallbackClientException("Error getting plugin " +
+            throw new
+                    AgentCallbackException("Error getting plugin " +
                                              "configs: " + exc.getMessage());
         }
     }

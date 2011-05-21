@@ -26,7 +26,7 @@
 package org.hyperic.hq.agent.handler.control;
 
 import org.hyperic.hq.agent.AgentRemoteException;
-import org.hyperic.hq.agent.bizapp.client.ControlCallbackClient;
+import org.hyperic.hq.agent.bizapp.client.ControlCallback;
 import org.hyperic.hq.control.agent.client.ControlCommandsClient;
 import org.hyperic.hq.product.ControlPluginManager;
 import org.hyperic.hq.product.PluginException;
@@ -41,12 +41,12 @@ import org.hyperic.util.config.ConfigResponse;
 public class ControlCommandsService implements ControlCommandsClient {
     
     private final ControlPluginManager _controlManager;
-    private final ControlCallbackClient _client;
+    private final ControlCallback _;
     
     public ControlCommandsService(ControlPluginManager controlManager, 
-                                  ControlCallbackClient client) {
+                                  ControlCallback client) {
         _controlManager = controlManager;
-        _client = client;
+        _ = client;
     }
 
     /**
@@ -101,7 +101,7 @@ public class ControlCommandsService implements ControlCommandsClient {
                              id,
                              pluginAction,
                              pluginArgs,
-                             _client, 
+                    _,
                              _controlManager);
         actionThread.start();
         

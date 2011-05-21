@@ -33,7 +33,7 @@ import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.agent.AgentConfigException;
 import org.hyperic.hq.agent.AgentMonitorValue;
 import org.hyperic.hq.agent.AgentUpgradeManager;
-import org.hyperic.hq.agent.bizapp.client.PlugininventoryCallbackClient;
+import org.hyperic.hq.agent.bizapp.client.PlugininventoryCallback;
 import org.hyperic.hq.agent.bizapp.client.StorageProviderFetcher;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorInterface;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorSimple;
@@ -324,8 +324,8 @@ public class AgentManager extends AgentMonitorSimple {
                             Thread.sleep(5000);
                             continue;
                         }
-                        PlugininventoryCallbackClient client =
-                                new PlugininventoryCallbackClient(new StorageProviderFetcher(storageProvider), plugins);
+                        PlugininventoryCallback client =
+                                new PlugininventoryCallback(new StorageProviderFetcher(storageProvider), plugins);
                         logger.info("Sending plugin status to server");
 
                         client.sendPluginReportToServer();

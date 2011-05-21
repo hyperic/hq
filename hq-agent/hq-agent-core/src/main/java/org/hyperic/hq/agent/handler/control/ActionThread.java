@@ -27,8 +27,8 @@ package org.hyperic.hq.agent.handler.control;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.agent.bizapp.client.AgentCallbackClientException;
-import org.hyperic.hq.agent.bizapp.client.ControlCallbackClient;
+import org.hyperic.hq.agent.bizapp.client.AgentCallbackException;
+import org.hyperic.hq.agent.bizapp.client.ControlCallback;
 import org.hyperic.hq.product.ControlPluginManager;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
@@ -44,7 +44,7 @@ import java.util.NoSuchElementException;
  */
 class ActionThread extends Thread {
     private ControlPluginManager  manager;
-    private ControlCallbackClient client;
+    private ControlCallback client;
     private String                pluginName;
     private String                pluginType;
     private String                action;
@@ -58,7 +58,7 @@ class ActionThread extends Thread {
     protected Log log = LogFactory.getLog(ActionThread.class.getName());
 
     ActionThread(String pluginName, String pluginType, String id,
-                 String action, String[] args, ControlCallbackClient client,
+                 String action, String[] args, ControlCallback client,
                  ControlPluginManager manager)
     {
         this.pluginName = pluginName;
@@ -158,7 +158,7 @@ class ActionThread extends Thread {
                                                      result, startTime,
                                                      System.currentTimeMillis(),
                                                      errMsg);
-            } catch (AgentCallbackClientException e) {
+            } catch (AgentCallbackException e) {
                 this.log.error("Unable to send command result: " +
                                e.getMessage());
             }

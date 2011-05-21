@@ -31,7 +31,7 @@ import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.agent.bizapp.agent.CommandsAPIInfo;
 import org.hyperic.hq.agent.bizapp.agent.ProviderInfo;
 import org.hyperic.hq.agent.bizapp.agent.client.AgentClient;
-import org.hyperic.hq.agent.bizapp.client.AgentCallbackClient;
+import org.hyperic.hq.agent.bizapp.client.AgentCallback;
 import org.hyperic.hq.common.YesOrNo;
 import org.hyperic.hq.transport.AgentTransport;
 import org.jboss.remoting.InvokerLocator;
@@ -315,7 +315,7 @@ public final class AgentTransportLifecycleImpl implements AgentTransportLifecycl
         String host = bootProperties.getProperty(AgentClient.QPROP_IPADDR);
 
         if (host == null && provider != null) {
-            host = AgentCallbackClient.getHostFromProviderURL(provider.getProviderAddress());
+            host = AgentCallback.getHostFromProviderURL(provider.getProviderAddress());
         }
 
         return host;

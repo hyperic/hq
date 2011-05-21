@@ -399,13 +399,13 @@ public class AgentClient {
         }
     }
 
-    private BizappCallbackClient testProvider(String provider)
-            throws AgentCallbackClientException {
+    private BizappCallback testProvider(String provider)
+            throws AgentCallbackException {
         StaticProviderFetcher fetcher;
-        BizappCallbackClient res;
+        BizappCallback res;
 
         fetcher = new StaticProviderFetcher(new ProviderInfo(provider, "no-auth"));
-        res = new BizappCallbackClient(fetcher, config);
+        res = new BizappCallback(fetcher, config);
         res.bizappPing();
         return res;
     }
@@ -413,10 +413,10 @@ public class AgentClient {
     /**
      * Test the connection information.
      */
-    private BizappCallbackClient getConnection(String provider,
+    private BizappCallback getConnection(String provider,
                                                boolean secure)
-            throws AutoQuestionException, AgentCallbackClientException {
-        BizappCallbackClient bizapp;
+            throws AutoQuestionException, AgentCallbackException {
+        BizappCallback bizapp;
         Properties bootP = this.config.getBootProperties();
         long start = System.currentTimeMillis();
 
@@ -428,7 +428,7 @@ public class AgentClient {
                 bizapp = this.testProvider(provider);
                 SYSTEM_OUT.println("Success");
                 return bizapp;
-            } catch (AgentCallbackClientException exc) {
+            } catch (AgentCallbackException exc) {
                 String msg = exc.getMessage();
                 if (msg.indexOf("is still starting") != -1) {
                     SYSTEM_ERR.println("HQ is still starting " +
@@ -538,7 +538,7 @@ public class AgentClient {
     private void cmdSetup()
             throws AgentConnectionException, AgentRemoteException, IOException,
             AutoQuestionException {
-        BizappCallbackClient bizapp;
+        BizappCallback bizapp;
         InetAddress localHost;
         CreateToken_result tokenRes;
         ProviderInfo providerInfo;
@@ -601,7 +601,7 @@ public class AgentClient {
                 port = this.askIntQuestion("What is the " + PRODUCT +
                         " server SSL port",
                         7443, QPROP_SSLPORT);
-                provider = AgentCallbackClient.getDefaultProviderURL(host,
+                provider = AgentCallback.getDefaultProviderURL(host,
                         port,
                         true);
             } else {
@@ -610,14 +610,14 @@ public class AgentClient {
                         " server port    ",
                         7080, QPROP_PORT);
 
-                provider = AgentCallbackClient.getDefaultProviderURL(host,
+                provider = AgentCallback.getDefaultProviderURL(host,
                         port,
                         false);
             }
 
             try {
                 bizapp = getConnection(provider, secure);
-            } catch (AgentCallbackClientException e) {
+            } catch (AgentCallbackException e) {
                 continue;
             }
 
@@ -649,12 +649,12 @@ public class AgentClient {
                     // the Lather servlet. We are just testing connectivity 
                     // to the servlet container here.
                     String unidirectionalProvider =
-                            AgentCallbackClient.getDefaultProviderURL(host,
+                            AgentCallback.getDefaultProviderURL(host,
                                     unidirectionalPort,
                                     true);
                     try {
                         getConnection(unidirectionalProvider, true);
-                    } catch (AgentCallbackClientException e) {
+                    } catch (AgentCallbackException e) {
                         continue;
                     }
 
@@ -673,7 +673,7 @@ public class AgentClient {
             try {
                 if (bizapp.userIsValid(user, pword))
                     break;
-            } catch (AgentCallbackClientException exc) {
+            } catch (AgentCallbackException exc) {
                 SYSTEM_ERR.println("Error validating user: " +
                         exc.getMessage());
                 return;

@@ -31,15 +31,15 @@ import org.hyperic.hq.bizapp.shared.lather.ControlGetPluginConfig_args;
 import org.hyperic.hq.bizapp.shared.lather.ControlGetPluginConfig_result;
 import org.hyperic.hq.bizapp.shared.lather.ControlSendCommandResult_args;
 
-public class ControlCallbackClient 
-    extends AgentCallbackClient
+public class ControlCallback
+    extends AgentCallback
 {
-    public ControlCallbackClient(ProviderFetcher fetcher){
+    public ControlCallback(ProviderFetcher fetcher){
         super(fetcher, CommandInfo.SECURE_COMMANDS);
     }
 
     public byte[] controlGetPluginConfiguration(String name)
-        throws AgentCallbackClientException
+        throws AgentCallbackException
     {
         ControlGetPluginConfig_result res;
         ControlGetPluginConfig_args args;
@@ -61,7 +61,7 @@ public class ControlCallbackClient
     public void controlSendCommandResult(String pluginName, int id, int result,
                                          long startTime, long endTime, 
                                          String message)
-        throws AgentCallbackClientException
+        throws AgentCallbackException
     {
         ControlSendCommandResult_args args;
         ProviderInfo provider;

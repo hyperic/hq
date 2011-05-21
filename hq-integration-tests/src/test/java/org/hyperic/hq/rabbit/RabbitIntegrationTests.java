@@ -34,7 +34,7 @@ public class RabbitIntegrationTests extends BaseInfrastructureTest {
      */
     private final static String AGENT_HOME = "/agent-4.6.0.BUILD-SNAPSHOT";
 
-    private BizappCallbackClient bizappClient;
+    private BizappCallback bizapp;
 
     private final String host = "localhost";
 
@@ -49,21 +49,21 @@ public class RabbitIntegrationTests extends BaseInfrastructureTest {
         assertNotNull(registerAgentService);
         System.setProperty("agent.install.home", AGENT_HOME);
         System.setProperty("agent.bundle.home", AGENT_HOME + "/bin");
-        ProviderInfo providerInfo = new ProviderInfo(AgentCallbackClient.getDefaultProviderURL(host, port, false), "no-auth");
-        this.bizappClient = new BizappCallbackClient(new StaticProviderFetcher(providerInfo), AgentConfig.newInstance());
-        assertNotNull("'bcc' must not be null", bizappClient);
+        ProviderInfo providerInfo = new ProviderInfo(AgentCallback.getDefaultProviderURL(host, port, false), "no-auth");
+        this.bizapp = new BizappCallback(new StaticProviderFetcher(providerInfo), AgentConfig.newInstance());
+        assertNotNull("'bcc' must not be null", bizapp);
     }
 
     @Test
-    public void bizappRegisterAgentSuccess() throws AgentCallbackClientException, InterruptedException { 
-        RegisterAgentResult response = this.bizappClient.registerAgent(null, user, pass, "fooAuthToken", host, port, "", 1, false, false);
+    public void bizappRegisterAgentSuccess() throws AgentCallbackException, InterruptedException {
+        RegisterAgentResult response = this.bizapp.registerAgent(null, user, pass, "fooAuthToken", host, port, "", 1, false, false);
         assertNotNull(response);
         assertTrue(response.response.startsWith("token:"));
     }
 
     @Test
-    public void bizappRegisterAgentFail() throws AgentCallbackClientException, InterruptedException {
-        RegisterAgentResult error = this.bizappClient.registerAgent(null, "invalid", pass, "fooAuthToken", host, port, "", 1, false, false);
+    public void bizappRegisterAgentFail() throws AgentCallbackException, InterruptedException {
+        RegisterAgentResult error = this.bizapp.registerAgent(null, "invalid", pass, "fooAuthToken", host, port, "", 1, false, false);
         assertNotNull(error);
         assertTrue(error.response.contains("Permission denied"));
     }
@@ -76,9 +76,9 @@ public class RabbitIntegrationTests extends BaseInfrastructureTest {
         executor.submit(new Callable<String>() {
             public String call() throws Exception {
                 AgentClient.main(new String[]{"start"});
-                ProviderInfo providerInfo = new ProviderInfo(AgentCallbackClient.getDefaultProviderURL(host, port, false), "no-auth");
+                ProviderInfo providerInfo = new ProviderInfo(AgentCallback.getDefaultProviderURL(host, port, false), "no-auth");
                 assertNotNull(providerInfo);
-                assertTrue(bizappClient.userIsValid("hqadmin", "hqadmin"));
+                assertTrue(bizapp.userIsValid("hqadmin", "hqadmin"));
                 AgentClient.main(new String[]{"die"});
                 TimeUnit.MILLISECONDS.sleep(1000);
                 return null;
@@ -95,19 +95,19 @@ public class RabbitIntegrationTests extends BaseInfrastructureTest {
     /* not migrated yet */
     private AutoinventoryCallbackClient autoinventoryClient;
 
-    private ControlCallbackClient controlClient;
+    private ControlCallback control;
 
-    private MeasurementCallbackClient measurementClient;
+    private MeasurementCallback measurement;
 
-    private PlugininventoryCallbackClient pluginInventoryClient;
+    private PlugininventoryCallback pluginInventory;
     
     @Test
-    public void bizappUserIsValid() throws AgentConfigException, AgentCallbackClientException, InterruptedException {
-        assertTrue(bizappClient.userIsValid(user, pass));
+    public void bizappUserIsValid() throws AgentConfigException, AgentCallbackException, InterruptedException {
+        assertTrue(bizapp.userIsValid(user, pass));
     }
  
-    public void bizappUpdateAgent() throws InterruptedException, AgentCallbackClientException {
-        String result = bizappClient.updateAgent("", user, pass, host, port, false, false);
+    public void bizappUpdateAgent() throws InterruptedException, AgentCallbackException {
+        String result = bizapp.updateAgent("", user, pass, host, port, false, false);
         assertNotNull(result);
     }
 }

@@ -28,8 +28,8 @@ package org.hyperic.hq.agent.handler.measurement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.bizapp.agent.CommandsAPIInfo;
-import org.hyperic.hq.agent.bizapp.client.AgentCallbackClientException;
-import org.hyperic.hq.agent.bizapp.client.MeasurementCallbackClient;
+import org.hyperic.hq.agent.bizapp.client.AgentCallbackException;
+import org.hyperic.hq.agent.bizapp.client.MeasurementCallback;
 import org.hyperic.hq.agent.bizapp.client.StorageProviderFetcher;
 import org.hyperic.hq.agent.server.AgentStartException;
 import org.hyperic.hq.agent.server.AgentStorageException;
@@ -77,7 +77,7 @@ public class SenderThread
 
     private volatile boolean                   shouldDie;
     private          Log                       log;
-    private MeasurementCallbackClient client;
+    private MeasurementCallback client;
     private          AgentStorageProvider      storage;
     private          String                    agentToken;
     private          LinkedList                transitionQueue;
@@ -172,13 +172,13 @@ public class SenderThread
                       this.maxBatchSize);
     }
 
-    private MeasurementCallbackClient setupClient()
+    private MeasurementCallback setupClient()
         throws AgentStartException 
     {
         StorageProviderFetcher fetcher;
 
         fetcher = new StorageProviderFetcher(this.storage);
-        return new MeasurementCallbackClient(fetcher);
+        return new MeasurementCallback(fetcher);
     }
 
     void die(){
@@ -462,7 +462,7 @@ public class SenderThread
             }
             success = true;
             serverError = false; // it's working fine
-        } catch(AgentCallbackClientException exc){
+        } catch(AgentCallbackException exc){
             if( ! serverError ) {
                 // serverError was false, i.e. it worked before
                 this.log.error("Error sending measurements: " + 

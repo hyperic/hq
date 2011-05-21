@@ -30,7 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentAPIInfo;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentRemoteValue;
-import org.hyperic.hq.agent.bizapp.client.ControlCallbackClient;
+import org.hyperic.hq.agent.bizapp.client.ControlCallback;
 import org.hyperic.hq.agent.bizapp.client.StorageProviderFetcher; 
 import org.hyperic.hq.agent.server.*;
 import org.hyperic.hq.control.agent.ControlCommandsAPI;
@@ -100,7 +100,7 @@ public class ControlCommandsServer implements AgentServerHandler {
 
         // setup control manager
         ControlPluginManager controlManager;
-        ControlCallbackClient client;
+        ControlCallback client;
 
         try {
             controlManager =
@@ -140,12 +140,12 @@ public class ControlCommandsServer implements AgentServerHandler {
         this.log.info("Control Commands Server shut down");
     }
 
-    private ControlCallbackClient setupClient()
+    private ControlCallback setupClient()
             throws AgentStartException {
         StorageProviderFetcher fetcher;
 
         fetcher = new StorageProviderFetcher(this.storage);
-        return new ControlCallbackClient(fetcher);
+        return new ControlCallback(fetcher);
     }
 
     private ControlPluginAdd_result

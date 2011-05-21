@@ -34,14 +34,14 @@ import org.hyperic.hq.bizapp.shared.lather.AiSendRuntimeReport_args;
 import org.hyperic.hq.bizapp.shared.lather.CommandInfo;
 
 public class AutoinventoryCallbackClient 
-    extends AgentCallbackClient
+    extends AgentCallback
 {
     public AutoinventoryCallbackClient(ProviderFetcher fetcher){
         super(fetcher);
     }
 
     public void aiSendReport(ScanState state) 
-        throws AgentCallbackClientException 
+        throws AgentCallbackException
     {
         AiSendReport_args args;
         ProviderInfo provider;
@@ -53,7 +53,7 @@ public class AutoinventoryCallbackClient
     }
 
     public void aiSendRuntimeReport(CompositeRuntimeResourceReport report) 
-        throws AutoinventoryException, AgentCallbackClientException 
+        throws AutoinventoryException, AgentCallbackException
     {
         AiSendRuntimeReport_args args;
         ProviderInfo provider;

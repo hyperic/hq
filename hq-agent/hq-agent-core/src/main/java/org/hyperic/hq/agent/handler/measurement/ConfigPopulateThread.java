@@ -27,7 +27,7 @@ package org.hyperic.hq.agent.handler.measurement;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.agent.bizapp.client.MeasurementCallbackClient;
+import org.hyperic.hq.agent.bizapp.client.MeasurementCallback;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.measurement.shared.MeasurementConfigEntity;
 import org.hyperic.hq.measurement.shared.MeasurementConfigList;
@@ -51,13 +51,13 @@ class ConfigPopulateThread
 {
     private static final long MAX_TIME_TO_SLEEP = 10 * 60 * 1000;
 
-    private MeasurementCallbackClient client;
+    private MeasurementCallback client;
     private LogTrackPluginManager  ltManager;
     private ConfigTrackPluginManager ctManager;
 
     private Log log = LogFactory.getLog(ConfigPopulateThread.class.getName());
 
-    ConfigPopulateThread(MeasurementCallbackClient client, 
+    ConfigPopulateThread(MeasurementCallback client,
                          LogTrackPluginManager ltManager,
                          ConfigTrackPluginManager ctManager)
     {
