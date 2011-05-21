@@ -25,9 +25,10 @@
 
 package org.hyperic.hq.agent.server;
 
+import org.hyperic.util.GenericValueMap;
+
 import java.util.Iterator;
 import java.util.Set;
-import org.hyperic.util.GenericValueMap;
 
 /**
  * Provides a very simple/generic storage interface.  Subsystems within

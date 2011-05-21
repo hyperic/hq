@@ -25,7 +25,7 @@ import static org.junit.Assert.assertTrue;
 
 
 @Ignore("'AGENT_HOME' must be set")
-public class LatherReplacementIntegrationTests extends BaseInfrastructureTest {
+public class RabbitIntegrationTests extends BaseInfrastructureTest {
 
     @Autowired private RegisterAgentService registerAgentService;
 
@@ -78,8 +78,7 @@ public class LatherReplacementIntegrationTests extends BaseInfrastructureTest {
                 AgentClient.main(new String[]{"start"});
                 ProviderInfo providerInfo = new ProviderInfo(AgentCallbackClient.getDefaultProviderURL(host, port, false), "no-auth");
                 assertNotNull(providerInfo);
-                BizappCallbackClient bcc = new BizappCallbackClient(new StaticProviderFetcher(providerInfo), AgentConfig.newInstance());
-                assertTrue(bcc.userIsValid("hqadmin", "hqadmin"));
+                assertTrue(bizappClient.userIsValid("hqadmin", "hqadmin"));
                 AgentClient.main(new String[]{"die"});
                 TimeUnit.MILLISECONDS.sleep(1000);
                 return null;

@@ -29,7 +29,6 @@ import org.hyperic.hq.agent.bizapp.agent.client.AgentClient;
 import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.concurrent.*;
@@ -41,7 +40,7 @@ import java.util.concurrent.*;
  * -Dorg.hyperic.sigar.path=/target/generated-test-sources, this is the only way I was
  *  able to get the agent and server to run for fast testing.
  *
- * 2. Set agent_home, insure your agent is actually there
+ * 2. Configure agent_home, insure your agent is actually there
  *
  * 3. Configure : agent_home/config/agent.properties
  * agent.setup.camIP=localhost
@@ -55,12 +54,12 @@ import java.util.concurrent.*;
  * agent.setup.unidirectional=no
  * agent.setup.resetupTokens=yes
  */
-@Ignore("Requires setup")
+//@Ignore("Requires setup")
 public class SpringAgentTest extends BaseInfrastructureTest {
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    private static final String agent_home = "/agent-4.6.0.BUILD-SNAPSHOT";
+    private static final String agent_home = "/Users/hedelson/tools/hyperic/agent-4.6.0.BUILD-SNAPSHOT";
 
     private final String agent_bundle_home = agent_home + "/bundles/agent-4.6.0.BUILD-SNAPSHOT";
 

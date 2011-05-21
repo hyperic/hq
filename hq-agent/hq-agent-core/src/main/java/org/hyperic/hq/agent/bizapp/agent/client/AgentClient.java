@@ -404,8 +404,7 @@ public class AgentClient {
         StaticProviderFetcher fetcher;
         BizappCallbackClient res;
 
-        fetcher = new StaticProviderFetcher(new ProviderInfo(provider,
-                "no-auth"));
+        fetcher = new StaticProviderFetcher(new ProviderInfo(provider, "no-auth"));
         res = new BizappCallbackClient(fetcher, config);
         res.bizappPing();
         return res;

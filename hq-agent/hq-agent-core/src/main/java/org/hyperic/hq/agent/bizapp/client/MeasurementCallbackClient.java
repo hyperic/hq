@@ -38,9 +38,8 @@ import org.hyperic.hq.measurement.data.MeasurementReport;
 import org.hyperic.hq.measurement.data.TrackEventReport;
 import org.hyperic.hq.measurement.shared.MeasurementConfigList;
 
-public class MeasurementCallbackClient 
-    extends AgentCallbackClient
-{
+public class MeasurementCallbackClient extends AgentCallbackClient {
+
     public MeasurementCallbackClient(ProviderFetcher fetcher){
         super(fetcher);
     }

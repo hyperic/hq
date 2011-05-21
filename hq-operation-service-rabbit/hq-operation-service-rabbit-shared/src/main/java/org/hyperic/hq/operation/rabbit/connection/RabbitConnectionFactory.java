@@ -27,14 +27,12 @@ package org.hyperic.hq.operation.rabbit.connection;
 
 import com.rabbitmq.client.Address;
 import com.rabbitmq.client.Connection;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
 /**
  * @author Helena Edelson
- */
-@Component
+ */ 
 public final class RabbitConnectionFactory extends AbstractRabbitConnectionFactory {
 
     public RabbitConnectionFactory() {

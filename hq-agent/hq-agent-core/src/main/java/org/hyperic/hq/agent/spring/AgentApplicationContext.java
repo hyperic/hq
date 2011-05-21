@@ -44,7 +44,7 @@ public final class AgentApplicationContext {
     private static final AtomicBoolean running = new AtomicBoolean(false);
 
     //RabbitOperationServiceConfiguration
-    private static final String[] basePackages = {"org.hyperic.hq.agent"};
+    private static final String[] basePackages = {"org.hyperic.hq.agent", "org.hyperic.hq.operation.rabbit"};
 
     private static final AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 
