@@ -24,6 +24,8 @@
  */
 package org.hyperic.hq.operation.rabbit.annotation;
 
+import org.springframework.stereotype.Component;
+
 import java.lang.annotation.*;
 
 /**
@@ -32,5 +34,6 @@ import java.lang.annotation.*;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+@Component
 public @interface OperationService {
 }
