@@ -112,7 +112,7 @@
 					</c:if>
 					<c:forEach var="attachment" items="${mastheadTrackerAttachments}">
 					<li>
- 						<a href="<spring:url page="/mastheadAttach.do?typeId=${attachment.attachment.id}"/>">${attachment.HTML}</a>
+ 						<a href="<spring:url value="/mastheadAttach.do?typeId=${attachment.attachment.id}"/>">${attachment.HTML}</a>
  					</li>
 					</c:forEach>
 				</ul>
@@ -154,7 +154,7 @@
     	var refreshCount = 0;
     	var refreshAlerts = function() {
       		hqDojo.xhrGet({
-	    	  	url: "<spring:url page="/common/RecentAlerts.jsp"/>",
+	    	  	url: "<spring:url value="/common/RecentAlerts.jsp"/>",
 	    	  	load: function(response, args) {
 	    	        hqDojo.style("headerAlerts", {
 	    	        	"display": "",
