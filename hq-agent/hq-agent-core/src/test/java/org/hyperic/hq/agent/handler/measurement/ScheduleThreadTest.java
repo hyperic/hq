@@ -258,8 +258,7 @@ public class ScheduleThreadTest extends TestCase {
     }
 
     public static class SimpleSender implements Sender {
-
-        public void processData(int dsnId, MetricValue data, int derivedID) {
+        public void processData(int dsnId, Object data, int derivedID) {
         }
     }
 

@@ -28,7 +28,9 @@ package org.hyperic.hq.operation;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
 
-
+/**
+ * @author Helena Edelson
+ */
 public class RegisterAgentResponse extends AbstractOperation {
 
     private String agentToken;

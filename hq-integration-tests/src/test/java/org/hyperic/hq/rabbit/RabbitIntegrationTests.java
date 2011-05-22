@@ -29,6 +29,8 @@ public class RabbitIntegrationTests extends BaseInfrastructureTest {
 
     @Autowired private RegisterAgentService registerAgentService;
 
+    private ExecutorService executor = Executors.newFixedThreadPool(1);
+
     /**
      * Must configure
      */
@@ -50,7 +52,8 @@ public class RabbitIntegrationTests extends BaseInfrastructureTest {
         System.setProperty("agent.install.home", AGENT_HOME);
         System.setProperty("agent.bundle.home", AGENT_HOME + "/bin");
         ProviderInfo providerInfo = new ProviderInfo(AgentCallback.getDefaultProviderURL(host, port, false), "no-auth");
-        this.bizapp = new BizappCallback(new StaticProviderFetcher(providerInfo), AgentConfig.newInstance());
+        this.bizapp = new BizappCallback();
+        bizapp.initialize(new StaticProviderFetcher(providerInfo), AgentConfig.newInstance());
         assertNotNull("'bcc' must not be null", bizapp);
     }
 
@@ -71,7 +74,6 @@ public class RabbitIntegrationTests extends BaseInfrastructureTest {
 
     @Test
     public void isUserValid() throws AgentConnectionException, AgentRemoteException, InterruptedException {
-        ExecutorService executor = Executors.newFixedThreadPool(1);
  
         executor.submit(new Callable<String>() {
             public String call() throws Exception {

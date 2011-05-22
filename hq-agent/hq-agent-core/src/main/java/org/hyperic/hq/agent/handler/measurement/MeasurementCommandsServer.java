@@ -136,8 +136,7 @@ public class MeasurementCommandsServer implements AgentServerHandler, AgentNotif
         log.info("Registering Measurement Commands Service with Agent Transport");
 
         try {
-            agentTransportLifecycle.registerService(MeasurementCommandsClient.class,
-                    measurementCommandsService);
+            agentTransportLifecycle.registerService(MeasurementCommandsClient.class, measurementCommandsService);
         } catch (Exception e) {
             throw new AgentStartException("Failed to register Measurement Commands Service.", e);
         }
@@ -153,11 +152,9 @@ public class MeasurementCommandsServer implements AgentServerHandler, AgentNotif
         agentService.registerMonitor("camMetric.schedule", this.scheduleObject);
         agentService.registerMonitor("camMetric.sender", this.senderObject);
 
-        // If we have don't have a provider, register a handler until
-        // we get one
+        // If we have don't have a provider, register a handler until we get one
         if (CommandsAPIInfo.getProvider(this.storage) == null) {
-            agentService.registerNotifyHandler(this,
-                    CommandsAPIInfo.NOTIFY_SERVER_SET);
+            agentService.registerNotifyHandler(this, CommandsAPIInfo.NOTIFY_SERVER_SET);
         } else {
             this.startConfigPopulator();
         }
@@ -170,18 +167,13 @@ public class MeasurementCommandsServer implements AgentServerHandler, AgentNotif
     }
 
     private void startConfigPopulator() {
-       /* StorageProviderFetcher fetcher = new StorageProviderFetcher(this.storage);
-        MeasurementCallback client = new MeasurementCallback(fetcher);*/
         ConfigPopulateThread populator = new ConfigPopulateThread(callback, this.ltPluginManager, this.ctPluginManager);
         populator.setDaemon(true);
         populator.start();
     }
 
 
-    private void spawnThreads(SenderThread senderObject,
-                              ScheduleThread scheduleObject,
-                              TrackerThread trackerObject)
-            throws AgentStartException {
+    private void spawnThreads(SenderThread senderObject, ScheduleThread scheduleObject, TrackerThread trackerObject) throws AgentStartException {
         this.senderThread = new Thread(senderObject, "SenderThread");
         senderThread.setDaemon(true);
         this.scheduleThread = new Thread(scheduleObject, "ScheduleThread");

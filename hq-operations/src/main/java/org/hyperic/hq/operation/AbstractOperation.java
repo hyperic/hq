@@ -1,5 +1,8 @@
 package org.hyperic.hq.operation;
 
-public abstract class AbstractOperation  {
+/**
+ * @author Helena Edelson
+ */
+abstract class AbstractOperation  {
   
 }

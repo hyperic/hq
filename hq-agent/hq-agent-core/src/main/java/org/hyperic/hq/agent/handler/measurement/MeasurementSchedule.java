@@ -30,14 +30,11 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.server.AgentStorageException;
 import org.hyperic.hq.agent.server.AgentStorageProvider;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.measurement.server.session.SRN;
+import org.hyperic.hq.operation.SRN;
 import org.hyperic.util.encoding.Base64;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Properties;
+import java.util.*;
 
 
 /**
@@ -46,23 +43,25 @@ import java.util.Properties;
  */
 
 class MeasurementSchedule {
+
+    private Log                  log = LogFactory.getLog(MeasurementSchedule.class);
+
     private static final String PROP_MSCHED = "measurement_schedule";
+
     private static final String PROP_MSRNS =  "measurement_srn";
     
     private AgentStorageProvider store;      
-    private ArrayList            srnList;
-    private Log                  log;
+
+    private final List<org.hyperic.hq.operation.SRN> newSrnList;
+    private final List<org.hyperic.hq.measurement.server.session.SRN> srnList;
 
     MeasurementSchedule(AgentStorageProvider store, Properties bootProps) {
         String info = bootProps.getProperty(PROP_MSCHED);
-        if (info != null) {
-            store.addOverloadedInfo(PROP_MSCHED, info);
-        }
+        if (info != null) store.addOverloadedInfo(PROP_MSCHED, info);
 
         this.store    = store;
-        this.srnList  = new ArrayList();
-        this.log      = LogFactory.getLog(MeasurementSchedule.class);
-
+        this.newSrnList  = new ArrayList<org.hyperic.hq.operation.SRN>();
+        this.srnList  = new ArrayList<org.hyperic.hq.measurement.server.session.SRN>();
         this.populateSRNInfo();
     }
 
@@ -71,8 +70,8 @@ class MeasurementSchedule {
         DataInputStream dIs;
         HashSet seenEnts;
         String encSRNList;
-
         this.srnList.clear();
+        this.newSrnList.clear();
 
         encSRNList = this.store.getValue(MeasurementSchedule.PROP_MSRNS);
         if(encSRNList == null){
@@ -97,13 +96,12 @@ class MeasurementSchedule {
 
                 ent = new AppdefEntityID(entType, entID);
                 if(seenEnts.contains(ent)){
-                    this.log.warn("Entity '" + ent + "' contained more than " +
-                                  "once in SRN storage.  Ignoring");
+                    this.log.warn("Entity '" + ent + "' contained more than once in SRN storage.  Ignoring");
                     continue;
                 }
 
                 seenEnts.add(ent);
-                this.srnList.add(new SRN(ent, revNo));
+                this.srnList.add(new org.hyperic.hq.measurement.server.session.SRN(ent, revNo));
             }
         } catch(IOException exc){
             this.log.error("Unable to decode SRN list: " + exc.getMessage());
@@ -122,17 +120,14 @@ class MeasurementSchedule {
         synchronized(this.srnList){
             try {
                 dOs.writeInt(this.srnList.size());
-                
-                for(Iterator i=this.srnList.iterator(); i.hasNext(); ){
-                    SRN srn = (SRN)i.next();
-                    AppdefEntityID ent = srn.getEntity();
-                    
+
+                for (org.hyperic.hq.measurement.server.session.SRN srn : this.srnList) {
+                    AppdefEntityID ent = srn.getEntity(); 
                     dOs.writeInt(ent.getType());
                     dOs.writeInt(ent.getID());
                     dOs.writeInt(srn.getRevisionNumber());
                 }
-                this.store.setValue(MeasurementSchedule.PROP_MSRNS, 
-                                    Base64.encode(bOs.toByteArray()));
+                this.store.setValue(MeasurementSchedule.PROP_MSRNS, Base64.encode(bOs.toByteArray()));
             } catch(IOException exc){
                 this.log.error("Error encoding SRN list");
                 return;
@@ -172,24 +167,23 @@ class MeasurementSchedule {
         this.store.flush();
     }
 
-    void updateSRN(SRN updSRN)
+    void updateSRN(org.hyperic.hq.measurement.server.session.SRN updSRN)
         throws AgentStorageException
     {
-        AppdefEntityID ent = updSRN.getEntity();
+        org.hyperic.hq.appdef.shared.AppdefEntityID ent = updSRN.getEntity();
         boolean toWrite = false, found = false;
 
         synchronized(this.srnList){
             final boolean debug = log.isDebugEnabled();
-            for(Iterator i=this.srnList.iterator(); i.hasNext(); ){
-                SRN srn = (SRN) i.next();
+            for (Object aSrnList : this.srnList) {
+                SRN srn = (SRN) aSrnList;
 
-                if(found = srn.getEntity().equals(ent)){
-                    if (toWrite =
-                        srn.getRevisionNumber() != updSRN.getRevisionNumber()) {
+                if (found = srn.getId().equals(ent)) {
+                    if (toWrite = srn.getRevisionNumber() != updSRN.getRevisionNumber()) {
                         if (debug) {
-                            log.debug("Updating SRN for " + ent + 
-                                      " from " + srn.getRevisionNumber() +
-                                      " to " + updSRN.getRevisionNumber());
+                            log.debug("Updating SRN for " + ent +
+                                    " from " + srn.getRevisionNumber() +
+                                    " to " + updSRN.getRevisionNumber());
                         }
                         srn.setRevisionNumber(updSRN.getRevisionNumber());
                     }
@@ -219,7 +213,7 @@ class MeasurementSchedule {
             for (Iterator i = this.srnList.iterator(); i.hasNext();) {
                 SRN srn = (SRN) i.next();
 
-                if (srn.getEntity().equals(ent)) {
+                if (srn.getId().equals(ent)) {
                     found = true;
                     i.remove();
                     toWrite = true;
@@ -248,7 +242,7 @@ class MeasurementSchedule {
      * 
      * @param ent Metrics matching this ID will be deleted 
      */
-    void deleteMeasurements(AppdefEntityID ent)
+    void deleteMeasurements(org.hyperic.hq.appdef.shared.AppdefEntityID ent)
         throws AgentStorageException 
     {
         boolean debug = this.log.isDebugEnabled();
@@ -277,7 +271,7 @@ class MeasurementSchedule {
             for(i=this.srnList.iterator(); i.hasNext(); ){
                 SRN srn = (SRN)i.next();
 
-                if(srn.getEntity().equals(ent)){
+                if(srn.getId().equals(ent)){
                     i.remove();
                 }
             }
@@ -288,9 +282,7 @@ class MeasurementSchedule {
         this.store.flush();
     }
 
-    SRN[] getSRNsAsArray(){
-        synchronized(this.srnList){
-            return (SRN[]) this.srnList.toArray(new SRN[0]);
-        }
+    public List<org.hyperic.hq.operation.SRN> getSrnList() {
+        return newSrnList;
     }
 }

@@ -28,41 +28,33 @@ package org.hyperic.hq.operation;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
 
-/**
- * @author Helena Edelson
- */
-public class SecureAgentConnection {
+import java.io.Serializable;
 
-    private final String hostname;
 
-    private final int port;
+public class SRN implements Serializable {
+    /* serializable to support legacy work */
+    private static final long serialVersionUID = 3790140606388568009L;
 
-    private final String username;
+    private AppdefEntityID id;
 
-    private final String password;
+    private int revisionNumber;
 
     @JsonCreator
-    public SecureAgentConnection(@JsonProperty("hostname") String hostname, @JsonProperty("port") int port,
-                           @JsonProperty("username") String username, @JsonProperty("password") String password) {
-        this.hostname = hostname;
-        this.port = port;
-        this.username = username;
-        this.password = password;
+    public SRN(@JsonProperty("id") AppdefEntityID id, @JsonProperty("revisionNumber") int revisionNumber){
+        this.id = id;
+        this.revisionNumber = revisionNumber;
     }
 
-    public String getHostname() {
-        return hostname;
+    public AppdefEntityID getId() {
+        return id;
     }
 
-    public int getPort() {
-        return port;
+    public int getRevisionNumber() {
+        return revisionNumber;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPassword() {
-        return password;
+    @JsonProperty("revisionNumber")
+    public void setRevisionNumber(int revisionNumber) {
+        this.revisionNumber = revisionNumber;
     }
 }

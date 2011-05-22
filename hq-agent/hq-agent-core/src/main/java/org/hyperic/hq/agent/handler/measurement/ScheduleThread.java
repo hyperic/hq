@@ -547,8 +547,7 @@ public class ScheduleThread
                     rs.retry.add(meas);
                     return;
                 }
-                sender.processData(meas.getDsnID(), data,
-                                    meas.getDerivedID());
+                sender.processData(meas.getDsnID(), data, meas.getDerivedID());
                 synchronized (statsLock) {
                     statNumMetricsFetched++;
                 }

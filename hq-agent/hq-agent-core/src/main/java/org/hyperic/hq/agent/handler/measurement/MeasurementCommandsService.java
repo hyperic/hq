@@ -254,9 +254,9 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
     public void scheduleMeasurements(ScheduleMeasurements_args args) 
         throws AgentRemoteException {
         
-        AppdefEntityID ent;
+        org.hyperic.hq.appdef.shared.AppdefEntityID ent;
         int nMeas = args.getNumMeasurements();
-        SRN srn;
+        org.hyperic.hq.measurement.server.session.SRN srn;
 
         srn = args.getSRN();
         ent = srn.getEntity();

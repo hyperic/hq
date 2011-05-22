@@ -52,13 +52,7 @@ public abstract class AgentCallback {
     private final Set<String> secureCommands = CommandInfo.getSecureCommands();
 
     protected ProviderFetcher providerFetcher;
-  
-    /*public AgentCallback(ProviderFetcher providerFetcher) {
-        this.secureCommands.addAll(Arrays.asList(CommandInfo.SECURE_COMMANDS));
-        initialize(providerFetcher);
-    }*/
-
-
+   
     public void initialize(ProviderFetcher providerFetcher) {
         this.providerFetcher = providerFetcher;
     }
@@ -112,61 +106,48 @@ public abstract class AgentCallback {
         return providerURL.substring(startIndex, endIndex);
     }
 
-    protected LatherValue invokeLatherCall(ProviderInfo provider,
-                                           String methodName,
-                                           LatherValue args)
-        throws AgentCallbackException
-    {
-        LatherHTTPClient client;
-        String addr;
-
-        addr = provider.getProviderAddress();
+    protected LatherValue invokeLatherCall(ProviderInfo provider, String methodName, LatherValue args) throws AgentCallbackException { 
+        String addr = provider.getProviderAddress();
 
         if(this.secureCommands.contains(methodName)){
             final String agentToken = provider.getAgentToken(); 
             ((SecureAgentLatherValue)args).setAgentToken(agentToken);
         }
 
-        client = new LatherHTTPClient(addr, TIMEOUT_CONN, TIMEOUT_DATA);
+        LatherHTTPClient client = new LatherHTTPClient(addr, TIMEOUT_CONN, TIMEOUT_DATA);
         try {
             return client.invoke(methodName, args);
         } catch(ConnectException exc){
-            // All exceptions are logged as debug.  If the caller wants to
-            // log the exception message, it can.
-            final String eMsg = "Unable to contact server @ " + addr + ": " +
-                exc.getMessage();
-        
-            this.log.debug(eMsg);
+            // All exceptions are logged as debug.  If the caller wants to log the exception message, it can.
+            final String eMsg = "Unable to contact server @ " + addr + ": " + exc.getMessage();
+            log.debug(eMsg);
             throw new AgentCallbackException(eMsg);
         } catch(IOException exc){
             String msg = exc.getMessage();
 
             if(msg != null){
                 String eMsg;
-                if(msg.indexOf("Service Unavailable") != -1){
-                    eMsg = "Unable to contact server -- it has no more " +
-                        "free connections";
-                    this.log.debug(eMsg);
+                if(msg.indexOf("Service Unavailable") != -1) {
+                    eMsg = "Unable to contact server -- it has no more free connections";
+                    log.debug(eMsg);
                 } else {
                     eMsg = "IO error: " + exc.getMessage();
-                    this.log.debug(eMsg);
+                    log.debug(eMsg);
                 }
                 throw new AgentCallbackException(eMsg);
             }
-            this.log.debug("IO error", exc);
-            throw new AgentCallbackException("IO error: " +
-                                                   exc.getMessage());
+            log.debug("IO error", exc);
+            throw new AgentCallbackException("IO error: " + exc.getMessage());
         } catch(LatherRemoteException exc){
             String eMsg;
 
             if(exc.getMessage().indexOf("Unauthorized agent denied") != -1){
                 eMsg = "Unable to invoke '" + methodName + 
                     "':  Permission denied";
-                this.log.debug(eMsg);
+                log.debug(eMsg);
             } else {
-                eMsg = "Remote error while invoking '" + methodName + ": " + 
-                    exc.getMessage();
-                this.log.debug(eMsg);
+                eMsg = "Remote error while invoking '" + methodName + ": " +  exc.getMessage();
+                log.debug(eMsg);
             } 
 
             throw new AgentCallbackException(eMsg, exc);

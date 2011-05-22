@@ -35,15 +35,11 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class BizappCallback extends AgentCallback {
+
     private final Log log = LogFactory.getLog(BizappCallback.class);
-
-    public BizappCallback(){}
-
-    public BizappCallback(ProviderFetcher fetcher, AgentConfig config){
-        //super(fetcher);
-        super();
+  
+    public void initialize(ProviderFetcher fetcher, AgentConfig config) {
         initialize(fetcher);
-        
         if (config.isProxyServerSet()) {
             log.info("Setting proxy server: host="+config.getProxyIp()+ "; port="+config.getProxyPort());
             System.setProperty(AgentConfig.PROP_LATHER_PROXYHOST, config.getProxyIp());

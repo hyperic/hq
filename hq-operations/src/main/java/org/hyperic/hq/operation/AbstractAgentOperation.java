@@ -5,7 +5,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 
-public class AbstractAgentOperation {
+public class AbstractAgentOperation extends AbstractOperation {
 
     private String agentToken;
 

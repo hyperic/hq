@@ -26,45 +26,52 @@
 package org.hyperic.hq.agent.bizapp.client;
 
 import org.hyperic.hq.agent.bizapp.agent.ProviderInfo;
-import org.hyperic.lather.LatherRemoteException;
-
 import org.hyperic.hq.bizapp.shared.lather.CommandInfo;
 import org.hyperic.hq.bizapp.shared.lather.MeasurementGetConfigs_args;
 import org.hyperic.hq.bizapp.shared.lather.MeasurementGetConfigs_result;
-import org.hyperic.hq.bizapp.shared.lather.MeasurementSendReport_args;
-import org.hyperic.hq.bizapp.shared.lather.MeasurementSendReport_result;
 import org.hyperic.hq.bizapp.shared.lather.TrackSend_args;
-import org.hyperic.hq.measurement.data.MeasurementReport;
 import org.hyperic.hq.measurement.data.TrackEventReport;
 import org.hyperic.hq.measurement.shared.MeasurementConfigList;
-import org.springframework.stereotype.Component;
+import org.hyperic.hq.operation.MeasurementReport;
+import org.hyperic.hq.operation.rabbit.annotation.OperationDispatcher;
+import org.hyperic.hq.operation.rabbit.annotation.OperationService;
+import org.hyperic.hq.operation.rabbit.util.Routing;
+import org.hyperic.lather.LatherRemoteException;
 
-@Component
+@OperationService
 public class MeasurementCallback extends AgentCallback {
 
-    /*public MeasurementCallback() {}
-    
-    public MeasurementCallback(ProviderFetcher fetcher){
-        super(fetcher);
-    }*/
+    @OperationDispatcher(request = Routing.EXCHANGE_REQUEST) 
+    public MeasurementReport measurementSendReport(MeasurementReport report) throws AgentCallbackException { 
+        return report;
+    }
 
-    /**
-     * Returns the current server time
-     */
-    public long measurementSendReport(MeasurementReport report) throws AgentCallbackException {
-        ProviderInfo provider = this.getProvider();
-        MeasurementSendReport_args args = new MeasurementSendReport_args();
+    
+    /*
+    The previous version of the measurement report send operation:
+    public long measurementSendReport(MeasurementReport report)
+        throws AgentCallbackClientException
+    {
+        MeasurementSendReport_args args;
+        MeasurementSendReport_result res;
+        ProviderInfo provider;
+
+        provider = this.getProvider();
+        args = new MeasurementSendReport_args();
         args.setReport(report);
 
-        MeasurementSendReport_result res = (MeasurementSendReport_result)
-            this.invokeLatherCall(provider,  CommandInfo.CMD_MEASUREMENT_SEND_REPORT, args);
+        res = (MeasurementSendReport_result)
+            this.invokeLatherCall(provider,
+                                  CommandInfo.CMD_MEASUREMENT_SEND_REPORT,
+                                  args);
 
         try {
             return res.getTime();
         } catch (LatherRemoteException exc) {
-            throw new AgentCallbackException("Unable to get return value from send report");
+            throw new AgentCallbackClientException("Unable to get return " +
+                                                   "value from send report");
         }
-    }
+    }*/
 
     private void trackSend(String cmd, TrackEventReport report) throws AgentCallbackException {
         TrackSend_args args = new TrackSend_args();
@@ -86,14 +93,11 @@ public class MeasurementCallback extends AgentCallback {
 
     public MeasurementConfigList getMeasurementConfigs() throws AgentCallbackException {
         ProviderInfo provider = this.getProvider();
-
         MeasurementGetConfigs_args args = new MeasurementGetConfigs_args();
-
-        MeasurementGetConfigs_result res = (MeasurementGetConfigs_result) this.invokeLatherCall(provider,
-                                            CommandInfo.CMD_MEASUREMENT_GET_CONFIGS, args);
+        MeasurementGetConfigs_result res = (MeasurementGetConfigs_result) this.invokeLatherCall(provider, CommandInfo.CMD_MEASUREMENT_GET_CONFIGS, args);
         try {
             return res.getConfigs();
-        } catch(LatherRemoteException exc){
+        } catch (LatherRemoteException exc) {
             throw new AgentCallbackException("Error getting plugin configs: " + exc.getMessage());
         }
     }
