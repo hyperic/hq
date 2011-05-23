@@ -25,6 +25,9 @@
 
 package org.hyperic.hq.plugin.weblogic;
 
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+
 import org.hyperic.hq.product.LogFileTailPlugin;
 import org.hyperic.hq.product.TrackEvent;
 import org.hyperic.sigar.FileInfo;
@@ -43,6 +46,18 @@ public class WeblogicLogFileTrackPlugin extends LogFileTailPlugin {
     private WeblogicLogParser getParser() {
         if (this.parser == null) {
             this.parser = new WeblogicLogParser();
+            String dateTimeFormatString = getManager().getProperty(
+                WeblogicLogParser.DATE_TIME_FORMAT_PROPERTY);
+            if (dateTimeFormatString != null) {
+                try {
+                    this.parser.setDateTimeFormat(new SimpleDateFormat(dateTimeFormatString, Locale
+                        .getDefault()));
+                } catch (IllegalArgumentException e) {
+                    getLog().error(
+                        "Unable to create date format from: " + dateTimeFormatString +
+                            ". Using default.");
+                }
+            }
         }
         return this.parser;
     }

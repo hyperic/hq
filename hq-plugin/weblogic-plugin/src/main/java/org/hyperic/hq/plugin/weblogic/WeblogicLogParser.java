@@ -46,9 +46,21 @@ public class WeblogicLogParser {
 
    private Pattern pattern = null;
     private static final Log LOG = LogFactory.getLog(WeblogicLogParser.class.getName());
-    private static final String FORMAT_PROPERTY = "weblogic.parser.datetime.format";
-    private final String DATE_FORMAT = System.getProperty(FORMAT_PROPERTY, "MMMM d, yyyy h:mm:ss a z");
-    private DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT,Locale.getDefault());
+    public static final String DATE_TIME_FORMAT_PROPERTY = "weblogic.parser.datetime.format";
+    private static final String DEFAULT_DATE_TIME_FORMAT = "MMMM d, yyyy h:mm:ss a z";
+    private DateFormat dateTimeFormat;
+    
+    public WeblogicLogParser(){
+        this.dateTimeFormat = new SimpleDateFormat(DEFAULT_DATE_TIME_FORMAT,Locale.getDefault());
+    }
+    
+    public DateFormat getDateTimeFormat() {
+        return dateTimeFormat;
+    }
+
+    public void setDateTimeFormat(DateFormat dateTimeFormat) {
+        this.dateTimeFormat = dateTimeFormat;
+    }
 
     class Entry {
         long time;
@@ -112,12 +124,11 @@ public class WeblogicLogParser {
         Iterator it = list.iterator();
         String timestamp = nextField(it);
         try {
-            entry.time = this.dateFormat.parse(timestamp).getTime();
+            entry.time = this.dateTimeFormat.parse(timestamp).getTime();
         } catch (ParseException e) {
             LOG.warn("Unable to match log timestamp (" + timestamp +
-                      ") with the current date format (" + DATE_FORMAT +
-                      "). Adjust the formatter property (" + FORMAT_PROPERTY +
-                      ") to get accurate timestamp results. Using current time until format is fixed.");
+                      ") with the current date format. Adjust the formatter property (" + DATE_TIME_FORMAT_PROPERTY +
+                      ") to get accurate timestamp results. Using current time for event until format is fixed.");
             entry.time = System.currentTimeMillis();
         }
 
