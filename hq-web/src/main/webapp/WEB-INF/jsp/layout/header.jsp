@@ -31,7 +31,7 @@
 		<sec:authorize access="hasRole('ROLE_HQ_USER')">
 			<li>
 				<span><fmt:message key="header.Welcome"/></span>
-				<a href="<html:rewrite action="/admin/user/UserAdmin" />?mode=view&u=${sessionScope.webUser.id}">
+				<a href="<html:rewrite action="/admin/user/UserAdmin?mode=view&u=${sessionScope.webUser.id}" />">
 	            	${sessionScope.webUser.firstName}
 				</a>
 			</li>
