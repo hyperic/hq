@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.agent.server;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentConfig;
 
@@ -38,6 +40,7 @@ import java.net.UnknownHostException;
 class DefaultConnectionListener
     extends AgentConnectionListener
 {
+    private Log log = LogFactory.getLog(DefaultConnectionListener.class);
     private ServerSocket listenSock;
 
     DefaultConnectionListener(AgentConfig cfg){
@@ -72,6 +75,7 @@ class DefaultConnectionListener
 
     public void cleanup(){
         if(this.listenSock != null){
+            log.info("closing listener socket " + listenSock.getInetAddress() + ":" + listenSock.getLocalPort());
             try {this.listenSock.close();} catch(IOException exc){}
             this.listenSock = null;
         }

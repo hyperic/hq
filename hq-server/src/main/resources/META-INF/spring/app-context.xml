@@ -87,6 +87,7 @@
 				<prop key="ha.node.ipTTL">64</prop>
                 <prop key="server.pluginsync.enabled">true</prop>
                 <prop key="server.custom.plugin.dir"></prop>
+                <prop key="vfabric.licenseServer.url"></prop>
 			</props>
 		</property>
 	</bean>
@@ -215,7 +216,6 @@
 		scope="prototype" />
 
 	<bean class="org.hyperic.hq.appdef.server.session.ResourceTreeGenerator" />
-
 
 	<bean id="tweakProperties"
 		class="org.springframework.beans.factory.config.PropertiesFactoryBean"

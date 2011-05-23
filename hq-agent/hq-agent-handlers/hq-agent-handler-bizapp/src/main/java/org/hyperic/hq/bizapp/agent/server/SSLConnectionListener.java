@@ -221,6 +221,7 @@ class SSLConnectionListener
 
     public void cleanup(){
         if(this.listenSock != null){
+            log.info("closing listener socket " + listenSock.getInetAddress() + ":" + listenSock.getLocalPort());
             try {this.listenSock.close();} catch(IOException exc){}
             this.listenSock = null;
         }

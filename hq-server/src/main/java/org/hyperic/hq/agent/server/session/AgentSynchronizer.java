@@ -63,7 +63,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class AgentSynchronizer implements DiagnosticObject {
     
-    private static final int NUM_WORKERS = 4;
+    private final int NUM_WORKERS;
     private static final long WAIT_TIME = 5 * MeasurementConstants.MINUTE;
     private final Log log = LogFactory.getLog(AgentSynchronizer.class.getName());
     private final Set<Integer> activeAgents = Collections.synchronizedSet(new HashSet<Integer>());
@@ -87,8 +87,20 @@ public class AgentSynchronizer implements DiagnosticObject {
         this.overlord = authzSubjectManager.getOverlordPojo();
         this.agentPluginSyncRestartThrottle = agentPluginSyncRestartThrottle;
         diagnosticsLogger.addDiagnosticObject(this);
+        NUM_WORKERS = getNumWorkers();
     }
     
+    private int getNumWorkers() {
+        int cpus = Runtime.getRuntime().availableProcessors();
+        if (cpus > 4) {
+            return 4;
+        } else if (cpus <= 1) {
+            return 1;
+        } else {
+            return cpus;
+        }
+    }
+
     public Set<Integer> getJobListByDescription(Collection<String> descriptions) {
         List<AgentDataTransferJob> jobs;
         final Set<String> descs = new HashSet<String>(descriptions);
@@ -113,6 +125,7 @@ public class AgentSynchronizer implements DiagnosticObject {
                 return new Thread(r, "AgentSynchronizer" + i.getAndIncrement());
             }
         });
+        log.info("starting AgentSynchronizer with " + NUM_WORKERS + " threads");
         for (int i=0; i<NUM_WORKERS; i++) {
             SchedulerThread worker = new SchedulerThread("AgentSynchronizer" + i, i*1000);
             executor.scheduleWithFixedDelay(worker, i+1, NUM_WORKERS, TimeUnit.SECONDS);
