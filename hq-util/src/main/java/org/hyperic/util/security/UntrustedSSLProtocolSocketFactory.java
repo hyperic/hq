@@ -37,14 +37,9 @@ import javax.net.ssl.X509TrustManager;
 
 import javax.net.ssl.SSLSocketFactory;
 
-import org.apache.commons.httpclient.ConnectTimeoutException;
-import org.apache.commons.httpclient.params.HttpConnectionParams;
-import org.apache.commons.httpclient.protocol.Protocol;
-import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
-import org.apache.commons.httpclient.protocol.SSLProtocolSocketFactory;
-
 // For use with Commons-HTTPClient
-public class UntrustedSSLProtocolSocketFactory 
+public class UntrustedSSLProtocolSocketFactory {
+	/*
     extends SSLProtocolSocketFactory
 {
     private SSLSocketFactory factory;
@@ -135,4 +130,5 @@ public class UntrustedSSLProtocolSocketFactory
         //timeout in jre 1.3 and in the process by-passes our factory
         return createSocket(host, port, clientHost, clientPort);
     }
+    */
 }

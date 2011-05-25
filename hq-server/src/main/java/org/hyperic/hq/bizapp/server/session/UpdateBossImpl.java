@@ -36,8 +36,6 @@ import java.util.zip.GZIPOutputStream;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.PlatformManager;
@@ -154,6 +152,7 @@ public class UpdateBossImpl implements UpdateBoss {
      * 
      */
     public void fetchReport() {
+    	/*
         final boolean debug = log.isDebugEnabled();
         final StopWatch watch = new StopWatch();
         UpdateStatus status = getOrCreateStatus();
@@ -219,6 +218,7 @@ public class UpdateBossImpl implements UpdateBoss {
         }
 
         processReport(statusCode, response);
+        */
     }
 
     private void processReport(int statusCode, String response) {

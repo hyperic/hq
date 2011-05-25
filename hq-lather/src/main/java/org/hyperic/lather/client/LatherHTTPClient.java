@@ -29,20 +29,49 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLException;
+import javax.net.ssl.TrustManager;
 
 import org.hyperic.lather.LatherRemoteException;
 import org.hyperic.lather.LatherValue;
 import org.hyperic.lather.xcode.LatherXCoder;
 
 import org.hyperic.util.encoding.Base64;
-import org.hyperic.util.security.UntrustedSSLProtocolSocketFactory;
+import org.hyperic.util.security.ConfigurableX509TrustManager;
+import org.hyperic.util.security.UntrustedSSLCertificateException;
 
-import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.protocol.Protocol;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.params.ConnRoutePNames;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.CoreConnectionPNames;
+import org.apache.http.util.EntityUtils;
 
 /**
  * The LatherClient is the base object which is used to invoke
@@ -57,95 +86,111 @@ public class LatherHTTPClient
     public static final String HDR_ERROR      = "X-error-response";
     public static final String HDR_VALUECLASS = "X-latherValue-class";
 
+    private ConfigurableX509TrustManager trustManager;
+    private HttpClient client;
     private LatherXCoder xCoder;
     private String       baseURL;
-    private int          timeoutConn, timeoutData;
-
-    public LatherHTTPClient(String baseURL){
+    
+    public LatherHTTPClient(String baseURL) throws Exception {
         this(baseURL, TIMEOUT_CONN, TIMEOUT_DATA);
     }
 
-    public LatherHTTPClient(String baseURL, int timeoutConn, int timeoutData){
-        Protocol mySSLProt;
+    public LatherHTTPClient(String baseURL, int timeoutConn, int timeoutData) throws Exception {
+    	KeyStore trustStore  = KeyStore.getInstance(KeyStore.getDefaultType());
+        FileInputStream instream = new FileInputStream(new File("/Users/david/.keystore"));
+         
+        try {
+            trustStore.load(instream, "hyperic!".toCharArray());
+        } finally {
+        	try { instream.close(); } catch (Exception ignore) {}
+        }
 
-        this.baseURL = baseURL;
+        KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
+        
+        keyManagerFactory.init(trustStore, "hyperic!".toCharArray());
+        trustManager = new ConfigurableX509TrustManager("NORMAL", trustStore);
+        
+        SSLContext sslContext = SSLContext.getInstance("TLS");
+        
+        sslContext.init(keyManagerFactory.getKeyManagers(), new TrustManager[] { trustManager }, new SecureRandom());
+
+        // XXX Should we use ALLOW_ALL_HOSTNAME_VERIFIER (least restrictive) or 
+        //     BROWSER_COMPATIBLE_HOSTNAME_VERIFIER (moderate restrictive) or
+        //     STRICT_HOSTNAME_VERIFIER (most restrictive)???
+        SSLSocketFactory socketFactory = new SSLSocketFactory(sslContext, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+        Scheme sslScheme = new Scheme("https", 443, socketFactory);
+		
+		this.client = new DefaultHttpClient();
+		this.baseURL = baseURL;
         this.xCoder  = new LatherXCoder();
-
-        mySSLProt = new Protocol("https",
-                                 new UntrustedSSLProtocolSocketFactory(),
-                                 443);
-        Protocol.registerProtocol("https", mySSLProt);
-        this.timeoutConn = timeoutConn;
-        this.timeoutData = timeoutData;
+        
+        client.getConnectionManager().getSchemeRegistry().register(sslScheme);
+        client.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, timeoutData);
+        client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, timeoutConn);
+        
+        configureProxy(client);
     }
 
     public LatherValue invoke(String method, LatherValue args)
         throws IOException, LatherRemoteException
     {
-        ByteArrayOutputStream bOs;
-        DataOutputStream dOs;
-        HttpClient client;
-        PostMethod meth;
-        String encodedArgs, responseBody;
-        byte[] rawData;
-
-        bOs    = new ByteArrayOutputStream();
-        dOs    = new DataOutputStream(bOs);
-
-        this.xCoder.encode(args, dOs);
-        rawData     = bOs.toByteArray();
-        encodedArgs = Base64.encode(rawData);
-
-        client = new HttpClient();
-        client.setConnectionTimeout(this.timeoutConn);
-        client.setTimeout(this.timeoutData);
-        client.setHttpConnectionFactoryTimeout(this.timeoutConn);
-        configureProxy(client);
-
-        meth   = new PostMethod(baseURL);
-
-        meth.addParameter("method",    method);
-        meth.addParameter("args",      encodedArgs);
-        meth.addParameter("argsClass", args.getClass().getName());
+        ByteArrayOutputStream bOs = new ByteArrayOutputStream();
+        DataOutputStream dOs = new DataOutputStream(bOs);
         
-        client.executeMethod(meth);
+        this.xCoder.encode(args, dOs);
+        
+        byte[] rawData = bOs.toByteArray();
+        String encodedArgs = Base64.encode(rawData);
+        List<NameValuePair> postParams = new ArrayList<NameValuePair>();
+        
+        postParams.add(new BasicNameValuePair("method", method));
+        postParams.add(new BasicNameValuePair("args", encodedArgs));
+        postParams.add(new BasicNameValuePair("argsClass", args.getClass().getName()));
+        
+        HttpPost post = new HttpPost(baseURL);
+        
+        post.setEntity(new UrlEncodedFormEntity(postParams, "UTF-8"));
+        
+        HttpResponse response = null;
 
-        responseBody = meth.getResponseBodyAsString();
-        meth.releaseConnection();
-
-        if(meth.getStatusCode() == HttpStatus.SC_OK){
+        try {
+        	response = client.execute(post);
+        } catch(SSLException e) {
+        	throw new UntrustedSSLCertificateException(e, trustManager.getChain());
+        }
+        
+        if (response != null && response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
             ByteArrayInputStream bIs;
             DataInputStream dIs;
-            Header errHeader = meth.getResponseHeader(HDR_ERROR);
-            Header clsHeader = meth.getResponseHeader(HDR_VALUECLASS);
-            Class resClass;
+            Header errHeader = response.getFirstHeader(HDR_ERROR);
+            Header clsHeader = response.getFirstHeader(HDR_VALUECLASS);
+            HttpEntity entity = response.getEntity();
+            String responseBody = EntityUtils.toString(entity);
 
-            if(errHeader != null){
+            if (errHeader != null) {
                 throw new LatherRemoteException(responseBody);
             }
-            
-            if(clsHeader == null){
-                throw new IOException("Server returned malformed result:  " +
-                                      "did not contain a value class header");
-            }
 
+            if (clsHeader == null) {
+                throw new IOException("Server returned malformed result: did not contain a value class header");
+            }
+	
+            Class resClass;
+	
             try {
-                resClass = Class.forName(clsHeader.getValue());
-            } catch(ClassNotFoundException exc){
-                throw new LatherRemoteException("Server returned a class '" +
-                                                clsHeader.getValue() + 
-                                                "' which the client did not " +
-                                                "have access to");
-            }
-
-            bIs = new ByteArrayInputStream(Base64.decode(responseBody));
-            dIs = new DataInputStream(bIs);
-
-            return this.xCoder.decode(dIs, resClass);
-        } else {
-            throw new IOException("Connection failure: " + 
-                                  meth.getStatusLine().toString());
-        }
+            	resClass = Class.forName(clsHeader.getValue());
+	        } catch(ClassNotFoundException exc){
+	            throw new LatherRemoteException("Server returned a class '" + clsHeader.getValue() + 
+	                                            "' which the client did not have access to");
+	        }
+	
+	        bIs = new ByteArrayInputStream(Base64.decode(responseBody));
+	        dIs = new DataInputStream(bIs);
+	
+	        return this.xCoder.decode(dIs, resClass);
+	    } else {
+	        throw new IOException("Connection failure: " + response.getStatusLine());
+	    }
     }
     
     private void configureProxy(HttpClient client) {                
@@ -153,8 +198,9 @@ public class LatherHTTPClient
         int proxyPort = Integer.getInteger("lather.proxyPort", new Integer(-1)).intValue();
         
         if (proxyHost != null & proxyPort != -1) {
-            client.getHostConfiguration().setProxy(proxyHost, proxyPort);
-            return;
+        	HttpHost proxy = new HttpHost(proxyHost, proxyPort);
+
+        	client.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
         }
     }
 }

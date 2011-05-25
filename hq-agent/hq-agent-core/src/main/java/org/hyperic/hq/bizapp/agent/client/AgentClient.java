@@ -28,7 +28,9 @@ package org.hyperic.hq.bizapp.agent.client;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
@@ -38,7 +40,12 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.security.KeyStore;
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import java.util.Properties;
+
+import javax.net.ssl.SSLException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -72,6 +79,7 @@ import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.security.SecurityUtil;
+import org.hyperic.util.security.UntrustedSSLCertificateException;
 import org.tanukisoftware.wrapper.WrapperManager;
 
 import sun.misc.Signal;
@@ -431,9 +439,53 @@ public class AgentClient {
                 return bizapp;
             } catch (AgentCallbackClientException exc) {
                 String msg = exc.getMessage();
+                
+                // ...check if there's a SSL exception...
+                if (exc.getExceptionOfType(UntrustedSSLCertificateException.class) != null) {
+                	UntrustedSSLCertificateException e = (UntrustedSSLCertificateException) exc.getExceptionOfType(UntrustedSSLCertificateException.class);
+                	X509Certificate[] certChain = e.getCertChain();
+                	
+                	if (certChain.length > 0) {
+                		X509Certificate cert = certChain[certChain.length - 1];
+                		String certType = cert.getType();
+                		String question = "Could not verify certificate. Do you want to trust it anyway?";
+	                	
+	                	try {
+		                	if (askYesNoQuestion(question, false, "accept.certificate")) {
+		            			try {
+		            				KeyStore trustStore  = KeyStore.getInstance(KeyStore.getDefaultType());
+		            				FileInputStream instream = new FileInputStream(new File("/Users/david/.keystore"));
+		            		         
+		            		        try {
+		            		            trustStore.load(instream, "hyperic!".toCharArray());
+		            		        } finally {
+		            		        	try { instream.close(); } catch (Exception ignore) {}
+		            		        }
+		            		        
+		    	        			FileOutputStream outstream = new FileOutputStream(new File("/Users/david/.keystore"));
+		    	        			int i = 0;
+		    	        			
+		    	        			for (Certificate certificate : certChain) {
+		    	        				trustStore.setCertificateEntry("hqcert-" + i++, cert);
+		    	        			}
+		    	        			
+		    	        			trustStore.store(outstream, "hyperic!".toCharArray());
+		            			} catch(Exception ex) {
+		            				throw new IOException("Could not import the certificates in keystore", ex);
+		    					}
+		                		
+		                		// Try again
+		                		continue;
+		                	}
+	                	} catch(IOException ioe) {
+	                		log.debug(ioe.getMessage());
+	                	}
+                	}
+                }
+                
                 if (msg.indexOf("is still starting") != -1) {
-                    SYSTEM_ERR.println("HQ is still starting " +
-                                       "(retrying in 10 seconds)");
+                    SYSTEM_ERR.println("HQ is still starting (retrying in 10 seconds)");
+
                     try {
                         Thread.sleep(10 * 1000);
                     } catch (InterruptedException e) {}
