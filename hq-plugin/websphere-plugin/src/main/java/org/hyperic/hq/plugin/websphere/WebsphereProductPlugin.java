@@ -33,7 +33,6 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -142,17 +141,17 @@ public class WebsphereProductPlugin extends ProductPlugin {
      * returns most recent version found.
      */
     public static File getRegistryInstallPath() {
-        List dirs = getRegistryInstallPaths();
+        List<File> dirs = getRegistryInstallPaths();
 
         if (dirs.size() == 0) {
             return null;
         }
 
-        return (File)dirs.get(0);
+        return dirs.get(0);
     }
 
-    public static List getRegistryInstallPaths() {
-        List dirs = new ArrayList();
+    public static List<File> getRegistryInstallPaths() {
+        List<File> dirs = new ArrayList<File>();
 
         try {
             RegistryKey key =
@@ -241,7 +240,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
         return isOSGi;
     }
 
-    private void addClassPath(List path,
+    private void addClassPath(List<String> path,
                               String dir,
                               String[] jars) {
 
@@ -260,12 +259,12 @@ public class WebsphereProductPlugin extends ProductPlugin {
         }
 
     //jar names minus version "_6.1.0.jar"
-    private void addClassPathOSGi(List path,
+    private void addClassPathOSGi(List<String> path,
                                   String dir,
                                   String[] jars)
     {
         log.debug("Adding OSGi packages from " + dir);
-        final HashMap wantedJars = new HashMap();
+        final HashMap<String, Boolean> wantedJars = new HashMap<String, Boolean>();
         for (int i=0; i<jars.length; i++) {
             wantedJars.put(jars[i], Boolean.TRUE);
         }
@@ -299,9 +298,9 @@ public class WebsphereProductPlugin extends ProductPlugin {
         JarOutputStream os = new JarOutputStream(new FileOutputStream(newJar));
         byte[] buffer = new byte[1024];
         try {
-            for (Enumeration e = jar.entries(); e.hasMoreElements();) {
+            for (Enumeration<JarEntry> e = jar.entries(); e.hasMoreElements();) {
                 int n;
-                JarEntry entry = (JarEntry)e.nextElement();
+                JarEntry entry = e.nextElement();
 
                 if (entry.getName().startsWith("org/apache/commons/logging/")) {
                     continue;
@@ -381,7 +380,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
     }
 
     private String[] getClassPathOSGi(String installDir) {
-        ArrayList path = new ArrayList();
+        ArrayList<String> path = new ArrayList<String>();
 
         String v = WebsphereDetector.getComponentVersion(new File(installDir, "properties/version/WAS.product"));
         if (v.startsWith("6")) {

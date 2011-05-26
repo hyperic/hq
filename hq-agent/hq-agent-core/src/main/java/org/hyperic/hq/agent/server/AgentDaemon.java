@@ -31,12 +31,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -101,11 +99,11 @@ public class AgentDaemon
     private AgentStorageProvider storageProvider;
     private CommandListener      listener;
     private AgentTransportLifecycle agentTransportLifecycle;
-    private Vector               serverHandlers;
-    private Vector               startedHandlers = new Vector();
+    private Vector<AgentServerHandler>               serverHandlers;
+    private Vector<AgentServerHandler>               startedHandlers = new Vector<AgentServerHandler>();
     private AgentConfig          bootConfig;
-    private Hashtable            notifyHandlers = new Hashtable();
-    private Hashtable            monitorClients;
+    private Hashtable<String, Vector<AgentNotificationHandler>>            notifyHandlers = new Hashtable<String, Vector<AgentNotificationHandler>>();
+    private Hashtable<String, AgentMonitorInterface>            monitorClients;
     private volatile boolean     running;         // Are we running?
 
     private ProductPluginManager ppm;
@@ -286,10 +284,10 @@ public class AgentDaemon
                                       String msgClass)
     {
         synchronized(this.notifyHandlers){
-            Vector handlers;
+            Vector<AgentNotificationHandler> handlers;
 
-            if((handlers = (Vector)this.notifyHandlers.get(msgClass)) == null){
-                handlers = new Vector();
+            if((handlers = this.notifyHandlers.get(msgClass)) == null){
+                handlers = new Vector<AgentNotificationHandler>();
                 this.notifyHandlers.put(msgClass, handlers);
             }
 
@@ -306,17 +304,14 @@ public class AgentDaemon
      */
     public void sendNotification(String msgClass, String message){
         synchronized(this.notifyHandlers){
-            Vector handlers;
+            Vector<AgentNotificationHandler> handlers;
 
-            if((handlers = (Vector)this.notifyHandlers.get(msgClass)) == null){
+            if((handlers = this.notifyHandlers.get(msgClass)) == null){
                 return;
             }
 
-            for(Iterator i=handlers.iterator(); i.hasNext(); ){
-                AgentNotificationHandler handler;
-
-                handler = (AgentNotificationHandler)i.next();
-                handler.handleNotification(msgClass, message);
+            for (AgentNotificationHandler handler : handlers) {
+            	handler.handleNotification(msgClass, message);
             }
         }
     }
@@ -382,7 +377,7 @@ public class AgentDaemon
         throws AgentConfigException
     {
         AgentStorageProvider provider;
-        Class storageClass;
+        Class<?> storageClass;
 
         try {
             storageClass = Class.forName(cfg.getStorageProvider());
@@ -474,7 +469,7 @@ public class AgentDaemon
         
         // set the lather proxy host and port if applicable
         if (cfg.isProxyServerSet()) {
-            this.logger.info("Setting proxy server: host="+cfg.getProxyIp()+
+            logger.info("Setting proxy server: host="+cfg.getProxyIp()+
                              "; port="+cfg.getProxyPort()); 
             System.setProperty(AgentConfig.PROP_LATHER_PROXYHOST, 
                     cfg.getProxyIp());
@@ -483,7 +478,7 @@ public class AgentDaemon
         }
 
         // Server Handlers
-        this.serverHandlers = new Vector();
+        this.serverHandlers = new Vector<AgentServerHandler>();
 
         // Load server handlers on the fly from lib/*.jar.  Server handler
         // jars  must have a Main-Class that implements the AgentServerHandler
@@ -543,6 +538,7 @@ public class AgentDaemon
                     this.serverHandlers.add(loadedHandler);
                     this.dispatcher.addServerHandler(loadedHandler);                        
                 }
+                jarFile.close();
             } catch (Exception e) {
                 throw new AgentConfigException("Failed to load " +
                                                "'" + libJars[i] + 
@@ -569,7 +565,7 @@ public class AgentDaemon
     public String[] getMonitors() 
         throws AgentMonitorException 
     {
-        return (String[])this.monitorClients.keySet().toArray(new String[0]);
+        return this.monitorClients.keySet().toArray(new String[0]);
     }
 
     /**
@@ -628,7 +624,7 @@ public class AgentDaemon
     {
         AgentMonitorInterface iface;
 
-        iface = (AgentMonitorInterface)this.monitorClients.get(monitorName);
+        iface = this.monitorClients.get(monitorName);
         if(iface == null){
             AgentMonitorValue[] res;
             AgentMonitorValue badVal;
@@ -872,7 +868,7 @@ public class AgentDaemon
             if (tmpDir != null) {
                 try {
                     // update plugins residing in tmp directory prior to cleaning it up
-                    List updatedPlugins = AgentUpgradeManager.updatePlugins(bootProps);
+                    List<String> updatedPlugins = AgentUpgradeManager.updatePlugins(bootProps);
                     if (!updatedPlugins.isEmpty()) {
                         logger.info("Successfully updated plugins: " + updatedPlugins);
                     }
@@ -885,7 +881,7 @@ public class AgentDaemon
                 System.setProperty("java.io.tmpdir", tmpDir);
             }
 
-            this.monitorClients = new Hashtable();
+            this.monitorClients = new Hashtable<String, AgentMonitorInterface>();
             this.registerMonitor("agent", this);
             this.registerMonitor("agent.commandListener", this.listener);
             redirectStreams(bootProps);
@@ -898,8 +894,8 @@ public class AgentDaemon
                 "org.hyperic.hq.agent.server.AgentTransportLifecycleImpl";
 
             try {
-            	Class clazz = this.handlerClassLoader.loadClass(agentTransportLifecycleClass);
-                Constructor constructor = clazz.getConstructor(
+            	Class<?> clazz = this.handlerClassLoader.loadClass(agentTransportLifecycleClass);
+                Constructor<?> constructor = clazz.getConstructor(
                                     new Class[]{AgentDaemon.class, 
                                                 AgentConfig.class, 
                                                 AgentStorageProvider.class
