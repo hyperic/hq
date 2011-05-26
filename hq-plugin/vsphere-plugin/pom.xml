@@ -8,7 +8,7 @@
 	<artifactId>vsphere-plugin</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ Plugin - vSphere Plugin</name>
-	<version>4.6.0.M2</version>
+	<version>4.6.0.BUILD-SNAPSHOT>
 
 	<properties>
 		<easymock.version>2.4</easymock.version>
