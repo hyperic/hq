@@ -141,12 +141,17 @@ public abstract class AgentCallbackClient {
     protected LatherValue invokeLatherCall(ProviderInfo provider,
                                            String methodName,
                                            LatherValue args)
-        throws AgentCallbackClientException
-    {
+    throws AgentCallbackClientException {
+    	return invokeLatherCall(provider, methodName, args, false);
+    }
+       
+    protected LatherValue invokeLatherCall(ProviderInfo provider,
+                                           String methodName,
+                                           LatherValue args,
+                                           final boolean acceptUnverifiedCertificates)
+    throws AgentCallbackClientException {
         LatherHTTPClient client;
-        String addr;
-
-        addr = provider.getProviderAddress();
+        String addr = provider.getProviderAddress();
 
         if(this.secureCommands.contains(methodName)){
             final String agentToken = provider.getAgentToken();
@@ -155,7 +160,7 @@ public abstract class AgentCallbackClient {
         }
 
         try {
-        	client = new LatherHTTPClient(addr, TIMEOUT_CONN, TIMEOUT_DATA);
+        	client = new LatherHTTPClient(addr, TIMEOUT_CONN, TIMEOUT_DATA, acceptUnverifiedCertificates);
         	
             return client.invoke(methodName, args);
         } catch(SSLException e) {
@@ -208,8 +213,8 @@ public abstract class AgentCallbackClient {
             } 
 
             throw new AgentCallbackClientException(eMsg, exc);
-        } catch(Exception e) {
-        	log.debug("Bad juju!", e);
+        } catch(IllegalStateException e) {
+        	log.debug("Could not create the LatherHTTPClient instance", e);
         	
         	throw new AgentCallbackClientException(e);
         }

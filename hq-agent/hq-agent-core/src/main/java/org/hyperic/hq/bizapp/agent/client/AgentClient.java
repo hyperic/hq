@@ -46,6 +46,7 @@ import java.security.cert.X509Certificate;
 import java.util.Properties;
 
 import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLPeerUnverifiedException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -405,7 +406,7 @@ public class AgentClient {
         }
     }
 
-    private BizappCallbackClient testProvider(String provider)
+    private BizappCallbackClient testProvider(String provider, final boolean acceptUnverifiedCertificates)
         throws AgentCallbackClientException
     {
         StaticProviderFetcher fetcher;
@@ -414,7 +415,7 @@ public class AgentClient {
         fetcher = new StaticProviderFetcher(new ProviderInfo(provider, 
                                                              "no-auth"));
         res = new BizappCallbackClient(fetcher, config);
-        res.bizappPing();
+        res.bizappPing(acceptUnverifiedCertificates);
         return res;
     }
 
@@ -428,58 +429,37 @@ public class AgentClient {
         BizappCallbackClient bizapp;
         Properties bootP = this.config.getBootProperties();
         long start = System.currentTimeMillis();
-       
+        boolean acceptUnverifiedCertificates = false;
+        
         while (true) {
             String sec = secure ? "secure" : "insecure";
             SYSTEM_OUT.print("- Testing " + sec  + " connection ... ");
 
             try {
-                bizapp = this.testProvider(provider);
+                bizapp = this.testProvider(provider, acceptUnverifiedCertificates);
                 SYSTEM_OUT.println("Success");
                 return bizapp;
             } catch (AgentCallbackClientException exc) {
+            	// ...reset to false just to be safe...
+            	acceptUnverifiedCertificates = false;
+            	
                 String msg = exc.getMessage();
                 
                 // ...check if there's a SSL exception...
-                if (exc.getExceptionOfType(UntrustedSSLCertificateException.class) != null) {
-                	UntrustedSSLCertificateException e = (UntrustedSSLCertificateException) exc.getExceptionOfType(UntrustedSSLCertificateException.class);
-                	X509Certificate[] certChain = e.getCertChain();
-                	
-                	if (certChain.length > 0) {
-                		X509Certificate cert = certChain[certChain.length - 1];
-                		String certType = cert.getType();
-                		String question = "Could not verify certificate. Do you want to trust it anyway?";
+                if (exc.getExceptionOfType(SSLPeerUnverifiedException.class) != null) {
+                	SYSTEM_OUT.println();
+                	SYSTEM_OUT.println(exc.getMessage());
+                	String question = "Are you sure you want to continue connecting?";
 	                	
-	                	try {
-		                	if (askYesNoQuestion(question, false, "accept.certificate")) {
-		            			try {
-		            				KeyStore trustStore  = KeyStore.getInstance(KeyStore.getDefaultType());
-		            				FileInputStream instream = new FileInputStream(new File("/Users/david/.keystore"));
-		            		         
-		            		        try {
-		            		            trustStore.load(instream, "hyperic!".toCharArray());
-		            		        } finally {
-		            		        	try { instream.close(); } catch (Exception ignore) {}
-		            		        }
-		            		        
-		    	        			FileOutputStream outstream = new FileOutputStream(new File("/Users/david/.keystore"));
-		    	        			int i = 0;
-		    	        			
-		    	        			for (Certificate certificate : certChain) {
-		    	        				trustStore.setCertificateEntry("hqcert-" + i++, cert);
-		    	        			}
-		    	        			
-		    	        			trustStore.store(outstream, "hyperic!".toCharArray());
-		            			} catch(Exception ex) {
-		            				throw new IOException("Could not import the certificates in keystore", ex);
-		    					}
-		                		
-		                		// Try again
-		                		continue;
-		                	}
-	                	} catch(IOException ioe) {
-	                		log.debug(ioe.getMessage());
+	                try {
+	                	if (askYesNoQuestion(question, false, "accept.certificate")) {
+		               		acceptUnverifiedCertificates = true;
+		               		
+		               		// try again
+	                		continue;
 	                	}
+                	} catch(IOException ioe) {
+                		log.debug(ioe.getMessage());
                 	}
                 }
                 

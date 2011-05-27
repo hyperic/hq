@@ -61,14 +61,14 @@ public class BizappCallbackClient
         System.setProperty(keyStorePropName, config.getBootProperties().getProperty(keyStorePropName));       
     }
 
-    public void bizappPing()
+    public void bizappPing(final boolean acceptUnverifiedCertificates)
         throws AgentCallbackClientException
     {
         ProviderInfo provider;
 
         provider = this.getProvider();
         this.invokeLatherCall(provider, CommandInfo.CMD_PING, 
-                              NullLatherValue.INSTANCE);
+                              NullLatherValue.INSTANCE, acceptUnverifiedCertificates);
     }
 
     public boolean userIsValid(String user, String pword)
