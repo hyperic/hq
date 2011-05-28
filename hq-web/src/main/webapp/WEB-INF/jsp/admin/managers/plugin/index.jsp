@@ -563,7 +563,11 @@
 			hqDojo.connect(hqDojo.byId("uploadButton"), "onclick", function(e){
 				var fileTypeCorrect=true;
 				var pluginList = hqDojo.query("input[type=file]", hqDojo.byId("hqDijit_FileUploaderForm_0"));
-				var newPluginList = pluginList.slice(0,pluginList.length-1);
+				var newPluginList = pluginList.slice(0,pluginList.length-1);//To get rid of last item which is empty
+				if(newPluginList.length==0){
+					showErrorMessage("validationMessage","<fmt:message key='admin.managers.plugin.message.invalid.no.file' />")
+					return; //no file selected, do nothing
+				}
 				
 				uncheckCheckboxes(hqDojo.query("input[type=checkbox]"));
 				newPluginList.forEach(function(input) {
