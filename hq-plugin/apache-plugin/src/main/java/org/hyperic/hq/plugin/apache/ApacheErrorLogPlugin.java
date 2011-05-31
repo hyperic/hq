@@ -50,7 +50,7 @@ public class ApacheErrorLogPlugin
         }
 
         return newTrackEvent(System.currentTimeMillis(), //XXX parse entry.timeStamp
-                             entry.level,     
+                             entry.level.toLowerCase(),     
                              info.getName(),
                              entry.message);
     }

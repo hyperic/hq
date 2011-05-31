@@ -10,6 +10,10 @@
 	<name>Hyperic HQ Plugin - Apache Plugin</name>
 	<version>4.6.0.BUILD-SNAPSHOT</version>
 
+	<properties>
+		<junit.version>4.6</junit.version>
+		<mockito.version>1.8.5</mockito.version>
+	</properties>
 
 	<dependencies>
 		<dependency>
@@ -30,6 +34,16 @@
             <version>2.6.3</version>
 			<scope>test</scope>
        </dependency>
+		<dependency>
+    			<groupId>org.mockito</groupId>
+    			<artifactId>mockito-all</artifactId>
+    			<version>${mockito.version}</version>
+		</dependency>
+                <dependency>
+                        <groupId>junit</groupId>
+                        <artifactId>junit</artifactId>
+                        <version>${junit.version}</version>
+                </dependency>
 	</dependencies>
 
 	<build>
