@@ -1624,8 +1624,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         final Map<Integer, Collection<String>> rtn = new HashMap<Integer, Collection<String>>(size);
         for (final Entry<Agent, Collection<AgentPluginStatus>> entry : removes.entrySet()) {
             final Agent agent = entry.getKey();
-            Collection<AgentPluginStatus> list = entry.getValue();
-            for (AgentPluginStatus s : list) {
+            final Collection<AgentPluginStatus> list = entry.getValue();
+            for (final AgentPluginStatus s : list) {
                 addToRemoveMap(rtn, agent, s.getFileName());
             }
         }
