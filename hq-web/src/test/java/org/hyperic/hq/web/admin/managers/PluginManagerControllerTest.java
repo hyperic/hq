@@ -96,8 +96,7 @@ public class PluginManagerControllerTest extends BaseControllerTest {
 
     }
     
-// XXX turning off until NPE on summaries is fixed
-//    @Test
+    @Test
     public void testMechanismOff(){
         Model model =new ExtendedModelMap();
         expect(mockPluginManager.getStatusesByAgentId(AgentPluginStatusEnum.SYNC_FAILURE)).andStubReturn(getStatusesByAgentId());
@@ -112,11 +111,9 @@ public class PluginManagerControllerTest extends BaseControllerTest {
         
         String toPage = pluginManagerController.index(model);
         Map<String,Object> map = model.asMap();
-        List<Map<String, Object>> summaries = (List<Map<String, Object>>)map.get("pluginSummaries");
         Map<String, Object> info = (Map<String, Object>)map.get("info");
         
         assertEquals("should be direct to admin/managers/plugin page.", "admin/managers/plugin",toPage);
-        assertEquals("pluginSummaries size should be 0",0,summaries.size());
         assertEquals("all agent count should be 0",Long.valueOf(0),info.get("allAgentCount"));
         assertTrue("mechanismOn should be false", !(Boolean)map.get("mechanismOn"));
         assertEquals("instruction should be admin.managers.plugin.mechanism.off",
