@@ -701,47 +701,52 @@
                 		}, li);
                 		
                 		if (summary.allAgentCount>0){      
-                			if(summary.successAgentCount>0){
-                				statusSpan.innerHTML+=summary.successAgentCount+"&nbsp;";
+                			if(summary.successAgentCount > 0){
+                				var successfulAgentSpan = hqDojo.create("div",{
+                					"class":"agentStatusSuccessfulSpan"
+                				},statusSpan);
+                				successfulAgentSpan.innerHTML+=summary.successAgentCount+"&nbsp;";
    	            				hqDojo.create("img",{
        	        					"src": "<spring:url value="/static/images/icon_available_green.gif"/>",
        	        					"alt": "successful",
        	        					"class": "successIcon"
-           	    				}, statusSpan); 
-           	    				statusSpan.innerHTML+="&nbsp;&nbsp;&nbsp;";
+           	    				}, successfulAgentSpan); 
+           	    				successfulAgentSpan.innerHTML+="&nbsp;&nbsp;&nbsp;";
                 			}
-                			if (summary.inProgressAgentCount>0 || summary.errorAgentCount > 0){
-                				var inProgressAgentSpan = hqDojo.create("span",{
+            
+                			if (summary.inProgressAgentCount > 0) {
+                				var inProgressAgentSpan = hqDojo.create("div",{
         	        				"id":summary.name+"_"+summary.id,
             	    				"class":"agentStatusProgressSpan"
                 					}, statusSpan);
-		                		if (summary.inProgressAgentCount>0) {
-		                		    inProgressAgentSpan.innerHTML+=summary.inProgressAgentCount+"&nbsp;";
-    		           				hqDojo.create("img",{
-        		       					"src": "<spring:url value="/images/4.0/icons/alert.png"/>",
-        	    	   					"alt": "in progress",
-        	       						"class": "inProgressIcon",
-        	       						"id":summary.name+"_"+summary.id
-	        	       				}, inProgressAgentSpan);
-	        	       				inProgressAgentSpan.innerHTML+="&nbsp;&nbsp;&nbsp;";
-	                			}	
-    	            			var errorAgentSpan = hqDojo.create("span",{
+		                	
+		                	    inProgressAgentSpan.innerHTML+=summary.inProgressAgentCount+"&nbsp;";
+    		           			hqDojo.create("img",{
+        		       				"src": "<spring:url value="/static/images/clock.gif"/>",
+        	    	   				"alt": "in progress",
+        	       					"class": "inProgressIcon",
+        	       					"id":summary.name+"_"+summary.id
+	        	       			}, inProgressAgentSpan);
+	        	       			inProgressAgentSpan.innerHTML+="&nbsp;&nbsp;&nbsp;";
+	                		}	
+	                			
+	                		if (summary.errorAgentCount > 0) {
+    	            			var errorAgentSpan = hqDojo.create("div",{
         		        			"id":summary.name+"_"+summary.id,
             		    			"class":"agentStatusFailSpan"
                 					}, statusSpan);
-                						
-	                			if (summary.errorAgentCount > 0) {
-                					errorAgentSpan.innerHTML+= summary.errorAgentCount+"&nbsp;";
-                					hqDojo.create("img",{
-                						"src": "<spring:url value="/images/icon_available_red.gif"/>",
-                						"alt": "failure",
-            	    					"class": "errorIcon",
-               		 					"id":summary.name+"_"+summary.id
+	                			
+                				errorAgentSpan.innerHTML+= summary.errorAgentCount+"&nbsp;";
+                				hqDojo.create("img",{
+                					"src": "<spring:url value="/images/icon_available_red.gif"/>",
+                					"alt": "failure",
+            	    				"class": "errorIcon",
+               		 				"id":summary.name+"_"+summary.id
                 					}, errorAgentSpan);
-                					errorAgentSpan.innerHTML+="</img>";
-                				}
-                			
+                				errorAgentSpan.innerHTML+="</img>";
                 			}
+         
+                			
                 		}
                 		index++;
                 	});

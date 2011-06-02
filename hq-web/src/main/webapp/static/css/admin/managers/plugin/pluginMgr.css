@@ -184,7 +184,13 @@
 		font-weight: bold;
 		height:9px;
 	}
-
+	.agentStatusProgressSpan,
+	.agentStatusFailSpan,
+	.agentStatusSuccessfulSpan{
+		float:left;
+		height:20px;
+	}
+	
 	.agentStatusProgressSpan:focus,
 	.agentStatusProgressSpan:hover,
 	.agentStatusFailSpan:focus,
