@@ -69,7 +69,6 @@ public class PluginManagerController extends BaseController implements Applicati
     
     @RequestMapping(method = RequestMethod.GET)
     public String index(Model model) {
-        model.addAttribute("pluginSummaries", getPluginSummaries());
         model.addAttribute("info",getAgentInfo());
         model.addAttribute("mechanismOn", pluginManager.isPluginSyncEnabled());
         if (pluginManager.isPluginSyncEnabled()){

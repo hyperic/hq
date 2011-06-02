@@ -52,50 +52,10 @@
 	<form:form id="deleteForm" name="deleteForm" onsubmit="return false;" method="delete">
 	
 	<ul id="pluginList">
-		<c:forEach var="pluginSummary" items="${pluginSummaries}" varStatus="index">
-			<li class="gridrow clear <c:if test="${pluginSummary.deleted}"> grey </c:if> <c:if test="${index.count % 2 == 0}"> even</c:if>" >
-				<span class="first column span-1">
-					<c:if test="${mechanismOn && !pluginSummary.deleted && !pluginSummary.inProgress}">
-                    	<input type="checkbox" value="${pluginSummary.id}_${pluginSummary.jarName} (${pluginSummary.name})" name="deleteId"/>&nbsp; 
-					</c:if>
-				</span>
-				<span class="column span-small" id="row_${pluginSummary.id}">${pluginSummary.name}
-					<c:if test="${pluginSummary.deleted}">
-						<br/><span class="deleting"><fmt:message key="admin.managers.Plugin.column.plugin.deleting"/></span>
-					</c:if>				
-				</span>
-				<span class="column span-med">${pluginSummary.version}&nbsp;</span>
-				<span class="column span-med">${pluginSummary.jarName}&nbsp;
-					<c:if test="${pluginSummary.disabled}">
-						<br/><span class="notFound"><fmt:message key="admin.managers.Plugin.column.plugin.disabled"/></span>
-					</c:if>
-				</span>
-				<span class="column span-med">${pluginSummary.initialDeployDate}&nbsp;</span>
-				<span class="column span-med">${pluginSummary.updatedDate}&nbsp;</span>		
-				<span class="last column span-status" >
-					<c:if test="${pluginSummary.allAgentCount>0}">
-					    <c:if test="${pluginSummary.successAgentCount>0}">
-					    	${pluginSummary.successAgentCount}&nbsp;<img class="successIcon" alt="successful" src="<spring:url value="/static/images/icon_available_green.gif" />"/>&nbsp;&nbsp;
-					    </c:if>
-					    
-					    <c:if test="${pluginSummary.inProgressAgentCount>0 ||pluginSummary.errorAgentCount>0 }">
-					    	<span id="${pluginSummary.name}_${pluginSummary.id}" class="agentStatusProgressSpan">				    	
-							<c:if test="${pluginSummary.inProgressAgentCount>0}">
-						        ${pluginSummary.inProgressAgentCount}&nbsp;
-						        <img id="${pluginSummary.name}_${pluginSummary.id}" alt="in progress" class="inProgressIcon" src="<spring:url value="/static/images/alert.png"/>"/>&nbsp;&nbsp;
-						   	</c:if>	
-						   	</span>
-						   	<span id="${pluginSummary.name}_${pluginSummary.id}" class="agentStatusFailSpan">
-						   	<c:if test="${pluginSummary.errorAgentCount>0}">	   		
-					   			${pluginSummary.errorAgentCount}&nbsp;
-					   			<img id="${pluginSummary.name}_${pluginSummary.id}" alt="failure" class="errorIcon" src="<spring:url value="/static/images/icon_available_red.gif"/>"/>
-							</c:if>
-							</span>
-						</c:if>
-					</c:if>
-				</span>
-			</li>
-		</c:forEach>
+		<li><div style="padding:10px;">
+			<img src="<spring:url value="/static/images/ajax-loader-blue.gif"/>"/> 
+			<fmt:message key='admin.managers.plugin.column.loading' />
+		</div></li>
 	</ul>
 	</form:form>
 	
@@ -238,7 +198,7 @@
 		function resizePluginMgrContentHeight(){
 			resizeContentHeight(hqDojo.byId("pluginList"),150,400);
 		}
-		
+		refreshDataGrid();//load the plugin list
 		uncheckCheckboxes(hqDojo.query("input[type=checkbox]"));
 		refreshTime(hqDojo.byId("timeNow"),"refreshTimeInfo","#EEEEEE");
 		resizePluginMgrContentHeight();
