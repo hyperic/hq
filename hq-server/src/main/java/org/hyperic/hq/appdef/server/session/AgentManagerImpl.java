@@ -1117,12 +1117,11 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     public long pingAgent(AuthzSubject subject, Agent agent) throws PermissionException,
         AgentNotFoundException, AgentConnectionException, AgentRemoteException, IOException,
         ConfigPropertyException {
-        if (log.isDebugEnabled()) log.debug("Pinging agent " + agent.getAddress());
-
         permissionManager.checkCreatePlatformPermission(subject);
-
         AgentCommandsClient client = agentCommandsClientFactory.getClient(agent);
-        return client.ping();
+        long time = client.ping();
+        if (log.isDebugEnabled()) log.debug("Ping agent " + agent.getAddress() + ", time=" + time);
+        return time;
     }
 
     /**
