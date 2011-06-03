@@ -14,11 +14,11 @@
 	<div id="currentTimeInfo">
 		<span style="float:left">
                 <img id="serverIcon" src="<spring:url value="/static/images/icon_hub_s.gif"/>"/> 
-                        Server Plugin &nbsp;
+                        <fmt:message key="admin.managers.Plugin.tip.icon.server"/> &nbsp;
                 <img id="defaultIcon" src="<spring:url value="/static/images/icon_hub_d.gif"/>"/> 
-                        Default Plugin &nbsp;
+                        <fmt:message key="admin.managers.Plugin.tip.icon.default"/> &nbsp;
             	<img id="customIcon" src="<spring:url value="/static/images/icon_hub_c.gif"/>"/> 
-                        Custom Plugin
+                        <fmt:message key="admin.managers.Plugin.tip.icon.custom"/>&nbsp;
         </span> 
         
 		<span style="float:right;" id="refreshTimeInfo"><fmt:message key="admin.managers.Plugin.information.refresh.time"/> <span id="timeNow"></span>
@@ -221,17 +221,17 @@
 		new hqDijit.Tooltip({
 			connectId:["serverIcon"],
 			position:["left"],
-			label: "Server plugins are required by HQ server. It should not be deleted or modified."
+			label: "<fmt:message key='admin.managers.Plugin.tip.server.plugin' />"
 		});
 		new hqDijit.Tooltip({
 			connectId:["defaultIcon"],
 			position:["left"],
-			label: "Default plugins are come with HQ package."
+			label: "<fmt:message key='admin.managers.Plugin.tip.default.plugin' />"
 		});	
 		new hqDijit.Tooltip({
 			connectId:["customIcon"],
 			position:["left"],
-			label: "Custom plugins are located in ${customDir}" 
+			label: "<fmt:message key='admin.managers.Plugin.tip.custom.plugin' />" 
 		});
 		new hqDijit.Tooltip({
 			connectId:["addedTimeHeader"],
@@ -687,21 +687,21 @@
                 		if(summary.isdefaultPlugin){
                 		    hqDojo.create("img",{
                 				"src": "<spring:url value="/static/images/icon_hub_d.gif"/>",
-                				"style":"padding:3px 0px 0px 0px 0px;"
+                				"style":"padding:3px 0px 0px 0px;"
                 				}, typeIcon);
                 			typeIcon.innerHTML+="&nbsp;";
                 		}
                 		if(summary.isCustomPlugin){
                 		    hqDojo.create("img",{
                 				"src": "<spring:url value="/static/images/icon_hub_c.gif"/>",
-                				"style":"padding:3px 0px 0px 0px 0px;"
+                				"style":"padding:3px 0px 0px 0px;"
                 				}, typeIcon);
                 			typeIcon.innerHTML+="&nbsp;";
                 		}
                 		if(summary.isServerPlugin){
                 		    hqDojo.create("img",{
                 				"src": "<spring:url value="/static/images/icon_hub_s.gif"/>",
-                				"style":"padding:3px 0px 0px 0px 0px;"
+                				"style":"padding:3px 0px 0px 0px;"
                 				}, typeIcon);
                 			typeIcon.innerHTML+="&nbsp;";
                 		}
