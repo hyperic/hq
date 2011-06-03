@@ -85,18 +85,18 @@ public class PluginSyncJob implements AgentDataTransferJob {
         try {
             final Collection<String> pluginNames = getPluginFileNames(plugins);
             final FileDataResult[] transferResult =
-                agentManager.transferAgentPlugins(overlord, getAgentId(), pluginNames);
+                agentManager.transferAgentPlugins(overlord, agentId, pluginNames);
             Map<String, Boolean> removeResult = null;
             if (toRemove != null && !toRemove.isEmpty()) {
-                removeResult = agentManager.agentRemovePlugins(overlord, getAgentId(), toRemove);
+                removeResult = agentManager.agentRemovePlugins(overlord, agentId, toRemove);
             }
             logDebugs(transferResult, removeResult);
             restartAgentAndLogErrors(transferResult, removeResult, agentManager);
         } catch (Exception e) {
             pluginManager.updateAgentPluginSyncStatusInNewTran(
-                AgentPluginStatusEnum.SYNC_FAILURE, getAgentId(), plugins);
+                AgentPluginStatusEnum.SYNC_FAILURE, agentId, plugins);
             throw new SystemException(
-                "error transferring agent plugins to agentId=" + getAgentId(), e);
+                "error transferring agent plugins to agentId=" + agentId, e);
         }
     }
 

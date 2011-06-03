@@ -28,8 +28,10 @@ package org.hyperic.hq.authz.server.session;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeSet;
 
 import net.sf.ehcache.Cache;
@@ -50,6 +52,7 @@ import org.hyperic.hq.authz.shared.EdgePermCheck;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.measurement.server.session.MonitorableType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -435,6 +438,38 @@ public class ResourceDAO
                     _log.debug(e,e);
                     continue;
                 }
+            }
+        }
+        return rtn;
+    }
+    
+    @SuppressWarnings("unchecked")
+    Map<String, Long> getResourceCountByProtoTypeName(Collection<MonitorableType> types) {
+        if (types == null || types.isEmpty()) {;
+            return Collections.emptyMap();
+        }
+        final Map<String, String> map = new HashMap<String, String>();
+        for (final MonitorableType mt : types) {
+            map.put(mt.getName(), mt.getPlugin());
+        }
+        final String hql = new StringBuilder()
+            .append("select count(*), prototype.name from Resource ")
+            .append("where prototype.name in (:typeNames) group by prototype.name")
+            .toString();
+        final Collection<Object[]> list = getSession().createQuery(hql)
+                           .setParameterList("typeNames", map.keySet())
+                           .list();
+        final Map<String, Long> rtn = new HashMap<String, Long>();
+        for (final Object[] objs : list) {
+            final String pluginName = map.get(objs[1]);
+            if (pluginName == null) {
+                continue;
+            }
+            Long count = rtn.get(pluginName);
+            if (count == null) {
+                rtn.put(pluginName, ((Number) objs[0]).longValue());
+            } else {
+                rtn.put(pluginName, count + ((Number) objs[0]).longValue());
             }
         }
         return rtn;

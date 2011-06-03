@@ -1117,12 +1117,11 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     public long pingAgent(AuthzSubject subject, Agent agent) throws PermissionException,
         AgentNotFoundException, AgentConnectionException, AgentRemoteException, IOException,
         ConfigPropertyException {
-        if (log.isDebugEnabled()) log.debug("Pinging agent " + agent.getAddress());
-
         permissionManager.checkCreatePlatformPermission(subject);
-
         AgentCommandsClient client = agentCommandsClientFactory.getClient(agent);
-        return client.ping();
+        long time = client.ping();
+        if (log.isDebugEnabled()) log.debug("Ping agent " + agent.getAddress() + ", time=" + time);
+        return time;
     }
 
     /**
@@ -1624,8 +1623,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         final Map<Integer, Collection<String>> rtn = new HashMap<Integer, Collection<String>>(size);
         for (final Entry<Agent, Collection<AgentPluginStatus>> entry : removes.entrySet()) {
             final Agent agent = entry.getKey();
-            Collection<AgentPluginStatus> list = entry.getValue();
-            for (AgentPluginStatus s : list) {
+            final Collection<AgentPluginStatus> list = entry.getValue();
+            for (final AgentPluginStatus s : list) {
                 addToRemoveMap(rtn, agent, s.getFileName());
             }
         }

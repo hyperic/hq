@@ -58,7 +58,7 @@
   			</tr>
   			<tr valign="top">
     			<td class="BlockContent" nowrap>
-      				<input type="text" size="12" maxlength="40" value="<fmt:message key="common.header.ResourceName"/>" onfocus="this.select();" name="keywords">      
+      				<input type="text" size="12" maxlength="40" value="<fmt:message key="common.header.ResourceName"/>" onfocus="this.value='';" name="keywords">      
     			</td>
     			<td class="BlockContent" nowrap>
       				<html:select property="ff" styleClass="FilterFormText" size="1" >

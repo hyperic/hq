@@ -75,6 +75,7 @@ import org.hyperic.hq.measurement.server.session.MonitorableTypeDAO;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.product.shared.PluginDeployException;
 import org.hyperic.hq.product.shared.PluginManager;
+import org.hyperic.hq.product.shared.PluginTypeEnum;
 import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.hq.zevents.ZeventManager;
@@ -99,6 +100,15 @@ import org.xml.sax.SAXException;
 public class PluginManagerImpl implements PluginManager, ApplicationContextAware {
     private static final Log log = LogFactory.getLog(PluginManagerImpl.class);
 
+    // this is hacky.  In a perfect world the plugin itself would define whether it is a "server"
+    // plugin or not.  We shouldn't have to hardcode this :-(
+    /** [HHQ-4776] a server plugin cannot be updated by the Plugin Manager UI */
+    private static final Set<String> serverPlugins = new HashSet<String>();
+    static {
+        serverPlugins.add("system-plugin.jar");
+        serverPlugins.add("netservices-plugin.jar");
+        serverPlugins.add("netdevice-plugin.jar");
+    }
     private static final String TMP_DIR = System.getProperty("java.io.tmpdir");
     private static final String PLUGIN_DIR = "hq-plugins";
     private static final String AGENT_PLUGIN_DIR = "[/\\\\]pdk[/\\\\]plugins[/\\\\]";
@@ -113,12 +123,11 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
     private AgentPluginStatusDAO agentPluginStatusDAO;
     private MonitorableTypeDAO monitorableTypeDAO;
     private ResourceManager resourceManager;
+    private AuthzSubjectManager authzSubjectManager;
 
     private ApplicationContext ctx;
 
     private File customPluginDir;
-
-    private AuthzSubjectManager authzSubjectManager;
 
     @Autowired
     public PluginManagerImpl(PluginDAO pluginDAO, AgentPluginStatusDAO agentPluginStatusDAO,
@@ -137,7 +146,7 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         this.resourceManager = resourceManager;
         this.authzSubjectManager = authzSubjectManager;
     }
-    
+
     @PostConstruct
     public void postConstruct() {
         ZeventManager.getInstance().addBufferedListener(PluginFileRemoveZevent.class,
@@ -163,7 +172,10 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         } catch (PermissionException e) {
             throw new PluginDeployException("plugin.manager.deploy.super.user", e);
         }
-        final Collection<Agent> agents = agentPluginStatusDAO.getAutoUpdatingAgents();
+        final Set<Agent> agents = new HashSet<Agent>();
+        for (final String fileName : pluginFileNames) {
+            agents.addAll(agentPluginStatusDAO.getPluginStatusByFileName(fileName).keySet());
+        }
         final Map<String, Plugin> pluginMap = getPluginMap(pluginFileNames);
         removePluginsAndAssociatedResources(subj, new ArrayList<Plugin>(pluginMap.values()));
         final AgentPluginUpdater agentPluginUpdater = Bootstrap.getBean(AgentPluginUpdater.class);
@@ -223,6 +235,22 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
                 plugin.setModifiedTime(now);
             }
         }
+    }
+    
+    public Collection<PluginTypeEnum> getPluginType(Plugin plugin) {
+        final Collection<PluginTypeEnum> rtn = new HashSet<PluginTypeEnum>();
+        final String pluginFile = plugin.getPath();
+        final File customFile = new File(customPluginDir, pluginFile);
+        final File defaultFile = new File(getServerPluginDir(), pluginFile);
+        if (serverPlugins.contains(pluginFile)) {
+            rtn.add(PluginTypeEnum.SERVER_PLUGIN);
+        }
+        if (customFile.exists()) {
+            rtn.add(PluginTypeEnum.CUSTOM_PLUGIN);
+        } else if (defaultFile.exists()) {
+            rtn.add(PluginTypeEnum.DEFAULT_PLUGIN);
+        }
+        return rtn;
     }
 
     @Value(value="${server.custom.plugin.dir}")

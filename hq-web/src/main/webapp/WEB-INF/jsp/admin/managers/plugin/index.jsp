@@ -12,6 +12,15 @@
 	<p id="instruction"><fmt:message key="${instruction}" /></p>
 
 	<div id="currentTimeInfo">
+		<span style="float:left">
+                <img id="serverIcon" src="<spring:url value="/static/images/icon_hub_s.gif"/>"/> 
+                        Server Plugin &nbsp;
+                <img id="defaultIcon" src="<spring:url value="/static/images/icon_hub_d.gif"/>"/> 
+                        Default Plugin &nbsp;
+            	<img id="customIcon" src="<spring:url value="/static/images/icon_hub_c.gif"/>"/> 
+                        Custom Plugin
+        </span> 
+        
 		<span style="float:right;" id="refreshTimeInfo"><fmt:message key="admin.managers.Plugin.information.refresh.time"/> <span id="timeNow"></span>
 		</span>
 		<span style="float:right;">&nbsp;&nbsp;</span>
@@ -31,18 +40,19 @@
 
 		<span style="float:left">
                 <img src="<spring:url value="/static/images/icon_available_green.gif"/>"/> 
-                        <fmt:message key="admin.managers.Plugin.tip.icon.success"/>
+                        <fmt:message key="admin.managers.Plugin.tip.icon.success"/> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 <img src="<spring:url value="/static/images/alert.png"/>"/> 
-                        <fmt:message key="admin.managers.Plugin.tip.icon.in.progress"/>
+                        <fmt:message key="admin.managers.Plugin.tip.icon.in.progress"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             	<img src="<spring:url value="/static/images/icon_available_red.gif"/>"/> 
-                        <fmt:message key="admin.managers.Plugin.tip.icon.error"/>
+                        <fmt:message key="admin.managers.Plugin.tip.icon.error"/>&nbsp;
         </span> 
 	</div>
 	
 	<div class="gridheader clear">
 		<span class="first column span-1">&nbsp;</span>
+		<span class="column span-1">&nbsp;</span>
 		<span class="column span-small"><fmt:message key="admin.managers.plugin.column.header.product.plugin" /></span>
-		<span class="column span-med"><fmt:message key="admin.managers.plugin.column.header.version" /></span>
+		<span class="column span-small"><fmt:message key="admin.managers.plugin.column.header.version" /></span>
 		<span class="column span-med"><fmt:message key="admin.managers.plugin.column.header.jar.name" /></span>
 		<span class="column span-med" id="addedTimeHeader"><fmt:message key="admin.managers.plugin.column.header.initial.deploy.date" /></span>
 		<span class="column span-med" id="updatedTimeHeader"><fmt:message key="admin.managers.plugin.column.header.last.sync.date" /></span>
@@ -52,50 +62,10 @@
 	<form:form id="deleteForm" name="deleteForm" onsubmit="return false;" method="delete">
 	
 	<ul id="pluginList">
-		<c:forEach var="pluginSummary" items="${pluginSummaries}" varStatus="index">
-			<li class="gridrow clear <c:if test="${pluginSummary.deleted}"> grey </c:if> <c:if test="${index.count % 2 == 0}"> even</c:if>" >
-				<span class="first column span-1">
-					<c:if test="${mechanismOn && !pluginSummary.deleted && !pluginSummary.inProgress}">
-                    	<input type="checkbox" value="${pluginSummary.id}_${pluginSummary.jarName} (${pluginSummary.name})" name="deleteId"/>&nbsp; 
-					</c:if>
-				</span>
-				<span class="column span-small" id="row_${pluginSummary.id}">${pluginSummary.name}
-					<c:if test="${pluginSummary.deleted}">
-						<br/><span class="deleting"><fmt:message key="admin.managers.Plugin.column.plugin.deleting"/></span>
-					</c:if>				
-				</span>
-				<span class="column span-med">${pluginSummary.version}&nbsp;</span>
-				<span class="column span-med">${pluginSummary.jarName}&nbsp;
-					<c:if test="${pluginSummary.disabled}">
-						<br/><span class="notFound"><fmt:message key="admin.managers.Plugin.column.plugin.disabled"/></span>
-					</c:if>
-				</span>
-				<span class="column span-med">${pluginSummary.initialDeployDate}&nbsp;</span>
-				<span class="column span-med">${pluginSummary.updatedDate}&nbsp;</span>		
-				<span class="last column span-status" >
-					<c:if test="${pluginSummary.allAgentCount>0}">
-					    <c:if test="${pluginSummary.successAgentCount>0}">
-					    	${pluginSummary.successAgentCount}&nbsp;<img class="successIcon" alt="successful" src="<spring:url value="/static/images/icon_available_green.gif" />"/>&nbsp;&nbsp;
-					    </c:if>
-					    
-					    <c:if test="${pluginSummary.inProgressAgentCount>0 ||pluginSummary.errorAgentCount>0 }">
-					    	<span id="${pluginSummary.name}_${pluginSummary.id}" class="agentStatusProgressSpan">				    	
-							<c:if test="${pluginSummary.inProgressAgentCount>0}">
-						        ${pluginSummary.inProgressAgentCount}&nbsp;
-						        <img id="${pluginSummary.name}_${pluginSummary.id}" alt="in progress" class="inProgressIcon" src="<spring:url value="/static/images/alert.png"/>"/>&nbsp;&nbsp;
-						   	</c:if>	
-						   	</span>
-						   	<span id="${pluginSummary.name}_${pluginSummary.id}" class="agentStatusFailSpan">
-						   	<c:if test="${pluginSummary.errorAgentCount>0}">	   		
-					   			${pluginSummary.errorAgentCount}&nbsp;
-					   			<img id="${pluginSummary.name}_${pluginSummary.id}" alt="failure" class="errorIcon" src="<spring:url value="/static/images/icon_available_red.gif"/>"/>
-							</c:if>
-							</span>
-						</c:if>
-					</c:if>
-				</span>
-			</li>
-		</c:forEach>
+		<li><div style="padding:10px;">
+			<img src="<spring:url value="/static/images/ajax-loader-blue.gif"/>"/> 
+			<fmt:message key='admin.managers.plugin.column.loading' />
+		</div></li>
 	</ul>
 	</form:form>
 	
@@ -238,7 +208,7 @@
 		function resizePluginMgrContentHeight(){
 			resizeContentHeight(hqDojo.byId("pluginList"),150,400);
 		}
-		
+		refreshDataGrid();//load the plugin list
 		uncheckCheckboxes(hqDojo.query("input[type=checkbox]"));
 		refreshTime(hqDojo.byId("timeNow"),"refreshTimeInfo","#EEEEEE");
 		resizePluginMgrContentHeight();
@@ -248,7 +218,21 @@
 		hqDojo.connect(hqDojo.byId("refreshIcon"),"onclick",function(e){
 			refreshPage();
 		});
-	
+		new hqDijit.Tooltip({
+			connectId:["serverIcon"],
+			position:["left"],
+			label: "Server plugins are required by HQ server. It should not be deleted or modified."
+		});
+		new hqDijit.Tooltip({
+			connectId:["defaultIcon"],
+			position:["left"],
+			label: "Default plugins are come with HQ package."
+		});	
+		new hqDijit.Tooltip({
+			connectId:["customIcon"],
+			position:["left"],
+			label: "Custom plugins are located in ${customDir}" 
+		});
 		new hqDijit.Tooltip({
 			connectId:["addedTimeHeader"],
 			position:["left"],
@@ -563,7 +547,11 @@
 			hqDojo.connect(hqDojo.byId("uploadButton"), "onclick", function(e){
 				var fileTypeCorrect=true;
 				var pluginList = hqDojo.query("input[type=file]", hqDojo.byId("hqDijit_FileUploaderForm_0"));
-				var newPluginList = pluginList.slice(0,pluginList.length-1);
+				var newPluginList = pluginList.slice(0,pluginList.length-1);//To get rid of last item which is empty
+				if(newPluginList.length==0){
+					showErrorMessage("validationMessage","<fmt:message key='admin.managers.plugin.message.invalid.no.file' />")
+					return; //no file selected, do nothing
+				}
 				
 				uncheckCheckboxes(hqDojo.query("input[type=checkbox]"));
 				newPluginList.forEach(function(input) {
@@ -693,6 +681,31 @@
         	        			"value": summary.id+"_"+summary.jarName+" ("+summary.name+")"
                 			}, span);
                 		}
+                		var typeIcon = hqDojo.create("span", {
+                			"class": "column span-1"
+                		}, li);
+                		if(summary.isdefaultPlugin){
+                		    hqDojo.create("img",{
+                				"src": "<spring:url value="/static/images/icon_hub_d.gif"/>",
+                				"style":"padding:3px 0px 0px 0px 0px;"
+                				}, typeIcon);
+                			typeIcon.innerHTML+="&nbsp;";
+                		}
+                		if(summary.isCustomPlugin){
+                		    hqDojo.create("img",{
+                				"src": "<spring:url value="/static/images/icon_hub_c.gif"/>",
+                				"style":"padding:3px 0px 0px 0px 0px;"
+                				}, typeIcon);
+                			typeIcon.innerHTML+="&nbsp;";
+                		}
+                		if(summary.isServerPlugin){
+                		    hqDojo.create("img",{
+                				"src": "<spring:url value="/static/images/icon_hub_s.gif"/>",
+                				"style":"padding:3px 0px 0px 0px 0px;"
+                				}, typeIcon);
+                			typeIcon.innerHTML+="&nbsp;";
+                		}
+                		
                 		var pluginName = hqDojo.create("span", {
                 			"class": "column span-small",
                 			"innerHTML": summary.name,
@@ -710,7 +723,7 @@
 							version = summary.version;
 						}
                 		span = hqDojo.create("span", {
-                			"class": "column span-med",
+                			"class": "column span-small",
                 			"innerHTML": version
                 		}, li);
                 		var spanName = hqDojo.create("span", {
@@ -737,53 +750,58 @@
                 		}, li);
                 		
                 		if (summary.allAgentCount>0){      
-                			if(summary.successAgentCount>0){
-                				statusSpan.innerHTML+=summary.successAgentCount+"&nbsp;";
+                			if(summary.successAgentCount > 0){
+                				var successfulAgentSpan = hqDojo.create("div",{
+                					"class":"agentStatusSuccessfulSpan"
+                				},statusSpan);
+                				successfulAgentSpan.innerHTML+=summary.successAgentCount+"&nbsp;";
    	            				hqDojo.create("img",{
        	        					"src": "<spring:url value="/static/images/icon_available_green.gif"/>",
        	        					"alt": "successful",
        	        					"class": "successIcon"
-           	    				}, statusSpan); 
-           	    				statusSpan.innerHTML+="&nbsp;&nbsp;&nbsp;";
+           	    				}, successfulAgentSpan); 
+           	    				successfulAgentSpan.innerHTML+="&nbsp;&nbsp;&nbsp;";
                 			}
-                			if (summary.inProgressAgentCount>0 || summary.errorAgentCount > 0){
-                				var inProgressAgentSpan = hqDojo.create("span",{
+            
+                			if (summary.inProgressAgentCount > 0) {
+                				var inProgressAgentSpan = hqDojo.create("div",{
         	        				"id":summary.name+"_"+summary.id,
             	    				"class":"agentStatusProgressSpan"
                 					}, statusSpan);
-		                		if (summary.inProgressAgentCount>0) {
-		                		    inProgressAgentSpan.innerHTML+=summary.inProgressAgentCount+"&nbsp;";
-    		           				hqDojo.create("img",{
-        		       					"src": "<spring:url value="/images/4.0/icons/alert.png"/>",
-        	    	   					"alt": "in progress",
-        	       						"class": "inProgressIcon",
-        	       						"id":summary.name+"_"+summary.id
-	        	       				}, inProgressAgentSpan);
-	        	       				inProgressAgentSpan.innerHTML+="&nbsp;&nbsp;&nbsp;";
-	                			}	
-    	            			var errorAgentSpan = hqDojo.create("span",{
+		                	
+		                	    inProgressAgentSpan.innerHTML+=summary.inProgressAgentCount+"&nbsp;";
+    		           			hqDojo.create("img",{
+        		       				"src": "<spring:url value="/static/images/clock.gif"/>",
+        	    	   				"alt": "in progress",
+        	       					"class": "inProgressIcon",
+        	       					"id":summary.name+"_"+summary.id
+	        	       			}, inProgressAgentSpan);
+	        	       			inProgressAgentSpan.innerHTML+="&nbsp;&nbsp;&nbsp;";
+	                		}	
+	                			
+	                		if (summary.errorAgentCount > 0) {
+    	            			var errorAgentSpan = hqDojo.create("div",{
         		        			"id":summary.name+"_"+summary.id,
             		    			"class":"agentStatusFailSpan"
                 					}, statusSpan);
-                						
-	                			if (summary.errorAgentCount > 0) {
-                					errorAgentSpan.innerHTML+= summary.errorAgentCount+"&nbsp;";
-                					hqDojo.create("img",{
-                						"src": "<spring:url value="/images/icon_available_red.gif"/>",
-                						"alt": "failure",
-            	    					"class": "errorIcon",
-               		 					"id":summary.name+"_"+summary.id
+	                			
+                				errorAgentSpan.innerHTML+= summary.errorAgentCount+"&nbsp;";
+                				hqDojo.create("img",{
+                					"src": "<spring:url value="/images/icon_available_red.gif"/>",
+                					"alt": "failure",
+            	    				"class": "errorIcon",
+               		 				"id":summary.name+"_"+summary.id
                 					}, errorAgentSpan);
-                					errorAgentSpan.innerHTML+="</img>";
-                				}
-                			
+                				errorAgentSpan.innerHTML+="</img>";
                 			}
+         
+                			
                 		}
                 		index++;
                 	});
                 	
 					var hashObj = hqDojo.queryToObject(hqDojo.hash());
-					if(hashObj.deleteIds!==""){
+					if(hashObj.deleteIds!==undefined && hashObj.deleteIds!==""){
 						hqDojo.forEach(hashObj.deleteIds.split(","),function(pluginId){
 							var checkbox = hqDojo.query("input[value='"+pluginId+"']");
 							if(checkbox[0]!==undefined){
@@ -820,7 +838,7 @@
 							label: "<fmt:message key='admin.managers.Plugin.tip.icon.error' />. <fmt:message key='admin.managers.Plugin.tip.icon.click' />"
 						});		
 					});
-                },
+                }, 
                 error: function(response, args) {
                 	
                 }

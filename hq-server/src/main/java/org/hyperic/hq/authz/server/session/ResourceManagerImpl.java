@@ -83,6 +83,7 @@ import org.hyperic.hq.measurement.server.session.MeasurementTemplateDAO;
 import org.hyperic.hq.measurement.server.session.MonitorableType;
 import org.hyperic.hq.measurement.server.session.MonitorableTypeDAO;
 import org.hyperic.hq.product.PlatformDetector;
+import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.pager.PageControl;
@@ -1357,6 +1358,14 @@ public class ResourceManagerImpl implements ResourceManager {
 
     public ResourceType findResourceTypeById(Integer id) {
         return resourceTypeDAO.findById(id);
+    }
+    
+    public Map<String, Long> getResourceCountByPlugin(Collection<Plugin> plugins) {
+        final Collection<MonitorableType> types = new ArrayList<MonitorableType>();
+        for (final Plugin plugin : plugins) {
+            types.addAll(monitorableTypeDAO.findByPluginName(plugin.getName()).values());
+        }
+        return resourceDAO.getResourceCountByProtoTypeName(types);
     }
 
     public void removeResourcesAndTypes(AuthzSubject subj, Collection<MonitorableType> types) {

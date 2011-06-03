@@ -47,8 +47,9 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue
 import org.hyperic.hq.appdef.shared.AppdefUtil;
-import org.hyperic.hq.appdef.server.session.Platform
+import org.hyperic.hq.appdef.shared.IpValue
 import org.hyperic.hq.appdef.shared.PlatformValue
+import org.hyperic.hq.appdef.server.session.Platform
 import org.hyperic.hq.appdef.server.session.Server
 import org.hyperic.hq.appdef.server.session.Service
 import org.hyperic.hq.appdef.shared.ServerValue
@@ -536,12 +537,23 @@ class ResourceCategory {
 		platVal.fqdn     = cfg.fqdn
 		platVal.cpuCount = 1  // XXX:  How can we better gauge?
 		platVal.location = cfg.location
+
+		for (ip in ips) {
+			def ipVal = new IpValue()
+			ipVal.setAddress(ip.address)
+			ipVal.setNetmask(ip.netmask)
+			ipVal.setMACAddress(ip.mac)
+			platVal.addIpValue(ipVal)
+		}
 		
+		if (platVal.getIpValues().length == 0 && cfg.ip != null) {
+			def ipVal = new IpValue()
+			ipVal.setAddress(cfg.ip)			
+			platVal.addIpValue(ipVal)
+		}
+				
 		def plat  = platMan.createPlatform(subject, proto.instanceId,
 				platVal, agent.id)
-		for (ip in ips) {
-			platMan.addIp(plat, ip.address, ip.netmask, ip.mac)
-		}
 		
 		def res = plat.resource
 		setConfig(res, cfg, subject)

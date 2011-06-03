@@ -25,6 +25,7 @@
 package org.hyperic.hq.ui.servlet;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -75,6 +76,13 @@ public class RenditServlet
         
         List fullPath = StringUtil.explode(reqUri, "/");
         int pathSize = fullPath.size();
+        
+        Iterator<String> it = fullPath.iterator();
+        while(it.hasNext()){
+            if("..".equals(it.next())){
+                return false;
+            }
+        }
         
         if (_log.isDebugEnabled()) {
             _log.debug("Examining path: " + fullPath);

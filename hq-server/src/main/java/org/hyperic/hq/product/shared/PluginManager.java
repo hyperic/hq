@@ -198,4 +198,6 @@ public interface PluginManager {
 
     Map<Integer, AgentPluginStatus> getStatusesByAgentId(AgentPluginStatusEnum ... keys);
 
+    Collection<PluginTypeEnum> getPluginType(Plugin plugin);
+
 }

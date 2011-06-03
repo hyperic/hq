@@ -381,10 +381,6 @@ public class PlatformManagerImpl implements PlatformManager {
             .findResourceById(AuthzConstants.authzHQSystem), subject, 0, 0);
         boolean pushed = false;
         try {
-        	// ...setup the decrement platform count event BEFORE deleting, need to get at the ips.
-        	// it'll get added to the zevent buffer if the transaction goes through successfully...
-        	zeventManager.enqueueEventAfterCommit(new DecrementPlatformCountZEvent(new ArrayList<Ip>(platform.getIps())));
-            
         	auditManager.pushContainer(audit);
             pushed = true;
             permissionManager.checkRemovePermission(subject, platform.getEntityId());
@@ -530,7 +526,6 @@ public class PlatformManagerImpl implements PlatformManager {
             // Send resource create event
             // Send resource create & increment platform count events
             zeventManager.enqueueEventAfterCommit(new ResourceCreatedZevent(subject, platform.getEntityId()));
-            zeventManager.enqueueEventAfterCommit(new IncrementPlatformCountZEvent(new ArrayList<Ip>(platform.getIps())));
 
             return platform;
         } catch (NotFoundException e) {
@@ -583,16 +578,6 @@ public class PlatformManagerImpl implements PlatformManager {
 
         // Send resource create & increment platform count events
         zeventManager.enqueueEventAfterCommit(new ResourceCreatedZevent(subject, platform.getEntityId()));
-        
-        List<Ip> ips = new ArrayList<Ip>();
-        
-        for (AIIpValue ipValue : aipValue.getAIIpValues()) {
-        	Ip ip = new Ip(ipValue.getAddress(), ipValue.getNetmask(), ipValue.getMACAddress());
-        	
-        	ips.add(ip);
-        }
-        
-        zeventManager.enqueueEventAfterCommit(new IncrementPlatformCountZEvent(ips));
         
         return platform;
     }
@@ -1611,37 +1596,7 @@ public class PlatformManagerImpl implements PlatformManager {
                 } else if (!plat.getAgent().equals(existing.getAgent())) {
                     // Need to enqueue the ResourceUpdatedZevent if the
                     // agent changed to get the metrics scheduled
-                	List<Zevent> events = new ArrayList<Zevent>();
-                    
-                    // ...a little through-hoop jumping for new licensing scheme, got to get the update list of ips...
-                	List<Ip> updatedIps = new ArrayList<Ip>();
-
-                    for (IpValue ipValue : existing.getAddedIpValues()) {
-                    	updatedIps.add(new Ip(ipValue.getAddress(), ipValue.getNetmask(), ipValue.getMACAddress()));
-                    }
-
-                    for (IpValue ipValue : existing.getUpdatedIpValues()) {
-                    	updatedIps.add(new Ip(ipValue.getAddress(), ipValue.getNetmask(), ipValue.getMACAddress()));
-                    }
-                    
-                    // ...setup an decrement event for the old ip,mac token, and an increment event for the new ip,mac id...
-                    events.add(new DecrementPlatformCountZEvent(new ArrayList<Ip>(plat.getIps())));
-                    events.add(new IncrementPlatformCountZEvent(updatedIps));
-                    
-                    // ...done jumping...
-                    events.add(new ResourceUpdatedZevent(subject, plat.getEntityId()));
-                    
-                    for (Server svr : plat.getServers()) {
-
-                        events.add(new ResourceUpdatedZevent(subject, svr.getEntityId()));
-
-                        for (Service svc : svr.getServices()) {
-
-                            events.add(new ResourceUpdatedZevent(subject, svc.getEntityId()));
-                        }
-                    }
-
-                    zeventManager.enqueueEventsAfterCommit(events);
+                    resourceManager.resourceHierarchyUpdated(subject, Collections.singletonList(plat.getResource()));
                 }
             }
             platformDAO.updatePlatform(plat, existing);

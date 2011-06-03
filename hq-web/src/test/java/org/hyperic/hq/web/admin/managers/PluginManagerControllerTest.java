@@ -29,7 +29,6 @@ import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
 import java.io.File;
-import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -39,18 +38,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
-
+import org.easymock.IExpectationSetters;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatus;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatusEnum;
 import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.product.shared.PluginManager;
+import org.hyperic.hq.product.shared.PluginTypeEnum;
 import org.hyperic.hq.web.BaseControllerTest;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -59,10 +56,6 @@ import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.hyperic.hq.product.Plugin;
 
-/**
- * @author Annie Chen
- *
- */
 public class PluginManagerControllerTest extends BaseControllerTest {
     private PluginManagerController pluginManagerController;
     private PluginManager mockPluginManager;
@@ -111,11 +104,9 @@ public class PluginManagerControllerTest extends BaseControllerTest {
         
         String toPage = pluginManagerController.index(model);
         Map<String,Object> map = model.asMap();
-        List<Map<String, Object>> summaries = (List<Map<String, Object>>)map.get("pluginSummaries");
         Map<String, Object> info = (Map<String, Object>)map.get("info");
         
         assertEquals("should be direct to admin/managers/plugin page.", "admin/managers/plugin",toPage);
-        assertEquals("pluginSummaries size should be 0",0,summaries.size());
         assertEquals("all agent count should be 0",Long.valueOf(0),info.get("allAgentCount"));
         assertTrue("mechanismOn should be false", !(Boolean)map.get("mechanismOn"));
         assertEquals("instruction should be admin.managers.plugin.mechanism.off",
@@ -188,8 +179,12 @@ public class PluginManagerControllerTest extends BaseControllerTest {
     
     @Test
     public void testPluginSummaries() throws ParseException{
-        expect(mockPluginManager.getAllPlugins()).andReturn(getAllPlugins());
+        List<Plugin> plugins = getAllPlugins();
+        expect(mockPluginManager.getAllPlugins()).andReturn(plugins);
         expect(mockPluginManager.getPluginRollupStatus()).andReturn(getPluginRollupStatus());
+        expect(mockPluginManager.getPluginType(plugins.get(0))).andReturn(getPluginType(0));
+        expect(mockPluginManager.getPluginType(plugins.get(1))).andReturn(getPluginType(2));//pluginType is set before plugin list sort by status
+        expect(mockPluginManager.getPluginType(plugins.get(2))).andReturn(getPluginType(1));
         replay(mockPluginManager);
  
         List<Map<String, Object>> summaries = pluginManagerController.getPluginSummaries();
@@ -203,6 +198,9 @@ public class PluginManagerControllerTest extends BaseControllerTest {
         assertEquals("plugin-a: initialDeployDate should be ...",format.format(date2),""+summaries.get(0).get("initialDeployDate"));
         assertEquals("plugin-a: id should be 1",1,summaries.get(0).get("id"));
         assertEquals("plugin-a: name should be plugin-a","plugin-a",summaries.get(0).get("name"));
+        assertEquals("plugin-a: is not default plugin",false, summaries.get(0).get("isdefaultPlugin"));
+        assertEquals("plugin-a: is server plugin",true, summaries.get(0).get("isServerPlugin"));
+        assertEquals("plugin-a: is not custom plugin",false, summaries.get(0).get("isCustomPlugin"));
         
         //make sure plugins are sorted by status
         assertEquals("plugin-c: name should be plugin-c","plugin-c",summaries.get(1).get("name"));
@@ -212,7 +210,10 @@ public class PluginManagerControllerTest extends BaseControllerTest {
         assertEquals("plugin-c: errorAgentCount should be 3",3,summaries.get(1).get("errorAgentCount"));
         assertEquals("plugin-c: inProgress should be true",true,(Boolean)summaries.get(1).get("inProgress"));
         assertEquals("plugin-c: id should be 3",3,summaries.get(1).get("id"));        
-
+        assertEquals("plugin-c: is default plugin",true, summaries.get(1).get("isdefaultPlugin"));
+        assertEquals("plugin-c: is not server plugin",false, summaries.get(1).get("isServerPlugin"));
+        assertEquals("plugin-c: is custom plugin",true, summaries.get(1).get("isCustomPlugin"));
+        
         assertEquals("plugin-b: name should be plugin-b","plugin-b",summaries.get(2).get("name"));
         assertEquals("plugin-b: inProgressAgentCount should be 0",0,summaries.get(2).get("inProgressAgentCount"));
         assertEquals("plugin-b: allAgentCount should be 99",99,summaries.get(2).get("allAgentCount"));
@@ -220,6 +221,26 @@ public class PluginManagerControllerTest extends BaseControllerTest {
         assertEquals("plugin-b: errorAgentCount should be 0",0,summaries.get(2).get("errorAgentCount"));
         assertEquals("plugin-b: inProgress should be false",false,(Boolean)summaries.get(2).get("inProgress"));
         assertEquals("plugin-b: id should be 2",2,summaries.get(2).get("id"));        
+        assertEquals("plugin-b: is not default plugin",false, summaries.get(2).get("isdefaultPlugin"));
+        assertEquals("plugin-b: is not server plugin",false, summaries.get(2).get("isServerPlugin"));
+        assertEquals("plugin-b: is not custom plugin",false, summaries.get(2).get("isCustomPlugin"));
+
+
+    }
+    private Collection<PluginTypeEnum> getPluginType(int index){
+        Collection<PluginTypeEnum> result = new ArrayList<PluginTypeEnum>();
+        switch (index){
+            case 0:
+                result.add(PluginTypeEnum.SERVER_PLUGIN);
+                return result;
+            case 1:
+                result.add(PluginTypeEnum.CUSTOM_PLUGIN);
+                result.add(PluginTypeEnum.DEFAULT_PLUGIN);
+                return result;
+            case 2:
+                return result;
+        }
+        return null;
     }
     
     @Test

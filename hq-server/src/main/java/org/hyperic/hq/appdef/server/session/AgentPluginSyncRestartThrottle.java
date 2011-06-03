@@ -117,6 +117,20 @@ public class AgentPluginSyncRestartThrottle {
         }
     }
     
+    /**
+     * @return {@link Map} of {@link Integer} agentId to {@link Long} time (ms) which represents
+     * the last time the agentId checked in after a restart
+     */
+    public Map<Integer, Long> getLastCheckinInfo() {
+        synchronized (LOCK) {
+            return new HashMap<Integer, Long>(lastCheckin);
+        }
+    }
+    
+    /**
+     * @return {@link Map} of {@link Integer} agentId to {@link Long} time (ms) which represents
+     * when a restart was initiated on the agentId 
+     */
     public Map<Integer, Long> getAgentIdsInRestartState() {
         synchronized (LOCK) {
             return new HashMap<Integer, Long>(agentRestartTimestampMap);
