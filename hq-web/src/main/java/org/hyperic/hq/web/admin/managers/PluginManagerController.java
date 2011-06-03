@@ -31,6 +31,7 @@ import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.product.shared.PluginDeployException;
 import org.hyperic.hq.product.shared.PluginManager;
+import org.hyperic.hq.product.shared.PluginTypeEnum;
 import org.hyperic.hq.ui.KeyConstants;
 import org.hyperic.hq.web.BaseController;
 import org.springframework.beans.BeansException;
@@ -52,7 +53,7 @@ public class PluginManagerController extends BaseController implements Applicati
     private static final Log log = LogFactory.getLog(PluginManagerController.class);
     
     private static final String HELP_PAGE_MAIN = "Administration.Plugin.Manager";
-    
+
     private PluginManager pluginManager;
     private AgentManager agentManager;
     private ApplicationContext applicationContext;
@@ -106,6 +107,7 @@ public class PluginManagerController extends BaseController implements Applicati
                 Map<AgentPluginStatusEnum, Integer> pluginStatus = 
                     allPluginStatus.get(pluginId);
                 
+                
                 pluginSummary.put("id", pluginId);
                 pluginSummary.put("name", plugin.getName());
                 pluginSummary.put("jarName", plugin.getPath());
@@ -134,6 +136,29 @@ public class PluginManagerController extends BaseController implements Applicati
                 pluginSummary.put("version", plugin.getVersion());   
                 pluginSummary.put("disabled", plugin.isDisabled());
                 pluginSummary.put("deleted", plugin.isDeleted());
+                
+                boolean isDefault = false;
+                boolean isCustom = false;
+                boolean isServer = false;
+                Collection<PluginTypeEnum> pluginType = pluginManager.getPluginType(plugin);
+                if(pluginType!=null){
+                    for(PluginTypeEnum type:pluginType){
+                        switch(type){
+                            case SERVER_PLUGIN:
+                                isServer = true;
+                                break;
+                            case CUSTOM_PLUGIN:
+                                isCustom = true;
+                                break;
+                            case DEFAULT_PLUGIN:
+                                isDefault = true;
+                                break;
+                        }
+                    }
+                }
+                pluginSummary.put("isdefaultPlugin", isDefault);
+                pluginSummary.put("isCustomPlugin",isCustom);
+                pluginSummary.put("isServerPlugin", isServer);
                 if(errorAgentCount>0){
                     finalPluginSummaries.add(pluginSummary);
                 }else if(inProgressAgentCount>0){

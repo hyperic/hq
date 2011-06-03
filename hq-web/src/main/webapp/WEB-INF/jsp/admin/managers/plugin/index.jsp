@@ -12,6 +12,15 @@
 	<p id="instruction"><fmt:message key="${instruction}" /></p>
 
 	<div id="currentTimeInfo">
+		<span style="float:left">
+                <img id="serverIcon" src="<spring:url value="/static/images/icon_hub_s.gif"/>"/> 
+                        Server Plugin &nbsp;
+                <img id="defaultIcon" src="<spring:url value="/static/images/icon_hub_d.gif"/>"/> 
+                        Default Plugin &nbsp;
+            	<img id="customIcon" src="<spring:url value="/static/images/icon_hub_c.gif"/>"/> 
+                        Custom Plugin
+        </span> 
+        
 		<span style="float:right;" id="refreshTimeInfo"><fmt:message key="admin.managers.Plugin.information.refresh.time"/> <span id="timeNow"></span>
 		</span>
 		<span style="float:right;">&nbsp;&nbsp;</span>
@@ -31,18 +40,19 @@
 
 		<span style="float:left">
                 <img src="<spring:url value="/static/images/icon_available_green.gif"/>"/> 
-                        <fmt:message key="admin.managers.Plugin.tip.icon.success"/>
+                        <fmt:message key="admin.managers.Plugin.tip.icon.success"/> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 <img src="<spring:url value="/static/images/alert.png"/>"/> 
-                        <fmt:message key="admin.managers.Plugin.tip.icon.in.progress"/>
+                        <fmt:message key="admin.managers.Plugin.tip.icon.in.progress"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             	<img src="<spring:url value="/static/images/icon_available_red.gif"/>"/> 
-                        <fmt:message key="admin.managers.Plugin.tip.icon.error"/>
+                        <fmt:message key="admin.managers.Plugin.tip.icon.error"/>&nbsp;
         </span> 
 	</div>
 	
 	<div class="gridheader clear">
 		<span class="first column span-1">&nbsp;</span>
+		<span class="column span-1">&nbsp;</span>
 		<span class="column span-small"><fmt:message key="admin.managers.plugin.column.header.product.plugin" /></span>
-		<span class="column span-med"><fmt:message key="admin.managers.plugin.column.header.version" /></span>
+		<span class="column span-small"><fmt:message key="admin.managers.plugin.column.header.version" /></span>
 		<span class="column span-med"><fmt:message key="admin.managers.plugin.column.header.jar.name" /></span>
 		<span class="column span-med" id="addedTimeHeader"><fmt:message key="admin.managers.plugin.column.header.initial.deploy.date" /></span>
 		<span class="column span-med" id="updatedTimeHeader"><fmt:message key="admin.managers.plugin.column.header.last.sync.date" /></span>
@@ -208,7 +218,21 @@
 		hqDojo.connect(hqDojo.byId("refreshIcon"),"onclick",function(e){
 			refreshPage();
 		});
-	
+		new hqDijit.Tooltip({
+			connectId:["serverIcon"],
+			position:["left"],
+			label: "Server plugins are required by HQ server. It should not be deleted or modified."
+		});
+		new hqDijit.Tooltip({
+			connectId:["defaultIcon"],
+			position:["left"],
+			label: "Default plugins are come with HQ package."
+		});	
+		new hqDijit.Tooltip({
+			connectId:["customIcon"],
+			position:["left"],
+			label: "Custom plugins are located in ${customDir}" 
+		});
 		new hqDijit.Tooltip({
 			connectId:["addedTimeHeader"],
 			position:["left"],
@@ -657,6 +681,31 @@
         	        			"value": summary.id+"_"+summary.jarName+" ("+summary.name+")"
                 			}, span);
                 		}
+                		var typeIcon = hqDojo.create("span", {
+                			"class": "column span-1"
+                		}, li);
+                		if(summary.isdefaultPlugin){
+                		    hqDojo.create("img",{
+                				"src": "<spring:url value="/static/images/icon_hub_d.gif"/>",
+                				"style":"padding:3px 0px 0px 0px 0px;"
+                				}, typeIcon);
+                			typeIcon.innerHTML+="&nbsp;";
+                		}
+                		if(summary.isCustomPlugin){
+                		    hqDojo.create("img",{
+                				"src": "<spring:url value="/static/images/icon_hub_c.gif"/>",
+                				"style":"padding:3px 0px 0px 0px 0px;"
+                				}, typeIcon);
+                			typeIcon.innerHTML+="&nbsp;";
+                		}
+                		if(summary.isServerPlugin){
+                		    hqDojo.create("img",{
+                				"src": "<spring:url value="/static/images/icon_hub_s.gif"/>",
+                				"style":"padding:3px 0px 0px 0px 0px;"
+                				}, typeIcon);
+                			typeIcon.innerHTML+="&nbsp;";
+                		}
+                		
                 		var pluginName = hqDojo.create("span", {
                 			"class": "column span-small",
                 			"innerHTML": summary.name,
@@ -674,7 +723,7 @@
 							version = summary.version;
 						}
                 		span = hqDojo.create("span", {
-                			"class": "column span-med",
+                			"class": "column span-small",
                 			"innerHTML": version
                 		}, li);
                 		var spanName = hqDojo.create("span", {
@@ -752,7 +801,7 @@
                 	});
                 	
 					var hashObj = hqDojo.queryToObject(hqDojo.hash());
-					if(hashObj.deleteIds!==""){
+					if(hashObj.deleteIds!==undefined && hashObj.deleteIds!==""){
 						hqDojo.forEach(hashObj.deleteIds.split(","),function(pluginId){
 							var checkbox = hqDojo.query("input[value='"+pluginId+"']");
 							if(checkbox[0]!==undefined){
@@ -789,7 +838,7 @@
 							label: "<fmt:message key='admin.managers.Plugin.tip.icon.error' />. <fmt:message key='admin.managers.Plugin.tip.icon.click' />"
 						});		
 					});
-                },
+                }, 
                 error: function(response, args) {
                 	
                 }

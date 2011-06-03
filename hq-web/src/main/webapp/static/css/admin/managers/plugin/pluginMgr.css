@@ -187,8 +187,7 @@
 	.agentStatusProgressSpan,
 	.agentStatusFailSpan,
 	.agentStatusSuccessfulSpan{
-		float:left;
-		height:20px;
+		float:left;height:20px;
 	}
 	
 	.agentStatusProgressSpan:focus,
