@@ -443,8 +443,7 @@ public class CommandsServer
                 bootConfig.getProperty("agent.keyalg", "RSA");
             keystore     = this.loadKeyStore();
             keyManagers  = this.getKeyManagers(keystore);
-            listener     = new SSLConnectionListener(cfg, keyManagers,
-                                                     this.tokenManager);
+            listener     = new SSLConnectionListener(cfg, this.tokenManager);
             agent.setConnectionListener(listener);
         } catch(AgentRunningException exc){
             throw new AgentStartException("Unable to initialize SSL: " +
