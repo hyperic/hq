@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -367,49 +366,6 @@ public class JBossDetector
 		return serviceTypes;
 	}
 
-    /**
-     * Look for for the embedded Tomcat server,
-     * if found drop a note of the installpath for
-     * the Tomcat detector to pickup.
-     */
-    private void noteEmbeddedTomcat(String path, String address, String port) {
-        File[] dirs = new File(path, "deploy").listFiles();
-
-        for (int i = 0; i < dirs.length; i++) {
-            File dir = dirs[i];
-            String name = dir.getName();
-
-            if (!dir.isDirectory()) {
-                continue;
-            }
-
-            if (!(name.startsWith(EMBEDDED_TOMCAT) ||
-                    name.startsWith("jboss-web.deployer"))) {
-                continue;
-            }
-
-            Map notes = getManager().getNotes();
-            List tomcats = (List) notes.get(EMBEDDED_TOMCAT);
-
-            if (tomcats == null) {
-                tomcats = new ArrayList();
-                notes.put(EMBEDDED_TOMCAT, tomcats);
-            }
-
-            Map _config = new HashMap();
-            _config.put(JBossProductPlugin.PROP_INSTALLPATH, dir.getPath());
-            if (port != null) {
-                _config.put("port", port);
-            }
-            if (address != null) {
-                _config.put("address", address);
-            }
-            tomcats.add(_config);
-
-            getLog().debug("Found embedded tomcat: " + _config);
-        }
-    }
-
     @Override
     public List<ServerResource> getServerResources(ConfigResponse platformConfig)
             throws PluginException {
@@ -582,8 +538,6 @@ public class JBossDetector
         //pickup any jars found relative to this installpath
         adjustClassPath(installpath);
 
-        noteEmbeddedTomcat(installpath, address, cfg.getHttpPort());
-
         List<ServerResource> servers = new ArrayList<ServerResource>();
         //apply externally defined AUTOINVENTORY_NAME, etc.
         if (pid > 0) {
@@ -734,4 +688,4 @@ public class JBossDetector
 
         return version;
     }
-}
+        }
