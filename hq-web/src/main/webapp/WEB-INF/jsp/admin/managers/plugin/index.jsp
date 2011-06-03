@@ -13,11 +13,9 @@
 
 	<div id="currentTimeInfo">
 		<span style="float:left">
-                <img id="serverIcon" src="<spring:url value="/static/images/icon_hub_s.gif"/>"/> 
+                <img id="serverIcon" alt="S" src="<spring:url value="/static/images/icon_hub_s.gif"/>"/> 
                         <fmt:message key="admin.managers.Plugin.tip.icon.server"/> &nbsp;
-                <img id="defaultIcon" src="<spring:url value="/static/images/icon_hub_d.gif"/>"/> 
-                        <fmt:message key="admin.managers.Plugin.tip.icon.default"/> &nbsp;
-            	<img id="customIcon" src="<spring:url value="/static/images/icon_hub_c.gif"/>"/> 
+            	<img id="customIcon" alt="D" src="<spring:url value="/static/images/icon_hub_c.gif"/>"/> 
                         <fmt:message key="admin.managers.Plugin.tip.icon.custom"/>&nbsp;
         </span> 
         
@@ -684,16 +682,10 @@
                 		var typeIcon = hqDojo.create("span", {
                 			"class": "column span-1"
                 		}, li);
-                		if(summary.isdefaultPlugin){
-                		    hqDojo.create("img",{
-                				"src": "<spring:url value="/static/images/icon_hub_d.gif"/>",
-                				"style":"padding:3px 0px 0px 0px;"
-                				}, typeIcon);
-                			typeIcon.innerHTML+="&nbsp;";
-                		}
                 		if(summary.isCustomPlugin){
                 		    hqDojo.create("img",{
                 				"src": "<spring:url value="/static/images/icon_hub_c.gif"/>",
+                				"alt": "C",
                 				"style":"padding:3px 0px 0px 0px;"
                 				}, typeIcon);
                 			typeIcon.innerHTML+="&nbsp;";
@@ -701,6 +693,7 @@
                 		if(summary.isServerPlugin){
                 		    hqDojo.create("img",{
                 				"src": "<spring:url value="/static/images/icon_hub_s.gif"/>",
+                				"alt": "S",
                 				"style":"padding:3px 0px 0px 0px;"
                 				}, typeIcon);
                 			typeIcon.innerHTML+="&nbsp;";
