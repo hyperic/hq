@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>Hyperic 4.5 Documentation : ui-Admin.Monitor.MetricTemplate</title>
+        <title>Hyperic 4.6 Documentation : ui-Admin.Monitor.MetricTemplate</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,22 +12,22 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Hyperic 4.5 Documentation : ui-Admin.Monitor.MetricTemplate
+                            Hyperic 4.6 Documentation : ui-Admin.Monitor.MetricTemplate
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Nov 30, 2010 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Mar 17, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1291142925008 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1291142925008 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1291142925008 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1300398784360 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1300398784360 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1300398784360 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1291142925008'>
+/*]]>*/</style><div class='rbtoc1300398784360'>
 <ul>
     <li><a href='#ui-Admin.Monitor.MetricTemplate-NavigatetotheMonitoringDefaultsPageforaResourceType'>Navigate to the Monitoring Defaults Page for a Resource Type</a></li>
     <li><a href='#ui-Admin.Monitor.MetricTemplate-EnableCollectionofaMetric'>Enable Collection of a Metric</a></li>
@@ -72,14 +72,14 @@ div.rbtoc1291142925008 li {margin-left: 0px;padding-left: 0px;}
 
 <ol>
 	<li>Check the metric name at the left.</li>
-	<li>In <b>Collection Interval for Selected</b> at the bottom of the page, enter  a time value and select a unit of time measure for the collection interval.</li>
-	<li>Click <span class="image-wrap" style=""><img src="attachments/71828506/71926244.png" width="15pxpx" style="border: 0px solid black"/></span>.</li>
+	<li>In <b>Collection Interval for Selected</b> at the bottom of the page, enter a time value and select a unit of time measure for the collection interval.</li>
+	<li>Click  the <b>Collection Interval for Selected</b> control at the bottom of the <b>Monitoring Defaults</b> page.</li>
 </ol>
 
 
 <h1><a name="ui-Admin.Monitor.MetricTemplate-SetIndicatorMetrics"></a>Set Indicator Metrics</h1>
 
-<p>To select the indicator metrics for a resource type (indicator metrics are the metrics that are charted on a resource's <b>Indicators</b> minitab in the Resource Hub) check the metric name at the left for each metric you wish to be an indicator, and click <span class="image-wrap" style=""><img src="attachments/71828506/71926244.png" width="15pxpx" style="border: 0px solid black"/></span> at the bottom of <b>Monitoring Defaults</b> page, the to the right of <b>Set Selected Metrics as Indicators</b> at the bottom of the page.</p>
+<p>To select the indicator metrics for a resource type (indicator metrics are the metrics that are charted on a resource's <b>Indicators</b> minitab in the Resource Hub) check the metric name at the left for each metric you wish to be an indicator, and click the <b>Set Selected Metrics as Indicators</b> control at the bottom of the <b>Monitoring Defaults</b> page.</p>
 
 <p>The metrics you configure will be the default indicators for the resource type.</p>
 
@@ -87,19 +87,21 @@ div.rbtoc1291142925008 li {margin-left: 0px;padding-left: 0px;}
 
 <h1><a name="ui-Admin.Monitor.MetricTemplate-APIsforMetricCollectionSettings"></a>APIs for Metric Collection Settings</h1>
 
-<p>As an alternative to the updating updating metric collection settings from the HQ user interface, you can use HQ APIs to perform updates from the command line or from scripts to perform bulk updates:</p>
+<p>As an alternative to the updating updating metric collection settings from the Hyperic user interface, you can use Hyperic APIs to perform updates from the command line or from scripts to perform bulk updates:</p>
 
 <ul>
-	<li><a href="http://support.hyperic.com/confluence/display/EVO/HQApi+metric+command" title="HQApi metric command">HQApi metric command</a> &#45; for listing and updating metric collection settings for an individual resource.</li>
-	<li><a href="http://support.hyperic.com/confluence/display/EVO/HQApi+metrictemplate+command" title="HQApi metrictemplate command">HQApi metrictemplate command</a> &#45; for listing and updating metric collection settings for an all instances of a resource type.</li>
+	<li><a href="HQApi metric command.html" title="HQApi metric command">HQApi metric command</a> &#45; for listing and updating metric collection settings for an individual resource.</li>
+	<li><a href="HQApi metrictemplate command.html" title="HQApi metrictemplate command">HQApi metrictemplate command</a> &#45; for listing and updating metric collection settings for an all instances of a resource type.</li>
 </ul>
 
 
-<p>For general information, see <a href="http://support.hyperic.com/confluence/display/EVO/Web+Services+API" title="Web Services API">Web Services API</a>.</p>
+<p>For general information, see <a href="vFabric Hyperic Web Services API.html" title="vFabric Hyperic Web Services API">vFabric Hyperic Web Services API</a>.</p>
 
 				    					    <br/>
                         <div class="tabletitle">
-                            <a name="attachments">Attachments:</a>
+                            <a name="attachments">
+                                <h2>Attachments:</h2>
+                            </a>
                         </div>
 
                         <div class="greybox" align="left">
@@ -116,10 +118,10 @@ div.rbtoc1291142925008 li {margin-left: 0px;padding-left: 0px;}
 	    </table>
 	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
 			<tr>
-				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jan 12, 2011 15:43</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on May 31, 2011 13:10</font></td>
 		    </tr>
 	    </table>
     </body>

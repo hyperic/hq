@@ -1,0 +1,169 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>Hyperic 4.6 Documentation : Introduction to Hyperic Monitoring</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            Hyperic 4.6 Documentation : Introduction to Hyperic Monitoring
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Mar 10, 2011 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1299789615548 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1299789615548 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1299789615548 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1299789615548'>
+<ul>
+    <li><a href='#IntroductiontoHypericMonitoring-HypericMonitoringandManagementFeatures'>Hyperic Monitoring and Management Features</a></li>
+    <li><a href='#IntroductiontoHypericMonitoring-OverviewoftheMonitoringUserInterface'>Overview of the Monitoring User Interface</a></li>
+    <li><a href='#IntroductiontoHypericMonitoring-KeyHypericFactsfortheNewUser'>Key Hyperic Facts for the New User</a></li>
+</ul></div>
+
+
+<p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
+
+
+
+
+<h1><a name="IntroductiontoHypericMonitoring-HypericMonitoringandManagementFeatures"></a>Hyperic Monitoring and Management Features</h1>
+
+<ul>
+	<li><b>Resource Discovery</b> &#8212; The Hyperic Agent managing a platform automatically discover the resources and software on the platform. The agent discovers key platform properties, such as architecture, RAM, CPU speed, IP address, and domain name. The agent uses <em>resource plugins</em> to discovery software products &#8212; for example, web servers, application servers, database servers, and so on &#45;--&#45; running on the platform. Hyperic categorizes the resources it discovers into <em>inventory types</em> Hyperic's <em>inventory model</em> is fundamental to how Hyperic makes sense of a large number of software resources and presents information about software resources components in a useful way. Discovered resources are presented in the Hyperic user interface; an authorized user explicitly imports them into inventory.</li>
+</ul>
+
+
+<ul>
+	<li><b>Metric Collection</b> &#8212; After a resource is added to inventory, and (if necessary) configured for monitoring, the Hyperic<br/>
+agent starts collecting metrics for the resource. Agents collect a stardard set of metrics that reflect availability, performance, utilization, and throughput for each supported resource type. An authorized user can tailor metric collection from the Hyperic user interface.</li>
+</ul>
+
+
+<ul>
+	<li><b>Event Tracking</b> &#8212; Hyperic can monitor log and configuration files and record events of interest for most server types. For example, you can track user logins, Windows registry key changes, error logs, configuration files, and so on. Event tracking is configured at for an individual resource.</li>
+</ul>
+
+
+<ul>
+	<li><b>Resource Control</b> &#8212; You can use Hyperic for remote control and administration of your software resources. Available control actions vary by resource type.  For instance, for an application server, you can do tasks like starting, stopping, and garbage collection.  For a database server, you can perform analysis or housekeeping functions.</li>
+</ul>
+
+
+<ul>
+	<li><b>Alerting and Notification</b> &#8212; You can&nbsp;set alerts on metrics and configure actions for HQ to perform when an alert fires. When an alert fires, HQ can respond in a variety of ways: it can issue email notifications, set SNMP traps, perform a control action, or issue a communication to another management system. You can define a sequence of responses to a fired alert &#8212; an escalation scheme &#8212; to ensure that problems don't fall through a crack.</li>
+</ul>
+
+
+<ul>
+	<li><b>Live Data</b> &#8212; Hyperic provides a <em>Live Exec</em> views for all platform types &#8212; you can run a variety of real-time system commands to obtain live system status.</li>
+</ul>
+
+
+<h1><a name="IntroductiontoHypericMonitoring-OverviewoftheMonitoringUserInterface"></a>Overview of the Monitoring User Interface</h1>
+
+<p>The Hyperic browser-based user interface, sometimes referred to as the <em>Hyperic Portal</em> is a configurable, extendible user interface for monitoring and analyzing performance and availability. Key features of the user inteface include:</p>
+
+<ul>
+	<li><b>Dashboard</b> &#8212; The Dashboard is the first page you see when you open the Hyperic user interface. The Dashboard contains multiple portlets &#8212; <b>Recent Alerts</b>, <b>Availability</b>, <b>Problem Resources</b>, and so on &#8212; each of which presents a summary view of events and resources of interest. The Dashboard can be tailored on a per-user basis. You can remove and rearrange portlets on your Dashboard, and tailor what data a portlet presents.</li>
+</ul>
+
+
+<ul>
+	<li><b>Resource Hub</b> &#8212; The <b>Resources</b> tab in the Hyperic user interface, often referred to as the <em>Resource Hub</em> is where you go to browse to specific resources, view resource properties, view metric data and charts, and initiate resource control actions. Hyperic administrators use the features of the Resource Hub to configure resources for monitoring and set up alert definitions.</li>
+</ul>
+
+
+<ul>
+	<li><b>Global Monitoring Views</b> &#8212; The Hyperic user interface contains a number of pages that present deployment-wide resource monitoring results.  These include:
+	<ul>
+		<li><b>Operations Center</b> &#8212; Provides a broad view of deployment health, including alerts, events, and currently down resources.</li>
+		<li><b>Alert Center</b> &#8212; Deployment-wide view of alert activity and alert definitions.</li>
+		<li><b>Event Center</b> &#8212; Deployment-wide view of log events, configuration events, and and alerts.</li>
+		<li><b>Nagios Data</b> &#8212; This view is available in deployments that have integrated Hyperic with Nagios.</li>
+		<li><b>Currently Down</b> &#8212; This page lists resources that are currently unavailable.</li>
+	</ul>
+	</li>
+</ul>
+
+
+<ul>
+	<li><b>Resource Type Views</b> &#8212; Some pages in the Hyperic user interface are specific to a particular resource type. Examples the <b>vSphere View</b> for vCenter and vCenter-managed resources, and the <b>GemFire View</b> for monitoring components of a GemFire distributed caching environment.</li>
+</ul>
+
+
+<h1><a name="IntroductiontoHypericMonitoring-KeyHypericFactsfortheNewUser"></a>Key Hyperic Facts for the New User</h1>
+
+<p>In vFabric Hyperic, the resources you can view and your permission levels are governed by your <em>role</em>. </p>
+
+<p>Some resources need to be configured for monitoring. Although Hyperic starts monitoring most resources as soon as they are added to inventory, for certain resource types, some configuration is required to enable the agent to start collection metrics. For example, the JMX URL and credentials have to be defined in Hyperic for the agent to be able to monitor via JMX.  </p>
+
+<p>The metric collected for a resource are governed by the default metric collection setting for the resource type.  </p>
+
+
+<div class="scroll-pagebreak"></div>
+
+
+
+
+
+
+
+
+				    					    <br/>
+                        <div class="tabletitle">
+                            <a name="attachments">
+                                <h2>Attachments:</h2>
+                            </a>
+                        </div>
+
+                        <div class="greybox" align="left">
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/74057673/74219872.gif">tab_Monitor_on.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/74057673/74219873.gif">dash-button_go-arrow.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/74057673/74219874.gif">fb_redraw.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/74057673/74219875.gif">tbb_edit.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/74057673/74219876.gif">tbb_editMetricTemplate.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/74057673/74219877.gif">MiniTab_Indicators_on.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/74057673/74219878.gif">MiniTab_Resources_on.gif</a> (image/gif)
+                                <br/>
+                                                    </div>
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on May 31, 2011 13:09</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>Hyperic 4.6 Documentation : Hyperic HQ 4.6 Features</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            Hyperic 4.6 Documentation : Hyperic HQ 4.6 Features
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Apr 28, 2011 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <h3><a name="HypericHQ4.6Features-ProductPluginManagementandDeployment"></a>Product Plugin Management and Deployment </h3>
+
+<p>Hyperic 4.6 provides new features that ease the process of deploying and managing product plugins. These features, described in the paragraphs below, include a user interface for managing product plugins, and new Hyperic Server and Hyperic Agent behaviors for ensuring consistent plugin deployment across a Hyperic environment. </p>
+
+<h4><a name="HypericHQ4.6Features-PluginManager"></a>Plugin Manager </h4>
+
+<p><b>Plugin Manager</b> is a new user interface that enables you to deploy and manage plugins across a Hyperic deployment from the Hyperic user interface. You can use <b>Plugin Manager</b> to deploy and remove plugins on the Hyperic Server and all agents reporting to the server. </p>
+
+<h4><a name="HypericHQ4.6Features-ServerAgentPluginSynchronization"></a>Server-Agent Plugin Synchronization </h4>
+
+<p>The new Server-Agent Plugin Synchronization (SAPS) feature ensures that product plugins are consistently deployed across a Hyperic deployment. SAPS is enabled by new behaviors on the Hyperic Server and Hyperic Agent. When a Hyperic 4.6 Agent starts up, it sends a plugin status report to the Hyperic Server. If an agent's deployed plugins do not exactly match those deployed on the Hyperic server, the server updates the agent's plugins appropriately. Similarly, each time the Hyperic Server is restarted, it compares the product plugins it deploys to most recent plugin status reported by each agent &#8212; if an agent's deployed plugins do not exactly match those deployed on the Hyperic server, the server updates the agent's plugins appropriately. SAPS is enabled by default; it can be disabled using the new <tt>server.pluginsync.enable</tt> server property, described below. </p>
+
+<h4><a name="HypericHQ4.6Features-NewHypericServerPropertytoEnableandDisableSAPS"></a>New Hyperic Server Property to Enable and Disable SAPS </h4>
+
+<p>Hyperic 4.6 provides a new Hyperic Server property, <tt>server.pluginsync.enable</tt>, which you can use to disable the SAPS feature described in the previous section. To disable SAPS, add <tt>server.pluginsync.enable=false</tt> to <tt>ServerHome/conf/hq-server.conf</tt>, and restart the Hyperic Server. </p>
+
+<h4><a name="HypericHQ4.6Features-NewPluginDescriptorElementtoSupportSAPS"></a>New Plugin Descriptor Element to Support SAPS </h4>
+
+<p>As of Hyperic 4.6, all product plugins must have a version. A new attribute &#8212; <tt>version</tt> &#8212; is required in the root <tt>&lt;plugin&gt;</tt> element in the XML descriptor for a product plugin. </p>
+
+<h3><a name="HypericHQ4.6Features-iPadandiPhoneSupport"></a>iPad and iPhone Support </h3>
+
+<p>The Hyperic 4.6 user interface can be access from iPads and iPhones.  </p>
+
+<h3><a name="HypericHQ4.6Features-UpdatedPlugins"></a>Updated Plugins </h3>
+
+<p>All Hyperic plugins have been updated to include the <tt>version</tt> attribute in the root <tt>&lt;plugin&gt;</tt> element, required for SAPS. </p>
+
+<p>In addition, the following Hyperic plugins are updated with new functionality, or to support more recent versions of the managed product: </p>
+<ul>
+	<li>GemFire</li>
+	<li>RabbitMQ</li>
+	<li>tc Server</li>
+	<li>Jboss &#8212; Support for Jboss 5.1 and 6.0 added.</li>
+	<li>PostgreSQL &#8212; Support for PostgreSQL 9.0 added.</li>
+	<li>WebSphere</li>
+	<li>WebLogic Server Plugin &#8212; In Hyperic 4.6, the plugin for managing WebLogic Server is enhanced to enable discovery of node managers and managed servers in a WebLogic domain without accessing the Administration Server for the domain. In previous releases, it was necessary to discover the Administration Server for a domain, and then configure that resource with WebLogic Server credentials, in order to discover the node manager and managed servers in the domain. A new Hyperic Agent configuration property, <tt>weblogic.discovery.new</tt>, enables discover of node managers and managed servers.</li>
+</ul>
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on May 31, 2011 13:08</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

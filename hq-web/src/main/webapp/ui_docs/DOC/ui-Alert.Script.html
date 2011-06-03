@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>Hyperic 4.5 Documentation : ui-Alert.Script</title>
+        <title>Hyperic 4.6 Documentation : ui-Alert.Script</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,38 +12,38 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Hyperic 4.5 Documentation : ui-Alert.Script
+                            Hyperic 4.6 Documentation : ui-Alert.Script
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Dec 06, 2010 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on May 31, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1291655348153 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1291655348153 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1291655348153 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1306864035082 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1306864035082 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1306864035082 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1291655348153'>
+/*]]>*/</style><div class='rbtoc1306864035082'>
 <ul>
-    <li><a href='#ui-Alert.Script-DefineaScriptActionforanAlert'>Define a Script Action for an Alert <span style="color: red">*</span></a></li>
+    <li><a href='#ui-Alert.Script-DefineaScriptActionforanAlert'>Define a Script Action for an Alert</a></li>
     <li><a href='#ui-Alert.Script-EnvironmentVariablesforFiredAlertData'>Environment Variables for Fired Alert Data</a></li>
     <li><a href='#ui-Alert.Script-ExampleScript'>Example Script</a></li>
     <li><a href='#ui-Alert.Script-AssigntheScriptActiontoanAlert'>Assign the Script Action to an Alert</a></li>
 </ul></div>
 
-<h1><a name="ui-Alert.Script-DefineaScriptActionforanAlert"></a>Define a Script Action for an Alert<font color="red">&#42;</font></h1>
+<h1><a name="ui-Alert.Script-DefineaScriptActionforanAlert"></a>Define a Script Action for an Alert</h1>
 
-<p>A script action allows you to access and use HQ environment variables that contain information about a fired alert. You can use the data in any fashion you wish, for instance in a web service call to external management system.</p>
+<p>A script action allows you to access and use Hyperic environment variables that contain information about a fired alert. You can use the data in any fashion you wish, for instance in a web service call to external management system.</p>
 
 <p>To use the script action feature, write a script that implements the action or logic you wish to perform with the alert-related environment variables. When you configure the alert, specify the script to be executed when the alert fires. The script is server-side only, meaning it must be accessible and executable by the same user running the HQ Server process.</p>
 
-<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Agent-side Scripts</b><br />If you wish to execute agent-side scripts, see <a href="http://support.hyperic.net/display/DOC/User-defined+Control+Actions">http://support.hyperic.net/display/DOC/User-defined+Control+Actions</a></td></tr></table></div>
+<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Agent-side Scripts</b><br />If you wish to execute agent-side scripts, see <a href="http://support.hyperic.com/display/EVO/User-Defined+Control+Actions" title="User-Defined Control Actions">User-Defined Control Actions</a></td></tr></table></div>
 
-<p>Script actions can be defined for resource alerts and resource type alerts. In this version of HQ, escalation schemes do not support script actions.</p>
+<p>Script actions can be defined for resource alerts and resource type alerts. In this version of Hyperic, escalation schemes do not support script actions.</p>
 
 <h1><a name="ui-Alert.Script-EnvironmentVariablesforFiredAlertData"></a>Environment Variables for Fired Alert Data</h1>
 
@@ -57,20 +57,25 @@ div.rbtoc1291655348153 li {margin-left: 0px;padding-left: 0px;}
 <th class='confluenceTh'> Example Output </th>
 </tr>
 <tr>
+<td class='confluenceTd'> HYPERIC_ALERT_ALERT_TIME </td>
+<td class='confluenceTd'> The time at which the&nbsp; alert fired, in milliseconds from epoch. </td>
+<td class='confluenceTd'> 1219167000000 </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HYPERIC_ALERT_CONDITION </td>
+<td class='confluenceTd'> The condition that caused the alert to fire. Note:&nbsp; This environment variable is supported only on Unix-based platforms. The value contains the Java \n character, which causes errors under Windows. In Windows environments, use the HYPERIC_ALERT_SUMMARY variable, which provides the same information without the \n character. </td>
+<td class='confluenceTd'> If Load Average 5 Minutes &gt; 1.0 (actual value = 1.4) </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HYPERIC_ALERT_DESCRIPTION </td>
+<td class='confluenceTd'> The description of the alert that fired.&nbsp; <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> This alert will fire when the load rises </td>
+</tr>
+<tr>
 <td class='confluenceTd'> HYPERIC_ALERT_ID </td>
-<td class='confluenceTd'> <font color="#0000ff">This variable is available in Hyperic 4.3 and later.</font> <br class="atl-forced-newline" />
+<td class='confluenceTd'>  <br class="atl-forced-newline" />
 <br class="atl-forced-newline" />
-The internal HQ ID for the alert that fired. <br class="atl-forced-newline" />  <br class="atl-forced-newline" />  <b>Note:</b>&nbsp;The&nbsp;HYPERIC_ALERT_ID for an alert is not committed to the HQ database until all alert actions are complete. Therefore, an alert action script (whether it uses SQL or HQApi) cannot query or update the HQ database using the alert's&nbsp;HYPERIC_ALERT_ID,&nbsp;because that value will not yet exist in the HQ database. </td>
-<td class='confluenceTd'>&nbsp;</td>
-</tr>
-<tr>
-<td class='confluenceTd'> HYPERIC_RESOURCE_NAME </td>
-<td class='confluenceTd'> The name of the resource for which the alert fired. </td>
-<td class='confluenceTd'> localhost.hyperic.com </td>
-</tr>
-<tr>
-<td class='confluenceTd'> HYPERIC_RESOURCE_ID<br class="atl-forced-newline" /> </td>
-<td class='confluenceTd'> The internal ID for the resource for which the alert fired. </td>
+The internal Hyperic ID for the alert that fired. <br class="atl-forced-newline" />  <br class="atl-forced-newline" />  <b>Note:</b>&nbsp;The&nbsp;HYPERIC_ALERT_ID for an alert is not committed to the Hyperic database until all alert actions are complete. Therefore, an alert action script (whether it uses SQL or HQApi) cannot query or update the Hyperic database using the alert's&nbsp;HYPERIC_ALERT_ID,&nbsp;because that value will not yet exist in the Hyperic database. </td>
 <td class='confluenceTd'>&nbsp;</td>
 </tr>
 <tr>
@@ -79,19 +84,9 @@ The internal HQ ID for the alert that fired. <br class="atl-forced-newline" />  
 <td class='confluenceTd'> High Load </td>
 </tr>
 <tr>
-<td class='confluenceTd'> HYPERIC_ALERT_DESCRIPTION </td>
-<td class='confluenceTd'> The description of the alert that fired.&nbsp; <br class="atl-forced-newline" /> </td>
-<td class='confluenceTd'> This alert will fire when the load rises </td>
-</tr>
-<tr>
 <td class='confluenceTd'> HYPERIC_ALERT_PRIORITY </td>
 <td class='confluenceTd'> The priority of the alert that fired, 1 for High, 2 for Medium, 3 for Low. </td>
 <td class='confluenceTd'> 2 </td>
-</tr>
-<tr>
-<td class='confluenceTd'> HYPERIC_ALERT_CONDITION </td>
-<td class='confluenceTd'> The condition that caused the alert to fire. Note:&nbsp; This environment variable is supported only on Unix-based platforms. The value contains the Java \n character, which causes errors under Windows. In Windows environments, use the HYPERIC_ALERT_SUMMARY variable, which provides the same information without the \n character. </td>
-<td class='confluenceTd'> If Load Average 5 Minutes &gt; 1.0 (actual value = 1.4) </td>
 </tr>
 <tr>
 <td class='confluenceTd'> HYPERIC_ALERT_SUMMARY </td>
@@ -99,9 +94,23 @@ The internal HQ ID for the alert that fired. <br class="atl-forced-newline" />  
 <td class='confluenceTd'> Mac OS X DOWN The-Idea-Men Availability (0.0%) </td>
 </tr>
 <tr>
-<td class='confluenceTd'> HYPERIC_ALERT_ALERT_TIME </td>
-<td class='confluenceTd'> The time at which the&nbsp; alert fired, in milliseconds from epoch. </td>
-<td class='confluenceTd'> 1219167000000 </td>
+<td class='confluenceTd'> HYPERIC_FIXED_ALERT_ID </td>
+<td class='confluenceTd'> <font color="#0000ff">This variable was added in Hyperic 4.5.1.2.</font> <br class="atl-forced-newline" />
+<br class="atl-forced-newline" />
+Valid for recovery alerts only. Supplies the internal Hyperic ID for the primary alert to which the recovery alert is assigned. </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> HYPERIC_FIXED_ALERT_NAME </td>
+<td class='confluenceTd'> <font color="#0000ff">This variable was added in Hyperic 4.5.1.2.</font> <br class="atl-forced-newline" />
+<br class="atl-forced-newline" />
+Valid for recovery alerts only. Supplies the name of the primary alert to which the recovery alert is assigned. </td>
+<td class='confluenceTd'> High Load </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HYPERIC_PLATFORM_NAME </td>
+<td class='confluenceTd'> The platform on which this alert fired. </td>
+<td class='confluenceTd'> localhost.hyperic.com </td>
 </tr>
 <tr>
 <td class='confluenceTd'> HYPERIC_RECOVERY_ALERT </td>
@@ -109,32 +118,39 @@ The internal HQ ID for the alert that fired. <br class="atl-forced-newline" />  
 <td class='confluenceTd'> false </td>
 </tr>
 <tr>
-<td class='confluenceTd'> HYPERIC_PLATFORM_NAME </td>
-<td class='confluenceTd'> The platform on which this alert fired. </td>
+<td class='confluenceTd'> HYPERIC_RESOURCE_ID <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> The internal ID for the resource for which the alert fired. </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> HYPERIC_RESOURCE_NAME </td>
+<td class='confluenceTd'> The name of the resource for which the alert fired. </td>
 <td class='confluenceTd'> localhost.hyperic.com </td>
 </tr>
 </tbody></table>
 </div>
 
 
+<div class="scroll-pagebreak"></div>
 <h1><a name="ui-Alert.Script-ExampleScript"></a>Example Script</h1>
 
 <p>The following script is an example of using the alert variables. The example script simply writes the time that the script executed and the variables to a log file; it is not a representative use case. The purpose of script actions is to enable more complex alert actions, and actions that meet the unique needs of your environment.</p>
 
 <div class="code panel" style="border-width: 1px;"><div class="codeHeader panelHeader" style="border-bottom-width: 1px;"><b>alert.pl</b></div><div class="codeContent panelContent">
-<pre class="code-java">#!/usr/bin/perl
-my $logfile = <span class="code-quote">"/tmp/output.txt"</span>;
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">#!/usr/bin/perl
+my $logfile = "/tmp/output.txt";
 my $date = localtime();
-open LOGFILE, <span class="code-quote">"&gt;$logfile"</span> or die <span class="code-quote">"Cannot open log file <span class="code-keyword">for</span> writing"</span>;
-print LOGFILE <span class="code-quote">"# Running script at $date"</span>, <span class="code-quote">"\n"</span>;
+open LOGFILE, "&gt;$logfile" or die "Cannot open log file for writing";
+print LOGFILE "# Running script at $date", "\n";
 foreach $key (sort keys(%ENV)) {
-<span class="code-keyword">if</span> ($key =~ m/^HYPERIC/) {
-my $msg = <span class="code-quote">"$key = $ENV{$key}"</span>;
-print LOGFILE $msg, <span class="code-quote">"\n"</span>;
+if ($key =~ m/^HYPERIC/) {
+my $msg = "$key = $ENV{$key}";
+print LOGFILE $msg, "\n";
 }
 }
-close LOGFILE;
-</pre>
+close LOGFILE;</pre>
+		</div>
 </div></div>
 
 <h1><a name="ui-Alert.Script-AssigntheScriptActiontoanAlert"></a>Assign the Script Action to an Alert</h1>
@@ -147,9 +163,13 @@ close LOGFILE;
 </ol>
 
 
+<div class="scroll-pagebreak"></div>
+
 				    					    <br/>
                         <div class="tabletitle">
-                            <a name="attachments">Attachments:</a>
+                            <a name="attachments">
+                                <h2>Attachments:</h2>
+                            </a>
                         </div>
 
                         <div class="greybox" align="left">
@@ -166,10 +186,10 @@ close LOGFILE;
 	    </table>
 	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
 			<tr>
-				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jan 12, 2011 15:43</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on May 31, 2011 13:10</font></td>
 		    </tr>
 	    </table>
     </body>

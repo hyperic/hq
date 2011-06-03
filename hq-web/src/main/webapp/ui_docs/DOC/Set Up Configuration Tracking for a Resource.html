@@ -1,0 +1,144 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>Hyperic 4.6 Documentation : Set Up Configuration Tracking for a Resource</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            Hyperic 4.6 Documentation : Set Up Configuration Tracking for a Resource
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on May 17, 2011 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1305653995633 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1305653995633 ul {list-style: disc;margin-left: 0px;padding-left: 20x;}
+div.rbtoc1305653995633 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1305653995633'>
+<ul>
+    <li><a href='#SetUpConfigurationTrackingforaResource-HypericConfigurationTrackingFunctionality'>Hyperic Configuration Tracking Functionality</a></li>
+    <li><a href='#SetUpConfigurationTrackingforaResource-SetUpConfigurationTrackingforaResource'>Set Up Configuration Tracking for a Resource</a></li>
+    <li><a href='#SetUpConfigurationTrackingforaResource-ViewConfigurationEventsforaResource'>View Configuration Events for a Resource</a></li>
+    <li><a href='#SetUpConfigurationTrackingforaResource-ConfigureAlertsBasedonConfigurationEvents'>Configure Alerts Based on Configuration Events</a></li>
+</ul></div>
+
+
+
+<p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
+
+
+
+
+
+
+
+
+<div class="scroll-pagebreak"></div>
+
+<h2><a name="SetUpConfigurationTrackingforaResource-HypericConfigurationTrackingFunctionality"></a>Hyperic Configuration Tracking Functionality</h2>
+
+<p>You can configure Hyperic to log an event when a specified file - usually a configuration artifact &#45;&nbsp; associated with a managed resource is modified.&nbsp; The agent use a cryptographic hash function to continuously compare a original version of the file with the current version to see if it has changed. You can view configuration event data on the <b>Monitor</b> page for a resource or the <b>Event Center</b>.&nbsp; You can base alert conditions on configuration events.&nbsp;</p>
+
+<ul>
+	<li>Hyperic can track multiple files per resource.</li>
+	<li>The Hyperic Agent must be able to read a file to track it - ensure that file permissions are such that the Hyperic Agent can read files you wish to track.</li>
+	<li>Hyperic is supported for most platform and server types; typically not for services.</li>
+</ul>
+
+
+<h2><a name="SetUpConfigurationTrackingforaResource-SetUpConfigurationTrackingforaResource"></a>Set Up Configuration Tracking for a Resource</h2>
+
+<p>To enable and configure configuration tracking for a single resource:</p>
+<ol>
+	<li>Navigate to the resource's <b>Inventory</b> page</li>
+	<li>In the "Configuration Properties" section, click <b>Edit</b>.</li>
+	<li>On the <b>Edit Configuration Properties</b> page:
+	<ol>
+		<li>Click the <b>Enable Config Tracking</b> box to turn configuration tracking on and off for the resource.</li>
+		<li>Enter the path, relative to the resource's installation directory, to each file you wish to track.&nbsp; Separate files with a comma.</li>
+		<li>Click <b>OK</b>.</li>
+	</ol>
+	</li>
+</ol>
+
+
+<h2><a name="SetUpConfigurationTrackingforaResource-ViewConfigurationEventsforaResource"></a>View Configuration Events for a Resource</h2>
+
+<p>You enable and configure log tracking for a resource on its <b>Configuration Properties</b> page. Navigate to the resource's <b>Inventory</b> page, and click <b>Edit</b> in the <b>Configuration Properties</b> section to display the <b>Configuration Properties</b> page.</p>
+
+<h2><a name="SetUpConfigurationTrackingforaResource-ConfigureAlertsBasedonConfigurationEvents"></a>Configure Alerts Based on Configuration Events</h2>
+
+<ol>
+	<li>Enable and configure configuration tracking as described above.</li>
+	<li>For the instructions in <a href="Define an Alert for a Resource.html" title="Define an Alert for a Resource">Define an Alert for a Resource</a> and choose the "Config Changed" condition type.</li>
+</ol>
+
+
+<div class="scroll-pagebreak"></div>
+
+				    					    <br/>
+                        <div class="tabletitle">
+                            <a name="attachments">
+                                <h2>Attachments:</h2>
+                            </a>
+                        </div>
+
+                        <div class="greybox" align="left">
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/74056477/74219587.gif">tab_Alert_on.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/74056477/74219588.gif">tbb_new.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/74056477/74219589.gif">tbb_edit.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/74056477/74219590.gif">icon_hub_i.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/74056477/74219591.bmp">logTrackingBar.bmp</a> (image/bmp)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/74056477/74219592.gif">icon_hub_m.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/74056477/74219593.gif">tab_Monitor_on.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/74056477/74219594.gif">tab_Inventory_on.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/74056477/74219595.gif">MiniTab_Indicators_on.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/74056477/74219596.gif">icon_hub_a.gif</a> (image/gif)
+                                <br/>
+                                                    </div>
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on May 31, 2011 13:08</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

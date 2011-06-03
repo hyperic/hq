@@ -1,0 +1,126 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>Hyperic 4.6 Documentation : Configure Agent - Server Communication Interactively</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            Hyperic 4.6 Documentation : Configure Agent - Server Communication Interactively
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Dec 10, 2010 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p>These are instructions for supplying agent configuration settings interactively the first time you start the agent.</p>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Agent can be configured in agent.properties file</b><br />Instead of configuring agent - server configuration properties interactively, you can specify them in the <tt>agent.properties</tt> file, as described in <a href="Configure Agent - Server Communication in Properties File.html" title="Configure Agent - Server Communication in Properties File">Configure Agent - Server Communication in Properties File</a> &#8212; preferable when you deploy  a large number of agents.
+
+<p><b>Note:</b> You <b>must</b> configure an HQ Agent that will manage VMware vSphere components in <tt>agent.properties</tt>; do not configure such agents interactively.</p></td></tr></table></div>
+
+<p>1. Make sure that the HQ Server to which the Agent will connect is running.</p>
+
+<p>2.&nbsp; Start the agent from the command line under your user account.</p>
+
+<p>On Windows, install the HQ Agent service, and then start it with these commands:</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">hq-agent.bat install
+hq-agent.bat start</pre>
+		</div>
+</div></div>
+<p>On Unix-based platforms, assuming you have already installed, or unpacked the agent into its installation directory, enter:</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">AgentInstallationDirectory/bin/hq-agent.sh start</pre>
+		</div>
+</div></div>
+<p>3.&nbsp; When the HQ Agent starts for the first time, it issues the prompts that follow so that it can establish communications with the HQ Server.</p>
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Prompt </th>
+<th class='confluenceTh'> Notes <br class="atl-forced-newline" /> </th>
+</tr>
+<tr>
+<td class='confluenceTd'> <em>Should Agent communications to HQ be unidirectional [default=no]</em> </td>
+<td class='confluenceTd'> This prompt only appears if you are installing HQ Enterprise. To understand this option, see <a href="Configure Unidirectional Agent - Server Communication.html" title="Configure Unidirectional Agent - Server Communication">Configure Unidirectional Agent - Server Communication</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <em>What is the HQ server IP address</em> </td>
+<td class='confluenceTd'> Enter the listen address of your HQ Server. The server must be running. If the server is on the same machine as the agent, you can enter localhost. <br class="atl-forced-newline" />
+If there is a firewall blocking traffic from the agent to the server, specify the address of the firewall. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <em>Should Agent communications to HQ always be secure [default=no].</em> </td>
+<td class='confluenceTd'> If you want agent and server to communicate via SSL, enter yes. Otherwise, enter Return to accept the default - which is plain HTTP communications. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <em>What is the HQ server port [default=7080]</em> </td>
+<td class='confluenceTd'> This prompt appears if you accepted the default for the previous prompt. If your HQ Server is configured to listen on the default port of 7080, press Return.&nbsp; <br class="atl-forced-newline" />
+If there is a firewall blocking traffic from the agent to the server, configure it to forward traffic on TCP port 7080 (or 7443) to the host running the HQ Server. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <em>What is the secure HQ server port [default=7443]</em> </td>
+<td class='confluenceTd'> This prompt only appears if you answered yes to "Should Agent communications to HQ always be secure" prompt. If your HQ Server is configured to listen for SSL communications on the default port of 7443, press Return. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <em>What is your HQ login [default=hqadmin]:</em> </td>
+<td class='confluenceTd'> By default, the HQ server is initially configured with an administrative account with username hqadmin. Unless you have configured a different HQ user account for agent-server communications, accept the default. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <em>What is your HQ password</em> </td>
+<td class='confluenceTd'> Enter the password for the username you supplied at the previous prompt. If you accepted the default admin user password when installing the HQ server, the password is hqadmin. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <em>What IP should HQ use to contact the agent [default=n.n.n.n]</em> </td>
+<td class='confluenceTd'> The prompt will show default that is the IP address the agent detected on the host. If there is another IP address on the host you prefer to use, enter it. <br class="atl-forced-newline" />
+If there is a firewall blocking traffic from the server to the agent, enter the IP address of the firewall, and configure the firewall to forward traffic intended for the HQ Agent to the listen address of the agent host. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <em>What port should HQ use to contact the agent [default=2144]</em> </td>
+<td class='confluenceTd'> Enter the agent port the HQ Server should use when it initiates contact with the agent. The value you supply to this prompt should be the port that the agent binds to at startup, which by default is 2144. <br class="atl-forced-newline" />
+<br class="atl-forced-newline" />
+<b>Note:</b> If your have previously edited agent.properties to explicitly define a different listen port, using the optional agent.listenPort property, that is the value you should supply to this prompt. <br class="atl-forced-newline" />
+<br class="atl-forced-newline" />
+If there is a firewall blocking traffic from the server to the agent, configure the device to forward traffic on TCP port 2144 to the HQ Agent. </td>
+</tr>
+</tbody></table>
+</div>
+
+<p>Messages similar to the following  are displayed upon successful startup of an agent.</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">Received temporary auth token from agent
+Registering agent with HQ
+HQ gave us the following agent token
+1215038691323-8570363106994871928-8259195015465958356
+Informing agent of new HQ server
+Validating
+Successfully setup agent</pre>
+		</div>
+</div></div>
+
+<div class="scroll-pagebreak"></div>
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on May 31, 2011 13:08</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

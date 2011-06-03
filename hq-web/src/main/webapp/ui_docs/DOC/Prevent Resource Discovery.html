@@ -1,0 +1,91 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>Hyperic 4.6 Documentation : Prevent Resource Discovery</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            Hyperic 4.6 Documentation : Prevent Resource Discovery
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Mar 04, 2011 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p>This section describes options for preventing Hyperic resource discovery processes. </p>
+
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1299259042667 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1299259042667 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1299259042667 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1299259042667'>
+<ul>
+    <li><a href='#PreventResourceDiscovery-ExcludeaPluginResourceHierarchy'>Exclude a Plugin Resource Hierarchy</a></li>
+    <li><a href='#PreventResourceDiscovery-DisablePlatformServiceDiscovery'>Disable Platform Service Discovery</a></li>
+    <li><a href='#PreventResourceDiscovery-DisableServiceDiscoveryforaServerInstance'>Disable Service Discovery for a Server Instance</a></li>
+</ul></div> 
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>For information about different types of auto-discovery scanning, see <a href="http://support.hyperic.com/display/EVO/Understanding+Resource+Auto-Discovery" title="Understanding Resource Auto-Discovery">Understanding Resource Auto&#45;Discovery</a>.</td></tr></table></div> 
+
+
+
+<p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
+ 
+<h1><a name="PreventResourceDiscovery-ExcludeaPluginResourceHierarchy"></a>Exclude a Plugin Resource Hierarchy </h1>
+
+<p>If you do not want the Hyperic Agent to discover a resource, you can prevent the agent from loading the plugin. Specify the plugin or plugins that you do not want the agent to load at startup with the <tt>agent.exclude</tt> property in the <tt>agent.properties</tt> file on the platform. </p>
+
+<h1><a name="PreventResourceDiscovery-DisablePlatformServiceDiscovery"></a>Disable Platform Service Discovery </h1>
+
+<p>To disable auto-discovery of platform services, update <tt>agent.properties</tt> with the following property settings. </p>
+
+<h6><a name="PreventResourceDiscovery-sigar.mirror.procnet"></a>sigar.mirror.procnet </h6>
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>
+<p><b>Description</b></p>
+
+<p>mirror /proc/net/tcp on linux</p>
+
+<p><b>Default</b></p>
+
+<p>true</p></td></tr></table></div> 
+
+<hr />
+<h6><a name="PreventResourceDiscovery-netservices.netstat"></a>netservices.netstat </h6>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Description</b> 
+
+<p>Add the <tt>netservices.netstat</tt> property to <tt>agent.properties</tt> and set it to "false" to prevent the agent from auto-discovering network services running on the platform. </p>
+
+<p><b>Default</b> </p>
+
+<p>As installed, <tt>agent.properties</tt> does not contain this property, and by default, an HQ Agent discovers network services running on a platform.</p></td></tr></table></div> 
+
+
+<h1><a name="PreventResourceDiscovery-DisableServiceDiscoveryforaServerInstance"></a>Disable Service Discovery for a Server Instance </h1>
+
+<p>If you do not want to the agent to discover the services running in a server, you can disable the behavior in the <b>Monitoring</b> section of the <b>Configuration Properties</b> page for a server instance. </p>
+
+<div class="scroll-pagebreak"></div>
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on May 31, 2011 13:08</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

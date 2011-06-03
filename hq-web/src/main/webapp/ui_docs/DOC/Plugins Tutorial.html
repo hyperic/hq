@@ -1,0 +1,238 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>Hyperic 4.6 Documentation : Plugins Tutorial</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            Hyperic 4.6 Documentation : Plugins Tutorial
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on May 19, 2011 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <h1><a name="PluginsTutorial-PluginsTutorials"></a><a name="PluginsTutorial-top"></a>Plugins Tutorials</h1>
+
+
+<p>Plugins are the interface between Hyperic HQ and products on the network you want to manage. HQ can detect hundreds of products thanks to its standard plugins, but if HQ dose not yet detect and manage products (or parts of products) you want it to, we encourage you to develop your own custom plugins.</p>
+
+
+<p>Here we provide tutorials for a couple implementations of a Measurement plugin, with the hope that leading you through the construction of enough different plugins will enable you to understand the plugin gestalt and then to write your own.</p>
+
+
+<p>Consult the <a href="http://support.hyperic.com/display/EVO/Plugin+Development+Center" title="Plugin Development Center">Plugin Development Center</a> for a full and detailed explanation of all things plugin.</p>
+
+
+<ul>
+	<li><a href="#PluginsTutorial-tutorial">Tutorials by plugin type</a></li>
+</ul>
+
+
+<ul>
+	<li><a href="#PluginsTutorial-inventory">How plugins and the HQ inventory model play nicely together</a></li>
+</ul>
+
+
+<ul>
+	<li><a href="#PluginsTutorial-XML">Every plugin needs an XML descriptor</a></li>
+</ul>
+
+
+<ul>
+	<li><a href="#PluginsTutorial-trouble">Troubleshooting</a></li>
+</ul>
+
+
+<ul>
+	<li><a href="#PluginsTutorial-help">Other sources of help</a></li>
+</ul>
+
+
+
+
+<p><a name="PluginsTutorial-tutorial"></a></p>
+
+<h3><a name="PluginsTutorial-TutorialsbyPluginTypeandImplementation"></a>Tutorials by Plugin Type and Implementation</h3>
+
+
+
+<p>This tutorial encompasses a variety of smaller tutorials, each dedicated to a specific type of plugin. </p>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'>Plugin Type</th>
+<th class='confluenceTh'>Implementation</th>
+<th class='confluenceTh'>When You Should Write a Plugin of This Type and Implementation</th>
+<th class='confluenceTh'>Tutorial</th>
+</tr>
+<tr>
+<td class='confluenceTd'><a href="Measurement Plugin.html" title="Measurement Plugin">Measurement</a></td>
+<td class='confluenceTd'> <a href="Script Plugin.html" title="Script Plugin">Script</a> </td>
+<td class='confluenceTd'> You want to discover and collect metrics from a script </td>
+<td class='confluenceTd'><a href="Script Plugin Tutorial.html" title="Script Plugin Tutorial">Script Plugin Tutorial</a></td>
+</tr>
+<tr>
+<td class='confluenceTd'><a href="Measurement Plugin.html" title="Measurement Plugin">Measurement</a></td>
+<td class='confluenceTd'> <a href="JMX Plugin.html" title="JMX Plugin">JMX</a> </td>
+<td class='confluenceTd'> You want to discover and collect metrics from a JMX-enabled application </td>
+<td class='confluenceTd'> <a href="JMX Plugin Tutorial.html" title="JMX Plugin Tutorial">JMX Plugin Tutorial</a></td>
+</tr>
+</tbody></table>
+</div>
+
+
+
+
+<p><em><a href="#PluginsTutorial-top">back to top</a></em></p>
+
+
+
+<p><a name="PluginsTutorial-inventory"></a></p>
+
+<h3><a name="PluginsTutorial-HowPluginsandtheHQInventoryModelPlayNicelyTogether"></a>How Plugins and the HQ Inventory Model Play Nicely Together</h3>
+
+<p>See <a href="http://support.hyperic.com/display/EVO/Hyperic+Inventory+Model" title="Hyperic Inventory Model">Hyperic Inventory Model</a></p>
+
+
+
+<p><em><a href="#PluginsTutorial-top">back to top</a></em></p>
+
+
+
+<p><a name="PluginsTutorial-XML"></a></p>
+
+<h3><a name="PluginsTutorial-EveryPluginNeedsanXMLDescriptor"></a>Every Plugin Needs an XML Descriptor</h3>
+
+
+
+<p>For every plugin, you must write an XML descriptor. In many cases, that is all you must write, as the plugin implementation has been templatized.</p>
+
+
+
+<p>Learn more about the <a href="http://support.hyperic.com/display/EVO/Plugin+XML+Descriptor" title="Plugin XML Descriptor">Plugin XML Descriptor</a> and its components.</p>
+
+
+
+<h4><a name="PluginsTutorial-XMLDescriptorforMeasurementPlugins"></a>XML Descriptor for Measurement Plugins </h4>
+
+
+
+<h5><a name="PluginsTutorial-AutoDiscovery"></a>Auto-Discovery</h5>
+
+
+
+<p>Every Measurement plugin must implement its own <a href="http://support.hyperic.com/display/EVO/Auto-Discovery" title="Auto-Discovery">auto-discovery</a> (called "autoinventory" within plugins) so that, once the plugin is deployed, HQ can actually find the product for which the plugin is being written and inventory it. </p>
+
+
+
+<p>In almost all cases, you will implement auto-discovery in your plugins for <a href="http://support.hyperic.com/display/EVO/Hyperic+Glossary#HypericGlossary-server">servers</a> or <a href="http://support.hyperic.com/display/EVO/Hyperic+Glossary#HypericGlossary-service">services</a>, not <a href="http://support.hyperic.com/display/EVO/Hyperic+Glossary#HypericGlossary-platform">platforms</a>.</p>
+
+
+
+<h5><a name="PluginsTutorial-AvailabilityMetric"></a>Availability Metric </h5>
+
+
+
+<p>The Availability metric indicates whether a Resource is up or down.</p>
+
+<p>A metrics-gathering plugin must determine Availability for <em>every</em> server and <em>every</em> service it monitors. A single plugin will likely gather Availability for multiple Resources. If Availability is not gathered for a Resource, HQ will consider the Resource to be unavailable, and will not show any metrics for it in the Portal.</p>
+
+<p>A plugin sets the value of Availability to 1 if the Resource is up, and 0 if it is down.&nbsp; These values are displayed in the Portal as "available" or "not available".</p>
+
+<p>Verifying the existence of a Resource's process is a common technique for determining its Availability. However, the method a plugin uses to determine Availability can vary depending on the Resource Type and the plugin developer's judgment. There might be alternative techniques for determining the Availability of a Resource. For instance, a plugin might determine the Availability of a web server based on whether its process is up, its port is listening, it is responsive to a request, or by some combination of these conditions.&nbsp; </p>
+
+
+
+<p><em><a href="#PluginsTutorial-top">back to top</a></em></p>
+
+
+
+<p><a name="PluginsTutorial-Trouble"></a></p>
+
+<h3><a name="PluginsTutorial-Troubleshooting"></a>Troubleshooting</h3>
+
+
+
+<p>This section describes several things you can do to figure out problems with your plugin.</p>
+
+
+
+<ul>
+	<li>Are you having problems with the HQ Server after the plugin is deployed? <a href="http://support.hyperic.com/display/~mmcgarry/Putting+an+Agent+in+DEBUG+mode" title="Putting an Agent in DEBUG mode">Turn on DEBUG mode on the Agent</a>.</li>
+</ul>
+
+
+<ul>
+	<li>What user is running the Agent? It should be the same user that is running the tests of the plugin.</li>
+</ul>
+
+
+<ul>
+	<li>Do you have the proper permissions for everything (executing scripts, accessing files, etc.)?</li>
+</ul>
+
+
+<ul>
+	<li>Are your environment variables set up correctly?</li>
+</ul>
+
+
+
+
+<p><b>Testing the Plugin</b></p>
+
+<p>For instructions, see <a href="Running and Testing Plugins from Command Line.html" title="Running and Testing Plugins from Command Line">Running and Testing Plugins from Command Line</a>.</p>
+
+
+
+
+
+<p><a name="PluginsTutorial-help"></a></p>
+
+<h3><a name="PluginsTutorial-OtherSourcesofHelp"></a>Other Sources of Help </h3>
+
+<p>If this tutorial leaves you with questions about how to write your plugin, you can find additional help in the following places:</p>
+
+<ul>
+	<li><a href="http://support.hyperic.com/display/EVO/Plugin+Development+Center" title="Plugin Development Center">Plugin Development Center</a></li>
+</ul>
+
+
+<ul>
+	<li><a href="http://forums.hyperic.com/jiveforums/index.jspa">HQ forums</a></li>
+</ul>
+
+
+<ul>
+	<li>Contact HQ Support</li>
+</ul>
+
+
+
+
+
+<div class="scroll-pagebreak"></div>
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on May 31, 2011 13:10</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

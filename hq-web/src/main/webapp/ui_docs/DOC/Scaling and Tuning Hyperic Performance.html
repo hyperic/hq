@@ -1,0 +1,199 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>Hyperic 4.6 Documentation : Scaling and Tuning Hyperic Performance</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            Hyperic 4.6 Documentation : Scaling and Tuning Hyperic Performance
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on May 20, 2011 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    
+
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1305906216776 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1305906216776 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1305906216776 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1305906216776'>
+<ul>
+    <li><a href='#ScalingandTuningHypericPerformance-SizingConsiderations'>Sizing Considerations</a></li>
+    <li><a href='#ScalingandTuningHypericPerformance-IncreasingJavaHeapandChangingGCSettings'>Increasing Java Heap and Changing GC Settings</a></li>
+    <li><a href='#ScalingandTuningHypericPerformance-IncreaseJMSMemory'>Increase JMS Memory</a></li>
+    <li><a href='#ScalingandTuningHypericPerformance-IncreasetheNumberConnectionstoDatabase'>Increase the Number Connections to Database</a></li>
+    <li><a href='#ScalingandTuningHypericPerformance-ConfigureHypericCacheSettingsforImprovedPerformance'>Configure Hyperic Cache Settings for Improved Performance</a></li>
+<ul>
+    <li><a href='#ScalingandTuningHypericPerformance-WhereAreCachesKept'>Where Are Caches Kept</a></li>
+    <li><a href='#ScalingandTuningHypericPerformance-DefaultCacheSettings'>Default Cache Settings</a></li>
+    <li><a href='#ScalingandTuningHypericPerformance-MonitoringCachestoIdentifyAreasforImprovement'>Monitoring Caches to Identify Areas for Improvement</a></li>
+    <li><a href='#ScalingandTuningHypericPerformance-ChangingCachesSettings'>Changing Caches Settings</a></li>
+    <li><a href='#ScalingandTuningHypericPerformance-ConfiguringPermissionCacheforImprovedPerformance'>Configuring Permission Cache for Improved Performance</a></li>
+</ul>
+</ul></div>
+
+<h1><a name="ScalingandTuningHypericPerformance-SizingConsiderations"></a>Sizing Considerations</h1>
+
+<p>The number of platforms the Hyperic Server can manage depends on the hardware it runs on, the number of Hyperic Agents reporting to the server, the volume of metrics that are collected, and the size of the Hyperic database. &nbsp;</p>
+
+<p>As a general rule, assume a minimal system configuration will support at least 25 Agents or more. On a high performance platform, a properly tuned Hyperic server can support from 100's to 1000's of agents. &nbsp;</p>
+
+<p>This page has instructions for tuning Hyperic for large environments.</p>
+
+<p><b>Note:</b> See <a href="Installation Requirements.html" title="Installation Requirements">Installation Requirements</a> for Hyperic Server system requirements.</p>
+
+<h1><a name="ScalingandTuningHypericPerformance-IncreasingJavaHeapandChangingGCSettings"></a>Increasing Java Heap and Changing GC Settings</h1>
+
+<p>Heap size startup options are set in the <tt>ServerHome/conf/hq-server.conf</tt> file using the <tt>server.java.opts</tt> property. Default settings are described in <a href="http://support.hyperic.com/display/EVO/server.java.opts" title="server.java.opts">server.java.opts</a>.</p>
+
+<p>How much you can increase the default heap options depends on the amount of RAM on the Hyperic Server host. Given sufficient RAM, you could use these settings:</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">server.java.opts=-Djava.awt.headless\=true -XX\:MaxPermSize\=192m -Xmx4096m -Xms4096m -XX\:+UseConcMarkSweepGC</pre>
+		</div>
+</div></div>
+<p>If you increase heap size, you may need to change JMS memory settings as well.  For more information, see the <a href="#ScalingandTuningHypericPerformance-IncreaseJMSMemorySettings">Increase JMS Memory Settings</a> below.</p>
+
+<p><b>Note:</b> If you are running Hyperic Server on a 64-bit system with 4GB (4096 MB) or less memory, Hyperic recommends you use 32-bit JVM.  A 64-bit JVM is not recommended unless you have more memory.  You might need twice as much heap on a 64-bit system as on a 32-bit system to achieve the same performance.</p>
+
+<h1><a name="ScalingandTuningHypericPerformance-IncreaseJMSMemory"></a>Increase JMS Memory</h1>
+
+<p>The JMS memory settings are configured using <tt>server.jms.highmemory</tt> and <tt>server.jms.maxmemory</tt> in <tt>ServerHome/conf/hq-server.conf</tt>, by default, 350MB and 400MB, respectively. </p>
+
+<p>The values for <tt>server.jms.highmemory</tt> and <tt>server.jms.maxmemory</tt> should be 80% and 90% of the Java heap size, respectively. Erratic alert behavior or missed alerts may indicate the settings are too low. </p>
+
+<h1><a name="ScalingandTuningHypericPerformance-IncreasetheNumberConnectionstoDatabase"></a>Increase the Number Connections to Database</h1>
+
+<p>The size of the connection pool for communication between Hyperic Server and the database is configured with <tt>server.database-minpoolsize</tt> and <tt>server.database-maxpoolsize</tt> in <tt>ServerHome/conf/hq-server.conf</tt>, by default, 5 and 100, respectively.</p>
+
+<p>In large environments, it may be appropriate to increase the size of the connection pool. If you are managing between 800 and 1500 platforms, set both <tt>server.database-minpoolsize</tt> and <tt>server.database-maxpoolsize</tt> to 300.</p>
+
+<p>Given properly configured caches, it should not be necessary to increase connection pool size to more than 700.</p>
+
+<p><b>Note:</b> If you increase <tt>server.database-minpoolsize</tt> to 100 or more, set <tt>server.database-maxpoolsize</tt> equal to that value.</p>
+
+<h1><a name="ScalingandTuningHypericPerformance-ConfigureHypericCacheSettingsforImprovedPerformance"></a>Configure Hyperic Cache Settings for Improved Performance</h1>
+
+<p>The default cache settings in Hyperic are suitable for most deployments. However, depending on your deployment and use of Hyperic, especially in large environments, changing the cache settings might improve performance.</p>
+
+<h2><a name="ScalingandTuningHypericPerformance-WhereAreCachesKept"></a>Where Are Caches Kept</h2>
+
+<p>All internal caches are kept in EHCache and are accessible via the "HQ Health" screen. EHCache provides:</p>
+<ul>
+	<li>Automatic integration with Hibernate</li>
+	<li>Optional distributed caching when running in a cluster.</li>
+	<li>A variety of proven, well-tested eviction algorithms</li>
+	<li>Better cache management and configuration</li>
+</ul>
+
+
+<h2><a name="ScalingandTuningHypericPerformance-DefaultCacheSettings"></a>Default Cache Settings</h2>
+
+<p>By default, the cache settings in Hyperic are set for a medium to large deployment:</p>
+<ul>
+	<li>100 Platforms</li>
+	<li>500 Servers</li>
+	<li>5000 Services</li>
+</ul>
+
+
+<p>These settings should suffice for most deployments.</p>
+
+<h2><a name="ScalingandTuningHypericPerformance-MonitoringCachestoIdentifyAreasforImprovement"></a>Monitoring Caches to Identify Areas for Improvement</h2>
+
+<p>You can monitor Hyperic's internal caches through the server.log or via the "HQ Health" screen. The log contains diagnostic information, which is written to the log periodically. The cache information should look like:</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">Cache                                                   Size   Hits   Misses
+=====                                                   ====   ====    =====
+Agent.findByAgentToken                                  2      4184        2
+AgentScheduleInQueue                                    0      0           0
+Alert.findByCreateTime                                  10     318       694
+Alert.findByEntity                                      0      0           0
+....</pre>
+		</div>
+</div></div>
+<p>This listing shows each cache, its size, and its hit counts. At the end of the listing there is a summary for the total size of all Hyperic caches.</p>
+
+<p>If a cache has an unusually high miss rate or becomes full, you can manually configure it to improve performance. For example, consider this cache:</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">Measurement.findByTemplateForInstance       		   10000   6766    25772</pre>
+		</div>
+</div></div>
+<p>The cache has 10,000 elements. With only 6766 hits and 25,772 misses, the hit ratio is around 20-25%. Ideally the number of misses should peak at about the maximum size of the cache. (There are some exceptions to this: the UpdateTimestampsCache and the PermissionCache have items invalidated from the cache frequently, so these rules do not apply.) So, increasing this cache's size would probably improve Hyperic performance.</p>
+
+<h2><a name="ScalingandTuningHypericPerformance-ChangingCachesSettings"></a>Changing Caches Settings</h2>
+
+<p>After you identify a cache whose configuration should be changed, you can change its configuration in the file <tt>server-n.n.n-EE\hq-engine\hq-server\webapps\ROOT\WEB-INF\ehcache.xml</tt>. In general, only the cache sizes should need to be changed.</p>
+
+<p>To continue with the example cache from above, the entry for the cache in this file looks like this:</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">&lt;cache name="DerivedMeasurement.findByTemplateForInstance"
+    maxElementsInMemory="10000"
+    eternal="true"
+    timeToIdleSeconds="0"
+    timeToLiveSeconds="0"
+    memoryStoreEvictionPolicy="LRU"/&gt;</pre>
+		</div>
+</div></div>
+<p>You may need to iterate on the cache size to find the optimal setting.</p>
+
+<p>The format of this file is described in EHCache's documentation.</p>
+
+<h2><a name="ScalingandTuningHypericPerformance-ConfiguringPermissionCacheforImprovedPerformance"></a>Configuring Permission Cache for Improved Performance </h2>
+
+<p>The PermissionCache can be changed to improve performance. This cache caches recently evaluated permission checks:</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">&lt;cache name="PermissionCache"
+    maxElementsInMemory="1000"
+    timeToIdleSeconds="0"
+    timeToLiveSeconds="60"
+    memoryStoreEvictionPolicy="LRU"/&gt;</pre>
+		</div>
+</div></div>
+<p>This cache is set to expire the checks after 60 seconds. In an environment where the user and role definitions are not updated frequently, you can increase the timeToLiveSeconds value to effect a significant performance increase.</p>
+
+<p>While the right value for timeToLiveSeconds depends on the environment, the rule of thumb is that it should be set no higher than the acceptable time for a permission-related operation to take effect. Perhaps this is even zero, but that can be costly because the Server needs to go to the database to check permission on every resource the user views.</p>
+
+<div class="scroll-pagebreak"></div>
+
+				    					    <br/>
+                        <div class="tabletitle">
+                            <a name="attachments">
+                                <h2>Attachments:</h2>
+                            </a>
+                        </div>
+
+                        <div class="greybox" align="left">
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/71830015/71926418.png">registry.png</a> (image/png)
+                                <br/>
+                                                    </div>
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on May 31, 2011 13:08</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

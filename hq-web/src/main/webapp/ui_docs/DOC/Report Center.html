@@ -1,0 +1,329 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>Hyperic 4.6 Documentation : Report Center</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            Hyperic 4.6 Documentation : Report Center
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Mar 15, 2011 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1300204718112 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1300204718112 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1300204718112 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1300204718112'>
+<ul>
+    <li><a href='#ReportCenter-ReportCenterOverview'>Report Center Overview</a></li>
+    <li><a href='#ReportCenter-NavigatetotheReportCenter'>Navigate to the Report Center</a></li>
+    <li><a href='#ReportCenter-BuiltInReports'>Built-In Reports</a></li>
+    <li><a href='#ReportCenter-CustomReports'>Custom Reports</a></li>
+    <li><a href='#ReportCenter-SpecifyingReportDescriptionandReportParameters'>Specifying Report Description and Report Parameters</a></li>
+    <li><a href='#ReportCenter-ActionableReports'>Actionable Reports</a></li>
+</ul></div>
+
+
+<p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
+
+
+<h1><a name="ReportCenter-ReportCenterOverview"></a>Report Center Overview</h1>
+
+<p>HQ's <b>Report Center</b> has built-in reports that provide visibility into availability, alerts, inventory, resource utilization, and resources that are not collecting metrics. You can also create your own reports. HQ reports can accept parameter values, and be generated in PDF, HTML, Excel, and CSV formats.</p>
+
+<h1><a name="ReportCenter-NavigatetotheReportCenter"></a>Navigate to the Report Center</h1>
+
+<p>Click <b>Analyze &gt; Report Center</b>.</p>
+
+<h1><a name="ReportCenter-BuiltInReports"></a>Built-In Reports</h1>
+
+<p>The table below describes the ready-to-run reports in the <b>Report Center</b>. HQ provides the following canned report templates:</p>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Report Template </th>
+<th class='confluenceTh'> What Does It Tell Me? </th>
+<th class='confluenceTh'> What The Report Displays </th>
+<th class='confluenceTh'> Required User Input (Parameters) </th>
+<th class='confluenceTh'> Sample Report </th>
+<th class='confluenceTh'> JRXML Template </th>
+</tr>
+<tr>
+<td class='confluenceTd'> Alert Detail </td>
+<td class='confluenceTd'> Which resources in my environment are firing the most alerts? </td>
+<td class='confluenceTd'> The same as the <a href="#ReportCenter-summary">Alert Summary Report\</a>, except, instead of a summary of alerts, every alert is shown. This is useful when analyzing a full alert log. </td>
+<td class='confluenceTd'> Start Date <br class="atl-forced-newline" />
+End Date <br class="atl-forced-newline" />
+Group </td>
+<td class='confluenceTd'> [] </td>
+<td class='confluenceTd'> []<br class="atl-forced-newline" />  [] </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Alert Summary<a name="ReportCenter-summary"></a> </td>
+<td class='confluenceTd'> Which resources in my environment are firing the most alerts? </td>
+<td class='confluenceTd'> A summary of all alerts that were triggered during the user-specified time range. You can restrict the list of alerts by a user-specified group. For each resource, the number of low-, medium-, and high&#45;<a href="http://support.hyperic.com/display/EVO/Hyperic+Glossary#HypericGlossary-priority">priority</a> alerts are shown, along with the total number of alerts. </td>
+<td class='confluenceTd'> Start Date <br class="atl-forced-newline" />
+End Date <br class="atl-forced-newline" />
+Group </td>
+<td class='confluenceTd'> [] </td>
+<td class='confluenceTd'> [] </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Availability Downtime </td>
+<td class='confluenceTd'> How many minutes were resources unavailable over the given time range? </td>
+<td class='confluenceTd'> Availability percentage and minutes of downtime, over a user-specified time range, for resources in a user-specified group. This report cannot be run against the entire environment. </td>
+<td class='confluenceTd'> Start Date <br class="atl-forced-newline" />
+End Date <br class="atl-forced-newline" />
+Group </td>
+<td class='confluenceTd'> [] </td>
+<td class='confluenceTd'> [] </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Disk Usage </td>
+<td class='confluenceTd'> Which disks are running low on free space? <br class="atl-forced-newline" />
+Which disks are filling up the quickest? </td>
+<td class='confluenceTd'> Disks in the environment that are running low on free space, over a user-specified time range. This report can be run against a single group or across the entire environment. </td>
+<td class='confluenceTd'> Start Date <br class="atl-forced-newline" />
+End Date <br class="atl-forced-newline" />
+Group </td>
+<td class='confluenceTd'> [] </td>
+<td class='confluenceTd'> [] </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Inventory </td>
+<td class='confluenceTd'> What resources were created during the given time range? <br class="atl-forced-newline" />
+What new services have been discovered? (HQ auto-imports them and so they are not immediately obvious.) </td>
+<td class='confluenceTd'> All resources created in the HQ environment in the user-specified time range, sorted by creation date. This report operates on the entire environment. </td>
+<td class='confluenceTd'> Start Date <br class="atl-forced-newline" />
+End Date </td>
+<td class='confluenceTd'> [] </td>
+<td class='confluenceTd'> [] </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Event Log Summary </td>
+<td class='confluenceTd'> What's happening on each of my resources? A summary of events across all resources, instead of for a single resource. </td>
+<td class='confluenceTd'> Resources and their logged events, taken from the system's event logs, sorted by the number of events. Learn more about <a href="http://support.hyperic.com/display/EVO/Log+Tracking" title="Log Tracking">log tracking</a> in HQ. </td>
+<td class='confluenceTd'> Start Date <br class="atl-forced-newline" />
+End Date </td>
+<td class='confluenceTd'> [] </td>
+<td class='confluenceTd'> [] </td>
+</tr>
+<tr>
+<td class='confluenceTd'> License Count <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> The platforms for which I have HQ licenses. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Platform name, type, license count, and date added. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> No user input <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> [] </td>
+<td class='confluenceTd'> [] </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Metric Interval </td>
+<td class='confluenceTd'> How many metrics are being collected on my resources, how often, and when? Basically, the report shows the metric load. </td>
+<td class='confluenceTd'> The collection interval and the number of metrics that are being collected for each resource. </td>
+<td class='confluenceTd'> No user input </td>
+<td class='confluenceTd'> [] </td>
+<td class='confluenceTd'> [] </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Network Interface </td>
+<td class='confluenceTd'> What kind of traffic are my resources experiencing? </td>
+<td class='confluenceTd'> Bits in/out per second for each resource </td>
+<td class='confluenceTd'> Start Date <br class="atl-forced-newline" />
+End Date <br class="atl-forced-newline" />
+Group </td>
+<td class='confluenceTd'> [] </td>
+<td class='confluenceTd'> [] </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Resources Not Collecting Metrics </td>
+<td class='confluenceTd'> Which of my metrics are no longer collecting any metrics, even though they're supposed to be? </td>
+<td class='confluenceTd'> Resources that have stopped publishing metrics, plus the last time a metric was recorded for the resource </td>
+<td class='confluenceTd'> No user input </td>
+<td class='confluenceTd'> [] </td>
+<td class='confluenceTd'> [] </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Resources Without Metrics </td>
+<td class='confluenceTd'> Which of my resources don't have metric collection enabled? For example, did you discover and import a platform but not configure it to collect metrics? For instance, Oracle needs a password, so when it is discovered and imported, it won't collect metrics if the password isn't provided. </td>
+<td class='confluenceTd'> Resources that don't have metric collection enabled in HQ </td>
+<td class='confluenceTd'> No user input </td>
+<td class='confluenceTd'> [] </td>
+<td class='confluenceTd'> [] </td>
+</tr>
+</tbody></table>
+</div>
+
+
+<p><tt>&#42;</tt> For reports involving specific resource types (for example, the Disk Usage and Network Usage reports include only "File Server Mount" resources), only <a href="http://support.hyperic.com/display/EVO/Hyperic+Glossary#HypericGlossary-compatiblegroup">compatible groups</a> of that resource type are allowed as an input parameter. For all non-resource-type-specific reports (for example, the Alert and Availability reports), all groups defined in HQ are available for selection.</p>
+
+<h1><a name="ReportCenter-CustomReports"></a>Custom Reports</h1>
+
+<p>If you need reports that HQ does not yet provide, you can write your own. HQ's reporting functionality uses <a href="http://www.jaspersoft.com/JasperSoft_JasperReports.html">JasperReports</a>, and the templates are written in JasperReports' XML format, JRXML. To write a report template, Hyperic suggests you use the Java-based application IReport (<a href="http://jasperforge.org/plugins/project/project_home.php?group_id=83">download it</a>). Custom report templates must be in either JRXML format (generated from the content created in iReport) or compiled .jasper format. At this time compiled .jasper format is the only format supported when deploying new templates to HQ.</p>
+
+<p>For help with JasperReports and iReport, consult their documentation:</p>
+
+<ul>
+	<li><a href="http://jasperforge.org/website/jasperreportswebsite/trunk/documentation.html">JasperReports Documentation</a></li>
+</ul>
+
+
+<ul>
+	<li><a href="http://jasperforge.org/website/ireportwebsite/IR%20Website/iReport_documentation.html">iReport Documentation</a></li>
+</ul>
+
+
+<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Requirements for Writing Custom Report Templates</b><br />Because HQ's reporting functionality uses JasperReports and only supports reporting generation using SQL queries against the HQ database, writing custom report templates requires familiarity with both JasperReports and the HQ database schema. Consult Hyperic Sales if you want to write custom report templates.</td></tr></table></div>
+<p><b>To incorporate a new report template into the Reporting screen:</b></p>
+
+<ol>
+	<li>Write a report template in JRXML or compiled Jasper format, being sure to specify any user-input parameters necessary for generating the report (for example, a date range).</li>
+	<li>Place the template (.jasper format only) in <tt>/hq-engine/hq-server/webapps/ROOT/WEB-INF/reportTemplates</tt>.
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false"/>
+		</div>
+</div></div></li>
+	<li>Log out of HQ and log back in, the report will appear in the report list.</li>
+</ol>
+
+
+<h1><a name="ReportCenter-SpecifyingReportDescriptionandReportParameters"></a>Specifying Report Description and Report Parameters</h1>
+
+<p>In the JasperReport file for a report:</p>
+
+<ul>
+	<li>Use a &lt;property&gt; element to define a <tt>description</tt> for the report. The text you specify will appear as the <b>Report Description</b> when you select a report on the <b>Report Center</b> page</li>
+</ul>
+
+
+<p>Use a &lt;parameter&gt; element to specify a report parameter. When you run the report, you will be queried to supply the parameter value. The following parameter types are supported:</p>
+
+<ul>
+	<li><tt>java.util.Date</tt></li>
+	<li><tt>java.util.String</tt></li>
+</ul>
+
+
+
+<h1><a name="ReportCenter-ActionableReports"></a>Actionable Reports</h1>
+
+<p>A couple of the reports give you information that can be immediately acted on:</p>
+
+<ul>
+	<li>"Resources Not Collecting Metrics": For the resources listed in this report, users should determine why the resources are no longer collecting metrics. Are the Agents on the resources turned off? Did the collection interval get out of synch?</li>
+</ul>
+
+
+<ul>
+	<li>"Resources Without Metrics": Access the resources listed here in HQ and <a href="http://support.hyperic.com/display/EVO/Monitoring+Defaults+Configuration#MonitoringDefaultsConfiguration-modify">configure them to collect metrics</a>.</li>
+</ul>
+
+
+<div class="scroll-pagebreak"></div>
+
+				    					    <br/>
+                        <div class="tabletitle">
+                            <a name="attachments">
+                                <h2>Attachments:</h2>
+                            </a>
+                        </div>
+
+                        <div class="greybox" align="left">
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/72450384/72646720.pdf">Alert Detail Report.pdf</a> (application/pdf)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/72450384/72646721.jrxml">MetricIntervals.jrxml</a> (application/octet-stream)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/72450384/72646722.jrxml">AlertSummary.jrxml</a> (application/octet-stream)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/72450384/72646723.pdf">Event Log Summary.pdf</a> (application/pdf)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/72450384/72646724.pdf">Resources Without Metrics.pdf</a> (application/pdf)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/72450384/72646725.jrxml">AvailabilityDowntime.jrxml</a> (application/octet-stream)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/72450384/72646726.pdf">Disk Usage Report.pdf</a> (application/pdf)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/72450384/72646727.pdf">Alert Summary Report.pdf</a> (application/pdf)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/72450384/72646728.pdf">Network Interface Report.pdf</a> (application/pdf)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/72450384/72646729.pdf">Inventory Report.pdf</a> (application/pdf)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/72450384/72646730.jrxml">LicenseCount.jrxml</a> (application/octet-stream)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/72450384/72646731.jrxml">EventLogSummary.jrxml</a> (application/octet-stream)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/72450384/72646732.jrxml">NewInventoryReport.jrxml</a> (application/octet-stream)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/72450384/72646733.jrxml">DiskUsage.jrxml</a> (application/octet-stream)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/72450384/72646734.jrxml">subreport_AlertDetail.jrxml</a> (application/octet-stream)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/72450384/72646735.jrxml">NetworkInterfaceReport.jrxml</a> (application/octet-stream)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/72450384/72646736.pdf">Availability Downtime Report.pdf</a> (application/pdf)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/72450384/72646737.jrxml">AlertDetail.jrxml</a> (application/octet-stream)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/72450384/72646738.pdf">Metric Interval Report.pdf</a> (application/pdf)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/72450384/72646739.jrxml">ResourcesNotCollectingMetrics.jrxml</a> (application/octet-stream)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/72450384/72646740.pdf">Resources Not Collecting Metrics.pdf</a> (application/pdf)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/72450384/72646741.jrxml">ResourcesWithoutMetrics.jrxml</a> (application/octet-stream)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/72450384/72646742.pdf">License Count.pdf</a> (application/pdf)
+                                <br/>
+                                                    </div>
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on May 31, 2011 13:09</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

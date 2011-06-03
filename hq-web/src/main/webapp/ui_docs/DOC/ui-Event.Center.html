@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>Hyperic 4.5 Documentation : ui-Event.Center</title>
+        <title>Hyperic 4.6 Documentation : ui-Event.Center</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,75 +12,60 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Hyperic 4.5 Documentation : ui-Event.Center
+                            Hyperic 4.6 Documentation : ui-Event.Center
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Nov 19, 2010 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Mar 10, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <p><a name="ui-Event.Center-top"></a></p>
-
-<h1><a name="ui-Event.Center-EventCenter"></a>Event Center</h1>
-
-<p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
-<p>This screen allows users to centrally view <em>all</em> the Events across the entire HQ deployment.</p>
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1299798992012 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1299798992012 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1299798992012 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1299798992012'>
 <ul>
-	<li><a href="#ui-Event.Center-Tasks">Tasks</a> available on this screen</li>
-	<li><a href="#ui-Event.Center-Sections">Sections</a> on this screen</li>
-	<li><a href="#ui-Event.Center-Navigating">Navigating</a> via the masthead menu</li>
-</ul>
-
-
+    <li><a href='#ui-Event.Center-EventCenter'>Event Center</a></li>
+    <li><a href='#ui-Event.Center-FiltertheEventList'>Filter the Event List</a></li>
+    <li><a href='#ui-Event.Center-ContentsoftheEventCenterPage'>Contents of the Event Center Page</a></li>
+</ul></div>
 
 
 <p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
 
-<p><a name="ui-Event.Center-Tasks"></a></p>
 
-<h1><a name="ui-Event.Center-Screenshot"></a>Screenshot</h1>
+<h1><a name="ui-Event.Center-EventCenter"></a>Event Center</h1>
 
-<p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 1151x528" href='http://support.hyperic.com/confluence/download/attachments/71828503/EventCenterPage.gif'><img src="attachments/thumbnails/71828503/71926238" height="32" width="32" style="border: 0px solid black"/></a></span></p>
+<p>The <b>Event Center</b> page, available on the <b>Analyze tab</b> in the Masthead, is a deployment wide view of events that have been logged for resources in your Hyperic deployment. Events are ordered by date, with most recent events first. To reverse the sort order, click the control in the <b>Date</b> column header.</p>
 
-<h1><a name="ui-Event.Center-TasksAvailableonThisScreen"></a>Tasks Available on This Screen</h1>
+<p>Click <span class="image-wrap" style=""><img src="attachments/71828503/71926239.gif" style="border: 0px solid black"/></span> at the top right to refresh the list.</p>
 
-<p>On this screen, users can do the following tasks:</p>
+<p><span class="image-wrap" style=""><img src="attachments/71828283/71926919.png" width="750pxpx" style="border: 0px solid black"/></span></p>
 
-<p><b>To refresh the list:</b></p>
-<ul>
-	<li>Click <span class="image-wrap" style=""><img src="attachments/71828503/71926239.gif" style="border: 0px solid black"/></span> at the top right.</li>
-</ul>
-
-
-<p><b>To sort the list:</b></p>
-<ul>
-	<li>Click the 'Date' column heading on the right side.<br/>
-When viewing events, the sort will apply to all events from the database, not just the events currently displayed on the screen.</li>
-</ul>
-
-
-<h1><a name="ui-Event.Center-Filter"></a>Filter</h1>
+<h1><a name="ui-Event.Center-FiltertheEventList"></a>Filter the Event List</h1>
 
 <p>To limit the events displayed in the Events section, choose one or more filter options.</p>
 <ul>
-	<li>Minimum Status - Select a status to limit the log tracking events in the list to those of that level or higher.&nbsp; Log tracking event levels, in decreasing order of severity, are:
+	<li><b>Minimum Status</b> &#8212; Select a status to limit the log tracking events in the list to those of that level or higher. Log tracking event levels, in decreasing order of severity, are:
 	<ul>
 		<li>Error</li>
-		<li>Warning&nbsp;</li>
-		<li>Info&nbsp;</li>
+		<li>Warning</li>
+		<li>Info</li>
 		<li>Debug</li>
 	</ul>
 	</li>
-	<li>Type - Select a type to limit events in the list to those of that type:
+	<li><b>Type</b> &#8212; Select a type to limit events in the list to those of that type:
 	<ul>
 		<li>Log track</li>
 		<li>Event Track</li>
 		<li>Alerts</li>
 	</ul>
 	</li>
-	<li>Time Range - Select on the following time ranges to limit th events in the list to those occurred during the range:
+	<li><b>Time Range</b> &#8212; Select on the following time ranges to limit th events in the list to those occurred during the range:
 	<ul>
 		<li>Last 4 hours</li>
 		<li>Last 8 hours</li>
@@ -89,28 +74,31 @@ When viewing events, the sort will apply to all events from the database, not ju
 		<li>Last month</li>
 	</ul>
 	</li>
-	<li>Groups - Select one or more groups to limit the events in the list to those related to resources in the selected group(s).</li>
+	<li><b>Groups</b> &#8212; Select one or more groups to limit the events in the list to those related to resources in the selected group(s).</li>
 </ul>
 
 
-<h1><a name="ui-Event.Center-Events"></a>Events</h1>
+<h1><a name="ui-Event.Center-ContentsoftheEventCenterPage"></a>Contents of the Event Center Page</h1>
 
-<p>This section lists all the events across the HQ deployment. In the "Filter" section, users can filter the list of events displayed at the right.</p>
+<p>The following data is shown for each event that matches the filter criteria selected in the <b>Filter</b> pane:</p>
 
 <p>The following information is shown for each event in the list:</p>
 <ul>
-	<li><ins>Date</ins>: Date and time the event happened</li>
-	<li><ins>Status</ins>: For log track events, the level is shown. For alerts, the status column contains "alert".</li>
-	<li><ins>Resource</ins>: The name of the resource that caused the event</li>
-	<li><ins>Subject</ins>: For an alert, the alert name; for a Nagios check, the plugin name, including path.</li>
-	<li><ins>Detail</ins>: Information about the event detail or triggering condition.</li>
+	<li><b>Date</b> &#8212; Date and time the event happened</li>
+	<li><b>Status</b> &#8212; For log track events, the level is shown. For alerts, the status column contains "alert".</li>
+	<li><b>Resource</b> &#8212; The name of the resource that caused the event</li>
+	<li><b>Subject</b> &#8212; For an alert, the alert name; for a Nagios check, the plugin name, including path.</li>
+	<li><b>Detail</b> &#8212; Information about the event detail or triggering condition.</li>
 </ul>
 
 
+<div class="scroll-pagebreak"></div>
 
 				    					    <br/>
                         <div class="tabletitle">
-                            <a name="attachments">Attachments:</a>
+                            <a name="attachments">
+                                <h2>Attachments:</h2>
+                            </a>
                         </div>
 
                         <div class="greybox" align="left">
@@ -127,10 +115,10 @@ When viewing events, the sort will apply to all events from the database, not ju
 	    </table>
 	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
 			<tr>
-				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jan 12, 2011 15:43</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on May 31, 2011 13:10</font></td>
 		    </tr>
 	    </table>
     </body>

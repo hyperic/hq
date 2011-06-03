@@ -1,0 +1,110 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>Hyperic 4.6 Documentation : Before You Start</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            Hyperic 4.6 Documentation : Before You Start
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Sep 17, 2010 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <style type='text/css'>/*<![CDATA[*/
+div.rbtoc1284732059544 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1284732059544 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1284732059544 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1284732059544'>
+<ul>
+    <li><a href='#BeforeYouStart-IfYouAreUsinganExternalDatabase'>If You Are Using an External Database</a></li>
+    <li><a href='#BeforeYouStart-HQComponentsandJRELocation'>HQ Components and JRE Location</a></li>
+<ul>
+    <li><a href='#BeforeYouStart-HQServerJRE'>HQ Server JRE</a></li>
+    <li><a href='#BeforeYouStart-HQAgentJRE'>HQ Agent JRE</a></li>
+</ul>
+    <li><a href='#BeforeYouStart-ToUnderstandAgentServerCommunications'>To Understand Agent - Server Communications</a></li>
+</ul></div> 
+
+<p>Review these topics before starting the installation process.</p>
+
+<h1><a name="BeforeYouStart-IfYouAreUsinganExternalDatabase"></a>If You Are Using an External Database</h1>
+
+<p>If you are using an external database, setup the HQ database before installing HQ components.&nbsp; Refer to the instruction for the database server you use:</p>
+<ul>
+	<li><a href="Set Up MySQL.html" title="Set Up MySQL">Set Up MySQL</a></li>
+	<li><a href="Set Up Oracle.html" title="Set Up Oracle">Set Up Oracle</a></li>
+	<li><a href="Set Up PostgreSQL.html" title="Set Up PostgreSQL">Set Up PostgreSQL</a></li>
+</ul>
+
+
+<p>Make a note of the JDBC URL, database username, and database password---these values are required when you set up the HQ Server.</p>
+
+<h1><a name="BeforeYouStart-HQComponentsandJRELocation"></a>HQ Components and JRE Location</h1>
+
+<p>If you are installing an HQ component from a package with with a bundled JRE on a system that doesn't not have a  pre-existing JRE, the component should have no problem resolving its JRE. In other circumstances, you may need to set the HQ_JAVA_HOME environment variable.</p>
+
+<h2><a name="BeforeYouStart-HQServerJRE"></a>HQ Server JRE</h2>
+
+<p>The order of preference when resolving the HQ Server's JRE is:</p>
+<ol>
+	<li>HQ_JAVA_HOME environment variable</li>
+	<li>embedded JRE</li>
+	<li>JAVA_HOME environment variable</li>
+</ol>
+
+
+<p>When installing the HQ Server with a platform-independent installer, make sure that your JAVA_HOME environment variable points to your pre-existing JRE.</p>
+
+<p>If you install the HQ Server from a package with an embedded JRE, and you want the server to use a different JRE on the host, set  HQ_JAVA_HOME to point to the desired JRE.</p>
+
+<h2><a name="BeforeYouStart-HQAgentJRE"></a>HQ Agent JRE</h2>
+
+<p>On Unix-based platforms, the order of preference when resolving the agent's JRE is:</p>
+<ol>
+	<li>HQ_JAVA_HOME environment variable</li>
+	<li>Embedded JRE</li>
+	<li>JAVA_HOME</li>
+</ol>
+
+
+<p>On Windows, the order of preference when resolving the agent's JRE is:</p>
+<ol>
+	<li>HQ_JAVA_HOME <b>system</b> variable</li>
+	<li>Embedded JRE</li>
+</ol>
+
+
+<p><b>Note:</b>  Under Windows, neither the JAVA_HOME nor the HQ_JAVA_HOME environment variables are honored when resolving the JRE for HQ 4.x Agents. To run a 4.x agent under windows you must set HQ_JAVA_HOME as as a system variable:</p>
+
+<p><tt>My Computer &gt; Properties &gt; Advanced &gt; Environment Variables &gt; System variables &gt; New</tt></p>
+
+<h1><a name="BeforeYouStart-ToUnderstandAgentServerCommunications"></a>To Understand Agent - Server Communications</h1>
+
+<p>For those new to configuring HQ components, the <a href="Understand Agent Environment and Operation.html" title="Understand Agent Environment and Operation">Understand Agent Environment and Operation</a> summarizes key facts about how the agent and server communicate with each other.</p>
+
+<div class="scroll-pagebreak"></div>
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on May 31, 2011 13:08</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>Hyperic 4.6 Documentation : Configure LDAP Properties</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            Hyperic 4.6 Documentation : Configure LDAP Properties
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Nov 30, 2010 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p>You configure HQ Server for your LDAP server in the "LDAP Configuration Properties" section of the <b>Administration &gt; HQ Server Settings</b> page.</p>
+
+<p>By default Hyperic HQ uses its database for storing information about users and authenticating those users. HQ can be configured to use an external LDAP directory for authenticating users in addition to its own database.</p>
+
+<p>In HQ Enterprise, these properties configure HQ to use an external LDAP directory &#8212; in addition to HQ's own database &#8212; for authenticating users.</p>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<td class='confluenceTd'> <b>Property</b> </td>
+<td class='confluenceTd'> <b>Description</b> </td>
+</tr>
+<tr>
+<td class='confluenceTd'>Use LDAP Authentication </td>
+<td class='confluenceTd'>Checkmark this option to enable LDAP authentication. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> URL </td>
+<td class='confluenceTd'> Location of your LDAP or Active Directory server. If other than the standard LDAP port is used, specify it the URL. Add the port to the end of the URL, after a colon &#40;:&#41; character. For example: <br class="atl-forced-newline" /> <br class="atl-forced-newline" /> <tt>ldap://YourLDAPHost:44389</tt> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> SSL </td>
+<td class='confluenceTd'> Indicates whether the LDAP directory requires SSL connections. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Username and Password </td>
+<td class='confluenceTd'> Used if the LDAP directory does not allow anonymous searching, as is common in secure environments. The username must be an LDAP user with sufficient privileges to view at least the sections of the directory containing the information for HQ users. The full node path is required, for example: <br class="atl-forced-newline" /> <br class="atl-forced-newline" /> <tt>cn=admin,dc=example,dc=com</tt> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Search Base </td>
+<td class='confluenceTd'> Also known as the suffix. Required for an LDAP connection. The full path to the branch required, for example: <br class="atl-forced-newline" /> <br class="atl-forced-newline" /> <tt>ou=people,dc=example,dc=com</tt> <br class="atl-forced-newline" /> <br class="atl-forced-newline" /> If you are unsure of this setting, check with your LDAP administrator. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Search Filter </td>
+<td class='confluenceTd'> Limits the users in LDAP to a subset of the entire directory. For example, <br class="atl-forced-newline" /> <br class="atl-forced-newline" /> <tt>(!(location=SFO*))</tt> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Login Property </td>
+<td class='confluenceTd'> The LDAP property that HQ will use as the username. Very important. Examples of common login properties are "cn" and "uid". </td>
+</tr>
+</tbody></table>
+</div>
+
+
+<p>After LDAP authentication has been successfully configured, users will be able to log into HQ with their LDAP password (using the value specified as the <ins>Login Property</ins> as their username). The first time LDAP users log in to HQ, they will be asked to provide some identifying information before they can continue: their first and last name, email address, phone number, etc. This is for display purposes and alert notification purposes.</p>
+
+<p><b>Note:</b>&nbsp; LDAP users must also have one or more HQ roles.&nbsp;As with all new users in HQ, LDAP users are not assigned to any roles by default and therefore they will not be able to see any resources in HQ until they are added to a role. HQ administrators will need to assign the appropriate role or roles to the user in HQ. (On the HQ <b>Administration</b> page, click <b>List Users</b>, select the user, and click <b>Add to List</b> in the "Roles Assigned To" section of the page.)</p>
+
+
+<div class="scroll-pagebreak"></div>
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on May 31, 2011 13:08</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

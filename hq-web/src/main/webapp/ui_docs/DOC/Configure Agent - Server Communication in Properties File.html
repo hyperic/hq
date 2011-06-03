@@ -1,0 +1,281 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>Hyperic 4.6 Documentation : Configure Agent - Server Communication in Properties File</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            Hyperic 4.6 Documentation : Configure Agent - Server Communication in Properties File
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on May 20, 2011 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1305906008635 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1305906008635 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1305906008635 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1305906008635'>
+<ul>
+    <li><a href='#ConfigureAgent-ServerCommunicationinPropertiesFile-FileBasedConfigurationofAgentServerCommunicationsisEfficient'>File-Based Configuration of Agent-Server Communications is Efficient</a></li>
+    <li><a href='#ConfigureAgent-ServerCommunicationinPropertiesFile-Procedure%3AConfigureAgentServerCommunicationProperties'>Procedure: Configure Agent-Server Communication Properties</a></li>
+<ul>
+    <li><a href='#ConfigureAgent-ServerCommunicationinPropertiesFile-Step1Openorcreate%7B%7Bagent.properties%7D%7D'>Step 1 - Open or create <tt>agent.properties</tt></a></li>
+    <li><a href='#ConfigureAgent-ServerCommunicationinPropertiesFile-Step2UncommentAgentServerCommunicationProperties'>Step 2 - Uncomment Agent-Server Communication Properties</a></li>
+    <li><a href='#ConfigureAgent-ServerCommunicationinPropertiesFile-Step3DefineCommunicationPropertiesin%7B%7Bagent.properties%7D%7DFile'>Step 3 - Define Communication Properties in <tt>agent.properties</tt> File</a></li>
+    <li><a href='#ConfigureAgent-ServerCommunicationinPropertiesFile-Step4ConfigureUnidirectionalCommunications%28Optional%29'>Step 4 - Configure Unidirectional Communications (Optional)</a></li>
+    <li><a href='#ConfigureAgent-ServerCommunicationinPropertiesFile-Step5ConfigureAdditionalAgentBehaviors%28Optional%29'>Step 5 - Configure Additional Agent Behaviors (Optional)</a></li>
+    <li><a href='#ConfigureAgent-ServerCommunicationinPropertiesFile-Step6Copy%7B%7Bagent.properties%7D%7DtoAgentInstallation'>Step 6 - Copy <tt>agent.properties</tt> to Agent Installation</a></li>
+</ul>
+    <li><a href='#ConfigureAgent-ServerCommunicationinPropertiesFile-CommunicationPropertiesReference'>Communication Properties Reference</a></li>
+</ul></div>
+
+
+<p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
+
+
+<h1><a name="ConfigureAgent-ServerCommunicationinPropertiesFile-FileBasedConfigurationofAgentServerCommunicationsisEfficient"></a>File-Based Configuration of Agent-Server Communications is Efficient</h1>
+
+<p>It is simple to configure a single Hyperic Agent interactively: start it up, and respond to the prompts for locations, ports, and the other properties required for the Hyperic Agent and Hyperic Server to communicate.</p>
+
+<p>However, if you have multiple Hyperic Agents to deploy, it is more efficient to set the values for the communication properties in properties files. For example, you can create a standard agent profile that you can copy to the agent installation, or to a location available to the agent installation.</p>
+
+<p>Note also that Hyperic Agents that manage VMware vSphere components <b>must</b> be configured using in <tt>agent.properties</tt> &#45; interactive configuration is not supported for such agents.</p>
+
+<p>In a standard <tt>agent.profile</tt> &#45; one that you can deploy to multiple agents that report to the same Hyperic Server, you do not edit the properties that specify an agent's listen address and port. At first startup, if explicit values for IP address and port are not set, the Hyperic Agent - which detects the network interfaces on the platform - uses the first detected interface as its listen address, and port 2144 or 2443 as its listen port, depending on whether you configure the agent for plain text or SSL communications.</p>
+
+<p>Whether you use a standard agent profile, or create a unique <tt>agent.properties</tt> file for each agent, be sure to copy the file into the <tt>AgentHome/conf</tt> directory, or to the hidden <tt>HqUserHome/.hq</tt> directory, if it exists. (The agent will honor the settings in an <tt>agent.properties</tt> in the Hyperic users home directory over those found in a properties file in <tt>AgentHome/conf</tt>.</p>
+
+<h1><a name="ConfigureAgent-ServerCommunicationinPropertiesFile-Procedure%3AConfigureAgentServerCommunicationProperties"></a>Procedure: Configure Agent-Server Communication Properties</h1>
+
+<h2><a name="ConfigureAgent-ServerCommunicationinPropertiesFile-Step1Openorcreate%7B%7Bagent.properties%7D%7D"></a>Step 1 - Open or create <tt>agent.properties</tt></h2>
+
+<p>Make a copy of the <tt>agent.properties</tt> file from the agent installation.</p>
+
+<h2><a name="ConfigureAgent-ServerCommunicationinPropertiesFile-Step2UncommentAgentServerCommunicationProperties"></a>Step 2 - Uncomment Agent-Server Communication Properties</h2>
+
+<p>In the{{agent.properties}} file, find the section excerpted below, and remove the hash mark (#) in front of each the properties shown at the end of the excerpt.</p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">## Use the following if you'd like to have the agent setup
+## automatically from these properties. The values for these
+## properties are used to answer the setup questions
+##
+## If any of these properties are left undefined, the setup
+## process will prompt for their values
+##
+## If the value that should be used is the default when interactive
+## setup is done, use the string *default* as the value for the option
+
+#agent.setup.camIP=localhost
+#agent.setup.camPort=7080
+#agent.setup.camSSLPort=7443
+#agent.setup.camSecure=yes
+#agent.setup.camLogin=hqadmin
+#agent.setup.camPword=hqadmin
+#agent.setup.agentIP=*default*
+#agent.setup.agentPort=*default*
+#agent.setup.resetupTokens=no</pre>
+		</div>
+</div></div>
+<p><b>Note:</b> For more information about the properties above, see <a href="#ConfigureAgent-ServerCommunicationinPropertiesFile-CommunicationPropertiesReference">Communication Properties Reference</a> below.</p>
+
+<h2><a name="ConfigureAgent-ServerCommunicationinPropertiesFile-Step3DefineCommunicationPropertiesin%7B%7Bagent.properties%7D%7DFile"></a>Step 3 - Define Communication Properties in <tt>agent.properties</tt> File</h2>
+
+<p>The <tt>agent.properties</tt> file contains properties you can configure to govern both agent-initiated and server-initiated communication.</p>
+
+<ul>
+	<li>Specify the location and credentials the agent should use to contact the Hyperic Server with these properties:
+	<ul>
+		<li>agent.setup.camIP &#8212; Specify the address or hostname of the Hyperic Server.&nbsp;</li>
+		<li>agent.setup.camPort &#8212; The default value is the standard plaintext Hyperic listen port. You can specify a different port &#8212; as long as it is not already in use.&nbsp;</li>
+		<li>agent.setup.camSSLPort &#8212; The default value is the standard SSL Hyperic listen port. You can specify a different port &#8212; as long as it is not already in use.</li>
+		<li>agent.setup.camSecure &#8212; The default value is "yes" (use SSL). Change to "no" if you do not require the agent to use secure communications when contacting the Hyperic Server.</li>
+		<li>agent.setup.camLogin &#8212; Specify the username the agent should use when connecting to the server. If you change the value from the default value ("hqadmin"), make sure that that user account is properly configured on the Hyperic Server.</li>
+		<li>agent.setup.camPword &#8212; Specify the password the agent should use, along with the username above, when connecting to the server. Make sure that the password is the one configured in Hyperic for the user account.</li>
+	</ul>
+	</li>
+</ul>
+
+
+<ul>
+	<li>Specify the address or hostname and the listen port the Hyperic Server should use to contact the Hyperic Agent with these properties:
+	<ul>
+		<li>agent.setup.agentIP &#8212; If you leave the default setting &#8212; "<b>default</b>" &#8212; the Hyperic Agent will detect an IP address on the platform and choose it as its listen address.</li>
+		<li>agent.setup.agentPort &#8212; If you leave the default setting &#8212; {"<b>default</b>" &#8212; the Hyperic Agent will use the default listen port (either 7080 or 7443) as its listen address. If that port is unavailable, the agent will detect a free port and choose it as its listen port.</li>
+	</ul>
+	</li>
+</ul>
+
+
+<p>These are the minimum properties required for agent-server communication.</p>
+
+<p>Unless you want to configure other agent behaviors, save your changes and proceed to <a href="#ConfigureAgent-ServerCommunicationinPropertiesFile-CopyToAgent.">Step 6 - Copy <tt>agent.properties</tt> to Agent Installation</a></p>
+
+<h2><a name="ConfigureAgent-ServerCommunicationinPropertiesFile-Step4ConfigureUnidirectionalCommunications%28Optional%29"></a>Step 4 - Configure Unidirectional Communications (Optional)</h2>
+
+<p>By default, agent-server communication is bi-directional. If your policies dictate that all communication between agent and server are agent-initiated, you can uncomment the <tt>agent.setup.unidirectional</tt> property and set it to "yes".</p>
+
+<p>Unless you want to configure other agent behaviors, save your changes and proceed to <a href="#ConfigureAgent-ServerCommunicationinPropertiesFile-CopyToAgent.">Step 6 - Copy <tt>agent.properties</tt> to Agent Installation</a>.</p>
+
+<h2><a name="ConfigureAgent-ServerCommunicationinPropertiesFile-Step5ConfigureAdditionalAgentBehaviors%28Optional%29"></a>Step 5 - Configure Additional Agent Behaviors (Optional)</h2>
+
+<p>As desired, you can configure additional agent behaviors in the <tt>agent.properties</tt> file. For information about configurable agent behaviors, see:</p>
+
+<ul>
+	<li><a href="Configure Auto-Discovery Scanning and Reporting.html" title="Configure Auto-Discovery Scanning and Reporting">Configure Auto-Discovery Scanning and Reporting</a></li>
+	<li><a href="Configure Plugin Loading.html" title="Configure Plugin Loading">Configure Plugin Loading</a></li>
+	<li><a href="Configure Agent Logging.html" title="Configure Agent Logging">Configure Agent Logging</a></li>
+	<li><a href="Tweak the Agent to Enable a Resource Plugin.html" title="Tweak the Agent to Enable a Resource Plugin">Tweak the Agent to Enable a Resource Plugin</a></li>
+</ul>
+
+
+
+<p>After completing your edits, save your changes and copy the updated properties file to desired agent or agents, as described in the next section.</p>
+
+<h2><a name="ConfigureAgent-ServerCommunicationinPropertiesFile-Step6Copy%7B%7Bagent.properties%7D%7DtoAgentInstallation"></a>Step 6 - Copy <tt>agent.properties</tt> to Agent Installation</h2>
+<p><a name="ConfigureAgent-ServerCommunicationinPropertiesFile-CopyToAgent"></a></p>
+
+<h1><a name="ConfigureAgent-ServerCommunicationinPropertiesFile-CommunicationPropertiesReference"></a>Communication Properties Reference</h1>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>agent.setup.camIP</b><br />
+<p><b>Description</b></p>
+
+<p>You can use  this property to define for the agent the IP address of the HQ server. The agent reads this value only in the event that it cannot find connection configuration in its data directory.  Specifying this and other agent.setup.* properties is a way to reduce the user interaction required to configure an agent to communicate with the server. </p>
+
+<p>The value can be provided as an IP address or a fully qualified domain name. To identify an server on the same host as the server, set the value to 127.0.0.1. </p>
+
+<p>If there is a firewall between the agent and server, specify the address of the firewall, and configure the firewall to forward traffic on port 7080, or 7443 if you use the SSL port, to the HQ Server.</p>
+
+<p><b>Default</b></p>
+
+<p>Commented out, localhost.    </p></td></tr></table></div>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>agent.setup.camPort</b><br />
+<p><b>Description</b></p>
+
+<p>You can use this property to define for the agent, at first startup after installation, what server port to use for non-secure communications with the server. The agent reads this value only in the event that it cannot find connection configuration in its data directory. Specifying this and other agent.setup.* properties is a way to reduce the user interaction required to configure an agent to communicate with the server. </p>
+
+<p><b>Default</b></p>
+
+<p>Commented out, 7080.</p></td></tr></table></div>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>agent.setup.camSSLPort</b><br /><p><b>Description</b></p>
+
+<p>You can use this property to define for the agent, at first startup after installation, what server port to use for SSL communications with the server. The agent reads this value only in the event that it cannot find connection configuration in its data directory. Specifying this and other agent.setup.* properties is a way to reduce the user interaction required to configure an agent to communicate with the server. </p>
+
+<p><b>Default</b></p>
+
+<p>Commented out, 7443.</p></td></tr></table></div>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>agent.setup.camSecure</b><br /><p><b>Description</b></p>
+
+<p>You can use this property to define for the agent, at first startup after installation, whether to communicate with the server over SSL. If you set this property to yes, all agent-server communications will be use the SSL secure port. </p>
+
+<p>If acceptable in your environment, non-SSL communication offers improved performance for agent-server communications.  </p>
+
+<p>The agent reads this value only in the event that it cannot find connection configuration in its data directory. Specifying this and other agent.setup.* properties is a way to reduce the user interaction required to configure an agent to communicate with the server. </p>
+
+<p><b>Default</b></p>
+
+<p>Commented out, value of yes.</p></td></tr></table></div>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>agent.setup.camLogin</b><br /><p><b>Description</b></p>
+
+<p>You can use this property to define for the agent, at first startup after installation, the HQ username to use when registering itself with the server.  The permission required on the server for this initialization is Create, for Platforms.</p>
+
+<p>A login from the agent to the server is only required during the initial configuration of the agent. </p>
+
+<p>The agent reads this value only in the event that it cannot find connection configuration in its data directory. Specifying this and other agent.setup.* properties is a way to reduce the user interaction required to configure an agent to communicate with the server. </p>
+
+<p><b>Default</b></p>
+
+<p>Commented out, hqadmin.</p></td></tr></table></div>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>agent.setup.camPword</b><br />
+<p><b>Description</b></p>
+
+<p>You can use this property to define for the agent, at first startup after installation, the password for the user specified by agent.setup.camLogin. </p>
+
+<p>The agent reads this value only in the event that it cannot find connection configuration in its data directory. Specifying this and other agent.setup.* properties is a way to reduce the user interaction required to configure an agent to communicate with the server. </p>
+
+<p><b>Default</b></p>
+
+<p>Commented out, hqadmin<b>.</b></p></td></tr></table></div>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>agent.setup.agentIP</b><br /><p><b>Description</b></p>
+
+<p>This specifies the IP address that the HQ Server will use to contact the HQ Agent. If the agent is on the same host as the server, value of 127.0.0.1 is valid.</p>
+
+<p>If there is a firewall between the server and agent, specify the IP address of the firewall, and configure the firewall to forward traffic intended for the agent to the agent's listen address, which can be configured with agent.listenIP.</p>
+
+<p>The agent reads this value only in the event that it cannot find connection configuration in its data directory. Specifying this and other agent.setup.* properties is a way to reduce the user interaction required to configure an agent to communicate with the server. </p>
+
+<p><b>Default</b></p>
+
+<p>As installed, agent.properties contains a commented out statement that sets the value to &#42;default&#42;.  If you use the agent.setup.* properties to supply an agent's configuration at first startup, and uncomment this property and leave the value &#42;default&#42;, the HQ Server will contact the agent using the IP address that SIGAR detects on the agent host. </p></td></tr></table></div>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>agent.setup.agentPort</b><br /><p><b>Description</b></p>
+
+<p>This specifies the port (on the IP address configured with agent.setup.agentIP) on the agent on which the HQ Server will communication with the agent.  </p>
+
+<p>If there is a firewall between the agent and the server, set agent.setup.agentPort to the appropriate port on the firewall, and configure the firewall to forward traffic intended for the agent to the agent listen port, which can be configured with.  </p>
+
+<p>The agent reads this value only in the event that it cannot find its connection configuration in its data directory. Specifying this and other agent.setup.* properties is a way to reduce the user interaction required to configure an agent to communicate with the server. </p>
+
+<p><b>Default</b></p>
+
+<p>As installed, agent.properties contains a commented out statement that sets the value to &#42;default&#42;.  If you use the agent.setup.* properties to supply an agent's configuration at first startup, and uncomment this property and leave the value &#42;default&#42;, the HQ Server will contact the agent on port 2144, unless SIGAR detects it is not available, in which case another default is selected.  </p></td></tr></table></div>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>agent.setup.resetupToken</b><br />
+<p><b>Description</b></p>
+
+<p>You can use this property to define for the agent, at first startup after installation,  whether the agent will create a new token to use to authenticate with the server each time it starts up.  Regenerating a token is useful if the Agent cannot connect to the server because the token has been deleted or corrupted.</p>
+
+<p>Regardless of the value of this property, an agent will generate a token the first time it is started after installation.</p>
+
+<p>The agent reads this value only in the event that it cannot find connection configuration in its data directory. Specifying this and other agent.setup.* properties is a way to reduce the user interaction required to configure an agent to communicate with the server. </p>
+
+<p><b>Default</b></p>
+
+<p>As installed, agent.properties contains a commented out statement that sets the value to no.</p></td></tr></table></div>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>agent.setup.unidirectional</b><br /><b>Available only in <font color="red">vFabric Hyperic</font></b>
+
+
+<p><b>Description</b></p>
+
+<p>Enables the unidirectional communications between HQ Agent and HQ Server in vFabric Hyperic. For more information, see <a href="Configure Unidirectional Agent - Server Communication.html" title="Configure Unidirectional Agent - Server Communication">Configure Unidirectional Agent &#45; Server Communication</a>.</p>
+
+<p><b>Default</b> </p>
+
+<p>Commented out, defaults to no.  </p></td></tr></table></div>
+<div class="scroll-pagebreak"></div>
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on May 31, 2011 13:08</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

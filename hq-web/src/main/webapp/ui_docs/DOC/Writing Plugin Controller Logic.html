@@ -1,0 +1,229 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>Hyperic 4.6 Documentation : Writing Plugin Controller Logic</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            Hyperic 4.6 Documentation : Writing Plugin Controller Logic
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Aug 10, 2010 by <font color="#0050B2">jencompgeek</font>.
+				    </div>
+
+				    <p>This section has topics related to programming the behavior of an HQU plugin.  <br/>
+<b>WIP Note</b>:  This section is a work in progress.  In the next version of this guide, these topics will be enhanced, and will provide cross-references to relevant "how to" topics.  Goal for this section is to provide practical "how to" information at a granular level, organized functionally into these categories:</p>
+<ul>
+	<li>
+	<ul>
+		<li>Accessing HQ Data and Functions</li>
+		<li>Defining User Interaction</li>
+		<li>Rendering</li>
+		<li>Miscellaneous Controller Topics</li>
+	</ul>
+	</li>
+</ul>
+
+
+<h1><a name="WritingPluginControllerLogic-AccessingHQDataandFunctions"></a><b>Accessing HQ Data and Functions</b></h1>
+<h2><a name="WritingPluginControllerLogic-HQUAPIs"></a><b>HQU APIs</b></h2>
+<p>HQU provides a set of Groovy APIs for accessing HQ data and functions, located in the hq-rendit jar.   The Groovy APIs provide a simpler, more intuitive interface to HQ which will be supported and deprecated as API versions periodically change. Although an HQU plugin can call any HQ class, Hyperic recommends the use of the Groovy APIs. Note however, in this release of the HQU Framework, not all backend functions are available through the Groovy APIs.</p>
+
+<h2><a name="WritingPluginControllerLogic-BackendAPIs"></a><b>Backend APIs</b></h2>
+<p>HQU plugins can use HQ's backend APIs, which can perform any HQ function. <b>This is not officially supported and may change in any future release of Hyperic.</b></p>
+
+<p>HQ Manager APIs are POJOs that provide transactional functionality, for example:<br/>
+hq-server/src/main/java/org/hyperic/hq/{subsystem}/server/session/SomeManagerImpl.java</p>
+
+<p>Invocation of a manager operation is simple:</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.appdef.shared.PlatformManager;
+
+private getPlat10001() {
+    Bootstrap.getBean(PlatformManager.class).findPlatformById(10001)
+}</pre>
+		</div>
+</div></div>
+
+<p>The Bootstrap class is a wrapper around the Spring application context that returns a singleton instance of a manager POJO.</p>
+
+<h1><a name="WritingPluginControllerLogic-DefiningUserInteraction"></a><b>Defining User Interaction</b> </h1>
+<h2><a name="WritingPluginControllerLogic-DefiningParameters"></a><b>Defining Parameters</b> </h2>
+<p>Controller actions are executed with parameters from the HTTP request. One, or multiple, values may be obtained for a parameter.  </p>
+
+<p>For example, this request provides a single timeout value and multiple id values:
+<a href="http://localhost:7080/hqu/pinger/madcast/execute.hqu?timeout=300&amp;id=3&amp;id=4">http://localhost:7080/hqu/pinger/madcast/execute.hqu?timeout=300&amp;id=3&amp;id=4</a></p>
+
+<p>To define the timeout  parameter, for which a single value is provided: </p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">def timeout params.getOne('timeout')</pre>
+		</div>
+</div></div>
+
+<p>To define the id  parameter, for which a two value are provided:</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">def id params.get('id')</pre>
+		</div>
+</div></div>
+
+<p>The listing of MadcastController.groovy below, illustrates both usages, allowing for a single value of timeout and multiple values of id to be obtained from the HTTP request. </p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">import org.hyperic.hq.hqu.rendit.BaseController
+
+class MadcastController extends BaseController {
+
+    def execute(params) {
+        def timeout = params.getOne('timeout', 60 // default timeout if not in URL)
+
+        def resources = lookupAndValidateResources(timeout, params.ids)
+
+        def start  = now
+        def errors = ExternalProgram.execute(timeout, resources)
+        log.info "Mastcasted to $\{resources.size()\} resources in $\{now - start\}ms"
+        render(locals:\[
+            castTime:now - start, 
+            isAdministrator: user.hasAdminPrivilege(), 
+            errors: errors\])
+    }
+
+    private getNow() {
+        System.currentTimeMillis()
+    }
+
+    private lookupAndValidateResources(timeout, ids) {
+        ....
+    }
+}</pre>
+		</div>
+</div></div>
+<h2><a name="WritingPluginControllerLogic-CreatingDojoTables"></a><b>Creating Dojo Tables</b> </h2>
+<p>DojoUtil.groovy provides  utility methods for creating complex content which interacts with HQ.</p>
+<ul>
+	<li>dojoTable()—A versatile, AJAX-based table that can deal with paging, sorting, and localization.</li>
+	<li>processTableRequest()—Processes table requests from dojoTables</li>
+	<li>dojoTabContainer()—A  tabbed container, with hidden tabs.</li>
+</ul>
+
+
+<p><br class="atl-forced-newline" />
+An example of processTableRequest:</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">def data(params) {
+        def json = DojoUtil.processTableRequest(SYSTEMSDOWN_SCHEMA , params)
+        render(inline:"/* ${json} */", contentType:'text/json-comment-filtered')
+    }</pre>
+		</div>
+</div></div>
+
+<h1><a name="WritingPluginControllerLogic-Rendering"></a><b>Rendering</b></h1>
+<h2><a name="WritingPluginControllerLogic-%7B%7DObtainingLocalizedStrings"></a><a name="WritingPluginControllerLogic-ObtainingLocalizedStrings"></a><b>Obtaining Localized Strings</b></h2>
+<p>The controller can obtain localized values for a controller method. This is useful if the controller needs to generate text that will be displayed in the rendered view, or write localized strings to a log or other file. </p>
+
+<p>Controller files can use the getLocaleBundle() method of BaseController.groovy, which returns a Map facade over a ResourceBundle.</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">def getName(u) {
+        "${localeBundle.NameIs}: ${u.name}"
+    }</pre>
+		</div>
+</div></div>
+
+<h2><a name="WritingPluginControllerLogic-RenderingAjax"></a><b>Rendering Ajax</b></h2>
+<p>If you want to render AJAX, see <a href="https://fisheye.springsource.org/browse/hq/hq-rendit/src/main/groovy/org/hyperic/hq/hqu/rendit/render/RenderFrame.groovy">RenderFrame.groovy </a> documentation</p>
+
+<h2><a name="WritingPluginControllerLogic-ReturningXMLfromControllers"></a><b>Returning XML from Controllers</b></h2>
+<p>Groovy provides the groovy.xml.MarkupBuilder class for generating XML.   <br/>
+To return XML from your controller, specify the methods whose results should be formatted as XML, using setXMLMethods().</p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">class EdatorController extends BaseController {
+    EdatorController() {
+        setXMLMethods(['findUsers'])
+    }
+    def findUsers(xmlBuilder, params) {
+        xmlBuilder.users {
+            for (u in UserManager.getUsers()) {
+                user(Name:u.name, Id:id)
+            }
+        }
+        xmlBuilder
+    }
+}</pre>
+		</div>
+</div></div>
+
+<p>HQU creates a groovy.xml.MarkupBuilder and passes it  as the first argument to your controller method. The controller should return the builder object, or some other XML that it wants to render.</p>
+
+<p>For more information, see "<a href="http://groovy.codehaus.org/Using+MarkupBuilder+for+Agile+XML+creation">Using MarkupBuilder for Agile XML Creation".  </a></p>
+
+<h2><a name="WritingPluginControllerLogic-ReturningJSONfromControllers"></a><b>Returning JSON from Controllers</b> </h2>
+<p>Requests are sent to HQ via a regular HTTP request:<br/>
+curl <a href="https://hqadmin:hqadmin@localhost:7443/hqu/myplugin/edator/viewUser.hqu?name=JoeBob">https://hqadmin:hqadmin@localhost:7443/hqu/myplugin/edator/viewUser.hqu?name=JoeBob</a></p>
+
+<p>and result in JSON objects:<br/>
+{"Name": "JoeBob", "Id": 32321 }</p>
+
+<p>To return JSON to the browser, specify the methods whose results should be formatted as JSON, using  setJSONMethods.  The result of the action must be a map (key-value pairs), but can contain values of most types.</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">class EdatorController extends BaseController {
+    EdatorController() {
+        setJSONMethods(['viewUser', 'newUser'])
+    }
+    def viewUser(params) {
+        def user = myFindUser(params)
+        [ Name: user.name, Id: user.id ]
+    }
+    def newUser(params){ ... }
+}</pre>
+		</div>
+</div></div>
+<h1><a name="WritingPluginControllerLogic-MiscellaneousControllerTopics"></a><b>Miscellaneous Controller Topics</b></h1>
+<h2><a name="WritingPluginControllerLogic-GroovyConsole"></a><b>Groovy Console</b></h2>
+<h2><a name="WritingPluginControllerLogic-ReusingMarkupwithGroovyTemplates"></a><b>Re-using Markup with Groovy Templates</b></h2>
+<p>Templates provide a way to reuse markup for different actions.  If you find yourself using a fragment of Groovy code frequently, for instance an HQL query, you can create a template for it. </p>
+
+<p>To create a template, copy it into your gconsoleTemplates directory</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">$ cp myTemplate.groovy $TOMCAT_HOME/webapps/ROOT/WEB-INF/gconsoleTemplates</pre>
+		</div>
+</div></div>
+
+<p>If you are building and deploying HQ from source, you can also place it in<br/>
+~/.hq/gconsoleTemplates and it will be automatically picked up by the build.</p>
+
+<p>Templates will appear as menu items in the Groovy Console.</p>
+<h2><a name="WritingPluginControllerLogic-UsingVariablesinControllers"></a><b>Using Variables in Controllers</b></h2>
+<h2><a name="WritingPluginControllerLogic-Authorization"></a><b>Authorization</b> </h2>
+<h2><a name="WritingPluginControllerLogic-Snippets"></a><b>Snippets</b></h2>
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on May 31, 2011 13:10</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

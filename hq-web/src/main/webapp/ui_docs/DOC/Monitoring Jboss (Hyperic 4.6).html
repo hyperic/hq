@@ -1,0 +1,212 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>Hyperic 4.6 Documentation : Monitoring Jboss (Hyperic 4.6)</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            Hyperic 4.6 Documentation : Monitoring Jboss (Hyperic 4.6)
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on May 16, 2011 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p>View Source</p>
+<h2><a name="MonitoringJboss%28Hyperic4.6%29-JBossPlugin"></a>JBoss Plugin </h2>
+<div class='panelMacro'><table class='noteMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/warning.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Requirements</b><br /><ul>
+	<li>Do not run a managed JBoss server on the same machine as the Hyperic Server. This is an unsupported configuration.</li>
+</ul>
+
+
+<ul>
+	<li>JBoss 4.2 and later must run under Java 1.5 or later for Hyperic to be able to manage it.</li>
+</ul>
+
+
+<ul>
+	<li>The Hyperic Agent can usually discover the location of Jboss but it may be necessary to define its installation directory. If you see the following error when configuring a JBoss Server in Hyperic:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">Invalid configuration: Plugin error: Plugin class not found:javax/management/MBeanException 
+(invalid classpath or corrupt plugin jar)</pre>
+		</div>
+</div></div> 
+	<ol>
+		<li>Add the <tt>jboss.installpath</tt> property to the <tt>agent.properties</tt> file for the agent. For usage, see <a href="http://support.hyperic.com/display/EVO/jboss.installpath" title="jboss.installpath">jboss.installpath</a>.</li>
+		<li>Restart the Hyperic Agent.</li>
+	</ol>
+	</li>
+</ul>
+</td></tr></table></div> 
+
+<h4><a name="MonitoringJboss%28Hyperic4.6%29-Download"></a>Download </h4>
+
+<ul>
+	<li>Included in the <a href="http://www.hyperic.com/downloads/">HQ distribution</a></li>
+	<li>Grab the latest source code:
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre> 
+
+svn co http://svn.hyperic.org/projects/hq/trunk hyperic-hq 
+
+</pre>
+</div></div> </li>
+</ul>
+
+
+<h4><a name="MonitoringJboss%28Hyperic4.6%29-Documentation"></a>Documentation </h4>
+
+<ul>
+	<li><a href="http://support.hyperic.com/display/EVO/JBoss+3.2+server" title="JBoss 3.2 server">JBoss 3.2 server</a>
+	<ul>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+3.2+Entity+EJB+service" title="JBoss 3.2 Entity EJB service">JBoss 3.2 Entity EJB service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+3.2+Hibernate+Session+Factory+service" title="JBoss 3.2 Hibernate Session Factory service">JBoss 3.2 Hibernate Session Factory service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+3.2+JCA+Connection+Pool+service" title="JBoss 3.2 JCA Connection Pool service">JBoss 3.2 JCA Connection Pool service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+3.2+JMS+Destination+service" title="JBoss 3.2 JMS Destination service">JBoss 3.2 JMS Destination service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+3.2+JMS+Topic+service" title="JBoss 3.2 JMS Topic service">JBoss 3.2 JMS Topic service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+3.2+Message+Driven+EJB+service" title="JBoss 3.2 Message Driven EJB service">JBoss 3.2 Message Driven EJB service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+3.2+Stateful+Session+EJB+service" title="JBoss 3.2 Stateful Session EJB service">JBoss 3.2 Stateful Session EJB service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+3.2+Stateless+Session+EJB+service" title="JBoss 3.2 Stateless Session EJB service">JBoss 3.2 Stateless Session EJB service</a></li>
+	</ul>
+	</li>
+</ul>
+
+
+<ul>
+	<li><a href="http://support.hyperic.com/display/EVO/JBoss+4.0+server" title="JBoss 4.0 server">JBoss 4.0 server</a>
+	<ul>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+4.0+EJB3+service" title="JBoss 4.0 EJB3 service">JBoss 4.0 EJB3 service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+4.0+Entity+EJB+service" title="JBoss 4.0 Entity EJB service">JBoss 4.0 Entity EJB service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+4.0+Hibernate+Session+Factory+service" title="JBoss 4.0 Hibernate Session Factory service">JBoss 4.0 Hibernate Session Factory service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+4.0+JCA+Connection+Pool+service" title="JBoss 4.0 JCA Connection Pool service">JBoss 4.0 JCA Connection Pool service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+4.0+JCA+Data+Source+service" title="JBoss 4.0 JCA Data Source service">JBoss 4.0 JCA Data Source service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+4.0+JMS+Destination+service" title="JBoss 4.0 JMS Destination service">JBoss 4.0 JMS Destination service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+4.0+JMS+Topic+service" title="JBoss 4.0 JMS Topic service">JBoss 4.0 JMS Topic service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+4.0+Message+Driven+EJB+service" title="JBoss 4.0 Message Driven EJB service">JBoss 4.0 Message Driven EJB service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+4.0+Stateful+Session+EJB+service" title="JBoss 4.0 Stateful Session EJB service">JBoss 4.0 Stateful Session EJB service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+4.0+Stateless+Session+EJB+service" title="JBoss 4.0 Stateless Session EJB service">JBoss 4.0 Stateless Session EJB service</a></li>
+	</ul>
+	</li>
+</ul>
+
+
+<ul>
+	<li><a href="http://support.hyperic.com/display/EVO/JBoss+4.2+server" title="JBoss 4.2 server">JBoss 4.2 server</a>
+	<ul>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+4.2+EJB3+service" title="JBoss 4.2 EJB3 service">JBoss 4.2 EJB3 service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+4.2+Entity+EJB+service" title="JBoss 4.2 Entity EJB service">JBoss 4.2 Entity EJB service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+4.2+Hibernate+Session+Factory+service" title="JBoss 4.2 Hibernate Session Factory service">JBoss 4.2 Hibernate Session Factory service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+4.2+JCA+Connection+Pool+service" title="JBoss 4.2 JCA Connection Pool service">JBoss 4.2 JCA Connection Pool service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+4.2+JCA+Data+Source+service" title="JBoss 4.2 JCA Data Source service">JBoss 4.2 JCA Data Source service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+4.2+JGroups+Channel+service" title="JBoss 4.2 JGroups Channel service">JBoss 4.2 JGroups Channel service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+4.2+JMS+Destination+service" title="JBoss 4.2 JMS Destination service">JBoss 4.2 JMS Destination service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+4.2+JMS+Topic+service" title="JBoss 4.2 JMS Topic service">JBoss 4.2 JMS Topic service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+4.2+Message+Driven+EJB+service" title="JBoss 4.2 Message Driven EJB service">JBoss 4.2 Message Driven EJB service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+4.2+Stateful+Session+EJB+service" title="JBoss 4.2 Stateful Session EJB service">JBoss 4.2 Stateful Session EJB service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+4.2+Stateless+Session+EJB+service" title="JBoss 4.2 Stateless Session EJB service">JBoss 4.2 Stateless Session EJB service</a></li>
+	</ul>
+	</li>
+</ul>
+
+
+<ul>
+	<li><a href="http://support.hyperic.com/display/EVO/JBoss+4.3+server" title="JBoss 4.3 server">JBoss 4.3 server</a>
+	<ul>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+4.3+EJB3+service" title="JBoss 4.3 EJB3 service">JBoss 4.3 EJB3 service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+4.3+Entity+EJB+service" title="JBoss 4.3 Entity EJB service">JBoss 4.3 Entity EJB service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+4.3+Hibernate+Session+Factory+service" title="JBoss 4.3 Hibernate Session Factory service">JBoss 4.3 Hibernate Session Factory service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+4.3+JCA+Connection+Pool+service" title="JBoss 4.3 JCA Connection Pool service">JBoss 4.3 JCA Connection Pool service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+4.3+JCA+Data+Source+service" title="JBoss 4.3 JCA Data Source service">JBoss 4.3 JCA Data Source service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+4.3+JGroups+Channel+service" title="JBoss 4.3 JGroups Channel service">JBoss 4.3 JGroups Channel service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+4.3+JMS+Destination+service" title="JBoss 4.3 JMS Destination service">JBoss 4.3 JMS Destination service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+4.3+JMS+Queue+Destination+service" title="JBoss 4.3 JMS Queue Destination service">JBoss 4.3 JMS Queue Destination service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+4.3+JMS+Topic+service" title="JBoss 4.3 JMS Topic service">JBoss 4.3 JMS Topic service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+4.3+Message+Driven+EJB+service" title="JBoss 4.3 Message Driven EJB service">JBoss 4.3 Message Driven EJB service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+4.3+Stateful+Session+EJB+service" title="JBoss 4.3 Stateful Session EJB service">JBoss 4.3 Stateful Session EJB service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+4.3+Stateless+Session+EJB+service" title="JBoss 4.3 Stateless Session EJB service">JBoss 4.3 Stateless Session EJB service</a></li>
+	</ul>
+	</li>
+</ul>
+
+
+<ul>
+	<li><a href="http://support.hyperic.com/display/EVO/JBoss+5.0+server" title="JBoss 5.0 server">JBoss 5.0 server</a>
+	<ul>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+5.0+EJB+3+service" title="JBoss 5.0 EJB 3 service">JBoss 5.0 EJB 3 service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+5.0+Hibernate+Session+Factory+service" title="JBoss 5.0 Hibernate Session Factory service">JBoss 5.0 Hibernate Session Factory service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+5.0+JCA+Connection+Pool+service" title="JBoss 5.0 JCA Connection Pool service">JBoss 5.0 JCA Connection Pool service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+5.0+JCA+Data+Source+service" title="JBoss 5.0 JCA Data Source service">JBoss 5.0 JCA Data Source service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+5.0+JGroups+Channel+service" title="JBoss 5.0 JGroups Channel service">JBoss 5.0 JGroups Channel service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+5.0+JMS+QUEUE+Destination+service" title="JBoss 5.0 JMS QUEUE Destination service">JBoss 5.0 JMS QUEUE Destination service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+5.0+JMS+Topic+service" title="JBoss 5.0 JMS Topic service">JBoss 5.0 JMS Topic service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+5.0+Message+Driven+EJB+service" title="JBoss 5.0 Message Driven EJB service">JBoss 5.0 Message Driven EJB service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+5.0+Stateful+Session+EJB+service" title="JBoss 5.0 Stateful Session EJB service">JBoss 5.0 Stateful Session EJB service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+5.0+Stateless+Session+EJB+service" title="JBoss 5.0 Stateless Session EJB service">JBoss 5.0 Stateless Session EJB service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+5.0+WebApp+service" title="JBoss 5.0 WebApp service">JBoss 5.0 WebApp service</a></li>
+	</ul>
+	</li>
+</ul>
+
+
+<ul>
+	<li><a href="http://support.hyperic.com/display/EVO/JBoss+5.1+server" title="JBoss 5.1 server">JBoss 5.1 server</a>
+	<ul>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+5.1+EJB+3+service" title="JBoss 5.1 EJB 3 service">JBoss 5.1 EJB 3 service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+5.1+Hibernate+Session+Factory+service" title="JBoss 5.1 Hibernate Session Factory service">JBoss 5.1 Hibernate Session Factory service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+5.1+JCA+Connection+Pool+service" title="JBoss 5.1 JCA Connection Pool service">JBoss 5.1 JCA Connection Pool service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+5.1+JCA+Data+Source+service" title="JBoss 5.1 JCA Data Source service">JBoss 5.1 JCA Data Source service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+5.1+JGroups+Channel+service" title="JBoss 5.1 JGroups Channel service">JBoss 5.1 JGroups Channel service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+5.1+JMS+QUEUE+Destination+service" title="JBoss 5.1 JMS QUEUE Destination service">JBoss 5.1 JMS QUEUE Destination service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+5.1+JMS+Topic+service" title="JBoss 5.1 JMS Topic service">JBoss 5.1 JMS Topic service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+5.1+Message+Driven+EJB+service" title="JBoss 5.1 Message Driven EJB service">JBoss 5.1 Message Driven EJB service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+5.1+Stateful+Session+EJB+service" title="JBoss 5.1 Stateful Session EJB service">JBoss 5.1 Stateful Session EJB service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+5.1+Stateless+Session+EJB+service" title="JBoss 5.1 Stateless Session EJB service">JBoss 5.1 Stateless Session EJB service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+5.1+WebApp+service" title="JBoss 5.1 WebApp service">JBoss 5.1 WebApp service</a></li>
+	</ul>
+	</li>
+</ul>
+
+
+<ul>
+	<li><a href="http://support.hyperic.com/display/EVO/JBoss+6.0+server" title="JBoss 6.0 server">JBoss 6.0 server</a>
+	<ul>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+6.0+EJB+3+service" title="JBoss 6.0 EJB 3 service">JBoss 6.0 EJB 3 service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+6.0+Hibernate+Session+Factory+service" title="JBoss 6.0 Hibernate Session Factory service">JBoss 6.0 Hibernate Session Factory service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+6.0+JCA+Connection+Pool+service" title="JBoss 6.0 JCA Connection Pool service">JBoss 6.0 JCA Connection Pool service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+6.0+JCA+Data+Source+service" title="JBoss 6.0 JCA Data Source service">JBoss 6.0 JCA Data Source service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+6.0+JGroups+Channel+service" title="JBoss 6.0 JGroups Channel service">JBoss 6.0 JGroups Channel service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+6.0+JMS+HornetQ+QUEUE+service" title="JBoss 6.0 JMS HornetQ QUEUE service">JBoss 6.0 JMS HornetQ QUEUE service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+6.0+JMS+HornetQ+Topic+service" title="JBoss 6.0 JMS HornetQ Topic service">JBoss 6.0 JMS HornetQ Topic service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+6.0+JMS+QUEUE+Destination+service" title="JBoss 6.0 JMS QUEUE Destination service">JBoss 6.0 JMS QUEUE Destination service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+6.0+JMS+Topic+service" title="JBoss 6.0 JMS Topic service">JBoss 6.0 JMS Topic service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+6.0+Message+Driven+EJB+service" title="JBoss 6.0 Message Driven EJB service">JBoss 6.0 Message Driven EJB service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+6.0+Stateful+Session+EJB+service" title="JBoss 6.0 Stateful Session EJB service">JBoss 6.0 Stateful Session EJB service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+6.0+Stateless+Session+EJB+service" title="JBoss 6.0 Stateless Session EJB service">JBoss 6.0 Stateless Session EJB service</a></li>
+		<li><a href="http://support.hyperic.com/display/EVO/JBoss+6.0+WebApp+service" title="JBoss 6.0 WebApp service">JBoss 6.0 WebApp service</a></li>
+	</ul>
+	</li>
+</ul>
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on May 31, 2011 13:08</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>
