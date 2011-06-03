@@ -674,7 +674,7 @@
                 		var span = hqDojo.create("span", {
                 			"class": "first column span-1"
                 		}, li);
-                		if(${mechanismOn} && (!summary.deleted) && (!summary.inProgress)){
+                		if(${mechanismOn} && (!summary.deleted) && (!summary.inProgress)&& (!summary.isServerPlugin)){
 	                		hqDojo.create("input", {
     	            			"type": "checkbox",
     	            			"name": "deleteId",
