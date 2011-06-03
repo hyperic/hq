@@ -60,16 +60,20 @@ public class SecureAgentConnection
     private String agentAddress;
     private int    agentPort;
     private String authToken;
-
+    private boolean autoValidate = false;
    
 
-    public SecureAgentConnection(String agentAddress, int agentPort,
-                              String authToken)
-    {
+    public SecureAgentConnection(String agentAddress, int agentPort, String authToken) {
         super(agentAddress, agentPort);
         this.agentAddress = agentAddress;
         this.agentPort    = agentPort;
         this.authToken    = authToken;
+    }
+    
+    public SecureAgentConnection(String agentAddress, int agentPort, String authToken, boolean autoValidate) {
+    	this(agentAddress, agentPort, authToken);
+    	
+    	this.autoValidate = autoValidate;
     }
     
     protected Socket getSocket()
@@ -98,7 +102,7 @@ public class SecureAgentConnection
                 postHandshakeTimeout = POST_HANDSHAKE_TIMEOUT;
             }
       
-        	SSLProvider sslProvider = new DefaultSSLProviderImpl();
+        	SSLProvider sslProvider = new DefaultSSLProviderImpl(autoValidate);
             SSLSocketFactory factory = sslProvider.getSSLSocketFactory();
             
         	// See the following links...

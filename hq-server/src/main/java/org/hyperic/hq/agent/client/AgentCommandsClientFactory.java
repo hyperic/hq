@@ -59,9 +59,7 @@ public class AgentCommandsClientFactory {
         if (isNewTransportAgent) {
             return new AgentCommandsClientImpl(agentProxyFactory, agentAddress, agentPort, unidirectional);
         } else {
-            return new LegacyAgentCommandsClientImpl(new SecureAgentConnection(agentAddress,
-                agentPort, authToken));
+            return new LegacyAgentCommandsClientImpl(new SecureAgentConnection(agentAddress, agentPort, authToken, true));
         }
     }
-
 }

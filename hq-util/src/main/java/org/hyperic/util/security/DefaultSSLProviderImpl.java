@@ -1,10 +1,13 @@
 package org.hyperic.util.security;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -27,6 +30,11 @@ import org.apache.http.conn.ssl.AbstractVerifier;
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
+import org.hyperic.sigar.Sigar;
+import org.hyperic.sigar.SigarException;
+import org.hyperic.util.exec.Execute;
+import org.hyperic.util.exec.ExecuteWatchdog;
+import org.hyperic.util.exec.PumpStreamHandler;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -45,12 +53,14 @@ public class DefaultSSLProviderImpl implements SSLProvider {
             File file = new File(KEYSTORE_PATH);
             char[] password = null;
             
-            if (file.exists()) {
-            	// ...keystore exist, so init the file input stream...
-            	keyStoreFileInputStream = new FileInputStream(file);
-            	password = KEYSTORE_PASSWORD.toCharArray();
+            if (!file.exists()) {
+            	generateInternalKeystore(file, "HQ");
             }
-
+            
+            // ...keystore exist, so init the file input stream...
+            keyStoreFileInputStream = new FileInputStream(file);
+            password = KEYSTORE_PASSWORD.toCharArray();
+            
             keystore.load(keyStoreFileInputStream, password);
 
             return keystore;
@@ -74,6 +84,74 @@ public class DefaultSSLProviderImpl implements SSLProvider {
         }
     }
 
+    private void generateInternalKeystore(File trustStoreFile, String alias) {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+
+        String javaHome = System.getProperty("java.home");
+        String keytool = javaHome + File.separator + "bin" + File.separator + "keytool";
+        String[] args = {
+            keytool,
+            "-genkey",
+            "-dname",     "CN=" + getFQDN() +  " (HQ Self-Signed Cert), OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=Unknown",
+            "-alias",     alias,
+            "-keystore",  trustStoreFile.getAbsolutePath(),
+            "-storepass", KEYSTORE_PASSWORD,
+            "-keypass",   KEYSTORE_PASSWORD,
+            "-keyalg",    "RSA"
+        };
+
+        int timeout = 5 * 60 * 1000; //5min
+        ExecuteWatchdog wdog = new ExecuteWatchdog(timeout);
+        Execute exec = new Execute(new PumpStreamHandler(output), wdog);
+        
+        exec.setCommandline(args);
+
+        int rc;
+        
+		try {
+			rc = exec.execute();
+		} catch (Exception e) {
+			rc = -1;
+		}
+        
+        if (rc != 0) {
+            String msg = output.toString().trim();
+
+            if (msg.length() == 0) {
+                msg = "timeout after " + timeout + "ms";
+            }
+            
+            throw new IllegalStateException(msg);
+        }
+    }
+
+    private String getFQDN() {
+        String address;
+        final String loopback = "127.0.0.1";
+
+        try {
+            address = InetAddress.getLocalHost().getCanonicalHostName();
+            
+            if (!loopback.equals(address)) {
+                return address;
+            }
+        } catch(UnknownHostException e) {
+            //hostname not in DNS or /etc/hosts
+        }
+
+        Sigar sigar = new Sigar();
+        
+        try {
+            address = sigar.getFQDN();
+        } catch (SigarException e) {
+            address = loopback;
+        } finally {
+            sigar.close();
+        }
+
+        return address;
+    }
+    
     private KeyManagerFactory getKeyManagerFactory(final KeyStore keystore) throws KeyStoreException, IOException {
     	try {
     		KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
