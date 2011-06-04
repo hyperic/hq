@@ -124,6 +124,7 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
     private MonitorableTypeDAO monitorableTypeDAO;
     private ResourceManager resourceManager;
     private AuthzSubjectManager authzSubjectManager;
+    private ZeventManager zeventManager;
 
     private ApplicationContext ctx;
 
@@ -136,7 +137,8 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
                              ResourceManager resourceManager,
                              AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle,
                              AgentSynchronizer agentSynchronizer,
-                             AuthzSubjectManager authzSubjectManager) {
+                             AuthzSubjectManager authzSubjectManager,
+                             ZeventManager zeventManager) {
         this.pluginDAO = pluginDAO;
         this.agentPluginStatusDAO = agentPluginStatusDAO;
         this.monitorableTypeDAO = monitorableTypeDAO;
@@ -145,15 +147,32 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         this.agentSynchronizer = agentSynchronizer;
         this.resourceManager = resourceManager;
         this.authzSubjectManager = authzSubjectManager;
+        this.zeventManager = zeventManager;
     }
 
     @PostConstruct
     public void postConstruct() {
-        ZeventManager.getInstance().addBufferedListener(PluginFileRemoveZevent.class,
+        zeventManager.addBufferedListener(PluginFileRemoveZevent.class,
             new ZeventListener<PluginFileRemoveZevent>() {
                 public void processEvents(List<PluginFileRemoveZevent> events) {
                     for (final PluginFileRemoveZevent event : events) {
                         deletePluginFiles(event.getPluginFileNames());
+                    }
+                }
+            }
+        );
+        zeventManager.addBufferedListener(PluginRemoveZevent.class,
+            new ZeventListener<PluginRemoveZevent>() {
+                public void processEvents(List<PluginRemoveZevent> events) {
+                    for (final PluginRemoveZevent event : events) {
+                        Collection<String> pluginFileNames = event.getPluginFileNames();
+                        AuthzSubject subj = event.getAuthzSubject();
+                        PluginManager pluginManager = Bootstrap.getBean(PluginManager.class);
+                        try {
+                            pluginManager.removePlugins(subj, pluginFileNames);
+                        } catch (PluginDeployException e) {
+                            log.error(e,e);
+                        }
                     }
                 }
             }
@@ -163,7 +182,7 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
     public Plugin getByJarName(String jarName) {
         return pluginDAO.getByFilename(jarName);
     }
-    
+
     @Transactional(readOnly=false)
     public void removePlugins(AuthzSubject subj, Collection<String> pluginFileNames)
     throws PluginDeployException {
@@ -178,15 +197,54 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         }
         final Map<String, Plugin> pluginMap = getPluginMap(pluginFileNames);
         removePluginsAndAssociatedResources(subj, new ArrayList<Plugin>(pluginMap.values()));
-        final AgentPluginUpdater agentPluginUpdater = Bootstrap.getBean(AgentPluginUpdater.class);
-        final Map<Integer, Collection<String>> toRemove = new HashMap<Integer, Collection<String>>(agents.size());
+        final AgentPluginUpdater agentPluginUpdater =
+            Bootstrap.getBean(AgentPluginUpdater.class);
+        final Map<Integer, Collection<String>> toRemove =
+            new HashMap<Integer, Collection<String>>(agents.size());
         for (final Agent agent : agents) {
             toRemove.put(agent.getId(), pluginFileNames);
         }
         agentPluginUpdater.queuePluginRemoval(toRemove);
-        checkCanDeletePluginFiles(pluginFileNames);
+        try {
+            checkCanDeletePluginFiles(pluginFileNames);
+        } catch (PluginDeployException e) {
+            log.error(e,e);
+        }
         removePluginsWithoutAssociatedStatuses(pluginFileNames, pluginMap);
-        ZeventManager.getInstance().enqueueEventAfterCommit(new PluginFileRemoveZevent(pluginFileNames));
+        zeventManager.enqueueEventAfterCommit(new PluginFileRemoveZevent(pluginFileNames));
+    }
+    
+    @Transactional(readOnly=false)
+    public void removePluginsInBackground(AuthzSubject subj, Collection<String> pluginFileNames)
+    throws PluginDeployException {
+        try {
+            permissionManager.checkIsSuperUser(subj);
+        } catch (PermissionException e) {
+            throw new PluginDeployException("plugin.manager.deploy.super.user", e);
+        }
+
+        final Collection<Plugin> plugins = pluginDAO.getPluginsByFileNames(pluginFileNames);
+        for (final Plugin plugin : plugins) {
+            plugin.setDeleted(true);
+        }
+        zeventManager.enqueueEventAfterCommit(new PluginRemoveZevent(subj, pluginFileNames));
+    }
+    
+    private class PluginRemoveZevent extends Zevent {
+        private AuthzSubject subj;
+        private Collection<String> pluginFileNames;
+        @SuppressWarnings("serial")
+        public PluginRemoveZevent(AuthzSubject subj, Collection<String> pluginFileNames) {
+            super(new ZeventSourceId() {}, new ZeventPayload() {});
+            this.subj = subj;
+            this.pluginFileNames = pluginFileNames;
+        }
+        private AuthzSubject getAuthzSubject() {
+            return subj;
+        }
+        private Collection<String> getPluginFileNames() {
+            return pluginFileNames;
+        }
     }
 
     @Transactional(readOnly=false, propagation=Propagation.REQUIRES_NEW)

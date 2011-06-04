@@ -114,13 +114,21 @@ public interface PluginManager {
                                               Collection<Plugin> plugins);
 
     /**
-     * Removes all plugins specified by the pluginFilenames collection
-     * @param subj
-     * @param pluginFileNames
+     * Removes all plugins and resources specified by the pluginFilenames collection
+     * @param subj {@link AuthzSubject} - must be a super user
      * @throws PluginDeployException - if plugins can't be deployed, most likely cause here is
      * permission issues in the hq filesystem
      */
     void removePlugins(AuthzSubject subj, Collection<String> pluginFileNames)
+    throws PluginDeployException;
+
+    /**
+     * Removes all plugins and resources specified by the pluginFilenames collection
+     * @param subj {@link AuthzSubject} - must be a super user
+     * @throws PluginDeployException - if plugins can't be deployed, most likely cause is
+     * permission issues with the subj.
+     */
+    void removePluginsInBackground(AuthzSubject subj, Collection<String> pluginFileNames)
     throws PluginDeployException;
 
     /**

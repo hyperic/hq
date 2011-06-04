@@ -266,7 +266,7 @@ public class PluginManagerController extends BaseController implements Applicati
                 Plugin plugin = pluginManager.getPluginById(Integer.parseInt(deleteIds[i]));
                 pluginFilenames.add(plugin.getPath());
             }
-            pluginManager.removePlugins(subject, pluginFilenames);
+            pluginManager.removePluginsInBackground(subject, pluginFilenames);
          
             return "success";
 
