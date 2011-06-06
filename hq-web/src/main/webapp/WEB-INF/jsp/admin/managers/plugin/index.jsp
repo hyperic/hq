@@ -367,7 +367,7 @@
 		hqDojo.connect(hqDojo.byId("searchText"),"onkeyup",function(e){
 			var pluginId = hqDojo.byId("pluginId").value;
 			var status = hqDojo.byId("status").value;
-			seeStatusDetail(pluginId,hqDojo.byId("searchText").value,status);			
+			seeStatusDetail(pluginId,status);			
 		});
 		
 		var agentSummaryDialog = new hqDijit.Dialog({
