@@ -44,6 +44,7 @@ import org.hyperic.hq.appdef.server.session.AgentPluginStatus;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatusEnum;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.shared.AgentManager;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.product.shared.PluginManager;
@@ -60,6 +61,7 @@ public class PluginManagerControllerTest extends BaseControllerTest {
     private PluginManagerController pluginManagerController;
     private PluginManager mockPluginManager;
     private AgentManager mockAgentManager;
+    private ResourceManager mockResourceManager;
     private AppdefBoss mockAppdefBoss;
     private AuthzBoss mockAuthzBoss;
     private static SimpleDateFormat format;
@@ -82,10 +84,11 @@ public class PluginManagerControllerTest extends BaseControllerTest {
         super.setUp();
         mockPluginManager = createMock(PluginManager.class);
         mockAgentManager = createMock(AgentManager.class);
+        mockResourceManager = createMock(ResourceManager.class);
         mockAppdefBoss = getMockAppdefBoss();
         mockAuthzBoss = getMockAuthzBoss();
         pluginManagerController = new PluginManagerController(mockAppdefBoss, mockAuthzBoss, 
-            mockPluginManager, mockAgentManager);
+            mockPluginManager, mockAgentManager,mockResourceManager);
 
     }
     

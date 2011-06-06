@@ -575,19 +575,53 @@
 				if(checkedPlugins.length>0){
 					hqDojo.forEach(checkedPlugins,function(checkedPlugin){
 						var pluginName = checkedPlugin.value.split("_")[1];
-
+						var pluginId = checkedPlugin.value.split("_")[0];
 						if (pluginName!=="undefined"){
 							hqDojo.create("li", {
-							    "innerHTML":pluginName
+							    "innerHTML":pluginName,
+							    "id":"remove_"+pluginId
 							}, "removeList");
 						}
 					});
+					showResourceCountForEachPlugin(checkedPlugins);
 					hqDijit.byId("removePanelDialog").show();
 				}else{
 					hqDojo.byId("errorMsg").innerHTML='<fmt:message key="admin.managers.Plugin.remove.error.dialog.empty" />';
 					hqDijit.byId("errorMsgPanelDialog").show();
 				}
 			});
+			
+			function showResourceCountForEachPlugin(checkedPlugins){
+				if(checkedPlugins!==undefined && checkedPlugins.length>0){
+					var pluginIds="";
+					hqDojo.forEach(checkedPlugins, function(checkedPlugin){
+						pluginIds +=  checkedPlugin.value.split("_")[0]+",";
+					});
+					pluginIds = pluginIds.substr(0,pluginIds.length-1);//get rid of the last ,
+					resourceCountUrl = "<spring:url value='/app/admin/managers/plugin/resource/count?deleteIds={pluginIds}' />";
+					resourceCountUrl = resourceCountUrl.replace("{pluginIds}",pluginIds);
+					var xhrArgs = {
+						preventCache:true,
+						url: resourceCountUrl,
+						handleAs: "json",
+						headers: { 
+                			"Content-Type": "application/json",
+                			"Accept": "application/json"
+                		},
+						load: function(response) {
+							var pluginList = pluginIds.split(",");
+							hqDojo.forEach(response,function(pluginCount){
+								if(hqDojo.byId("remove_"+pluginCount.pluginId)!==null){
+									hqDojo.byId("remove_"+pluginCount.pluginId).innerHTML+=" - "+pluginCount.count+" <fmt:message key="admin.managers.plugin.confirmation.delete.resource" />";								
+								}
+							});
+						},
+						error: function(response){}
+					};
+					
+					hqDojo.xhrGet(xhrArgs);
+				} 
+			}
 
 			hqDojo.connect(hqDojo.byId("removeButton"), "onclick", function(e) {
 				var checkedPlugins = hqDojo.filter(hqDojo.query("input[type=checkbox]"), function(e){ return e.checked; });
@@ -830,7 +864,7 @@
 							connectId: [e],
 							label: "<fmt:message key='admin.managers.Plugin.tip.icon.error' />. <fmt:message key='admin.managers.Plugin.tip.icon.click' />"
 						});		
-					});
+					}); 
                 }, 
                 error: function(response, args) {
                 	

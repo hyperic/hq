@@ -25,6 +25,7 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.product.PlatformDetector;
@@ -56,16 +57,18 @@ public class PluginManagerController extends BaseController implements Applicati
 
     private PluginManager pluginManager;
     private AgentManager agentManager;
+    private ResourceManager resourceManager;
     private ApplicationContext applicationContext;
     SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy hh:mm aa zzz");
 
     
     @Autowired
     public PluginManagerController(AppdefBoss appdefBoss, AuthzBoss authzBoss, 
-            PluginManager pluginManager, AgentManager agentManager) {
+            PluginManager pluginManager, AgentManager agentManager, ResourceManager resourceManager) {
         super(appdefBoss, authzBoss);
         this.pluginManager = pluginManager;
         this.agentManager = agentManager;
+        this.resourceManager = resourceManager;
     }
     
     @RequestMapping(method = RequestMethod.GET)
@@ -80,6 +83,38 @@ public class PluginManagerController extends BaseController implements Applicati
         model.addAttribute("customDir", pluginManager.getCustomPluginDir().getAbsolutePath());
         model.addAttribute(KeyConstants.PAGE_TITLE_KEY, HELP_PAGE_MAIN);
         return "admin/managers/plugin";
+    }
+    /**
+     * Get the resource count for each plugin. (The count will be shown in delete confirmation dialog.)
+     * @param deleteIds
+     * @return 
+     */
+    @RequestMapping(method = RequestMethod.GET, value="/resource/count", headers="Accept=application/json")
+    public @ResponseBody List<Map<String, String>> getResourceCount(@RequestParam("deleteIds") String deleteIds){
+        
+        Map<String,String> nameIdMapping = new HashMap<String,String>();
+        String[] tempDeleteIds = deleteIds.split(",");
+        List<Plugin> plugins = new ArrayList<Plugin>();
+        
+        for (int i= 0; i<tempDeleteIds.length;i++){
+            Plugin plugin = pluginManager.getPluginById(Integer.parseInt(tempDeleteIds[i]));
+            if(plugin!=null){
+                plugins.add(plugin);
+                nameIdMapping.put(plugin.getName(), String.valueOf(plugin.getId()));
+            }
+        }
+        List<Map<String,String>> result = new ArrayList<Map<String,String>>();
+        Map<String, Long> counts = resourceManager.getResourceCountByPlugin(plugins);
+        Iterator it = counts.entrySet().iterator();
+        while(it.hasNext()){
+            Map.Entry<String, Long> pair = (Map.Entry<String, Long>) it.next();
+            Map<String,String> count = new HashMap<String, String>();
+            count.put("pluginId", nameIdMapping.get(pair.getKey()));
+            count.put("count", String.valueOf(pair.getValue()));
+            result.add(count);
+        }
+        
+        return result;
     }
     
     @RequestMapping(method = RequestMethod.GET, value="/list", headers="Accept=application/json")
@@ -156,7 +191,7 @@ public class PluginManagerController extends BaseController implements Applicati
                         }
                     }
                 }
-                pluginSummary.put("isdefaultPlugin", isDefault);
+                pluginSummary.put("isdefaultPlugin", isDefault);//TODO no need for showing it's default anymore
                 pluginSummary.put("isCustomPlugin",isCustom);
                 pluginSummary.put("isServerPlugin", isServer);
                 if(errorAgentCount>0){
@@ -257,7 +292,7 @@ public class PluginManagerController extends BaseController implements Applicati
     
      @RequestMapping(method = RequestMethod.DELETE, value="/delete")
      public @ResponseBody String deletePlugin(@RequestParam(RequestParameterKeys.DELETE_ID) 
-                                              String[] deleteIds, HttpSession session, Model model){
+                                              String[] deleteIds, HttpSession session){
         AuthzSubject subject;
         try {
             subject = getAuthzSubject(session);
