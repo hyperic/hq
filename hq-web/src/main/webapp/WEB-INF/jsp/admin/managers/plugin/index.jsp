@@ -60,10 +60,10 @@
 	<form:form id="deleteForm" name="deleteForm" onsubmit="return false;" method="delete">
 	
 	<ul id="pluginList">
-		<li><div style="padding:10px;">
-			<img src="<spring:url value="/static/images/ajax-loader-blue.gif"/>"/> 
-			<fmt:message key='admin.managers.plugin.column.loading' />
-		</div></li>
+		<li>&nbsp;</li><li>&nbsp;</li>
+		<li>
+			<img id="tableLoadingIcon" src="<spring:url value="/static/images/ajax-loader-blue.gif"/>"/>
+		</li>
 	</ul>
 	</form:form>
 	
