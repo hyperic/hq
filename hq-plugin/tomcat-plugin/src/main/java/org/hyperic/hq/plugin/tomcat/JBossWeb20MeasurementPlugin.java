@@ -9,8 +9,6 @@ import org.hyperic.hq.product.MetricNotFoundException;
 import org.hyperic.hq.product.MetricUnreachableException;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.jmx.MxMeasurementPlugin;
-import org.hyperic.util.config.ConfigResponse;
 
 /**
  *
@@ -24,6 +22,11 @@ public class JBossWeb20MeasurementPlugin extends JBossWebMeasurementPlugin {
             MetricNotFoundException,
             MetricUnreachableException {
         double doubleVal;
+
+        if(metric.getDomainName().equals("java.lang")){
+            return MetricValue.NONE;
+        }
+        
         Object objectVal = JBossUtil.getRemoteMBeanValue(metric);
         String stringVal = objectVal.toString();
 

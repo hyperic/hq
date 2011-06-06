@@ -52,6 +52,7 @@ public class JBossWebServerDetector extends TomcatServerDetector {
                 ServerResource server = getServerResource(process);
                 ConfigResponse cfg = new ConfigResponse();
                 cfg.setValue("jmx.url", getJMXURL(process));
+                cfg.setValue("process.query", getProcQuery() + ",Args.*.ct=" + process.getInstallPath());
                 setProductConfig(server, cfg);
                 servers.add(server);
             }
@@ -59,7 +60,7 @@ public class JBossWebServerDetector extends TomcatServerDetector {
         return servers;
     }
 
-    protected String getJMXURL(MxProcess process){
+    protected String getJMXURL(MxProcess process) {
         return "ptql:" + getProcQuery() + ",Args.*.ct=" + process.getInstallPath();
     }
 
