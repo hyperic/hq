@@ -585,7 +585,7 @@
     <property name="VERSION_FILE" value="deploy/jboss-web.deployer/jbossweb.jar"/>
     <property name="PROC_QUERY" value="State.Name.re=java|jsvc,State.Name.Pne=jsvc,Args.*.eq=org.jboss.Main"/>
     <plugin type="autoinventory" class="org.hyperic.hq.plugin.tomcat.JBossWebServerDetector"/>
-    <plugin type="measurement" class="org.hyperic.hq.plugin.tomcat.JBossWeb20MeasurementPlugin"/>
+    <plugin type="measurement" class="org.hyperic.hq.plugin.tomcat.JBossWeb2XMeasurementPlugin"/>
      &hibernate-services;
   </server>
 
@@ -594,7 +594,7 @@
     <property name="VERSION_FILE" value="deploy/jbossweb.sar/jbossweb.jar"/>
     <property name="PROC_QUERY" value="State.Name.re=java|jsvc,State.Name.Pne=jsvc,Args.*.eq=org.jboss.Main"/>
     <plugin type="autoinventory" class="org.hyperic.hq.plugin.tomcat.JBossWebServerDetector"/>
-    <plugin type="measurement" class="org.hyperic.hq.plugin.tomcat.JBossWebMeasurementPlugin"/>
+    <plugin type="measurement" class="org.hyperic.hq.plugin.tomcat.JBossWeb2XMeasurementPlugin"/>
      &hibernate-services;
   </server>
 

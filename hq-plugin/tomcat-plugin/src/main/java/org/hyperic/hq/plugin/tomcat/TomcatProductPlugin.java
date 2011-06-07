@@ -58,10 +58,12 @@ public class TomcatProductPlugin extends ProductPlugin {
         try {
             Sigar sigar = new Sigar();
             long[] pids = ProcessFinder.find(sigar, "State.Name.re=java|jsvc,State.Name.Pne=jsvc,Args.*.eq=org.jboss.Main");
-            res = new File(sigar.getProcExe(pids[0]).getCwd()).getParent();
+            if (pids.length > 0) {
+                res = new File(sigar.getProcExe(pids[0]).getCwd()).getParent();
+            }
         } catch (SigarException ex) {
-            getLog().debug("[getRunningInstallPath] "+ex.getMessage(),ex);
-            res=null;
+            getLog().debug("[getRunningInstallPath] " + ex.getMessage(), ex);
+            res = null;
         }
         return res;
     }
