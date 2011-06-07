@@ -42,6 +42,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -108,6 +109,7 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         serverPlugins.add("system-plugin.jar");
         serverPlugins.add("netservices-plugin.jar");
         serverPlugins.add("netdevice-plugin.jar");
+        serverPlugins.add("hqagent-plugin.jar");
     }
     private static final String TMP_DIR = System.getProperty("java.io.tmpdir");
     private static final String PLUGIN_DIR = "hq-plugins";
@@ -190,6 +192,15 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
             permissionManager.checkIsSuperUser(subj);
         } catch (PermissionException e) {
             throw new PluginDeployException("plugin.manager.deploy.super.user", e);
+        }
+        // [HHQ-4776] certain plugins should not be removed from HQ
+        for (Iterator<String> it=pluginFileNames.iterator(); it.hasNext(); ) {
+            String filename = it.next();
+            if (serverPlugins.contains(filename)) {
+                log.error("Attempt to remove plugin with filename=" + filename + " is being ignored" +
+                          " since this is a plugin of type=" + PluginTypeEnum.SERVER_PLUGIN);
+                it.remove();
+            }
         }
         final Set<Agent> agents = new HashSet<Agent>();
         for (final String fileName : pluginFileNames) {
@@ -414,7 +425,9 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
             final String filename = entry.getKey();
             final byte[] bytes = entry.getValue();
             File file = null;
-            if (filename.toLowerCase().endsWith(".jar")) {
+            if (serverPlugins.contains(filename.toLowerCase())) {
+                throw new PluginDeployException("plugin.cannot.deploy.server.type.plugin", filename);
+            } else if (filename.toLowerCase().endsWith(".jar")) {
                 file = getFileAndValidateJar(filename, bytes);
             } else if (filename.toLowerCase().endsWith(".xml")) {
                 file = getFileAndValidateXML(filename, bytes);
