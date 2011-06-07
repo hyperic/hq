@@ -14,10 +14,16 @@
 
 	<dependencies>
 		<dependency>
-    		<groupId>org.apache.tomcat</groupId>
-    		<artifactId>catalina</artifactId>
-    		<version>6.0.32</version>
-    		<scope>provided</scope>
+    			<groupId>org.apache.tomcat</groupId>
+    			<artifactId>catalina</artifactId>
+    			<version>6.0.32</version>
+    			<scope>provided</scope>
+		</dependency>
+		<dependency>
+    			<groupId>org.apache.tomcat</groupId>
+    			<artifactId>juli</artifactId>
+    			<version>6.0.32</version>
+    			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
