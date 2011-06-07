@@ -172,7 +172,6 @@ public class PluginManagerController extends BaseController implements Applicati
                 pluginSummary.put("disabled", plugin.isDisabled());
                 pluginSummary.put("deleted", plugin.isDeleted());
                 
-                boolean isDefault = false;
                 boolean isCustom = false;
                 boolean isServer = false;
                 Collection<PluginTypeEnum> pluginType = pluginManager.getPluginType(plugin);
@@ -185,13 +184,12 @@ public class PluginManagerController extends BaseController implements Applicati
                             case CUSTOM_PLUGIN:
                                 isCustom = true;
                                 break;
-                            case DEFAULT_PLUGIN:
-                                isDefault = true;
+                            default:
                                 break;
+
                         }
                     }
                 }
-                pluginSummary.put("isdefaultPlugin", isDefault);//TODO no need for showing it's default anymore
                 pluginSummary.put("isCustomPlugin",isCustom);
                 pluginSummary.put("isServerPlugin", isServer);
                 if(errorAgentCount>0){

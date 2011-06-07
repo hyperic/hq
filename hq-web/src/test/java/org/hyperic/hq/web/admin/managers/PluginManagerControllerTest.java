@@ -201,7 +201,6 @@ public class PluginManagerControllerTest extends BaseControllerTest {
         assertEquals("plugin-a: initialDeployDate should be ...",format.format(date2),""+summaries.get(0).get("initialDeployDate"));
         assertEquals("plugin-a: id should be 1",1,summaries.get(0).get("id"));
         assertEquals("plugin-a: name should be plugin-a","plugin-a",summaries.get(0).get("name"));
-        assertEquals("plugin-a: is not default plugin",false, summaries.get(0).get("isdefaultPlugin"));
         assertEquals("plugin-a: is server plugin",true, summaries.get(0).get("isServerPlugin"));
         assertEquals("plugin-a: is not custom plugin",false, summaries.get(0).get("isCustomPlugin"));
         
@@ -213,7 +212,6 @@ public class PluginManagerControllerTest extends BaseControllerTest {
         assertEquals("plugin-c: errorAgentCount should be 3",3,summaries.get(1).get("errorAgentCount"));
         assertEquals("plugin-c: inProgress should be true",true,(Boolean)summaries.get(1).get("inProgress"));
         assertEquals("plugin-c: id should be 3",3,summaries.get(1).get("id"));        
-        assertEquals("plugin-c: is default plugin",true, summaries.get(1).get("isdefaultPlugin"));
         assertEquals("plugin-c: is not server plugin",false, summaries.get(1).get("isServerPlugin"));
         assertEquals("plugin-c: is custom plugin",true, summaries.get(1).get("isCustomPlugin"));
         
@@ -224,7 +222,6 @@ public class PluginManagerControllerTest extends BaseControllerTest {
         assertEquals("plugin-b: errorAgentCount should be 0",0,summaries.get(2).get("errorAgentCount"));
         assertEquals("plugin-b: inProgress should be false",false,(Boolean)summaries.get(2).get("inProgress"));
         assertEquals("plugin-b: id should be 2",2,summaries.get(2).get("id"));        
-        assertEquals("plugin-b: is not default plugin",false, summaries.get(2).get("isdefaultPlugin"));
         assertEquals("plugin-b: is not server plugin",false, summaries.get(2).get("isServerPlugin"));
         assertEquals("plugin-b: is not custom plugin",false, summaries.get(2).get("isCustomPlugin"));
 
