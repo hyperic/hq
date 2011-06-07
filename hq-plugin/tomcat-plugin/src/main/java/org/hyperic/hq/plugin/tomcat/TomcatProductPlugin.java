@@ -2,55 +2,24 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package org.hyperic.hq.plugin.tomcat;
 
 import java.io.File;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ProductPluginManager;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
 import org.hyperic.sigar.ptql.ProcessFinder;
 
-
 /**
  *
  * @author administrator
  */
 public class TomcatProductPlugin extends ProductPlugin {
-    @Override
-    protected void adjustClassPath(String installpath) {
-        //super.init will call this if jboss.installpath is configured
-        File servers = new File(installpath, "server");
-        if (!servers.exists()) {
-            return;
-        }
-
-        File[] dirs = servers.listFiles();
-        if (dirs == null) {
-            return;
-        }
-
-        for (int i=0; i<dirs.length; i++) {
-            File dir = dirs[i];
-            String name = dir.getName();
-            //skip server/ dirs already listed in hq-plugin.xml
-            if (name.equals("all") ||
-                name.equals("default") ||
-                name.equals("minimal"))
-            {
-                continue;
-            }
-
-            super.adjustClassPath(dir.toString());
-        }
-    }
 
     @Override
     public String[] getClassPath(ProductPluginManager manager) {
-        String prop = getName() + "." + ProductPlugin.PROP_INSTALLPATH;
+        String prop = "jbossweb." + ProductPlugin.PROP_INSTALLPATH;
         String sysval = System.getProperty(prop);
         String installDir = manager.getProperties().getProperty(prop, sysval);
         String from;
@@ -60,8 +29,7 @@ public class TomcatProductPlugin extends ProductPlugin {
         if (installDir == null) {
             installDir = getRunningInstallPath();
             from = "running process";
-        }
-        else {
+        } else {
             from = "properties";
         }
 
@@ -71,13 +39,11 @@ public class TomcatProductPlugin extends ProductPlugin {
             getLog().debug(prop + " not configured");
             //may be resolved later by JBossDetector.adjustClassPath
             return classpath;
-        }
-        else {
-            getLog().debug("Setting " + prop + "=" +
-                           installDir + ", configured from " + from);
+        } else {
+            getLog().debug("Setting " + prop + "=" + installDir + ", configured from " + from);
         }
 
-        for (int i=0; i<classpath.length; i++) {
+        for (int i = 0; i < classpath.length; i++) {
             File jar = new File(installDir, classpath[i]);
             if (jar.exists()) {
                 classpath[i] = jar.getPath();
@@ -88,11 +54,14 @@ public class TomcatProductPlugin extends ProductPlugin {
     }
 
     private String getRunningInstallPath() {
-        String res="/Users/administrator/jboss/jboss-4.2.3.GA";
+        String res = null;
         try {
-            ProcessFinder.find(new Sigar(), "State.Name.re=java|jsvc,State.Name.Pne=jsvc,Args.*.eq=org.jboss.Main");
+            Sigar sigar = new Sigar();
+            long[] pids = ProcessFinder.find(sigar, "State.Name.re=java|jsvc,State.Name.Pne=jsvc,Args.*.eq=org.jboss.Main");
+            res = new File(sigar.getProcExe(pids[0]).getCwd()).getParent();
         } catch (SigarException ex) {
-            Logger.getLogger(TomcatProductPlugin.class.getName()).log(Level.SEVERE, null, ex);
+            getLog().debug("[getRunningInstallPath] "+ex.getMessage(),ex);
+            res=null;
         }
         return res;
     }
