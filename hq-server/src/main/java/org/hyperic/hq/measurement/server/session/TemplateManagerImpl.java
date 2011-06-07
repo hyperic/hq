@@ -334,6 +334,9 @@ public class TemplateManagerImpl implements TemplateManager {
                 template.setDefaultOn(interval != 0);
             }
             final Collection<Measurement> measurements = measTemplMap.get(template.getId());
+            if (measurements == null) {
+                continue;
+            }
             for (final Measurement m : measurements) {
                 m.setEnabled(template.isDefaultOn());
                 m.setInterval(template.getDefaultInterval());
