@@ -34,14 +34,14 @@ public class JBossWeb2XMeasurementPlugin extends JBossWebMeasurementPlugin {
      */
     @Override
     public String translate(String template, ConfigResponse config) {
-        getLog().debug("-> template=" + template);
+        getLog().debug("[translate] template=" + template);
         String metric = super.translate(template, config);
         if (template.contains(":java.lang:")) {
-            getLog().debug("-> process.query=" + config.getValue("process.query"));
-            getLog().debug("-> jmx.url=" + config.getValue("jmx.url"));
+            getLog().debug("[translate] process.query=" + config.getValue("process.query"));
+            getLog().debug("[translate] jmx.url=" + config.getValue("jmx.url"));
             metric=metric.replaceAll("jmx.url=[^,]*,", "jmx.url="+Metric.encode("ptql:" + config.getValue("process.query"))+",");
         }
-        getLog().debug("-> metric=" + metric);
+        getLog().debug("[translate] metric=" + metric);
         return metric;
     }
 }
