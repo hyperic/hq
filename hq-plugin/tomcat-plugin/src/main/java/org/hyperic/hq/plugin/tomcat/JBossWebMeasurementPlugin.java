@@ -26,6 +26,10 @@ public class JBossWebMeasurementPlugin extends MxMeasurementPlugin {
 
     private static final String COMPOSITE_PREFIX = "Composite.";
 
+    public MetricValue getJMXValue(Metric metric) throws PluginException, MetricNotFoundException, MetricUnreachableException {
+        return super.getValue(metric);
+    }
+
     @Override
     public MetricValue getValue(Metric metric) throws PluginException, MetricNotFoundException, MetricUnreachableException {
         double doubleVal;
