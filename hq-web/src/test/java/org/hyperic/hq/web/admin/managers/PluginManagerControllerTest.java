@@ -261,7 +261,33 @@ public class PluginManagerControllerTest extends BaseControllerTest {
         List<Map<String, Object>> result =  pluginManagerController.getAgentStatus(3, "xx","inprogress");
         
         assertEquals("result should be empty",0,result.size());
-    }   
+    }
+    @Test
+    public void testDeletePluginResouceCount(){
+        List<Plugin> plugins = getAllPlugins();
+        
+        expect(mockPluginManager.getPluginById(1)).andStubReturn(plugins.get(0));
+        expect(mockPluginManager.getPluginById(2)).andStubReturn(plugins.get(1));
+        expect(mockPluginManager.getPluginById(3)).andStubReturn(plugins.get(2));
+        expect(mockResourceManager.getResourceCountByPlugin(plugins)).andStubReturn(getResourceCounts());
+        replay(mockPluginManager);
+        replay(mockResourceManager);
+        
+        List<Map<String, String>> result = pluginManagerController.getResourceCount("1,2,3");
+        
+        assertEquals("There should be only two entries",2,result.size());
+        assertEquals("The first one should be plugin-a (id=1) ","1",result.get(0).get("pluginId"));
+        assertEquals("plugin-a should have 200 count","200",result.get(0).get("count"));
+        assertEquals("The second one should be plugin-c (id=3) ","3",result.get(1).get("pluginId"));
+        assertEquals("plugin-a should have 1 count","1",result.get(1).get("count"));        
+    }
+    private Map<String, Long> getResourceCounts(){
+        Map<String, Long> result = new HashMap<String,Long>();
+        result.put("plugin-a", (long)200);
+        result.put("plugin-c", (long)1);
+        return result;
+    }
+    
     private Map<Integer, AgentPluginStatus> getStatusesByAgentId(){
         Map<Integer, AgentPluginStatus>  result = new HashMap<Integer, AgentPluginStatus>();
         AgentPluginStatus statusX = new AgentPluginStatus();
