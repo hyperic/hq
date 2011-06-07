@@ -67,7 +67,7 @@
 		<surefire.version>2.6</surefire.version>
         <tiles2.version>2.2.2</tiles2.version>
 		<tomcat-jdbc.version>1.0.8.5</tomcat-jdbc.version>
-		<tomcat-juli.version>6.0.20</tomcat-juli.version>
+		<tomcat-juli.version>6.0.32</tomcat-juli.version>
 		<urlrewrite.version>3.1.0</urlrewrite.version>
 		<velocity.version>1.6.3</velocity.version>
 		<wrapper.version>3.5.6</wrapper.version>
@@ -510,8 +510,8 @@
 			  <version>${tomcat-jdbc.version}</version>
 			</dependency>
 			<dependency>
-			  <groupId>org.apache</groupId>
-			  <artifactId>tomcat-juli</artifactId>
+			  <groupId>org.apache.tomcat</groupId>
+			  <artifactId>juli</artifactId>
 			  <version>${tomcat-juli.version}</version>
 			</dependency>
 			<dependency>

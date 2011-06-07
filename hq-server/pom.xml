@@ -138,8 +138,8 @@
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.apache</groupId>
-			<artifactId>tomcat-juli</artifactId>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>juli</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
