@@ -253,31 +253,6 @@
 			label: "<fmt:message key='admin.managers.Plugin.tip.custom.directory' />"
 		});
 
-
-		hqDojo.query(".notFound").forEach(function(e){
-			new hqDijit.Tooltip({
-				connectId: [e],
-				label: "<fmt:message key='admin.managers.Plugin.column.plugin.disabled.tip' />"
-			});		
-		});	
-		hqDojo.query(".inProgressIcon").forEach(function(e){
-			new hqDijit.Tooltip({
-				connectId: [e],
-				label: "<fmt:message key='admin.managers.Plugin.tip.icon.in.progress' />. <fmt:message key='admin.managers.Plugin.tip.icon.click' />"
-			});		
-		});
-		hqDojo.query(".successIcon").forEach(function(e){
-			new hqDijit.Tooltip({
-				connectId: [e],
-				label: "<fmt:message key='admin.managers.Plugin.tip.icon.success' />"
-			});		
-		});	
-		hqDojo.query(".errorIcon").forEach(function(e){
-			new hqDijit.Tooltip({
-				connectId: [e],
-				label: "<fmt:message key='admin.managers.Plugin.tip.icon.error' />. <fmt:message key='admin.managers.Plugin.tip.icon.click' />"
-			});		
-		});
 		function seeStatusDetail(pluginId,status){
 			hqDijit.byId("showStatusPanelDialog").show();
 			var agentListUl = hqDojo.byId("agentList");
