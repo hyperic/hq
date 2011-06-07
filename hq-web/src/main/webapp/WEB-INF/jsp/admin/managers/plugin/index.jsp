@@ -60,10 +60,10 @@
 	<form:form id="deleteForm" name="deleteForm" onsubmit="return false;" method="delete">
 	
 	<ul id="pluginList">
-		<li><div style="padding:10px;">
-			<img src="<spring:url value="/static/images/ajax-loader-blue.gif"/>"/> 
-			<fmt:message key='admin.managers.plugin.column.loading' />
-		</div></li>
+		<li>&nbsp;</li><li>&nbsp;</li>
+		<li>
+			<img id="tableLoadingIcon" src="<spring:url value="/static/images/ajax-loader-blue.gif"/>"/>
+		</li>
 	</ul>
 	</form:form>
 	
@@ -367,7 +367,7 @@
 		hqDojo.connect(hqDojo.byId("searchText"),"onkeyup",function(e){
 			var pluginId = hqDojo.byId("pluginId").value;
 			var status = hqDojo.byId("status").value;
-			seeStatusDetail(pluginId,hqDojo.byId("searchText").value,status);			
+			seeStatusDetail(pluginId,status);			
 		});
 		
 		var agentSummaryDialog = new hqDijit.Dialog({
@@ -544,9 +544,9 @@
 			
 			hqDojo.connect(hqDojo.byId("uploadButton"), "onclick", function(e){
 				var fileTypeCorrect=true;
-				var pluginList = hqDojo.query("input[type=file]", hqDojo.byId("hqDijit_FileUploaderForm_0"));
+				var pluginList = hqDojo.query("input[type=file]", hqDojo.byId("selectFileButton"));
 				var newPluginList = pluginList.slice(0,pluginList.length-1);//To get rid of last item which is empty
-				if(newPluginList.length==0){
+				if(newPluginList.length<1){
 					showErrorMessage("validationMessage","<fmt:message key='admin.managers.plugin.message.invalid.no.file' />")
 					return; //no file selected, do nothing
 				}
@@ -564,7 +564,6 @@
 				if(fileTypeCorrect){
 					hqDijit.byId("uploadPanelDialog").hide();
 					uploader.upload();
-					hqDijit.registry.remove("selectFileButton");
 				}
 			});
 			
