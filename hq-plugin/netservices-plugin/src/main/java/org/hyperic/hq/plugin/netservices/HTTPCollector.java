@@ -273,7 +273,7 @@ public class HTTPCollector extends SocketChecker {
 		
 		boolean isHEAD = getMethod().equals(METHOD_HEAD);
 		HttpConfig config = new HttpConfig(getTimeoutMillis(), getTimeoutMillis(), proxyHost, proxyPort);
-		HttpClient client = new HQHttpClient(config);
+		HttpClient client = new HQHttpClient("hq-agent", config);
 		HttpParams params = client.getParams();
 		
 		params.setParameter(CoreProtocolPNames.USER_AGENT, this.useragent);

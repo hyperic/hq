@@ -797,18 +797,43 @@ public class AgentClient {
                 // with a different IP address
                 SYSTEM_OUT.println("- Informing " + PRODUCT +
                                    " about agent setup changes");
-                try {
-                    response = bizapp.updateAgent(providerInfo.getAgentToken(),
-                                                  user, pword, agentIP, 
-                                                  agentPort, 
-                                                  isNewTransportAgent, 
-                                                  unidirectional);
-                    if(response != null)
-                        SYSTEM_ERR.println("- Error updating agent: " +
-                                           response);
-                } catch(Exception exc){
-                    SYSTEM_ERR.println("- Error updating agent: " + 
-                                       exc.getMessage());
+                
+                boolean acceptUnverifiedCertificates = false;
+                
+                while(true) {
+	                try {
+	                    response = bizapp.updateAgent(providerInfo.getAgentToken(),
+	                                                  user, pword, agentIP, 
+	                                                  agentPort, 
+	                                                  isNewTransportAgent, 
+	                                                  unidirectional,
+	                                                  acceptUnverifiedCertificates);
+	                    if (response != null) {
+	                        if (response.contains("java.security.cert.CertificateException")) {
+	    	            		String question = "The server to agent communication channel is using a self-signed certificate and not be verified" +
+	    	            						  "\nAre you sure you want to continue connecting?";
+	    	                	
+	    		                try {
+	    		                	if (askYesNoQuestion(question, false, "accept.certificate")) {
+	    			               		acceptUnverifiedCertificates = true;
+	    			               		
+	    			               		// try again
+	    		                		continue;
+	    		                	}
+	    	                	} catch(IOException ioe) {
+	    	                		log.debug(ioe.getMessage());
+	    	                	}
+	    	                } 
+	                        
+	                        SYSTEM_ERR.println("- Error updating agent: " + response);
+	                    }
+
+	                    break;
+	                } catch(Exception exc){
+	                	SYSTEM_ERR.println("- Error updating agent: " + 
+	                                       exc.getMessage());
+	                    return;
+	                }
                 }
                 
                 if (providerInfo.isNewTransport()!=isNewTransportAgent || 
@@ -844,27 +869,49 @@ public class AgentClient {
         // Ask server to verify agent
         SYSTEM_OUT.println("- Registering agent with " + PRODUCT);
         RegisterAgentResult result;
-        try {
-            result = bizapp.registerAgent(oldAgentToken, 
-                                          user, pword, 
-                                          tokenRes.getToken(), 
-                                          agentIP, agentPort,
-                                          ProductProperties.getVersion(),
-                                          getCpuCount(), isNewTransportAgent, 
-                                          unidirectional);
-            response = result.response;
-            if(!response.startsWith("token:")){
-                SYSTEM_ERR.println("- Unable to register agent: " + response);
-                return;
-            }
+        boolean acceptUnverifiedCertificates = false;
+        
+        while(true) {
+	        try {
+	            result = bizapp.registerAgent(oldAgentToken, 
+	                                          user, pword, 
+	                                          tokenRes.getToken(), 
+	                                          agentIP, agentPort,
+	                                          ProductProperties.getVersion(),
+	                                          getCpuCount(), isNewTransportAgent, 
+	                                          unidirectional, acceptUnverifiedCertificates);
 
-            // Else the bizapp responds with the token that the agent needs
-            // to use to contact it
-            agentToken = response.substring("token:".length());
-        } catch(Exception exc){
-            exc.printStackTrace(SYSTEM_ERR);
-            SYSTEM_ERR.println("- Error registering agent: "+exc.getMessage());
-            return;
+	            response = result.response;
+	            
+	            if(!response.startsWith("token:")) {
+	            	if (response.contains("java.security.cert.CertificateException")) {
+	            		String question = "The server to agent communication channel is using a self-signed certificate and could not be verified" +
+	            						  "\nAre you sure you want to continue connecting?";
+	                	
+		                try {
+		                	if (askYesNoQuestion(question, false, "accept.certificate")) {
+			               		acceptUnverifiedCertificates = true;
+			               		
+			               		// try again
+		                		continue;
+		                	}
+	                	} catch(IOException ioe) {
+	                		log.debug(ioe.getMessage());
+	                	}
+	                } 
+
+	            	SYSTEM_ERR.println("- Unable to register agent: " + response);
+	            	return;
+	            }
+	
+	            // Else the bizapp responds with the token that the agent needs
+	            // to use to contact it
+	            agentToken = response.substring("token:".length());
+	            break;
+	        } catch(Exception exc){
+	            exc.printStackTrace(SYSTEM_ERR);
+	            SYSTEM_ERR.println("- Error registering agent: "+exc.getMessage());
+	        }
         }
         
         SYSTEM_OUT.println("- " + PRODUCT +
@@ -1245,7 +1292,7 @@ public class AgentClient {
                 return null;
             }
 
-            conn = new SecureAgentConnection(connIp, cfg.getListenPort(), authToken);
+            conn = new SecureAgentConnection(connIp, cfg.getListenPort(), authToken, "hq-agent", false);
             return new AgentClient(cfg, conn);
         } else {
             // Not the main agent daemon process, wait for the token to become
@@ -1255,7 +1302,7 @@ public class AgentClient {
             while (initializeStartTime > (System.currentTimeMillis() - startupTimeout)) {
                 try {
                     authToken = AgentClientUtil.getLocalAuthToken(tokenFile);
-                    conn = new SecureAgentConnection(connIp, cfg.getListenPort(), authToken);
+                    conn = new SecureAgentConnection(connIp, cfg.getListenPort(), authToken, "hq-agent", false);
                     return new AgentClient(cfg, conn);
                 } catch(FileNotFoundException exc){
                     SYSTEM_ERR.println("- No token file found, waiting for " +

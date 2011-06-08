@@ -86,7 +86,7 @@ public class LatherHTTPClient
     		config.setProxyHostname(proxyHostname);
     		config.setProxyPort(proxyPort);
     		
-	        this.client = new HQHttpClient(config, acceptUnverifiedCertificates);
+	        this.client = new HQHttpClient(config, "hq-agent", acceptUnverifiedCertificates);
 			this.baseURL = baseURL;
 	        this.xCoder  = new LatherXCoder();
     	} catch(Exception e) {

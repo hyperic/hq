@@ -55,11 +55,11 @@ public class AgentCommandsClientFactory {
     }
 
     public AgentCommandsClient getClient(String agentAddress, int agentPort, String authToken,
-                                         boolean isNewTransportAgent, boolean unidirectional) {
+                                         boolean isNewTransportAgent, boolean unidirectional, boolean acceptCertificates) {
         if (isNewTransportAgent) {
             return new AgentCommandsClientImpl(agentProxyFactory, agentAddress, agentPort, unidirectional);
         } else {
-            return new LegacyAgentCommandsClientImpl(new SecureAgentConnection(agentAddress, agentPort, authToken, true));
+            return new LegacyAgentCommandsClientImpl(new SecureAgentConnection(agentAddress, agentPort, authToken, "hq", acceptCertificates));
         }
     }
 }

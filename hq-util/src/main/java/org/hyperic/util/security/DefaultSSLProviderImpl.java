@@ -36,6 +36,7 @@ import org.hyperic.util.exec.Execute;
 import org.hyperic.util.exec.ExecuteWatchdog;
 import org.hyperic.util.exec.PumpStreamHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 @Component
 public class DefaultSSLProviderImpl implements SSLProvider {
@@ -45,21 +46,26 @@ public class DefaultSSLProviderImpl implements SSLProvider {
     private final static String KEYSTORE_PASSWORD = "cl1ent!";
     private final static String KEYSTORE_PATH = "hq.truststore";
 
-    private KeyStore getKeyStore() throws KeyStoreException, IOException {
+    private KeyStore getKeyStore(String alias, String filePath, String filePassword) throws KeyStoreException, IOException {
     	FileInputStream keyStoreFileInputStream = null;
 
         try {
         	KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-            File file = new File(KEYSTORE_PATH);
+        	File file = new File(filePath);
             char[] password = null;
             
             if (!file.exists()) {
-            	generateInternalKeystore(file, "HQ");
+            	// ...if file doesn't exist, and path was user specified throw IOException...
+            	if (StringUtils.hasText(filePath) && !filePath.equals(KEYSTORE_PATH)) {
+            		throw new IOException("User specified keystore [" + filePath + "] does not exist.");
+            	}
+            	
+            	password = filePassword.toCharArray();
+            	generateInternalKeystore(file, alias, filePassword);
             }
             
             // ...keystore exist, so init the file input stream...
             keyStoreFileInputStream = new FileInputStream(file);
-            password = KEYSTORE_PASSWORD.toCharArray();
             
             keystore.load(keyStoreFileInputStream, password);
 
@@ -84,7 +90,7 @@ public class DefaultSSLProviderImpl implements SSLProvider {
         }
     }
 
-    private void generateInternalKeystore(File trustStoreFile, String alias) {
+    private void generateInternalKeystore(File trustStoreFile, String alias, String password) {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
 
         String javaHome = System.getProperty("java.home");
@@ -92,11 +98,11 @@ public class DefaultSSLProviderImpl implements SSLProvider {
         String[] args = {
             keytool,
             "-genkey",
-            "-dname",     "CN=" + getFQDN() +  " (HQ Self-Signed Cert), OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=Unknown",
+            "-dname",     "CN=" + alias + "_" + getFQDN() +  " (HQ Self-Signed Cert), OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=Unknown",
             "-alias",     alias,
             "-keystore",  trustStoreFile.getAbsolutePath(),
-            "-storepass", KEYSTORE_PASSWORD,
-            "-keypass",   KEYSTORE_PASSWORD,
+            "-storepass", password,
+            "-keypass",   password,
             "-keyalg",    "RSA"
         };
 
@@ -152,11 +158,11 @@ public class DefaultSSLProviderImpl implements SSLProvider {
         return address;
     }
     
-    private KeyManagerFactory getKeyManagerFactory(final KeyStore keystore) throws KeyStoreException, IOException {
+    private KeyManagerFactory getKeyManagerFactory(final KeyStore keystore, final String password) throws KeyStoreException, IOException {
     	try {
     		KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
     		
-    		keyManagerFactory.init(keystore, KEYSTORE_PASSWORD.toCharArray());
+    		keyManagerFactory.init(keystore, password.toCharArray());
     		
     		return keyManagerFactory;
 		} catch (NoSuchAlgorithmException e) {
@@ -189,14 +195,28 @@ public class DefaultSSLProviderImpl implements SSLProvider {
 		}
     }
 	
-    public DefaultSSLProviderImpl() {
-    	this(false);
+    private String getKeystoreFilePath() {
+    	return KEYSTORE_PATH;
     }
     
-	public DefaultSSLProviderImpl(final boolean acceptUnverifiedCertificates) {
+    private String getKeystorePassword() {
+    	return KEYSTORE_PASSWORD;
+    }
+    
+    public DefaultSSLProviderImpl() {
+    	this("hq-unknown");
+    }
+	
+    public DefaultSSLProviderImpl(String alias) {
+    	this(alias, false);
+    }
+    
+	public DefaultSSLProviderImpl(final String alias, final boolean acceptUnverifiedCertificates) {
     	try {
-	        final KeyStore trustStore = getKeyStore();
-	        KeyManagerFactory keyManagerFactory = getKeyManagerFactory(trustStore);
+    		final String filePath = getKeystoreFilePath();
+    		final String filePassword = getKeystorePassword();
+	        final KeyStore trustStore = getKeyStore(alias, filePath, filePassword);
+	        KeyManagerFactory keyManagerFactory = getKeyManagerFactory(trustStore, filePassword);
 	        TrustManagerFactory trustManagerFactory = getTrustManagerFactory(trustStore);
 	        
 	        final X509TrustManager defaultTrustManager = (X509TrustManager) trustManagerFactory.getTrustManagers()[0];

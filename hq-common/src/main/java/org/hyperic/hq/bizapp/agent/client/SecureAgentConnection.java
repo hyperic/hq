@@ -29,18 +29,11 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
-import javax.net.ssl.X509TrustManager;
 
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.hyperic.hq.agent.client.AgentConnection;
-import org.hyperic.hq.bizapp.agent.CommonSSL;
-import org.hyperic.util.JDK;
-import org.hyperic.util.security.BogusTrustManager;
 import org.hyperic.util.security.DefaultSSLProviderImpl;
 import org.hyperic.util.security.SSLProvider;
 
@@ -61,7 +54,7 @@ public class SecureAgentConnection
     private int    agentPort;
     private String authToken;
     private boolean autoValidate = false;
-   
+    private String alias = "hq";
 
     public SecureAgentConnection(String agentAddress, int agentPort, String authToken) {
         super(agentAddress, agentPort);
@@ -70,9 +63,10 @@ public class SecureAgentConnection
         this.authToken    = authToken;
     }
     
-    public SecureAgentConnection(String agentAddress, int agentPort, String authToken, boolean autoValidate) {
+    public SecureAgentConnection(String agentAddress, int agentPort, String authToken, String alias, boolean autoValidate) {
     	this(agentAddress, agentPort, authToken);
     	
+        this.alias = alias;
     	this.autoValidate = autoValidate;
     }
     
@@ -102,7 +96,7 @@ public class SecureAgentConnection
                 postHandshakeTimeout = POST_HANDSHAKE_TIMEOUT;
             }
       
-        	SSLProvider sslProvider = new DefaultSSLProviderImpl(autoValidate);
+        	SSLProvider sslProvider = new DefaultSSLProviderImpl(alias, autoValidate);
             SSLSocketFactory factory = sslProvider.getSSLSocketFactory();
             
         	// See the following links...
@@ -117,7 +111,7 @@ public class SecureAgentConnection
             // connection issues with the agent.  
             socket.setSoTimeout(readTimeout);
             socket.startHandshake();
-            
+
             // [HHQ-3694] The timeout is set to a post handshake value.
             socket.setSoTimeout(postHandshakeTimeout);
         } catch(IOException exc){

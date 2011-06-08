@@ -193,7 +193,7 @@ public class UpdateBossImpl implements UpdateBoss {
         
         try {
 	        HttpConfig config = new HttpConfig(HTTP_TIMEOUT_MILLIS, HTTP_TIMEOUT_MILLIS, null, -1);
-	        HQHttpClient client = new HQHttpClient(config);
+	        HQHttpClient client = new HQHttpClient("hq", config);
 	        HttpPost post = new HttpPost(updateNotifyUrl);
 	        
 	        post.addHeader("x-hq-guid", req.getProperty("hq.guid"));

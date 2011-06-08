@@ -178,7 +178,7 @@ class SSLConnectionListener
     public void setup(int timeout)
         throws AgentStartException
     {
-    	SSLProvider provider = new DefaultSSLProviderImpl();
+    	SSLProvider provider = new DefaultSSLProviderImpl("hq-agent");
         SSLContext context = provider.getSSLContext();
     	SSLServerSocketFactory sFactory = context.getServerSocketFactory();
         AgentConfig cfg = this.getConfig();

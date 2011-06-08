@@ -99,6 +99,7 @@ public class BizappCallbackClient
      * @param cpuCount The host platform cpu count.
      * @param isNewTransportAgent <code>true</code> if the agent is using the new transport layer.
      * @param unidirectional <code>true</code> if the agent is unidirectional.
+     * @param acceptCertificates <code>true</code> if the server should accept agent SSL certificates
      * @return The result containing the new agent token.
      */
     public RegisterAgentResult registerAgent(String oldAgentToken, 
@@ -108,7 +109,8 @@ public class BizappCallbackClient
                                              String version,
                                              int cpuCount, 
                                              boolean isNewTransportAgent, 
-                                             boolean unidirectional)
+                                             boolean unidirectional,
+                                             boolean acceptCertificates)
         throws AgentCallbackClientException
     {
         RegisterAgent_result res;
@@ -135,6 +137,10 @@ public class BizappCallbackClient
             args.setNewTransportAgent(unidirectional);            
         }
 
+        if (acceptCertificates) {
+        	args.setAcceptCertificates(acceptCertificates);
+        }
+        
         res = (RegisterAgent_result)this.invokeLatherCall(provider,
                                                 CommandInfo.CMD_REGISTER_AGENT,
                                                 args);
@@ -144,7 +150,8 @@ public class BizappCallbackClient
     public String updateAgent(String agentToken, String user, String pword,
                               String agentIp, int agentPort, 
                               boolean isNewTransportAgent, 
-                              boolean unidirectional)
+                              boolean unidirectional,
+                              boolean acceptCertificates)
         throws AgentCallbackClientException
     {
         UpdateAgent_result res;
@@ -164,6 +171,10 @@ public class BizappCallbackClient
             args.setNewTransportAgent(unidirectional);
         }
 
+        if (acceptCertificates) {
+        	args.setAcceptCertificates(acceptCertificates);
+        }
+        
         res = (UpdateAgent_result)this.invokeLatherCall(provider,
                                                 CommandInfo.CMD_UPDATE_AGENT,
                                                 args);

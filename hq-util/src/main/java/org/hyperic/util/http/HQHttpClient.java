@@ -21,18 +21,18 @@ import org.hyperic.util.security.SSLProvider;
 import org.springframework.util.Assert;
 
 public class HQHttpClient extends DefaultHttpClient {
-    public HQHttpClient() {
-    	this(null);
+    public HQHttpClient(final String alias) {
+    	this(alias, null);
     }
     
-    public HQHttpClient(final HttpConfig config) {
-    	this(config, false);
+    public HQHttpClient(final String alias, final HttpConfig config) {
+    	this(config, alias, false);
     }
     
-    public HQHttpClient(final HttpConfig config, final boolean acceptUnverifiedCertificates) {
+    public HQHttpClient(final HttpConfig config, final String alias, final boolean acceptUnverifiedCertificates) {
     	super();
     	
-   		SSLProvider sslProvider = new DefaultSSLProviderImpl(acceptUnverifiedCertificates);
+   		SSLProvider sslProvider = new DefaultSSLProviderImpl(alias, acceptUnverifiedCertificates);
         Scheme sslScheme = new Scheme("https", 443, sslProvider.getSSLSocketFactory());
 			
 		getConnectionManager().getSchemeRegistry().register(sslScheme);
