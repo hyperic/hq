@@ -561,38 +561,38 @@ public class MeasurementDAO
 
     /**
      * @param {@link List} of {@link Integer} resource ids
-     * @return {@link Object[]} 0 = {@link Integer} 1 = {@link List} of
-     *         Availability {@link Measurement}s Measurements which are children
-     *         of the resource
+     * @return {@link Object[]}
+     *  0 = {@link Integer} resourceId
+     *  1 = {@link List} of Availability {@link Measurement}s which are children of the resource
      */
     @SuppressWarnings("unchecked")
     final List<Object[]> findRelatedAvailMeasurements(final List<Integer> resourceIds,
                                                       final String resourceRelationType) {
         if (resourceIds.isEmpty()) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
-
-        final String sql = new StringBuilder().append("select e.from.id,m from Measurement m ")
-            .append("join m.resource.toEdges e ").append("join m.template t ").append(
-                "join e.relation r ").append("where m.resource.resourceType is not null ").append(
-                "and e.distance > 0 ").append("and r.name = :relationType ").append(
-                "and e.from in (:resourceIds) and ").append(ALIAS_CLAUSE).toString();
-
-        // create a new list so that the original list is not modified
-        // and sort the resource ids so that the results are more cacheable
-        final List sortedResourceIds = new ArrayList(resourceIds);
-        Collections.sort(sortedResourceIds);
-
+        final String sql = new StringBuilder(300)
+            .append("select e.from.id, m ")
+            .append("from Measurement m ")
+            .append("join m.resource.toEdges e ")
+            .append("join m.template t ")
+            .append("join e.relation r ")
+            .append("where m.resource.resourceType is not null ")
+            .append("and e.distance > 0 ")
+            .append("and r.name = :relationType ")
+            .append("and e.from in (:resourceIds) and ")
+            .append(ALIAS_CLAUSE)
+            .toString();
         final HQDialect dialect = getHQDialect();
-        final int max = (dialect.getMaxExpressions() <= 0) ? BATCH_SIZE : dialect
-            .getMaxExpressions();
-        final List rtn = new ArrayList(sortedResourceIds.size());
-        for (int i = 0; i < sortedResourceIds.size(); i += max) {
-            final int end = Math.min(i + max, sortedResourceIds.size());
-            final List list = sortedResourceIds.subList(i, end);
-            rtn.addAll(getSession().createQuery(sql).setParameterList("resourceIds", list,
-                new IntegerType()).setParameter("relationType", resourceRelationType).setCacheable(
-                true).setCacheRegion("Measurement.findRelatedAvailMeasurements").list());
+        final int max = (dialect.getMaxExpressions() <= 0) ? BATCH_SIZE : dialect.getMaxExpressions();
+        final List<Object[]> rtn = new ArrayList<Object[]>(resourceIds.size());
+        for (int i = 0; i < resourceIds.size(); i += max) {
+            final int end = Math.min(i + max, resourceIds.size());
+            final List<Integer> list = resourceIds.subList(i, end);
+            rtn.addAll(getSession().createQuery(sql)
+                                   .setParameterList("resourceIds", list, new IntegerType())
+                                   .setParameter("relationType", resourceRelationType)
+                                   .list());
         }
         return rtn;
     }

@@ -1356,6 +1356,12 @@ public class PlatformManagerImpl implements PlatformManager {
             return new PageList<Platform>();
         }
     }
+    
+    @Transactional(readOnly=true)
+    public Collection<Platform> findAll(AuthzSubject superUser) throws PermissionException {
+        permissionManager.checkIsSuperUser(superUser);
+        return platformDAO.findAll();
+    }
 
     /**
      * Get the scope of viewable platforms for a given user
