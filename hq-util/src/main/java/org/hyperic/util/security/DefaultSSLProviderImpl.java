@@ -35,10 +35,8 @@ import org.hyperic.sigar.SigarException;
 import org.hyperic.util.exec.Execute;
 import org.hyperic.util.exec.ExecuteWatchdog;
 import org.hyperic.util.exec.PumpStreamHandler;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-@Component
 public class DefaultSSLProviderImpl implements SSLProvider {
 	private SSLContext sslContext;
 	private SSLSocketFactory sslSocketFactory;
@@ -92,7 +90,6 @@ public class DefaultSSLProviderImpl implements SSLProvider {
 
     private void generateInternalKeystore(File trustStoreFile, String alias, String password) {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
-
         String javaHome = System.getProperty("java.home");
         String keytool = javaHome + File.separator + "bin" + File.separator + "keytool";
         String[] args = {
