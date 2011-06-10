@@ -1737,7 +1737,8 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         if (measId == null) {
             return null;
         }
-        return measurementTemplateDAO.get(measId);
+        Integer tId = measurementDAO.get(measId).getTemplate().getId();
+        return measurementTemplateDAO.get(tId);
     }
 
 }
