@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -49,9 +50,8 @@ import org.hyperic.hq.common.DiagnosticObject;
 import org.hyperic.hq.common.DiagnosticsLogger;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ha.HAUtil;
-import org.hyperic.hq.hibernate.SessionManager;
-import org.hyperic.hq.hibernate.SessionManager.SessionRunner;
 import org.hyperic.hq.measurement.server.session.Measurement;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.MetricDataCache;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
@@ -130,19 +130,13 @@ implements DiagnosticObject, ApplicationContextAware, ApplicationListener<Contex
                 if (rtn == null) {
                     return "report will not be executed until the server is up for 60 minutes\n";
                 }
+                return rtn;
             }
         }
         final StringBuilder verbose = new StringBuilder();
         final StringBuilder nonVerbose = new StringBuilder();
         try {
-            SessionManager.runInSession(new SessionRunner() {
-                public void run() throws Exception {
-                    setStatusBuf(nonVerbose, verbose);
-                }
-                public String getName() {
-                    return MetricsNotComingInDiagnostic.class.getSimpleName();
-                }
-            });
+            setStatusBuf(nonVerbose, verbose);
         } catch (Throwable e) {
             log.error(e, e);
         } finally {
@@ -159,32 +153,45 @@ implements DiagnosticObject, ApplicationContextAware, ApplicationListener<Contex
         final boolean debug = log.isDebugEnabled();
         final StopWatch watch = new StopWatch();
         
+        /* !!!PLEASE NOTE!!!
+         * This diagostic pulls in a large amount of pojos when it runs.  In order to alleviate
+         * the potential of it crashing the server this method does not run in single session
+         * anymore.  The reason for this is so that memory may be freed up while the method is
+         * resolving all the resources not reporting metrics.  The code looks odd since it is
+         * pulling in pojos using hibernate get() to avoid lazy session initialization issues,
+         * so please be careful when modifying it.
+         */
         if (debug) watch.markTimeBegin("getAllPlatforms");
         final Collection<Platform> platforms = getAllPlatforms();
         if (debug) watch.markTimeEnd("getAllPlatforms");
 
         if (debug) watch.markTimeBegin("getResources");
-        final Collection<Resource> resources = getResources(platforms);
+        final Map<Integer, Resource> resources = getResources(platforms);
         if (debug) watch.markTimeEnd("getResources");
 
         if (debug) watch.markTimeBegin("getAvailMeasurements");
         final Map<Integer, List<Measurement>> measCache =
-            measurementManager.getAvailMeasurements(resources);
+            measurementManager.getAvailMeasurements(resources.values());
         if (debug) watch.markTimeEnd("getAvailMeasurements");
                 
-        if (debug) watch.markTimeBegin("getLastAvail");
+        if (debug) watch.markTimeBegin("getLastPlatformAvail");
         final Map<Integer, MetricValue> avails =
-            availabilityManager.getLastAvail(resources, measCache);
-        if (debug) watch.markTimeEnd("getLastAvail");
+            availabilityManager.getLastAvail(resources.values(), measCache);
+        if (debug) watch.markTimeEnd("getLastPlatformAvail");
                 
-        if (debug) watch.markTimeBegin("getChildren");
         final List<Resource> children = new ArrayList<Resource>();
-        final Map<Resource,Platform> childrenToPlatform = getChildren(platforms, measCache, avails, children);
+        if (debug) watch.markTimeBegin("getChildren");
+        final Map<Integer,Platform> childrenToPlatform =
+            getChildren(platforms, measCache, avails, resources, children);
         if (debug) watch.markTimeEnd("getChildren");
+        
+        if (debug) watch.markTimeBegin("filterOutNonAvailableResources");
+        filterOutNonAvailableResources(children, childrenToPlatform);
+        if (debug) watch.markTimeEnd("filterOutNonAvailableResources");
         
         if (debug) watch.markTimeBegin("getEnabledMeasurements");
         final Collection<List<Measurement>> measurements =
-            measurementManager.getEnabledMeasurements(children).values();
+            measurementManager.getEnabledNonAvailMeasurements(children).values();
         if (debug) watch.markTimeEnd("getEnabledMeasurements");
                 
         if (debug) watch.markTimeBegin("getLastMetricValues");
@@ -192,7 +199,7 @@ implements DiagnosticObject, ApplicationContextAware, ApplicationListener<Contex
         if (debug) watch.markTimeEnd("getLastMetricValues");
         
         if (debug) watch.markTimeBegin("getStatus");
-        setStatus(measurements, values, avails, childrenToPlatform, nonVerbose, verbose);
+        setStatus(measurements, values, avails, childrenToPlatform, resources, nonVerbose, verbose);
         if (debug) watch.markTimeEnd("getStatus");
         
         if (debug) {
@@ -206,16 +213,32 @@ implements DiagnosticObject, ApplicationContextAware, ApplicationListener<Contex
         }
     }
 
+    private void filterOutNonAvailableResources(List<Resource> resources,
+                                                Map<Integer, Platform> resourcesToPlatform) {
+        final Map<Integer, List<Measurement>> measCache =
+            measurementManager.getAvailMeasurements(resources);
+        final Map<Integer, MetricValue> avails =
+            availabilityManager.getLastAvail(resources, measCache);
+        for (final Iterator<Resource> it=resources.iterator(); it.hasNext(); ) {
+            final Resource child = it.next();
+            if (!resourceIsAvailable(child, measCache, avails)) {
+                it.remove();
+                resourcesToPlatform.remove(child.getId());
+            }
+        }
+    }
+
     private void setStatus(Collection<List<Measurement>> measurementLists,
                            Map<Integer, MetricValue> values,
                            Map<Integer, MetricValue> avails,
-                           Map<Resource, Platform> childrenToPlatform,
+                           Map<Integer, Platform> childrenToPlatform,
+                           Map<Integer, Resource> resources,
                            StringBuilder nonVerbose, StringBuilder verbose) {
         final Map<Platform, List<String>> platHierarchyNotReporting = new HashMap<Platform, List<String>>();
         for (final List<Measurement> mList : measurementLists) {
             for (Measurement m : mList) {
-                if (m != null && !m.getTemplate().isAvailability() && !values.containsKey(m.getId())) {
-                    final Platform platform = childrenToPlatform.get(m.getResource());
+                if (m != null && !values.containsKey(m.getId())) {
+                    final Platform platform = childrenToPlatform.get(m.getResource().getId());
                     if (platform == null) {
                         continue;
                     }
@@ -225,11 +248,18 @@ implements DiagnosticObject, ApplicationContextAware, ApplicationListener<Contex
                         platHierarchyNotReporting.put(platform, tmp);
                     }
                     List<String> list = tmp;
+                    Resource res = resources.get(m.getResource().getId());
+                    // res should not be null, but just in case
+                    if (res == null) {
+                        res = resourceManager.getResourceById(m.getResource().getId());
+                    }
+                    MeasurementTemplate template = measurementManager.getTemplatesByMeasId(m.getId());
+                    String templateName = (template == null) ? "UNKNOWN" : template.getName();
                     list.add(new StringBuilder(128)
                         .append("\nmid=").append(m.getId())
-                        .append(", name=").append(m.getTemplate().getName())
+                        .append(", name=").append(templateName)
                         .append(", resid=").append(m.getResource().getId())
-                        .append(", resname=").append(m.getResource().getName())
+                        .append(", resname=").append(res.getName())
                         .toString());
                 }
             }
@@ -264,41 +294,40 @@ implements DiagnosticObject, ApplicationContextAware, ApplicationListener<Contex
     }
 
     /**
-     * @return {@link Map} of {@link Resource}s to their top level
-     *         {@link Platform}
+     * @return {@link Map} of {@link Integer}s of resourceIds to their top level {@link Platform}
      */
-    private Map<Resource, Platform> getChildren(Collection<Platform> platforms,
-                                                Map<Integer, List<Measurement>> measCache,
-                                                Map<Integer, MetricValue> avails,
-                                                List<Resource> children) {
-        final Map<Resource, Platform> rtn = new HashMap<Resource, Platform>(platforms.size());
+    private Map<Integer, Platform> getChildren(Collection<Platform> platforms,
+                                               Map<Integer, List<Measurement>> measCache,
+                                               Map<Integer, MetricValue> avails,
+                                               Map<Integer, Resource> resourceMap,
+                                               List<Resource> children) {
+        final Map<Integer, Platform> rtn = new HashMap<Integer, Platform>();
         final long now = now();
-        final List<Resource> resources = new ArrayList<Resource>(platforms.size());
         for (final Platform platform : platforms) {
-            final Resource r = platform.getResource();
-            if (r == null || r.isInAsyncDeleteState()) {
-                continue;
-            }
             if ((now - platform.getCreationTime()) < VIOLATION_THRESHOLD ||
-                !measCache.containsKey(r.getId()) || 
-                !platformIsAvailable(platform, measCache, avails)) {
+                !measCache.containsKey(platform.getResource().getId()) || 
+                !resourceIsAvailable(platform.getResource(), measCache, avails)) {
+                resourceMap.remove(platform.getResource().getId());
                 continue;
             }
-            resources.add(platform.getResource());
         }
-
-        final Collection<ResourceEdge> edges = resourceManager.findResourceEdges(resourceManager
-            .getContainmentRelation(), resources);
+        final Collection<ResourceEdge> edges = resourceManager.findResourceEdges(
+            resourceManager.getContainmentRelation(), new ArrayList<Resource>(resourceMap.values()));
         for (final ResourceEdge edge : edges) {
             try {
-                final Platform platform = platformManager.findPlatformById(edge.getFrom()
-                    .getInstanceId());
-                final Resource child = edge.getTo();
+                Resource from = resourceMap.get(edge.getFrom().getId());
+                // res should not be null, but just in case
+                if (from == null) {
+                    from = resourceManager.getResourceById(edge.getFrom().getId());
+                }
+                final Platform platform = platformManager.findPlatformById(from.getInstanceId());
+                final Resource child = resourceManager.getResourceById(edge.getTo().getId());
                 if (child == null || child.isInAsyncDeleteState()) {
                     continue;
                 }
+                resourceMap.put(child.getId(), child);
                 children.add(child);
-                rtn.put(child, platform);
+                rtn.put(child.getId(), platform);
             } catch (PlatformNotFoundException e) {
                 log.debug(e);
             }
@@ -306,10 +335,15 @@ implements DiagnosticObject, ApplicationContextAware, ApplicationListener<Contex
         return rtn;
     }
 
-    private Collection<Resource> getResources(Collection<Platform> platforms) {
-        final Collection<Resource> resources = new ArrayList<Resource>(platforms.size());
+    private Map<Integer, Resource> getResources(Collection<Platform> platforms) {
+        final Map<Integer, Resource> resources = new HashMap<Integer, Resource>(platforms.size());
         for (final Platform platform : platforms) {
-            resources.add(platform.getResource());
+            final Integer resId = platform.getResource().getId();
+            final Resource r = resourceManager.getResourceById(resId);
+            if (r == null || r.isInAsyncDeleteState()) {
+                continue;
+            }
+            resources.put(resId, r);
         }
         return resources;
     }
@@ -333,11 +367,13 @@ implements DiagnosticObject, ApplicationContextAware, ApplicationListener<Contex
         return System.currentTimeMillis();
     }
 
-    private boolean platformIsAvailable(Platform platform,
+    private boolean resourceIsAvailable(Resource resource,
                                         Map<Integer, List<Measurement>> measCache,
                                         Map<Integer, MetricValue> avails) {
-        final Resource resource = platform.getResource();
         final List<Measurement> measurements =  measCache.get(resource.getId());
+        if (measurements == null) {
+            return false;
+        }
         final Measurement availMeas = (Measurement) measurements.get(0);
         MetricValue val = avails.get(availMeas.getId());
         return (val.getValue() == MeasurementConstants.AVAIL_DOWN) ? false : true;

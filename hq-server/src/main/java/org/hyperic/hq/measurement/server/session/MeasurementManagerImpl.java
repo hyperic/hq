@@ -659,8 +659,17 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
      * @return {@link Map} of {@link Integer} representing resourceId to
      * {@link List} of {@link Measurement}s
      */
+    public Map<Integer,List<Measurement>> getEnabledNonAvailMeasurements(List<Resource> resources) {
+        return measurementDAO.findEnabledByResources(resources, false);
+    }
+    
+    /**
+     * @param aeids {@link List} of {@link Resource}s
+     * @return {@link Map} of {@link Integer} representing resourceId to
+     * {@link List} of {@link Measurement}s
+     */
     public Map<Integer,List<Measurement>> getEnabledMeasurements(List<Resource> resources) {
-        return measurementDAO.findEnabledByResources(resources);
+        return measurementDAO.findEnabledByResources(resources, true);
     }
     
     /**
@@ -744,7 +753,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         for (AppdefEntityID aeid : aeids) {
             resources.add(resourceManager.findResource(aeid));
         }
-        return measurementDAO.findEnabledByResources(resources);
+        return measurementDAO.findEnabledByResources(resources, true);
     }
 
     /**
@@ -1723,4 +1732,12 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }
+
+    public MeasurementTemplate getTemplatesByMeasId(Integer measId) {
+        if (measId == null) {
+            return null;
+        }
+        return measurementTemplateDAO.get(measId);
+    }
+
 }
