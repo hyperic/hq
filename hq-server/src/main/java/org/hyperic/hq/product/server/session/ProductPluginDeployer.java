@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -59,6 +60,7 @@ import org.hyperic.util.file.FileUtil;
 import org.hyperic.util.file.FileWatcher;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
@@ -68,6 +70,7 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.roo.file.monitor.event.FileEvent;
 import org.springframework.roo.file.monitor.event.FileEventListener;
 import org.springframework.roo.file.monitor.event.FileOperation;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 
 /**
@@ -97,15 +100,21 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
 
     private TransactionRetry transactionRetry;
 
+    private TaskScheduler taskScheduler;
+
+    private Collection<FileEvent> fileEvents = new ArrayList<FileEvent>();
+
     @Autowired
     public ProductPluginDeployer(RenditServer renditServer, ProductManager productManager,
                                  AgentManager agentManager, PluginManager pluginManager,
+                                 @Value("#{scheduler}")TaskScheduler taskScheduler,
                                  TransactionRetry transactionRetry) {
         this.renditServer = renditServer;
         this.productManager = productManager;
         this.agentManager = agentManager;
         this.pluginManager = pluginManager;
         this.transactionRetry = transactionRetry;
+        this.taskScheduler = taskScheduler;
     }
 
     private void initializePlugins(Collection<File> pluginDirs) {
@@ -299,6 +308,11 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
         if(!(pluginDirs.isEmpty())) {
             fileWatcher.start();
         }
+        taskScheduler.scheduleWithFixedDelay(new PluginFileExecutor(), new Date(now()+60000l), 5000l);
+    }
+
+    private long now() {
+        return System.currentTimeMillis();
     }
 
     private void unpackJar(File pluginJarFile, File destDir, String prefix) throws Exception {
@@ -469,45 +483,75 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
                       new Throwable());
         }
     }
+    
+    private class PluginFileExecutor implements Runnable {
+        public void run() {
+            try {
+                handleFileEvents();
+            } catch (Throwable t) {
+                log.error(t,t);
+            }
+        }
+        public void handleFileEvents() {
+            final Collection<String> toSync = new ArrayList<String>();
+            final Collection<FileEvent> events;
+            synchronized (fileEvents) {
+                events = new ArrayList<FileEvent>(fileEvents);
+                fileEvents.clear();
+            }
+            if (events.isEmpty()) {
+                return;
+            }
+            final boolean debug = log.isDebugEnabled();
+            for (final FileEvent fileEvent : events) {
+                try {
+                    if (debug) log.debug("Received product plugin file event: " + fileEvent);
+                    final File pluginFile = fileEvent.getFileDetails().getFile();
+                    if (FileOperation.CREATED.equals(fileEvent.getOperation())) {
+                        File serverPlugin = new File(getServerPluginDir(), pluginFile.getName());
+                        if (!serverPlugin.equals(pluginFile)) {
+                            // plugin was deployed in the custom dir but already exists in the
+                            // server dir.  redeploy it!
+                            undeployPlugin(serverPlugin, true);
+                        }
+                        boolean deployed = loadAndDeployPlugin(pluginFile);
+                        if (deployed) {
+                            toSync.add(pluginFile.getName());
+                        }
+                    } else if (FileOperation.DELETED.equals(fileEvent.getOperation())) {
+                        File customPlugin = new File(getCustomPluginDir(), pluginFile.getName());
+                        if (customPlugin.exists()) {
+                            // do nothing, the file existed in both custom dir and server
+                            // then the server file was deleted
+                        } else {
+                            undeployPlugin(pluginFile, false);
+                        }
+                    } else if (FileOperation.UPDATED.equals(fileEvent.getOperation()) &&
+                               !(pluginDirs.contains(fileEvent.getFileDetails().getFile()))) {
+                        boolean undeployed = undeployPlugin(pluginFile, false);
+                        if (undeployed) {
+                            boolean deployed = loadAndDeployPlugin(pluginFile);
+                            if (deployed) {
+                                toSync.add(pluginFile.getName());
+                            }
+                        }
+                    }
+                } catch (Throwable e) {
+                    log.error("Error responding to plugin file event " + fileEvent + ": " + e, e);
+                }
+            }
+            agentManager.syncPluginToAgentsAfterCommit(toSync);
+        }
+    }
 
     private class ProductPluginFileEventListener implements FileEventListener {
         public void onFileEvent(FileEvent fileEvent) {
-            if (log.isDebugEnabled()) {
-                log.debug("Received product plugin file event: " + fileEvent);
+            final File pluginFile = fileEvent.getFileDetails().getFile();
+            if (!pluginFile.isFile()) {
+                return;
             }
-            try {
-                final File pluginFile = fileEvent.getFileDetails().getFile();
-                if (FileOperation.CREATED.equals(fileEvent.getOperation())) {
-                    File serverPlugin = new File(getServerPluginDir(), pluginFile.getName());
-                    if (!serverPlugin.equals(pluginFile)) {
-                        // plugin was deployed in the custom dir but already exists in the
-                        // server dir.  redeploy it!
-                        undeployPlugin(serverPlugin, true);
-                    }
-                    boolean deployed = loadAndDeployPlugin(pluginFile);
-                    if (deployed) {
-                        agentManager.syncPluginToAgentsAfterCommit(pluginFile.getName());
-                    }
-                } else if (FileOperation.DELETED.equals(fileEvent.getOperation())) {
-                    File customPlugin = new File(getCustomPluginDir(), pluginFile.getName());
-                    if (customPlugin.exists()) {
-                        // do nothing, the file existed in both custom dir and server
-                        // then the server file was deleted
-                    } else {
-                        undeployPlugin(pluginFile, false);
-                    }
-                } else if (FileOperation.UPDATED.equals(fileEvent.getOperation()) &&
-                           !(pluginDirs.contains(fileEvent.getFileDetails().getFile()))) {
-                    boolean undeployed = undeployPlugin(pluginFile, false);
-                    if (undeployed) {
-                        boolean deployed = loadAndDeployPlugin(pluginFile);
-                        if (deployed) {
-                    	   agentManager.syncPluginToAgentsAfterCommit(pluginFile.getName());
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                log.error("Error responding to plugin file event " + fileEvent + ": " + e, e);
+            synchronized (fileEvents) {
+                fileEvents.add(fileEvent);
             }
         }
     }

@@ -197,7 +197,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                 for (final PluginDeployedZevent zevent : events) {
                     final Runnable runner = new Runnable() {
                         public void run() {
-                            am.syncPluginToAgents(zevent.getFileName());
+                            am.syncPluginToAgents(zevent.getFileNames());
                         }
                     };
                     try {
@@ -1491,24 +1491,50 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     }
 
     @Transactional(readOnly=true)
-    public void syncPluginToAgentsAfterCommit(String pluginFileName) {
-        ZeventManager.getInstance().enqueueEventAfterCommit(new PluginDeployedZevent(pluginFileName));
+    public void syncPluginToAgentsAfterCommit(Collection<String> pluginFileNames) {
+        if (pluginFileNames.isEmpty()) {
+            return;
+        }
+        ZeventManager.getInstance().enqueueEventAfterCommit(new PluginDeployedZevent(pluginFileNames));
     }
 
-    public void syncPluginToAgents(String filename) {
+    public void syncPluginToAgents(Collection<String> filenames) {
+        if (filenames.isEmpty()) {
+            return;
+        }
+        final Map<Integer, Collection<Plugin>> toSync = new HashMap<Integer, Collection<Plugin>>();
+        for (final String filename : filenames) {
+            final Map<Integer, Collection<Plugin>> tmp = updateStatusAndGetSyncInfo(filename);
+            for (final Entry<Integer, Collection<Plugin>> entry : tmp.entrySet()) {
+                final Integer agentid = entry.getKey();
+                if (agentid == null) {
+                    continue;
+                }
+                Collection<Plugin> plugins = toSync.get(agentid);
+                if (plugins == null) {
+                    plugins = new ArrayList<Plugin>();
+                    toSync.put(agentid, plugins);
+                }
+                plugins.addAll(entry.getValue());
+            }
+        }
+        agentPluginUpdater.queuePluginTransfer(toSync, null, true);
+    }
+
+    private Map<Integer, Collection<Plugin>> updateStatusAndGetSyncInfo(String filename) {
         final Plugin plugin = pluginDAO.getByFilename(filename);
         if (plugin == null) {
             log.error("attempted to initiate plugin transfer of " + filename + " but plugin " +
                       "does not exist in HQ");
-            return;
+            return Collections.emptyMap();
         } else if (plugin.isDisabled()) {
             log.error("attempted to initiate plugin transfer of " + filename + " but plugin " +
                       "is disabled in HQ");
-            return;
+            return Collections.emptyMap();
         } else if (plugin.isDeleted()) {
             log.error("attempted to initiate plugin transfer of " + filename + " but plugin " +
                       "is marked as deleted in HQ");
-            return;
+            return Collections.emptyMap();
         }
         final Collection<Agent> agents = agentPluginStatusDAO.getAutoUpdatingAgents();
         final Map<Agent, AgentPluginStatus> map = agentPluginStatusDAO.getPluginStatusByFileName(filename);
@@ -1538,7 +1564,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                 }
             }
         }
-        agentPluginUpdater.queuePluginTransfer(toSync, null, true);
+        return toSync;
     }
     
     @Transactional(readOnly=true)
@@ -1662,22 +1688,14 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     // THESE CLASSES ARE USED TO DRIVE THE ZEVENTS FOR THE SERVER -> AGENT PLUGIN SYNC
     // -----------------------------
     private class PluginDeployedZevent extends Zevent {
+        private Collection<String> pluginFileNames;
         @SuppressWarnings("serial")
-        private PluginDeployedZevent(String pluginFileName) {
-            super(new ZeventSourceId() {}, new PluginDeployPayload(pluginFileName));
+        private PluginDeployedZevent(Collection<String> pluginFileNames) {
+            super(new ZeventSourceId() {}, new ZeventPayload() {});
+            this.pluginFileNames = pluginFileNames;
         }
-        private String getFileName() {
-            return ((PluginDeployPayload) getPayload()).getFileName();
-        }
-    }
-
-    private class PluginDeployPayload implements ZeventPayload {
-        private final String pluginFileName;
-        private PluginDeployPayload(String pluginFileName) {
-            this.pluginFileName = pluginFileName;
-        }
-        private String getFileName() {
-            return pluginFileName;
+        private Collection<String> getFileNames() {
+            return pluginFileNames;
         }
     }
 
