@@ -490,16 +490,16 @@ public interface AgentManager {
     public void syncAllAgentPlugins();
 
     /**
-     * syncs the specified pluginFileName all Auto Updating Agents
+     * syncs the specified pluginFileNames to all Auto Updating Agents
      */
-    public void syncPluginToAgents(String pluginName);
+    public void syncPluginToAgents(Collection<String> pluginNames);
 
     /**
-     * syncs the specified pluginFileName all Auto Updating Agents after commit
-     * @see AgentManager#syncPluginToAgents(String)
+     * syncs the specified pluginFileNames to all Auto Updating Agents after commit
+     * @see AgentManager#syncPluginToAgents(Collection)
      * @see AgentManager#getNumAutoUpdatingAgents()
      */
-    public void syncPluginToAgentsAfterCommit(String pluginFileName);
+    public void syncPluginToAgentsAfterCommit(Collection<String> pluginFileNames);
 
     /**
      * @return long representing the unique agent_ids in the EAM_AGENT_PLUGIN_STATUS table
