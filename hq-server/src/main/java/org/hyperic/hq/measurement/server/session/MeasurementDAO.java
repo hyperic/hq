@@ -53,9 +53,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class MeasurementDAO
     extends HibernateDAO<Measurement> {
-    private static final String ALIAS_CLAUSE = " upper(t.alias) = '" +
-                                               MeasurementConstants.CAT_AVAILABILITY.toUpperCase() +
-                                               "' ";
+    private static final String NON_AVAIL_CLAUSE =
+        " upper(t.alias) != '" + MeasurementConstants.CAT_AVAILABILITY.toUpperCase() + "' ";
+    private static final String ALIAS_CLAUSE =
+        " upper(t.alias) = '" + MeasurementConstants.CAT_AVAILABILITY.toUpperCase() + "' ";
     private AgentDAO agentDao;
 
     @Autowired
@@ -236,17 +237,21 @@ public class MeasurementDAO
     
     /**
      * @param {@link Collection} of {@link Resource}s
+     * @param includeAvailability - should availability be included in the returned Map
      * @return {@link Map} of {@link Integer} representing resourceId to
      * {@link List} of {@link Measurement}s
      */
     @SuppressWarnings("unchecked")
-    public Map<Integer,List<Measurement>> findEnabledByResources(List<Resource> resources) {
+    public Map<Integer,List<Measurement>> findEnabledByResources(List<Resource> resources,
+                                                                 boolean includeAvailability) {
         if (resources == null || resources.size() == 0) {
             return new HashMap<Integer,List<Measurement>>(0,1);
         }
         final String sql = new StringBuilder(256)
             .append("select m from Measurement m ")
+            .append((!includeAvailability) ? "join m.template t " : "")
             .append("where m.enabled = '1' and ")
+            .append((!includeAvailability) ? NON_AVAIL_CLAUSE + "and ": "")
             .append("m.resource in (:rids) ")
             .toString();
         final Map<Integer,List<Measurement>> rtn = new HashMap<Integer,List<Measurement>>();
