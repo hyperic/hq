@@ -27,7 +27,7 @@
 
 <plugin package="org.hyperic.hq.plugin.mysql" version="@project.version@">
   <classpath>
-    <include name="pdk/lib/jdbc/mysql-connector-java*5.1.10-bin.jar"/>
+    <include name="pdk/lib/jdbc/mysql-connector-java*5.1.10.jar"/>
   </classpath>
 
   <!-- we use a dummy jmx object name -->
