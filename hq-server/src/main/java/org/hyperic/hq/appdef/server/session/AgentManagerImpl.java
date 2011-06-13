@@ -1310,8 +1310,12 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                 // on the agent side.
                 canRestartAgent = true;
             } else {
-                if (debug) log.debug("agent=" + agent + " has no updates and plugins haven't " +
-                                     "been modified since the last checkin, ignoring");
+                log.warn("agent=" + agent + " has checked in the exact same plugin set " +
+                         "twice in a row.  To avoid any potential issues on " +
+                         "the agent which may cause it to continuously restart the Server will sync " +
+                         "the agent's plugin repository but will not restart it.  Depending on the " +
+                         "state of the agent it may take up to two successful agent restarts in " +
+                         "order for the agent's plugin to be successfully sync'd with the Server.");
             }
             final Map<String, AgentPluginStatus> statusByFileName =
                 agentPluginStatusDAO.getPluginStatusByAgent(agent);
