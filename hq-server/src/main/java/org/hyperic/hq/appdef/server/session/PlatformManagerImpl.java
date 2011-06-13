@@ -786,20 +786,15 @@ public class PlatformManagerImpl implements PlatformManager {
                     for (Platform plat : platforms) {
 
                         // Make sure the types match
-                        if (!plat.getPlatformType().getName().equals(
-                            aiPlatform.getPlatformTypeName())) {
+                        if (!plat.getPlatformType().getName().equals(aiPlatform.getPlatformTypeName())) {
                             continue;
                         }
 
-                        // If we got any platforms that match this IP address,
-                        // then
-                        // we just take it and see if we can match up more
-                        // criteria.
-                        // We can assume that is a candidate for the platform we
-                        // are
+                        // If we got any platforms that match this IP address, then
+                        // we just take it and see if we can match up more criteria.
+                        // We can assume that is a candidate for the platform we are
                         // looking for. This should only fall apart if we have
-                        // multiple platforms defined for the same IP address,
-                        // which
+                        // multiple platforms defined for the same IP address, which
                         // should be a rarity.
 
                         if (plat.getFqdn().equals(fqdn)) { // Perfect

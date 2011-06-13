@@ -86,7 +86,11 @@ public class AgentDAO
     @SuppressWarnings("unchecked")
     public List<Agent> findByIP(String ip) {
         String hql = "from Agent where address=:address";
-        return (List<Agent>) getSession().createQuery(hql).setString("address", ip).list();
+        return (List<Agent>) getSession().createQuery(hql)
+                                         .setString("address", ip)
+                                         .setCacheable(true)
+                                         .setCacheRegion("Agent.findByIP")
+                                         .list();
     }
     
     public int countUsed() {
