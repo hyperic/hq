@@ -142,14 +142,16 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
             .append("    from EAM_PLUGIN p ")
             .append("    join EAM_AGENT_PLUGIN_STATUS st on p.md5 = st.md5 ")
             .append("    where st.agent_id = s.agent_id and s.md5 = st.md5 ")
-            .append("    and p.deleted = '0' ")
-            .append(")")
+            .append("    and p.deleted = '0'")
+            .append(") ")
+            .append("OR s.last_sync_status != :syncSuccess")
             .toString();
         final SQLQuery query = getSession().createSQLQuery(sql);
         if (agentId != null) {
             query.setParameter("agentId", agentId);
         }
         return query.addScalar("id", Hibernate.INTEGER)
+                    .setParameter("syncSuccess", AgentPluginStatusEnum.SYNC_SUCCESS.toString())
                     .list();
     }
     

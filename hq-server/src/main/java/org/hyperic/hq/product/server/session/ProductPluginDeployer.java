@@ -546,10 +546,6 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
 
     private class ProductPluginFileEventListener implements FileEventListener {
         public void onFileEvent(FileEvent fileEvent) {
-            final File pluginFile = fileEvent.getFileDetails().getFile();
-            if (!pluginFile.isFile()) {
-                return;
-            }
             synchronized (fileEvents) {
                 fileEvents.add(fileEvent);
             }

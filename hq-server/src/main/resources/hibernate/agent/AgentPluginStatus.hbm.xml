@@ -60,7 +60,7 @@
     </property>
 
     <property name="MD5" type="string">
-      <column name="MD5" not-null="true" length="100" index="APS_MD5_IDX"/>
+      <column name="MD5" not-null="false" length="100" index="APS_MD5_IDX"/>
     </property>
 
     <property name="lastCheckin" type="long">

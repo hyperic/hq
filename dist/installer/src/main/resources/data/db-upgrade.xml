@@ -11681,6 +11681,20 @@ has already been defined.
     </schema-directSQL>
  </schemaSpec>
 
+ <schemaSpec version="3.207">
+    <schema-directSQL>
+        <statement targetDB="mysql">
+            alter table EAM_AGENT_PLUGIN_STATUS modify MD5 varchar(100) null
+        </statement>
+        <statement targetDB="postgresql">
+            alter table EAM_AGENT_PLUGIN_STATUS alter column md5 drop not null
+        </statement>
+        <statement targetDB="oracle">
+            alter table EAM_AGENT_PLUGIN_STATUS modify varchar2(100) null
+        </statement>
+    </schema-directSQL>
+ </schemaSpec>
+
 </dbupgrade>
 </target>
 </project>

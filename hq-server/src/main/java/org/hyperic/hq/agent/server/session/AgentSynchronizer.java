@@ -53,15 +53,17 @@ import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.common.DiagnosticObject;
 import org.hyperic.hq.common.DiagnosticsLogger;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AgentSynchronizer implements DiagnosticObject {
+public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAware {
     
     private final int NUM_WORKERS;
     private static final long WAIT_TIME = 5 * MeasurementConstants.MINUTE;
@@ -77,6 +79,7 @@ public class AgentSynchronizer implements DiagnosticObject {
     private ConcurrentStatsCollector concurrentStatsCollector;
     private AuthzSubject overlord;
     private AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle;
+    private ApplicationContext ctx;
 
     @Autowired
     public AgentSynchronizer(ConcurrentStatsCollector concurrentStatsCollector,
@@ -210,6 +213,7 @@ public class AgentSynchronizer implements DiagnosticObject {
     }
 
     private void executeJob(final AgentDataTransferJob job) throws InterruptedException {
+        final AvailabilityManager availabilityManager = ctx.getBean(AvailabilityManager.class);
         final String name = Thread.currentThread().getName() + "-" + executorNum.getAndIncrement();
         final Thread thread = new Thread(name) {
             public void run() {
@@ -229,7 +233,6 @@ public class AgentSynchronizer implements DiagnosticObject {
                     }
                     return;
                 }
-                AvailabilityManager availabilityManager = Bootstrap.getBean(AvailabilityManager.class);
                 if (availabilityManager.platformIsAvailable(job.getAgentId())) {
                     // agent is busy but up and running, add job back to the queue
                     if (log.isDebugEnabled()) {
@@ -237,19 +240,7 @@ public class AgentSynchronizer implements DiagnosticObject {
                                   " but availabilityManager shows that it is available, " +
                                   "rescheduling job=" + getJobInfo(job));
                     }
-                    synchronized (agentJobs) {
-                        // if the job queue isn't very full then we don't want to keep spinning
-                        // as a result of re-adding this job.  Instead lets just sleep for a few
-                        // secs and then re-issue the job.
-                        if (agentJobs.size() < NUM_WORKERS) {
-                            try {
-                                agentJobs.wait(5000);
-                            } catch (InterruptedException e) {
-                                log.debug(e,e);
-                            }
-                        }
-                        agentJobs.add(job);
-                    }
+                    reAddJob(job, true);
                 } else {
                     log.warn("Could not ping agent in order to run job " + getJobInfo(job));
                     job.onFailure();
@@ -262,18 +253,50 @@ public class AgentSynchronizer implements DiagnosticObject {
         thread.start();
         thread.join(WAIT_TIME);
         // if the thread is alive just try to interrupt it and keep going
-        if (thread.isAlive()) {
+        final boolean threadIsAlive = thread.isAlive();
+        final boolean jobWasSuccessful = job.wasSuccessful();
+        final boolean platformIsAvailable = availabilityManager.platformIsAvailable(job.getAgentId());
+        if (jobWasSuccessful) {
+            // do nothing, this is good!
+        } else if (!jobWasSuccessful && platformIsAvailable) {
+            if (threadIsAlive) {
+                thread.interrupt();
+            }
+            log.warn("AgentDataTransferJob=" + getJobInfo(job) +
+                     " has take more than " + WAIT_TIME/1000/60 +
+                     " minutes to run.  The agent appears alive, and therefore will interrupt the " +
+                     "current job and requeue it.  Job threadName={" + thread.getName() + "}");
+            reAddJob(job, false);
+        } else if (threadIsAlive) {
+            thread.interrupt();
             log.warn("AgentDataTransferJob=" + getJobInfo(job) +
                      " has take more than " + WAIT_TIME/1000/60 +
                      " minutes to run.  Disregarding job threadName={" + thread.getName() + "}");
-            thread.interrupt();
+        }
+    }
+    
+    private void reAddJob(AgentDataTransferJob job, boolean wait) {
+        synchronized (agentJobs) {
+            // if the job queue isn't very full then we don't want to keep spinning
+            // as a result of re-adding this job.  Instead lets just sleep for a few
+            // secs and then re-issue the job.
+            if (wait) {
+                if (agentJobs.size() < NUM_WORKERS) {
+                    try {
+                        agentJobs.wait(5000);
+                    } catch (InterruptedException e) {
+                        log.debug(e,e);
+                    }
+                }
+            }
+            agentJobs.add(job);
         }
     }
 
     private boolean agentIsAlive(AgentDataTransferJob job) {
         try {
             // XXX need to set this in the constructor
-            final AgentManager agentManager = Bootstrap.getBean(AgentManager.class);
+            final AgentManager agentManager = ctx.getBean(AgentManager.class);
             agentManager.pingAgent(overlord, job.getAgentId());
         } catch (Exception e) {
             log.debug(e,e);
@@ -353,6 +376,10 @@ public class AgentSynchronizer implements DiagnosticObject {
 
     public String getName() {
         return "Agent Synchronizer";
+    }
+
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.ctx = applicationContext;
     }
 
 }

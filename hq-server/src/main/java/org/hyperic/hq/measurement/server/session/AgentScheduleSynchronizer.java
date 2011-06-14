@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.PostConstruct;
 
@@ -221,6 +222,7 @@ public class AgentScheduleSynchronizer {
         }
         final AgentDataTransferJob job = new AgentDataTransferJob() {
             private Collection<AppdefEntityID> aeids;
+            private AtomicBoolean success = new AtomicBoolean(false);
             public String getJobDescription() {
                 if (schedule) {
                     return "Agent Schedule Job";
@@ -240,9 +242,16 @@ public class AgentScheduleSynchronizer {
                 if (aeids != null && !aeids.isEmpty()) {
                     runSchedule(schedule, agentId, aeids);
                 }
+                if (Thread.currentThread().isInterrupted()) {
+                    return;
+                }
+                success.set(true);
             }
             public void onFailure() {
                 log.warn("could not schedule aeids=" + aeids + " to agentId=" + agentId);
+            }
+            public boolean wasSuccessful() {
+                return success.get();
             }
         };
         if (schedule) {

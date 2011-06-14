@@ -1555,7 +1555,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                     status = new AgentPluginStatus();
                     status.setAgent(agent);
                     status.setFileName(plugin.getPath());
-                    status.setMD5(plugin.getMD5());
+                    status.setMD5(null);
                     status.setPluginName(plugin.getName());
                     status.setProductName(plugin.getName());
                     status.setLastCheckin(0);
@@ -1637,7 +1637,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                     addToRemoveMap(removeMap, agent, s.getFileName());
                     continue;
                 }
-                if (!plugin.getMD5().equals(s.getMD5())) {
+                if (!plugin.getMD5().equals(s.getMD5()) ||
+                        !s.getLastSyncStatus().equals(AgentPluginStatusEnum.SYNC_SUCCESS.toString())) {
                     plugins.add(plugin);
                 }
             }

@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -55,6 +56,7 @@ public class AgentRemovePluginJob implements AgentDataTransferJob {
     private AgentManager agentManager;
     private PluginManager pluginManager;
     private AuthzSubjectManager authzSubjectManager;
+    private AtomicBoolean success = new AtomicBoolean(false);
 
     @Autowired
     public AgentRemovePluginJob(AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle,
@@ -88,9 +90,13 @@ public class AgentRemovePluginJob implements AgentDataTransferJob {
                     log.error("error removing plugin file=" + file + " from agentId=" + agentId);
                 }
             }
+            if (Thread.currentThread().isInterrupted()) {
+                return;
+            }
             if (!pluginFileNames.isEmpty()) {
                 agentPluginSyncRestartThrottle.restartAgent(agentId);
             }
+            success.set(true);
         } catch (Exception e) {
             throw new SystemException("error removing pluginFiles=" + pluginFileNames +
                                       " from agentId=" + agentId, e);
@@ -112,6 +118,10 @@ public class AgentRemovePluginJob implements AgentDataTransferJob {
     public void onFailure() {
         pluginManager.updateAgentPluginSyncStatus(
             AgentPluginStatusEnum.SYNC_FAILURE, null, Collections.singletonMap(agentId, pluginFileNames));
+    }
+
+    public boolean wasSuccessful() {
+        return success.get();
     }
 
 }
