@@ -2,7 +2,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -72,25 +72,23 @@
   </table>
 </div>
 
-${jsIncludes}
-<script src="<html:rewrite page="/js/effects.js"/>" type="text/javascript"></script>
-<script src="<html:rewrite page="/js/footer.js"/>" type="text/javascript"></script>
-<script>
-	${jsScript}
-	
+<jsu:importScript path="/js/effects.js" />
+<jsu:importScript path="/js/footer.js" />
+<jsu:script>
 	hqDojo.require("dijit.dijit");
   	hqDojo.require("dijit.Dialog");
 
   	var aboutDia = null;
-  	hqDojo.ready(function(){
-  		aboutDia = new hqDijit.Dialog({
-                id: 'about_popup',
-                refocus: true,
-                autofocus: false,
-                opacity: 0,
-                title: "<fmt:message key="about.Title" />"
-            }, hqDojo.byId('about'));
-  	});
+</jsu:script>
+<jsu:script onLoad="true">
+	aboutDia = new hqDijit.Dialog({
+	    id: 'about_popup',
+        refocus: true,
+        autofocus: false,
+        opacity: 0,
+        title: "<fmt:message key="about.Title" />"
+    }, hqDojo.byId('about'));
 
   	setFoot();
-</script>
+</jsu:script>
+<jsu:writeJs />

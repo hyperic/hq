@@ -3,7 +3,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -62,12 +62,11 @@
 </c:if>
 
 <c:set var="widgetInstanceName" value="listMetrics"/>
-<c:set var="jsScript" scope="request">
-	${jsScript}
+<jsu:script>
 	var pageData = new Array();
 	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-</c:set>
+</jsu:script>
 <!--  PARTICIPATING RESOURCE TITLE -->
 <tiles:insert definition=".header.tab">
 <tiles:put name="tabKey" value="resource.common.monitor.visibility.chart.ParticipatingResourceTab"/>
@@ -191,7 +190,6 @@
 </div>
 
 <input type="Hidden" id="privateChart">
-<c:set var="jsScript" scope="request">
-	${jsScript}
+<jsu:script>
   	testCheckboxes('<c:out value="${widgetInstanceName}"/>');
-</c:set>
+</jsu:script>

@@ -5,7 +5,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -37,18 +37,15 @@
 <tiles:importAttribute name="availableServicesCount"/>
 <tiles:importAttribute name="pendingServices"/>
 <tiles:importAttribute name="pendingServicesCount"/>
-<c:set var="jsIncludes" scope="request">
-	${jsIncludes}
-	<script  src="<html:rewrite page="/js/addRemoveWidget.js"/>" type="text/javascript"></script>
-</c:set>
+<jsu:importScript path="/js/addRemoveWidget.js" />
+
 <c:set var="widgetInstanceName" value="addServices"/>
-<c:set var="jsScript" scope="request">
-	${jsScript}
+
+<jsu:script>
 	var pageData = new Array();
 	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-</c:set>
-
+</jsu:script>
 <c:url var="selfJscAction" value="/resource/application/Inventory.do">
   <c:param name="mode" value="addServices"/>
   <c:param name="rid" value="${resource.id}"/>
@@ -249,10 +246,7 @@
     <c:param name="nameFilter" value="${param.nameFilter}"/>
   </c:if>
 </c:url>
-
-<c:set var="jsScript" scope="request">
-	${jsScript}
-	
+<jsu:script>
     function applyNameFilter() {
         goToLocationSelfAndElement(
                 'nameFilter',
@@ -260,8 +254,7 @@
                 '<c:out value="${selfJscAction}" escapeXml="false"/>');
         return false;
     }
-</c:set>
-
+</jsu:script>
 <!--  SELECT & ADD -->
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr>

@@ -7,7 +7,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -35,13 +35,8 @@
 
 
 <tiles:importAttribute name="BaselineValue" ignore="true"/>
-<c:set var="jsIncludes" scope="request">
-	${jsIncludes}
-	<script src="<html:rewrite page="/js/schedule.js"/>" type="text/javascript"></script>
-</c:set>
-<c:set var="jsScript" scope="request">
-	${jsScript}
-
+<jsu:importScript path="/js/schedule.js" />
+<jsu:script>
 	var imagePath="/images/";
 	var jsPath="<html:rewrite page="/js/"/>";
 	var cssPath="<html:rewrite page="/css/"/>";
@@ -51,7 +46,7 @@
 		document.EditMetricBaselineForm.recalc.value='y';
 		document.EditMetricBaselineForm.submit();
 	}
-</c:set>
+</jsu:script>
 <link rel=stylesheet href="<html:rewrite page="/css/win.css"/>" type="text/css">
 <%-- end vit: delete this block --%>
 
@@ -137,14 +132,12 @@
 		<option value="31">31</option>
 		</html:select>&nbsp;/&nbsp;
 		<html:select property="startYear" styleId="startYear" styleClass="logo">
-		    <c:set var="jsScript" scope="request">
-		    	${jsScript}
-		    	
+			<jsu:script>
 		        for (i=0; i<SEL_NUMYEARS; i++) {
                 	var startYear =  document.getElementById('startYear');
                 	startYear.options[i] = new Option(yearArr[i], yearArr[i]);
 				}
-		    </c:set>
+			</jsu:script>
 		</html:select>&nbsp;<html:link href="#" onclick="cal('startMonth','startDay','startYear');"><html:img page="/images/schedule_iconCal.gif" width="19" height="17" alt="" border="0"/></html:link>
 		&nbsp;@&nbsp;
 		<input name="startHour" styleId="startHour" size="2" maxlength="2" value="08">&nbsp;:&nbsp;<input name="startMin" styleId="styleMin" size="2" maxlength="2" value="00">&nbsp;
@@ -213,14 +206,12 @@
 		<option value="31">31</option>
 		</html:select>&nbsp;/&nbsp;
 		<html:select property="endYear" styleId="endYear"> 
-		    <c:set var="jsScript" scope="request">
-		    	${jsScript}
-		    	
+			<jsu:script>
 		        for (i=0; i<SEL_NUMYEARS; i++) {
                 	var endYear =  document.getElementById('endYear');
                 	endYear.options[i] = new Option(yearArr[i], yearArr[i]);
 				}
-		    </c:set>
+			</jsu:script>
 		</html:select>&nbsp;<html:link href="#" onclick="cal('endMonth','endDay','endYear');"><html:img page="/images/schedule_iconCal.gif" width="19" height="17" alt="" border="0"/></html:link>
 		&nbsp;@&nbsp;
 		<input name="endHour" styleId="endHour" size="2" maxlength="2" value="08">&nbsp;:&nbsp;<input name="endMin" styleId="endMin" size="2" maxlength="2" value="00">&nbsp;

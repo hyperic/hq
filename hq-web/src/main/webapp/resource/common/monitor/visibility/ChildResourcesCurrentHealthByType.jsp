@@ -6,7 +6,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -34,12 +34,11 @@
 
 
 <c:set var="chbtWidget" value="currentHealthByType"/>
-<c:set var="jsScript" scope="request">
-	${jsScript}
+<jsu:script>
 	initializeWidgetProperties('<c:out value="${chbtWidget}"/>');
 	chbtWidgetProps = getWidgetProperties('<c:out value="${chbtWidget}"/>');
 	chbtWidgetProps['subGroup'] = 'chbtListMember';
-</c:set>
+</jsu:script>
 <tiles:importAttribute name="summaries" ignore="true"/>
 <tiles:importAttribute name="childResourceType" ignore="true"/>
 <tiles:importAttribute name="memberTypeLabel" ignore="true"/>
@@ -120,7 +119,6 @@
 </c:choose>
 
 <input type="hidden" id="privateChildResource">
-<c:set var="jsScript" scope="request">
-	${jsScript}
+<jsu:script>
   	testCheckboxes("ToggleButtonsCompare", '<c:out value="${chbtWidget}"/>', "privateChildResource", "chbtListMember");
-</c:set>
+</jsu:script>

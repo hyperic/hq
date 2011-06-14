@@ -5,7 +5,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -36,10 +36,7 @@
 <html:link action="/ResourceHub" linkName="browseUrl" styleId="browseUrl" style="visibility:hidden;">
 	<html:param name="ff" value="{ff}"/> 
 </html:link>
-
-<c:set var="jsScript" scope="request">
-	${jsScript}
-	
+<jsu:script>
 	function requestAvailSummary${portlet.token}() {
 		hqDojo.xhrGet({
 			url: "<html:rewrite action="/dashboard/ViewAvailSummary" />",
@@ -52,12 +49,10 @@
 			error: reportError
 		});
 	}
-	
-	hqDojo.ready(function() {
-		requestAvailSummary${portlet.token}();
-	});
-</c:set>
-
+</jsu:script>
+<jsu:script onLoad="true">
+	requestAvailSummary${portlet.token}();
+</jsu:script>
 <div class="effectsPortlet">
 	<tiles:insert definition=".header.tab">
   		<tiles:put name="tabKey" value="dash.home.AvailSummary" />

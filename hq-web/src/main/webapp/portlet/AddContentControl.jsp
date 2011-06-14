@@ -4,7 +4,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -34,9 +34,7 @@
 <tiles:importAttribute name="availablePortlets"/>
 <tiles:importAttribute name="wide"/>
 <tiles:importAttribute name="portlets"/>
-
-<c:set var="jsScript" scope="request">
-	${jsScript}
+<jsu:script>
 	<c:choose>
 		<c:when test="${wide}">
   			function isWide(portlet) {
@@ -62,7 +60,7 @@
 	      return true
 	    }
 	  }
-</c:set>
+</jsu:script>
 
 <c:choose>
 <c:when test="${not empty availablePortlets }">

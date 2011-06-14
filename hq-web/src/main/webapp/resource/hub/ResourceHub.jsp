@@ -6,7 +6,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -31,15 +31,10 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-
-<c:set var="jsIncludes" scope="request">
-	${jsIncludes}
-	<script  src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
-	<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
-</c:set>
+<jsu:importScript path="/js/functions.js" />
+<jsu:importScript path="/js/listWidget.js" />
 <c:set var="widgetInstanceName" value="listResources"/>
-<c:set var="jsScript" scope="request">
-	${jsScript}
+<jsu:script>
 	var pageData = new Array();
 	var FOO = "chart";
 	var LIST  = "list"; 
@@ -47,7 +42,7 @@
 	
 	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-</c:set>
+</jsu:script>
 <hq:constant var="PLATFORM"
     classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
     symbol="APPDEF_TYPE_PLATFORM"/>
@@ -309,8 +304,7 @@
 
 <c:choose>
   <c:when test="${ResourceHubForm.view == LIST}">
-    <c:set var="jsScript" scope="request">
-		${jsScript}
+  	<jsu:script>
       	function refreshAvail() {
 	        var now = new Date()
 	    <c:forEach var="resource" items="${AllResources}">
@@ -324,11 +318,10 @@
 	      function setAvailRefresh() {
 	        setTimeout( "refreshAvail()", 60*1000 );
 	      }
-	      
-	      hqDojo.ready(function() {
-	    	  setAvailRefresh();
-	      });
-	</c:set>
+	</jsu:script>
+	<jsu:script onLoad="true">	      
+   	  	setAvailRefresh();
+	</jsu:script>
     <c:choose>
     <c:when test="${empty Indicators || empty AllResources}">
     <display:table items="${AllResources}" var="resource" action="${sAction}" width="100%" cellspacing="0" cellpadding="0">
@@ -520,8 +513,6 @@
 </html:form>
 <tiles:insert definition=".resource.common.addToGroup"/>
 <tiles:insert definition=".page.footer"/>
-
-<c:set var="jsScript" scope="request">
-	${jsScript}
+<jsu:script>
   	clearIfAnyChecked();
-</c:set>
+</jsu:script>

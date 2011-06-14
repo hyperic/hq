@@ -4,7 +4,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -30,19 +30,13 @@
   USA.
  --%>
 
-<c:set var="selectedDashboardId" value="${sessionScope['.user.dashboard.selected.id']}"/>
-<c:set var="jsIncludes" scope="request">
-	${jsIncludes}
-	
-	<script src="<html:rewrite page='/js/dash.js' />" type="text/javascript"></script>
-	<script src="<html:rewrite page='/js/scriptaculous.js' />" type="text/javascript"></script>
-	<script src="<html:rewrite page='/js/requests.js' />" type="text/javascript" id="requests"></script>
-	<script src="<html:rewrite page='/js/dashboard.js' />" type="text/javascript"></script>
-	<script src="<html:rewrite page='/js/effects.js' />" type="text/javascript"></script>
-</c:set>
-<c:set var="jsScript" scope="request">
-	${jsScript}
-	
+<c:set var="selectedDashboardId" value="${sessionScope['.user.dashboard.selected.id']}" />
+<jsu:importScript path="/js/dash.js" />
+<jsu:importScript path="/js/scriptaculous.js" />
+<jsu:importScript path="/js/requests.js" />
+<jsu:importScript path="/js/dashboard.js" />
+<jsu:importScript path="/js/effects.js" />
+<jsu:script>
 	if (top != self){
 	    top.location.href = self.document.location;
 	}
@@ -140,11 +134,10 @@
 	        setInterval("requestFavoriteResources()", 30000);
 	    }
 	}
-	
-	hqDojo.ready(function() {
-		refreshPortlets();
-	});
-</c:set>
+</jsu:script>
+<jsu:script onLoad="true">	
+	refreshPortlets();
+</jsu:script>
 <html:link action="/Resource" linkName="viewResUrl" styleId="viewResUrl" style="display:none;">
 	<html:param name="eid" value="{eid}"/>
 </html:link>
@@ -289,10 +282,7 @@
 									</td>
 								</tr>
 							</table>
-					
-							<c:set var="jsScript" scope="request">
-								${jsScript}
-								
+							<jsu:script>
 						        // -----------
 						        // XXX:
 						        // This should be rewritten using dojo 1.1 dnd.move package
@@ -313,7 +303,7 @@
 			                    	},
 			               			constraint: 'vertical'
 				               	});
-				      		</c:set>
+				      		</jsu:script>
 				      	</c:if> 
 				      	<c:choose>
 							<c:when test="${narrow eq 'true'}">
@@ -324,14 +314,11 @@
 							</c:otherwise>
 						</c:choose> 
 					<%=divEnd%> 
-				
-					<c:set var="jsScript" scope="request">
-						${jsScript}
-						
+					<jsu:script>
 						if (!Prototype.Browser.IE) {
 		        			resizeToCorrectWidth();
 		      			}
-		    		</c:set>
+		      		</jsu:script>
 		    	</td>
 			</c:forEach>
 		</tr>

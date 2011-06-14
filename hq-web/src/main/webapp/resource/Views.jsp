@@ -5,7 +5,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -63,14 +63,10 @@
 
 <c:set var="canControl" value="${requestScope[CONST_CONTROLLABLE]}"/> 
 <c:set var="entityId" value="${Resource.entityId}"/>
-<c:set var="jsIncludes" scope="request">
-	${jsIncludes}
-	<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
-</c:set>
-<c:set var="jsScript" scope="request">
-	${jsScript}
+<jsu:importScript path="/js/listWidget.js" />
+<jsu:script>
 	var pageData = new Array();
-</c:set>
+</jsu:script>
 <c:choose>
 	<c:when test="${CONST_APPLICATION == entityId.type}">
 	 
