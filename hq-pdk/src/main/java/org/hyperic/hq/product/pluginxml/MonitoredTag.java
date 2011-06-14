@@ -37,7 +37,6 @@ public class MonitoredTag
     private static final String TAG_NAME = "monitored";
 
     public MonitoredTag() {
-        // TODO Auto-generated constructor stub
     }
 
     public MonitoredTag(BaseTag parent) {
@@ -54,8 +53,10 @@ public class MonitoredTag
 
     public XmlTagInfo[] getSubTags() {
         return new XmlTagInfo[] {
-            new XmlTagInfo(new FolderTag(this),
-                           XmlTagInfo.ONE_OR_MORE),
+           new XmlTagInfo(new FolderTag(this),
+                    XmlTagInfo.ONE_OR_MORE),
+           new XmlTagInfo(new MonitoredPropertiesTag(this),
+                   XmlTagInfo.ZERO_OR_MORE)
         };
     }
 }

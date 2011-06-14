@@ -87,7 +87,7 @@ public class FolderTag
         if (parentFolder != null)
             parentFolder.addSubFolder(this.monitoredFolderConfig);
         else
-            this.data.addMonitoredFolder(this.monitoredFolderConfig);
+            this.data.addMonitoredConfig(this.monitoredFolderConfig);
     }
     
     public MonitoredFolderConfig getMonitoredFolderConfig() {

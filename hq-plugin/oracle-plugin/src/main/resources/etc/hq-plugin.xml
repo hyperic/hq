@@ -500,6 +500,8 @@ fi
             	<folder path="network/admin" recursive="false" filter=".*\.ora"/>
             </monitored>
     </plugin>
+    <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="true" />
+    
 
     <service name="User Instance">
       <plugin type="measurement"

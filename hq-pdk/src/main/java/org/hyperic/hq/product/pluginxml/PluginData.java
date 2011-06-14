@@ -43,6 +43,7 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.product.IMonitorConfig;
 import org.hyperic.hq.product.MonitoredFolderConfig;
 import org.hyperic.hq.product.MeasurementInfo;
 import org.hyperic.hq.product.PlatformTypeInfo;
@@ -96,7 +97,7 @@ public class PluginData {
     private static Map serviceExtensions = null;
     private static Map serviceInventoryPlugins = new HashMap();
     List includes = new ArrayList();
-    private List<MonitoredFolderConfig> monitoredFolders = new LinkedList<MonitoredFolderConfig>();
+    private List<IMonitorConfig> monitoredConfigs = new LinkedList<IMonitorConfig>();
 
     public String getName() {
         return this.name;
@@ -724,16 +725,16 @@ public class PluginData {
         globalProperties.putAll(props);
     }
 
-    public List<MonitoredFolderConfig> getMonitoredFolders() {
-        return monitoredFolders;
+    public List<IMonitorConfig> getMonitoredConfigs() {
+        return monitoredConfigs;
     }
 
-    public void setMonitoredFolders(List<MonitoredFolderConfig> monitoredFolders) {
-        this.monitoredFolders = monitoredFolders;
+    public void setMonitoredConfigs(List<IMonitorConfig> monitoredConfigs) {
+        this.monitoredConfigs = monitoredConfigs;
     }
 
-    public void addMonitoredFolder(MonitoredFolderConfig monitoredFolder) {
-        this.monitoredFolders.add(monitoredFolder);
+    public void addMonitoredConfig(IMonitorConfig monitoredConfig) {
+        this.monitoredConfigs.add(monitoredConfig);
     }
 
     //cleanup resources no longer needed after the plugin

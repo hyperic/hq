@@ -3,7 +3,7 @@ package org.hyperic.hq.product;
 import java.util.LinkedList;
 import java.util.List;
 
-public class MonitoredFolderConfig {
+public class MonitoredFolderConfig implements IMonitorConfig{
     private String path;
     private String filter;
     private boolean recursive; 
@@ -36,8 +36,25 @@ public class MonitoredFolderConfig {
     }
  
     public String dumpXML(){
-        return "<folder recursive='" + (recursive ? "true":"false") + "' path='"+getPath()+"' filter='"+getFilter()+"' />";
+        final StringBuffer sb = new StringBuffer();
+        sb.append("<folder recursive='" + (recursive ? "true":"false") + "' path='"+getPath()+"' filter='"+getFilter());
+        if (subFolders == null || subFolders.size() <= 0){
+            sb.append("' />");
+            return sb.toString();
+        }
+        sb.append("'>");
+        for (final MonitoredFolderConfig config: subFolders){
+            sb.append(config.dumpXML());
+        }
+        sb.append("<folder>");
+        return sb.toString();
     }
+    
+    @Override
+    public String toString(){
+        return getPath()+";"+isRecursive()+";"+getFilter()+";";
+    }
+
     
     public List<MonitoredFolderConfig> getSubFolders() {
         return subFolders;

@@ -30,8 +30,8 @@
 package org.hyperic.hq.product;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -41,14 +41,14 @@ import org.hyperic.cm.filemonitor.IChangeListener;
 import org.hyperic.cm.filemonitor.IFileMonitor;
 import org.hyperic.cm.filemonitor.data.EventActionsEnum;
 import org.hyperic.cm.filemonitor.data.EventMessage;
-import org.hyperic.cm.versioncontrol.dto.FolderDto;
+import org.hyperic.cm.filemonitor.dto.FolderDto;
 import org.hyperic.hq.product.pluginxml.PluginData;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 
 public class FileChangeTrackPlugin extends ConfigFileTrackPlugin{
     
-    private Map<String, FolderDto> monitoredDirs = new HashMap<String, FolderDto>();
+    private Collection<String> monitoredDirs = new ArrayList<String>();
      
     protected static Log log =
         LogFactory.getLog(FileChangeTrackPlugin.class.getName());
@@ -86,15 +86,15 @@ public class FileChangeTrackPlugin extends ConfigFileTrackPlugin{
 
     /*** temporary implementation just so something should show up ***/
     protected String getDefaultConfigFile(TypeInfo info, ConfigResponse config) {
-        final List<MonitoredFolderConfig> configs = data.getMonitoredFolders();
+        final List<IMonitorConfig> configs = data.getMonitoredConfigs();
         if (configs == null || configs.size() <= 0)
             return "";
 
         final StringBuffer sb = new StringBuffer();
-        for (final MonitoredFolderConfig folderConf: configs){
+        for (final IMonitorConfig monitoredConf: configs){
             if (sb.length() > 0)
                 sb.append(",");
-            sb.append(folderConf.getPath()+";"+folderConf.isRecursive()+";"+folderConf.getFilter());
+            sb.append(monitoredConf.toString());
         }
         return sb.toString();
     }
@@ -113,81 +113,37 @@ public class FileChangeTrackPlugin extends ConfigFileTrackPlugin{
         this.config = config;
 
         final PluginData data = getPluginData();
-        final List<MonitoredFolderConfig> configs = data.getMonitoredFolders();
+        final List<IMonitorConfig> configs = data.getMonitoredConfigs();
         if (configs == null || configs.size() <= 0)
             return;
         
         final String installpath =
             config.getValue(ProductPlugin.PROP_INSTALLPATH);
-        
-        final Collection<FolderDto> folders = convert(installpath, configs);
+
+        final StringBuffer sb = new StringBuffer();
+        sb.append("<templates><monitored>");
+        for (final IMonitorConfig monitoredConf: configs){
+            sb.append(monitoredConf.dumpXML());
+        }
+        sb.append("</monitored></templates>");
         
         final IFileMonitor monitor = getManager().getFileMonitor();
         if (eventHandler == null){
             eventHandler = new EventHandler();
         }
 
-        monitor.addMonitoredDirs(folders, eventHandler);
-      }
+        monitoredDirs = monitor.addMonitoredDirs(installpath, sb.toString(), eventHandler);
+        
+    }
 
     public void shutdown()
         throws PluginException {
         final IFileMonitor monitor = getManager().getFileMonitor();
-        if (monitoredDirs != null && monitoredDirs.size() > 0){
-            monitor.removeMonitoredDirs(monitoredDirs.values());
+        if (monitor !=null && monitoredDirs != null && monitoredDirs.size() > 0){
+            monitor.removeMonitoredDirs(monitoredDirs);
             monitoredDirs.clear();
         }
         super.shutdown();
     }
     
-    private Collection<FolderDto> convert (final String installDir, final Collection<MonitoredFolderConfig> configs){
-        if (configs == null || configs.size() <= 0)
-            return null;
-        
-        for (final MonitoredFolderConfig config:configs){
-            final FolderDto folder = convert(installDir, config);
-            monitoredDirs.put(folder.getPath(), folder);
-        }
-          
-        return monitoredDirs.values();
-    }
-    
-    private FolderDto convert(final String installDir, final MonitoredFolderConfig folderConfig){
-        if (folderConfig == null)
-            return null;
-        final FolderDto dto = new FolderDto();
-        final String configPath = folderConfig.getPath();
-        String path = replaceSysVariables(configPath);
-        final boolean isAbsolute = path.charAt(1) == ':' || path.charAt(0) == '/' || path.startsWith("~/"); 
-        final String basePath = isAbsolute ? "" : installDir+ File.separator ;
-        dto.setPath(basePath + folderConfig.getPath());
-        dto.setFilter(folderConfig.getFilter());
-        dto.setRecursive(folderConfig.isRecursive());
-        return dto;
-    } 
-    
-    private String replaceSysVariables(String path){
-        StringBuffer convertedPath = new StringBuffer();
-        if (path.contains("*")){
-            String[] arr = path.split("\\*");
-            if (arr != null && arr.length >0){
-                int index;
-                if (path.startsWith("*")){
-                    index = 0;
-                } else{
-                    convertedPath.append(arr[0]);
-                    index = 1;
-                }
-
-                for (;index<arr.length;index=index+2){
-                    final String sysProp = System.getProperty(arr[index]);
-                    convertedPath.append(sysProp);
-                    if (index+1<arr.length)
-                        convertedPath.append(arr[index+1]);
-                }
-                return convertedPath.toString();
-            }
-        }
-        return path;
-    }
 }
