@@ -156,6 +156,11 @@ public class Scanner {
             PlatformResource pValue =
                 detectPlatform(_pluginManager, platformConfig);
 
+            // strip config from received platform resource
+            byte[] configData = pValue.getProductConfig();
+            ConfigResponse discoveredPlatformConfig = 
+                configData != null ? ConfigResponse.decode(configData) : new ConfigResponse();
+
             //default platform config to the platform values we just discovered.
             if (_scanConfig.getIsDefaultScan() && (platformConfig == null)) {
                 platformConfig = new ConfigResponse();
@@ -166,6 +171,11 @@ public class Scanner {
                 platformConfig.setValue(ProductPlugin.PROP_PLATFORM_TYPE,
                                         pValue.getPlatformTypeName());
             }
+
+            // merge but do not overwrite. we need to keep config
+            // known by agent/server.
+            // XXX: should we also use control/measurement configs?
+            platformConfig.merge(discoveredPlatformConfig, false);
 
             _state.setPlatform(pValue);
         
