@@ -5,7 +5,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -93,9 +93,7 @@
 	  		</tr>
 		</c:if>
 	</table>
-
-	<c:set var="jsScript" scope="request">
-		${jsScript}
+	<jsu:script>
   		var isButtonClicked = false;
   
   		function checkSubmit() {
@@ -110,5 +108,5 @@
   	  	if (escalationSpan != null) {
 	  		escalationSpan.appendChild(hyperic.form.createEscalationPauseOptions({id: "pauseTimeSel", name: "pauseTime"}, <c:out value="${escalation.maxPauseTime}"/>));
   		}
-	</c:set>
+  	</jsu:script>
 </c:if>

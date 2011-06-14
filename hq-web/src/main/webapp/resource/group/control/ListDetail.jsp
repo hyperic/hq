@@ -6,7 +6,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%-- Tile for displaying a detailed status list for a group control action,
      whether current or history.
     
@@ -55,16 +55,12 @@
 	<c:param name="rid" value="${Resource.id}"/>
 	<c:param name="type" value="${Resource.entityId.type}"/>
 </c:url>
-<c:set var="jsIncludes" scope="request">
-	${jsIncludes}
-	<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
-</c:set>
-<c:set var="jsScript" scope="request">
-	${jsScript}
+<jsu:importScript path="/js/listWidget.js" />
+<jsu:script>
   var pageData = new Array();
   initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
   widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-</c:set>
+</jsu:script>
 <c:set var="entityId" value="${Resource.entityId}"/>
 <tiles:insert definition=".page.title.resource.group">
   <tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />

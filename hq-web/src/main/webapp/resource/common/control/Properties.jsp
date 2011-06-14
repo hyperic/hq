@@ -4,7 +4,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -29,11 +29,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
+<jsu:importScript path="/js/control_ControlActionProperties.js" />
 
-<c:set var="jsIncludes" scope="request">
-	${jsIncludes}
-	<script src="<html:rewrite page="/js/control_ControlActionProperties.js"/>" type="text/javascript"></script>
-</c:set>
 <!--  GENERAL PROPERTIES TITLE -->
 <tiles:insert definition=".header.tab">
   <tiles:put name="tabKey" value="resource.group.Control.Properties.Tab"/>
@@ -105,7 +102,6 @@
 </table>
 </div>
 <!--  /  -->
-<c:set var="jsScript" scope="request">
-	${jsScript}
+<jsu:script>
   	document.getElementById("configFile").style.display = "none";
-</c:set>
+</jsu:script>

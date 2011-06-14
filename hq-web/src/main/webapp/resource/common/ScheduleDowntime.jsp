@@ -4,7 +4,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use Hyperic
   program services by normal system calls through the application
@@ -61,9 +61,7 @@
 		</span>
 	</div>
 </div>
-
-<c:set var="jsScript" scope="request">
-	${jsScript}
+<jsu:script>
 	hqDojo.require("dijit.dijit");
 	hqDojo.require("dijit.form.Button");
 	hqDojo.require("dijit.form.DateTextBox");
@@ -121,14 +119,13 @@
 		eeToolsMenuElement.insertBefore(downtimeLinkBreak, eeAddToGroupMenuElement.nextSibling);
 		eeToolsMenuElement.insertBefore(downtimeLink, downtimeLinkBreak.nextSibling);
 	}
-	
-	hqDojo.ready(function(){
-	    maintenance_<c:out value="${resource.id}"/> = new hyperic.maintenance_schedule({
-	        "title": "<fmt:message key="resource.group.MaintenanceWindow.Title"/>", 
-	        "appdefentityId": "<c:out value="${resource.entityId}"/>", 
-	        "resourceName": "<c:out value="${resource.name}"/>",
-	        "url": "/app/resource/<c:out value='${resource.entityId}' />/downtime"
-	    });
-	});
-</c:set>
+</jsu:script>
+<jsu:script onLoad="true">
+    maintenance_<c:out value="${resource.id}"/> = new hyperic.maintenance_schedule({
+        "title": "<fmt:message key="resource.group.MaintenanceWindow.Title"/>", 
+        "appdefentityId": "<c:out value="${resource.entityId}"/>", 
+        "resourceName": "<c:out value="${resource.name}"/>",
+        "url": "/app/resource/<c:out value='${resource.entityId}' />/downtime"
+    });
+</jsu:script>
 </c:if>

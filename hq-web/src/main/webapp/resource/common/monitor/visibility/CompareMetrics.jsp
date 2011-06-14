@@ -31,23 +31,20 @@
 <%@ taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 
-<c:set var="jsIncludes" scope="request">
-	${jsIncludes}
-	<script src="<html:rewrite page="/js/functions.js" />" type="text/javascript"></script>
-	<script src="<html:rewrite page="/js/rico.js"/>" type="text/javascript"></script>
-	<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
-</c:set>
+<jsu:importScript path="/js/functions.js" />
+<jsu:importScript path="/js/rico.js" />
+<jsu:importScript path="/js/listWidget.js" />
 <link rel=stylesheet href="<html:rewrite page="/css/win.css"/>" type="text/css">
 <%-- end vit: delete this block --%>
 <c:set var="widgetInstanceName" value="compareMetrics"/>
-<c:set var="jsScript" scope="request">
-	${jsScript}
+<jsu:script>
 	var imagePath = "/images/";
 	var pageData = new Array();
 	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-</c:set>
+</jsu:script>
 <hq:constant 
   classname="org.hyperic.hq.measurement.MeasurementConstants" 
   symbol="COLL_TYPE_DYNAMIC"

@@ -5,7 +5,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -42,16 +42,12 @@
 <tiles:importAttribute name="useConfigure" ignore="true"/>
 <tiles:importAttribute name="useCheckboxes" ignore="true"/>
 <tiles:importAttribute name="favorites" ignore="true"/>
-<c:set var="jsIncludes" scope="request">
-	${jsIncludes}
-	<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
-</c:set>
+<jsu:importScript path="/js/listWidget.js" />
 <c:set var="mdsWidget" value="metricsDisplaySummary"/>
-<c:set var="jsScript" scope="request">
-	${jsScript}
+<jsu:script>
 	initializeWidgetProperties('<c:out value="${mdsWidget}"/>');
 	mdsWidgetProps = getWidgetProperties('<c:out value="${mdsWidget}"/>');
-</c:set>
+</jsu:script>
 <hq:constant 
     classname="org.hyperic.hq.measurement.MeasurementConstants" 
     symbol="CAT_AVAILABILITY" var="availability" />
@@ -119,27 +115,26 @@ sometimes we don't want any left side buttons or checkboxes at all
         </td>
 <c:if test="${useCurrent && not MetricsDisplayForm.readOnly}">
         <td align="right" nowrap>
-        <c:set var="jsScript" scope="request">
-			${jsScript}
-	          var metricsUpdater;
-	          hqDojo.ready( function() {
-	            var ctype = null;
-	            <c:if test="${not empty childResourceType}">
-	              ctype = '<c:out value="${ctype}"/>';
-	            </c:if>
+		<jsu:script>
+	    	var metricsUpdater;
+	    </jsu:script>
+	    <jsu:script onLoad="true">    
+            var ctype = null;
+            <c:if test="${not empty childResourceType}">
+              ctype = '<c:out value="${ctype}"/>';
+            </c:if>
 	            
-	            // arguments: eid, ctype, localized messages
-	            // XXX TODO FIXME: messages should not be passed around, should be using dojo i18n lib instead.
-	            metricsUpdater = new hyperic.MetricsUpdater('<c:out value="${eid}"/>',ctype,{
+            // arguments: eid, ctype, localized messages
+            // XXX TODO FIXME: messages should not be passed around, should be using dojo i18n lib instead.
+            metricsUpdater = new hyperic.MetricsUpdater('<c:out value="${eid}"/>',ctype,{
 	              '0' : '<fmt:message key="OFF"/>',
 	              '60' : '<fmt:message key="resource.common.monitor.visibility.MetricRefresh.60"/>',
 	              '120' : '<fmt:message key="resource.common.monitor.visibility.MetricRefresh.120"/>',
 	              '300' : '<fmt:message key="resource.common.monitor.visibility.MetricRefresh.300"/>',
 	              'LastUpdated': '<fmt:message key="resource.common.monitor.visibility.LastUpdated"/>'
-	            });
-	            metricsUpdater.update();
-	          });
-	   	</c:set>
+            });
+            metricsUpdater.update();
+		</jsu:script>
         <span id="CurrentValuesLabel">
           <fmt:message key="resource.common.monitor.visibility.MetricRefreshLabel"/>
         </span>
@@ -359,8 +354,7 @@ sometimes we don't want any left side buttons or checkboxes at all
 </table>
 
 <c:if test="${useCheckboxes}">
-<c:set var="jsScript" scope="request">
-	${jsScript}
-	clearIfAnyChecked('m');
-</c:set>
+	<jsu:script>
+		clearIfAnyChecked('m');
+	</jsu:script>
 </c:if>

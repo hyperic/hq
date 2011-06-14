@@ -5,7 +5,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -31,17 +31,12 @@
   USA.
  --%>
 
-<c:set var="jsIncludes" scope="request">
-	${jsIncludes}
-	<script src='<html:rewrite page="/js/scriptaculous.js"/>' type="text/javascript"></script>
-	<script src='<html:rewrite page="/js/dashboard.js"/>' type="text/javascript"></script>
-	<script src='<html:rewrite page="/js/effects.js"/>' type="text/javascript"></script>
-	<script src='<html:rewrite page="/js/popup.js"/>' type="text/javascript"></script>
-	<script src='<html:rewrite page="/js/window.js"/>' type="text/javascript"></script>
-</c:set>
-<c:set var="jsScript" scope="request"
-	${jsScript}
-	
+<jsu:importScript path="/js/scriptaculous.js" />
+<jsu:importScript path="/js/dashboard.js" />
+<jsu:importScript path="/js/effects.js" />
+<jsu:importScript path="/js/popup.js" />
+<jsu:importScript path="/js/window.js" />
+<jsu:script>
 	document.toggleSubmit = function(e){
 		if(e && e.keyCode == 13){
 	        saveEscalation();
@@ -49,14 +44,6 @@
 	        e.preventDefault();
 	    }
 	};
-	
-	hqDojo.ready(function(){
-		requestViewEscalation();
-		
-	    hqDojo.connect(document, 'onkeypress', document.toggleSubmit);
-	    hqDojo.connect(document.forms[0], 'onkeypress', document.toggleSubmit);
-	    hqDojo.connect(document.forms[1], 'onkeypress', document.toggleSubmit);
-	});
 	
 	var selUserEsc;
 	var selActionTypeEsc;
@@ -1297,7 +1284,14 @@
 	    new Ajax.Request(url, {method: 'post', parameters: pars, onComplete: updateEscView, onFailure: reportError});
 	    document.EscalationForm.reset();
 	}
-</c:set>
+</jsu:script>
+<<jsu:script onLoad="true">
+	requestViewEscalation();
+		
+    hqDojo.connect(document, 'onkeypress', document.toggleSubmit);
+    hqDojo.connect(document.forms[0], 'onkeypress', document.toggleSubmit);
+    hqDojo.connect(document.forms[1], 'onkeypress', document.toggleSubmit);
+</jsu:script>
 <html:form action="/alerts/ConfigEscalation" method="GET">
     <html:hidden property="mode"/>
     <c:choose>
@@ -1580,16 +1574,12 @@
 </tr>
 </tbody>
 </table>
-
-<c:set var="jsScript" scope="request">
-	${jsScript}
-	
+<jsu:script>
   var escalationSpan = hqDojo.byId("AlertEscalationOption");
   if (escalationSpan != null) {
 	  escalationSpan.appendChild(hyperic.form.createEscalationPauseOptions({id: "maxWaitTime", name: "maxWaitTime", className:"maxWaitTime"}));
   }
-</c:set>
-
+</jsu:script>
 <div id="usersList" style="display:none;">
     <div class="ListHeader">Select Users</div>
     <ul class="boxy">

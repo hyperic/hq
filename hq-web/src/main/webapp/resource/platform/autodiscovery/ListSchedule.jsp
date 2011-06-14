@@ -5,7 +5,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -67,17 +67,13 @@
     <c:param name="sc" value="${param.sc}"/>
   </c:if>
 </c:url>
-<c:set var="jsIncludes" scope="request">
-	${jsIncludes}
-	<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
-</c:set>
+<jsu:importScript path="/js/listWidget.js" />
 <c:set var="widgetInstanceName" value="listAutoDiscoverySchedule"/>
-<c:set var="jsScript" scope="request">
-	${jsScript}
+<jsu:script>
 	var pageData = new Array();
 	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-</c:set>
+</jsu:script>
 <c:set var="entityId" value="${Resource.entityId}"/>
 
 <html:form action="/resource/platform/autodiscovery/RemoveSchedule">

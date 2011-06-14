@@ -7,7 +7,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -57,8 +57,8 @@
 <hq:constant
     classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
     symbol="APPDEF_TYPE_GROUP_COMPAT_SVC" var="CONST_COMPAT_SVC" />
-<c:set var="jsScript" scope="request">
-	${jsScript}
+    
+<jsu:script>
 	var compatibleArr = new Array();
 	var compatibleCount = 0;
 	// need to set the total size of the compatbility types
@@ -163,7 +163,7 @@
 	  	}
 	  }
 	}
-</c:set>
+</jsu:script>
 <!--  GENERAL PROPERTIES TITLE -->
 <tiles:insert definition=".header.tab">
   <tiles:put name="tabKey" value="resource.group.inventory.New.GroupType.Title"/>
@@ -211,21 +211,17 @@
 <logic:messagesNotPresent property="typeAndResourceTypeId">
       <td width="80%" class="BlockContent">      
           <html:select property="typeAndResourceTypeId"/>
-		  <c:set var="jsScript" scope="request">
-			${jsScript}
-
-            document.getElementsByName("typeAndResourceTypeId")[0].style.display = "none";
-          </c:set>
+          <jsu:script>
+          	document.getElementsByName("typeAndResourceTypeId")[0].style.display = "none";
+          </jsu:script>
       </td>
 </logic:messagesNotPresent>
 <logic:messagesPresent property="typeAndResourceTypeId">
       <td width="80%" class="ErrorField">      
           <html:select property="typeAndResourceTypeId"/>
-          <c:set var="jsScript" scope="request">
-			${jsScript}
-
+          <jsu:script>
             document.getElementsByName("typeAndResourceTypeId")[0].style.display = "none";
-          </c:set>
+          </jsu:script>
       </td>          
 </logic:messagesPresent>
       <script  type="text/javascript">

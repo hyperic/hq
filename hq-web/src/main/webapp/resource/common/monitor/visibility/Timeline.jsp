@@ -4,11 +4,10 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 
 <tiles:importAttribute name="hideLogs" ignore="true"/>
-
-<c:set var="jsScript" scope="request">
-	${jsScript}
+<jsu:script>
   	var semiIndex = imagePath.indexOf(";");
   	if (semiIndex != -1)
     	imagePath = imagePath.substring(0, semiIndex);
@@ -16,7 +15,7 @@
   	<c:forEach var="timeTick" items="${timeIntervals}">
     	overlay.times.push('<hq:dateFormatter value="${timeTick.time}"/>');
   	</c:forEach>
-</c:set>
+</jsu:script>
 <div id="overlay" class="overlay"></div>
 
 <table cellpadding="0" cellspacing="0" border="0" width="100%">
@@ -68,24 +67,23 @@
       <div id="eventDetailTable"
            style="position: relative; height: 230px; display: none;">
       <div class="eventDetails">
-<c:set var="jsScript" scope="request">
-	${jsScript}
-  	var statusArr =
-    new Array ("ALL", "ERR", "WRN", "INF", "DBG", "ALR", "CTL");
-
-  	function filterEventsDetails(status) {
-    	for (i = 0; i < statusArr.length; i++) {
-      		hqDojo.attr(statusArr[i] + "EventsTab", "class", "eventsTab"); 
-    	}
-    
-    	hqDojo.attr(status + "EventsTab", "class", "eventsTabOn");
-
-    	if (status != statusArr[0])
-      		showEventsDetails(eventsTime, status);
-    	else
-      		showEventsDetails(eventsTime);
-  	}
-</c:set>
+	<jsu:script>
+	  	var statusArr =
+	    new Array ("ALL", "ERR", "WRN", "INF", "DBG", "ALR", "CTL");
+	
+	  	function filterEventsDetails(status) {
+	    	for (i = 0; i < statusArr.length; i++) {
+	      		hqDojo.attr(statusArr[i] + "EventsTab", "class", "eventsTab"); 
+	    	}
+	    
+	    	hqDojo.attr(status + "EventsTab", "class", "eventsTabOn");
+	
+	    	if (status != statusArr[0])
+	      		showEventsDetails(eventsTime, status);
+	    	else
+	      		showEventsDetails(eventsTime);
+	  	}
+	</jsu:script>
       <table cellspacing="0" width="100%">
         <tr>
           <td id="ALLEventsTab" width="10%" class="eventsTabOn" nowrap="true">

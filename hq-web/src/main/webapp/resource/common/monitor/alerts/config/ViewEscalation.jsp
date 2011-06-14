@@ -5,7 +5,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -37,14 +37,10 @@
 <c:if test="${empty chooseScheme}">
   <c:set var="chooseScheme" value="true"/>
 </c:if>
-<c:set var="jsIncludes" scope="request">
-	${jsIncludes}
-	<script  src='<html:rewrite page="/js/scriptaculous.js"/>' type="text/javascript"></script>
-	<script src='<html:rewrite page="/js/dashboard.js"/>' type="text/javascript"></script>
-	<script src='<html:rewrite page="/js/effects.js"/>' type="text/javascript"></script>
-</c:set>
-<c:set var="jsScript" scope="request">
-	${jsScript}
+<jsu:importScript path="/js/scriptaculous.js" />
+<jsu:importScript path="/js/dashboard.js" />
+<jsu:importScript path="/js/effects.js" />
+<jsu:script>
 	<c:choose>
 		<c:when test="${not empty escalationJSON}">
 		function showViewEscResponse() {
@@ -285,19 +281,19 @@
 		      }
 		   }    
 		
-			hqDojo.ready(function() {
+			<jsu:script onLoad="true">
 				showViewEscResponse();
-			});
+			</jsu:script>
 		</c:when>
 		<c:when test="${not empty primaryAlert}">
 			function disableEscForRecoveryAlert() {
 				hqDojo.byId('escIdSel').options[0].text = "<fmt:message key="alert.config.error.escalation.alert.recovery" />";
 				hqDojo.byId('escIdSel').disabled = true;
 			}
-		
-			hqDojo.ready(function() {
+
+			<jsu:script onLoad="true">		
 				disableEscForRecoveryAlert();
-			}
+			</jsu:script>
 		</c:when>
 		</c:choose>
 			function addOption(sel, val, txt, selected) {
@@ -341,10 +337,10 @@
 				    </c:if>
 		   		}
 		
-		    	hqDojo.ready(function() {
+				<jsu:script onLoad="true">
 		    		initEsc();
-		    	});
-		
+				</jsu:script>
+						
 		    	function hideExample() {
 		            hqDojo.byId('example').style.display= 'none';
 		    	}
@@ -357,7 +353,7 @@
 		        document.EscalationSchemeForm.submit();
 		      }
 		    }
-	</c:set>
+	</jsu:script>
 <c:if test="${chooseScheme}">
 	<html:form action="/alerts/ConfigEscalation">
   		<input type="hidden" id="ad" name="ad" value='<c:out value="${alertDef.id}"/>' />

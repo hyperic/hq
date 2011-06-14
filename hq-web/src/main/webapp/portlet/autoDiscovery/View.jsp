@@ -7,7 +7,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -42,10 +42,7 @@
   <tiles:put name="adminUrl" beanName="adminUrl" />
   <tiles:put name="portletName" beanName="portletName" />
 </tiles:insert>
-
-<c:set var="jsScript" scope="request">
-	${jsScript}
-	
+<jsu:script>
 	// If the user has checked a server but not its platform, check the platform
 	function setImportCheckboxes (cbform) {
 	  var pcChecked = false;
@@ -87,8 +84,7 @@
 	    if(!setRemoveCheckboxes(AIQueueForm)) return false;
 	    AIQueueForm.queueAction.value = formValue; 
 	}
-</c:set>
-
+</jsu:script>
 <tiles:insert definition=".portlet.error"/>
 
 <table width="100%" cellpadding="0" cellspacing="0" border="0" class="portletLRBorder">

@@ -2,7 +2,7 @@
 <%@ page errorPage="/common/Error.jsp" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -28,9 +28,7 @@
   USA.
  --%>
 
-
-<c:set var="jsScript" scope="request">
-	${jsScript}
+<jsu:script>
 	var isButtonClicked = false;
   
   	function checkSubmit() {
@@ -39,8 +37,7 @@
       		return false;
     	}
   	}
-</c:set>
-
+</jsu:script>
 <table width="100%" cellpadding="0" cellspacing="0" border="0" class="buttonTable">
   <tr>
     <td colspan="2"><html:img page="/images/spacer.gif" width="1" height="10" border="0"/></td>

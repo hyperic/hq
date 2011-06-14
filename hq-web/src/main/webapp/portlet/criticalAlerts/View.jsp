@@ -5,7 +5,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -38,13 +38,8 @@
 	<html:param name="mode" value="viewAlert"/>
 	<html:param name="eid" value="{eid}"/>
 </html:link>
-<c:set var="jsIncludes" scope="request">
-	${jsIncludes}
-	<script src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
-</c:set>
-<c:set var="jsScript" scope="request">
-	${jsScript}
-	
+<jsu:importScript path="/js/listWidget.js" />
+<jsu:script>
 	var pageData = new Array();
 	var _hqu_<c:out value="${widgetInstanceName}${portlet.token}"/>_refreshTimeout;
 	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
@@ -73,16 +68,16 @@
 	hqDojo.require("dijit.ProgressBar");
 	
 	var MyAlertCenter = null;
-	hqDojo.ready(function(){
-		if (MyAlertCenter == null) {
-			MyAlertCenter = new hyperic.alert_center("<fmt:message key="dash.home.CriticalAlerts"/>");
-		}
+</jsu:script>
+<jsu:script onLoad="true">
+	if (MyAlertCenter == null) {
+		MyAlertCenter = new hyperic.alert_center("<fmt:message key="dash.home.CriticalAlerts"/>");
+	}
 	
-		hqDojo.connect("requestRecentAlerts<c:out value="${portlet.token}"/>", function() { MyAlertCenter.resetAlertTable(hqDojo.byId('<c:out value="${widgetInstanceName}${portlet.token}"/>_FixForm')); });
+	hqDojo.connect("requestRecentAlerts<c:out value="${portlet.token}"/>", function() { MyAlertCenter.resetAlertTable(hqDojo.byId('<c:out value="${widgetInstanceName}${portlet.token}"/>_FixForm')); });
 	
-		_hqu_<c:out value="${widgetInstanceName}${portlet.token}"/>_autoRefresh();
-	});
-</c:set>
+	_hqu_<c:out value="${widgetInstanceName}${portlet.token}"/>_autoRefresh();
+</jsu:script>
 <c:set var="rssUrl" value="/rss/ViewCriticalAlerts.rss"/>
 <div class="effectsPortlet">
 	<!-- Content Block  -->
@@ -159,12 +154,10 @@
           		</tr>
       		</tfoot>
   		</table>
-  		<c:set var="jsScript" scope="request">
-  			${jsScript}
-  			
+  		<jsu:script>
   			if (hqDojo.byId("HQAlertCenterDialog") == null) {
   				document.write('<div id="HQAlertCenterDialog" style="display:none;"></div>');
   			}
-  		</c:set>
+  		</jsu:script>
   	</html:form>
 </div>

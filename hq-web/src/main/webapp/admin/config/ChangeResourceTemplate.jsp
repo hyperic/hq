@@ -5,6 +5,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -31,9 +32,7 @@
  --%>
 
 <tiles:insert page="/admin/config/AdminHomeNav.jsp"/>
-<c:set var="jsScript" scope="request">
-	${jsScript}
-	
+<jsu:script>
 	function onMouseRow(el) {
     	el.style.background="#a6c2e7";
     }
@@ -45,7 +44,7 @@
     function offMouseRowOdd(el) {
         el.style.background="#EBEDF2";
     }
-</c:set>
+</jsu:script>
 
 <table width="100%" cellpadding="0" cellspacing="0" border="0" id="listTable">
 <!-- PLATFORM CONTENTS -->

@@ -6,7 +6,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -38,20 +38,15 @@
 <c:url var="selfAction" value="/dashboard/Admin.do">
 	<c:param name="mode" value="resourceHealth"/>
 </c:url>
-<c:set var="jsIncludes" scope="request">
-	${jsIncludes}
-	<script  src="<html:rewrite page="/js/prototype.js"/>" type="text/javascript"></script>
-	<script  src="<html:rewrite page="/js/scriptaculous.js"/>" type="text/javascript"></script>
-	<script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
-</c:set>
-<c:set var="jsScript" scope="request">
-	${jsScript}
-
+<jsu:importScript path="/js/prototype.js" />
+<jsu:importScript path="/js/scriptaculous.js" />
+<jsu:importScript path="/js/listWidget.js" />
+<jsu:script>
 	var pageData = new Array();
 	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');  
 	var help = '<hq:help/>';
-</c:set>
+</jsu:script>
 
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr class="PageTitle"> 

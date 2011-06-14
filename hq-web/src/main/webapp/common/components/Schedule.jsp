@@ -5,7 +5,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -37,18 +37,13 @@
 <c:if test="${empty TheControlForm}">
  <c:set var="TheControlForm" value="${requestScope[\"org.apache.struts.taglib.html.BEAN\"]}"/>
 </c:if>
-<c:set var="jsIncludes" scope="request">
-	${jsIncludes}
-	<script src="<html:rewrite page="/js/schedule.js"/>" type="text/javascript"></script>
-</c:set>
-<c:set var="jsScript" scope="request">
-	${jsScript}
+<jsu:importScript path="/js/schedule.js" />
+<jsu:script>
  	var imagePath = "/images/";
  	var jsPath = "/js/";
  	var cssPath = "/css/";
  	var isMonitorSchedule = false;
-</c:set>
-
+</jsu:script>
 <!--  SCHEDULE TITLE -->
 <tiles:insert definition=".header.tab">
   <tiles:put name="tabKey" value="resource.autodiscovery.ScheduleTab"/>
@@ -161,13 +156,11 @@
 						</html:select>
 						/
 						<html:select property="startYear" styleId="startYear" onchange="turnOnRecurrence(true); toggleRadio('startTime', 1);">
-							<c:set var="jsScript" scope="request">
-								${jsScript}
-								
-								for (i=0; i<SEL_NUMYEARS; i++) {
+							<jsu:script>
+								for (i=0; i < SEL_NUMYEARS; i++) {
 									document.writeln("<option value=\"" + yearArr[i] + "\">" + yearArr[i] + "</option>");
 								}
-							</c:set>
+							</jsu:script>
 						</html:select>
 					</td>
 					<td><html:link href="#" onclick="cal('startMonth', 'startDay', 'startYear'); return false;"><html:img page="/images/schedule_iconCal.gif" width="19" height="17" hspace="5" border="0"/></html:link></td>
@@ -400,13 +393,11 @@
 									</html:select>
 									/
 									<html:select property="endYear" styleId="endYear" onchange="toggleRadio('endTime', 1);">
-									<c:set var="jsScript" scope="request">
-										${jsScript}
-										
-										for (i=0; i<SEL_NUMYEARS; i++) {
+									<jsu:script>
+										for (i=0; i < SEL_NUMYEARS; i++) {
 											document.writeln("<option value=\"" + yearArr[i] + "\">" + yearArr[i] + "</option>");
 										}
-									</c:set>
+									</jsu:script>
 									</html:select>
 								</td>
 								<td><html:link href="#" onclick="cal('endMonth', 'endDay', 'endYear'); return false;"><html:img page="/images/schedule_iconCal.gif" width="19" height="17"  hspace="5" border="0"/></html:link></td>
@@ -429,10 +420,7 @@
     </tr>
 </table>
 <!--  /  -->
-
-<c:set var="jsScript" scope="request">
-	${jsScript}
-	
+<jsu:script>
 	<c:choose>
  		<c:when test="${param.mode eq 'edit'}">
  			init(<c:out escapeXml="false" value="${TheControlForm.startMonth}"/>, <c:out escapeXml="false" value="${TheControlForm.startDay}"/>, <c:out escapeXml="false" value="${TheControlForm.startYear}"/>, <c:out escapeXml="false" value="${TheControlForm.endMonth}"/>, <c:out escapeXml="false" value="${TheControlForm.endDay}"/>, <c:out escapeXml="false" value="${TheControlForm.endYear}"/>, <c:out escapeXml="false" value="\"${TheControlForm.recurInterval}\""/>);
@@ -448,4 +436,4 @@
  		</c:otherwise>
 	</c:choose>
   	toggleRecurrence("startTime");
-</c:set>
+</jsu:script>

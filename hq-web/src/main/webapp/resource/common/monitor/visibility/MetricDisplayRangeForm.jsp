@@ -4,7 +4,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -58,17 +58,13 @@
     <c:set var="endYear" value="${MetricDisplayRangeForm.endYear}"/>
   </c:otherwise>
 </c:choose>
-<c:set var="jsIncludes" scope="request">
-	${jsIncludes}
-	<script src="<html:rewrite page="/js/schedule.js"/>" type="text/javascript"></script>
-	<script src="<html:rewrite page="/js/monitorSchedule.js"/>" type="text/javascript"></script>
-</c:set>
-<c:set var="jsScript" scope="request">
-	${jsScript}
+<jsu:importScript path="/js/schedule.js" />
+<jsu:importScript path="/js/monitorSchedule.js" />
+<jsu:script>
  	var jsPath = "<html:rewrite page="/js/"/>";
  	var cssPath = "<html:rewrite page="/css/"/>";
  	var isMonitorSchedule = true;
-</c:set>
+</jsu:script>
 <tiles:insert definition=".portlet.error"/>
 
 <table border="0" cellspacing="0" cellpadding="0">

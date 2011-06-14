@@ -2,7 +2,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <c:set var="count" value="0"/>
 <c:forEach var="timeTick" items="${timeIntervals}">
   <c:set var="eventsExist" value="${timeTick.eventsExist || eventsExist}"/>
@@ -11,13 +11,9 @@
 <c:if test="${eventsExist}">
 <tr>
   <td>
-  	<c:set var="jsIncludes" scope="request">
-		${jsIncludes}
-		<script src="<html:rewrite page="/js/timeline/api-2.0/timeline-api.js"/>" type="text/javascript"></script>
-		<script src="<html:rewrite page="/js/effects.js"/>" type="text/javascript"></script>
-	</c:set>
-	<c:set var="jsScript" scope="request">
-		${jsScript}
+  	<jsu:importScript path="/js/timeline/api-2.0/timeline-api.js" />
+  	<jsu:importScript path="/js/effects.js" />
+	<jsu:script>
 		var eventSource = new Timeline.DefaultEventSource();
 		
 		function timeLineOnLoad() {
@@ -65,10 +61,6 @@
 		  setTimeout("fillEventLogs()", 5000);
 		 }
 		
-			hqDojo.ready(function() {
-				timeLineOnLoad();
-			});
-		
 		  function fillEventLogs() {
 		  <c:forEach var="timeTick" items="${timeIntervals}" varStatus="status">
 		      <c:if test="${timeTick.eventsExist}">
@@ -93,7 +85,10 @@
 		      }
 		      evt._description = eventHtml;
 		  }
-	</c:set>
+	</jsu:script>
+	<jsu:script onLoad="true">
+		timeLineOnLoad();
+	</jsu:script>
   </td>
 </tr>
 <tr>

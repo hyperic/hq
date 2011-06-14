@@ -30,6 +30,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 
 <c:set var="rssUrl" value="/rss/ViewResourceHealth.rss"/>
 
@@ -42,10 +43,8 @@
 	</tiles:insert>
 
   	<!-- JSON available at /dashboard/ViewResourceHealth.do -->
-	<c:set var="jsScript" scope="request">
-		${jsScript}
-		
-		function requestFavoriteResources() {
+  	<jsu:script>
+  		function requestFavoriteResources() {
 			hqDojo.xhrGet({
 				url: "<html:rewrite action="/dashboard/ViewResourceHealth"/>",
 				handleAs: "json",
@@ -56,11 +55,10 @@
 				error: reportError
 			});
 		}
-		
-		hqDojo.ready(function() {
-			requestFavoriteResources();
-		});
-	</c:set>
+	</jsu:script>
+	<jsu:script onLoad="true">
+		requestFavoriteResources();
+	</jsu:script>
 
  	<table width="100%" border="0" cellspacing="0" cellpadding="0" id="favoriteTable" class="portletLRBorder">
  		<tbody>

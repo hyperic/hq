@@ -5,7 +5,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
 <%@ taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -49,10 +49,8 @@
 <tiles:insert definition=".header.tab">
   <tiles:put name="tabKey" value="alert.config.props.Syslog.Title"/>
 </tiles:insert>
-<c:set var="jsIncludes" scope="request">
-	${jsIncludes}
-	<script  src="<html:rewrite page='/js/alertConfigFunctions.js'/>" type="text/javascript"></script>
-</c:set>
+<jsu:importScript path="/js/alertConfigFunctions.js" />
+
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr valign="top">
     <td width="20%" class="BlockLabel">

@@ -6,7 +6,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -44,16 +44,14 @@
 <c:if test="${empty mode}">
   <c:set var="mode" value="currentHealth"/>
 </c:if>
-
-<c:set var="jsScript" scope="request">
-	${jsScript}
-  	<c:set var="widgetInstanceName" value="childResources"/>
-  	<c:set var="listMembersName" value="groupMembers"/>
-
+<c:set var="widgetInstanceName" value="childResources"/>
+<c:set var="listMembersName" value="groupMembers"/>
+<jsu:script>
   	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
   	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-
-	<c:if test="${empty params.eids && not virtual}">
+</jsu:script>
+<c:if test="${empty params.eids && not virtual}">
+	<jsu:script>
 	  function checkAllBoxes() {
 	    var check = true;
 	    for (var i = 0; i < document.forms[0].elements.length; i++) {
@@ -70,12 +68,11 @@
 	      }
 	    }
 	  }
-	
-	  	hqDojo.ready(function() {
-	  		checkAllBoxes();
-	  	});
-	</c:if>
-</c:set>
+	</jsu:script>
+	<jsu:script onLoad="true">
+  		checkAllBoxes();
+	</jsu:script>
+</c:if>
 <c:if test="${empty childResourcesHealthKey}">
   <c:set var="childResourcesHealthKey" value="resource.service.monitor.visibility.MembersTab"/>
 </c:if>

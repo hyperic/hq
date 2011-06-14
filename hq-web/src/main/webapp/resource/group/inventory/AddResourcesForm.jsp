@@ -6,7 +6,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 <%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
-
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -50,17 +50,13 @@
     classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants"
     symbol="APPDEF_TYPE_GROUP_COMPAT_SVC" var="CONST_COMPAT_SVC" />
 
-<c:set var="jsIncludes" scope="request">
-	${jsIncludes}
-	<script  src="<html:rewrite page="/js/addRemoveWidget.js"/>" type="text/javascript"></script>
-</c:set>
+<jsu:importScript path="/js/addRemoveWidget.js" />
 <c:set var="widgetInstanceName" value="addResources"/>
-<c:set var="jsScript" scope="request">
-	${jsScript}
+<jsu:script>
 	var pageData = new Array();
 	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');
-</c:set>
+</jsu:script>
 <c:url var="selfPnaAction" value="/resource/group/Inventory.do">
   <c:param name="mode" value="addResources"/>
   <c:param name="rid" value="${Resource.id}"/>
@@ -312,8 +308,7 @@
     <c:param name="nameFilter" value="${param.nameFilter}"/>
   </c:if>
 </c:url>
-<c:set var="jsScript" scope="request">
-	${jsScript}
+<jsu:script>
     function applyNameFilter() {
         goToLocationSelfAndElement(
                 'nameFilter',
@@ -321,7 +316,7 @@
                 '<c:out value="${selfPnFilterNameAction}" escapeXml="false"/>');
         return false;
     }
-</c:set>
+</jsu:script>
 <!--  SELECT & ADD -->
 <table width="100%" cellpadding="0" cellspacing="0" border="0">
 <!--  SELECT & ADD -->
