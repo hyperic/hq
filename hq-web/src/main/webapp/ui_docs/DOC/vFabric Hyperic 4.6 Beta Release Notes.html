@@ -16,17 +16,17 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Apr 28, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p>These release notes are for the beta release of vFabric Hyperic 4.6. </p>
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1304020247540 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1304020247540 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1304020247540 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1307466752473 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1307466752473 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1307466752473 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1304020247540'>
+/*]]>*/</style><div class='rbtoc1307466752473'>
 <ul>
     <li><a href='#vFabricHyperic4.6BetaReleaseNotes-vFabricHyperic4.6Features'>vFabric Hyperic 4.6 Features</a></li>
 <ul>
@@ -95,11 +95,11 @@ div.rbtoc1304020247540 li {margin-left: 0px;padding-left: 0px;}
 
 <h3><a name="vFabricHyperic4.6BetaReleaseNotes-ProductPluginforSpringInsightOperations"></a>Product Plugin for Spring Insight Operations </h3>
 
-<p>Spring Insight is a web application that runs in tcServer Developer Edition and analyzes the runtime performance of applications running in the container and provides visibility into it activity on a request-by-request basis. Spring Insight Operations ships as a template with tcServer. For more information, see <a href="http://static.springsource.com/projects/tc-server/2.1/devedition/htmlsingle/devedition.html">Using Spring Insight</a>. </p>
+<p>Spring Insight is a web application that runs in tcServer Developer Edition and analyzes the runtime performance of applications running in the container and provides visibility into it activity on a request-by-request basis. Spring Insight Operations ships as a template with tcServer.</p>
 
-<p>vFabric Hyperic 4.6's Spring Insight collects application metrics from Spring Insight Operations. The plugin provides a user interface that correlates the performance of an application with the performance of the application server in runs in, and also with the platform that hosts the application server. Given a performance problem that appears to be at the application level, you can jump from the Hyperic Insight Applications view into the Insight Operations Dashboard, into the same application context as the problem occurred, to diagnose the underlying problem. </p>
+<p>vFabric Hyperic 4.6's Spring Insight plugin collects application metrics from Spring Insight Operations. The plugin provides a user interface that correlates the performance of an application with the performance of the application server in runs in, and also with the platform that hosts the application server. Given a performance problem that appears to be at the application level, you can jump from the Hyperic Insight Applications view into the Insight Operations Dashboard, into the same application context as the problem occurred, to diagnose the underlying problem. </p>
 
-<p>For more information, see <a href="Spring Insight Plugin.html" title="Spring Insight Plugin">Spring Insight Plugin</a>.</p> 
+<p>For plugin documentation, see <a href="Spring Insight.html" title="Spring Insight">Spring Insight</a>. For information about the Spring Insight view in the Hyperic user interface, see the <a href="ui-Resources.Insight.Applications.html" title="ui-Resources.Insight.Applications">help page</a>.</p> 
 
 <h1><a name="vFabricHyperic4.6BetaReleaseNotes-HypericHQ4.6Features"></a>Hyperic HQ 4.6 Features </h1>
 
@@ -136,12 +136,12 @@ div.rbtoc1304020247540 li {margin-left: 0px;padding-left: 0px;}
 <p>In addition, the following Hyperic plugins are updated with new functionality, or to support more recent versions of the managed product: </p>
 <ul>
 	<li>GemFire</li>
-	<li>RabbitMQ</li>
-	<li>tc Server</li>
+	<li>RabbitMQ &#8212; In Hyperic 4.6, the RabbitMQ plugin no long requires access the <tt>erlang.cookie</tt> file &#8212; the plugin now uses the <tt>rabbitmq-management</tt> plugin. The configuration process has changed, and additional metrics are available. For more information see Monitoring RabbitMQ &#45; Hyperic 4.6.</li>
+	<li>tc Server &#8212; Support for tc Server 7.0 added.</li>
 	<li>Jboss &#8212; Support for Jboss 5.1 and 6.0 added.</li>
 	<li>PostgreSQL &#8212; Support for PostgreSQL 9.0 added.</li>
 	<li>WebSphere</li>
-	<li>WebLogic Server Plugin &#8212; In Hyperic 4.6, the plugin for managing WebLogic Server is enhanced to enable discovery of node managers and managed servers in a WebLogic domain without accessing the Administration Server for the domain. In previous releases, it was necessary to discover the Administration Server for a domain, and then configure that resource with WebLogic Server credentials, in order to discover the node manager and managed servers in the domain. A new Hyperic Agent configuration property, <tt>weblogic.discovery.new</tt>, enables discover of node managers and managed servers.</li>
+	<li>WebLogic Server Plugin &#8212; In Hyperic 4.6, the plugin for managing WebLogic Server is enhanced to enable discovery of node managers and managed servers in a WebLogic domain without accessing the Administration Server for the domain. In previous releases, it was necessary to discover the Administration Server for a domain, and then configure that resource with WebLogic Server credentials, in order to discover the node manager and managed servers in the domain.</li>
 </ul>
  
 
@@ -325,7 +325,7 @@ div.rbtoc1304020247540 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on May 31, 2011 13:08</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 14, 2011 15:08</font></td>
 		    </tr>
 	    </table>
     </body>

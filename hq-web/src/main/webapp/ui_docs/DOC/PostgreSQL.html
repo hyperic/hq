@@ -1,0 +1,95 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>Hyperic 4.6 Documentation : PostgreSQL</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            Hyperic 4.6 Documentation : PostgreSQL
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jun 14, 2011 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <style type='text/css'>/*<![CDATA[*/
+div.rbtoc1308071721619 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1308071721619 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1308071721619 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1308071721619'>
+<ul>
+    <li><a href='#PostgreSQL-ConfigurePostgreSQLMonitoring'>Configure PostgreSQL Monitoring</a></li>
+    <li><a href='#PostgreSQL-PostgreSQLMetrics'>PostgreSQL Metrics</a></li>
+</ul></div>
+
+<h1><a name="PostgreSQL-ConfigurePostgreSQLMonitoring"></a>Configure PostgreSQL Monitoring</h1>
+
+<p>Hyperic's PostgreSQL plugin uses the PostgreSQL statistics collector. Enable PostgreSQL to collect the required metrics, set the following the statistics parameters in <tt>postgresql.conf</tt>.</p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">stats_start_collector = true
+stats_block_level = true
+stats_row_level = true</pre>
+		</div>
+</div></div>
+
+<p>Optionally, set the following parameter to ensure that a database restart does not result in a gap in monitoring data. </p>
+
+<p><tt>stats_reset_on_server_start = false</tt></p>
+
+<p>Restart PostgreSQL after updating <tt>postgresql.conf</tt>.</p>
+
+<p>Note that some metrics, for instance "Index Space Used" and "Database Space Used" are only incremented after a vacuum or analyze operation is performed. </p>
+
+
+<h1><a name="PostgreSQL-PostgreSQLMetrics"></a>PostgreSQL Metrics</h1>
+
+
+<ul>
+	<li><a href="http://support.hyperic.com/display/DOCS46/PostgreSQL+9.0+server" title="PostgreSQL 9.0 server">PostgreSQL 9.0 server</a></li>
+	<li><a href="http://support.hyperic.com/display/DOCS46/PostgreSQL+9.0+Table+service" title="PostgreSQL 9.0 Table service">PostgreSQL 9.0 Table service</a></li>
+	<li><a href="http://support.hyperic.com/display/DOCS46/PostgreSQL+9.0+Index+service" title="PostgreSQL 9.0 Index service">PostgreSQL 9.0 Index service</a></li>
+	<li><a href="http://support.hyperic.com/display/DOCS46/PostgreSQL+8.4+server" title="PostgreSQL 8.4 server">PostgreSQL 8.4 server</a></li>
+	<li><a href="http://support.hyperic.com/display/DOCS46/PostgreSQL+8.4+Table+service" title="PostgreSQL 8.4 Table service">PostgreSQL 8.4 Table service</a></li>
+	<li><a href="http://support.hyperic.com/display/DOCS46/PostgreSQL+8.4+Index+service" title="PostgreSQL 8.4 Index service">PostgreSQL 8.4 Index service</a></li>
+	<li><a href="http://support.hyperic.com/display/DOCS46/PostgreSQL+8.3+server" title="PostgreSQL 8.3 server">PostgreSQL 8.3 server</a></li>
+	<li><a href="http://support.hyperic.com/display/DOCS46/PostgreSQL+8.3+Table+service" title="PostgreSQL 8.3 Table service">PostgreSQL 8.3 Table service</a></li>
+	<li><a href="http://support.hyperic.com/display/DOCS46/PostgreSQL+8.3+Index+service" title="PostgreSQL 8.3 Index service">PostgreSQL 8.3 Index service</a></li>
+	<li><a href="http://support.hyperic.com/display/DOCS46/PostgreSQL+8.2+server" title="PostgreSQL 8.2 server">PostgreSQL 8.2 server</a></li>
+	<li><a href="http://support.hyperic.com/display/DOCS46/PostgreSQL+8.2+Table+service" title="PostgreSQL 8.2 Table service">PostgreSQL 8.2 Table service</a></li>
+	<li><a href="http://support.hyperic.com/display/DOCS46/PostgreSQL+8.2+Index+service" title="PostgreSQL 8.2 Index service">PostgreSQL 8.2 Index service</a></li>
+	<li><a href="http://support.hyperic.com/display/DOCS46/PostgreSQL+8.1+server" title="PostgreSQL 8.1 server">PostgreSQL 8.1 server</a></li>
+	<li><a href="http://support.hyperic.com/display/DOCS46/PostgreSQL+8.1+Table+service" title="PostgreSQL 8.1 Table service">PostgreSQL 8.1 Table service</a></li>
+	<li><a href="http://support.hyperic.com/display/DOCS46/PostgreSQL+8.1+Index+service" title="PostgreSQL 8.1 Index service">PostgreSQL 8.1 Index service</a></li>
+	<li><a href="http://support.hyperic.com/display/DOCS46/PostgreSQL+8.0+server" title="PostgreSQL 8.0 server">PostgreSQL 8.0 server</a></li>
+	<li><a href="http://support.hyperic.com/display/DOCS46/PostgreSQL+8.0+Table+service" title="PostgreSQL 8.0 Table service">PostgreSQL 8.0 Table service</a></li>
+	<li><a href="http://support.hyperic.com/display/DOCS46/PostgreSQL+8.0+Index+service" title="PostgreSQL 8.0 Index service">PostgreSQL 8.0 Index service</a></li>
+	<li><a href="http://support.hyperic.com/display/DOCS46/PostgreSQL+7.4+server" title="PostgreSQL 7.4 server">PostgreSQL 7.4 server</a></li>
+	<li><a href="http://support.hyperic.com/display/DOCS46/PostgreSQL+7.4+Table+service" title="PostgreSQL 7.4 Table service">PostgreSQL 7.4 Table service</a></li>
+	<li><a href="http://support.hyperic.com/display/DOCS46/PostgreSQL+7.4+Index+service" title="PostgreSQL 7.4 Index service">PostgreSQL 7.4 Index service</a></li>
+</ul>
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 14, 2011 15:09</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

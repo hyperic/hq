@@ -16,15 +16,15 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Mar 15, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1300215988391 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1300215988391 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1300215988391 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1307466940334 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1307466940334 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1307466940334 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1300215988391'>
+/*]]>*/</style><div class='rbtoc1307466940334'>
 <ul>
     <li><a href='#UnderstandMetrics%2CMetricCollectionandBaselines-MetricCategories'>Metric Categories</a></li>
 <ul>
@@ -47,9 +47,6 @@ div.rbtoc1300215988391 li {margin-left: 0px;padding-left: 0px;}
 
 
 
-
-
-
 <h1><a name="UnderstandMetrics%2CMetricCollectionandBaselines-MetricCategories"></a>Metric Categories</h1>
 
 
@@ -67,22 +64,22 @@ div.rbtoc1300215988391 li {margin-left: 0px;padding-left: 0px;}
 </tr>
 <tr>
 <td class='confluenceTd'> Green </td>
-<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/71830509/72646943.gif" style="border: 0px solid black"/></span> </td>
+<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/76285153/76579269.gif" style="border: 0px solid black"/></span> </td>
 <td class='confluenceTd'> For an individual resource, indicates that its availability status is "green". In the case of an group, indicates that none of the group members has  availability status of  "red". <br class="atl-forced-newline" /> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Yellow </td>
-<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/71830509/72646944.gif" style="border: 0px solid black"/></span> </td>
+<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/76285153/76579268.gif" style="border: 0px solid black"/></span> </td>
 <td class='confluenceTd'> This value appears for a group only. It indicates that (1) one or more group members, but not all members, have the availability status of "red", and (2) the remaining members have status "green". </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Red </td>
-<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/71830509/72646945.gif" style="border: 0px solid black"/></span> </td>
+<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/76285153/76579267.gif" style="border: 0px solid black"/></span> </td>
 <td class='confluenceTd'> Indicates that an individual resource's availability status is "red".  For a group, indicates that all members of the group have either availability status "red" or "unknown".  </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Grey </td>
-<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/71830509/72646942.gif" style="border: 0px solid black"/></span> </td>
+<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/76285153/76579270.gif" style="border: 0px solid black"/></span> </td>
 <td class='confluenceTd'> For an individual resource, indicates that its availability is unknown. &nbsp;For an group, indicates that the availability of at least one of the members is unknown. <br class="atl-forced-newline" /> </td>
 </tr>
 </tbody></table>
@@ -133,7 +130,6 @@ div.rbtoc1300215988391 li {margin-left: 0px;padding-left: 0px;}
 
 
 
-
 <h1><a name="UnderstandMetrics%2CMetricCollectionandBaselines-Baselines"></a>Baselines</h1>
 
 <p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
@@ -156,7 +152,7 @@ div.rbtoc1300215988391 li {margin-left: 0px;padding-left: 0px;}
 
 
 <ul>
-	<li><b>Exception Management:</b> You can monitor application health &#8212; watching for changes in <a href="http://support.hyperic.com/display/EVO/Hyperic+Glossary#HypericGlossary-problemresource">problem indicators</a>, a proactive form of fault management &#8212; by defining an alert based on either the baseline, the high, or the low metric values. For example, you can set up an alert that triggers when the metric value is more than 25% of the baseline value.</li>
+	<li><b>Exception Management:</b> You can monitor application health &#8212; watching for changes in <a href="http://support.hyperic.com/display/DOCS46/Hyperic+Glossary#HypericGlossary-problemresource">problem indicators</a>, a proactive form of fault management &#8212; by defining an alert based on either the baseline, the high, or the low metric values. For example, you can set up an alert that triggers when the metric value is more than 25% of the baseline value.</li>
 </ul>
 
 
@@ -172,11 +168,13 @@ div.rbtoc1300215988391 li {margin-left: 0px;padding-left: 0px;}
 </ul>
 
 
-<p><span class="image-wrap" style=""><img src="attachments/71828283/71925891.png" width="700pxpxpxpx" style="border: 0px solid black"/></span></p>
+<p><span class="image-wrap" style=""><img src="attachments/76285170/76579467.png" width="700pxpxpxpx" style="border: 0px solid black"/></span></p>
 
 <h2><a name="UnderstandMetrics%2CMetricCollectionandBaselines-HowaBaselineisCalculated"></a>How a Baseline is Calculated</h2>
 
 <p>Hyperic continuously and automatically calculates the baselines for dynamic metrics it collects for a resource: it averages the observed metric values over a user-specified time frame. A baseline value for a metric becomes more accurate as more data is collected. Hyperic calculates the baseline values based on the frequency of calculation, the set of metrics to consider, and the minimum number of data points to use for calculation. You can change these values and thereby change how baselines are calculated.</p>
+
+<p>For more information, see <a href="Configure Metric Baselines.html" title="Configure Metric Baselines">Configure Metric Baselines</a>.</p>
  
 
 <div class="scroll-pagebreak"></div>
@@ -200,7 +198,7 @@ div.rbtoc1300215988391 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on May 31, 2011 13:09</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 14, 2011 15:09</font></td>
 		    </tr>
 	    </table>
     </body>

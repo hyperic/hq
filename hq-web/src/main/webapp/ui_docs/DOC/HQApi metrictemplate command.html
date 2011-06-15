@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>Hyperic 4.6 Documentation : HQApi metrictemplate command</title>
+        <title>Hyperic 4.6 Documentation : HQApi metricTemplate command</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,47 +12,48 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Hyperic 4.6 Documentation : HQApi metrictemplate command
+                            Hyperic 4.6 Documentation : HQApi metricTemplate command
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Mar 16, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 09, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1300305570570 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1300305570570 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1300305570570 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1307638685857 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1307638685857 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1307638685857 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1300305570570'>
+/*]]>*/</style><div class='rbtoc1307638685857'>
 <ul>
-    <li><a href='#HQApimetrictemplatecommand-Functionality'>Functionality</a></li>
-    <li><a href='#HQApimetrictemplatecommand-metricTemplateCommandOptions'>metricTemplate Command Options</a></li>
+    <li><a href='#HQApimetricTemplatecommand-Functionality'>Functionality</a></li>
+    <li><a href='#HQApimetricTemplatecommand-metricTemplateCommandOptions'>metricTemplate Command Options</a></li>
 <ul>
-    <li><a href='#HQApimetrictemplatecommand-metricTemplatelist'>metricTemplate list</a></li>
+    <li><a href='#HQApimetricTemplatecommand-metricTemplatelist'>metricTemplate list</a></li>
 <ul>
-    <li><a href='#HQApimetrictemplatecommand-metricTemplatelistCommandQualifiers'>metricTemplate list Command Qualifiers</a></li>
-    <li><a href='#HQApimetrictemplatecommand-StructureofametricTemplatesResponse'>Structure of a metricTemplatesResponse</a></li>
-    <li><a href='#HQApimetrictemplatecommand-AttributesinaMetricTemplatesResponse'>Attributes in a MetricTemplatesResponse</a></li>
+    <li><a href='#HQApimetricTemplatecommand-metricTemplatelistCommandQualifiers'>metricTemplate list Command Qualifiers</a></li>
+    <li><a href='#HQApimetricTemplatecommand-StructureofametricTemplatesResponse'>Structure of a metricTemplatesResponse</a></li>
+    <li><a href='#HQApimetricTemplatecommand-AttributesinaMetricTemplatesResponse'>Attributes in a MetricTemplatesResponse</a></li>
 </ul>
-    <li><a href='#HQApimetrictemplatecommand-metricTemplatesync'>metricTemplate sync</a></li>
+    <li><a href='#HQApimetricTemplatecommand-metricTemplatesync'>metricTemplate sync</a></li>
 </ul>
-    <li><a href='#HQApimetrictemplatecommand-Examples'>Examples</a></li>
+    <li><a href='#HQApimetricTemplatecommand-Examples'>Examples</a></li>
 <ul>
-    <li><a href='#HQApimetrictemplatecommand-metricTemplatelist'>metricTemplate list</a></li>
-    <li><a href='#HQApimetrictemplatecommand-metricTemplatesync'>metricTemplate sync</a></li>
+    <li><a href='#HQApimetricTemplatecommand-metricTemplatelist'>metricTemplate list</a></li>
+    <li><a href='#HQApimetricTemplatecommand-metricTemplatesync'>metricTemplate sync</a></li>
 </ul>
 </ul></div>
 
 
 <p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
 
+
 <div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Related Topics</b><br />This page provides information for running an HQ API from the command line. Related topics include: 
 <ul>
-	<li><a href="http://support.hyperic.com/display/EVO/Web+Services+API" title="Web Services API">Web Services API</a> - brief introduction to the API.</li>
+	<li><a href="http://support.hyperic.com/display/DOCS46/Web+Services+API" title="Web Services API">Web Services API</a> - brief introduction to the API.</li>
 	<li><a href="HQ API Command-Line Tools.html" title="HQ API Command-Line Tools">HQ API Command&#45;Line Tools</a> - how to get started with the command line tools.</li>
 	<li><a href="HQApi Java API.html" title="HQApi Java API">HQApi Java API</a> - about accessing the APIs programmatically.</li>
 </ul>
@@ -60,7 +61,7 @@ div.rbtoc1300305570570 li {margin-left: 0px;padding-left: 0px;}
 
 <div class="scroll-pagebreak"></div>
 
-<h1><a name="HQApimetrictemplatecommand-Functionality"></a>Functionality </h1>
+<h1><a name="HQApimetricTemplatecommand-Functionality"></a>Functionality </h1>
 <p>The <b>metricTemplate</b> command has options to output the metric collection configuration for a specified resource type. This is useful for:</p>
 
 <ul>
@@ -71,33 +72,30 @@ div.rbtoc1300305570570 li {margin-left: 0px;padding-left: 0px;}
 
 <p>To work with the metric collection configuration for a specific resource, see the <a href="HQApi metric command.html" title="HQApi metric command">HQApi metric command</a>.</p>
 
-<h1><a name="HQApimetrictemplatecommand-metricTemplateCommandOptions"></a>metricTemplate Command Options</h1>
+<h1><a name="HQApimetricTemplatecommand-metricTemplateCommandOptions"></a>metricTemplate Command Options</h1>
 
-<h2><a name="HQApimetrictemplatecommand-metricTemplatelist"></a>metricTemplate list</h2>
+<h2><a name="HQApimetricTemplatecommand-metricTemplatelist"></a>metricTemplate list</h2>
 
 <p>The <b>metricTemplate list</b> returns an MetricTemplatesResponse element that defines all of the metrics that are supported for a specific escalations defined in HQ.</p>
 
-<h3><a name="HQApimetrictemplatecommand-metricTemplatelistCommandQualifiers"></a>metricTemplate list Command Qualifiers</h3>
+<h3><a name="HQApimetricTemplatecommand-metricTemplatelistCommandQualifiers"></a>metricTemplate list Command Qualifiers</h3>
 
 <p>The --prototype qualifier, which specifies a resource type, is required for the <b>list</b> option. </p>
 
-<h3><a name="HQApimetrictemplatecommand-StructureofametricTemplatesResponse"></a>Structure of a metricTemplatesResponse</h3>
+<h3><a name="HQApimetricTemplatecommand-StructureofametricTemplatesResponse"></a>Structure of a metricTemplatesResponse</h3>
 
 <p>The MetricTemplatesResponse returned by the <b>metricTemplate list</b> has this element structure.</p>
 
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre> 
-
 MetricTemplatesResponse
-
       MetricTemplate
-
 </pre>
 </div></div>
 
 <p>where there is 1 MetricTemplate element for each metric that can be collected for the resource type.</p>
 
-<h3><a name="HQApimetrictemplatecommand-AttributesinaMetricTemplatesResponse"></a>Attributes in a MetricTemplatesResponse</h3>
+<h3><a name="HQApimetricTemplatecommand-AttributesinaMetricTemplatesResponse"></a>Attributes in a MetricTemplatesResponse</h3>
 
 <div class='table-wrap'>
 <table class='confluenceTable'><tbody>
@@ -177,13 +175,13 @@ MetricTemplatesResponse
 </div>
 
 
-<h2><a name="HQApimetrictemplatecommand-metricTemplatesync"></a>metricTemplate sync</h2>
+<h2><a name="HQApimetricTemplatecommand-metricTemplatesync"></a>metricTemplate sync</h2>
 
 <p>The <b>metricTemplate sync</b> option can be used to update the values of the <tt>defaultInterval</tt>, <tt>defaultOn</tt>, and <tt>indicator</tt> attributes. The values of other attributes in the <tt>MetricTemplate</tt> element are not written to HQ.</p>
 
-<h1><a name="HQApimetrictemplatecommand-Examples"></a>Examples</h1>
+<h1><a name="HQApimetricTemplatecommand-Examples"></a>Examples</h1>
 
-<h2><a name="HQApimetrictemplatecommand-metricTemplatelist"></a>metricTemplate list</h2>
+<h2><a name="HQApimetricTemplatecommand-metricTemplatelist"></a>metricTemplate list</h2>
 
 <p>In this example, the metrics supported for the resource type "CPU" are listed. </p>
 
@@ -236,7 +234,7 @@ MetricTemplatesResponse
 </div></div>
 
 
-<h2><a name="HQApimetrictemplatecommand-metricTemplatesync"></a>metricTemplate sync</h2>
+<h2><a name="HQApimetricTemplatecommand-metricTemplatesync"></a>metricTemplate sync</h2>
 
 <p>In this example, the first command writes the <tt>MetricTemplate</tt> for each metric supported for the "CPU" resource type to a file called cpu-metrics.xml. </p>
 
@@ -261,7 +259,7 @@ Successfully synced 13 templates.</pre>
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on May 31, 2011 13:09</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 14, 2011 15:09</font></td>
 		    </tr>
 	    </table>
     </body>

@@ -16,7 +16,7 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on May 18, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <h1><a name="ScriptPlugin-ScriptPlugin"></a>Script Plugin</h1>
@@ -31,11 +31,11 @@
 <ul>
 	<li><b>Availability</b> &#8212; Uses process exit code:
 	<ul>
-		<li>0 == <span class="image-wrap" style=""><img src="attachments/71828341/71926045.gif" style="border: 0px solid black"/></span> OK</li>
-		<li>1 == <span class="image-wrap" style=""><img src="attachments/71828341/71926047.gif" style="border: 0px solid black"/></span> Warning</li>
-		<li>2 == <span class="image-wrap" style=""><img src="attachments/71828341/71926043.gif" style="border: 0px solid black"/></span> Critical</li>
-		<li>3 == <span class="image-wrap" style=""><img src="attachments/71828341/71926044.gif" style="border: 0px solid black"/></span> Unknown</li>
-		<li>4 == <span class="image-wrap" style=""><img src="attachments/71828341/71926048.gif" style="border: 0px solid black"/></span> Paused</li>
+		<li>0 == <span class="image-wrap" style=""><img src="attachments/76284378/76578846.gif" style="border: 0px solid black"/></span> OK</li>
+		<li>1 == <span class="image-wrap" style=""><img src="attachments/76284378/76578843.gif" style="border: 0px solid black"/></span> Warning</li>
+		<li>2 == <span class="image-wrap" style=""><img src="attachments/76284378/76578847.gif" style="border: 0px solid black"/></span> Critical</li>
+		<li>3 == <span class="image-wrap" style=""><img src="attachments/76284378/76578844.gif" style="border: 0px solid black"/></span> Unknown</li>
+		<li>4 == <span class="image-wrap" style=""><img src="attachments/76284378/76578845.gif" style="border: 0px solid black"/></span> Paused</li>
 	</ul>
 	</li>
 </ul>
@@ -113,7 +113,7 @@
 
 <p>A script plugin includes an XML descriptor and at least one script, which can be defined externally or embedded in the XML file. The plugin can use multiple scripts or a single script; the script must output <em>key=value</em> pairs. These pairs are parsed by the script executor and are collected as metrics using the keys within the metric templates. The scripts can be written in any language. You can even use Nagios plugins out of the box.</p>
 
-<p>Learn more about the <a href="http://support.hyperic.com/display/EVO/Plugin+XML+Descriptor" title="Plugin XML Descriptor">XML descriptor</a>.</p>
+<p>Learn more about the <a href="http://support.hyperic.com/display/DOCS46/Plugin+XML+Descriptor" title="Plugin XML Descriptor">XML descriptor</a>.</p>
 
 <p>As an example, we will create an <a href="http://support.hyperic.com/display/hypcomm/io-device-plugin.xml" title="io-device-plugin.xml"><em>I/O Device</em></a> service which uses an <a href="http://perso.orange.fr/sebastien.godard/index.html">iostat</a> script wrapper to format the data.  Most Linux admins are familar with the <b>iostat</b> command which reports CPU and I/O stats for devices and partitions:</p>
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
@@ -254,7 +254,7 @@ I/O Device CPU Usage:
 
 <h4><a name="ScriptPlugin-CreateanIODeviceservice"></a>Create an IO Device service</h4>
 
-<p>After you have <a href="http://support.hyperic.com/display/EVO/Plugin+Development+Center#PluginDevelopmentCenter-PluginDevelopmentCenterdeployment">deployed</a> the iodevice plugin, instances of the service must be created manually.  Using the HQ GUI:</p>
+<p>After you have <a href="http://support.hyperic.com/display/DOCS46/Plugin+Development+Center#PluginDevelopmentCenter-PluginDevelopmentCenterdeployment">deployed</a> the iodevice plugin, instances of the service must be created manually.  Using the HQ GUI:</p>
 <ul>
 	<li>Navigate to the platform view of choice and click the "New Platform Service" link</li>
 	<li>Enter a <b>Name</b> of your choice</li>
@@ -290,15 +290,11 @@ I/O Device CPU Usage:
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre>exec:file=pdk/scripts/device_iostat.pl,args=sda:Availability
 
-
-
 </pre>
 </div></div>
 <p>The properties/cache-key would be:</p>
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre>file=pdk/scripts/device_iostat.pl,args=sda
-
-
 
 </pre>
 </div></div>
@@ -306,15 +302,11 @@ I/O Device CPU Usage:
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre>exec:file=pdk/scripts/device_iostat.pl:sda_Availability
 
-
-
 </pre>
 </div></div>
 <p>Which makes the properties/cache-key the same for all resources:</p>
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre>file=pdk/scripts/device_iostat.pl
-
-
 
 </pre>
 </div></div>
@@ -346,22 +338,22 @@ I/O Device CPU Usage:
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/71828341/71926046.vbs">windows_updates.vbs</a> (application/octet-stream)
+                                <a href="attachments/76284378/76578843.gif">icon_available_yellow.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/71828341/71926048.gif">icon_available_orange.gif</a> (image/gif)
+                                <a href="attachments/76284378/76578844.gif">icon_available_error.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/71828341/71926045.gif">icon_available_green.gif</a> (image/gif)
+                                <a href="attachments/76284378/76578845.gif">icon_available_orange.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/71828341/71926043.gif">icon_available_red.gif</a> (image/gif)
+                                <a href="attachments/76284378/76578846.gif">icon_available_green.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/71828341/71926047.gif">icon_available_yellow.gif</a> (image/gif)
+                                <a href="attachments/76284378/76578847.gif">icon_available_red.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/71828341/71926044.gif">icon_available_error.gif</a> (image/gif)
+                                <a href="attachments/76284378/76578848.vbs">windows_updates.vbs</a> (application/octet-stream)
                                 <br/>
                                                     </div>
 				    
@@ -373,7 +365,7 @@ I/O Device CPU Usage:
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on May 31, 2011 13:09</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 14, 2011 15:09</font></td>
 		    </tr>
 	    </table>
     </body>

@@ -16,18 +16,18 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on May 31, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1306866421052 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1306866421052 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1306866421052 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1307466602719 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1307466602719 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1307466602719 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1306866421052'>
+/*]]>*/</style><div class='rbtoc1307466602719'>
 <ul>
     <li><a href='#HQApialertdefinitioncommand-alertdefinitionFunctionality'>alertdefinition Functionality</a></li>
     <li><a href='#HQApialertdefinitioncommand-UnderstandingAlertDefinitionOptions'>Understanding Alert Definition Options</a></li>
@@ -56,9 +56,10 @@ div.rbtoc1306866421052 li {margin-left: 0px;padding-left: 0px;}
 
 <p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
 
+
 <div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Related Topics</b><br />This page provides information for running an HQ API from the command line. Related topics include: 
 <ul>
-	<li><a href="http://support.hyperic.com/display/EVO/Web+Services+API" title="Web Services API">Web Services API</a> - brief introduction to the API.</li>
+	<li><a href="http://support.hyperic.com/display/DOCS46/Web+Services+API" title="Web Services API">Web Services API</a> - brief introduction to the API.</li>
 	<li><a href="HQ API Command-Line Tools.html" title="HQ API Command-Line Tools">HQ API Command&#45;Line Tools</a> - how to get started with the command line tools.</li>
 	<li><a href="HQApi Java API.html" title="HQApi Java API">HQApi Java API</a> - about accessing the APIs programmatically.</li>
 </ul>
@@ -81,7 +82,7 @@ div.rbtoc1306866421052 li {margin-left: 0px;padding-left: 0px;}
 
 <h1><a name="HQApialertdefinitioncommand-UnderstandingAlertDefinitionOptions"></a>Understanding Alert Definition Options</h1>
 
-<p>For information about alert definitions options, including condition types and action filtering, refer to <a href="http://support.hyperic.com/display/EVO/Defining+Alerts" title="Defining Alerts">Defining Alerts</a>.</p>
+<p>For information about alert definitions options, including condition types and action filtering, refer to <a href="http://support.hyperic.com/display/DOCS46/Defining+Alerts" title="Defining Alerts">Defining Alerts</a>.</p>
 
 <h1><a name="HQApialertdefinitioncommand-alertdefinitionCommandOptions"></a>alertdefinition Command Options</h1>
 
@@ -155,15 +156,10 @@ div.rbtoc1306866421052 li {margin-left: 0px;padding-left: 0px;}
 <p>The <tt>AlertDefinitionsResponse</tt> object returned by the alertdefinition list command has this element structure:</p>
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre>AlertDefinitionsResponse
-
 alertdefinition
-
 Resource
-
 AlertCondition
-
 escalation
-
 </pre>
 </div></div>
 <p>where there are:</p>
@@ -235,7 +231,7 @@ escalation
 <tr>
 <td class='confluenceTd'>&nbsp;</td>
 <td class='confluenceTd'> <tt>frequency</tt> </td>
-<td class='confluenceTd'> Use to configure the the alert definition's <b>Enable Actions(s</b>) behavior, which governs whether an alert will fire each time the condition(s) are met.For information on these options, see <a href="http://support.hyperic.com/display/EVO/Defining+Alerts#DefiningAlerts-EnableActions">Enable Actions</a>.
+<td class='confluenceTd'> Use to configure the the alert definition's <b>Enable Actions(s</b>) behavior, which governs whether an alert will fire each time the condition(s) are met.For information on these options, see <a href="http://support.hyperic.com/display/DOCS46/Defining+Alerts#DefiningAlerts-EnableActions">Enable Actions</a>.
 <ul>
 	<li>"0" - Each time the conditions are met.</li>
 	<li>"2" &#45;&nbsp;Once every &#95;&#95; times conditions are met within a time period of... <b>Note</b>:&nbsp; Use Use <tt>count</tt> and <tt>range</tt> to specify the timing values.</li>
@@ -273,19 +269,19 @@ escalation
 <td class='confluenceTd'>&nbsp;</td>
 <td class='confluenceTd'> <tt>willRecover</tt> </td>
 <td class='confluenceTd'> Used to configure the "Generate one alert and then disable alert definition until fixed" behavior. <br class="atl-forced-newline" />
-For information, see <a href="http://support.hyperic.com/display/EVO/Defining+Alerts#DefiningAlerts-EnableActions">Enable Actions</a>.&nbsp; <br class="atl-forced-newline" /> </td>
+For information, see <a href="http://support.hyperic.com/display/DOCS46/Defining+Alerts#DefiningAlerts-EnableActions">Enable Actions</a>.&nbsp; <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> "true" or "false" </td>
 </tr>
 <tr>
 <td class='confluenceTd'>&nbsp;</td>
 <td class='confluenceTd'> <tt>controlFiltered</tt> </td>
-<td class='confluenceTd'> For a description of the behavior this attribute controls, please see <a href="http://support.hyperic.com/display/EVO/Defining+Alerts#DefiningAlerts-DisregardControlActions">Disregard Control Actions for Related Alerts</a>. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> For a description of the behavior this attribute controls, please see <a href="http://support.hyperic.com/display/DOCS46/Defining+Alerts#DefiningAlerts-DisregardControlActions">Disregard Control Actions for Related Alerts</a>. <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> "true" or "false" </td>
 </tr>
 <tr>
 <td class='confluenceTd'>&nbsp;</td>
 <td class='confluenceTd'> <tt>notifyFiltered</tt> </td>
-<td class='confluenceTd'> For a description of the behavior this attribute controls, please see <a href="http://support.hyperic.com/display/EVO/Defining+Alerts#DefiningAlerts-DisregardControlActions">Disregard Control Actions for Related Alerts</a>. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> For a description of the behavior this attribute controls, please see <a href="http://support.hyperic.com/display/DOCS46/Defining+Alerts#DefiningAlerts-DisregardControlActions">Disregard Control Actions for Related Alerts</a>. <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> "true" or "false" </td>
 </tr>
 <tr>
@@ -442,13 +438,9 @@ For more information about each type of alert condition, see <a href="ui-Alert.C
 <td class='confluenceTd'> Allowable values (which correspond to the operators listed in cell to the left):
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre>&amp;gt;
-
 &amp;lt;
-
 =
-
 !
-
 </pre>
 </div></div> </td>
 </tr>
@@ -512,13 +504,9 @@ The operator used to compare the the actual metric value to <tt>baselinePercenta
 <td class='confluenceTd'> Allowable values (which correspond to the operators listed in cell to the left):
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre>&amp;gt;
-
 &amp;lt;
-
 =
-
 !
-
 </pre>
 </div></div> </td>
 </tr>
@@ -669,47 +657,26 @@ The target resource must have log tracking enabled.&nbsp; <br class="atl-forced-
 <p>In this example, no qualifiers were supplied. All resource alert definitions are returned.</p>
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre>./build/hqapi1-0.8/bin/hqapi.sh alertdefinition list
-
 &lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
-
 &lt;AlertDefinitionsResponse&gt;
-
 &lt;Status&gt;Success&lt;/Status&gt;
-
 &lt;AlertDefinition controlFiltered="false" notifyFiltered="false" willRecover="false" range="0"
-
      count="0" frequency="0" enabled="true" active="true" priority="2" parent="10159"
-
      description="" name="Disk Full!" id="10162"&gt;
-
 &lt;Resource name="localhost MacOSX File System /dev/disk1s5 mounted on /Volumes/hyperic (local/hfs)"
-
      id="10801"/&gt;
-
 &lt;AlertCondition thresholdValue="98.0" thresholdComparator="&amp;gt;" thresholdMetric="Use Percent"
-
      type="1" required="true"/&gt;
-
 &lt;/AlertDefinition&gt;
-
 &lt;AlertDefinition controlFiltered="false" notifyFiltered="false" willRecover="false" range="0"
-
      count="0" frequency="0" enabled="true"
-
 active="true" priority="2" parent="10159" description="" name="Disk Full!" id="10161"&gt;
-
 &lt;Resource name="localhost MacOSX File System /dev/disk1s3 mounted on /Volumes/backup
-
      (local/hfs)" id="10800"/&gt;
-
 &lt;AlertCondition thresholdValue="98.0" thresholdComparator="&amp;gt;" thresholdMetric="Use Percent"
-
      type="1" required="true"/&gt;
-
 &lt;/AlertDefinition&gt;
-
 &lt;/AlertDefinitionsResponse&gt;
-
 </pre>
 </div></div>
 
@@ -720,23 +687,14 @@ active="true" priority="2" parent="10159" description="" name="Disk Full!" id="1
 <p>When you use the <tt>&#45;-typeAlerts</tt> qualifier, "child" resource alert definitions that HQ automatically creates for resources of the type specified by a resource type alert definition are <em>not</em> returned.</p>
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
-
 &lt;AlertDefinitionsResponse&gt;
-
 &lt;Status&gt;Success&lt;/Status&gt;
-
 &lt;AlertDefinition controlFiltered="false" notifyFiltered="false" willRecover="true" range="0"
-
      count="0" frequency="0" enabled="true" active="true" priority="2" parent="0" description=""
-
      name="JbossStatelessResourceType" id="10001"&gt;
-
 &lt;ResourcePrototype name="JBoss 4.2 Stateless Session EJB" id="10182"/&gt;
-
 &lt;AlertCondition metricChange="Availability" type="4" required="true"/&gt;
-
 &lt;/AlertDefintionsResponse&gt;
-
 </pre>
 </div></div>
 
@@ -745,25 +703,15 @@ active="true" priority="2" parent="10159" description="" name="Disk Full!" id="1
 <p>The fragment below has an example of each type of <tt>AlertCondition</tt></p>
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre>&lt;AlertCondition thresholdValue="2.0" thresholdComparator="&amp;gt;" thresholdMetric=
-
      "Load Average 5 Minutes" type="1" required="true"/&gt;
-
 &lt;AlertCondition baselineType="mean" baselinePercentage="0.0" baselineComparator="&amp;gt;"
-
      baselineMetric="Zombie Processes" type="2" required="true"/&gt;
-
 &lt;AlertCondition controlStatus="Completed" controlAction="start" type="3" required="true"/&gt;
-
 &lt;AlertCondition metricChange="Zombie Processes" type="4" required="true"/&gt;
-
 &lt;AlertCondition recover="Availability Down" type="5" required="true"/&gt;
-
 &lt;AlertCondition property="arch" type="6" required="true"/&gt;
-
 &lt;AlertCondition logMatches="login" logLevel="INF" type="7" required="true"/&gt;
-
 &lt;AlertCondition configMatch="/var/log/messages" type="8" required="true"/&gt;
-
 </pre>
 </div></div>
 
@@ -772,15 +720,10 @@ active="true" priority="2" parent="10159" description="" name="Disk Full!" id="1
 <p>In this example, the contents of the typedefs.xml file are written to HQ.</p>
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre>bash-3.2$ ./bin/hqapi.sh alertdefinition list --typeAlerts &gt; typedefs.xml
-
 &lt;EDIT typedefs.xml&gt;
-
 bash-3.2$ cat typedefs.xml | ./bin/hqapi.sh alertdefinition sync
-
 Successfully synced 14 alert definitions.
-
 bash-3.2$
-
 </pre>
 </div></div>
 
@@ -789,11 +732,8 @@ bash-3.2$
 <p>In this example, the <tt>alertdefintion</tt> whose internal ID is 10045 is deleted.</p>
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre>bash-3.2$ ./bin/hqapi.sh alertdefinition delete --id=10048
-
 Successfully deleted alert definition id 10048
-
 bash-3.2$
-
 </pre>
 </div></div>
 
@@ -806,7 +746,7 @@ bash-3.2$
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on May 31, 2011 13:09</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 14, 2011 15:09</font></td>
 		    </tr>
 	    </table>
     </body>

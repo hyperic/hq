@@ -16,18 +16,18 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on May 17, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1305656832489 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1305656832489 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1305656832489 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1307466697533 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1307466697533 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1307466697533 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1305656832489'>
+/*]]>*/</style><div class='rbtoc1307466697533'>
 <ul>
     <li><a href='#SNMPFunctionalityinHyperic-HypericandSNMP'>Hyperic and SNMP</a></li>
     <li><a href='#SNMPFunctionalityinHyperic-SimpleSNMPAgentAvailabilityChecks'>Simple SNMP Agent Availability Checks</a></li>
@@ -39,6 +39,7 @@ div.rbtoc1305656832489 li {margin-left: 0px;padding-left: 0px;}
 
 
 <p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
+
 
 
 <h1><a name="SNMPFunctionalityinHyperic-HypericandSNMP"></a>Hyperic and SNMP</h1>
@@ -56,7 +57,7 @@ div.rbtoc1305656832489 li {margin-left: 0px;padding-left: 0px;}
 <p>These are Hyperic's built-in capabilities for collecting availability, throughput, and utilization metrics for SNMP devices and hosts.</p>
 
 <ul>
-	<li>Network Device Platform Type - Hyperic has built-in support for monitoring any device that implements IF-MIB (rfc2863)<a href="http://tools.ietf.org/html/rfc2863">http://tools.ietf.org/html/rfc2863</a> and IP-MIB (rfc4293)  <a href="http://tools.ietf.org/html/rfc4293">http://tools.ietf.org/html/rfc4293</a>. You configure a platform of type "Network Device". For more information see <a href="Monitoring a Network Device.html" title="Monitoring a Network Device">Monitoring a Network Device</a>.</li>
+	<li>Network Device Platform Type - Hyperic has built-in support for monitoring any device that implements IF-MIB (rfc2863)<a href="http://tools.ietf.org/html/rfc2863">http://tools.ietf.org/html/rfc2863</a> and IP-MIB (rfc4293)  <a href="http://tools.ietf.org/html/rfc4293">http://tools.ietf.org/html/rfc4293</a>. You configure a platform of type "Network Device". For more information see Monitoring a Network Device.</li>
 </ul>
 
 
@@ -94,7 +95,7 @@ div.rbtoc1305656832489 li {margin-left: 0px;padding-left: 0px;}
 	<ul>
 		<li><tt>sysUptimeOID.0</tt> &#45; No configuration is required for this binding.</li>
 		<li><tt>snmpTrapOID.0</tt> &#45; This binding is configured on the <b>HQ Server</b> settings page.</li>
-		<li>A variable binding for the alert data specified in the <tt>snmp_trap.gsp</tt> alert notification template - the alert definition name and the "short reason" for firing. Note that Alert templates may be customized, as described in <a href="http://support.hyperic.com/display/EVO/Tailoring+Alert+Notification+Templates" title="Tailoring Alert Notification Templates">Tailoring Alert Notification Templates</a>.</li>
+		<li>A variable binding for the alert data specified in the <tt>snmp_trap.gsp</tt> alert notification template - the alert definition name and the "short reason" for firing. Note that Alert templates may be customized, as described in <a href="http://support.hyperic.com/display/DOCS46/Tailoring+Alert+Notification+Templates" title="Tailoring Alert Notification Templates">Tailoring Alert Notification Templates</a>.</li>
 	</ul>
 	</li>
 </ul>
@@ -107,7 +108,7 @@ div.rbtoc1305656832489 li {margin-left: 0px;padding-left: 0px;}
 		<ul>
 			<li><tt>sysUptimeOID.0</tt> &#45; No configuration is required for this binding.</li>
 			<li><tt>snmpTrapOID.0</tt> &#45; This binding is configured on the <b>HQ Server</b> settings page.</li>
-			<li>A variable binding for the alert data specified in the <tt>snmp_trap.gsp</tt> alert notification template - the alert definition name and the "short reason" for firing. Note that Alert templates may be customized, as described in <a href="http://support.hyperic.com/display/EVO/Tailoring+Alert+Notification+Templates" title="Tailoring Alert Notification Templates">Tailoring Alert Notification Templates</a>.The notification has two varbinds - <tt>SysUpTime.0</tt> and <tt>snmpTrapOID.0</tt>.</li>
+			<li>A variable binding for the alert data specified in the <tt>snmp_trap.gsp</tt> alert notification template - the alert definition name and the "short reason" for firing. Note that Alert templates may be customized, as described in <a href="http://support.hyperic.com/display/DOCS46/Tailoring+Alert+Notification+Templates" title="Tailoring Alert Notification Templates">Tailoring Alert Notification Templates</a>.The notification has two varbinds - <tt>SysUpTime.0</tt> and <tt>snmpTrapOID.0</tt>.</li>
 		</ul>
 		</li>
 		<li>In HQ Enterprise 4.3 Beta and later - When you configure an SNMP notification as an escalation step, you can specify additional variable bindings. When the escalation step is performed, the trap will contain those variable bindings, along with <tt>SysUpTime.0</tt>, <tt>snmpTrapOID.0</tt>, and a variable binding for the alert data specified in the <tt>snmp_trap.gsp</tt> alert notification template.</li>
@@ -132,7 +133,7 @@ div.rbtoc1305656832489 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on May 31, 2011 13:08</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 14, 2011 15:09</font></td>
 		    </tr>
 	    </table>
     </body>

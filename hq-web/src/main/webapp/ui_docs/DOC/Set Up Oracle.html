@@ -16,7 +16,7 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Apr 05, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
@@ -24,11 +24,11 @@
 
 <p>This section has instructions for configuring an Oracle database for an Hyperic installation.</p>
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1302023733184 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1302023733184 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1302023733184 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1307466671805 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1307466671805 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1307466671805 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1302023733184'>
+/*]]>*/</style><div class='rbtoc1307466671805'>
 <ul>
     <li><a href='#SetUpOracle-BeforeInstallingHypericServer'>Before Installing Hyperic Server</a></li>
 <ul>
@@ -57,6 +57,7 @@ div.rbtoc1302023733184 li {margin-left: 0px;padding-left: 0px;}
 
 
 <p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
+
 
 
 <div class="scroll-pagebreak"></div>
@@ -180,15 +181,15 @@ RESOURCE YES</pre>
 
 <h1><a name="SetUpOracle-EnableRowMovementforOracle10gand11g"></a>Enable Row Movement for Oracle 10g and 11g</h1>
 
-<p>After installing Hyperic Server, run the <a href="attachments/71829942/71926415.sql">enable_row_movement.sql</a> procedure attached to this page - this is necessary to enable the routine maintenance described in <a href="#SetUpOracle-PeriodicOracle10gand11gDatabaseMaintenance">Periodic Oracle 10g and 11g Database Maintenance</a>. &nbsp;It is only necessary to enable row movement once; you do not need to do it on a recurring basis.</p>
+<p>After installing Hyperic Server, run the <a href="attachments/76284654/76578872.sql">enable_row_movement.sql</a> procedure attached to this page - this is necessary to enable the routine maintenance described in <a href="#SetUpOracle-PeriodicOracle10gand11gDatabaseMaintenance">Periodic Oracle 10g and 11g Database Maintenance</a>. &nbsp;It is only necessary to enable row movement once; you do not need to do it on a recurring basis.</p>
 
 <h1><a name="SetUpOracle-PeriodicOracle10gand11gDatabaseMaintenance"></a>Periodic Oracle 10g and 11g Database Maintenance</h1>
 
 <p>Perform the following maintenance after running Hyperic for about a week, and monthly thereafter:</p>
 
 <ol>
-	<li>Run the <a href="attachments/71829942/71926414.sql">table_maintenance.sql</a> procedure attached to this page to compact and shrink space on all Hyperic tables (except HQ_METRIC&#42; tables).</li>
-	<li>Run the <a href="attachments/71829942/71926416.sql">rebuild_index.sql</a> procedure  attached to this page to rebuild the index on all Hyperic tables.</li>
+	<li>Run the <a href="attachments/76284654/76578873.sql">table_maintenance.sql</a> procedure attached to this page to compact and shrink space on all Hyperic tables (except HQ_METRIC&#42; tables).</li>
+	<li>Run the <a href="attachments/76284654/76578871.sql">rebuild_index.sql</a> procedure  attached to this page to rebuild the index on all Hyperic tables.</li>
 	<li>Run tablespace maintenance as appropriate:
 	<ol>
 		<li>Perform the following query to determine how fragmented a tablespace is. The query returns the tablespace name and total count of holes in it.
@@ -201,7 +202,7 @@ order by 1,2;</pre>
 		</div>
 </div></div></li>
 		<li>If the hole count is in the order of thousands, run <b>Reorganize</b>.<br/>
-<span class="image-wrap" style=""><img src="attachments/71828283/71926432.png" width="750px" style="border: 0px solid black"/></span></li>
+<span class="image-wrap" style=""><img src="attachments/76285170/76579595.png" width="750px" style="border: 0px solid black"/></span></li>
 	</ol>
 	</li>
 </ol>
@@ -396,13 +397,13 @@ alter index &lt;schema&gt;.METRIC_DATA_8D_1S_MID_IDX initrans 15;</pre>
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/71829942/71926414.sql">table_maintenance.sql</a> (application/octet-stream)
+                                <a href="attachments/76284654/76578871.sql">rebuild_index.sql</a> (application/octet-stream)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/71829942/71926415.sql">enable_row_movement.sql</a> (application/octet-stream)
+                                <a href="attachments/76284654/76578872.sql">enable_row_movement.sql</a> (application/octet-stream)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/71829942/71926416.sql">rebuild_index.sql</a> (application/octet-stream)
+                                <a href="attachments/76284654/76578873.sql">table_maintenance.sql</a> (application/octet-stream)
                                 <br/>
                                                     </div>
 				    
@@ -414,7 +415,7 @@ alter index &lt;schema&gt;.METRIC_DATA_8D_1S_MID_IDX initrans 15;</pre>
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on May 31, 2011 13:08</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 14, 2011 15:08</font></td>
 		    </tr>
 	    </table>
     </body>

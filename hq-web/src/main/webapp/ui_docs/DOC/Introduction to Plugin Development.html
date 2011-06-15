@@ -16,15 +16,15 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on May 19, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1305821158383 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1305821158383 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1305821158383 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1307466539529 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1307466539529 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1307466539529 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1305821158383'>
+/*]]>*/</style><div class='rbtoc1307466539529'>
 <ul>
     <li><a href='#IntroductiontoPluginDevelopment-PluginDevelopmentCenter'> Plugin Development Center</a></li>
     <li><a href='#IntroductiontoPluginDevelopment-WhatPluginsDo'>What Plugins Do</a></li>
@@ -39,6 +39,7 @@ div.rbtoc1305821158383 li {margin-left: 0px;padding-left: 0px;}
 
 
 <p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
+
 
 
 <h1><a name="IntroductiontoPluginDevelopment-PluginDevelopmentCenter"></a><a name="IntroductiontoPluginDevelopment-top"></a>Plugin Development Center</h1>
@@ -67,12 +68,12 @@ div.rbtoc1305821158383 li {margin-left: 0px;padding-left: 0px;}
 
 
 <ul>
-	<li><em>Monitoring</em>: Plugins can implement HQ <a href="http://support.hyperic.com/display/EVO/Monitoring+Overview" title="Monitoring Overview">monitoring</a>, defining and collecting metrics and configuring them for display in the UI. <a href="Measurement Plugin.html" title="Measurement Plugin">Measurement plugins</a> implement monitoring.</li>
+	<li><em>Monitoring</em>: Plugins can implement HQ <a href="http://support.hyperic.com/display/DOCS46/Monitoring+Overview" title="Monitoring Overview">monitoring</a>, defining and collecting metrics and configuring them for display in the UI. <a href="Measurement Plugin.html" title="Measurement Plugin">Measurement plugins</a> implement monitoring.</li>
 </ul>
 
 
 <ul>
-	<li><em>Control</em>: Plugins can implement the HQ <a href="http://support.hyperic.com/display/EVO/Controlling+Resources" title="Controlling Resources">control</a> feature, defining control actions used to control resources. <a href="Control Plugin.html" title="Control Plugin">Control plugins</a> implement control.</li>
+	<li><em>Control</em>: Plugins can implement the HQ <a href="http://support.hyperic.com/display/DOCS46/Controlling+Resources" title="Controlling Resources">control</a> feature, defining control actions used to control resources. <a href="Control Plugin.html" title="Control Plugin">Control plugins</a> implement control.</li>
 </ul>
 
 
@@ -94,29 +95,29 @@ div.rbtoc1305821158383 li {margin-left: 0px;padding-left: 0px;}
 <p>The Agent does the work of gathering all the data from resources and generally communicating with the resource. Using the plugin, the Agent can:</p>
 
 <ul>
-	<li><em>Auto-discover a resource.</em> In the case of a server, say, the plugin can also auto-discover all the server's hosted services. (<a href="http://support.hyperic.com/display/EVO/Auto-Discovery" title="Auto-Discovery">Learn more</a> about auto-discovery.)</li>
+	<li><em>Auto-discover a resource.</em> In the case of a server, say, the plugin can also auto-discover all the server's hosted services. (<a href="http://support.hyperic.com/display/DOCS46/Auto-Discovery" title="Auto-Discovery">Learn more</a> about auto-discovery.)</li>
 </ul>
 
 
 <ul>
-	<li><em>Gather metrics from a resource</em>. (Learn more about <a href="http://support.hyperic.com/display/EVO/Monitoring+Overview" title="Monitoring Overview">monitoring and measuring resource behavior</a>.) See the <a href="http://support.hyperic.com/display/EVO/Plugin+XML+Descriptor#PluginXMLDescriptor-metric">XML descriptor syntax</a> for defining and gathering metrics.</li>
+	<li><em>Gather metrics from a resource</em>. (Learn more about <a href="http://support.hyperic.com/display/DOCS46/Monitoring+Overview" title="Monitoring Overview">monitoring and measuring resource behavior</a>.) See the <a href="http://support.hyperic.com/display/DOCS46/Plugin+XML+Descriptor#PluginXMLDescriptor-metric">XML descriptor syntax</a> for defining and gathering metrics.</li>
 </ul>
 
 
 <ul>
-	<li><em>Control a resource.</em> (<a href="http://support.hyperic.com/display/EVO/Controlling+Resources" title="Controlling Resources">Learn more</a> about controlling resources.)</li>
+	<li><em>Control a resource.</em> (<a href="http://support.hyperic.com/display/DOCS46/Controlling+Resources" title="Controlling Resources">Learn more</a> about controlling resources.)</li>
 </ul>
 
 
 <p>The Server deals in meta-data, which is to say, it knows about:</p>
 
 <ul>
-	<li><em>Platform, server, and service resource types</em> and how the plugin's targeted resources map to the inventory model. See the XML descriptor syntax for specifying <a href="http://support.hyperic.com/display/EVO/Plugin+XML+Descriptor#PluginXMLDescriptor-server">servers</a> and <a href="http://support.hyperic.com/display/EVO/Plugin+XML+Descriptor#PluginXMLDescriptor-service">services</a>.</li>
+	<li><em>Platform, server, and service resource types</em> and how the plugin's targeted resources map to the inventory model. See the XML descriptor syntax for specifying <a href="http://support.hyperic.com/display/DOCS46/Plugin+XML+Descriptor#PluginXMLDescriptor-server">servers</a> and <a href="http://support.hyperic.com/display/DOCS46/Plugin+XML+Descriptor#PluginXMLDescriptor-service">services</a>.</li>
 </ul>
 
 
 <ul>
-	<li><em>The configuration schema</em> for each resource type (the same data you see displayed on the "<a href="ui-Inventory.Configuration.html" title="ui-Inventory.Configuration">Resource Configuration</a>" screen). See the <a href="http://support.hyperic.com/display/EVO/Plugin+XML+Descriptor#PluginXMLDescriptor-config">XML descriptor syntax</a> for specifying configuring properties.</li>
+	<li><em>The configuration schema</em> for each resource type (the same data you see displayed on the "<a href="ui-Inventory.Configuration.html" title="ui-Inventory.Configuration">Resource Configuration</a>" screen). See the <a href="http://support.hyperic.com/display/DOCS46/Plugin+XML+Descriptor#PluginXMLDescriptor-config">XML descriptor syntax</a> for specifying configuring properties.</li>
 </ul>
 
 
@@ -265,7 +266,7 @@ div.rbtoc1305821158383 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on May 31, 2011 13:09</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 14, 2011 15:09</font></td>
 		    </tr>
 	    </table>
     </body>

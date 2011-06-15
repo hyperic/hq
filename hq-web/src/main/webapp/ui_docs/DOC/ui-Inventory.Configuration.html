@@ -16,20 +16,20 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Sep 21, 2010 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 08, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
  
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1285109097852 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1285109097852 ul {margin-left: 0px;padding-left: 20px;}
-div.rbtoc1285109097852 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1307566791152 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1307566791152 ul {margin-left: 0px;padding-left: 20px;}
+div.rbtoc1307566791152 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1285109097852'>
+/*]]>*/</style><div class='rbtoc1307566791152'>
 <ul>
-    <li><a href='#ui-Inventory.Configuration-NavigatetoConfigurationPropertiespage.'>Navigate to Configuration Properties page.</a></li>
+    <li><a href='#ui-Inventory.Configuration-NavigatetotheConfigurationPropertiesPage'>Navigate to the Configuration Properties Page</a></li>
     <li><a href='#ui-Inventory.Configuration-ConfigureSharedProperties'>Configure Shared Properties</a></li>
     <li><a href='#ui-Inventory.Configuration-ConfigureMonitoringPropertiesLogTracking'>Configure Monitoring Properties - Log Tracking</a></li>
 <ul>
@@ -42,16 +42,17 @@ div.rbtoc1285109097852 li {margin-left: 0px;padding-left: 0px;}
     <li><a href='#ui-Inventory.Configuration-HQConfigurationTrackingFunctionality'>HQ Configuration Tracking Functionality</a></li>
     <li><a href='#ui-Inventory.Configuration-SetUpConfigurationTrackingforaResource'>Set Up Configuration Tracking for a Resource</a></li>
     <li><a href='#ui-Inventory.Configuration-ViewConfigurationEventsforaResource'>View Configuration Events for a Resource</a></li>
-    <li><a href='#ui-Inventory.Configuration-ConfigureAlertsBasedonConfigurationEvents'>Configure Alerts Based on Configuration Events</a></li>
 </ul>
     <li><a href='#ui-Inventory.Configuration-ConfigureControlProperties'>Configure Control Properties</a></li>
+    <li><a href='#ui-Inventory.Configuration-ConfigureAlertDefinitionsBasedonEvents'>Configure Alert Definitions Based on Events</a></li>
 </ul></div> 
 
 
 <p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
+
  
 
-<h1><a name="ui-Inventory.Configuration-NavigatetoConfigurationPropertiespage."></a>Navigate to Configuration Properties page. </h1>
+<h1><a name="ui-Inventory.Configuration-NavigatetotheConfigurationPropertiesPage"></a>Navigate to the Configuration Properties Page </h1>
 <p>The <b>Configuration Properties</b> section of the <b>Inventory</b> page for a resource contains the configuration options and currently selected values for the resource. Configuration properties for the resource are presented in three sections: </p>
 
 <ul>
@@ -63,7 +64,13 @@ div.rbtoc1285109097852 li {margin-left: 0px;padding-left: 0px;}
 
 <p>Click <b>Edit</b> to open the <b>Edit Configuration Properties</b> page for the currently selected resource.</p> 
 
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>If a resource type requires user-supplied configuration property values, configuration instructions should be available at the bottom of the <b>Configuration Properties</b> for a resource of that type. In addition, <a href="vFabric Hyperic Resource Configuration and Metrics.html" title="vFabric Hyperic Resource Configuration and Metrics">vFabric Hyperic Resource Configuration and Metrics</a> documents the configuration requirements for many Hyperic plugins.</td></tr></table></div>
+
 <h1><a name="ui-Inventory.Configuration-ConfigureSharedProperties"></a>Configure Shared Properties </h1>
+
+<p>The properties that appear in the "Shared" section of the <b>Configuration Properties</b> page vary by resource type. </p>
+
+<p>Some resource types have no configuration properties. Some resource types' configuration properties are discovered by the managing product plugin, and you do not need to supply property values unless, for some reason, the plugin fails to obtain the values. </p>
 
 <h1><a name="ui-Inventory.Configuration-ConfigureMonitoringPropertiesLogTracking"></a>Configure Monitoring Properties - Log Tracking </h1>
 
@@ -100,7 +107,7 @@ div.rbtoc1285109097852 li {margin-left: 0px;padding-left: 0px;}
 
 <p>This section describes the log tracking configuration options for resources that whose log files use logj4 levels. </p>
 
-<p><span class="image-wrap" style=""><img src="attachments/71828283/71925965.png" style="border: 0px solid black"/></span> </p>
+<p><span class="image-wrap" style=""><img src="attachments/76285170/76579519.png" style="border: 0px solid black"/></span> </p>
 
 <p>An authorized user can set the values of these configuration options:</p>
 <ul>
@@ -122,7 +129,7 @@ div.rbtoc1285109097852 li {margin-left: 0px;padding-left: 0px;}
 
 <p>This section describes the log tracking configuration options for network services. </p>
 
-<p><span class="image-wrap" style=""><img src="attachments/71828283/71925963.png" style="border: 0px solid black"/></span> </p>
+<p><span class="image-wrap" style=""><img src="attachments/76285170/76579500.png" style="border: 0px solid black"/></span> </p>
 
 <p>An authorized user can set the values of these configuration options:</p>
 <ul>
@@ -135,14 +142,15 @@ div.rbtoc1285109097852 li {margin-left: 0px;padding-left: 0px;}
 		<li>Debug</li>
 	</ul>
 	</li>
-	<li>Specify substrings or expressions to use as include/exclude filter criteria. Enter a substring or a regular expression that a log message must contain or match in <b>Log Pattern Match</b>. For more information, see <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">java.util.regex.Pattern</a>.h3. Log Tracking for Windows Events</li>
+	<li>Specify substrings or expressions to use as include/exclude filter criteria. Enter a substring or a regular expression that a log message must contain or match in <b>Log Pattern Match</b>. For more information, see <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">java.util.regex.Pattern</a>.</li>
 </ul>
+
 
 
 <h3><a name="ui-Inventory.Configuration-LogTrackingforWindowsPlatforms"></a>Log Tracking for Windows Platforms </h3>
 <p>This section describes the log tracking configuration options for platforms of type "win32". </p>
 
-<p><span class="image-wrap" style=""><img src="attachments/71828283/71925964.png" style="border: 0px solid black"/></span> </p>
+<p><span class="image-wrap" style=""><img src="attachments/76285170/76579520.png" style="border: 0px solid black"/></span> </p>
 
 <p>An authorized user can set the values of these configuration options:</p>
 <ul>
@@ -226,12 +234,12 @@ When Windows log tracking is enabled, an entry of this form is logged for events
 <p>You can use the parameters below to configure the Windows event attributes that the agent writes for a Windows event. Each parameter maps to Windows event attribute of the same name.</p>
 
 <ul>
-	<li><tt>%user%</tt> &#45;  The name of the user on whose behalf the event occurred.</li>
-	<li><tt>%computer%</tt> &#45; The name of the computer on which the event occurred.</li>
-	<li><tt>%source%</tt> &#45; The software that logged the Windows event.</li>
-	<li><tt>%event%</tt> &#45; A number identifying the particular event type.</li>
-	<li><tt>%message%</tt> &#45; The event message.</li>
-	<li><tt>%category%</tt> &#45; An application-specific value used for grouping events.</li>
+	<li><tt>%user%</tt> &#8212;  The name of the user on whose behalf the event occurred.</li>
+	<li><tt>%computer%</tt> &#8212; The name of the computer on which the event occurred.</li>
+	<li><tt>%source%</tt> &#8212; The software that logged the Windows event.</li>
+	<li><tt>%event%</tt> &#8212; A number identifying the particular event type.</li>
+	<li><tt>%message%</tt> &#8212; The event message.</li>
+	<li><tt>%category%</tt> &#8212; An application-specific value used for grouping events.</li>
 </ul>
 
 
@@ -245,9 +253,7 @@ When Windows log tracking is enabled, an entry of this form is logged for events
 <p>04/19/2010 06:06 AM Log Message (SYSTEM): SYSTEM: HP_Admistrator@Office Print:7:Printer HP LaserJet 6P was paused.</p>
 </div></div>
 
-<p>This entry is for as for an Windows event written to the Windows System event log at 6:06 AM on 04/19/2010. The software associated with the event was running as "HP_Administrator" on the host "Office". The Windows event's <b>Source,</b>&nbsp;<b>Event,</b> and&nbsp;<b>Message</b> attributes, are "Print", "7", and "Printer HP LaserJet 6P was paused.", respectively.</p>
-
-<p>After you configure the content of the log entry written for a Windows event, when you configure an alert definition for a Windows resource, you can create an alert condition based on the message content, including the custom fields you have configured. For more information, see the "Define Alert Condition Set" section in <em>Configure Monitoring Options</em>. <p> <a href="http://support.hyperic.com/display/EVO/Defining+Alerts#DefiningAlerts-conditions">Define Alert Condition Set</a> </p></p></td></tr></table></div>  
+<p>This entry is for as for an Windows event written to the Windows System event log at 6:06 AM on 04/19/2010. The software associated with the event was running as "HP_Administrator" on the host "Office". The Windows event's <b>Source,</b>&nbsp;<b>Event,</b> and&nbsp;<b>Message</b> attributes, are "Print", "7", and "Printer HP LaserJet 6P was paused.", respectively.</p></td></tr></table></div>  
 
 <h1><a name="ui-Inventory.Configuration-ConfigureMonitoringPropertiesConfigurationTracking"></a>Configure Monitoring Properties - Configuration Tracking </h1>
 
@@ -258,6 +264,7 @@ When Windows log tracking is enabled, an entry of this form is logged for events
 
 
 <p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
+
 
 
 <h2><a name="ui-Inventory.Configuration-HQConfigurationTrackingFunctionality"></a>HQ Configuration Tracking Functionality</h2>
@@ -290,40 +297,15 @@ When Windows log tracking is enabled, an entry of this form is logged for events
 <h2><a name="ui-Inventory.Configuration-ViewConfigurationEventsforaResource"></a>View Configuration Events for a Resource</h2>
 
 <p>You enable and configure log tracking for a resource on its <b>Configuration Properties</b> page. Navigate to the resource's <b>Inventory</b> page, and click <b>Edit</b> in the <b>Configuration Properties</b> section to display the <b>Configuration Properties</b> page.</p>
-
-<h2><a name="ui-Inventory.Configuration-ConfigureAlertsBasedonConfigurationEvents"></a>Configure Alerts Based on Configuration Events</h2>
-
-<ol>
-	<li>Enable and configure configuration tracking as described above.</li>
-	<li>Navigate to that resource's "Alert" screen ( <span class="image-wrap" style=""><img src="attachments/71828532/71926305.gif" style="border: 0px solid black"/></span>).<br/>
-One way to get there is from the "Browse Resources" screen: click <span class="image-wrap" style=""><img src="attachments/71828532/71926314.gif" style="border: 0px solid black"/></span> next to the resource.</li>
-	<li>Click <span class="image-wrap" style=""><img src="attachments/71828532/71926306.gif" style="border: 0px solid black"/></span> to define a new alert or click the alert name to edit an existing definition.</li>
-	<li>If defining a new alert, follow the <a href="ui-Alert.New.html" title="ui-Alert.New">instructions</a> on the "New Alert" screen for defining an alert.<br/>
-Be sure to select <ins>Config change and match file name</ins> as a triggering condition.</li>
-	<li>If editing an alert definition:
-	<ol>
-		<li>On the "<a href="ui-Alert.Edit.html" title="ui-Alert.Edit">Edit Alert</a>" screen, click <span class="image-wrap" style=""><img src="attachments/71828532/71926307.gif" style="border: 0px solid black"/></span> in the "Condition Set" section.</li>
-		<li>On the "Edit Alert Condition" screen, follow the <a href="ui-Alert.Condition.html#ui-Alert.Condition-editcondition">instructions</a> for editing the alert's condition.<br/>
-Be sure to select <ins>Config change and match file name</ins> as a triggering condition.</li>
-	</ol>
-	</li>
-</ol>
  
 
 <h1><a name="ui-Inventory.Configuration-ConfigureControlProperties"></a>Configure Control Properties </h1>
 
-<p>This section lists the information necessary for HQ to perform <a href="http://support.hyperic.com/display/EVO/Hyperic+Glossary#HypericGlossary-controlaction">control actions</a> on this resource. Not all resource types have associated control actions: <a href="http://support.hyperic.com/display/EVO/Hyperic+Glossary#HypericGlossary-platform">Platforms</a>, <a href="http://support.hyperic.com/display/EVO/Hyperic+Glossary#HypericGlossary-application">applications</a>, and <a href="http://support.hyperic.com/display/EVO/Hyperic+Glossary#HypericGlossary-mixedgroup">mixed groups</a> do not have control actions. </p>
+<p>If the plugin that manages a resource type enables control actions for the type, a "Control" section of the <b>Configuration Properties</b> page for a resource instance lists any properties required or supported for the control actions. In some cases, you must provide the value of required properties. Often, there are optional properties; for example, if Hyperic can perform a "start" command for a server type, there is usually an optional property that you can use to supply command arguments.</p>
 
-<p><b>Example</b> <br/>
-For an Apache server, HQ can perform these control actions: start, stop, restart, graceful, startssl, and configtest. In order for HQ to do that, the user must provide the following information about the Apache installation: </p>
-<ul>
-	<li><ins>pidfile</ins>: The Apache httpd pid file</li>
-	<li><ins>program</ins>: The apache httpd control program</li>
-	<li><ins>prefix</ins>: Prefix arguments to the control program</li>
-	<li><ins>timeout</ins>: Timeout of control operations (measured in seconds)</li>
-</ul>
+<h1><a name="ui-Inventory.Configuration-ConfigureAlertDefinitionsBasedonEvents"></a>Configure Alert Definitions Based on Events</h1>
 
-
+<p>You can configure an resource alert condition based on a log event, configuration event, or a control action. For more information see the "Define Alert Condition Set" section on the <a href="Define an Alert for a Resource.html" title="Define an Alert for a Resource">Define an Alert for a Resource</a> page. </p>
 
 				    					    <br/>
                         <div class="tabletitle">
@@ -334,7 +316,7 @@ For an Apache server, HQ can perform these control actions: start, stop, restart
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/71828466/71926153.gif">fb_ok.gif</a> (image/gif)
+                                <a href="attachments/76284841/76579050.gif">fb_ok.gif</a> (image/gif)
                                 <br/>
                                                     </div>
 				    
@@ -346,7 +328,7 @@ For an Apache server, HQ can perform these control actions: start, stop, restart
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on May 31, 2011 13:10</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 14, 2011 15:09</font></td>
 		    </tr>
 	    </table>
     </body>

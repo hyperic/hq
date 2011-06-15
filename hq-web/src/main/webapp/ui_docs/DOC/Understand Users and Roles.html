@@ -16,7 +16,7 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Mar 14, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
@@ -33,21 +33,22 @@
 
 
 <p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
+
  
 
 <div class="scroll-pagebreak"></div>
 
 <h1><a name="UnderstandUsersandRoles-Authentication"></a>Authentication </h1>
 
-<p>Hyperic Server encrypts user passwords using a encryption key you supply during installation. Note however, that Hyperic Server does <em>not</em> have a strength-of-password policy, or a lockout policy for failed login attempts. Best practice is to integrate Hyperic with your existing enterprise directory. For information about integrating Hyperic with LDAP, Active Directory, and Kerberos, see <a href="Configure LDAP Properties.html" title="Configure LDAP Properties">Configure LDAP Properties</a> and <a href="Configure Kerberos Properties.html" title="Configure Kerberos Properties">Configure Kerberos Properties</a>. </p>
+<p>Hyperic Server encrypts user passwords using a encryption key you supply during installation. Note however, that Hyperic Server does <em>not</em> have a strength-of-password policy, or a lockout policy for failed login attempts. Best practice is to integrate Hyperic with your existing enterprise directory. For information about integrating Hyperic with LDAP, Active Directory, and Kerberos, see <a href="Configure LDAP Properties.html" title="Configure LDAP Properties">Configure LDAP Properties</a> and <a href="Configure Kerberos Properties.html" title="Configure Kerberos Properties">Configure Kerberos Properties</a>.</p>
 
 <h1><a name="UnderstandUsersandRoles-UserAccountsinHyperic"></a>User Accounts in Hyperic</h1>
 
-<p>You create an account in Hyperic for each user. </p>
+<p>In Hyperic HQ, a user account specifies the user's name, username, and contact information, including the email and SMS addresses for receiving alert notifications.  </p>
 
-<p>In Hyperic HQ, a user account specifies the user's name, username, and contact information, including the email and SMS addresses for receiving alert notifications.    </p>
+<p>In vFabric Hyperic, a user account is also associated with one or more <em>roles</em>, the mechanism by which resource access and associated permissions are granted to users. Note that in vFabric Hyperic, to have access to resources, a user account must be assigned at least one role to which resources are assigned. </p>
 
-<p>In vFabric Hyperic, a user account is also associated with one or more <em>roles</em>, the mechanism by which resource access and associated permissions are granted to users. Note that in vFabric Hyperic, to have access to resources, a user account must be assigned at least one role to which resources are assigned. Roles are not supported in Hyperic HQ &#8212; all users have all permissions to all resources in inventory. Similarly, any Hyperic HQ user has the permission to create other users.</p>
+<p>Roles are not supported in Hyperic HQ &#8212; all users have all permissions to all resources in inventory. Similarly, any Hyperic HQ user has the permission to create other users.</p>
 
 <p>For information about roles, see <a href="#UnderstandUsersandRoles-RolesinvFabricHyperic">Roles in vFabric Hyperic</a>.</p>
 
@@ -56,12 +57,8 @@
 
 <p>There is one built-in user account in Hyperic HQ, and two in vFabric Hyperic.</p>
 
-<h3><a name="UnderstandUsersandRoles-hqadminAccount"></a>hqadmin Account</h3>
-
-<p>Both Hyperic HQ and vFabric Hyperic have a built-in <tt>hqadmin</tt> account, which has the <tt>superuser</tt> role, and can:  </p>
 <ul>
-	<li>Administer the HQ Server</li>
-	<li>and, in vFabric Hyperic:
+	<li><b><tt>hqadmin</tt></b>  &#8212; Both Hyperic HQ and vFabric Hyperic have a built-in <tt>hqadmin</tt> account, which can administer the Hyperic Server. In vFabric Hyperic, the <tt>hqadmin</tt> account  the has the <tt>superuser</tt> role, and can, and in addition to permission to administer the Hyperic Servcer, can:
 	<ul>
 		<li>Assign alert definitions to resource types</li>
 		<li>Modify role-based dashboards</li>
@@ -70,17 +67,33 @@
 </ul>
 
 
-<h3><a name="UnderstandUsersandRoles-guestAccount"></a>guest Account</h3>
-
-<p>vFabric Hyperic has a built-in <tt>guest</tt> account, which, when enabled, allows anonymous, view-only access to the HQ user interface. The <tt>guest</tt> user has the built-in <tt>guest</tt> role. Note that the guest role provides <b>View</b> permissions for all types, but unless resource groups are assigned to the role, anonymous users will not be able to view any resources. To allow anonymous users to view resources in HQ you must enable the <tt>guest</tt> account and assign the groups of resources you wish to expose to the <tt>guest</tt> role.</p>
-
-<p>You can expose all resources to the guest role without assigning groups to the role. To do so, insert the following row into the database. Note that there is no user-interface that can revert this assignment and that you will have to remove the row manually from the database to disable it.</p>
+<ul>
+	<li><b><tt>guest</tt></b> &#8212; vFabric Hyperic has a built-in <tt>guest</tt> account, which, when enabled, allows anonymous, view-only access to the Hyperic user interface. The <tt>guest</tt> user has the built-in <tt>guest</tt> role. Note that the guest role provides <b>View</b> permissions for all types, but unless resource groups are assigned to the role, anonymous users will not be able to view any resources. To allow anonymous users to view resources in HQ you must enable the <tt>guest</tt> account and assign the groups of resources you wish to expose to the <tt>guest</tt> role.
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>If desired, you can grant the <b>guest</b> role access to all resources without assigning groups to the role. To grant the <b>guest</b> role full access to all resources, insert the following row into the database. Note that there is no user interface that can revert this update &#8211; you will must manually remove the row from the database to revert the behavior.
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <script type="syntaxhighlighter" class="theme: Confluence; brush: java; gutter: false"><![CDATA[INSERT INTO EAM_ROLE_RESOURCE_GROUP_MAP VALUES (2, 1);]]></script>
-</div></div>
+</div></div></td></tr></table></div></li>
+</ul>
+
+
+<h2><a name="UnderstandUsersandRoles-UserAccountCreationandAuthentication"></a>User Account Creation and Authentication</h2>
+
+<h3><a name="UnderstandUsersandRoles-HypericHQUserAccounts"></a>Hyperic HQ User Accounts</h3>
+
+<p>In Hyperic HQ, you create an account for each user, as described on <a href="Create and Manage User Accounts.html" title="Create and Manage User Accounts">Create and Manage User Accounts</a>. All Hyperic HQ user account data is stored in Hyperic database.  </p>
+
+<h3><a name="UnderstandUsersandRoles-vFabricHypericUserAccounts"></a>vFabric Hyperic User Accounts</h3>
+
+<p>In vFabric Hyperic, you can create user accounts manually, or you can integrate vFabric Hyperic with an external authentication so that an LDAP user can log on to Hyperic vFabric using LDAP credentials and register as a new Hyperic user. </p>
+
+<p>Note that each user account in vFabric Hyperic must have one or more roles &#8212; if you integrate vFabric Hyperic with your authentication system, Hyperic can automatically assign roles to a new Hyperic user, based on the LDAP groups to which the user belongs.</p>
+
+<p>For more information, see <a href="Configure LDAP Properties.html" title="Configure LDAP Properties">Configure LDAP Properties</a>. </p>
+
+<p><b>Note:</b> If you do not have an authentication system, you can manually create user accounts as described in <a href="Create and Manage User Accounts.html" title="Create and Manage User Accounts">Create and Manage User Accounts</a>.</p>
+
 
 <div class="scroll-pagebreak"></div>
-
 
 <h1><a name="UnderstandUsersandRoles-RolesinvFabricHyperic"></a>Roles in vFabric Hyperic </h1>
 
@@ -90,6 +103,7 @@
 <p><a name="UnderstandUsersandRoles-UnderstandRoles"></a> </p>
 
 <p>In vFabric Hyperic, every user is assigned one or more roles. Roles enable: </p>
+
 <ul>
 	<li><b>Access control</b> &#45; A role defines what resources the users added to the role - <em>role users</em> &#45; can access, and the types of operations - view, edit, create, and so on - they can perform on those resources.</li>
 </ul>
@@ -107,7 +121,7 @@
 
 <p>The sections below describe the information you define for a role in vFabric Hyperic. </p>
 
-<h2><a name="UnderstandUsersandRoles-PermissionMatrixGrantsAccesstoTypes"></a>Permission Matrix Grants Access to Types </h2>
+<h2><a name="UnderstandUsersandRoles-PermissionMatrix%3AGrantsAccesstoTypes"></a>Permission Matrix: Grants Access to Types </h2>
 <p><a name="UnderstandUsersandRoles-UnderstandMatrix"></a> <br/>
 The permission matrix for a role defines the level of access that role users have to configurable items in vFabric Hyperic. There are several types of targets to which you can define a permission level: </p>
 
@@ -128,7 +142,7 @@ The permission matrix for a role defines the level of access that role users hav
 
 <p>The screenshot below shows the permission matrix you define for a role. </p>
 
-<p><span class="image-wrap" style=""><img src="attachments/71828283/71925897.png" width="650" style="border: 0px solid black"/></span> </p>
+<p><span class="image-wrap" style=""><img src="attachments/76285170/76579580.png" width="650" style="border: 0px solid black"/></span> </p>
 
 <h3><a name="UnderstandUsersandRoles-AboutPermissionLevels"></a>About Permission Levels </h3>
 
@@ -200,7 +214,7 @@ The permission matrix for a role defines the level of access that role users hav
 <p>For example, <b>Full</b> access to Servers requires at least Read access to Platforms and Full access to Services.</p> 
 
 
-<h2><a name="UnderstandUsersandRoles-GroupsGrantAccesstoSpecificResources"></a>Groups Grant Access to Specific Resources </h2>
+<h2><a name="UnderstandUsersandRoles-Groups%3AGrantAccesstoSpecificResources"></a>Groups: Grant Access to Specific Resources </h2>
 <p><a name="UnderstandUsersandRoles-UnderstandGroups"></a> <br/>
 In addition to defining a permission matrix for a role, you assign one or more resource groups to the role. Together, the permission levels and groups defined in the role determine the <em>specific</em> inventory resources that role users can work with. </p>
 
@@ -212,13 +226,13 @@ In addition to defining a permission matrix for a role, you assign one or more r
 
 <p>You can assign the same resource group to multiple roles, and you can assign the same user to multiple roles. This allows for the fact that different users may need different levels of access to the same resources. For instance, you can create one role for users that need <b>Read-Only</b> access to the members of a resource group, and another for users that need <b>Full</b> permission, and assign the same resource groups to both roles. </p>
 
-<h2><a name="UnderstandUsersandRoles-AlertCalendarsEnableShiftBasedNotifications"></a>Alert Calendars Enable Shift-Based Notifications </h2>
+<h2><a name="UnderstandUsersandRoles-AlertCalendar%3AEnableShiftBasedNotifications"></a>Alert Calendar: Enable Shift-Based Notifications </h2>
 
 <p>An Alert Calendar is an optional component of a role that builds on the notion of role-based notification. In role-based alert notifications, the notification recipient is a role - notifications are sent to all users with the role. An Alert Calendar for role defines the time periods during a work week that role users are on duty. You can define multiple roles to span the week - each with a different availability calendar, and assign all of the complementary roles as the notification recipients. In this case, Hyperic Server will send alert notifications only to the role that is currently on-duty, based on the alert calendars defined in the roles. </p>
 
 <p>The screenshot below shows the alert calendar you can define for a role. </p>
 
-<p><span class="image-wrap" style=""><img src="attachments/71828283/71925896.png" width="750" style="border: 0px solid black"/></span> </p>
+<p><span class="image-wrap" style=""><img src="attachments/76285170/76579581.png" width="750" style="border: 0px solid black"/></span> </p>
 
 <div class="scroll-pagebreak"></div>
 
@@ -230,16 +244,18 @@ In addition to defining a permission matrix for a role, you assign one or more r
 
 <p>The screenshot below is the permission matrix for the Hyperic SuperUser. The built-in hqadmin account has the SuperUser role. </p>
 
-<p><span class="image-wrap" style=""><img src="attachments/71828283/71925908.png" width="750" style="border: 0px solid black"/></span> </p>
+<p><span class="image-wrap" style=""><img src="attachments/76285170/76579376.png" width="750" style="border: 0px solid black"/></span> </p>
 <div class="scroll-pagebreak"></div>
 
 <h3><a name="UnderstandUsersandRoles-GuestRole"></a>Guest Role </h3>
 
 <p>The screenshot below is the permission matrix for the Hyperic SuperUser. The built-in guest account has the Guest role. </p>
 
-<p><span class="image-wrap" style=""><img src="attachments/71828283/71925899.png" width="750" style="border: 0px solid black"/></span> </p>
+<p><span class="image-wrap" style=""><img src="attachments/76285170/76579377.png" width="750" style="border: 0px solid black"/></span> </p>
 
+<h2><a name="UnderstandUsersandRoles-HypericRolesandLDAPGroups"></a>Hyperic Roles and LDAP Groups</h2>
 
+<p>If integrate vFabric Hyperic with your LDAP system, you can automatically assign roles to a new user based upon the groups the user is assigned in the LDAP system.  For more information, <a href="Configure LDAP Properties.html" title="Configure LDAP Properties">Configure LDAP Properties</a>. </p>
 <div class="scroll-pagebreak"></div> 
 
 				    
@@ -251,7 +267,7 @@ In addition to defining a permission matrix for a role, you assign one or more r
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on May 31, 2011 13:09</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 14, 2011 15:09</font></td>
 		    </tr>
 	    </table>
     </body>

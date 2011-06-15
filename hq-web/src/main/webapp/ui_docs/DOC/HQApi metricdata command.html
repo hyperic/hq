@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>Hyperic 4.6 Documentation : HQApi metricdata command</title>
+        <title>Hyperic 4.6 Documentation : HQApi metricData command</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,35 +12,35 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Hyperic 4.6 Documentation : HQApi metricdata command
+                            Hyperic 4.6 Documentation : HQApi metricData command
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on May 26, 2011 by <font color="#0050B2">docs</font>.
+					    This page last changed on Jun 09, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1306448825739 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1306448825739 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1306448825739 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1307638636866 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1307638636866 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1307638636866 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1306448825739'>
+/*]]>*/</style><div class='rbtoc1307638636866'>
 <ul>
-    <li><a href='#HQApimetricdatacommand-Functionality'>Functionality</a></li>
-    <li><a href='#HQApimetricdatacommand-CommandOptions'>Command Options</a></li>
+    <li><a href='#HQApimetricDatacommand-Functionality'>Functionality</a></li>
+    <li><a href='#HQApimetricDatacommand-CommandOptions'>Command Options</a></li>
 <ul>
-    <li><a href='#HQApimetricdatacommand-list'>list</a></li>
+    <li><a href='#HQApimetricDatacommand-list'>list</a></li>
 <ul>
-    <li><a href='#HQApimetricdatacommand-listCommandOutput'>list Command Output</a></li>
-    <li><a href='#HQApimetricdatacommand-listCommandQualifiers'>list Command Qualifiers</a></li>
-    <li><a href='#HQApimetricdatacommand-Examples'>Examples</a></li>
+    <li><a href='#HQApimetricDatacommand-listCommandOutput'>list Command Output</a></li>
+    <li><a href='#HQApimetricDatacommand-listCommandQualifiers'>list Command Qualifiers</a></li>
+    <li><a href='#HQApimetricDatacommand-Examples'>Examples</a></li>
 <ul>
-    <li><a href='#HQApimetricdatacommand-ListMeasurementsforaMetric'>List Measurements for a Metric</a></li>
-    <li><a href='#HQApimetricdatacommand-ListMeasurementsforaResource'>List Measurements for a Resource</a></li>
-    <li><a href='#HQApimetricdatacommand-ListMeasurementsforaCompatibleGroup'>List Measurements for a Compatible Group</a></li>
+    <li><a href='#HQApimetricDatacommand-ListMeasurementsforaMetric'>List Measurements for a Metric</a></li>
+    <li><a href='#HQApimetricDatacommand-ListMeasurementsforaResource'>List Measurements for a Resource</a></li>
+    <li><a href='#HQApimetricDatacommand-ListMeasurementsforaCompatibleGroup'>List Measurements for a Compatible Group</a></li>
 </ul>
 </ul>
 </ul>
@@ -49,29 +49,30 @@ div.rbtoc1306448825739 li {margin-left: 0px;padding-left: 0px;}
 
 <p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
 
+
 <div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Related Topics</b><br />This page provides information for running an HQ API from the command line. Related topics include: 
 <ul>
-	<li><a href="http://support.hyperic.com/display/EVO/Web+Services+API" title="Web Services API">Web Services API</a> - brief introduction to the API.</li>
+	<li><a href="http://support.hyperic.com/display/DOCS46/Web+Services+API" title="Web Services API">Web Services API</a> - brief introduction to the API.</li>
 	<li><a href="HQ API Command-Line Tools.html" title="HQ API Command-Line Tools">HQ API Command&#45;Line Tools</a> - how to get started with the command line tools.</li>
 	<li><a href="HQApi Java API.html" title="HQApi Java API">HQApi Java API</a> - about accessing the APIs programmatically.</li>
 </ul>
 </td></tr></table></div> 
 
 <div class="scroll-pagebreak"></div>
-<h1><a name="HQApimetricdatacommand-Functionality"></a>Functionality</h1>
+<h1><a name="HQApimetricDatacommand-Functionality"></a>Functionality</h1>
 
 <p>The <b>metricData</b> command can be used to list all measurements for a particular metric for a particular resource in HQ.</p>
 
-<h1><a name="HQApimetricdatacommand-CommandOptions"></a>Command Options</h1>
+<h1><a name="HQApimetricDatacommand-CommandOptions"></a>Command Options</h1>
 
-<h2><a name="HQApimetricdatacommand-list"></a>list</h2>
+<h2><a name="HQApimetricDatacommand-list"></a>list</h2>
 
-<h3><a name="HQApimetricdatacommand-listCommandOutput"></a>list Command Output</h3>
+<h3><a name="HQApimetricDatacommand-listCommandOutput"></a>list Command Output</h3>
 
-<p>The data returned by the <b>list</b> option varies by the command qualifiers you supply.  See <a href="#HQApimetricdatacommand-Examples">Examples</a>.</p>
+<p>The data returned by the <b>list</b> option varies by the command qualifiers you supply.  See <a href="#HQApimetricDatacommand-Examples">Examples</a>.</p>
 
 
-<h3><a name="HQApimetricdatacommand-listCommandQualifiers"></a>list Command Qualifiers</h3>
+<h3><a name="HQApimetricDatacommand-listCommandQualifiers"></a>list Command Qualifiers</h3>
 
 <p>The <b>list</b> command requires one of the following qualifiers: <tt>groupID</tt>, <tt>metricID</tt>, or <tt>resourceID</tt>.</p>
 <div class='table-wrap'>
@@ -108,9 +109,9 @@ div.rbtoc1306448825739 li {margin-left: 0px;padding-left: 0px;}
 </div>
 
 
-<h3><a name="HQApimetricdatacommand-Examples"></a>Examples</h3>
+<h3><a name="HQApimetricDatacommand-Examples"></a>Examples</h3>
 
-<h4><a name="HQApimetricdatacommand-ListMeasurementsforaMetric"></a>List Measurements for a Metric</h4>
+<h4><a name="HQApimetricDatacommand-ListMeasurementsforaMetric"></a>List Measurements for a Metric</h4>
 
 <p>The query below returns measurements for the metric whose ID is 10001 &#8212; the Availability metric for a platform in inventory. The timestamp and the value are returned for each data point.</p>
 
@@ -125,7 +126,7 @@ div.rbtoc1306448825739 li {margin-left: 0px;padding-left: 0px;}
 		</div>
 </div></div>
 
-<h4><a name="HQApimetricdatacommand-ListMeasurementsforaResource"></a>List Measurements for a Resource</h4>
+<h4><a name="HQApimetricDatacommand-ListMeasurementsforaResource"></a>List Measurements for a Resource</h4>
 
 <p>The query below returns measurements of all metrics collected in the last hour for a resource whose id is 10826 &#8212; a platform in inventory.</p>
 
@@ -153,7 +154,7 @@ div.rbtoc1306448825739 li {margin-left: 0px;padding-left: 0px;}
 		</div>
 </div></div>
 
-<h4><a name="HQApimetricdatacommand-ListMeasurementsforaCompatibleGroup"></a>List Measurements for a Compatible Group</h4>
+<h4><a name="HQApimetricDatacommand-ListMeasurementsforaCompatibleGroup"></a>List Measurements for a Compatible Group</h4>
 
 <p>The query below returns measurements for a compatible group whose id is 10826.</p>
 
@@ -189,7 +190,7 @@ Availability,20910,0.0,1.0,0.1284722222222222,0.1284722222222222</pre>
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on May 31, 2011 13:09</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 14, 2011 15:09</font></td>
 		    </tr>
 	    </table>
     </body>

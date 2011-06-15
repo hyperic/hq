@@ -16,7 +16,7 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on May 31, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <h3><a name="ui-Alert.Condition-ConditionSet"></a>Condition Set</h3>
@@ -33,7 +33,7 @@
 		<li>Define the rule for evaluating the metric value.&nbsp; You can:
 		<ul>
 			<li><ins>Compare metric value to an absolute value</ins>. Select an operator: <b>&gt;(greater than)</b>, <b>&lt;(less than)</b>, <b>=(equal to)</b>, or <b>&#33;= (not equal to)</b>, and enter a metric value. If the metric value is a percentage, specify it as a float value. For example, enter <tt>.99</tt> for <tt>99%</tt>, <tt>1.0</tt> for 100%. Use a period (.) as a decimal separator, rather than a comma (,).</li>
-			<li><ins>Compare metric value to its minimum, baseline, or maximum value</ins> <font color="red">&#42;</font>, in HQ Enterprise only. Select an operator: <b>&gt;(greater than)</b>, <b>&lt;(less than)</b>, <b>=(equal to)</b>, or <b>&#33;= (not equal to)</b>, and choose "Min Value", "Baseline Value" or "Max Value". Baselining must be enabled. For more information, see <a href="http://support.hyperic.com/display/EVO/Baselines" title="Baselines">Baselines</a>.</li>
+			<li><ins>Compare metric value to its minimum, baseline, or maximum value</ins> <font color="red">&#42;</font>, in HQ Enterprise only. Select an operator: <b>&gt;(greater than)</b>, <b>&lt;(less than)</b>, <b>=(equal to)</b>, or <b>&#33;= (not equal to)</b>, and choose "Min Value", "Baseline Value" or "Max Value". Baselining must be enabled. For more information, see <a href="http://support.hyperic.com/display/DOCS46/Baselines" title="Baselines">Baselines</a>.</li>
 			<li><ins>Fire upon change in metric value</ins>.&nbsp; Click <b>value changes</b>.</li>
 		</ul>
 		</li>
@@ -56,12 +56,12 @@
 
 
 <ul>
-	<li><b>Events/Log Level Condition</b> &#45; To define a condition that is triggered by a log event, select a message severity level ("error", "warn", "info", "debug", "all") and optionally a match string. The condition is satisfied each time a message of the selected severity that contains the match string (if one was specified) is written to a log file that HQ is tracking. Log tracking must be enabled for the resource. To determine the log files that HQ monitors for the resource, see the <b>Configuration Properties</b> section of the resource's <b>Inventory</b> tab. The log files that HQ monitors for a resource are defined using the <b>server.log_track.files</b> property. For configuration instructions, see&nbsp; see <a href="http://support.hyperic.com/display/EVO/Log+Tracking" title="Log Tracking">Log Tracking</a>.</li>
+	<li><b>Events/Log Level Condition</b> &#45; To define a condition that is triggered by a log event, select a message severity level ("error", "warn", "info", "debug", "all") and optionally a match string. The condition is satisfied each time a message of the selected severity that contains the match string (if one was specified) is written to a log file that HQ is tracking. Log tracking must be enabled for the resource. To determine the log files that HQ monitors for the resource, see the <b>Configuration Properties</b> section of the resource's <b>Inventory</b> tab. The log files that HQ monitors for a resource are defined using the <b>server.log_track.files</b> property. For configuration instructions, see&nbsp; see <a href="http://support.hyperic.com/display/DOCS46/Log+Tracking" title="Log Tracking">Log Tracking</a>.</li>
 </ul>
 
 
 <ul>
-	<li><b>Config Changed... Condition</b> &#45; This type of condition is triggered by a change to a configuration file that HQ is configured to monitor for the resource. To limit the condition to a single file, enter its filename in the "match filename" field.&nbsp; If you don't specify a filename, a change to any file monitored will trigger the alert.&nbsp; To determine the log files that HQ monitors for the resource, see the <b>Configuration Properties</b> section of the resource's <b>Inventory</b> tab. The files that HQ monitors for a resource are defined using the <b>server.config_track.files</b> property. The maximum length for filename entered is&nbsp; 25 characters.&nbsp; For configuration instructions, see <a href="http://support.hyperic.com/display/EVO/Configuration+Tracking" title="Configuration Tracking">Configuration Tracking</a>.</li>
+	<li><b>Config Changed... Condition</b> &#45; This type of condition is triggered by a change to a configuration file that HQ is configured to monitor for the resource. To limit the condition to a single file, enter its filename in the "match filename" field.&nbsp; If you don't specify a filename, a change to any file monitored will trigger the alert.&nbsp; To determine the log files that HQ monitors for the resource, see the <b>Configuration Properties</b> section of the resource's <b>Inventory</b> tab. The files that HQ monitors for a resource are defined using the <b>server.config_track.files</b> property. The maximum length for filename entered is&nbsp; 25 characters.&nbsp; For configuration instructions, see <a href="http://support.hyperic.com/display/DOCS46/Configuration+Tracking" title="Configuration Tracking">Configuration Tracking</a>.</li>
 </ul>
 
 
@@ -78,7 +78,7 @@
 
 <p>To designate the alert you're defining as a recovery alert, select the primary alert definition from the pulldown.</p>
 
-<p>A recovery alert condition should detect when the condition that fired the primary alert is no longer true. When a recovery alert fires, it marks the primary alert "Fixed", and the primary alert definition is re-enabled. The primary alert definition should be configured to <b>Generate one alert and then disable alert definition until fixed,</b> as described below. For more information, see <a href="http://support.hyperic.com/display/EVO/Recovery+Alerts" title="Recovery Alerts">Recovery Alerts</a>.</p>
+<p>A recovery alert condition should detect when the condition that fired the primary alert is no longer true. When a recovery alert fires, it marks the primary alert "Fixed", and the primary alert definition is re-enabled. The primary alert definition should be configured to <b>Generate one alert and then disable alert definition until fixed,</b> as described below. For more information, see <a href="http://support.hyperic.com/display/DOCS46/Recovery+Alerts" title="Recovery Alerts">Recovery Alerts</a>.</p>
 
 <h3><a name="ui-Alert.Condition-EnableActions"></a>Enable Actions</h3>
 <p><a name="ui-Alert.Condition-EnableActions"></a></p>
@@ -104,7 +104,7 @@
 
 <p>This option eliminates redundant firing for the same problem. If you do not choose this option, the alert will fire repeatedly as long as the triggering condition is still true.&nbsp;&nbsp;</p>
 
-<p>In HQ Enterprise this configuration option &#45;&nbsp; used in conjunction with recovery alerts &#45;&nbsp; automates the process of disabling and re-enabling an alert definition.&nbsp; Result:&nbsp; (1) no redundant alerts for the same problem, and (2) you don't have manually "fix" an alert triggered by a transient problem.&nbsp; For more information, see <a href="http://support.hyperic.com/display/EVO/Recovery+Alerts" title="Recovery Alerts">Recovery Alerts</a>.</p>
+<p>In HQ Enterprise this configuration option &#45;&nbsp; used in conjunction with recovery alerts &#45;&nbsp; automates the process of disabling and re-enabling an alert definition.&nbsp; Result:&nbsp; (1) no redundant alerts for the same problem, and (2) you don't have manually "fix" an alert triggered by a transient problem.&nbsp; For more information, see <a href="http://support.hyperic.com/display/DOCS46/Recovery+Alerts" title="Recovery Alerts">Recovery Alerts</a>.</p>
 
 <h4><a name="ui-Alert.Condition-DisregardControlActionsforRelatedAlerts."></a>Disregard Control Actions for Related Alerts.</h4>
 <p><a name="ui-Alert.Condition-DisregardControlActions"></a></p>
@@ -129,7 +129,7 @@
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/71828485/71926179.gif">fb_ok.gif</a> (image/gif)
+                                <a href="attachments/76284822/76579009.gif">fb_ok.gif</a> (image/gif)
                                 <br/>
                                                     </div>
 				    
@@ -141,7 +141,7 @@
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on May 31, 2011 13:10</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 14, 2011 15:09</font></td>
 		    </tr>
 	    </table>
     </body>

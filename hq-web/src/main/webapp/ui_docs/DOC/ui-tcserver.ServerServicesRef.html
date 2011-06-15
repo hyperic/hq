@@ -16,41 +16,29 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on May 31, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <p>The features described on this page are available in tc Server and tc Server Standard Edition.</p>
-<style type='text/css'>/*<![CDATA[*/
-div.rbtoc1306863249998 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1306863249998 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1306863249998 li {margin-left: 0px;padding-left: 0px;}
-
-/*]]>*/</style><div class='rbtoc1306863249998'>
-<ul>
-    <li><a href='#ui-tcserver.ServerServicesRef-tcRuntimeServicesReference'>tc Runtime Services Reference</a></li>
-<ul>
-    <li><a href='#ui-tcserver.ServerServicesRef-GeneralServiceProperties'>General Service Properties</a></li>
-    <li><a href='#ui-tcserver.ServerServicesRef-ConnectorProperties'>Connector Properties</a></li>
-    <li><a href='#ui-tcserver.ServerServicesRef-EngineProperties'>Engine Properties</a></li>
-    <li><a href='#ui-tcserver.ServerServicesRef-ThreadDiagnostics'>Thread Diagnostics</a></li>
-    <li><a href='#ui-tcserver.ServerServicesRef-HostProperties'>Host Properties</a></li>
-    <li><a href='#ui-tcserver.ServerServicesRef-HTTPAccessLogging'>HTTP Access Logging</a></li>
+				    <ul>
+	<li><a href="#ui-tcserver.ServerServicesRef-tcRuntimeServicesReference">tc Runtime Services Reference</a></li>
+	<li><a href="#ui-tcserver.ServerServicesRef-GeneralServiceProperties">General Service Properties</a></li>
+	<li><a href="#ui-tcserver.ServerServicesRef-ConnectorProperties">Connector Properties</a></li>
+	<li><a href="#ui-tcserver.ServerServicesRef-EngineProperties">Engine Properties</a></li>
+	<li><a href="#ui-tcserver.ServerServicesRef-ThreadDiagnostics">Thread Diagnostics</a></li>
+	<li><a href="#ui-tcserver.ServerServicesRef-HostProperties">Host Properties</a></li>
+	<li><a href="#ui-tcserver.ServerServicesRef-HTTPAccessLogging">HTTP Access Logging</a></li>
 </ul>
-</ul></div>
 
 
-<p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
+<h3><a name="ui-tcserver.ServerServicesRef-tcRuntimeServicesReference"></a>tc Runtime Services Reference</h3>
 
-
-<h1><a name="ui-tcserver.ServerServicesRef-tcRuntimeServicesReference"></a>tc Runtime Services Reference</h1>
-
-<p>This page defines the fields on the <b>Views &gt; Server Configuration &gt; Services</b> tab used to configure and create tc Runtime services.</p>
+<p>This section defines the fields on the <b>Views &gt; Server Configuration &gt; Services</b> tab used to configure and create tc Runtime services.</p>
 
 <p>A tc Runtime service represents the combination of one or more Connector components that share a single Engine component for processing incoming requests. A tc Runtime consists of one or more services. The default tc Runtime service which is always present in newly created tc Runtime instance is called "catalina."</p>
 
 <p>See <a href="http://tomcat.apache.org/tomcat-6.0-doc/config/service.html">The Service Component</a> on the Apache Web site for more information.</p>
 
-<h2><a name="ui-tcserver.ServerServicesRef-GeneralServiceProperties"></a>General Service Properties</h2>
+<h3><a name="ui-tcserver.ServerServicesRef-GeneralServiceProperties"></a>General Service Properties</h3>
 
 <div class='table-wrap'>
 <table class='confluenceTable'><tbody>
@@ -66,7 +54,7 @@ div.rbtoc1306863249998 li {margin-left: 0px;padding-left: 0px;}
 </div>
 
 
-<h2><a name="ui-tcserver.ServerServicesRef-ConnectorProperties"></a>Connector Properties</h2>
+<h3><a name="ui-tcserver.ServerServicesRef-ConnectorProperties"></a>Connector Properties</h3>
 
 <p>Each tc Runtime service can have one or more connectors configured. Connectors are specific to a protocol, such as HTTP or AJP. See the following documentation on the Apache Web site for additional detailed information:</p>
 <ul>
@@ -244,7 +232,7 @@ The files in this directory must be PEM-encoded and are accessed through hash fi
 </div>
 
 
-<h2><a name="ui-tcserver.ServerServicesRef-EngineProperties"></a>Engine Properties</h2>
+<h3><a name="ui-tcserver.ServerServicesRef-EngineProperties"></a>Engine Properties</h3>
 
 <p>A tc Runtime engine represents the entire request processing machinery associated with a particular service. It receives and processes all requests from one or more connectors, and returns the completed response to the connector for ultimate transmission back to the client.</p>
 
@@ -271,7 +259,7 @@ The files in this directory must be PEM-encoded and are accessed through hash fi
 </div>
 
 
-<h2><a name="ui-tcserver.ServerServicesRef-ThreadDiagnostics"></a>Thread Diagnostics</h2>
+<h3><a name="ui-tcserver.ServerServicesRef-ThreadDiagnostics"></a>Thread Diagnostics</h3>
 
 <p>When you deploy and start a Web application on a tc Runtime instance, and then clients begin connecting and using the application, you might find that the clients occasionally run into problems such as slow requests or even failed requests. Although tc Runtime by default logs these errors in the log files, it is often difficult to pinpoint where exactly the error came from and how to go about fixing it. By enabling thread diagnostics, tc Runtime provides additional information to help you troubleshoot the problem.</p>
 
@@ -314,7 +302,7 @@ To view this information after you have enabled thread diagnostics, go to the <b
 </div>
 
 
-<h2><a name="ui-tcserver.ServerServicesRef-HostProperties"></a>Host Properties</h2>
+<h3><a name="ui-tcserver.ServerServicesRef-HostProperties"></a>Host Properties</h3>
 
 <p>A tc Runtime Host represents a virtual host, which is an association of a network name for a tc Runtime (such as "www.mycompany.com" associated with the particular tc Runtime . To be effective, the network name must be registered in the Domain Name Service (DNS) server that manages the Internet domain to which you belong</p>
 
@@ -357,7 +345,7 @@ To view this information after you have enabled thread diagnostics, go to the <b
 </div>
 
 
-<h2><a name="ui-tcserver.ServerServicesRef-HTTPAccessLogging"></a>HTTP Access Logging</h2>
+<h3><a name="ui-tcserver.ServerServicesRef-HTTPAccessLogging"></a>HTTP Access Logging</h3>
 
 <p>The tc Runtime logging subsystem creates log files in the same format as those created by standard Web servers. These logs can later be analyzed by standard log analysis tools to track page hit counts, user session activity, and so on. The logging files are rolled over nightly at midnight.</p>
 <div class='table-wrap'>
@@ -403,7 +391,7 @@ To view this information after you have enabled thread diagnostics, go to the <b
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on May 31, 2011 13:10</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 14, 2011 15:09</font></td>
 		    </tr>
 	    </table>
     </body>
