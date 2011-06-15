@@ -249,13 +249,10 @@ public class ServerConfig
                     schema.addOption(new StringConfigOption("server.mail.host", Q_MAIL_HOST, fqdn));
                 }
 
-                if (installMode.isQuick()) {
-                    schema.addOption(new HiddenConfigOption("server.mail.sender", "hqadmin@" +
-                                                                                  domain));
-                } else {
-                    schema.addOption(new StringConfigOption("server.mail.sender", Q_MAIL_FROM,
-                        "hqadmin@" + domain));
-                }
+                // We always ask for username and password now per HQ-3627, 
+                // so probably shouldn't auto enter the email value
+                schema.addOption(new StringConfigOption("server.mail.sender", Q_MAIL_FROM, "hqadmin@" + domain));
+
                 break;
 
             case 5:
@@ -384,25 +381,21 @@ public class ServerConfig
                 senderChoice = previous.getValue("server.mail.sender");
                 // dont ask about admin username if this is an HA node
                 // this should have already been set up
-                if (installMode.isQuick()) {
-                    schema.addOption(new HiddenConfigOption("server.admin.username", "hqadmin"));
-                    schema.addOption(new HiddenConfigOption("server.admin.password", "hqadmin"));
-                    schema.addOption(new HiddenConfigOption("server.admin.email", senderChoice));
-                } else {
-                    usernameOption = new AdminUsernameConfigOption("server.admin.username",
-                        Q_ADMIN_USER, "hqadmin");
-                    schema.addOption(usernameOption);
+                // We always ask for username and password now per HQ-3627
+                usernameOption = new AdminUsernameConfigOption("server.admin.username", Q_ADMIN_USER, "hqadmin");
+                    
+                schema.addOption(usernameOption);
 
-                    passwordOption = new StringConfigOption("server.admin.password",
-                        Q_ADMIN_PASSWORD, null);
-                    passwordOption.setSecret(true);
-                    passwordOption.setMinLength(6);
-                    passwordOption.setMaxLength(40);
-                    schema.addOption(passwordOption);
-
-                    schema.addOption(new StringConfigOption("server.admin.email", Q_ADMIN_EMAIL,
-                        senderChoice));
-                }
+                passwordOption = new StringConfigOption("server.admin.password", Q_ADMIN_PASSWORD, null);
+                    
+                passwordOption.setSecret(true);
+                passwordOption.setMinLength(6);
+                passwordOption.setMaxLength(40);
+                schema.addOption(passwordOption);
+                
+                // probably shouldn't auto enter the email value, since we're asking for username...
+                schema.addOption(new StringConfigOption("server.admin.email", Q_ADMIN_EMAIL, senderChoice));
+                
                 break;
 
             case 7:
