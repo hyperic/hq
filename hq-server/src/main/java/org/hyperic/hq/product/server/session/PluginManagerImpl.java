@@ -25,13 +25,17 @@
 
 package org.hyperic.hq.product.server.session;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.io.Writer;
 import java.net.JarURLConnection;
 import java.net.URL;
@@ -82,6 +86,7 @@ import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.hq.zevents.ZeventPayload;
 import org.hyperic.hq.zevents.ZeventSourceId;
+import org.jdom.Document;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 import org.springframework.beans.BeansException;
@@ -459,7 +464,11 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         try {
             rtn = new File(TMP_DIR + File.separator + filename);
             final ByteArrayInputStream is = new ByteArrayInputStream(bytes);
-            validatePluginXml(is);
+            final Document doc = getDocument(new InputStreamReader(is), new HashMap<String, Reader>());
+            final String name = doc.getRootElement().getName();
+            if (!name.equals("plugin")) {
+                throw new PluginDeployException("plugin.manager.invalid.xml", filename);
+            }
             writer = new FileWriter(rtn);
             final String str = new String(bytes);
             writer.write(str);
@@ -496,7 +505,6 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         JarInputStream jis = null;
         FileOutputStream fos = null;
         String file = null;
-        String currXml = null;
         try {
             bais = new ByteArrayInputStream(bytes);
             jis = new JarInputStream(bais);
@@ -512,25 +520,7 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
             final URL url = new URL("jar", "", "file:" + file + "!/");
             final JarURLConnection jarConn = (JarURLConnection) url.openConnection();
             final JarFile jarFile = jarConn.getJarFile();
-            final Enumeration<JarEntry> entries = jarConn.getJarFile().entries();
-            while (entries.hasMoreElements()) {
-                InputStream is = null;
-                try {
-                    final JarEntry entry = entries.nextElement();
-                    if (entry.isDirectory()) {
-                        continue;
-                    }
-                    if (!entry.getName().toLowerCase().endsWith(".xml")) {
-                        continue;
-                    }
-                    currXml = entry.getName();
-                    is = jarFile.getInputStream(entry);
-                    validatePluginXml(is);
-                    currXml = null;
-                } finally {
-                    close(is);
-                }
-            }
+            processJarEntries(jarFile, file, filename);
             return rtn;
         } catch (IOException e) {
             final File toRemove = new File(file);
@@ -538,25 +528,102 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
                 toRemove.delete();
             }
             throw new PluginDeployException("plugin.manager.file.ioexception", e, filename);
-        } catch (JDOMException e) {
-            final File toRemove = new File(file);
-            if (toRemove != null && toRemove.exists()) {
-                toRemove.delete();
-            }
-            throw new PluginDeployException("plugin.manager.file.xml.wellformed.error", e, currXml);
         } finally {
             close(jis);
             close(fos);
         }
     }
     
-    private void validatePluginXml(InputStream is) throws JDOMException, IOException {
-        SAXBuilder builder = new SAXBuilder();
+    private void processJarEntries(JarFile jarFile, String jarFilename, String filename)
+    throws PluginDeployException, IOException {
+        final Map<String, JDOMException> xmlFailures = new HashMap<String, JDOMException>();
+        boolean hasPluginRootElement = false;
+        final Enumeration<JarEntry> entries = jarFile.entries();
+        final Map<String, Reader> xmlReaders = getXmlReaderMap(jarFile);
+        while (entries.hasMoreElements()) {
+            Reader reader = null;
+            String currXml = null;
+            try {
+                final JarEntry entry = entries.nextElement();
+                if (entry.isDirectory()) {
+                    continue;
+                }
+                if (!entry.getName().toLowerCase().endsWith(".xml")) {
+                    continue;
+                }
+                currXml = entry.getName();
+                reader = xmlReaders.get(currXml);
+                final Document doc = getDocument(reader, xmlReaders);
+                if (doc.getRootElement().getName().toLowerCase().equals("plugin")) {
+                    hasPluginRootElement = true;
+                }
+                currXml = null;
+            } catch (JDOMException e) {
+                log.error(e,e);
+                xmlFailures.put(currXml, e);
+            }
+        }
+        if (!hasPluginRootElement) {
+            final File toRemove = new File(jarFilename);
+            if (toRemove != null && toRemove.exists()) {
+                toRemove.delete();
+            }
+            if (!xmlFailures.isEmpty()) {
+                for (final Entry<String, JDOMException> entry : xmlFailures.entrySet()) {
+                    final String xml = entry.getKey();
+                    JDOMException ex = entry.getValue();
+                    log.error("could not parse " + xml, ex);
+                }
+                throw new PluginDeployException(
+                    "plugin.manager.file.xml.wellformed.error", xmlFailures.keySet().toString());
+            } else {
+                throw new PluginDeployException("plugin.manager.no.plugin.root.element", filename);
+            }
+        }
+    }
+
+    private Map<String, Reader> getXmlReaderMap(JarFile jarFile) throws IOException {
+        final Map<String, Reader> rtn = new HashMap<String, Reader>();
+        final Enumeration<JarEntry> entries = jarFile.entries();
+        while (entries.hasMoreElements()) {
+            final JarEntry entry = entries.nextElement();
+            if (entry.isDirectory()) {
+                continue;
+            }
+            if (!entry.getName().toLowerCase().endsWith(".xml")) {
+                continue;
+            }
+            InputStream is = null;
+            try {
+                is = jarFile.getInputStream(entry);
+                final BufferedReader br = new BufferedReader(new InputStreamReader(is));
+                final StringBuilder buf = new StringBuilder();
+                String tmp;
+                while (null != (tmp = br.readLine())) {
+                    buf.append(tmp);
+                }
+                rtn.put(entry.getName(), new NoCloseStringReader(buf.toString()));
+            } finally {
+                close(is);
+            }
+        }
+        return rtn;
+    }
+
+    private Document getDocument(Reader reader, final Map<String, Reader> xmlReaders)
+    throws JDOMException, IOException {
+        final SAXBuilder builder = new SAXBuilder();
         builder.setEntityResolver(new EntityResolver() {
             // systemId = file:///pdk/plugins/process-metrics.xml
             public InputSource resolveEntity(String publicId, String systemId)
             throws SAXException, IOException {
                 final File entity = new File(systemId);
+                for (final Entry<String, Reader> entry : xmlReaders.entrySet()) {
+                    final String filename = entry.getKey();
+                    if (entity.getAbsolutePath().contains(filename)) {
+                        return new InputSource(entry.getValue());
+                    }
+                }
                 final String filename = entity.getName().replaceAll(AGENT_PLUGIN_DIR, "");
                 File file = new File(getCustomPluginDir(), filename);
                 if (!file.exists()) {
@@ -564,10 +631,17 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
                 }
                 return (file.exists()) ?
                     new InputSource("file://" + file.getAbsolutePath()) :
-                    new InputSource(systemId);
+                    new InputSource(xmlReaders.get(filename));
             }
         });
-        builder.build(is);
+        return builder.build(reader);
+    }
+    
+    private class NoCloseStringReader extends StringReader {
+        private NoCloseStringReader(String s) {
+            super(s);
+        }
+        public void close() {}
     }
 
     public Map<Integer, Map<AgentPluginStatusEnum, Integer>> getPluginRollupStatus() {
