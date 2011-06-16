@@ -37,8 +37,6 @@
               value="jdbcUrl=%jdbcUrl%,jdbcUser=%jdbcUser%,jdbcPassword=%jdbcPassword%"/>
     <property name="domain"
               value="mysqlstats"/>
-    <property name="properties"
-              value="key=Variable_name,value=Value"/>
     <property name="showGlobal"
               value="query=show /*!50002 global */ status"/>
     <property name="showSlave"
@@ -107,7 +105,7 @@
 
   <!-- Filter for Global Status Metrics -->
     <filter name="template"
-            value="${domain}:${showGlobal},${properties}:${alias}"/>
+            value="${domain}:${showGlobal},key=Variable_name,value=Value:${alias}"/>
     <metrics name="global-4.0">
     <!--
       Must ALWAYS capture an Availability metric, or none of the other metrics for
