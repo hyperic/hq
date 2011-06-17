@@ -62,7 +62,7 @@ public class ErsApacheServerDetector
      * for each server defined in the covalent/ers-2.x/servers
      * directory.
      */
-    public List getServerList(String installpath)
+    public List getServerList(String installpath,ApacheBinaryInfo binary)
         throws PluginException {
 
         getLog().debug("[getServerList] installpath="+installpath);
@@ -101,7 +101,7 @@ public class ErsApacheServerDetector
 
             server.setIdentifier(getAIID(serverRoot));
 
-            if (configureServer(server, null)) {
+            if (configureServer(server, binary)) {
                 if (isWin32()) {
                     ConfigResponse cf = new ConfigResponse();
                     String sname = getWindowsServiceName(serverName);
@@ -182,7 +182,7 @@ public class ErsApacheServerDetector
             if (!new File(path, versionFile).exists()) {
                 continue;
             }
-            List found = getServerList(path);
+            List found = getServerList(path,info);
             if (found != null) {
                 servers.addAll(found);
             }
@@ -196,7 +196,13 @@ public class ErsApacheServerDetector
      * So the corresponding ERS server base dir is two dirs up from that.
      */
     public List getServerResources(ConfigResponse platformConfig, String path) throws PluginException {
-        return getServerList(getParentDir(path, 3));
+        String version = getTypeInfo().getVersion();
+        ApacheBinaryInfo binary = ApacheBinaryInfo.getInfo(path, version);
+        if (binary == null) {
+            getLog().debug("[getServerResources] no Binary Info path=" + path + " version=" + version);
+            return null; //does not match our server type version
+        }
+        return getServerList(getParentDir(path, 3), binary);
     }
 
     /**
@@ -230,13 +236,19 @@ public class ErsApacheServerDetector
             }
         }
 
+        ApacheBinaryInfo binary = ApacheBinaryInfo.getInfo(path, version);
+        if (binary == null) {
+            getLog().debug("[getServerResources] no Binary Info path=" + path + " version=" + version);
+            return null; //does not match our server type version
+        }
+        
         //convert:
         //"C:\Program Files\covalent\ers\apache\bin\httpsd.exe" -k runservice
         //to:
         //C:\Program Files\covalent\ers
         path = getCanonicalPath(path);
 
-        return getServerList(getParentDir(path, 3));
+        return getServerList(getParentDir(path, 3),binary);
     }
 
     private String getAIID (String serverRoot) {
