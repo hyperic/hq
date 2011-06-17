@@ -53,7 +53,7 @@ public class SecureAgentConnection
     private String agentAddress;
     private int    agentPort;
     private String authToken;
-    private boolean autoValidate = false;
+    private boolean acceptUnverifiedCertificate = false;
     private String alias = "hq";
 
     public SecureAgentConnection(String agentAddress, int agentPort, String authToken) {
@@ -63,11 +63,11 @@ public class SecureAgentConnection
         this.authToken    = authToken;
     }
     
-    public SecureAgentConnection(String agentAddress, int agentPort, String authToken, String alias, boolean autoValidate) {
+    public SecureAgentConnection(String agentAddress, int agentPort, String authToken, String alias, boolean acceptUnverifiedCertificate) {
     	this(agentAddress, agentPort, authToken);
     	
         this.alias = alias;
-    	this.autoValidate = autoValidate;
+    	this.acceptUnverifiedCertificate = acceptUnverifiedCertificate;
     }
     
     protected Socket getSocket()
@@ -96,7 +96,7 @@ public class SecureAgentConnection
                 postHandshakeTimeout = POST_HANDSHAKE_TIMEOUT;
             }
       
-        	SSLProvider sslProvider = new DefaultSSLProviderImpl(alias, autoValidate);
+        	SSLProvider sslProvider = new DefaultSSLProviderImpl(alias, acceptUnverifiedCertificate);
             SSLSocketFactory factory = sslProvider.getSSLSocketFactory();
             
         	// See the following links...

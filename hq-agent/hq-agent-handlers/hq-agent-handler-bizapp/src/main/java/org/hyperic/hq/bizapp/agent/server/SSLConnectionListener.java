@@ -175,9 +175,7 @@ class SSLConnectionListener
         return res;
     }
 
-    public void setup(int timeout)
-        throws AgentStartException
-    {
+    public void setup(int timeout) throws AgentStartException {
     	SSLProvider provider = new DefaultSSLProviderImpl("hq-agent");
         SSLContext context = provider.getSSLContext();
     	SSLServerSocketFactory sFactory = context.getServerSocketFactory();
@@ -196,6 +194,8 @@ class SSLConnectionListener
             this.listenSock = (SSLServerSocket) sFactory.createServerSocket(port, 50, addr);
             
             this.listenSock.setSoTimeout(timeout);
+            // TODO make configurable
+            this.listenSock.setNeedClientAuth(true);
         } catch(IOException exc){
             throw new AgentStartException("Failed to listen at " + cfg.getListenIp() + ":" + port + ": " + exc.getMessage());
         }

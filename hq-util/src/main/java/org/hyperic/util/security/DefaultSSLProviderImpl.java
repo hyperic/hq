@@ -227,50 +227,61 @@ public class DefaultSSLProviderImpl implements SSLProvider {
 					try {
 						defaultTrustManager.checkServerTrusted(chain, authType);
 					} catch(Exception e) {
-						if (!acceptUnverifiedCertificates) {
+						boolean acceptOverride = Boolean.parseBoolean(System.getProperty("accept.unverified.certificates", "true"));
+			        	
+						if (!acceptUnverifiedCertificates && !acceptOverride) {
 							throw new CertificateException(e);
 						} else {
-							FileOutputStream keyStoreFileOutputStream = null;
-					        int i=0;
-					        
-					        try {
-					        	keyStoreFileOutputStream = new FileOutputStream(KEYSTORE_PATH);
-					        	
-						        for (X509Certificate cert : chain) {
-						        	String[] cnValues = AbstractVerifier.getCNs(cert);
-						        	String alias = cnValues[0];
-						        	
-						        	trustStore.setCertificateEntry(alias, cert);
-						        }
-						        
-						        trustStore.store(keyStoreFileOutputStream, KEYSTORE_PASSWORD.toCharArray());
-					        } catch (FileNotFoundException fnfe) {
-								// Bad news here
-								fnfe.printStackTrace();
-							} catch (KeyStoreException ke) {
-								// TODO Auto-generated catch block
-								ke.printStackTrace();
-							} catch (NoSuchAlgorithmException nsae) {
-								// TODO Auto-generated catch block
-								nsae.printStackTrace();
-							} catch (IOException ioe) {
-								// TODO Auto-generated catch block
-								ioe.printStackTrace();
-							} finally {
-					        	if (keyStoreFileOutputStream != null) {
-					        		try { 
-					        			keyStoreFileOutputStream.close();
-					        		} catch(IOException ioe) {}
-					        		
-					        		keyStoreFileOutputStream = null;
-					        	}
-					        }
+							importCertificate(chain);
 						}
 					}
 				}
 				
 				public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-					defaultTrustManager.checkClientTrusted(chain, authType);
+					try {
+						defaultTrustManager.checkClientTrusted(chain, authType);
+					} catch(Exception e) {
+						// TODO auto import client certs, make this configurable behavior
+						importCertificate(chain);
+					}
+				}
+				
+				private void importCertificate(X509Certificate[] chain) throws CertificateException {
+					FileOutputStream keyStoreFileOutputStream = null;
+			        int i=0;
+			        
+			        try {
+			        	keyStoreFileOutputStream = new FileOutputStream(filePath);
+			        	
+				        for (X509Certificate cert : chain) {
+				        	String[] cnValues = AbstractVerifier.getCNs(cert);
+				        	String alias = cnValues[0];
+				        	
+				        	trustStore.setCertificateEntry(alias, cert);
+				        }
+				        
+				        trustStore.store(keyStoreFileOutputStream, filePassword.toCharArray());
+			        } catch (FileNotFoundException fnfe) {
+						// Bad news here
+						fnfe.printStackTrace();
+					} catch (KeyStoreException ke) {
+						// TODO Auto-generated catch block
+						ke.printStackTrace();
+					} catch (NoSuchAlgorithmException nsae) {
+						// TODO Auto-generated catch block
+						nsae.printStackTrace();
+					} catch (IOException ioe) {
+						// TODO Auto-generated catch block
+						ioe.printStackTrace();
+					} finally {
+			        	if (keyStoreFileOutputStream != null) {
+			        		try { 
+			        			keyStoreFileOutputStream.close();
+			        		} catch(IOException ioe) {}
+			        		
+			        		keyStoreFileOutputStream = null;
+			        	}
+			        }
 				}
 			};
 	        

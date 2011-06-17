@@ -132,13 +132,10 @@ public class BizappCallbackClient
         args.setAgentPort(agentPort);
         args.setVersion(version);
         args.setCpuCount(cpuCount);
+        args.setAcceptCertificates(acceptCertificates);
         
         if (isNewTransportAgent) {
             args.setNewTransportAgent(unidirectional);            
-        }
-
-        if (acceptCertificates) {
-        	args.setAcceptCertificates(acceptCertificates);
         }
         
         res = (RegisterAgent_result)this.invokeLatherCall(provider,
@@ -166,13 +163,10 @@ public class BizappCallbackClient
         args.setAgentIP(agentIp);
         args.setAgentPort(agentPort);
         args.setAgentToken(agentToken);
+        args.setAcceptCertificates(acceptCertificates);
         
         if (isNewTransportAgent) {
             args.setNewTransportAgent(unidirectional);
-        }
-
-        if (acceptCertificates) {
-        	args.setAcceptCertificates(acceptCertificates);
         }
         
         res = (UpdateAgent_result)this.invokeLatherCall(provider,

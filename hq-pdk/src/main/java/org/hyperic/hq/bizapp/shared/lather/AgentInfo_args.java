@@ -128,6 +128,8 @@ public abstract class AgentInfo_args
                 Boolean.valueOf(getStringValue(PROP_ACCEPT_CERTIFICATES)).booleanValue();
         } catch (LatherKeyNotFoundException e) {
             // this is an older agent that does not support the ssl validation
+        	// auto accept the certificate in this case...
+        	acceptCertificates = true;
         }
         
         return acceptCertificates;

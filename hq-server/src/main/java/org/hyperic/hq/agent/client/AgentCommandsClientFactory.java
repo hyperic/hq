@@ -37,7 +37,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class AgentCommandsClientFactory {
-
+	
     private final AgentProxyFactory agentProxyFactory;
 
     @Autowired
@@ -49,8 +49,11 @@ public class AgentCommandsClientFactory {
         if (agent.isNewTransportAgent()) {
             return new AgentCommandsClientImpl(agent, agentProxyFactory);
         } else {
+        	// Grab config setting, that specifies auto accepting
+        	boolean acceptCertificates = Boolean.parseBoolean(System.getProperty("accept.unverified.certificates", "false"));
+        	
             return new LegacyAgentCommandsClientImpl(new SecureAgentConnection(agent.getAddress(),
-                agent.getPort(), agent.getAuthToken()));
+                agent.getPort(), agent.getAuthToken(), "hq", acceptCertificates));
         }
     }
 
