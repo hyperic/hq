@@ -39,6 +39,7 @@ import org.hyperic.hq.ui.Constants;
 public class HelpTag extends VarSetterBaseTag {
     private static String INTERNAL_HELP_BASE_URL = "/ui_docs/DOC/";
     private boolean context = true;
+	private String key = "";
     
     //----------------------------------------------------public methods
     public boolean isContext() {
@@ -48,7 +49,15 @@ public class HelpTag extends VarSetterBaseTag {
     public void setContext(boolean context) {
         this.context = context;
     }
-
+	
+    public String getKey() {
+        return key;
+    }
+	
+    public void setKey(String key) {
+        this.key = key;
+    }
+	
     public int doStartTag() throws JspException{
         JspWriter output = pageContext.getOut();
         String helpURL = ((HttpServletRequest) pageContext.getRequest()).getContextPath() + INTERNAL_HELP_BASE_URL;
@@ -59,7 +68,8 @@ public class HelpTag extends VarSetterBaseTag {
             if ( helpContext != null)
                 helpURL = helpURL + "ui-" + helpContext; 
         }
-        
+        helpURL+=key;
+		
         if (INTERNAL_HELP_BASE_URL.equals(helpURL)) {
                 helpURL += "index";
         }

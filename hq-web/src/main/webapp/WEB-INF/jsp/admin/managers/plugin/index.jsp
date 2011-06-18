@@ -396,14 +396,14 @@
 			},
 			"#agentStatusHelp":{
 			    onclick: function(e){
-		             var helpHref = "<hq:help/>.Status";
+		             var helpHref = "<hq:help key='.Status'/>";
 			         var helpWin=window.open(helpHref,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');
                      helpWin.focus();
 		        }
 			},
 			"#agentSummaryHelp":{
 			    onclick: function(e){
-		    		var helpHref = "<hq:help/>.Status";
+		    		var helpHref = "<hq:help key='.Status'/>";
 					var helpWin=window.open(helpHref,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');
             		helpWin.focus();
 	            }
