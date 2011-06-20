@@ -264,8 +264,8 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
             }
             log.warn("AgentDataTransferJob=" + getJobInfo(job) +
                      " has take more than " + WAIT_TIME/1000/60 +
-                     " minutes to run.  The agent appears alive, and therefore will interrupt the " +
-                     "current job and requeue it.  Job threadName={" + thread.getName() + "}");
+                     " minutes to run.  The agent appears alive so therefore the job will be" +
+                     " interrupted and requeued.  Job threadName={" + thread.getName() + "}");
             reAddJob(job, false);
         } else if (threadIsAlive) {
             thread.interrupt();

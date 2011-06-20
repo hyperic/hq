@@ -903,6 +903,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         if (filenames == null || filenames.isEmpty()) {
             return new FileDataResult[0];
         }
+        final boolean debug = log.isDebugEnabled();
         final List<FileDataResult> rtn = new ArrayList<FileDataResult>();
         concurrentStatsCollector.addStat(filenames.size(),
             ConcurrentStatsCollector.AGENT_PLUGIN_TRANSFER);
@@ -939,8 +940,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                                    PLUGINS_EXTENSION + AgentUpgradeManager.UPDATED_PLUGIN_EXTENSION);
             // tokenize agent.bundle.home since this can only be resolved at the agent
             files[i][1] = AGENT_BUNDLE_HOME_PROP + "/tmp/" + updatePlugin;
-            log.info("Transferring agent bundle from local repository at " + files[i][0] +
-                     " to agent " + agent + " at " + files[i][1]);
+            if (debug) log.debug("Transferring agent bundle from local repository at " + files[i][0] +
+                                 " to agent " + agent + " at " + files[i][1]);
             modes[i] = FileData.WRITETYPE_CREATEOROVERWRITE;
             i++;
         }
@@ -1309,13 +1310,6 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                 // only set canRestartAgent if plugins from the last run to this run have changed
                 // on the agent side.
                 canRestartAgent = true;
-            } else {
-                log.warn("agent=" + agent + " has checked in the exact same plugin set " +
-                         "twice in a row.  To avoid any potential issues on " +
-                         "the agent which may cause it to continuously restart the Server will sync " +
-                         "the agent's plugin repository but will not restart it.  Depending on the " +
-                         "state of the agent it may take up to two successful agent restarts in " +
-                         "order for the agent's plugin to be successfully sync'd with the Server.");
             }
             final Map<String, AgentPluginStatus> statusByFileName =
                 agentPluginStatusDAO.getPluginStatusByAgent(agent);
@@ -1332,10 +1326,13 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
             // contained in creates
             processPluginsNotOnAgent(agent, updateMap, creates);
             if (!canRestartAgent && (!updateMap.isEmpty() || !removeMap.isEmpty())) {
-                log.warn("agent=" + agent + " checked in the same plugin report twice in a row " +
-                         " and plugins have not been updated on the server but it's inventory " +
-                         " should be sync'd. updateMap=" + updateMap + ", removeMap=" + removeMap +
-                         ".  All plugins will be sync'd but agent will not be restarted.");
+                log.warn("agent=" + agent + " has checked in the exact same plugin set " +
+                         "twice in a row.  To avoid any potential issues on " +
+                         "the agent which may cause it to continuously restart the Server will sync " +
+                         "up the agent's plugin repository but will not restart it.  Depending on the " +
+                         "state of the agent it may take up to two successful agent restarts in " +
+                         "order for the agent's plugin to be successfully sync'd with the Server." +
+                         "  updateMap=" + updateMap + ", removeMap=" + removeMap);
             }
             agentPluginUpdater.queuePluginTransfer(updateMap, removeMap, canRestartAgent);
         } catch (AgentNotFoundException e) {

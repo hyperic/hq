@@ -559,7 +559,7 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
                 }
                 currXml = null;
             } catch (JDOMException e) {
-                log.error(e,e);
+                log.debug(e,e);
                 xmlFailures.put(currXml, e);
             }
         }
