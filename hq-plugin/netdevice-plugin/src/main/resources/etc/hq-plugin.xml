@@ -58,8 +58,8 @@
   USA.
  -->
 
-<plugin name="netdevice"
-        class="org.hyperic.hq.plugin.netdevice.NetworkDeviceProductPlugin" version="@project.version@">
+<plugin name="netdevice" class="org.hyperic.hq.plugin.netdevice.NetworkDeviceProductPlugin">
+  <property name="PLUGIN_VERSION" value="@project.version@"/>
 
   <!-- column sums from IfTableCollector -->
   <filter name="iftotal.template"

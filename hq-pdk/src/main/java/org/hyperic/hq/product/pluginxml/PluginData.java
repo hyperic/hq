@@ -70,6 +70,7 @@ public class PluginData {
     public static final String PLUGINS_PREFIX = "pdk/plugins/";
     private static final Log log = LogFactory.getLog("PluginData");
     private static final TypeInfo[] NO_TYPES = new TypeInfo[0];
+    private static final String PLUGIN_VERSION_PROP = "PLUGIN_VERSION";
     private static HashMap cache = new HashMap();
 
     Map scratch;
@@ -670,7 +671,11 @@ public class PluginData {
     }
     
     public void setProperty(String key, String value) {
-        this.properties.setProperty(key, value);
+        if (key.equals(PLUGIN_VERSION_PROP) && value != null) {
+            setVersion(value);
+        } else {
+            this.properties.setProperty(key, value);
+        }
     }
 
     /**

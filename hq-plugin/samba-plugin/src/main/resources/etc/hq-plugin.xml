@@ -31,7 +31,8 @@
 <!DOCTYPE plugin [
   <!ENTITY multi-process-metrics SYSTEM "/pdk/plugins/multi-process-metrics.xml">
 ]>
-<plugin package="org.hyperic.hq.plugin.samba" version="@project.version@">
+<plugin package="org.hyperic.hq.plugin.samba">
+  <property name="PLUGIN_VERSION" value="@project.version@"/>
   <!-- extracted to: pdk/work/scripts/samba/hq-samba-stat -->
   <script name="hq-samba-stat">
 #!/usr/bin/perl

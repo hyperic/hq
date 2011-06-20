@@ -27,7 +27,8 @@
  *  USA.
  -->
 
-<plugin class="org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin" version="@project.version@">
+<plugin class="org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin">
+    <property name="PLUGIN_VERSION" value="@project.version@"/>
 
     <filter name="server-connection" value="node=%node%,addr=%addr%,port=%port%,username=%username%,password=%password%"/>
 

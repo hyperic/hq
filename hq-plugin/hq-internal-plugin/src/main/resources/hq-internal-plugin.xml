@@ -23,7 +23,8 @@
   USA.
  -->
 
-<plugin version="@project.version@">
+<plugin>
+  <property name="PLUGIN_VERSION" value="@project.version@"/>
   <service name="HQ Internals"
            server="JBoss"
            version="4.0">

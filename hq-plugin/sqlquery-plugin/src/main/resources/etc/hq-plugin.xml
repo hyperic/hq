@@ -25,7 +25,8 @@
   USA.
  -->
 
-<plugin version="@project.version@">
+<plugin>
+  <property name="PLUGIN_VERSION" value="@project.version@"/>
   <!-- include all drivers from this directory -->
   <classpath>
     <include name="pdk/lib/jdbc"/>

@@ -23,7 +23,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  -->
-<plugin name="vsphere" class="VSphereProductPlugin" version="@project.version@">
+<plugin name="vsphere" class="VSphereProductPlugin">
+  <property name="PLUGIN_VERSION" value="@project.version@"/>
   <config name="sdk">
     <option name="url"
             description="vCenter sdk url"

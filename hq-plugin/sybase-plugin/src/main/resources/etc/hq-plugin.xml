@@ -57,7 +57,8 @@
   USA.
  -->
 
-<plugin package="org.hyperic.hq.plugin.sybase" class="SybaseProductPlugin" version="@project.version@">
+<plugin package="org.hyperic.hq.plugin.sybase" class="SybaseProductPlugin">
+  <property name="PLUGIN_VERSION" value="@project.version@"/>
   <!--classpath>
     <include name="pdk/lib/jdbc/jconn3.jar"/>
     <include name="pdk/lib/jdbc/jconn4.jar"/>

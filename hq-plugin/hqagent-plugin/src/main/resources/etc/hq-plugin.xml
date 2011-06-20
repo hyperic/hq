@@ -25,8 +25,9 @@
   USA.
  -->
 
-<plugin class="org.hyperic.hq.plugin.hqagent.AgentProductPlugin" version="@project.version@">
-  <metrics name="HQ Agent">
+<plugin class="org.hyperic.hq.plugin.hqagent.AgentProductPlugin">
+    <property name="PLUGIN_VERSION" value="@project.version@"/>
+    <metrics name="HQ Agent">
     <metric name="Availability"
             alias="Availability"
             template="camAgent:availability"

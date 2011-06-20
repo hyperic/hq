@@ -35,8 +35,9 @@
 ]>
 
 
-<plugin package="org.hyperic.hq.plugin.tomcat" class="TomcatProductPlugin" name="tomcat" version="@project.version@">
-  <classpath>
+<plugin package="org.hyperic.hq.plugin.tomcat" class="TomcatProductPlugin" name="tomcat">
+    <property name="PLUGIN_VERSION" value="@project.version@"/>
+    <classpath>
     <include name="pdk/lib/mx4j"/>
     <!-- relative to auto-discovered installpath (see PROC_HOME_PROPERTY) -->
     <include name="server/lib/commons-modeler-*.jar"/>
