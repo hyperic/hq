@@ -55,7 +55,7 @@
                             <li><b>username</b>: Administrator User name</li>
                             <li><b>password</b>: Administrator User password</li>
                             <li><b>nodurable</b>: If checked, all nondurable objetcs (Channels, Queue, etc.) will be auto-discovered</li>
-                            <li><b>autosycn</b>: If checked, all unavailable objetcs (Channels, Queue, etc.) will be auto-delete (but not the idle ones, shows as paused)</li>
+                            <li><b>autosync</b>: If checked, all unavailable objetcs (Channels, Queue, etc.) will be auto-delete (but not the idle ones, shows as paused)</li>
                         </ol>
                   </p>
                   <p>
@@ -80,7 +80,7 @@
             <option name="username" description="Username" default="guest"/>
             <option name="password" description="Password" default="guest"/>
             <option name="nodurable" description="Discover Nondurable Objects" type="boolean" default="false"/>
-            <option name="autosycn" description="Auto-Delete Unavailable Objects" type="boolean" default="false"/>
+            <option name="autosync" description="Auto-Delete Unavailable Objects" type="boolean" default="false"/>
         </config>
 
         <properties>
