@@ -113,6 +113,7 @@ public class IDGenerator {
             switch (itsDBType) {
                 case DBUtil.DATABASE_POSTGRESQL_7:
                 case DBUtil.DATABASE_POSTGRESQL_8:
+                case DBUtil.DATABASE_POSTGRESQL_9:
                     itsAlterSQL = "SELECT setval ('" + itsSequenceName + "', " + itsMaxKey + ")";
                     alterPS = conn.prepareStatement(itsAlterSQL);
                     rs = alterPS.executeQuery();
@@ -121,6 +122,7 @@ public class IDGenerator {
                 case DBUtil.DATABASE_ORACLE_8:
                 case DBUtil.DATABASE_ORACLE_9:
                 case DBUtil.DATABASE_ORACLE_10:
+                case DBUtil.DATABASE_ORACLE_11:
                     alterPS = conn.prepareStatement(itsAlterSQL);
                     alterPS.executeUpdate();
                     break;
@@ -150,6 +152,7 @@ public class IDGenerator {
         switch (itsDBType) {
             case DBUtil.DATABASE_POSTGRESQL_7:
             case DBUtil.DATABASE_POSTGRESQL_8:
+            case DBUtil.DATABASE_POSTGRESQL_9:
                 itsAlterSQL = "SELECT setval ('" + itsSequenceName + "', " + itsMaxKey + ")";
                 itsSelectSQL = "SELECT nextval('" + itsSequenceName + "'::text)";
 
