@@ -59,7 +59,7 @@ public class ConfigResponse implements GenericValueMap, Serializable  {
             EMPTY_CONFIG = new ConfigResponse().encode();
         } catch (EncodingException e) {
             //aint gonna happen.
-            throw new IllegalArgumentException(e.getMessage());
+            throw new IllegalArgumentException(e.getMessage(), e);
         }
     }
 
@@ -232,18 +232,17 @@ public class ConfigResponse implements GenericValueMap, Serializable  {
             // Read attributes
             while(true){
                 String key, val;
-                
-                if((key = (String)objectStream.readObject()) == null)
+                if((key = (String)objectStream.readObject()) == null) {
                     break;
-                
+                }
                 val = (String)objectStream.readObject();
                 res.setValue(key, val);
             }
             return res;
         } catch(IOException exc){
-            throw new EncodingException(exc.toString());
+            throw new EncodingException(exc.toString(), exc);
         } catch(ClassNotFoundException exc){
-            throw new EncodingException(exc.toString());
+            throw new EncodingException(exc.toString(), exc);
         }
     }
 
@@ -283,7 +282,7 @@ public class ConfigResponse implements GenericValueMap, Serializable  {
             objectStream.flush();
             retVal = byteStream.toByteArray();
         } catch(IOException exc){
-            throw new EncodingException(exc.toString());
+            throw new EncodingException(exc.toString(), exc);
         } finally {
             // ObjectStreams MUST be closed.
             if (objectStream != null )
