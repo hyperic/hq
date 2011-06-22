@@ -70,7 +70,7 @@
             template="Buffer Manager:Platform=Win32:Page writes/sec"
             category="UTILIZATION"
             group="Reliability"
-            collectionType="dynamic"
+            collectionType="trendsup"
             units="none"/>
         <metric name="Free pages"
             template="${buffer.manager}"
