@@ -308,6 +308,12 @@
             category="UTILIZATION"
             collectionType="dynamic"
             units="B"/>
+    <metric name="Percent Free Swap"
+            template="sigar:Type=Swap:FreePercent"
+            units="percentage"/>
+    <metric name="Percent Used Swap"
+            template="sigar:Type=Swap:UsedPercent"
+            units="percentage"/>
     <metric name="Swap Pages In"
             template="sigar:Type=Swap:PageIn"
             category="UTILIZATION"
