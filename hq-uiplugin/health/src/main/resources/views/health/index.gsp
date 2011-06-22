@@ -4,8 +4,9 @@
 
 	function getSystemStats() {
   		hqDojo.xhrGet({
-    		url: '<%= urlFor(action:"getSystemStats") %>',
+    		url: '<%= urlFor(action:"getSystemStats", encodeUrl:true) %>',
     		handleAs: "json-comment-filtered",
+    		preventCache: true,
     		load: function(response, args) {
       			hqDojo.byId('userCPU').innerHTML       = response.sysUserCpu;
 			    hqDojo.style('userCPUBar', 'width', response.sysUserCpu) ;
@@ -340,9 +341,10 @@
 	    	return;
   		}
     
-	  	hqDojo.xhrPost({
+	  	hqDojo.xhrGet({
     		url: '<%= urlFor(action:"getDiag", encodeUrl:true) %>',
     		handleAs: "json-comment-filtered",
+    		preventCache: true,
 	    	content: {
     			diag: d
         	},
@@ -372,9 +374,10 @@
 	    	return;
   		}
     
-  		hqDojo.xhrPost({
+  		hqDojo.xhrGet({
     		url: '<%= urlFor(action:"runQuery", encodeUrl:true) %>',
 	    	handleAs: "json-comment-filtered",
+	    	preventCache: true,
 	    	content: {
 	    		query: q
 	        },
@@ -396,9 +399,10 @@
 	    	return;
 	  	}
 	    
-	  	hqDojo.xhrPost({
+	  	hqDojo.xhrGet({
 	    	url: '<%= urlFor(action:"executeQuery", encodeUrl:true) %>',
 	    	handleAs: "json-comment-filtered",
+	    	preventCache: true,
 	    	content: {
 	    		query: q
 	        },
