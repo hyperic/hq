@@ -1,0 +1,267 @@
+<plugin name="cloudfoundry" class="org.hyperic.hq.plugin.cloudfoundry.product.CloudFoundryProductPlugin" >
+	<property name="PLUGIN_VERSION" value="@project.version@"/>
+	
+	<config name="login">
+		<option name="email"
+				description="Cloud Foundry Email" />
+		<option name="password"
+				description="Cloud Foundry Password"
+				type="secret" />
+		<option name="uri"
+				description="Cloud Foundry Target URI"
+				default="http://api.cloudfoundry.com" />
+	</config>
+	
+	<config name="app-service-config">
+		<option name="service.name"
+				description="Service Name"
+				type="hidden" />
+	</config>
+
+    <properties name="app-service-cprops">
+    	<property name="resource.name" description="Name" />
+    	<property name="resource.tier" description="Tier" />
+    	<property name="resource.type" description="Type" />
+    	<property name="resource.vendor" description="Vendor" />
+    	<property name="resource.version" description="Version" />		    	
+    </properties>
+    
+    <metrics name="app-service-metrics">
+		<metric name="Availability"
+    		template="cloudfoundry:${api-connection},service=%service.name%:${alias}"
+			interval="300000"
+			indicator="true" />
+			
+	    <metric name="Uptime"
+    		template="cloudfoundry:${api-connection},service=%service.name%:${alias}"
+			interval="300000"
+            category="UTILIZATION"
+            units="sec"
+            collectionType="static"
+            indicator="true" />
+    </metrics>
+	
+	<server name="Cloud Foundry">
+
+		<plugin type="autoinventory" 
+				class="org.hyperic.hq.plugin.cloudfoundry.inventory.CloudFoundryDetector" />
+
+	    <plugin type="measurement"
+	            class="org.hyperic.hq.plugin.cloudfoundry.measurement.CloudFoundryMeasurementPlugin"/>
+
+	    <property name="PROC_QUERY"
+	              value="State.Name.eq=dummyProcForCF"/>
+	
+	    <property name="INVENTORY_ID" value="${PROC_QUERY}"/>
+
+    	<properties>
+    		<property name="info.build" description="Build" />
+    		<property name="info.version" description="Version" />
+    		<property name="info.name" description="Name" />
+    		<property name="info.support" description="Support" />
+    		<property name="info.limits.memory" description="Maximum Total Memory" />
+    		<property name="info.limits.apps" description="Maximum Apps" />
+    		<property name="info.limits.services" description="Maximum Services" />
+    	</properties>
+    	
+		<config include="login" />
+		
+	    <filter name="api-connection"
+	            value="uri=%uri%,email=%email%,password=%password%"/>
+		            
+	    <metric name="Availability"
+	    		template="cloudfoundry:${api-connection}:${alias}"
+	            indicator="true"/>
+	            
+		<metric name="Memory Used"
+	    		template="cloudfoundry:${api-connection}:${alias}"
+				interval="300000"
+				units="B"
+				category="UTILIZATION"
+				indicator="true" />
+				
+		<metric name="Memory Used (Percent)"
+				alias="PercentMemoryUsed"
+	    		template="cloudfoundry:${api-connection}:${alias}"
+				interval="300000"
+				units="percentage"
+				category="UTILIZATION"
+				indicator="true" />
+				
+		<metric name="Apps Used"
+	    		template="cloudfoundry:${api-connection}:${alias}"
+				interval="300000"
+				units="none"
+				category="UTILIZATION"
+				indicator="true" />
+
+		<metric name="Apps Used (Percent)"
+				alias="PercentAppsUsed"
+	    		template="cloudfoundry:${api-connection}:${alias}"
+				interval="300000"
+				units="percentage"
+				category="UTILIZATION"
+				indicator="true" />
+
+		<metric name="Services Used"
+	    		template="cloudfoundry:${api-connection}:${alias}"
+				interval="300000"
+				units="none"
+				category="UTILIZATION"
+				indicator="true" />
+
+		<metric name="Services Used (Percent)"
+				alias="PercentServicesUsed"
+	    		template="cloudfoundry:${api-connection}:${alias}"
+				interval="300000"
+				units="percentage"
+				category="UTILIZATION"
+				indicator="true" />
+				        
+		<service name="MySQL Service">
+			<plugin type="autoinventory" />
+
+		    <plugin type="measurement"
+		            class="org.hyperic.hq.plugin.cloudfoundry.measurement.CloudServiceMeasurementPlugin"/>
+
+			<properties include="app-service-cprops" />		    
+		    <config include="app-service-config" />
+			<metrics include="app-service-metrics"/>		
+		</service>
+
+		<service name="MongoDB Service">
+			<plugin type="autoinventory" />
+
+		    <plugin type="measurement"
+		            class="org.hyperic.hq.plugin.cloudfoundry.measurement.CloudServiceMeasurementPlugin"/>
+
+			<properties include="app-service-cprops" />		    
+		    <config include="app-service-config" />
+			<metrics include="app-service-metrics"/>		
+		</service>
+
+		<service name="Redis Service">
+			<plugin type="autoinventory" />
+
+		    <plugin type="measurement"
+		            class="org.hyperic.hq.plugin.cloudfoundry.measurement.CloudServiceMeasurementPlugin"/>
+
+			<properties include="app-service-cprops" />		    
+		    <config include="app-service-config" />
+			<metrics include="app-service-metrics"/>		
+		</service>
+		
+		<service name="RabbitMQ Service">
+			<plugin type="autoinventory" />
+
+		    <plugin type="measurement"
+		            class="org.hyperic.hq.plugin.cloudfoundry.measurement.CloudServiceMeasurementPlugin"/>
+
+			<properties include="app-service-cprops" />		    
+		    <config include="app-service-config" />
+			<metrics include="app-service-metrics"/>		
+		</service>
+		
+		<service name="Application">
+			<plugin type="autoinventory" />
+
+		    <plugin type="measurement"
+		            class="org.hyperic.hq.plugin.cloudfoundry.measurement.CloudApplicationMeasurementPlugin"/>
+
+    		<plugin type="control"
+    				class="org.hyperic.hq.plugin.cloudfoundry.control.CloudApplicationControlPlugin"/>
+    				
+    		<plugin type="log_track"
+    				class="org.hyperic.hq.plugin.cloudfoundry.events.CloudApplicationEventPlugin"/>
+
+		    <actions>
+				<include name="stop"/>
+				<include name="start"/>
+				<include name="restart"/>
+				<include name="memory"/>
+				<include name="instances"/>
+				<include name="scaleUp"/>
+				<include name="scaleDown"/>
+		    </actions>
+			
+		    <properties>
+		    	<property name="staging.model" description="Application Type" />
+		    	<property name="staging.stack" description="Stack Type" />
+		    	<property name="resource.name" description="Application Name" />
+		    	<property name="resource.core" description="Cores Per Instance" />
+		    	<property name="resource.disk" description="Disk Limit Per Instance" />
+		    	<property name="resource.memory" description="Memory Limit Per Instance" />
+		    	<property name="resource.uri" description="URI" />
+		    	<property name="resource.app.services" description="Services" />
+		    </properties>
+    
+			<config>
+				<option name="application.name"
+						description="Application Name"
+						type="hidden" />
+						
+				<option name="application.hierarchy"
+						description="Application Resource Hierarchy"
+						type="hidden" />
+			</config>
+			
+			<metric name="Availability"
+	    		template="cloudfoundry:${api-connection},app=%application.name%:${alias}"
+				interval="300000"
+				indicator="true" />
+
+			<metric name="Number Of Instances"
+	    		template="cloudfoundry:${api-connection},app=%application.name%:${alias}"
+				interval="300000"
+				category="UTILIZATION"
+				indicator="true" />
+
+		    <metric name="Max Uptime"
+	    		template="cloudfoundry:${api-connection},app=%application.name%:${alias}"
+				interval="300000"
+	            category="UTILIZATION"
+	            units="sec"
+	            collectionType="static"
+	            indicator="true" />
+            
+			<metric name="Average Memory Used"
+	    		template="cloudfoundry:${api-connection},app=%application.name%:${alias}"
+				interval="300000"
+				units="B"
+				category="UTILIZATION"
+				indicator="true" />
+
+			<metric name="Average Memory Used (Percent)"
+				alias="PercentAverageMemoryUsed"
+	    		template="cloudfoundry:${api-connection},app=%application.name%:${alias}"
+				interval="300000"
+				units="percentage"
+				category="UTILIZATION"
+				indicator="true" />
+				
+			<metric name="Average Disk Usage"
+	    		template="cloudfoundry:${api-connection},app=%application.name%:${alias}"
+				interval="300000"
+				units="B"
+				category="UTILIZATION"
+				indicator="true" />
+
+			<metric name="Average Disk Usage (Percent)"
+				alias="PercentAverageDiskUsage"
+	    		template="cloudfoundry:${api-connection},app=%application.name%:${alias}"
+				interval="300000"
+				units="percentage"
+				category="UTILIZATION"
+				indicator="true" />
+								
+			<metric name="Average CPU Usage"
+	    		template="cloudfoundry:${api-connection},app=%application.name%:${alias}"
+				interval="300000"
+				units="percentage"
+				category="UTILIZATION"
+				indicator="true" />
+		</service>
+
+	</server>
+
+</plugin>
