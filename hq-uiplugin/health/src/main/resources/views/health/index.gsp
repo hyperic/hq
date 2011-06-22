@@ -8,11 +8,11 @@
 <script type="text/javascript">
 document.navTabCat = "Admin";
 function getSystemStats() {
-  dojo.io.bind({
-    url: '<%= urlFor(action:"getSystemStats") %>',
-    method: "get",
-    mimetype: "text/json-comment-filtered",
-    load: function(type, data, evt) {
+  dojo11.xhrGet({
+    url: '<%= urlFor(action:"getSystemStats", encodeUrl:true) %>',
+    handleAs: "json-comment-filtered",
+    preventCache: true,
+    load: function(data, args) {
       dojo.byId('userCPU').innerHTML = data.sysUserCpu;
       dojo.byId('userCPUBar').style.width = data.sysUserCpu;
       dojo.byId('sysCPU').innerHTML  = data.sysSysCpu;
@@ -301,9 +301,10 @@ function selectDiag(d) {
     return;
   }
     
-	  	dojo11.xhrPost({
+	  	dojo11.xhrGet({
     		url: '<%= urlFor(action:"getDiag", encodeUrl:true) %>',
     		handleAs: "json-comment-filtered",
+    		preventCache: true,
 	    	content: {
     			diag: d
         	},
@@ -330,15 +331,18 @@ function selectQuery(q) {
     dojo.byId('queryData').innerHTML = '';
     return;
   }
-    
-  dojo.io.bind({
-    url: '<%= urlFor(action:"runQuery") %>' + '?query=' + q,
-    method: "post",
-    mimetype: "text/json-comment-filtered",
-    load: function(type, data, evt) {
-      dojo.byId('queryData').innerHTML = data.queryData;
-    }
-  });
+
+  		dojo11.xhrGet({
+    		url: '<%= urlFor(action:"runQuery", encodeUrl:true) %>',
+	    	handleAs: "json-comment-filtered",
+	    	preventCache: true,
+	    	content: {
+	    		query: q
+	        },
+	    	load: function(response, args) {
+	      		dojo11.byId('queryData').innerHTML = response.queryData;
+	    	}
+	  	});
 }
 
 function queryAction() {
@@ -352,9 +356,10 @@ function executeQuery(q) {
     return;
   }
     
-  		dojo11.xhrPost({
-    		url: '<%= urlFor(action:"runQuery", encodeUrl:true) %>',
+  		dojo11.xhrGet({
+    		url: '<%= urlFor(action:"executeQuery", encodeUrl:true) %>',
 	    	handleAs: "json-comment-filtered",
+	    	preventCache: true,
 	    	content: {
 	    		query: q
 	        },
@@ -362,33 +367,17 @@ function executeQuery(q) {
 	      		dojo11.byId('queryData').innerHTML = response.queryData;
 	    	}
 	  	});
-	}
+}
 
 function loadQuery() {
   var selectDrop = document.getElementById('querySelect');
   selectQuery(selectDrop.options[selectDrop.selectedIndex].value);
 }
-
-		executeQuery(selectDrop.options[selectDrop.selectedIndex].value);
-	}
 	
-	function executeQuery(q) {
-	  	if (q == 'none') {
-	    	dojo11.byId('queryData').innerHTML = '';
-	    	return;
-	  	}
-	    
-	  	dojo11.xhrPost({
-	    	url: '<%= urlFor(action:"executeQuery", encodeUrl:true) %>',
-	    	handleAs: "json-comment-filtered",
-	    	content: {
-	    		query: q
-	        },
-	    	load: function(response, args) {
-	      		dojo11.byId('queryData').innerHTML = response.queryData;
-	    	}
-	  	});
-	}
+function refreshQuery() {
+  	loadQuery();
+  	setTimeout("refreshQuery()", 1000 * 60);
+}
 
 refreshQuery();
 
