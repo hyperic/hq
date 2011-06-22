@@ -359,8 +359,10 @@ class AlertController
     }
 
     private getGroups() {
-        def res = [[code:0, value:localeBundle.AllGroups]]
-        resourceHelper.findViewableGroups().each { group ->
+        def res = [
+            [code:0, value:localeBundle.AllGroups]
+        ]
+        def groups = resourceHelper.findViewableGroups().sort { p1, p2 -> p1.name.compareToIgnoreCase(p2.name) }.each { group ->
             res << [code: group.id, value: group.name]
         }
         res
