@@ -236,14 +236,9 @@ public class DefaultSSLProviderImpl implements SSLProvider {
 						}
 					}
 				}
-				
+
 				public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-					try {
-						defaultTrustManager.checkClientTrusted(chain, authType);
-					} catch(Exception e) {
-						// TODO auto import client certs, make this configurable behavior
-						importCertificate(chain);
-					}
+					defaultTrustManager.checkClientTrusted(chain, authType);
 				}
 				
 				private void importCertificate(X509Certificate[] chain) throws CertificateException {
