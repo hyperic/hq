@@ -283,8 +283,17 @@ __ll__
 		  </antcall>
 	</target>
 	
-  <target name="post-agent-unpack">
-	   <echo>^^^INFO: Setting permissions on agent binaries...</echo>
+	<target name="post-agent-unpack">
+		<echo>^^^INFO: Setting permissions on ${agent-dir}...</echo>
+	  	<chmod perm="go-rwx" type="both">
+	  		<fileset dir="${agent-dir}">
+	  			<include name="**/bin/*" />
+	  			<include name="**/conf/*" />
+	  			<include name="**/bundles/**/bin/*" />
+	  			<include name="**/bundles/**/conf/*" />
+	  		</fileset>
+	  	</chmod>
+	  	<echo>^^^INFO: Setting permissions on agent binaries...</echo>
 		<antcall target="chmod-exec">
 			<param name="chmod.dir" value="${agent-dir}"/>
 		</antcall>
@@ -293,7 +302,7 @@ __ll__
   		<antcall target="fix-text-files">
 			<param name="crlf.dir" value="${agent-dir}"/>
 	    </antcall>
-  </target>
+  	</target>
 
   <target name="agent"
           depends="agent.valid-props,setup-agent-init"
@@ -687,7 +696,19 @@ ${errMsg}
     </antcall>
 
     <!-- Mark executables as executable -->
-    <echo>^^^INFO: Setting permissions on server binaries...</echo>
+	<echo>^^^INFO: Setting permissions on ${server.product.dir}...</echo>
+    <chmod perm="go-rwx" type="both">
+		<fileset dir="${server.product.dir}">
+	  		<include name="**/bin/*" />
+	  		<include name="**/conf/*" />
+	  		<include name="**/data/*" />
+	  		<include name="**/hqdb/*" />
+	  		<include name="**/hq-engine/hq-server/bin/*" />
+			<include name="**/hq-engine/hq-server/conf/*" />
+			<include name="**/hq-engine/hq-server/webapps/ROOT/WEB-INF/**" />
+  		</fileset>
+	</chmod>    
+	<echo>^^^INFO: Setting permissions on server binaries...</echo>
     <antcall target="chmod-exec">
       <param name="chmod.dir" value="${server.product.dir}"/>
     </antcall>
@@ -737,7 +758,7 @@ ${errMsg}
   </target>
 
   <target name="chmod-exec">
-    <chmod perm="a+rx">
+    <chmod perm="750">
       <fileset dir="${chmod.dir}">
         <include name="**/bin/*"/>
         <include name="**/sbin/*"/>
