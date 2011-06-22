@@ -16,15 +16,15 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 21, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1307466694477 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1307466694477 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1307466694477 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1308677006466 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1308677006466 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1308677006466 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1307466694477'>
+/*]]>*/</style><div class='rbtoc1308677006466'>
 <ul>
     <li><a href='#MetricsandMetricCollection-MetricCategories'>Metric Categories</a></li>
 <ul>
@@ -59,27 +59,44 @@ div.rbtoc1307466694477 li {margin-left: 0px;padding-left: 0px;}
 <tr>
 <th class='confluenceTh'> Availability Icon Color</th>
 <th class='confluenceTh'>Availability Icon </th>
+<th class='confluenceTh'> State</th>
 <th class='confluenceTh'> Definition </th>
 </tr>
 <tr>
 <td class='confluenceTd'> Green </td>
-<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/76285153/76579269.gif" style="border: 0px solid black"/></span> </td>
-<td class='confluenceTd'> For an individual resource, indicates that its availability status is "green". In the case of an group, indicates that none of the group members has  availability status of  "red". <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/77463561/77660601.gif" style="border: 0px solid black"/></span> </td>
+<td class='confluenceTd'>Up </td>
+<td class='confluenceTd'>For an individual resource, indicates that its availability status is "up". <br class="atl-forced-newline" /> <br class="atl-forced-newline" />  For a group, indicates that none of the group members has availability status of  "down".  </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Yellow </td>
-<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/76285153/76579268.gif" style="border: 0px solid black"/></span> </td>
-<td class='confluenceTd'> This value appears for a group only. It indicates that (1) one or more group members, but not all members, have the availability status of "red", and (2) the remaining members have status "green". </td>
+<td class='confluenceTd'><span class="image-wrap" style=""><img src="attachments/77463561/77660604.gif" style="border: 0px solid black"/></span>  </td>
+<td class='confluenceTd'>Warn </td>
+<td class='confluenceTd'> This state is valid for a group only. It indicates that (1) one or more group members, but not all members, have the availability state of "down", and (2) the remaining members have status "green". </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Orange </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>Maintenance/Paused </td>
+<td class='confluenceTd'>This icon appears only for a VM or a group of VMs.  <br class="atl-forced-newline" /> <br class="atl-forced-newline" /> For an individual VM indicates it is paused.<br class="atl-forced-newline" /> <br class="atl-forced-newline" />  For a group, indicates that all VMs in the group are paused.     </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Red </td>
-<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/76285153/76579267.gif" style="border: 0px solid black"/></span> </td>
-<td class='confluenceTd'> Indicates that an individual resource's availability status is "red".  For a group, indicates that all members of the group have either availability status "red" or "unknown".  </td>
+<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/77463561/77660603.gif" style="border: 0px solid black"/></span> </td>
+<td class='confluenceTd'> Down</td>
+<td class='confluenceTd'> For an individual resource, indicates that its availability status is "down".<br class="atl-forced-newline" /> <br class="atl-forced-newline" />   For a group, indicates that all members of the group have either availability status "red" or "unknown".  </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Grey </td>
-<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/76285153/76579270.gif" style="border: 0px solid black"/></span> </td>
-<td class='confluenceTd'> For an individual resource, indicates that its availability is unknown. &nbsp;For an group, indicates that the availability of at least one of the members is unknown. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/77463561/77660602.gif" style="border: 0px solid black"/></span> </td>
+<td class='confluenceTd'>Unknown </td>
+<td class='confluenceTd'>For an individual resource, indicates that its availability is unknown. <br class="atl-forced-newline" /> <br class="atl-forced-newline" /> For a group, indicates that the availability of at least one of the members is unknown. <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Black </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>Suspended/Powered Off </td>
+<td class='confluenceTd'>This icon appears only for a VM or a group of VMs.  <br class="atl-forced-newline" /> <br class="atl-forced-newline" /> For an single VM indicates it is suspended or powered off. <br class="atl-forced-newline" /> <br class="atl-forced-newline" /> For a group of VMs, indicates that all VMs in the group are suspended or powered down.   </td>
 </tr>
 </tbody></table>
 </div>
@@ -126,8 +143,6 @@ div.rbtoc1307466694477 li {margin-left: 0px;padding-left: 0px;}
 <div class="scroll-pagebreak"></div>
 
 
-
-
 <h1><a name="MetricsandMetricCollection-Baselines"></a>Baselines</h1>
 
 <p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
@@ -166,7 +181,7 @@ div.rbtoc1307466694477 li {margin-left: 0px;padding-left: 0px;}
 </ul>
 
 
-<p><span class="image-wrap" style=""><img src="attachments/76285170/76579467.png" width="700pxpxpxpx" style="border: 0px solid black"/></span></p>
+<p><span class="image-wrap" style=""><img src="attachments/77463605/77660406.png" width="700pxpxpxpx" style="border: 0px solid black"/></span></p>
 
 <h2><a name="MetricsandMetricCollection-HowaBaselineisCalculated"></a>How a Baseline is Calculated</h2>
 
@@ -193,7 +208,7 @@ div.rbtoc1307466694477 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jun 14, 2011 15:09</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 22, 2011 15:14</font></td>
 		    </tr>
 	    </table>
     </body>

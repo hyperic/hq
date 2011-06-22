@@ -16,81 +16,10 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 21, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1307466562726 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1307466562726 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1307466562726 li {margin-left: 0px;padding-left: 0px;}
-
-/*]]>*/</style><div class='rbtoc1307466562726'>
-<ul>
-    <li><a href='#DeployPlugin-AboutPluginDeployment'>About Plugin Deployment</a></li>
-    <li><a href='#DeployPlugin-WheretoInstallCustomPluginFiles'>Where to Install Custom Plugin Files</a></li>
-<ul>
-    <li><a href='#DeployPlugin-DeploytoCustomPluginsDirectory'>Deploy to Custom Plugins Directory</a></li>
-    <li><a href='#DeployPlugin-DeploytoBuiltinPluginDirectories'>Deploy to Built-in Plugin Directories</a></li>
-    <li><a href='#DeployPlugin-DeploytoBuiltinPluginDirectoriesinvFabricHyperic'>Deploy to Built-in Plugin Directories in vFabric Hyperic</a></li>
-</ul>
-</ul></div>
-
-<h1><a name="DeployPlugin-AboutPluginDeployment"></a>About Plugin Deployment</h1>
-
-<p>Resource plugins must be deployed to the Hyperic Server and to each Hyperic Agent where you have resources that you want the plugin to manage. You must deploy the same version of a plugin to the server and agents.</p>
-
-<p>The the Hyperic Server supports hot deployment of resource plugins &#8212;  you do not have to restart the Hyperic Server after deploying a new or updated plugin. The Hyperic Agent does not support hot deployment of plugins; you must restart an agent to cause it to reload all plugins, including any new or updated plugins.  </p>
-
-<h1><a name="DeployPlugin-WheretoInstallCustomPluginFiles"></a>Where to Install Custom Plugin Files</h1>
-
-<p>There are two alternative locations for deploying plugins on both agent and server, described in the sections below.</p>
-
-<h2><a name="DeployPlugin-DeploytoCustomPluginsDirectory"></a>Deploy to Custom Plugins Directory</h2>
-<p><a name="DeployPlugin-custom"></a></p>
-
-<p>The best practice for deploying custom plugins is to create a directory on the Hyperic Server, and one on each agent, that will not be overwritten by a server or agent upgrade, for instance, a subdirectory of the Hyperic Server's parent directory, and a subdirectory of the Hyperic Agent's parent directory. For example, </p>
-
-<p>On a Unix-like platform, </p>
-<ul>
-	<li>If the Hyperic Server is installed at <tt>/usr/local/hyperic/&lt;Server directory&gt;</tt>, then add the plugin in <tt>/usr/local/hyperic/hq-plugins</tt></li>
-	<li>If the Hyperic Agent is installed at <tt>/usr/local/hyperic/&lt;Agent directory&gt;</tt>, then add the plugin in <tt>/usr/local/hyperic/hq-plugins</tt></li>
-</ul>
-
-
-<p>On Windows,</p>
-<ul>
-	<li>If the Server is installed at <tt>C:\Program Files\Hyperic HQ\&lt;Server directory&gt;</tt>, then add the plugin in <tt>C:\Program Files\Hyperic HQ\hq-plugins</tt></li>
-	<li>If the Agent is installed at <tt>C:\Program Files\Hyperic HQ\&lt;Agent directory&gt;</tt>, then add the plugin in <tt>C:\Program Files\Hyperic HQ\hq-plugins</tt></li>
-</ul>
-
-
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Requirements for Hot Deployment on Hyperic Server</b><br />To support hot deployment, the <tt>hq-plugins</tt> directory on the Hyperic Server must have existed prior to the last Hyperic Server restart. If you want to hot deploy to a directory that you create yourself, create the directory restart the Hyperic Server. After the Hyperic Server is restarted, plugins you place in the directory will be hot deployed.</td></tr></table></div>
-
-<h2><a name="DeployPlugin-DeploytoBuiltinPluginDirectories"></a>Deploy to Built-in Plugin Directories</h2>
-
-<p>If you are installing a patch to one of the built-in Hyperic plugins, or you prefer to store all resource plugins in the same location, deploy your plugin to the built-in plugin directories on the server and agent. </p>
-<ul>
-	<li><tt>ServerHome/hq-engine/hq-server/webapps/ROOT/WEB_INF/hq-plugins/</tt> &#8212; Plugins you place this directory are hot deployed. Server restart is not required.</li>
-	<li><tt>AgentHome/bundles/agent-x.y.z/pdk/plugins/</tt> &#8212; Restart the agent to load the new or updated plugin.</li>
-</ul>
-
-
-<h2><a name="DeployPlugin-DeploytoBuiltinPluginDirectoriesinvFabricHyperic"></a>Deploy to Built-in Plugin Directories in vFabric Hyperic</h2>
-<p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
-
-<p>vFabric Hyperic supports a streamlined plugin deployment process that is useful for deploying a new or updated plugin to a large number of agents. </p>
-
-<p>To do so:</p>
-
-<ol>
-	<li>Deploy the plugin to the built-in plugins directory on the Hyperic Server, as described in the previous section.</li>
-	<li>Use the "Push Plugin" agent control command in the Hyperic user interface to push the updated plugin to desired agents.
-	<ul>
-		<li>For information about the push plugin command, see <a href="Start, Stop, and Other Agent Operations.html#Start%2CStop%2CandOtherAgentOperations-push">Push a Resource Plugin to the Agent from the Hyperic User Interface</a>.</li>
-	</ul>
-	</li>
-</ol>
-
+				    <p>For information about deploying plugins, see <a href="Plugin Deployment and Management.html" title="Plugin Deployment and Management">Plugin Deployment and Management</a>.</p>
 
 				    
                     			    </td>
@@ -101,7 +30,7 @@ div.rbtoc1307466562726 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jun 14, 2011 15:09</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 22, 2011 15:14</font></td>
 		    </tr>
 	    </table>
     </body>

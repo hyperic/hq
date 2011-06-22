@@ -16,18 +16,18 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 13, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 21, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1308006505928 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1308006505928 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1308006505928 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1308680278702 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1308680278702 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1308680278702 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1308006505928'>
+/*]]>*/</style><div class='rbtoc1308680278702'>
 <ul>
     <li><a href='#NetAppFiler-NetAppFilerPluginOverview'>NetApp Filer Plugin Overview</a></li>
 <ul>
@@ -49,26 +49,22 @@ div.rbtoc1308006505928 li {margin-left: 0px;padding-left: 0px;}
 </ul></div>
 
 
-<p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
-
-
-
 <h1><a name="NetAppFiler-NetAppFilerPluginOverview"></a>NetApp Filer Plugin Overview</h1>
 
-<p>Hyperic's NetApp Filer plugin, available in Hyperic 4.3 and later, manages and monitors NetApp filers that use NFS v2, NFS v3, and CIFS protocols.</p>
+<p>Hyperic's NetApp Filer plugin manages and monitors NetApp filers that use NFS v2, NFS v3, and CIFS protocols.</p>
 
 <p>The NetApp Filer plugin is based on Hyperic's Network Device plugin, and uses SNMP GET requests to obtain resource statistics for the filer and its services. If you want to create events for SNMP traps issued by a filer, you can configure the NetApp Filter to send traps to the HQ Agent that manages the filer. &nbsp;Note however that it is not necessary to receive traps to obtain filer metrics.</p>
 
 <p>The indented list below illustrates the hierarchy of Hyperic resource types that map to NetApp Filer entities. Each resource type is described below in <a href="#NetAppFiler-NetAppFilerResourcesandtheHQInventoryModel">NetApp Filer Resources and the HQ Inventory Model</a>.</p>
 
-<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
-<pre>NetApp Filer
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">NetApp Filer
      NetApp Filer File System
      NetApp Filer NFS server v2
      NetApp Filer NFS server v3
-     NetApp Filer CIFS Server
-
-</pre>
+     NetApp Filer CIFS Server</pre>
+		</div>
 </div></div>
 
 
@@ -112,7 +108,7 @@ div.rbtoc1308006505928 li {margin-left: 0px;padding-left: 0px;}
 
 
 
-<p><b>Note:</b> For more information about the managed resource hierarchy, see <a href="http://support.hyperic.com/display/DOCS46/HQ+Inventory+Model" title="HQ Inventory Model">HQ Inventory Model</a>.</p>
+<p><b>Note:</b> For more information about the managed resource hierarchy, see <a href="Resources, Resource Types and Inventory Types.html" title="Resources, Resource Types and Inventory Types">Resources, Resource Types and Inventory Types</a>.</p>
 
 <h1><a name="NetAppFiler-ConfigurationInstructions"></a>Configuration Instructions</h1>
 
@@ -130,7 +126,7 @@ div.rbtoc1308006505928 li {margin-left: 0px;padding-left: 0px;}
 	<li>Select <b>New Platform</b> from the <b>Tools</b> menu.
 	<ul>
 		<li>Click the thumbnail below to see the <b>New Platform</b> page.<br/>
-<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1002x516" href='http://support.hyperic.com/download/attachments/76285170/NewPlatformNetworkDevice.png'><img src="attachments/thumbnails/76285170/76579545" style="border: 0px solid black"/></a></span></li>
+<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1002x516" href='http://support.hyperic.com/download/attachments/77463605/NewPlatformNetworkDevice.png'><img src="attachments/thumbnails/77463605/77660352" style="border: 0px solid black"/></a></span></li>
 	</ul>
 	</li>
 	<li>Enter a name for your platform.</li>
@@ -162,7 +158,7 @@ div.rbtoc1308006505928 li {margin-left: 0px;padding-left: 0px;}
 
 <h3><a name="NetAppFiler-NetAppFilerConfigurationPropertiesPage"></a>NetApp Filer Configuration Properties Page</h3>
 
-<p><span class="image-wrap" style=""><img src="attachments/71828283/72646768.png" width="800pxpx" style="border: 0px solid black"/></span></p>
+<p><span class="image-wrap" style=""><img src="attachments/77463605/77660396.png" width="800pxpx" style="border: 0px solid black"/></span></p>
 
 <h3><a name="NetAppFiler-NetAppFilerConfigurationOptions"></a>NetApp Filer Configuration Options</h3>
 
@@ -173,7 +169,7 @@ div.rbtoc1308006505928 li {margin-left: 0px;padding-left: 0px;}
 <p>
 <div class='table-wrap'>
 
-<table id='TBL1307938321576' width='800px' class='confluenceTable'><tbody>
+<table id='TBL1307938328916' width='800px' class='confluenceTable'><tbody>
 <tr>
 <th class='confluenceTh'> name </th>
 <th class='confluenceTh'> description</th>
@@ -188,7 +184,7 @@ div.rbtoc1308006505928 li {margin-left: 0px;padding-left: 0px;}
 
 <div class='table-wrap'>
 
-<table id='TBL1307938321577' width='800px' class='confluenceTable'><tbody>
+<table id='TBL1307938328917' width='800px' class='confluenceTable'><tbody>
 <tr>
 <td class='confluenceTd'> snmpIp </td>
 <td class='confluenceTd'> SNMP agent IP address </td>
@@ -346,13 +342,13 @@ function customizeMacroTable(tableId,columnTypes,firstDataRowIndex,highlightColo
 
 var columnTypes = ['S'];
 var columnAttributes = 'style=&quot;width:15%;&quot;,style=&quot;width:15%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:30%;&quot;,style=&quot;width:10%;&quot;';
-customizeMacroTable('TBL1307938321576', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
+customizeMacroTable('TBL1307938328916', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
 //-->
  </script> 
 <script type='text/javascript'> <!-- 
 var columnTypes = ['S'];
 var columnAttributes = 'style=&quot;width:15%;&quot;,style=&quot;width:15%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:10%;&quot;,style=&quot;width:30%;&quot;,style=&quot;width:10%;&quot;';
-customizeMacroTable('TBL1307938321577', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
+customizeMacroTable('TBL1307938328917', columnTypes, 1, 'lightgoldenrodyellow', false, 'Click to sort', '', false, false, false, true, 0, false, '' );
 //-->
  </script> </p>
 
@@ -1935,7 +1931,7 @@ customizeMacroTable('TBL1307938321577', columnTypes, 1, 'lightgoldenrodyellow', 
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jun 14, 2011 15:09</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 22, 2011 15:14</font></td>
 		    </tr>
 	    </table>
     </body>

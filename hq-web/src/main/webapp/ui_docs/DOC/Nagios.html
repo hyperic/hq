@@ -16,18 +16,18 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 14, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 21, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1308071366600 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1308071366600 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1308071366600 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1308679167154 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1308679167154 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1308679167154 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1308071366600'>
+/*]]>*/</style><div class='rbtoc1308679167154'>
 <ul>
     <li><a href='#Nagios-NagiosResourcesandtheHypericInventoryModel'>Nagios Resources and the Hyperic Inventory Model</a></li>
     <li><a href='#Nagios-ManagementFunctions'>Management Functions</a></li>
@@ -51,17 +51,13 @@ div.rbtoc1308071366600 li {margin-left: 0px;padding-left: 0px;}
 </ul></div>
 
 
-<p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
-
-
-
 <p>Hyperic has built-in support for integration with Nagios. Hyperic imports your Nagios checks, runs them, and presents the results in the Hyperic user interface. Note that Hyperi runs the Nagios checks independently from Nagios. During the Hyperic implementation process, Nagios users find it useful to run Hyperic and Nagios side-by-side and compare results.</p>
 
 <h1><a name="Nagios-NagiosResourcesandtheHypericInventoryModel"></a>Nagios Resources and the Hyperic Inventory Model</h1>
 
 <p>To understand the configuration process and to interpret the Nagios data presented in the Hyperic user interface, it's helpful to understand how the elements of a Nagios implementation map to the Hyperic inventory model.</p>
 
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>For information about the inventory types in Hyperic, see <a href="http://support.hyperic.com/display/DOCS46/Hyperic+Inventory+Model" title="Hyperic Inventory Model">Hyperic Inventory Model</a>.</td></tr></table></div>
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>For information about the inventory types in Hyperic, see <a href="Resources, Resource Types and Inventory Types.html" title="Resources, Resource Types and Inventory Types">Resources, Resource Types and Inventory Types</a>.</td></tr></table></div>
 
 <ul>
 	<li><b>Nagios server host</b>&#45;--The machine that hosts the Nagios server is a platform in Hyperic. The Hyperic Agent you install on it auto-discovers it, and the platform type. Its name is its fully qualified domain name (FQDN).</li>
@@ -156,11 +152,11 @@ Return code </td>
 <ul>
 	<li><b>Availability</b> &#8212; Reflects the availability of the Nagios check itself, rather than the service it is monitoring. The value is derived from the Nagios plugin's return code:
 	<ul>
-		<li>0 == <span class="image-wrap" style=""><img src="attachments/76285153/76579269.gif" style="border: 0px solid black"/></span> OK</li>
-		<li>1 == <span class="image-wrap" style=""><img src="attachments/76285153/76579268.gif" style="border: 0px solid black"/></span> Warning</li>
-		<li>2 == <span class="image-wrap" style=""><img src="attachments/76285153/76579267.gif" style="border: 0px solid black"/></span> Critical</li>
-		<li>3 == <span class="image-wrap" style=""><img src="attachments/76285153/76579270.gif" style="border: 0px solid black"/></span> Unknown</li>
-		<li>other == <span class="image-wrap" style=""><img src="attachments/76285153/76579267.gif" style="border: 0px solid black"/></span> Unknown</li>
+		<li>0 == <span class="image-wrap" style=""><img src="attachments/77463561/77660601.gif" style="border: 0px solid black"/></span> OK</li>
+		<li>1 == <span class="image-wrap" style=""><img src="attachments/77463561/77660604.gif" style="border: 0px solid black"/></span> Warning</li>
+		<li>2 == <span class="image-wrap" style=""><img src="attachments/77463561/77660603.gif" style="border: 0px solid black"/></span> Critical</li>
+		<li>3 == <span class="image-wrap" style=""><img src="attachments/77463561/77660602.gif" style="border: 0px solid black"/></span> Unknown</li>
+		<li>other == <span class="image-wrap" style=""><img src="attachments/77463561/77660603.gif" style="border: 0px solid black"/></span> Unknown</li>
 	</ul>
 	</li>
 	<li><b>Execution Time</b> &#8212; time to execute the Ngios check.</li>
@@ -223,7 +219,7 @@ Return code </td>
 	<li>Click the blue <b>Configuration Properties</b> link in the message.
 	<ul>
 		<li>The <b>Configuration Properties</b> page appears.<br/>
-<span class="image-wrap" style=""><img src="attachments/76285170/76579391.png" width="750px" style="border: 0px solid black"/></span></li>
+<span class="image-wrap" style=""><img src="attachments/77463605/77660206.png" width="750px" style="border: 0px solid black"/></span></li>
 	</ul>
 	</li>
 	<li>On the <b>Configuration Properties</b> page:
@@ -257,23 +253,23 @@ Return code </td>
 
 <p>The page displays the most recent results of the Nagios checks. This is the same information that is displayed on the Nagios Service Details page.</p>
 <ul>
-	<li><b>Host</b>&#45;--The host that the Nagios check is monitoring</li>
-	<li><b>Service</b>&#45;--The Nagios plugin used to perform the check</li>
-	<li><b>Status</b>&#45;--The Return Code from execution of the check</li>
-	<li><b>Last Check</b>&#45;--When the check was last run</li>
-	<li><b>Event Log</b>&#45;--Output of the plugin</li>
+	<li><b>Host</b>--- The host that the Nagios check is monitoring</li>
+	<li><b>Service</b> &#8212; The Nagios plugin used to perform the check</li>
+	<li><b>Status</b> &#8212; The Return Code from execution of the check</li>
+	<li><b>Last Check</b> &#8212; When the check was last run</li>
+	<li><b>Event Log</b> &#8212; Output of the plugin</li>
 </ul>
 
 
 <p>Each line is color-coded:</p>
 <ul>
-	<li><b>Pink</b>&#45;--monitored service is down.</li>
-	<li><b>Yellow</b>&#45;--monitored service has triggered an alert, based on the threshold defined in Nagios.</li>
-	<li><b>Green</b>&#45;--monitored service is OK.</li>
+	<li><b>Pink</b> &#8212; monitored service is down.</li>
+	<li><b>Yellow</b> &#8212; monitored service has triggered an alert, based on the threshold defined in Nagios.</li>
+	<li><b>Green</b> &#8212; monitored service is OK.</li>
 </ul>
 
 
-<p><span class="image-wrap" style=""><img src="attachments/76285170/76579476.png" style="border: 0px solid black"/></span></p>
+<p><span class="image-wrap" style=""><img src="attachments/77463605/77660413.png" style="border: 0px solid black"/></span></p>
 
 <div class="scroll-pagebreak"></div>
 
@@ -287,20 +283,20 @@ Return code </td>
 	<li>Choose the Nagios server from the list of servers.
 	<ul>
 		<li>The <b>Indicators</b> tab for the Nagios server appears.<br/>
-<span class="image-wrap" style=""><img src="attachments/76285170/76579473.png" style="border: 0px solid black"/></span></li>
+<span class="image-wrap" style=""><img src="attachments/77463605/77660404.png" style="border: 0px solid black"/></span></li>
 	</ul>
 	</li>
 	<li>In the <b>Resources</b> mintab, click the autogroup called "Nagios Plugin", which contains the Nagios checks.</li>
 	<li>The first chart on the <b>Indicators</b> tab shows the average execution time for the all of the checks in the group.
 	<ul>
 		<li>Note: (Charts of average Result Values and Return Codes are also presented, but this data is not meaningful for a group.)<br/>
-<span class="image-wrap" style=""><img src="attachments/76285170/76579474.png" style="border: 0px solid black"/></span></li>
+<span class="image-wrap" style=""><img src="attachments/77463605/77660403.png" style="border: 0px solid black"/></span></li>
 	</ul>
 	</li>
 	<li>Click on a specific check in the <b>Group Members</b> list.
 	<ul>
 		<li>The <b>Indicators</b> tab for the Nagios service appears.<br/>
-<span class="image-wrap" style=""><img src="attachments/76285170/76579475.png" style="border: 0px solid black"/></span></li>
+<span class="image-wrap" style=""><img src="attachments/77463605/77660414.png" style="border: 0px solid black"/></span></li>
 	</ul>
 	</li>
 	<li>To view log messages output by the check, click the blue icons above the time range bar at the bottom of the page.</li>
@@ -318,7 +314,7 @@ Return code </td>
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jun 14, 2011 15:09</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 22, 2011 15:14</font></td>
 		    </tr>
 	    </table>
     </body>

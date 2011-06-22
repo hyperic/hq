@@ -16,18 +16,18 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 09, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 21, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1307644356414 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1307644356414 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1307644356414 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1308679998071 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1308679998071 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1308679998071 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1307644356414'>
+/*]]>*/</style><div class='rbtoc1308679998071'>
 <ul>
     <li><a href='#WriteanSNMPPlugin-WritinganSNMPPlugin'>Writing an SNMP Plugin</a></li>
     <li><a href='#WriteanSNMPPlugin-GettingStarted'>Getting Started</a></li>
@@ -40,10 +40,6 @@ div.rbtoc1307644356414 li {margin-left: 0px;padding-left: 0px;}
     <li><a href='#WriteanSNMPPlugin-AdditionalSNMPPluginExamples'>Additional SNMP Plugin Examples</a></li>
     <li><a href='#WriteanSNMPPlugin-Resources'>Resources</a></li>
 </ul></div>
-
-
-<p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
-
 
 
 
@@ -61,7 +57,9 @@ div.rbtoc1307644356414 li {margin-left: 0px;padding-left: 0px;}
 
 <p>In any HQ plug-in, there are two main concepts to understand:</p>
 
-<p>First is the <a href="http://www.hyperic.com/products/architecture.html">inventory model</a>. Resource types define where things live in the hierarchy along with supported metrics, control actions, log message sources, etc., as well as the configuration properties used by each feature. In the case of implementing a custom SNMP plug-in for a network device, you are typically defining a platform type that collects any scalar variables that apply to the device and one or more service types to collect table data such as interfaces, power supplies, fans, etc.</p>
+<p>First is the inventory model. Resource types define where things live in the hierarchy along with supported metrics, control actions, log message sources, etc., as well as the configuration properties used by each feature. For more information, see <a href="Resources, Resource Types and Inventory Types.html" title="Resources, Resource Types and Inventory Types">Resources, Resource Types and Inventory Types</a>.</p>
+
+<p>In the case of implementing a custom SNMP plug-in for a network device, you are typically defining a platform type that collects any scalar variables that apply to the device and one or more service types to collect table data such as interfaces, power supplies, fans, etc.</p>
 
 <p>Second is the metric template attribute which is a string containing all info required to collect a particular data point. In an SNMP plug-in, each of the metrics correlate to an SNMP OID. While we tend to use the object names to gather the desired data points in the plugins, you can also use the numeric OID. This has the added benefit of avoiding having to worry about ready access to the MIB file anywhere the plug-in is used.</p>
 
@@ -369,7 +367,7 @@ nsIfName.3 = STRING: "vlan1"
 
 <h1><a name="WriteanSNMPPlugin-TheFinalProduct"></a>The Final Product</h1>
 
-<p>The final plug-in in its entirety is here in <a href="attachments/76284383/76578849.xml">netscreen-plugin.xml</a>.</p>
+<p>The final plug-in in its entirety is here in <a href="attachments/77464172/77660749.xml">netscreen-plugin.xml</a>.</p>
 
 
 <h1><a name="WriteanSNMPPlugin-AdditionalSNMPPluginExamples"></a>Additional SNMP Plugin Examples</h1>
@@ -435,10 +433,112 @@ nsIfName.3 = STRING: "vlan1"
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/76284383/76578849.xml">netscreen-plugin.xml</a> (text/xml)
+                                <a href="attachments/77464172/77660749.xml">netscreen-plugin.xml</a> (text/xml)
                                 <br/>
                                                     </div>
 				    
+                                            <div class="tabletitle">
+                            <a name="comments">
+                                <h2>Comments:</h2>
+                            </a>
+                        </div>
+
+                        <table border="0" width="100%">
+                                                        <tr>
+                                <td >
+                                    <a name="comment-77464911"></a>
+                                    <font class="smallfont"><p>I'd like to develop an SNMP plug-in as an extension of network device plug-in in order to collect ip metrics by some including tag like &amp;netdevice-platform and discover interfaces as hyperic services by '&amp;netdevice-services'.<br/>
+I guess that some way I should include /etc/netdevice-platform.xml and /etc/netdevice-platform.xml /etc/netdevice-services.xml files as it was done with Cisco based plug-in and with JMX based plugin. Can you add some addition documentation about import capabilities?<br/>
+Thanks,<br/>
+Paolo</p></font>
+                                    <div align="left" class="smallfont" style="color: #666666; width: 98%; margin-bottom: 10px;">
+                                        <img src="images/icons/comment_16.gif" height="16" width="16" border="0" align="absmiddle"/>
+                                        Posted by paolo.bacco@italtel.it at Dec 17, 2008 00:52
+                                    </div>
+                                </td>
+                            </tr>
+                                                        <tr>
+                                <td  style="border-top: 1px dashed #666666">
+                                    <a name="comment-77464909"></a>
+                                    <font class="smallfont"><p>Hi everyone,</p>
+
+<p>Just wondering if i install hyperic on windows and want to implement a SNMP based plugin where do i save the MIB's?  </p>
+
+<p>Regards</p>
+
+<p>Ashwin</p>
+</font>
+                                    <div align="left" class="smallfont" style="color: #666666; width: 98%; margin-bottom: 10px;">
+                                        <img src="images/icons/comment_16.gif" height="16" width="16" border="0" align="absmiddle"/>
+                                        Posted by ashwin.kadle@gmail.com at Jan 16, 2009 22:36
+                                    </div>
+                                </td>
+                            </tr>
+                                                        <tr>
+                                <td  style="border-top: 1px dashed #666666">
+                                    <a name="comment-77464892"></a>
+                                    <font class="smallfont"><p>Hi Ashwin,</p>
+
+<p>there for you can set the following properties in your plugin:</p>
+
+<p>&lt;property name="MIBDIR" value="C:\mibs"/&gt;<br/>
+&lt;property name="MIBS" value="$</p>
+<div class="error"><span class="error">Unknown macro: {MIBDIR}</span> </div>
+<p>/NOTES-MIB.txt"/&gt;</p>
+
+<p>It's not important where the MIBs are stored because you can change the MIB directory in the configuration properties of your plugin.</p>
+
+<p>Please ask questions about Hyperic HQ Development forum:
+<a href="http://forums.hyperic.com/jiveforums/">http://forums.hyperic.com/jiveforums/</a></p>
+
+<p>Thanks,<br/>
+Mirko</p></font>
+                                    <div align="left" class="smallfont" style="color: #666666; width: 98%; margin-bottom: 10px;">
+                                        <img src="images/icons/comment_16.gif" height="16" width="16" border="0" align="absmiddle"/>
+                                        Posted by excowboy at Jan 17, 2009 14:40
+                                    </div>
+                                </td>
+                            </tr>
+                                                        <tr>
+                                <td  style="border-top: 1px dashed #666666">
+                                    <a name="comment-77464889"></a>
+                                    <font class="smallfont"><p>Thank you </p></font>
+                                    <div align="left" class="smallfont" style="color: #666666; width: 98%; margin-bottom: 10px;">
+                                        <img src="images/icons/comment_16.gif" height="16" width="16" border="0" align="absmiddle"/>
+                                        Posted by  at Jan 18, 2009 20:24
+                                    </div>
+                                </td>
+                            </tr>
+                                                        <tr>
+                                <td  style="border-top: 1px dashed #666666">
+                                    <a name="comment-77464887"></a>
+                                    <font class="smallfont"><p>Can I use an SNMP plug-in to change passwords across an entire closed network?</p></font>
+                                    <div align="left" class="smallfont" style="color: #666666; width: 98%; margin-bottom: 10px;">
+                                        <img src="images/icons/comment_16.gif" height="16" width="16" border="0" align="absmiddle"/>
+                                        Posted by  at Mar 20, 2009 08:55
+                                    </div>
+                                </td>
+                            </tr>
+                                                        <tr>
+                                <td  style="border-top: 1px dashed #666666">
+                                    <a name="comment-77464884"></a>
+                                    <font class="smallfont"><p>This XML mechanism is not convenient when it comes to implement multiple mibs, possibly with different versions.<br/>
+Would that be so difficult to simply build the XML (or whatever internal plugin representation) directly from the mib file?</p>
+
+<p>A simpler alternative would be an snmpWalk of the mib by Hyperic (being given the mib description) and the automatic collection proposal for all metrics.</p>
+
+<p>Is there anything in the roadmap about it?</p>
+
+<p>I could script this SNMP walk output in order to do it externally but this MIB parsing feature is a standard NMS one and as such belong to HQ.</p>
+
+<p>Sylvain</p></font>
+                                    <div align="left" class="smallfont" style="color: #666666; width: 98%; margin-bottom: 10px;">
+                                        <img src="images/icons/comment_16.gif" height="16" width="16" border="0" align="absmiddle"/>
+                                        Posted by sylvain.combe@sicap.com at Jun 24, 2010 23:25
+                                    </div>
+                                </td>
+                            </tr>
+                                                    </table>
                     			    </td>
 		    </tr>
 	    </table>
@@ -447,7 +547,7 @@ nsIfName.3 = STRING: "vlan1"
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jun 14, 2011 15:09</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 22, 2011 15:14</font></td>
 		    </tr>
 	    </table>
     </body>

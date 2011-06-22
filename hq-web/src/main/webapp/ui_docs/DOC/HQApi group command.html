@@ -16,18 +16,18 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 21, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
  
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1307466617761 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1307466617761 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1307466617761 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1308679754382 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1308679754382 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1308679754382 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1307466617761'>
+/*]]>*/</style><div class='rbtoc1308679754382'>
 <ul>
     <li><a href='#HQApigroupcommand-Functionality'>Functionality</a></li>
     <li><a href='#HQApigroupcommand-groupCommandOptions'>group Command Options</a></li>
@@ -56,15 +56,11 @@ div.rbtoc1307466617761 li {margin-left: 0px;padding-left: 0px;}
     <li><a href='#HQApigroupcommand-groupsyncCreateorUpdateaMixedGroupfromCommandLine'>group sync - Create or Update a Mixed Group from Command Line</a></li>
 </ul>
 </ul></div> 
-
-
-<p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
-
  
 <div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Related Topics</b><br />This page provides information for running an HQ API from the command line. Related topics include: 
 <ul>
-	<li><a href="http://support.hyperic.com/display/DOCS46/Web+Services+API" title="Web Services API">Web Services API</a> - brief introduction to the API.</li>
-	<li><a href="HQ API Command-Line Tools.html" title="HQ API Command-Line Tools">HQ API Command&#45;Line Tools</a> - how to get started with the command line tools.</li>
+	<li><a href="vFabric Hyperic Web Services API.html" title="vFabric Hyperic Web Services API">vFabric Hyperic Web Services API</a> - brief introduction to the API.</li>
+	<li><a href="HQApi Command-Line Tools.html" title="HQApi Command-Line Tools">HQApi Command&#45;Line Tools</a> - how to get started with the command line tools.</li>
 	<li><a href="HQApi Java API.html" title="HQApi Java API">HQApi Java API</a> - about accessing the APIs programmatically.</li>
 </ul>
 </td></tr></table></div>  
@@ -81,9 +77,9 @@ div.rbtoc1307466617761 li {margin-left: 0px;padding-left: 0px;}
 
 
 
-<p>For information about groups in Hyperic, see <a href="Resources, Resource Types and Inventory Types.html#Resources%2CResourceTypesandInventoryTypes-groups">About Groups in Hyperic</a>.</p>
+<p>For information about groups in Hyperic, see <a href="Resources, Resource Types and Inventory Types.html#Resources%2CResourceTypesandInventoryTypes-groups">Resources, Resource Types and Inventory Types#groups</a>.</p>
 
-
+<p>For information about groups in Hyperic, see "About Groups in Hyperic" in <em>vFabric Hyperic Administration</em>.</p>
 
 
 <h1><a name="HQApigroupcommand-groupCommandOptions"></a>group Command Options </h1>
@@ -91,7 +87,7 @@ div.rbtoc1307466617761 li {margin-left: 0px;padding-left: 0px;}
 <h2><a name="HQApigroupcommand-grouplist"></a>group list </h2>
 
 <p>The <b>group list</b> command returns a <tt>GroupsResponse</tt> element, which contains a contains a <tt>Group</tt> element (that defines the attributes of a group) for each group returned. </p>
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>See <a href="http://support.hyperic.com/display/DOCS46/Hyperic+Inventory+Model" title="Hyperic Inventory Model">Hyperic Inventory Model</a>.</td></tr></table></div> 
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>See <a href="Resources, Resource Types and Inventory Types.html" title="Resources, Resource Types and Inventory Types">Resources, Resource Types and Inventory Types</a>.</td></tr></table></div> 
 
 <h3><a name="HQApigroupcommand-grouplistCommandQualifiers"></a>group list Command Qualifiers </h3>
 
@@ -407,7 +403,7 @@ Successfully synced 2 groups.</pre>
 		</div>
 </div></div> 
 
-<p>For more information about supplying values to <b>sync</b> using an XML file, see <p><b>Note:&nbsp;</b> When you use <b>sync</b> to create a new item, do not specify the <tt>id</tt> attribute for the new item. See <a href="HQ API Command-Line Tools.html#HQAPICommand-LineTools-sync">sync</a> for more information. </p> </p>
+<p>For more information about supplying values to <b>sync</b> using an XML file, see <p><b>Note:&nbsp;</b> When you use <b>sync</b> to create a new item, do not specify the <tt>id</tt> attribute for the new item. See <a href="HQApi Command-Line Tools.html#HQApiCommand-LineTools-sync">sync</a> for more information. </p> </p>
 
 <h2><a name="HQApigroupcommand-groupsyncCreateorUpdateaCompatibleGroupfromCommandLine"></a>group sync - Create or Update a Compatible Group from Command Line </h2>
 
@@ -434,7 +430,7 @@ Successfully synced 2 groups.</pre>
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jun 14, 2011 15:09</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 22, 2011 15:14</font></td>
 		    </tr>
 	    </table>
     </body>

@@ -16,7 +16,7 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 08, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 21, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
@@ -24,11 +24,11 @@
 
 <p>This page is a high level summary of alerting functionality in Hyperic HQ and vFabric Hyperic. See the last section, <a href="#AlertsandAlertDefinitions-AdvancedAlertFunctionalityinvFabricHyperic">Advanced Alert Functionality in vFabric Hyperic</a>, for a summary of vFabric Hyperic-only features.</p>
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1307568713350 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1307568713350 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1307568713350 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1308680964074 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1308680964074 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1308680964074 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1307568713350'>
+/*]]>*/</style><div class='rbtoc1308680964074'>
 <ul>
     <li><a href='#AlertsandAlertDefinitions-Alerts'>Alerts</a></li>
     <li><a href='#AlertsandAlertDefinitions-FunctionalityofaResourceAlert'>Functionality of a Resource Alert</a></li>
@@ -41,10 +41,6 @@ div.rbtoc1307568713350 li {margin-left: 0px;padding-left: 0px;}
     <li><a href='#AlertsandAlertDefinitions-RespondingtoAlertandNotificationStorms'>Responding to Alert and Notification Storms</a></li>
     <li><a href='#AlertsandAlertDefinitions-AdvancedAlertFunctionalityinvFabricHyperic'>Advanced Alert Functionality in vFabric Hyperic</a></li>
 </ul></div>
-
-
-<p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
-
 
 
 <h1><a name="AlertsandAlertDefinitions-Alerts"></a>Alerts </h1>
@@ -106,22 +102,22 @@ An alert is set of rules you define that tells Hyperic, for a given resource, ho
 
 <p>There are several benefits to using escalation:</p>
 <ul>
-	<li><b>Prevent redundant alerts</b> &#45; When an alert kicks off an escalation, Hyperic effectively disables the associated alert definition - preventing a sequence of additional alerts for the same problem. The alert definition remains inactive until the escalation ends. An escalation configured to repeat itself ensures that redundant alerts will be prevented even if the escalation ends before the triggering problem is resolved.</li>
+	<li><b>Prevent redundant alerts</b> &#8212; When an alert kicks off an escalation, Hyperic effectively disables the associated alert definition - preventing a sequence of additional alerts for the same problem. The alert definition remains inactive until the escalation ends. An escalation configured to repeat itself ensures that redundant alerts will be prevented even if the escalation ends before the triggering problem is resolved.</li>
 </ul>
 
 
 <ul>
-	<li><b>Automate issue management processes</b> &#45; An escalation automates the process of monitoring and managing problem resolution processes. Thoughtfully configured escalations call attention to "long-running" or broken response processes, and make it harder for issues to fall through the crack.</li>
+	<li><b>Automate issue management processes</b> &#8212; An escalation automates the process of monitoring and managing problem resolution processes. Thoughtfully configured escalations call attention to "long-running" or broken response processes, and make it harder for issues to fall through the crack.</li>
 </ul>
 
 
 <ul>
-	<li><b>Reduce the effort of managing alert response rules</b> &#45; Unlike other types of notifications that are defined within an alert definition (for example, the <b>Notify Hyperic Users</b> and <b>Notify Other Recipients</b> actions) an escalation is defined and updated separately. When policies, procedures, or staff assignments change, it is less effort to update one escalation than many alert definitions.</li>
+	<li><b>Reduce the effort of managing alert response rules</b> &#8212; Unlike other types of notifications that are defined within an alert definition (for example, the <b>Notify Hyperic Users</b> and <b>Notify Other Recipients</b> actions) an escalation is defined and updated separately. When policies, procedures, or staff assignments change, it is less effort to update one escalation than many alert definitions.</li>
 </ul>
 
 
 <ul>
-	<li><b>Escalations add flexibility to automation</b> &#45; An escalation has an "acknowledgement" status that enables the automated response to be more flexible and take into account whether or not someone is attending to the problem. You can specify steps to perform based on whether an alert is or is not acknowledged, or based on how long it has been unacknowledged.</li>
+	<li><b>Escalations add flexibility to automation</b> &#8212; An escalation has an "acknowledgement" status that enables the automated response to be more flexible and take into account whether or not someone is attending to the problem. You can specify steps to perform based on whether an alert is or is not acknowledged, or based on how long it has been unacknowledged.</li>
 </ul>
 
 
@@ -145,8 +141,8 @@ An alert is set of rules you define that tells Hyperic, for a given resource, ho
 
 <p>If for some reason the volume of alerts or notifications gets out of control, you can use options on the <b>HQ Server Settings</b> page to immediately and globally:</p>
 <ul>
-	<li><b>Disable all alert definitions</b> &#45; No alerts will fire for any resources. Notifications defined in escalations in progress will be completed.</li>
-	<li><b>Disable all notifications</b> &#45; No alert notifications will be sent. Any escalations currently in progress stop - any remaining notification steps are not performed.</li>
+	<li><b>Disable all alert definitions</b> &#8212; No alerts will fire for any resources. Notifications defined in escalations in progress will be completed.</li>
+	<li><b>Disable all notifications</b> &#8212; No alert notifications will be sent. Any escalations currently in progress stop - any remaining notification steps are not performed.</li>
 </ul>
 
 
@@ -156,28 +152,28 @@ An alert is set of rules you define that tells Hyperic, for a given resource, ho
 
 <p>vFabric Hyperic provides all the features described in the previous sections, plus these additional alert definition and management features:</p>
 <ul>
-	<li><b>Multi-condition resource alerts</b> &#45; In vFabric Hyperic you can define up to three conditions for a resource alert.</li>
+	<li><b>Multi-condition resource alerts</b> &#8212; In vFabric Hyperic you can define up to three conditions for a resource alert.</li>
 </ul>
 
 
 <ul>
-	<li><b>Additional alert actions</b> &#45; vFabric Hyperic provides additional alert actions, including
+	<li><b>Additional alert actions</b> &#8212; vFabric Hyperic provides additional alert actions, including
 	<ul>
-		<li><b>SNMP trap</b> &#45; generation</li>
-		<li><b>Script action</b> &#45; you can configure a script that does custom alert processing or notification, for instance, to share alert information with another management system</li>
-		<li><b>Control action</b> &#45; operation on a resource, either the resource where the alert fired, or a related resource,</li>
+		<li><b>SNMP trap</b> &#8212; generation</li>
+		<li><b>Script action</b> &#8212; you can configure a script that does custom alert processing or notification, for instance, to share alert information with another management system</li>
+		<li><b>Control action</b> &#8212; operation on a resource, either the resource where the alert fired, or a related resource,</li>
 	</ul>
 	</li>
 </ul>
 
 
 <ul>
-	<li><b>Recovery alerts</b> &#45; In vFabric Hyperic, you can create <em>recovery alerts</em> to streamline your process for responding to alerts. First you create an alert definition that is configured to fire once and then disable itself until fixed. Then you define a recovery alert that fires when the condition that fired the primary alert is no longer true. When the recovery alert fires, it sets the primary alert's status to "fixed" and re-enables the primary alert definition.</li>
+	<li><b>Recovery alerts</b> &#8212; In vFabric Hyperic, you can create <em>recovery alerts</em> to streamline your process for responding to alerts. First you create an alert definition that is configured to fire once and then disable itself until fixed. Then you define a recovery alert that fires when the condition that fired the primary alert is no longer true. When the recovery alert fires, it sets the primary alert's status to "fixed" and re-enables the primary alert definition.</li>
 </ul>
 
 
 <ul>
-	<li><b>Resource type alerts</b> &#45; In vFabric Hyperic you can create an alert definition for a resource type, that will be inherited by all resources of that type. Resource type alerts are useful if want to assign exactly the same alert rules to every resource of the same type, and to be able to enable and disable the alert definition for all of them in one fell swoop.</li>
+	<li><b>Resource type alerts</b> &#8212; In vFabric Hyperic you can create an alert definition for a resource type, that will be inherited by all resources of that type. Resource type alerts are useful if want to assign exactly the same alert rules to every resource of the same type, and to be able to enable and disable the alert definition for all of them in one fell swoop.</li>
 </ul>
 
 
@@ -186,22 +182,22 @@ An alert is set of rules you define that tells Hyperic, for a given resource, ho
 </div></div>
 
 <ul>
-	<li><b>Resource group alerts</b> &#45; In vFabric Hyperic you can create an alert definition for a compatible group - a group you have defined that contains selected resources, all of which have the same resource type. A resource group alert is useful when you are concerned about how many of a set of resources are having a particular problem - you want to know if 2 out of 10 platforms have high disk utilization, for instance. A resource group alert is evaluated differently than resource alerts or resource type alerts. A resource alert or resource type alert is fires for a specific resource based on monitoring results for that resource only. A resource group alert fires when a metric condition is true for a specified number or percentage of the resources in the group.</li>
+	<li><b>Resource group alerts</b> &#8212; In vFabric Hyperic you can create an alert definition for a compatible group - a group you have defined that contains selected resources, all of which have the same resource type. A resource group alert is useful when you are concerned about how many of a set of resources are having a particular problem - you want to know if 2 out of 10 platforms have high disk utilization, for instance. A resource group alert is evaluated differently than resource alerts or resource type alerts. A resource alert or resource type alert is fires for a specific resource based on monitoring results for that resource only. A resource group alert fires when a metric condition is true for a specified number or percentage of the resources in the group.</li>
 </ul>
 
 
 <ul>
-	<li><b>Hierarchical alerting</b> &#45; <em>H</em><em>ierarchical alerting</em> prevents a cascade of alerts from resulting from the same root cause, so that a single problem doesn't result in alerts firing at multiple levels of the platform-server-service hierarchy. Hierarchical alerting is enabled by default. Hierarchical alerting functionality can be extended to network devices or virtual hosts that platforms depend on by defining dependencies. For more information, see <a href="http://support.hyperic.com/display/DOCS46/Controlling+Alert+and+Notification+Volume#ControllingAlertandNotificationVolume-HierarchicalAlertingPreventsaCascadeofAlertsinResourceHierarchies">Hierarchical Alerting Prevents a Cascade of Alerts in Resource Hierarchies</a>.</li>
+	<li><b>Hierarchical alerting</b> &#8212; <em>Hierarchical alerting</em> prevents a cascade of alerts from resulting from the same root cause, so that a single problem doesn't result in alerts firing at multiple levels of the platform-server-service hierarchy. Hierarchical alerting is enabled by default. Hierarchical alerting functionality can be extended to network devices or virtual hosts that platforms depend on by defining dependencies. For more information, see <a href="Manage Alert and Notification Volume.html" title="Manage Alert and Notification Volume">Manage Alert and Notification Volume</a>.</li>
 </ul>
 
 
 <ul>
-	<li><b>Notification throttling</b> &#45; Notification throttling allows you limit the number of notifications that can be issued over a specified interval; when notification volume reaches the limit, Hyperic stops sending individual notifications, and instead sends periodic rollup notifications, until the volume of alerts with notification actions goes down.</li>
+	<li><b>Notification throttling</b> &#8212; Notification throttling allows you limit the number of notifications that can be issued over a specified interval; when notification volume reaches the limit, Hyperic stops sending individual notifications, and instead sends periodic rollup notifications, until the volume of alerts with notification actions goes down.</li>
 </ul>
 
 
 <ul>
-	<li><b>Advanced Views for Alert Monitoring and Analysis</b> &#45; In vFabric Hyperic, the <b>Alert Center</b> presents filterable views of alerts and alert definitions. The <b>Operations Center</b> and presents filterable views of unfixed alerts.</li>
+	<li><b>Advanced Views for Alert Monitoring and Analysis</b> &#8212; In vFabric Hyperic, the <b>Alert Center</b> presents filterable views of alerts and alert definitions. The <b>Operations Center</b> and presents filterable views of unfixed alerts.</li>
 </ul>
 
 
@@ -216,7 +212,7 @@ An alert is set of rules you define that tells Hyperic, for a given resource, ho
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jun 14, 2011 15:09</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 22, 2011 15:14</font></td>
 		    </tr>
 	    </table>
     </body>

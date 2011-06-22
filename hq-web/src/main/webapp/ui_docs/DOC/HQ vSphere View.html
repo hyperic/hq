@@ -35,16 +35,12 @@
 
 
 
-<p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
-
-
-
 <div class="scroll-pagebreak"></div>
 <h1><a name="HQvSphereView-AbouttheHQvSpherePage"></a>About the HQ vSphere Page</h1>
 
 <p>This page describes the <b>HQ vSphere</b> page, an interface for monitoring and managing vSphere Hosts and VMs available in HQ Enterprise.</p>
 
-<p>See Monitoring vSphere Components &#40;Hyperic 4.5.1 and Later&#41; for information about the management functions supported for each resource type and configuration instructions.
+<p>See <a href="vSphere.html" title="vSphere">vSphere</a> for information about the management functions supported for each resource type and configuration instructions.
 <br class="atl-forced-newline" />
 <br class="atl-forced-newline" />
 <a name="HQvSphereView-installagent"></a></p>
@@ -58,7 +54,7 @@
 
 <p>You can also navigate to the <b>HQ vSphere</b> page from the Resource Hub. The resource page for a vCenter server or vSphere Host has a <b>View in HQ vSphere</b> link above the <b>Monitor</b> tab. Click the thumbnail for a screenshot.</p>
 
-<p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 996x825" href='http://support.hyperic.com/download/attachments/76285170/VsphereHostIndicators.png'><img src="attachments/thumbnails/76285170/76579484" style="border: 0px solid black"/></a></span></p>
+<p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 996x825" href='http://support.hyperic.com/download/attachments/77463605/VsphereHostIndicators.png'><img src="attachments/thumbnails/77463605/77660360" style="border: 0px solid black"/></a></span></p>
 
 <h2><a name="HQvSphereView-HQvSphereandResourcePermissions"></a>HQ vSphere and Resource Permissions</h2>
 
@@ -113,41 +109,41 @@
 
 
 <p>Click the thumbnail to see an expanded hierarchy in the <b>Inventory</b> tab.<br/>
-<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1068x368" href='http://support.hyperic.com/download/attachments/76285170/VirtualHierarchy.png'><img src="attachments/thumbnails/76285170/76579483" style="border: 0px solid black"/></a></span></p>
+<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1068x368" href='http://support.hyperic.com/download/attachments/77463605/VirtualHierarchy.png'><img src="attachments/thumbnails/77463605/77660359" style="border: 0px solid black"/></a></span></p>
 
 <div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Icons in the vSphere Inventory Tab</b><br />The icon to the left of an item in the resource tree indicates the type of the resource, and for a VM, its availability status. For information about how VM availability is determined, see <a href="#HQvSphereView-VMwarevSphereVMMetrics">VMware vSphere VM Metrics</a> below.
 <div class='table-wrap'>
 <table class='confluenceTable'><tbody>
 <tr>
-<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/76285153/76579287.png" width="20" style="border: 0px solid black"/></span> </td>
+<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/77463561/77660592.png" width="20" style="border: 0px solid black"/></span> </td>
 <td class='confluenceTd'> vCenter Server </td>
 </tr>
 <tr>
-<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/76285153/76579295.png" width="20" style="border: 0px solid black"/></span> </td>
+<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/77463561/77660565.png" width="20" style="border: 0px solid black"/></span> </td>
 <td class='confluenceTd'> vSphere Host </td>
 </tr>
 <tr>
-<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/76285153/76579289.png" width="20" style="border: 0px solid black"/></span> </td>
+<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/77463561/77660590.png" width="20" style="border: 0px solid black"/></span> </td>
 <td class='confluenceTd'> VM whose availability is <tt>Up</tt> </td>
 </tr>
 <tr>
-<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/76285153/76579281.png" width="20" style="border: 0px solid black"/></span> </td>
+<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/77463561/77660582.png" width="20" style="border: 0px solid black"/></span> </td>
 <td class='confluenceTd'> VM whose availability is <tt>Paused</tt> </td>
 </tr>
 <tr>
-<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/76285153/76579293.png" width="20" style="border: 0px solid black"/></span> </td>
+<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/77463561/77660563.png" width="20" style="border: 0px solid black"/></span> </td>
 <td class='confluenceTd'> VM whose availability is <tt>Powered Off</tt> </td>
 </tr>
 <tr>
-<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/76285153/76579288.png" width="20" style="border: 0px solid black"/></span> </td>
+<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/77463561/77660591.png" width="20" style="border: 0px solid black"/></span> </td>
 <td class='confluenceTd'> VM whose availability status is <tt>Down</tt> </td>
 </tr>
 <tr>
-<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/76285153/76579282.png" width="20" style="border: 0px solid black"/></span> </td>
+<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/77463561/77660581.png" width="20" style="border: 0px solid black"/></span> </td>
 <td class='confluenceTd'> VM whose availability status is <tt>Unknown</tt> </td>
 </tr>
 <tr>
-<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/76285153/76579294.png" width="20" style="border: 0px solid black"/></span> </td>
+<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/77463561/77660564.png" width="20" style="border: 0px solid black"/></span> </td>
 <td class='confluenceTd'> An HQ-managed resource running in a VM that has an HQ Agent running in it. </td>
 </tr>
 </tbody></table>
@@ -237,7 +233,7 @@
 
 <p>Click the thumbnail for an example screenshot; the  selected resource is a DB2 server running on a VM whose name is "vmcent54x64-db297".</p>
 
-<p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 995x607" href='http://support.hyperic.com/download/attachments/76285170/ServerInVmSummaryTab.png'><img src="attachments/thumbnails/76285170/76579482" style="border: 0px solid black"/></a></span></p>
+<p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 995x607" href='http://support.hyperic.com/download/attachments/77463605/ServerInVmSummaryTab.png'><img src="attachments/thumbnails/77463605/77660411" style="border: 0px solid black"/></a></span></p>
 
 <p>To view inventory properties for the managed resource itself, click the <b>view resource</b> link next to the resource name to view the resource in the Resource Hub.</p>
 
@@ -255,10 +251,10 @@
 <p>The <b>Performance</b> tab displays an <b>Availability</b> bar, and a chart for each metric currently enabled for the selected resource type.</p>
 
 <p>Click the thumbnail for the <b>Performance</b> tab for a vSphere Host.<br/>
-<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1072x1584" href='http://support.hyperic.com/download/attachments/76285170/VsphereHostPerfTab.png'><img src="attachments/thumbnails/76285170/76579481" style="border: 0px solid black"/></a></span></p>
+<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1072x1584" href='http://support.hyperic.com/download/attachments/77463605/VsphereHostPerfTab.png'><img src="attachments/thumbnails/77463605/77660412" style="border: 0px solid black"/></a></span></p>
 
 <p>Click the thumbnail for the <b>Performance</b> tab for a vSphere VM.<br/>
-<span class="image-wrap" style=""><a class="confluence-thumbnail-link 986x1104" href='http://support.hyperic.com/download/attachments/76285170/VmPerformanceTab.png'><img src="attachments/thumbnails/76285170/76579505" style="border: 0px solid black"/></a></span></p>
+<span class="image-wrap" style=""><a class="confluence-thumbnail-link 986x1104" href='http://support.hyperic.com/download/attachments/77463605/VmPerformanceTab.png'><img src="attachments/thumbnails/77463605/77660370" style="border: 0px solid black"/></a></span></p>
 
 <p>The tables in <a href="http://support.hyperic.com/display/DOCS46/VMware+vSphere+Host+Metrics" title="VMware vSphere Host Metrics">VMware vSphere Host Metrics</a> and <a href="http://support.hyperic.com/display/DOCS46/VMware+vSphere+Host+Metrics" title="VMware vSphere Host Metrics">VMware vSphere Host Metrics</a> list supported vSphere metrics and default settings.</p>
 
@@ -278,19 +274,19 @@
 
 <ul>
 	<li><b>Compare each VM metric with its vSphere Host equivalent</b> &#8212; For example compare the VM's "Disk Usage (Average)" metric to its host's "Disk Usage (Average)" metric; the VM's "CPU Usage (Average)" metric to its host's "CPU Usage (Average)" metric; and so on. Click the thumbnail for an example screenshot.<br/>
-<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1129x1285" href='http://support.hyperic.com/download/attachments/76285170/VmHostAlltoAll.png'><img src="attachments/thumbnails/76285170/76579506" style="border: 0px solid black"/></a></span></li>
+<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1129x1285" href='http://support.hyperic.com/download/attachments/77463605/VmHostAlltoAll.png'><img src="attachments/thumbnails/77463605/77660369" style="border: 0px solid black"/></a></span></li>
 </ul>
 
 
 <ul>
 	<li><b>Compare each VM metric to a selected vSphere Host metric</b> &#8212; For example, compare each VM metric to the "Disk Usage (Average)" metric of its vSphere host. Click the thumbnail for an example screenshot.<br/>
-<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1099x1087" href='http://support.hyperic.com/download/attachments/76285170/VmHostAlltoOne.png'><img src="attachments/thumbnails/76285170/76579510" style="border: 0px solid black"/></a></span></li>
+<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1099x1087" href='http://support.hyperic.com/download/attachments/77463605/VmHostAlltoOne.png'><img src="attachments/thumbnails/77463605/77660381" style="border: 0px solid black"/></a></span></li>
 </ul>
 
 
 <ul>
 	<li><b>Compare metrics for a managed resource in the VM with performance of the VM or the vSphere host</b> &#8212; Use the <b>Compare</b> pull-down to select a VM or Host metric - the charts for the managed resource metrics will be overlayed with the line for the selected VM or host metric. Click the thumbnail for an example in which the vSphere Hosts's "CPU Usage (Average)" counter is overlayed on each HQ Agent metric chart.<br/>
-<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1110x1248" href='http://support.hyperic.com/download/attachments/76285170/ApptoHostCompare.png'><img src="attachments/thumbnails/76285170/76579509" style="border: 0px solid black"/></a></span></li>
+<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1110x1248" href='http://support.hyperic.com/download/attachments/77463605/ApptoHostCompare.png'><img src="attachments/thumbnails/77463605/77660382" style="border: 0px solid black"/></a></span></li>
 </ul>
 
 
@@ -300,7 +296,7 @@
 
 <p>Click the thumbnail to see the an example screenshot.</p>
 
-<p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 975x727" href='http://support.hyperic.com/download/attachments/76285170/VmControlTab.png'><img src="attachments/thumbnails/76285170/76579507" style="border: 0px solid black"/></a></span></p>
+<p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 975x727" href='http://support.hyperic.com/download/attachments/77463605/VmControlTab.png'><img src="attachments/thumbnails/77463605/77660384" style="border: 0px solid black"/></a></span></p>
 
 <div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>If a VM does not have an agent running in it, no <b>Control</b> tab appears. You can run control actions from the "Control" page for the VM in the Resource Hub. Click <b>view resource</b> next to the "Hostname" property on the VM's <b>Summary</b> tab.</td></tr></table></div>
 
@@ -340,15 +336,15 @@ Total latency = kernelLatency + deviceLatency \\ | <font color="navy">ms</font> 
 | <font color="gray">Memory Swap Out</font> | <font color="gray">mem.swapout.average</font> | 2 | Sum of Memory Swap Out of all powered on VMs on the host. \\ | <font color="gray">KB</font> | <font color="gray">UTILIZATION</font> | <font color="gray">false</font> | <font color="gray">5 min</font> |
 | <font color="gray">Memory Swap Used</font> | <font color="gray">mem.swapused.average</font> | 2 | Amount of memory that is used by swap. Sum of Memory Swapped of all powered on virtual machines and vSphere services on the host. \\ | <font color="gray">KB</font> | <font color="gray">UTILIZATION</font> | <font color="gray">false</font> | <font color="gray">5 min</font> |
 | <font color="navy">Memory Balloon</font> | <font color="navy">mem.vmmemctl.average</font> | 1 | Sum of Memory Balloon (Amount of memory allocated by the virtual machine memory control driver) of all powered on virtual machines and vSphere services on the host. If the balloon target value is greater than the balloon value, the VMkernel inflates the balloon, causing more virtual machine memory to be reclaimed. If the balloon target value is less than the balloon value, the VMkernel deflate the balloon, which allows the virtual machine to consume additional memory if needed. \\ | <font color="navy">KB</font> | <font color="navy">UTILIZATION</font> | <font color="navy">true</font> | <font color="navy">5 min</font> |
-| <font color="gray">Memory Unreserved</font> | <font color="gray">mem.unreserved.average</font> | 2 | Amount of memory that is unreserved. Memory reservation not used by the Service Console, VMkernel, vSphere services and other powered on VMs’ user-specified memory reservations and overhead memory. \\ | <font color="gray">KB</font> | <font color="gray">UTILIZATION</font> | <font color="gray">false</font> | <font color="gray">5 min</font> |
+| <font color="gray">Memory Unreserved</font> | <font color="gray">mem.unreserved.average</font> | 2 | Amount of memory that is unreserved. Memory reservation not used by the Service Console, VMkernel, vSphere services and other powered on VMs' user-specified memory reservations and overhead memory. \\ | <font color="gray">KB</font> | <font color="gray">UTILIZATION</font> | <font color="gray">false</font> | <font color="gray">5 min</font> |
 | <font color="gray">Memory Heap</font> | <font color="gray">mem.heap.average</font> | 2 | Amount of VMkernel virtual address space dedicated to VMkernel main heap and related data. \\ | <font color="gray">KB</font> | <font color="gray">UTILIZATION</font> | <font color="gray">false</font> | <font color="gray">5 min</font> |
-| <font color="gray">Memory Heap Free</font> | <font color="gray">mem.heapfree.average</font> | 2 | Amount of free address space in the VMkernel’s main heap. Heap Free varies, depending on the number of physical devices and various configuration options. There is no direct way for the user to increase or decrease this statistic. \\ | <font color="gray">KB</font> | <font color="gray">UTILIZATION</font> | <font color="gray">false</font> | <font color="gray">5 min</font> |
+| <font color="gray">Memory Heap Free</font> | <font color="gray">mem.heapfree.average</font> | 2 | Amount of free address space in the VMkernel's main heap. Heap Free varies, depending on the number of physical devices and various configuration options. There is no direct way for the user to increase or decrease this statistic. \\ | <font color="gray">KB</font> | <font color="gray">UTILIZATION</font> | <font color="gray">false</font> | <font color="gray">5 min</font> |
 | <font color="gray">Memory Overhead</font> | <font color="gray">mem.overhead.average</font> | 1 | Total of all overhead metrics (Amount of additional machine memory allocated to a virtual machine for overhead. The overhead amount is beyond the reserved amount).for powered-on virtual machines, plus the overhead of running vSphere services on the host. \\ | <font color="gray">KB</font> | <font color="gray">UTILIZATION</font> | <font color="gray">false</font> | <font color="gray">5 min</font> |
 | <font color="gray">Memory Zero</font> | <font color="gray">mem.zero.average</font> | 2 | Amount of memory that is zeroed out (contains only 0s). This statistic is included in Memory Shared.  For a vSphere Host, Sum of Memory Zero of all powered on VMs and vSphere services on the host. \\ | <font color="gray">KB</font> | <font color="gray">UTILIZATION</font> | <font color="gray">false</font> | <font color="gray">5 min</font> |
 | <font color="gray">Memory Reserved Capacity</font> | <font color="gray">mem.reservedCapacity.average</font> | 2 | Total amount of memory reservation used by powered on VMs and vSphere services on the host. Includes overhead amount. \\ | <font color="gray">MB</font> | <font color="gray">UTILIZATION</font> | <font color="gray">false</font> | <font color="gray">5 min</font> |
 | <font color="navy">Memory Active</font> | <font color="navy">mem.active.average</font> | 2 | Amount of memory actively used, as estimated by VMkernel. Active memory is based on the current workload of the virtual machine or host. \\
 For a vSphere Host,&nbsp;sum of the active guest physical memory of all powered on virtual machines on the host, plus memory used by basic VMKernel applications on the host. | <font color="navy">KB</font> | <font color="navy">UTILIZATION</font> | <font color="navy">true</font> | <font color="navy">5 min</font> |
-| <font color="navy">Memory Shared</font> | <font color="navy">mem.shared.average</font> | 2 | Sum of the shared memory values of all powered-on virtual machines, plus the amount for the vSphere services on the host. The host’s Memory Shared may be larger than the amount of machine memory if memory is overcommitted (the aggregate virtual machine configured memory is much greater than machine memory). The value of this statistic reflects how effective transparent page sharing and memory overcommitment are for saving machine memory. \\ | <font color="navy">KB</font> | <font color="navy">UTILIZATION</font> | <font color="navy">true</font> | <font color="navy">5 min</font> |
+| <font color="navy">Memory Shared</font> | <font color="navy">mem.shared.average</font> | 2 | Sum of the shared memory values of all powered-on virtual machines, plus the amount for the vSphere services on the host. The host's Memory Shared may be larger than the amount of machine memory if memory is overcommitted (the aggregate virtual machine configured memory is much greater than machine memory). The value of this statistic reflects how effective transparent page sharing and memory overcommitment are for saving machine memory. \\ | <font color="navy">KB</font> | <font color="navy">UTILIZATION</font> | <font color="navy">true</font> | <font color="navy">5 min</font> |
 | <font color="gray">Memory Granted</font> | <font color="gray">mem.granted.average</font> | 2 | The total of all granted metrics for all powered-on virtual machines, plus memory for vSphere services on the host. \\ | <font color="gray">KB</font> | <font color="gray">UTILIZATION</font> | <font color="gray">false</font> | <font color="gray">5 min</font> |
 | <font color="gray">Memory Consumed</font> | <font color="gray">mem.consumed.average</font> | 1 | Amount of machine memory used on the host. Consumed memory includes memory used by virtual machines, the service console, VMkernel, and vSphere services, plus the total consumed memory for all running virtual machines. \\
 host consumed memory = total host memory - free host memory \\ | <font color="gray">KB</font> | <font color="gray">UTILIZATION</font> | <font color="gray">false</font> | <font color="gray">5 min</font> |
@@ -360,7 +356,7 @@ host consumed memory = total host memory - free host memory \\ | <font color="gr
 For 0&nbsp;and&nbsp;1, swapping is favored over ballooning. For&nbsp;2&nbsp;and&nbsp;3, ballooning is favored over swapping. \\ | <font color="gray">none</font> | <font color="gray">UTILIZATION</font> | <font color="gray">false</font> | <font color="gray">5 min</font> |
 | <font color="gray">Memory Shared Common</font> | <font color="gray">mem.sharedcommon.average</font> | 2 | Amount of machine memory that is shared by all powered-on virtual machines and vSphere services on the host. \\
 Memory Shared - Memory Shared Common = Host memory saved by sharing \\ | <font color="gray">KB</font> | <font color="gray">UTILIZATION</font> | <font color="gray">false</font> | <font color="gray">5 min</font> |
-| <font color="gray">Memory Used by vmkernel</font> | <font color="gray">mem.sysUsage.average</font> | 2 | Amount of memory used by the VMkernel. Amount of machine memory used by the VMkernel for “core” functionality (such as its own internal uses, device drivers, etc). It does not include memory used by VMs or by vSphere services. \\ | <font color="gray">KB</font> | <font color="gray">UTILIZATION</font> | <font color="gray">false</font> | <font color="gray">5 min</font> |
+| <font color="gray">Memory Used by vmkernel</font> | <font color="gray">mem.sysUsage.average</font> | 2 | Amount of memory used by the VMkernel. Amount of machine memory used by the VMkernel for "core" functionality (such as its own internal uses, device drivers, etc). It does not include memory used by VMs or by vSphere services. \\ | <font color="gray">KB</font> | <font color="gray">UTILIZATION</font> | <font color="gray">false</font> | <font color="gray">5 min</font> |
 
 <h2><a name="HQvSphereView-VMwarevSphereVMMetrics"></a>VMware vSphere VM Metrics</h2>
 
@@ -422,7 +418,7 @@ While a VM may&nbsp;have been configured to use 4 GB of RAM, as an example, it m
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jun 14, 2011 15:09</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 22, 2011 15:14</font></td>
 		    </tr>
 	    </table>
     </body>

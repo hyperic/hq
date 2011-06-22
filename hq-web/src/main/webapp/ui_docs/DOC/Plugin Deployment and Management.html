@@ -16,16 +16,15 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 14, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 22, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    
-<style type='text/css'>/*<![CDATA[*/
-div.rbtoc1308071916204 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1308071916204 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1308071916204 li {margin-left: 0px;padding-left: 0px;}
+				    <style type='text/css'>/*<![CDATA[*/
+div.rbtoc1308758591790 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1308758591790 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1308758591790 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1308071916204'>
+/*]]>*/</style><div class='rbtoc1308758591790'>
 <ul>
     <li><a href='#PluginDeploymentandManagement-NewPluginManagementFeaturesinHyperic4.6'>New Plugin Management Features in Hyperic 4.6</a></li>
     <li><a href='#PluginDeploymentandManagement-PluginAdministrationTasks'>Plugin Administration Tasks</a></li>
@@ -62,7 +61,7 @@ div.rbtoc1308071916204 li {margin-left: 0px;padding-left: 0px;}
 <p>If you run Hyperic with SAPS enabled, you can use <b>Plugin Manager</b> to administer plugins throughout your Hyperic deployment. The primary tasks you perform are:</p>
 
 <ul>
-	<li>Deploy and update custom plugins &#8212; If you develop your own plugin, or customize a built-in plugin, use <b>Plugin Manager</b> to upload and deploy the new or modified plugin to the Hyperic Server and to all agents in your deployment.</li>
+	<li>Deploy and update custom plugins &#8212; If you develop your own plugin, or customize a built-in plugin, use <b>Plugin Manager</b> to upload and deploy the new or modified plugin to the Hyperic Server and to all agents in your deployment. Plugins you deploy with <b>Plugin Manager</b> are deployed to a directory external to the Hyperic Server's installation directory, so that they are not overwritten by a server upgrade. For more information, see <a href="#PluginDeploymentandManagement-ResourcePluginDeploymentDirectories">Resource Plugin Deployment Directories</a> below.</li>
 </ul>
 
 
@@ -84,7 +83,7 @@ div.rbtoc1308071916204 li {margin-left: 0px;padding-left: 0px;}
 
 
 <ul>
-	<li><tt>user.dir/hq-plugins</tt> &#8212; When you deploy a custom plugin, or a customized version of a built-in plugin, <b>Plugin Manager</b> deploys it to the <tt>hq-plugins</tt> subdirectory of the current working directory of the Hyperic Server process. Custom plugins are deployed to a separate plugin directory, external to the server installation, so that they will not be overwritten when you upgrade the Hyperic Server.</li>
+	<li><tt>user.dir/hq-plugins</tt> &#8212; When you deploy a custom plugin, or a customized version of a built-in plugin, <b>Plugin Manager</b> deploys it to the <tt>hq-plugins</tt> subdirectory of the current working directory of the Hyperic Server process. Custom plugins are deployed to a separate plugin directory, external to the server installation, so that they will not be overwritten when you upgrade the Hyperic Server. You can configure the server to store custom plugins in a different directory with the <tt>server.plugin.custom.dir</tt> property. For more information, see <a href="http://support.hyperic.com/display/DOCS46/server.plugin.custom.dir" title="server.plugin.custom.dir">server.plugin.custom.dir</a>.</li>
 </ul>
 
 
@@ -100,9 +99,7 @@ div.rbtoc1308071916204 li {margin-left: 0px;padding-left: 0px;}
 
 <p>When you remove one or more plugins using <b>Plugin Manager</b>, all resources in inventory of types managed by the plugin are removed from inventory.</p>
 
-<p>For information about using the <b>Plugin Manager</b>, see <a href="ui-Administration.Plugin.Manager.html" title="ui-Administration.Plugin.Manager">Manage Plugins with the Plugin Manager</a>.</p>
-
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Plugin Deployment Best Practice</b><br />In previous versions of Hyperic, product plugins were manually deployed to agents and servers, separately, with no mechanism to determine or enforce consistency between the server and agents. As of Hyperic 4.6, the best practice for deploying resource plugins is to use the <b>Plugin Manager</b>, rather than to manually deploy the plugins.</td></tr></table></div>
+<p>For information about using the <b>Plugin Manager</b>, see <a href="http://support.hyperic.com/display/DOCS46/ui-Administration.Plugin.Manager" title="ui-Administration.Plugin.Manager">Manage Plugins with the Plugin Manager</a>.</p>
 
 
 <h1><a name="PluginDeploymentandManagement-AboutCustomPluginDeploymentwithPluginManager"></a>About Custom Plugin Deployment with Plugin Manager</h1>
@@ -111,7 +108,7 @@ div.rbtoc1308071916204 li {margin-left: 0px;padding-left: 0px;}
 
 <ol>
 	<li>The plugin is copied to the Hyperic Server's <tt>user.dir/hq-plugins</tt> directory.</li>
-	<li>If a product plugin of the same name exists in the server's <tt>hq-plugins</tt> directory (likely to be the case if you are deploying a customized version of a built-in plugin), the new version in <tt>user.dir/hq-plugins</tt> henceforth is loaded, rather than the version in the server's <tt>hq-plugins</tt> directory.</li>
+	<li>If a product plugin of the same name exists in the server's <tt>hq-plugins</tt> directory (likely to be the case if you are deploying a customized version of a built-in plugin), the new version in <tt>user.dir/hq-plugins</tt> henceforth is loaded, rather than the version in the server's <tt>hq-plugins</tt> directory (<tt>ServerHome/hq-engine/hq-server/webapps/ROOT/WEB_INF/hq-plugins/</tt>).</li>
 	<li>The Hyperic Server updates and restarts each agent. Note that agent update and agent restart are asynchronous &#8212; the server processes two queues: one of agents that still need the update pushed, and one of those that have the update and need to be restarted.
 	<ul>
 		<li>The server pushes the new or changed plugins to all agents, up to four at a time. A built-in throttle mechanism limits the number of agent update threads.</li>
@@ -138,7 +135,8 @@ div.rbtoc1308071916204 li {margin-left: 0px;padding-left: 0px;}
 
 <p>Server-side and agent-side plugins can become out-of-sync if you manually add or remove plugins and do not apply updates consistently to the server and to every agent.</p>
 
-<p>To detect plugin mismatches caused by inconsistent manual deployment, the Hyperic Server checks for out-of-sync plugins every time it starts up, and every time an agent connects to it upon agent start or restart. In the case of a mismatch between server-side and agent-side plugins, the Hyperic Server updates the agent.</p>
+<p>To detect plugin mismatches caused by inconsistent manual deployment, the Hyperic Server checks for out-of-sync plugins every time it starts up, and every time an agent connects to it upon agent start or restart. (The Hyperic Server does the post-startup checks five minutes after startup, so that any agents that were restarted while the server was down to sync their plugin inventory.)  In the case of a mismatch between server-side and agent-side plugins, the Hyperic Server updates the agent.</p>
+
 
 <h2><a name="PluginDeploymentandManagement-AboutPluginSyncatAgentStartup"></a>About Plugin Sync at Agent Startup</h2>
 
@@ -186,7 +184,7 @@ compares the MD5 checksum of the plugins it loaded with the MD5 checksums in the
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jun 14, 2011 15:09</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 22, 2011 15:14</font></td>
 		    </tr>
 	    </table>
     </body>

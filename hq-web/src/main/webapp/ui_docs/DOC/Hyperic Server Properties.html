@@ -16,10 +16,46 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 09, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 21, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    
+				    <style type='text/css'>/*<![CDATA[*/
+div.rbtoc1308692328864 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1308692328864 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1308692328864 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1308692328864'>
+<ul>
+    <li><a href='#HypericServerProperties-AboutHypericServerConfiguration'>About Hyperic Server Configuration</a></li>
+<ul>
+    <li><a href='#HypericServerProperties-ConfigurationSettingsinhqserver.conf'>Configuration Settings in hq-server.conf</a></li>
+    <li><a href='#HypericServerProperties-ConfigurationSettingsintheDatabase'>Configuration Settings in the Database</a></li>
+</ul>
+    <li><a href='#HypericServerProperties-ServerPropertyDefinitions'>Server Property Definitions</a></li>
+<ul>
+    <li><a href='#HypericServerProperties-server.connectionvalidationsql'>server.connection-validation-sql</a></li>
+    <li><a href='#HypericServerProperties-server.plugin.custom.dir'>server.plugin.custom.dir</a></li>
+    <li><a href='#HypericServerProperties-server.database'>server.database</a></li>
+    <li><a href='#HypericServerProperties-server.databaseblockingtimeout'>server.database-blockingtimeout</a></li>
+    <li><a href='#HypericServerProperties-server.databasedriver'>server.database-driver</a></li>
+    <li><a href='#HypericServerProperties-server.databasemaxpoolsize'>server.database-maxpoolsize</a></li>
+    <li><a href='#HypericServerProperties-server.databaseminpoolsize'>server.database-minpoolsize</a></li>
+    <li><a href='#HypericServerProperties-server.databasepassword'>server.database-password</a></li>
+    <li><a href='#HypericServerProperties-server.databaseurl'>server.database-url</a></li>
+    <li><a href='#HypericServerProperties-server.databaseuser'>server.database-user</a></li>
+    <li><a href='#HypericServerProperties-server.encryptionkey'>server.encryption-key</a></li>
+    <li><a href='#HypericServerProperties-server.hibernate.dialect'>server.hibernate.dialect</a></li>
+    <li><a href='#HypericServerProperties-server.java.opts'>server.java.opts</a></li>
+    <li><a href='#HypericServerProperties-server.jms.highmemory'>server.jms.highmemory</a></li>
+    <li><a href='#HypericServerProperties-server.jms.maxmemory'>server.jms.maxmemory</a></li>
+    <li><a href='#HypericServerProperties-server.mail.host'>server.mail.host</a></li>
+    <li><a href='#HypericServerProperties-server.quartzDelegate'>server.quartzDelegate</a></li>
+    <li><a href='#HypericServerProperties-server.webapp.port'>server.webapp.port</a></li>
+    <li><a href='#HypericServerProperties-server.webapp.secure.port'>server.webapp.secure.port</a></li>
+    <li><a href='#HypericServerProperties-ClusteringPropertiesinHypericEnterprise'>Clustering Properties in Hyperic Enterprise</a></li>
+</ul>
+</ul></div>
+
 <h1><a name="HypericServerProperties-AboutHypericServerConfiguration"></a>About Hyperic Server Configuration</h1>
 
 <h2><a name="HypericServerProperties-ConfigurationSettingsinhqserver.conf"></a>Configuration Settings in hq-server.conf</h2>
@@ -53,7 +89,21 @@
 
 <p><tt>server.connection-validation-sql=select 1</tt></p>
 
+<h2><a name="HypericServerProperties-server.plugin.custom.dir"></a>server.plugin.custom.dir</h2>
+<p><b>Description</b> <br/>
+The <tt>server.plugin.custom.dir</tt> property can be used to specify the location of the Hyperic's Server's custom plugin directory, rather than the default location described below.</p>
 
+<p>To specify the location of the custom plugin directory, add <tt>server.plugin.custom.dir</tt> to <tt>ServerHome/conf/hq-server.conf</tt>, supplying the full path to the directory, and restart the Hyperic Server:</p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<script type="syntaxhighlighter" class="theme: Confluence; brush: java; gutter: false"><![CDATA[server.plugin.custom.dir=FullDirectoryPath]]></script>
+</div></div> 
+
+<p>For more information about plugin deployment, see <a href="Plugin Deployment and Management.html" title="Plugin Deployment and Management">Plugin Deployment and Management</a>.</p>
+
+<p><b>Default</b> </p>
+
+<p>By default, the Hyperic Server stores custom plugins in a subdirectory of the current working directory of the Hyperic Server process &#8212; <tt>user.dir/hq-plugins</tt>. Note however that <tt>hq-server.conf</tt> does not contain the <tt>server.plugin.custom.dir</tt> property. You must add this property to the configuration file to specify a directory.</p>
 
 <h2><a name="HypericServerProperties-server.database"></a>server.database</h2>
 
@@ -350,7 +400,7 @@
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jun 14, 2011 15:08</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 22, 2011 15:14</font></td>
 		    </tr>
 	    </table>
     </body>

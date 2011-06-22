@@ -16,18 +16,18 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 21, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1307466602719 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1307466602719 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1307466602719 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1308693409214 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1308693409214 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1308693409214 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1307466602719'>
+/*]]>*/</style><div class='rbtoc1308693409214'>
 <ul>
     <li><a href='#HQApialertdefinitioncommand-alertdefinitionFunctionality'>alertdefinition Functionality</a></li>
     <li><a href='#HQApialertdefinitioncommand-UnderstandingAlertDefinitionOptions'>Understanding Alert Definition Options</a></li>
@@ -53,14 +53,10 @@ div.rbtoc1307466602719 li {margin-left: 0px;padding-left: 0px;}
 </ul>
 </ul></div>
 
-
-<p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
-
-
 <div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Related Topics</b><br />This page provides information for running an HQ API from the command line. Related topics include: 
 <ul>
-	<li><a href="http://support.hyperic.com/display/DOCS46/Web+Services+API" title="Web Services API">Web Services API</a> - brief introduction to the API.</li>
-	<li><a href="HQ API Command-Line Tools.html" title="HQ API Command-Line Tools">HQ API Command&#45;Line Tools</a> - how to get started with the command line tools.</li>
+	<li><a href="vFabric Hyperic Web Services API.html" title="vFabric Hyperic Web Services API">vFabric Hyperic Web Services API</a> - brief introduction to the API.</li>
+	<li><a href="HQApi Command-Line Tools.html" title="HQApi Command-Line Tools">HQApi Command&#45;Line Tools</a> - how to get started with the command line tools.</li>
 	<li><a href="HQApi Java API.html" title="HQApi Java API">HQApi Java API</a> - about accessing the APIs programmatically.</li>
 </ul>
 </td></tr></table></div> 
@@ -70,9 +66,9 @@ div.rbtoc1307466602719 li {margin-left: 0px;padding-left: 0px;}
 
 <h1><a name="HQApialertdefinitioncommand-alertdefinitionFunctionality"></a>alertdefinition Functionality</h1>
 
-<p>The <b>alertdefinition</b> command has options to output resource and (in HQ Enterprise only) resource type alert definitions, create them, update them, and delete them.</p>
+<p>The <b>alertdefinition</b> command has options to output resource and (in vFabric Hyperic only) resource type alert definitions, create them, update them, and delete them.</p>
 
-<p>An alert definition defines the target resource or (HQ Enterprise only) resource type, the alert conditions, and as available, (in HQ Enterprise only) the escalation associated with the alert definition. This is useful for:</p>
+<p>An alert definition defines the target resource or (vFabric Hyperic only) resource type, the alert conditions, and as available, (in vFabric Hyperic) the escalation associated with the alert definition. This is useful for:</p>
 <ul>
 	<li>Initial setup of alerts across a deployment.</li>
 	<li>Implement changes in alerting strategy across a deployment.</li>
@@ -96,7 +92,7 @@ div.rbtoc1307466602719 li {margin-left: 0px;padding-left: 0px;}
 <p>If you do not supply a qualifier, the <b>alertdefinition list</b> command returns all resource alert definitions, including those that were:</p>
 <ul>
 	<li>configured for a specific resource instance</li>
-	<li>(in HQ Enterprise only) automatically created for a resource instance as a result of a resource type alert definition</li>
+	<li>(in vFabric Hyperic only) automatically created for a resource instance as a result of a resource type alert definition</li>
 </ul>
 
 
@@ -125,7 +121,7 @@ div.rbtoc1307466602719 li {margin-left: 0px;padding-left: 0px;}
 </tr>
 <tr>
 <td class='confluenceTd'> <tt>&#45;-excludeTypeAlerts</tt> </td>
-<td class='confluenceTd'> Returns resource alerts that were configured for a specific resource instance. Resource alert definitions that (in HQ Enterprise only) are automatically created for resource instances as a result of a resource type alert definition are <em>not</em> returned. This qualifier cannot be used in conjunction with the <tt>&#45;-typeAlerts</tt> qualifier. </td>
+<td class='confluenceTd'> Returns resource alerts that were configured for a specific resource instance. Resource alert definitions that (in vFabric Hyperic only) are automatically created for resource instances as a result of a resource type alert definition are <em>not</em> returned. This qualifier cannot be used in conjunction with the <tt>&#45;-typeAlerts</tt> qualifier. </td>
 </tr>
 <tr>
 <td class='confluenceTd'> <tt>&#45;-excludeTypeIds</tt> </td>
@@ -287,7 +283,7 @@ For information, see <a href="http://support.hyperic.com/display/DOCS46/Defining
 <tr>
 <td class='confluenceTd'>&nbsp;</td>
 <td class='confluenceTd'> <tt>parent</tt> </td>
-<td class='confluenceTd'> In HQ Enterprise, the internal ID of the parent resource type alert definition, if there is one. </td>
+<td class='confluenceTd'> In vFabric Hyperic, the internal ID of the parent resource type alert definition, if there is one. </td>
 <td class='confluenceTd'> Valid ID of a resource type alert definition in HQ. <br class="atl-forced-newline" />  <tt>"0"</tt> indicates no parent. </td>
 </tr>
 <tr>
@@ -368,7 +364,7 @@ For information, see <a href="http://support.hyperic.com/display/DOCS46/Defining
 	<li>"6" - inventory property condition</li>
 	<li>"7" - event/log condition</li>
 	<li>"8" - config changed condition <br class="atl-forced-newline" />
-For more information about each type of alert condition, see <a href="ui-Alert.Condition.html" title="ui-Alert.Condition">condition types</a>. </li>
+For more information about each type of alert condition, see <a href="http://support.hyperic.com/display/DOCS46/ui-Alert.Condition" title="ui-Alert.Condition">condition types</a>. </li>
 </ul>
 </td>
 <td class='confluenceTd'> An integer value of 1 though 8 </td>
@@ -403,7 +399,7 @@ For more information about each type of alert condition, see <a href="ui-Alert.C
 
 <h3><a name="HQApialertdefinitioncommand-AlertConditionAttributesforDifferentConditionTypes"></a>AlertCondition Attributes for Different Condition Types</h3>
 
-<p>This table defines the attributes in <tt>AlertCondition</tt> element for each of the eight different condition types.&nbsp; For information about each type of condition, see <a href="ui-Alert.Condition.html" title="ui-Alert.Condition">Alert Conditions</a>.</p>
+<p>This table defines the attributes in <tt>AlertCondition</tt> element for each of the eight different condition types.&nbsp; For information about each type of condition, see <a href="http://support.hyperic.com/display/DOCS46/ui-Alert.Condition" title="ui-Alert.Condition">Alert Conditions</a>.</p>
 <div class='table-wrap'>
 <table class='confluenceTable'><tbody>
 <tr>
@@ -641,7 +637,7 @@ The target resource must have log tracking enabled.&nbsp; <br class="atl-forced-
 
 <p>The <b>alertdefinition sync</b> command takes an <tt>AlertDefinitionsResponse</tt> and syncs any changes back into the HQ inventory. All attributes of the <tt>alertdefinition</tt> element, new or changed <tt>AlertCondition</tt> elements, and the optional <tt>Escalation</tt> element will be updated.</p>
 
-<p><b>Note:&nbsp;</b> When you use <b>sync</b> to create a new item, do not specify the <tt>id</tt> attribute for the new item. See <a href="HQ API Command-Line Tools.html#HQAPICommand-LineTools-sync">sync</a> for more information. </p>
+<p><b>Note:&nbsp;</b> When you use <b>sync</b> to create a new item, do not specify the <tt>id</tt> attribute for the new item. See <a href="HQApi Command-Line Tools.html#HQApiCommand-LineTools-sync">sync</a> for more information. </p>
 
 <h2><a name="HQApialertdefinitioncommand-alertdefinitiondelete"></a>alertdefinition delete</h2>
 
@@ -746,7 +742,7 @@ bash-3.2$
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jun 14, 2011 15:09</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 22, 2011 15:14</font></td>
 		    </tr>
 	    </table>
     </body>

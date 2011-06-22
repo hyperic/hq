@@ -31,11 +31,11 @@
 <ul>
 	<li><b>Availability</b> &#8212; Uses process exit code:
 	<ul>
-		<li>0 == <span class="image-wrap" style=""><img src="attachments/76284378/76578846.gif" style="border: 0px solid black"/></span> OK</li>
-		<li>1 == <span class="image-wrap" style=""><img src="attachments/76284378/76578843.gif" style="border: 0px solid black"/></span> Warning</li>
-		<li>2 == <span class="image-wrap" style=""><img src="attachments/76284378/76578847.gif" style="border: 0px solid black"/></span> Critical</li>
-		<li>3 == <span class="image-wrap" style=""><img src="attachments/76284378/76578844.gif" style="border: 0px solid black"/></span> Unknown</li>
-		<li>4 == <span class="image-wrap" style=""><img src="attachments/76284378/76578845.gif" style="border: 0px solid black"/></span> Paused</li>
+		<li>0 == <span class="image-wrap" style=""><img src="attachments/77464162/77660744.gif" style="border: 0px solid black"/></span> OK</li>
+		<li>1 == <span class="image-wrap" style=""><img src="attachments/77464162/77660747.gif" style="border: 0px solid black"/></span> Warning</li>
+		<li>2 == <span class="image-wrap" style=""><img src="attachments/77464162/77660751.gif" style="border: 0px solid black"/></span> Critical</li>
+		<li>3 == <span class="image-wrap" style=""><img src="attachments/77464162/77660746.gif" style="border: 0px solid black"/></span> Unknown</li>
+		<li>4 == <span class="image-wrap" style=""><img src="attachments/77464162/77660745.gif" style="border: 0px solid black"/></span> Paused</li>
 	</ul>
 	</li>
 </ul>
@@ -338,25 +338,88 @@ I/O Device CPU Usage:
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/76284378/76578843.gif">icon_available_yellow.gif</a> (image/gif)
+                                <a href="attachments/77464162/77660747.gif">icon_available_yellow.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/76284378/76578844.gif">icon_available_error.gif</a> (image/gif)
+                                <a href="attachments/77464162/77660746.gif">icon_available_error.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/76284378/76578845.gif">icon_available_orange.gif</a> (image/gif)
+                                <a href="attachments/77464162/77660745.gif">icon_available_orange.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/76284378/76578846.gif">icon_available_green.gif</a> (image/gif)
+                                <a href="attachments/77464162/77660744.gif">icon_available_green.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/76284378/76578847.gif">icon_available_red.gif</a> (image/gif)
+                                <a href="attachments/77464162/77660751.gif">icon_available_red.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/76284378/76578848.vbs">windows_updates.vbs</a> (application/octet-stream)
+                                <a href="attachments/77464162/77660750.vbs">windows_updates.vbs</a> (application/octet-stream)
                                 <br/>
                                                     </div>
 				    
+                                            <div class="tabletitle">
+                            <a name="comments">
+                                <h2>Comments:</h2>
+                            </a>
+                        </div>
+
+                        <table border="0" width="100%">
+                                                        <tr>
+                                <td >
+                                    <a name="comment-77464905"></a>
+                                    <font class="smallfont"><p>After copying plugin from examples to plugin directory, I got error saying IllegalArgument exception.<br/>
+Changed command to <br/>
+java -Dagent.bundle.home=$PWD -jar pdk/lib/hq-product.jar -Dplugins.include=io-device -Ddevice=sda -t "I/O Device"<br/>
+notice &#45;Dagent.bundle.home</p></font>
+                                    <div align="left" class="smallfont" style="color: #666666; width: 98%; margin-bottom: 10px;">
+                                        <img src="images/icons/comment_16.gif" height="16" width="16" border="0" align="absmiddle"/>
+                                        Posted by  at Mar 17, 2009 05:10
+                                    </div>
+                                </td>
+                            </tr>
+                                                        <tr>
+                                <td  style="border-top: 1px dashed #666666">
+                                    <a name="comment-77464904"></a>
+                                    <font class="smallfont"><p>hi,</p>
+
+<p>Thanks for the help.<br/>
+when i m trying to test from the console m getting blank output.<br/>
+plugins]# java -jar ../../pdk/lib/hq-product.jar -Dplugins.include=io-device -Ddevice=hda</p>
+
+<p>where as when i execute the perl script with print statements stats are displaying.</p>
+
+<p>Thanks,<br/>
+Naren.</p></font>
+                                    <div align="left" class="smallfont" style="color: #666666; width: 98%; margin-bottom: 10px;">
+                                        <img src="images/icons/comment_16.gif" height="16" width="16" border="0" align="absmiddle"/>
+                                        Posted by naren at Feb 08, 2010 03:09
+                                    </div>
+                                </td>
+                            </tr>
+                                                        <tr>
+                                <td  style="border-top: 1px dashed #666666">
+                                    <a name="comment-77464902"></a>
+                                    <font class="smallfont"><p>In the script regexp search with ":device" where as output as "device".<br/>
+Now its working.</p></font>
+                                    <div align="left" class="smallfont" style="color: #666666; width: 98%; margin-bottom: 10px;">
+                                        <img src="images/icons/comment_16.gif" height="16" width="16" border="0" align="absmiddle"/>
+                                        Posted by naren at Feb 08, 2010 22:43
+                                    </div>
+                                </td>
+                            </tr>
+                                                        <tr>
+                                <td  style="border-top: 1px dashed #666666">
+                                    <a name="comment-77464914"></a>
+                                    <font class="smallfont"><p>while configuring plugins in Inventory-&gt;config properties.<br/>
+Path: ? is it pl path or xml path.<br/>
+prefix: ? need to add anything for the above script.</p></font>
+                                    <div align="left" class="smallfont" style="color: #666666; width: 98%; margin-bottom: 10px;">
+                                        <img src="images/icons/comment_16.gif" height="16" width="16" border="0" align="absmiddle"/>
+                                        Posted by naren at Feb 08, 2010 22:46
+                                    </div>
+                                </td>
+                            </tr>
+                                                    </table>
                     			    </td>
 		    </tr>
 	    </table>
@@ -365,7 +428,7 @@ I/O Device CPU Usage:
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jun 14, 2011 15:09</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 22, 2011 15:14</font></td>
 		    </tr>
 	    </table>
     </body>
