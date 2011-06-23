@@ -2241,7 +2241,7 @@ public class AppdefBossImpl implements AppdefBoss {
                 resourceManager.findAllViewableResourceIds(subject, resourceTypes);
             for (final Integer resourceId : resourceIds) {
                 final Resource r = resourceManager.findResourceById(resourceId);
-                if (r == null || r.isInAsyncDeleteState() || r.isSystem()) {
+                if (r == null || r.isInAsyncDeleteState()) {
                     continue;
                 }
                 try {
@@ -2262,7 +2262,7 @@ public class AppdefBossImpl implements AppdefBoss {
                 resourceManager.findAllViewableResourceIds(subject, null);
             for (final Integer resourceId : resourceIds) {
                 final Resource r = resourceManager.findResourceById(resourceId);
-                if (r == null || r.isInAsyncDeleteState() || r.isSystem()) {
+                if (r == null || r.isInAsyncDeleteState()) {
                     continue;
                 }
                 try {
