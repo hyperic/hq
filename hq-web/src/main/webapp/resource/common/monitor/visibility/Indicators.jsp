@@ -108,7 +108,7 @@
 					<c:param name="view" value="${view}"/>
 					<c:param name="alertDefaults" value="true"/>
 				</c:url>
-				<a href='<html:rewrite page=""/>?eid=<c:out value="${eid}"/>&view=<c:out value="${view}"/>&alertDefaults=true'>
+				<a href="${resourceCurrentHealthUrl}">
 					<fmt:message key="resource.common.monitor.visibility.now" />
 				</a>
 			</td>

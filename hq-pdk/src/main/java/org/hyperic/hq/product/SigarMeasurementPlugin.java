@@ -27,6 +27,7 @@ package org.hyperic.hq.product;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarProxy;
@@ -154,6 +155,40 @@ public class SigarMeasurementPlugin extends MeasurementPlugin {
         return attr.equals("State");
     }
 
+    private MetricValue getSwapPercentage(Metric m)
+        throws MetricNotFoundException
+    {
+        String attribute = m.getAttributeName();
+        Object total, free, used;
+
+        SigarInvokerJMX invoker =
+            SigarInvokerJMX.getInstance(sigarProxy, m.getObjectName());
+        synchronized (sigar) {
+            try {
+                total = invoker.invoke("Total");
+                free = invoker.invoke("Free");
+                used = invoker.invoke("Used");
+        } catch (SigarNotImplementedException e) {
+                throw new MetricInvalidException("Unable to gather swap metrics", e);
+            } catch (SigarException e) {
+                throw new MetricInvalidException("Unable to gather swap metrics", e);
+            }
+        }
+
+        Double returnVal;
+        if (convertToDouble(total, false) == 0) {
+            // Avoid potential div by 0.
+            returnVal = Double.NaN;
+        } else if (attribute.equals("UsedPercent")) {
+            returnVal = convertToDouble(used, false)/convertToDouble(total, false);
+        } else if (attribute.equals("FreePercent")) {
+            returnVal = convertToDouble(free, false)/convertToDouble(total, false);
+        } else {
+            throw new MetricNotFoundException("Unhandled attribute " + attribute);
+        }
+        return new MetricValue(returnVal, System.currentTimeMillis());
+    }
+
     public MetricValue getValue(Metric metric) 
         throws PluginException,
                MetricNotFoundException,
@@ -167,6 +202,13 @@ public class SigarMeasurementPlugin extends MeasurementPlugin {
 
         if (this.sigar == null) {
             getSigar();
+        }
+
+        //XXX: Until these are supported within SIGAR
+        Properties props = metric.getObjectProperties();
+        String mType = props.getProperty("Type");
+        if (mType.equals("Swap") && (attr.equals("UsedPercent") || attr.equals("FreePercent"))) {
+            return getSwapPercentage(metric);
         }
 
         if (domain.equals(PTQL_DOMAIN)) {
