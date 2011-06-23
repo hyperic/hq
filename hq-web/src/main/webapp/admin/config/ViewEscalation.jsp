@@ -56,10 +56,13 @@ var selUserEsc;
 var selActionTypeEsc;
 
 function requestViewEscalation() {
-    var url = '<html:rewrite page="/escalation/jsonByEscalationId.do"/>';
-    url += '?id=' + escape('<c:out value="${param.escId}"/>');
-    url += "&preventCache=" + new Date().getTime();
-    new Ajax.Request(url, {method: 'get', onSuccess:showViewEscResponse, onFailure :reportError});
+    var url = '<html:rewrite action="/escalation/jsonByEscalationId"/>';
+    var pars = {
+    	"id": escape('${param.escId}'),
+    	"preventCache": (new Date()).getTime()
+    };
+    
+    new Ajax.Request(url, {method: 'get', parameters: pars, onSuccess:showViewEscResponse, onFailure :reportError});
 }
 
 
@@ -938,8 +941,10 @@ function showResponseRemoved() {
 
 function removeAction(id) {
     var url = '<html:rewrite action="/escalation/removeAction"/>';
-    var pars = "id=" + id;
-    pars += "&EscId=" + dojo11.byId('id').value;
+    var pars = {
+    	"id": id,
+    	"EscId": dojo11.byId('id').value    	
+    }
 	
     new Ajax.Request(url, {method: 'post', parameters: pars, onComplete: showResponseRemoved, onFailure :reportError});
 }

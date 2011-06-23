@@ -139,7 +139,7 @@ function showEscRows(originalRequest) {
     td3.setAttribute('align', 'right');
 
     if (schemes.length > 1) {
-      	td3.innerHTML = '<a href="' + unescape(removeEscUrl).replace("{escId}", schemes[i].id) + '">' + hqDojo.byId('deleteBtn').innerHTML + '</a>';
+      	td3.innerHTML = '<a href="' + unescape(removeEscUrl).replace("{escId}", schemes[i].id) + '">' + dojo11.byId('deleteBtn').innerHTML + '</a>';
     } else {
         td3.innerHTML="&nbsp;";
     }

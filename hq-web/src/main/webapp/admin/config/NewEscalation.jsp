@@ -637,7 +637,15 @@ function editEscalation (row) {
             aetId = '';
         }
 
-        var pars = "rowOrder=" + rowOrder + "escForm=" + escFormSerial + "&ad=" + adId + "&gad=" + gadId + "&eid=" + eId + "aetid=" + aetId;
+        var pars = { 
+        	"rowOrder": rowOrder,
+        	"escForm": escFormSerial,
+        	"ad": adId,
+        	"gad": gadId,
+        	"eid": eId,
+        	"aetid": aetId
+        };
+        
         new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: showResponse, onFailure :reportError} );
 
     }
@@ -670,7 +678,15 @@ function editEscalation (row) {
             aetId = '';
         }
 
-        var pars = "rowOrder=0&" + "escForm=" + escFormSerial + "&ad=" + adId + "&gad=" + gadId + "&eid=" + eId + "aetid=" + aetId;
+        var pars = {
+        	"rowOrder": 0,
+        	"escForm": escFormSerial,
+        	"ad": adId,
+        	"gad": gadId,
+        	"eid": eId,
+        	"aetid": aetId		
+        };
+        
         new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: showResponse, onFailure: reportError} );
     }
 
