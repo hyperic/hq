@@ -88,6 +88,9 @@
                 <prop key="server.pluginsync.enabled">true</prop>
                 <prop key="server.custom.plugin.dir"></prop>
                 <prop key="vfabric.licenseServer.url"></prop>
+                <prop key="server.keyAlias"></prop>
+                <prop key="server.keystore"></prop>
+                <prop key="server.keypass"></prop>
 			</props>
 		</property>
 	</bean>
@@ -221,6 +224,17 @@
 		class="org.springframework.beans.factory.config.PropertiesFactoryBean"
 		p:location="classpath:/tweak.properties" />
 
+	<bean id="securityProperties"
+		class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+		<property name="properties">
+			<props>
+				<prop key="server.keyAlias">${server.keyAlias}</prop>
+				<prop key="server.keystore">${server.keystore}</prop>
+				<prop key="server.keypass">${server.keypass}</prop>
+			</props>
+		</property>	
+	</bean>
+	
 	<context:mbean-export />
 	<context:mbean-server />
 
