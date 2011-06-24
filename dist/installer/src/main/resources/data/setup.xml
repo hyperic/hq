@@ -705,7 +705,9 @@ ${errMsg}
 	  		<include name="**/hqdb/*" />
 	  		<include name="**/hq-engine/hq-server/bin/*" />
 			<include name="**/hq-engine/hq-server/conf/*" />
-			<include name="**/hq-engine/hq-server/webapps/ROOT/WEB-INF/**" />
+			<include name="**/hq-engine/hq-server/webapps/ROOT/WEB-INF/*" />
+			<include name="**/hq-engine/hq-server/webapps/ROOT/WEB-INF/classes/*" />
+			<include name="**/hq-engine/hq-server/webapps/ROOT/WEB-INF/license/*" />
   		</fileset>
 	</chmod>    
 	<echo>^^^INFO: Setting permissions on server binaries...</echo>
