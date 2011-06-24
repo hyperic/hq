@@ -11660,6 +11660,15 @@ has already been defined.
                       precision="128"
                       columnType="VARCHAR2" />
  </schemaSpec>
+ 
+ <schemaSpec version="3.206">
+    <schema-insert table="EAM_CONFIG_PROPS"
+                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES ('71', 'SSL_SERVER_KEY_ALIAS', '', 'hq', %%FALSE%%)"/>
+    <schema-insert table="EAM_CONFIG_PROPS"
+                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES ('72', 'SSL_SERVER_KEYSTORE', '', 'conf/hyperic.keystore', %%FALSE%%)"/>
+    <schema-insert table="EAM_CONFIG_PROPS"
+                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES ('73', 'SSL_SERVER_KEYPASS', '', 'hyperic', %%FALSE%%)"/>
+ </schemaSpec>
 
 </dbupgrade>
 </target>

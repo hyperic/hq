@@ -128,5 +128,9 @@ public class HQConstants {
     
     // license expiration warning
     public static final int LICENSE_EXPIRATION_WARNING_MAX_DAYS = 45;
-
+    
+    //SSL keystore config
+    public static final String SSL_SERVER_KEYSTORE = "SSL_SERVER_KEYSTORE";
+    public static final String SSL_SERVER_KEY_ALIAS ="SSL_SERVER_KEY_ALIAS";
+    public static final String SSL_SERVER_KEYPASS = "SSL_SERVER_KEYPASS";
 }
