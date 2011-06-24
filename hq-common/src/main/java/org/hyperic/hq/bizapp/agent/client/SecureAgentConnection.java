@@ -33,8 +33,11 @@ import java.net.Socket;
 import javax.net.ssl.SSLSocket;
 
 import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.hyperic.hq.agent.AgentConfig;
+import org.hyperic.hq.agent.AgentConfigException;
 import org.hyperic.hq.agent.client.AgentConnection;
 import org.hyperic.util.security.DefaultSSLProviderImpl;
+import org.hyperic.util.security.KeystoreConfig;
 import org.hyperic.util.security.SSLProvider;
 
 /**
@@ -54,19 +57,20 @@ public class SecureAgentConnection
     private int    agentPort;
     private String authToken;
     private boolean acceptUnverifiedCertificate = false;
-    private String alias = "hq";
 
-    public SecureAgentConnection(String agentAddress, int agentPort, String authToken) {
+    private KeystoreConfig keystoreConfig;
+
+    public SecureAgentConnection(KeystoreConfig keystoreConfig, String agentAddress, int agentPort, String authToken) {
         super(agentAddress, agentPort);
         this.agentAddress = agentAddress;
         this.agentPort    = agentPort;
         this.authToken    = authToken;
+        this.keystoreConfig = keystoreConfig;
     }
     
-    public SecureAgentConnection(String agentAddress, int agentPort, String authToken, String alias, boolean acceptUnverifiedCertificate) {
-    	this(agentAddress, agentPort, authToken);
-    	
-        this.alias = alias;
+    public SecureAgentConnection(String agentAddress, int agentPort, String authToken, KeystoreConfig keystoreConfig, boolean acceptUnverifiedCertificate) {
+    	this(keystoreConfig, agentAddress, agentPort, authToken);
+
     	this.acceptUnverifiedCertificate = acceptUnverifiedCertificate;
     }
     
@@ -95,8 +99,8 @@ public class SecureAgentConnection
             } catch (NumberFormatException e) {
                 postHandshakeTimeout = POST_HANDSHAKE_TIMEOUT;
             }
-      
-        	SSLProvider sslProvider = new DefaultSSLProviderImpl(alias, acceptUnverifiedCertificate);
+            SSLProvider sslProvider = new DefaultSSLProviderImpl(keystoreConfig, acceptUnverifiedCertificate);
+
             SSLSocketFactory factory = sslProvider.getSSLSocketFactory();
             
         	// See the following links...

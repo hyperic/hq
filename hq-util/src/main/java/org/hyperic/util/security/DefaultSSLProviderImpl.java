@@ -41,12 +41,13 @@ public class DefaultSSLProviderImpl implements SSLProvider {
 	private SSLContext sslContext;
 	private SSLSocketFactory sslSocketFactory;
 	
-    private final static String KEYSTORE_PASSWORD = "cl1ent!";
-    private final static String KEYSTORE_PATH = "hq.truststore";
-
-    private KeyStore getKeyStore(String alias, String filePath, String filePassword) throws KeyStoreException, IOException {
+    private KeyStore getKeyStore(KeystoreConfig keystoreConfig) throws KeyStoreException, IOException {
     	FileInputStream keyStoreFileInputStream = null;
-
+    	
+    	String alias = keystoreConfig.getAlias();
+    	String filePath = keystoreConfig.getFilePath();
+    	String filePassword = keystoreConfig.getFilePassword();
+    	
         try {
         	KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
         	File file = new File(filePath);
@@ -54,7 +55,7 @@ public class DefaultSSLProviderImpl implements SSLProvider {
             
             if (!file.exists()) {
             	// ...if file doesn't exist, and path was user specified throw IOException...
-            	if (StringUtils.hasText(filePath) && !filePath.equals(KEYSTORE_PATH)) {
+            	if (StringUtils.hasText(filePath) && !keystoreConfig.isHqDefault()) {
             		throw new IOException("User specified keystore [" + filePath + "] does not exist.");
             	}
             	
@@ -191,31 +192,14 @@ public class DefaultSSLProviderImpl implements SSLProvider {
 			throw new IOException(e);
 		}
     }
-	
-    private String getKeystoreFilePath() {
-    	return KEYSTORE_PATH;
-    }
-    
-    private String getKeystorePassword() {
-    	return KEYSTORE_PASSWORD;
-    }
-    
-    public DefaultSSLProviderImpl() {
-    	this("hq-unknown");
-    }
-	
-    public DefaultSSLProviderImpl(String alias) {
-    	this(alias, false);
-    }
-    
-	public DefaultSSLProviderImpl(final String alias, final boolean acceptUnverifiedCertificates) {
-    	try {
-    		final String filePath = getKeystoreFilePath();
-    		final String filePassword = getKeystorePassword();
-	        final KeyStore trustStore = getKeyStore(alias, filePath, filePassword);
-	        KeyManagerFactory keyManagerFactory = getKeyManagerFactory(trustStore, filePassword);
-	        TrustManagerFactory trustManagerFactory = getTrustManagerFactory(trustStore);
-	        
+            
+    public DefaultSSLProviderImpl(final KeystoreConfig keystoreConfig, final boolean acceptUnverifiedCertificates ){
+
+        try{  
+            final KeyStore trustStore = getKeyStore(keystoreConfig);
+            KeyManagerFactory keyManagerFactory = getKeyManagerFactory(trustStore, keystoreConfig.getFilePassword());
+            TrustManagerFactory trustManagerFactory = getTrustManagerFactory(trustStore);
+       
 	        final X509TrustManager defaultTrustManager = (X509TrustManager) trustManagerFactory.getTrustManagers()[0];
 	        
 	        X509TrustManager customTrustManager = new X509TrustManager() {
@@ -246,7 +230,7 @@ public class DefaultSSLProviderImpl implements SSLProvider {
 			        int i=0;
 			        
 			        try {
-			        	keyStoreFileOutputStream = new FileOutputStream(filePath);
+			        	keyStoreFileOutputStream = new FileOutputStream(keystoreConfig.getFilePath());
 			        	
 				        for (X509Certificate cert : chain) {
 				        	String[] cnValues = AbstractVerifier.getCNs(cert);
@@ -255,7 +239,7 @@ public class DefaultSSLProviderImpl implements SSLProvider {
 				        	trustStore.setCertificateEntry(alias, cert);
 				        }
 				        
-				        trustStore.store(keyStoreFileOutputStream, filePassword.toCharArray());
+				        trustStore.store(keyStoreFileOutputStream, keystoreConfig.getFilePassword().toCharArray());
 			        } catch (FileNotFoundException fnfe) {
 						// Bad news here
 						fnfe.printStackTrace();

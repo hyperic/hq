@@ -17,22 +17,19 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.CoreConnectionPNames;
 import org.hyperic.util.security.DefaultSSLProviderImpl;
+import org.hyperic.util.security.KeystoreConfig;
 import org.hyperic.util.security.SSLProvider;
 import org.springframework.util.Assert;
 
 public class HQHttpClient extends DefaultHttpClient {
-    public HQHttpClient(final String alias) {
-    	this(alias, null);
+
+    public HQHttpClient(final KeystoreConfig keyConfig, final HttpConfig config) {
+        this(keyConfig, config, false);
     }
-    
-    public HQHttpClient(final String alias, final HttpConfig config) {
-    	this(config, alias, false);
-    }
-    
-    public HQHttpClient(final HttpConfig config, final String alias, final boolean acceptUnverifiedCertificates) {
+    public HQHttpClient(final KeystoreConfig keyConfig, final HttpConfig config, final boolean acceptUnverifiedCertificates) {
     	super();
     	
-   		SSLProvider sslProvider = new DefaultSSLProviderImpl(alias, acceptUnverifiedCertificates);
+   		SSLProvider sslProvider = new DefaultSSLProviderImpl(keyConfig, acceptUnverifiedCertificates);
         Scheme sslScheme = new Scheme("https", 443, sslProvider.getSSLSocketFactory());
 			
 		getConnectionManager().getSchemeRegistry().register(sslScheme);
