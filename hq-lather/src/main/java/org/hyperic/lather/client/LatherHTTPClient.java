@@ -33,6 +33,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.hyperic.hq.agent.AgentConfig;
+import org.hyperic.hq.agent.AgentConfigException;
 import org.hyperic.lather.LatherRemoteException;
 import org.hyperic.lather.LatherValue;
 import org.hyperic.lather.xcode.LatherXCoder;
@@ -40,6 +42,7 @@ import org.hyperic.lather.xcode.LatherXCoder;
 import org.hyperic.util.encoding.Base64;
 import org.hyperic.util.http.HQHttpClient;
 import org.hyperic.util.http.HttpConfig;
+import org.hyperic.util.security.KeystoreConfig;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -86,7 +89,25 @@ public class LatherHTTPClient
     		config.setProxyHostname(proxyHostname);
     		config.setProxyPort(proxyPort);
     		
-	        this.client = new HQHttpClient(config, "hq-agent", acceptUnverifiedCertificates);
+    		
+            AgentConfig cfg;
+            final String propFile = System.getProperty(AgentConfig.DEFAULT_PROPFILE);
+            try {
+                cfg = AgentConfig.newInstance(propFile);
+            } catch(IOException exc){
+                System.err.println("Error: " + exc);
+                return ;
+            } catch(AgentConfigException exc){
+                System.err.println("Agent Properties error: " + exc.getMessage());
+                return ;
+            }     
+            String filePath = cfg.getBootProperties().getProperty(AgentConfig.SSL_KEYSTORE);
+            String filePass = cfg.getBootProperties().getProperty(AgentConfig.SSL_KEYPASS);
+            String alias = cfg.getBootProperties().getProperty(AgentConfig.SSL_KEY_ALIAS);
+            boolean isDefault = AgentConfig.PROP_KEYSTORE[1].equals(filePath);//see if the config value is default value
+            KeystoreConfig  keyConfig = new KeystoreConfig(alias, filePath, filePass, isDefault);
+    		
+	        this.client = new HQHttpClient(keyConfig, config, acceptUnverifiedCertificates);
 			this.baseURL = baseURL;
 	        this.xCoder  = new LatherXCoder();
     	} catch(Exception e) {

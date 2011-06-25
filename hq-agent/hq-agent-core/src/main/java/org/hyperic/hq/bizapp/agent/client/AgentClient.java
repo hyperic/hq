@@ -79,6 +79,7 @@ import org.hyperic.sigar.FileWatcherThread;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
 import org.hyperic.util.StringUtil;
+import org.hyperic.util.security.KeystoreConfig;
 import org.hyperic.util.security.SecurityUtil;
 import org.hyperic.util.security.UntrustedSSLCertificateException;
 import org.tanukisoftware.wrapper.WrapperManager;
@@ -1268,6 +1269,12 @@ public class AgentClient {
             return null;
         }
         
+        String filePath = cfg.getBootProperties().getProperty(AgentConfig.SSL_KEYSTORE);
+        String filePass = cfg.getBootProperties().getProperty(AgentConfig.SSL_KEYPASS);
+        String alias = cfg.getBootProperties().getProperty(AgentConfig.SSL_KEY_ALIAS);
+        boolean isDefault = AgentConfig.PROP_KEYSTORE[1].equals(filePath);//see if the config value is default value
+        KeystoreConfig  keystoreConfig = new KeystoreConfig(alias, filePath, filePass, isDefault);
+        
         String tokenFile = cfg.getTokenFile();
         if (generateToken) {
             try {
@@ -1292,8 +1299,9 @@ public class AgentClient {
                 return null;
             }
 
-            conn = new SecureAgentConnection(connIp, cfg.getListenPort(), authToken, "hq-agent", false);
+            conn = new SecureAgentConnection(connIp, cfg.getListenPort(), authToken, keystoreConfig, false);
             return new AgentClient(cfg, conn);
+                
         } else {
             // Not the main agent daemon process, wait for the token to become
             // available.  We will only wait up to the configured agent.startupTimeOut
@@ -1302,7 +1310,7 @@ public class AgentClient {
             while (initializeStartTime > (System.currentTimeMillis() - startupTimeout)) {
                 try {
                     authToken = AgentClientUtil.getLocalAuthToken(tokenFile);
-                    conn = new SecureAgentConnection(connIp, cfg.getListenPort(), authToken, "hq-agent", false);
+                    conn = new SecureAgentConnection(connIp, cfg.getListenPort(), authToken, keystoreConfig, false);
                     return new AgentClient(cfg, conn);
                 } catch(FileNotFoundException exc){
                     SYSTEM_ERR.println("- No token file found, waiting for " +

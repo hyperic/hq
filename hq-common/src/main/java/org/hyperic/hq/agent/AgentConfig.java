@@ -78,6 +78,10 @@ public class AgentConfig {
     public static final String PDK_WORK_DIR_KEY = "agent.pdkWorkDir";
     public static final String AGENT_BUNDLE_HOME = "agent.bundle.home";
   
+    //Property name for keystore
+    public static final String SSL_KEYSTORE = "agent.keystore";
+    public static final String SSL_KEYPASS = "agent.keypass";
+    public static final String SSL_KEY_ALIAS = "agent.keyAlias";
 
     // The following final objects are the properties which are usable
     // within the configuation object.  The first element in the array
@@ -102,8 +106,12 @@ public class AgentConfig {
     { "agent.logDir", System.getProperty("agent.logDir", PROP_INSTALLHOME[1] + "/log") };
     public static final String[] PROP_DATADIR = 
     { "agent.dataDir", System.getProperty("agent.dataDir", PROP_INSTALLHOME[1] + "/data") };
+    public static final String[] PROP_ALIAS = 
+    { SSL_KEY_ALIAS, "hq-agent" };
     public static final String[] PROP_KEYSTORE = 
-    { "agent.keystore", PROP_DATADIR[1] + "/keystore" };
+    { SSL_KEYSTORE, PROP_DATADIR[1] + "/keystore" };
+    public static final String[] PROP_KEYPASS = 
+    { SSL_KEYPASS, "storePW" };    
     public static final String[] PROP_LIB_HANDLERS = 
     { "agent.lib.handlers", PROP_BUNDLEHOME[1] + "/lib/handlers" };
     public static final String[] PROP_LIB_HANDLERS_LIB = 
@@ -156,6 +164,7 @@ public class AgentConfig {
         PROP_LOGDIR,
         PROP_DATADIR,
         PROP_KEYSTORE,
+        PROP_KEYPASS,
         PROP_LIB_HANDLERS,
         PROP_LIB_HANDLERS_LIB,
         PROP_PDK_DIR,

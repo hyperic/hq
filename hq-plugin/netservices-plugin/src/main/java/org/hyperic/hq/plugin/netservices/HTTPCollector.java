@@ -53,11 +53,14 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
+import org.hyperic.hq.agent.AgentConfig;
+import org.hyperic.hq.agent.AgentConfigException;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.http.HQHttpClient;
 import org.hyperic.util.http.HttpConfig;
+import org.hyperic.util.security.KeystoreConfig;
 import org.springframework.util.StringUtils;
 
 public class HTTPCollector extends SocketChecker {
@@ -273,7 +276,25 @@ public class HTTPCollector extends SocketChecker {
 		
 		boolean isHEAD = getMethod().equals(METHOD_HEAD);
 		HttpConfig config = new HttpConfig(getTimeoutMillis(), getTimeoutMillis(), proxyHost, proxyPort);
-		HttpClient client = new HQHttpClient("hq-agent", config);
+
+        AgentConfig cfg;
+        final String propFile = System.getProperty(AgentConfig.DEFAULT_PROPFILE);
+        try {
+            cfg = AgentConfig.newInstance(propFile);
+        } catch(IOException exc){
+            System.err.println("Error: " + exc);
+            return;
+        } catch(AgentConfigException exc){
+            System.err.println("Agent Properties error: " + exc.getMessage());
+            return;
+        }
+        String filePath = cfg.getBootProperties().getProperty(AgentConfig.SSL_KEYSTORE);
+        String filePass = cfg.getBootProperties().getProperty(AgentConfig.SSL_KEYPASS);
+        String alias = cfg.getBootProperties().getProperty(AgentConfig.SSL_KEY_ALIAS);
+        boolean isDefault = AgentConfig.PROP_KEYSTORE[1].equals(filePath);//see if the config value is default value
+        KeystoreConfig  keyConfig = new KeystoreConfig(alias, filePath, filePass, isDefault);
+        
+		HttpClient client = new HQHttpClient (keyConfig, config);
 		HttpParams params = client.getParams();
 		
 		params.setParameter(CoreProtocolPNames.USER_AGENT, this.useragent);

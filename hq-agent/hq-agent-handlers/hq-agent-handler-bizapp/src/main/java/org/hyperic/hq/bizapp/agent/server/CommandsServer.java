@@ -77,8 +77,7 @@ import org.hyperic.util.security.SecurityUtil;
 public class CommandsServer 
     implements AgentServerHandler, TokenStorer, AgentNotificationHandler
 {
-    private static final String KEYSTORE_PW = "storePW";
-    private static final String KEYSTORE_FILE = "data/agent.keystore";
+    //private static final String KEYSTORE_PW = "storePW";
 
     private static final long   TOKEN_TIMEOUT = 20 * 1000;   // 20 seconds
 
@@ -89,7 +88,9 @@ public class CommandsServer
     private AgentDaemon          agent;
     private Socket               startupSock;
     private String               tokenFile;
+    private String               keyAlias;
     private String               keystoreFile;
+    private String               keystorePass;
     private String               keyAlg;
     private AgentStartupCallback agentStartupCallback;
 
@@ -101,6 +102,7 @@ public class CommandsServer
         this.agent        = null;
         this.startupSock  = null;
         this.keystoreFile = null;
+        this.keystorePass = null;
         this.keyAlg       = null;
         this.agentStartupCallback = null;
     }
@@ -225,7 +227,7 @@ public class CommandsServer
         throws AgentStartException
     {
         try {
-            keystore.load(loadData, KEYSTORE_PW.toCharArray());
+            keystore.load(loadData, this.keystorePass.toCharArray());
         } catch(IOException exc){
             throw new AgentStartException("Unable to create new keystore: " +
                                           exc.getMessage());
@@ -266,10 +268,10 @@ public class CommandsServer
             keytool,
             "-genkey",
             "-dname",     getDname(),
-            "-alias",     "HQ",
+            "-alias",     this.keyAlias,
             "-keystore",  this.keystoreFile,
-            "-storepass", KEYSTORE_PW,
-            "-keypass",   KEYSTORE_PW,
+            "-storepass", this.keystorePass,
+            "-keypass",   this.keystorePass,
             "-keyalg",    this.keyAlg
         };
 
@@ -342,7 +344,6 @@ public class CommandsServer
         alg = KeyManagerFactory.getDefaultAlgorithm();
         try {
             res = KeyManagerFactory.getInstance(alg);
-            res.init(useStore, KEYSTORE_PW.toCharArray());
         } catch(Exception exc){
             throw new AgentStartException("Unable to get default key " +
                                           "manager: " + exc.getMessage());
@@ -437,10 +438,15 @@ public class CommandsServer
             this.setupTokenManager(cfg);
             bootConfig   = cfg.getBootProperties();
             this.storage = agent.getStorageProvider();
+            this.keyAlias =
+                bootConfig.getProperty(bootConfig.getProperty(AgentConfig.SSL_KEY_ALIAS));
             this.keystoreFile =
-                bootConfig.getProperty(AgentConfig.PROP_KEYSTORE[0]);
+                bootConfig.getProperty(bootConfig.getProperty(AgentConfig.SSL_KEYSTORE));
+            this.keystorePass =
+                bootConfig.getProperty(bootConfig.getProperty(AgentConfig.SSL_KEYPASS));
             this.keyAlg =
                 bootConfig.getProperty("agent.keyalg", "RSA");
+            
             keystore     = this.loadKeyStore();
             keyManagers  = this.getKeyManagers(keystore);
             listener     = new SSLConnectionListener(cfg, this.tokenManager);
