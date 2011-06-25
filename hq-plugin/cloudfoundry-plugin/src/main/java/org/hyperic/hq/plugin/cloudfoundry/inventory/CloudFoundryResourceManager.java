@@ -29,6 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.server.AgentDaemon;
 import org.hyperic.hq.agent.server.ConfigStorage;
+import org.hyperic.hq.appdef.shared.AIServiceValue;
 import org.hyperic.hq.bizapp.agent.client.HQApiCommandsClient;
 import org.hyperic.hq.bizapp.agent.client.HQApiFactory;
 import org.hyperic.hq.hqapi1.HQApi;
@@ -44,6 +45,7 @@ import org.hyperic.hq.product.ServiceResource;
 import org.hyperic.util.config.ConfigResponse;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -155,7 +157,7 @@ public class CloudFoundryResourceManager implements TransientResourceManager {
             	if (sname != null) {
 	                resources.add(sname);
 	                if (_log.isDebugEnabled()) {
-	                    _log.debug(PROTOTYPE_CLOUD_FOUNDRY + " aiq service={"
+	                    _log.debug(PROTOTYPE_CLOUD_FOUNDRY + " resource {"
 	                            + "name=" + sname
 	                            + "}");
 	                }
@@ -168,10 +170,12 @@ public class CloudFoundryResourceManager implements TransientResourceManager {
                 if (sname != null) {
 	                if (Collections.binarySearch(resources, sname) < 0) {
 	                    commandsClient.deleteResource(service);
-	                    _log.debug(PROTOTYPE_CLOUD_FOUNDRY + " service deleted={"
-	                    		+ "hq name=" + service.getName()
-	                            + ", cloud foundry name=" + sname
-	                            + "}");
+	                    if (_log.isDebugEnabled()) {
+		                    _log.debug(PROTOTYPE_CLOUD_FOUNDRY + " resource deleted {"
+		                    		+ "Hyperic name=" + service.getName()
+		                            + ", Cloud Foundry name=" + sname
+		                            + "}");
+	                    }
 	                    numResourcesDeleted++;
 	                    // TODO: Create event log when resources are deleted
 	                }
@@ -205,7 +209,6 @@ public class CloudFoundryResourceManager implements TransientResourceManager {
         List<Resource> resources = commandsClient.getResources(rezProto, true, true);
 
         for (Resource r : resources) {
-            _log.debug(r.getName());
             if (isResourceConfigMatch(r.getResourceConfig(), serverProps)) {
                 cloudfoundry = r;
                 break;
@@ -241,17 +244,29 @@ public class CloudFoundryResourceManager implements TransientResourceManager {
     
     private String getResourceName(ServiceResource s) {
     	String name = null;
+    	ConfigResponse svcConfig = null;
     	
     	try {
     		// Hyperic 4.6+
-    		ConfigResponse svcConfig = s.getProductConfig();
-    		name = svcConfig.getValue("resource.name");
+    		svcConfig = s.getProductConfig();
     	} catch (NoSuchMethodError ne) {
     		_log.debug(ne);
     		
-    		// TODO: pre-Hyperic 4.6
+    		// pre-Hyperic 4.6
+    		try {
+    			Field privateResourceField = ServiceResource.class.getDeclaredField("resource");
+    			privateResourceField.setAccessible(true);
+    			AIServiceValue resource = (AIServiceValue) privateResourceField.get(s);
+    			svcConfig = ConfigResponse.decode(resource.getProductConfig());
+    		} catch (Throwable t) {
+    			_log.debug("Could not get service product config", t);
+    		}
     	}
-    	
+
+    	if (svcConfig != null) {
+    		name = svcConfig.getValue("resource.name");
+    	}
+
     	return name;
     }
     
