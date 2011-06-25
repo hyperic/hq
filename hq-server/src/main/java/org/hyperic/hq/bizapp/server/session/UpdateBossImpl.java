@@ -57,8 +57,10 @@ import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.hqu.server.session.UIPlugin;
 import org.hyperic.hq.hqu.shared.UIPluginManager;
+import org.hyperic.hq.security.ServerKeystoreConfig;
 import org.hyperic.util.http.HQHttpClient;
 import org.hyperic.util.http.HttpConfig;
+import org.hyperic.util.security.KeystoreConfig;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -82,6 +84,7 @@ public class UpdateBossImpl implements UpdateBoss {
     private String updateNotifyUrl;
     private static final int HTTP_TIMEOUT_MILLIS = 30000;
     private DataSource dataSource;
+    private KeystoreConfig keystoreConf;
  
 
     @Autowired
@@ -94,7 +97,8 @@ public class UpdateBossImpl implements UpdateBoss {
                           UIPluginManager uiPluginManager,
                           ServerConfigAuditFactory serverConfigAuditFactory,
                           DataSource dataSource,
-                          @Value("#{tweakProperties['hq.updateNotify.url'] }") String updateNotifyUrl) {
+                          @Value("#{tweakProperties['hq.updateNotify.url'] }") String updateNotifyUrl,
+                          ServerKeystoreConfig serverKeystoreConfig) {
         this.updateDAO = updateDAO;
         this.serverConfigManager = serverConfigManager;
         this.platformManager = platformManager;
@@ -104,6 +108,7 @@ public class UpdateBossImpl implements UpdateBoss {
         this.serverConfigAuditFactory = serverConfigAuditFactory;
         this.dataSource = dataSource;
         this.updateNotifyUrl = updateNotifyUrl;
+        keystoreConf =  serverKeystoreConfig;
     }
 
     protected Properties getRequestInfo(UpdateStatus status) {
@@ -193,7 +198,7 @@ public class UpdateBossImpl implements UpdateBoss {
         
         try {
 	        HttpConfig config = new HttpConfig(HTTP_TIMEOUT_MILLIS, HTTP_TIMEOUT_MILLIS, null, -1);
-	        HQHttpClient client = new HQHttpClient("hq", config);
+	        HQHttpClient client = new HQHttpClient(keystoreConf, config);
 	        HttpPost post = new HttpPost(updateNotifyUrl);
 	        
 	        post.addHeader("x-hq-guid", req.getProperty("hq.guid"));

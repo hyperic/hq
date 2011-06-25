@@ -27,7 +27,9 @@ package org.hyperic.hq.agent.client;
 
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.bizapp.agent.client.SecureAgentConnection;
+import org.hyperic.hq.security.ServerKeystoreConfig;
 import org.hyperic.hq.transport.AgentProxyFactory;
+import org.hyperic.util.security.KeystoreConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -39,21 +41,25 @@ import org.springframework.stereotype.Component;
 public class AgentCommandsClientFactory {
 	
     private final AgentProxyFactory agentProxyFactory;
-
+    private KeystoreConfig keystoreConfig;
+    
     @Autowired
-    public AgentCommandsClientFactory(AgentProxyFactory agentProxyFactory) {
+    public AgentCommandsClientFactory(AgentProxyFactory agentProxyFactory, ServerKeystoreConfig serverKeystoreConfig) {
         this.agentProxyFactory = agentProxyFactory;
+        keystoreConfig = serverKeystoreConfig;
     }
 
     public AgentCommandsClient getClient(Agent agent) {
         if (agent.isNewTransportAgent()) {
             return new AgentCommandsClientImpl(agent, agentProxyFactory);
         } else {
+
         	// Grab config setting, that specifies auto accepting
         	boolean acceptCertificates = Boolean.parseBoolean(System.getProperty("accept.unverified.certificates", "false"));
-        	
+
             return new LegacyAgentCommandsClientImpl(new SecureAgentConnection(agent.getAddress(),
-                agent.getPort(), agent.getAuthToken(), "hq", acceptCertificates));
+                agent.getPort(), agent.getAuthToken(),keystoreConfig,acceptCertificates));
+
         }
     }
 
@@ -62,7 +68,7 @@ public class AgentCommandsClientFactory {
         if (isNewTransportAgent) {
             return new AgentCommandsClientImpl(agentProxyFactory, agentAddress, agentPort, unidirectional);
         } else {
-            return new LegacyAgentCommandsClientImpl(new SecureAgentConnection(agentAddress, agentPort, authToken, "hq", acceptCertificates));
+            return new LegacyAgentCommandsClientImpl(new SecureAgentConnection(agentAddress, agentPort, authToken, keystoreConfig, acceptCertificates));
         }
     }
 }
