@@ -89,7 +89,6 @@ public class CloudApplicationMeasurementPlugin extends MeasurementPlugin {
             	List<InstanceStats> records = stats.getRecords();
             	for (InstanceStats stat : records) {
             		memory += stat.getUsage().getMem();
-            		_log.debug("appName=" + appName + ", memory=" + memory);
             	}
             	// FIXME: the cloud foundry api is returning the value
             	// in KB, so need to convert to the proper units
@@ -108,8 +107,6 @@ public class CloudApplicationMeasurementPlugin extends MeasurementPlugin {
                 	// in KB, so need to convert to the proper units
                 	memory = memory * 1024;                	
             		long quota = stat.getMemQuota();            		
-            		_log.debug("appName=" + appName + ", memory=" + memory
-            					+ ", quota=" + quota);
             		percent += memory/quota;
             	}
             	if (!records.isEmpty()) {
@@ -122,7 +119,6 @@ public class CloudApplicationMeasurementPlugin extends MeasurementPlugin {
             	List<InstanceStats> records = stats.getRecords();
             	for (InstanceStats stat : records) {
             		disk += stat.getUsage().getDisk();
-            		_log.debug("appName=" + appName + ", disk=" + disk);
             	}            	
             	if (!records.isEmpty()) {
             		disk = disk/records.size();
@@ -135,8 +131,6 @@ public class CloudApplicationMeasurementPlugin extends MeasurementPlugin {
             	for (InstanceStats stat : records) {
             		int disk = stat.getUsage().getDisk();
             		double quota = (double) stat.getDiskQuota();
-            		_log.debug("appName=" + appName + ", disk=" + disk
-            					+ ", quota=" + quota);
             		percent += disk/quota;
             	}
             	if (!records.isEmpty()) {
@@ -149,7 +143,6 @@ public class CloudApplicationMeasurementPlugin extends MeasurementPlugin {
             	List<InstanceStats> records = stats.getRecords();
             	for (InstanceStats stat : records) {
             		cpu += stat.getUsage().getCpu() / 100d;
-            		_log.debug("appName=" + appName + ", cpu=" + cpu);
             	}            	
             	if (!records.isEmpty()) {
             		cpu = cpu/records.size();
@@ -160,7 +153,6 @@ public class CloudApplicationMeasurementPlugin extends MeasurementPlugin {
             	List<InstanceStats> records = stats.getRecords();
             	double maxUptime = 0;
             	for (InstanceStats stat : records) {
-            		_log.debug("appName=" + appName + ", uptime=" + stat.getUptime());
             		if (stat.getUptime() > maxUptime) {
             			maxUptime = stat.getUptime();
             		}

@@ -22,25 +22,15 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-package org.hyperic.hq.plugin.cloudfoundry.product;
 
-import java.util.Properties;
+package org.hyperic.hq.plugin.cloudfoundry.inventory;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.product.GenericPlugin;
-import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.PluginManager;
-import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.hq.product.TypeInfo;
+import java.util.List;
+import org.hyperic.hq.product.ServiceResource;
 
-public class CloudFoundryProductPlugin extends ProductPlugin {
-    private static final Log logger = LogFactory.getLog(CloudFoundryProductPlugin.class);
+public interface TransientResourceManager {
 
-    public void init(PluginManager manager) throws PluginException {
-        super.init(manager);
-        Properties props = manager.getProperties();
-        logger.debug("manager.getProperties [" + props +"]");
-    }
+	public void syncServices(List<ServiceResource> serviceResources)
+		throws Exception;
+
 }

@@ -69,7 +69,6 @@ public class CloudFoundryMeasurementPlugin extends MeasurementPlugin {
             } else if (metricName.equals("MemoryUsed")) {
             	CloudInfo info = cf.getCloudInfo();
             	long memory = (long) info.getUsage().getTotalMemory();
-            	_log.debug("memoryused=" + memory);
             	// FIXME: the cloud foundry api returns the value in MB
             	// so need to convert to the proper units
             	memory = memory * 1024 * 1024;
@@ -78,33 +77,27 @@ public class CloudFoundryMeasurementPlugin extends MeasurementPlugin {
             	CloudInfo info = cf.getCloudInfo();
             	int memory = info.getUsage().getTotalMemory();
             	double max = (double) info.getLimits().getMaxTotalMemory();
-            	_log.debug("maxmemory=" + max);
             	double percent = memory/max;
-            	_log.debug("percentmemoryused=" + percent);
             	return new MetricValue(percent);            	
             } else if (metricName.equals("AppsUsed")) {
             	CloudInfo info = cf.getCloudInfo();
             	int apps = info.getUsage().getApps();
-            	_log.debug("apps=" + apps);
             	return new MetricValue(Integer.valueOf(apps));
             } else if (metricName.equals("PercentAppsUsed")) {
             	CloudInfo info = cf.getCloudInfo();
             	int apps = info.getUsage().getApps();
             	double max = (double) info.getLimits().getMaxApps();
             	double percent = apps/max;
-            	_log.debug("percentappsused=" + percent);
             	return new MetricValue(percent);
             } else if (metricName.equals("ServicesUsed")) {
             	CloudInfo info = cf.getCloudInfo();
             	int services = info.getUsage().getServices();
-            	_log.debug("services=" + services);
             	return new MetricValue(Integer.valueOf(services));
             } else if (metricName.equals("PercentServicesUsed")) {
             	CloudInfo info = cf.getCloudInfo();
             	int services = info.getUsage().getServices();
             	double max = (double) info.getLimits().getMaxServices();
             	double percent = services/max;
-            	_log.debug("percentservicesused=" + percent);
             	return new MetricValue(percent);
             }
         } catch (PluginException e) {

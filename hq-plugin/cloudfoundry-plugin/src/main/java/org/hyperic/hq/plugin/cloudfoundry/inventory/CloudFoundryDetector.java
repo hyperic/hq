@@ -42,9 +42,10 @@ import org.hyperic.hq.agent.AgentCommand;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.autoinventory.agent.client.AICommandsUtils;
 import org.hyperic.hq.plugin.cloudfoundry.util.CloudFoundryFactory;
-import org.hyperic.hq.product.DaemonDetector;
+import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.MetricUnreachableException;
 import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
 import org.hyperic.util.config.ConfigResponse;
@@ -60,13 +61,19 @@ import org.cloudfoundry.client.lib.CloudInfo;
 import org.cloudfoundry.client.lib.CloudService;
 import org.cloudfoundry.client.lib.InstanceStats;
 
-public class CloudFoundryDetector extends DaemonDetector {
+public class CloudFoundryDetector extends ServerDetector implements AutoServerDetector {
 
     private static final Log _log =
         LogFactory.getLog(CloudFoundryDetector.class.getName());
 
-    private static final String SERVER_PROTOTYPE_CLOUD_FOUNDRY = "Cloud Foundry";
-    private static final String HIERARCHY_KEY = "application.hierarchy";
+    private static final String PROTOTYPE_CLOUD_FOUNDRY = "Cloud Foundry";
+    private static final String PROTOTYPE_CLOUD_FOUNDRY_APP = "Cloud Foundry Application";
+    private static final String PROTOTYPE_CLOUD_FOUNDRY_MONGODB = "Cloud Foundry MongoDB Service";
+    private static final String PROTOTYPE_CLOUD_FOUNDRY_MYSQL = "Cloud Foundry MySQL Service";
+    private static final String PROTOTYPE_CLOUD_FOUNDRY_RABBITMQ = "Cloud Foundry RabbitMQ Service";
+    private static final String PROTOTYPE_CLOUD_FOUNDRY_REDIS = "Cloud Foundry Redis Service";
+    
+    private static final String HIERARCHY_KEY = "resource.hierarchy";
 
     // TODO: these constants are part of RuntimeAutodiscoverer as private
     // constants, so we need to define them again here.
@@ -75,9 +82,8 @@ public class CloudFoundryDetector extends DaemonDetector {
 
     private void runAutoDiscovery(ConfigResponse cf) {
         _log.debug("[runAutoDiscovery] >> start");
-        _log.debug("[runAutoDiscovery] >> config=" + cf.toProperties());
         try {
-            AgentRemoteValue configARV = AICommandsUtils.createArgForRuntimeDiscoveryConfig(0, 0, "cloudfoundry", null, cf);
+            AgentRemoteValue configARV = AICommandsUtils.createArgForRuntimeDiscoveryConfig(0, 0, PROTOTYPE_CLOUD_FOUNDRY, null, cf);
             _log.debug("[runAutoDiscovery] configARV=" + configARV);
             AgentCommand ac = new AgentCommand(1, 1, "autoinv:pushRuntimeDiscoveryConfig", configARV);
             AgentDaemon.getMainInstance().getCommandDispatcher().processRequest(ac, null, null);
@@ -86,11 +92,27 @@ public class CloudFoundryDetector extends DaemonDetector {
             _log.debug("[runAutoDiscovery]" + ex.getMessage(), ex);
         }
     }
-    
-    private void discoverServices(AgentDaemon agent)
-    	throws PluginException {
-	
+        
+    public List getServerResources(ConfigResponse platformConfig) 
+        throws PluginException {
+        
+    	AgentDaemon agent = AgentDaemon.getMainInstance();
+    	
+    	return recreateServerResources(agent);
+    }
+
+    /**
+     * Recreate manually-added server as an autodiscovered
+	 * server so that custom properties can be autodiscovered.
+	 * 
+     * @param agent
+     * @return
+     */
+    private List recreateServerResources(AgentDaemon agent) {
+    	List<ServerResource> resources = new ArrayList<ServerResource>();
+    	
 	    try {
+	    	// get config for existing servers
 	        AgentStorageProvider storageProvider = agent.getStorageProvider();
 	        ConfigStorage storage = new ConfigStorage(storageProvider, 
 	                                                  STORAGE_KEYLIST, 
@@ -100,55 +122,68 @@ public class CloudFoundryDetector extends DaemonDetector {
 	        for (Iterator i = configs.entrySet().iterator(); i.hasNext();) {
 	            Map.Entry entry = (Map.Entry)i.next();
 	            ConfigStorage.Key key = (ConfigStorage.Key)entry.getKey();
-	            String type = key.getTypeName();
+	            String typeName = key.getTypeName();
 	            
-	            _log.debug("discoverServices type=" + type);
+	            if (_log.isDebugEnabled()) {
+	            	_log.debug("recreateServerResources typeName=" + typeName
+		            			+ ", id=" + key.getId()
+		            			+ ", key=" + key);
+	            }
 	
-	            if (SERVER_PROTOTYPE_CLOUD_FOUNDRY.equals(type)) {
+	            if (PROTOTYPE_CLOUD_FOUNDRY.equals(typeName) && key.getId() > 0) {
 	                ConfigResponse serverConfig = (ConfigResponse)entry.getValue();
+
+	    	    	// discover any new apps or services during default scan
+	                // to improve response time
 	                runAutoDiscovery(serverConfig);
+
+	                // recreate manually-added server as an autodiscovered
+	                // server so that custom properties can be autodiscovered
+	                ServerResource s = recreateServerResource(key, serverConfig);
+	                if (s != null) {
+	                	resources.add(s);
+	                }
 	            }
 	        }            
 	    } catch (Exception e) {
 	        _log.error("Could not discover apps and services during the default scan: " 
 	                       + e.getMessage(), e);
 	    }
-    }
-    
-    /**
-     * Need to discover during the default scan
-     * instead of the runtime scan to improve response time
-     */
-    public List getServerResources(ConfigResponse platformConfig) 
-        throws PluginException {
-            	
-        // discover new servers
-    	List servers = super.getServerResources(platformConfig);
-    	
-    	_log.debug("[getServerResources] servers=" + servers.size()
-    				+ " , platformConfig=" + platformConfig);
-    	
-    	// get config for existing servers and discover
-    	// any new apps or services
-    	AgentDaemon agent = AgentDaemon.getMainInstance();
-    	discoverServices(agent);
+	    
+    	_log.debug("[recreateServerResources] servers=" + resources.size());
 
-        return servers;
+	    return resources;    	
     }
-    
+
+    private ServerResource recreateServerResource(ConfigStorage.Key key, ConfigResponse serverConfig) {
+    	ServerResource server = null;
+    	
+    	try {
+	    	Properties props = new Properties();
+	        props.putAll(serverConfig.toProperties());
+	        props.putAll(getManager().getProperties());
+	
+	        CloudFoundryResourceManager manager = new CloudFoundryResourceManager(props);    	
+	        server = manager.createServerResource(key);
+	
+	        if (server != null) {
+	        	discoverServerConfig(server);
+	        }
+    	} catch (Exception e) {
+    		_log.debug("Could not recreate server resource", e);
+    		server = null;
+    	}
+        
+        return server;
+    }
+
     /**
      * Further configure the Cloud Foundry server resource.
      * @param server
-     * @param pid
      */
-    protected void discoverServerConfig(ServerResource server, long pid) {
-        super.discoverServerConfig(server, pid);
-        
+    private void discoverServerConfig(ServerResource server) {        
         try {
             ConfigResponse serverConfig = server.getProductConfig();
-            _log.debug("[discoverServerConfig] pid=" + pid
-            			+ ", server=" + server
-            			+ ", config=" + serverConfig);
 	    	CloudFoundryClient cf = CloudFoundryFactory.getCloudFoundryClient(serverConfig.toProperties());
 	    	
 	    	if (cf != null) {
@@ -161,41 +196,39 @@ public class CloudFoundryDetector extends DaemonDetector {
 	    		custom.setValue("info.support", info.getSupport());    				
 	    		custom.setValue("info.limits.apps", Integer.toString(info.getLimits().getMaxApps()));
 	    		custom.setValue("info.limits.services", Integer.toString(info.getLimits().getMaxServices()));
-	    		
+	    			    		
 	    		// display max memory in GB
-	    		double maxMemory = info.getLimits().getMaxTotalMemory() / 1000d;    			
+	    		double maxMemory = info.getLimits().getMaxTotalMemory() / 1024d;    			
 	    		custom.setValue("info.limits.memory", Double.toString(maxMemory) + " GB");
-	
+		    		
 	    		server.setCustomProperties(custom);
 	    	}
         } catch (Exception e) {
-        	_log.debug("Could not set custom server properties", e);
+        	_log.info("Could not set custom server properties", e);
         }
     }
 
-    protected List discoverServices(ConfigResponse config)
+    protected List discoverServices(ConfigResponse serverConfig)
         throws PluginException {
-
-        //return super.discoverServices(config);
-
-        //XXX this method only gets called once a day by default
-        //but we won't have the Cloud Foundry config until the server
-        //resource is configured.
-    	
-    	_log.debug("discoverServices: config=" + config);
-    	
-        List services = new ArrayList();
-    	CloudFoundryClient cf = CloudFoundryFactory.getCloudFoundryClient(config.toProperties());
+    	    	
+        List<ServiceResource> services = new ArrayList<ServiceResource>();
+    	CloudFoundryClient cf = CloudFoundryFactory.getCloudFoundryClient(serverConfig.toProperties());
 
     	if (cf != null) {
-    		services.addAll(discoverCloudApplications(cf));
-    		services.addAll(discoverCloudServices(cf));
+    		services.addAll(discoverCloudApplications(cf, serverConfig));
+    		services.addAll(discoverCloudServices(cf, serverConfig));
+    		
+    		// TODO: what if all apps and services were deleted in cloud foundry
+    		if (!services.isEmpty()) {
+    			syncServices(serverConfig, services);
+    		}
     	}
         return services;    	
     }
     
-    private List discoverCloudApplications(CloudFoundryClient cf) {
-        List services = new ArrayList();
+    private List<ServiceResource> discoverCloudApplications(CloudFoundryClient cf,
+    														ConfigResponse serverConfig) {
+        List<ServiceResource> services = new ArrayList<ServiceResource>();
 
 		List<CloudApplication> apps = cf.getApplications();
         
@@ -205,25 +238,24 @@ public class CloudFoundryDetector extends DaemonDetector {
 	        	JSONArray jsonServices = jsonConfig.getJSONArray("service");
 	
 	            ServiceResource service = new ServiceResource();
-	            service.setType("Cloud Foundry Application");
-	            service.setServiceName(app.getName());
+	            service.setType(PROTOTYPE_CLOUD_FOUNDRY_APP);
 	
 	            ConfigResponse productCfg = new ConfigResponse();
-	            productCfg.setValue("application.name", app.getName());                
+	            productCfg.setValue("resource.name", app.getName());                
 	        	productCfg.setValue(HIERARCHY_KEY, jsonConfig.toString());
 	            service.setProductConfig(productCfg);
 	            
 	            service.setMeasurementConfig(new ConfigResponse());
 	            
 	            ConfigResponse custom = new ConfigResponse();
-	        	custom.setValue("staging.model", app.getStaging().get("model"));
-	        	custom.setValue("staging.stack", app.getStaging().get("stack"));
-	        	custom.setValue("resource.name", app.getName());
-	        	custom.setValue("resource.memory", app.getMemory() + " MB");
+	        	custom.setValue("app.model", app.getStaging().get("model"));
+	        	custom.setValue("app.stack", app.getStaging().get("stack"));
+	        	custom.setValue("app.name", app.getName());
+	        	custom.setValue("app.memory", app.getMemory() + " MB");
 	        	
 	        	String uris = app.getUris().toString();
 	        	uris = uris.substring(1, uris.length()-1);
-	        	custom.setValue("resource.uri", uris);
+	        	custom.setValue("app.uri", uris);
 
 	    		// display max disk in GB
 	    		double maxDisk = 0;
@@ -241,8 +273,8 @@ public class CloudFoundryDetector extends DaemonDetector {
             	}
             	if (!records.isEmpty()) {
 		    		maxDisk = maxDisk / (1024 * 1024 * 1024);
-		        	custom.setValue("resource.disk", maxDisk + " GB");
-		        	custom.setValue("resource.core", Integer.toString(maxCores));
+		        	custom.setValue("app.disk", maxDisk + " GB");
+		        	custom.setValue("app.core", Integer.toString(maxCores));
             	}
 	    		
 	        	String appServices = "";
@@ -250,10 +282,13 @@ public class CloudFoundryDetector extends DaemonDetector {
 	        		appServices = jsonServices.toString().replace("\"", "");
 	        		appServices = appServices.substring(1, appServices.length()-1);
 	        	}
-	        	custom.setValue("resource.app.services", appServices);
+	        	custom.setValue("app.services", appServices);
 	        	
 	        	service.setCustomProperties(custom);
-	        	        	
+
+	        	String name = formatAutoInventoryName(service.getType(), serverConfig, productCfg, custom);
+	            service.setName(name);
+
 	            services.add(service);
 			} catch (Exception e) {
 				_log.debug("Could not discover cloud application: " + e.getMessage(), e);
@@ -268,9 +303,7 @@ public class CloudFoundryDetector extends DaemonDetector {
     	
 		JSONObject jsonConfig = new JSONObject();
 		JSONArray jsonServices = new JSONArray();
-		
-		_log.debug("appServices=" + app.getServices().size());
-		
+				
 		for (String s : app.getServices()) {
 			jsonServices.put(s);
 		}
@@ -281,49 +314,66 @@ public class CloudFoundryDetector extends DaemonDetector {
     	return jsonConfig;
     }
     
-    private List discoverCloudServices(CloudFoundryClient cf) {
-    	List services = new ArrayList();
-    	
+    private List<ServiceResource> discoverCloudServices(CloudFoundryClient cf,
+    													ConfigResponse serverConfig) {
+    	List<ServiceResource> services = new ArrayList<ServiceResource>();    	
     	List<CloudService> cloudServices = cf.getServices();
-    	
-    	_log.debug("services=" + cloudServices.size());
-    	
+    	    	
     	for (CloudService cs : cloudServices) {
             ServiceResource service = new ServiceResource();
             String vendor = cs.getVendor();
             
             if ("mysql".equalsIgnoreCase(vendor)) {
-            	service.setType("Cloud Foundry MySQL Service");
+            	service.setType(PROTOTYPE_CLOUD_FOUNDRY_MYSQL);
             } else if ("mongodb".equalsIgnoreCase(vendor)) {
-            	service.setType("Cloud Foundry MongoDB Service");            	
+            	service.setType(PROTOTYPE_CLOUD_FOUNDRY_MONGODB);            	
             } else if ("redis".equalsIgnoreCase(vendor)) {
-            	service.setType("Cloud Foundry Redis Service");            	
+            	service.setType(PROTOTYPE_CLOUD_FOUNDRY_REDIS);            	
             } else if ("rabbitmq".equalsIgnoreCase(vendor)) {
-            	service.setType("Cloud Foundry RabbitMQ Service");            	
+            	service.setType(PROTOTYPE_CLOUD_FOUNDRY_RABBITMQ);            	
             } else {
             	_log.info("Unsupported Cloud Foundry service: " + vendor);
             	continue;
             }
 
-            service.setServiceName(cs.getName());
-
             ConfigResponse productCfg = new ConfigResponse();
-            productCfg.setValue("service.name", cs.getName());                
+            productCfg.setValue("resource.name", cs.getName());                
             service.setProductConfig(productCfg);
 
             service.setMeasurementConfig(new ConfigResponse());
             
             ConfigResponse custom = new ConfigResponse();
-        	custom.setValue("resource.name", cs.getName());
-        	custom.setValue("resource.tier", cs.getTier());
-        	custom.setValue("resource.type", cs.getType());
-        	custom.setValue("resource.vendor", vendor);
-        	custom.setValue("resource.version", cs.getVersion());
+        	custom.setValue("service.name", cs.getName());
+        	custom.setValue("service.tier", cs.getTier());
+        	custom.setValue("service.type", cs.getType());
+        	custom.setValue("service.vendor", vendor);
+        	custom.setValue("service.version", cs.getVersion());
         	service.setCustomProperties(custom);
+
+        	String name = formatAutoInventoryName(service.getType(), serverConfig, productCfg, custom);
+            service.setName(name);
 
             services.add(service);
     	}
     	
     	return services;
+    }
+    
+    private void syncServices(ConfigResponse serverConfig, List<ServiceResource> cloudResources) {
+        // TODO: make auto-sync a configurable property?
+       boolean autoSync = true;
+    	_log.debug("[syncServices] autoSync=" + autoSync + ", resources=" + cloudResources.size());
+        if (autoSync) {
+            try {
+                Properties props = new Properties();
+                props.putAll(serverConfig.toProperties());
+                props.putAll(getManager().getProperties());
+
+                TransientResourceManager manager = new CloudFoundryResourceManager(props);
+                manager.syncServices(cloudResources);
+            } catch (Throwable e) {
+                _log.debug("Could not sync transient services: " + e.getMessage(), e);
+            }
+        }
     }
 }
