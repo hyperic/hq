@@ -75,6 +75,8 @@ public class CloudFoundryDetector extends ServerDetector implements AutoServerDe
     
     private static final String HIERARCHY_KEY = "resource.hierarchy";
 
+    private static final int ARV_DUMMY_INSTANCE_ID = 0;
+    
     // TODO: these constants are part of RuntimeAutodiscoverer as private
     // constants, so we need to define them again here.
     private static final String STORAGE_PREFIX  = "runtimeautodiscovery";
@@ -83,7 +85,7 @@ public class CloudFoundryDetector extends ServerDetector implements AutoServerDe
     private void runAutoDiscovery(ConfigResponse cf) {
         _log.debug("[runAutoDiscovery] >> start");
         try {
-            AgentRemoteValue configARV = AICommandsUtils.createArgForRuntimeDiscoveryConfig(0, 0, PROTOTYPE_CLOUD_FOUNDRY, null, cf);
+            AgentRemoteValue configARV = AICommandsUtils.createArgForRuntimeDiscoveryConfig(0, ARV_DUMMY_INSTANCE_ID, PROTOTYPE_CLOUD_FOUNDRY, null, cf);
             _log.debug("[runAutoDiscovery] configARV=" + configARV);
             AgentCommand ac = new AgentCommand(1, 1, "autoinv:pushRuntimeDiscoveryConfig", configARV);
             AgentDaemon.getMainInstance().getCommandDispatcher().processRequest(ac, null, null);
@@ -130,7 +132,8 @@ public class CloudFoundryDetector extends ServerDetector implements AutoServerDe
 		            			+ ", key=" + key);
 	            }
 	
-	            if (PROTOTYPE_CLOUD_FOUNDRY.equals(typeName) && key.getId() > 0) {
+	            if (PROTOTYPE_CLOUD_FOUNDRY.equals(typeName) 
+	            		&& key.getId() != ARV_DUMMY_INSTANCE_ID) {
 	                ConfigResponse serverConfig = (ConfigResponse)entry.getValue();
 
 	    	    	// discover any new apps or services during default scan
@@ -139,7 +142,7 @@ public class CloudFoundryDetector extends ServerDetector implements AutoServerDe
 
 	                // recreate manually-added server as an autodiscovered
 	                // server so that custom properties can be autodiscovered
-	                ServerResource s = recreateServerResource(key, serverConfig);
+	                ServerResource s = recreateServerResource(serverConfig);
 	                if (s != null) {
 	                	resources.add(s);
 	                }
@@ -155,7 +158,7 @@ public class CloudFoundryDetector extends ServerDetector implements AutoServerDe
 	    return resources;    	
     }
 
-    private ServerResource recreateServerResource(ConfigStorage.Key key, ConfigResponse serverConfig) {
+    private ServerResource recreateServerResource(ConfigResponse serverConfig) {
     	ServerResource server = null;
     	
     	try {
@@ -164,7 +167,7 @@ public class CloudFoundryDetector extends ServerDetector implements AutoServerDe
 	        props.putAll(getManager().getProperties());
 	
 	        CloudFoundryResourceManager manager = new CloudFoundryResourceManager(props);    	
-	        server = manager.createServerResource(key);
+	        server = manager.createServerResource();
 	
 	        if (server != null) {
 	        	discoverServerConfig(server);

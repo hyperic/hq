@@ -68,7 +68,6 @@ public class CloudFoundryResourceManager implements TransientResourceManager {
     private static final String CONFIG_URI = "uri";
     private static final String INFO_AUTOIDENTIFIER = "autoIdentifier";
     
-    private HQApi api;
     private HQApiCommandsClient commandsClient;
     private Properties props;
 
@@ -76,26 +75,26 @@ public class CloudFoundryResourceManager implements TransientResourceManager {
             throws PluginException {
 
         this.props = props;
-        this.api = HQApiFactory.getHQApi(AgentDaemon.getMainInstance(), props);
-        this.commandsClient = new HQApiCommandsClient(this.api);
+        HQApi api = HQApiFactory.getHQApi(AgentDaemon.getMainInstance(), props);
+        this.commandsClient = new HQApiCommandsClient(api);
     }
     
-    public ServerResource createServerResource(ConfigStorage.Key key) {    	
-    	if (key.getId() == 0) {
-    		return null;    		
-    	}
-
+    public ServerResource createServerResource() {
+    	Resource cloudfoundry = null;
     	String aiid = null;
 
     	try {
-        	String appdefKey = "2:" + key.getId();
-	    	Resource resource = getResource(appdefKey);
+            cloudfoundry = getCloudFoundryServer(this.props);
 	    	
-	    	if (resource == null) {
+	    	if (cloudfoundry == null) {
+                if (_log.isDebugEnabled()) {
+                    _log.debug("Could not find a " + PROTOTYPE_CLOUD_FOUNDRY 
+                    			+ " server with the specified properties.");
+                }
 	    		return null;
 	    	}
 	    	
-	    	for (ResourceInfo info : resource.getResourceInfo()) {
+	    	for (ResourceInfo info : cloudfoundry.getResourceInfo()) {
 	    		if (INFO_AUTOIDENTIFIER.equals(info.getKey())) {
 	    			aiid = info.getValue();
 	    			break;
@@ -111,7 +110,7 @@ public class CloudFoundryResourceManager implements TransientResourceManager {
 
         ServerResource server = new ServerResource();
 
-        String serverType = key.getTypeName();
+        String serverType = cloudfoundry.getResourcePrototype().getName();
         String platformName = this.props.getProperty("platform.name");
         String installPath = this.props.getProperty("installpath");
         String email = this.props.getProperty("email");
@@ -146,7 +145,8 @@ public class CloudFoundryResourceManager implements TransientResourceManager {
 
             if (cloudfoundry == null) {
                 if (_log.isDebugEnabled()) {
-                    _log.debug("Could not find a " + PROTOTYPE_CLOUD_FOUNDRY + " server");
+                    _log.debug("Could not find a " + PROTOTYPE_CLOUD_FOUNDRY 
+                    			+ " server with the specified properties.");
                 }
                 return;
             }
@@ -189,16 +189,6 @@ public class CloudFoundryResourceManager implements TransientResourceManager {
                 _log.info(numResourcesDeleted + " Cloud Foundry resources deleted");
             }
         }
-    }
-
-    private Resource getResource(String appdefKey) 
-		throws IOException {
-	
-		ResourceApi api = this.api.getResourceApi();
-		ResourceResponse response = api.getResource(appdefKey, false, false);
-		this.commandsClient.assertSuccess(response, "Getting resource for " + appdefKey, false);
-	
-		return response.getResource();
     }
     
     private Resource getCloudFoundryServer(Properties serverProps)
