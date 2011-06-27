@@ -3806,7 +3806,6 @@ hyperic.maintenance_schedule = function(args) {
     			value: that.selected_from_time,
     			constraints: {
                     datePattern: 'MM/dd/y'},
-    			lang: "en-us",
     			promptMessage: "A valid date in format mm/dd/yyyy is required.",
     			rangeMessage: hyperic.data.maintenance_schedule.error.startDateRange,
     			invalidMessage: hyperic.data.maintenance_schedule.error.datePattern,
@@ -3818,7 +3817,6 @@ hyperic.maintenance_schedule = function(args) {
     			value: that.selected_to_time,
     			constraints: {
                     datePattern: 'MM/dd/y'},
-    			lang: "en-us",
     			promptMessage: "A valid date in format mm/dd/yyyy is required.",
     			rangeMessage: hyperic.data.maintenance_schedule.error.endDateRange,
     			invalidMessage: hyperic.data.maintenance_schedule.error.datePattern,
@@ -3828,7 +3826,6 @@ hyperic.maintenance_schedule = function(args) {
         that.inputs.from_time = new hqDijit.form.TimeTextBox({
     			name: "from_time",
     			value: that.selected_from_time,
-    			lang: "en-us",
                 rangeMessage: hyperic.data.maintenance_schedule.error.startTimeRange,
     			invalidMessage: hyperic.data.maintenance_schedule.error.timePattern,
     			required: true
@@ -3837,7 +3834,6 @@ hyperic.maintenance_schedule = function(args) {
         that.inputs.to_time = new hqDijit.form.TimeTextBox({
     			name: "to_time",
     			value: that.selected_to_time,
-    			lang: "en-us",
                 rangeMessage: hyperic.data.maintenance_schedule.error.endTimeRange,
     			invalidMessage: hyperic.data.maintenance_schedule.error.timePattern,
     			required: true
