@@ -158,10 +158,14 @@ public class CloudApplicationMeasurementPlugin extends MeasurementPlugin {
             		}
             	}            	
             	return new MetricValue(maxUptime);            	
-            } else if (metricName.equals("NumberOfInstances")) {
+            } else if (metricName.equals("TotalInstances")) {
             	CloudApplication app = cf.getApplication(appName);
             	int count = app.getInstances();
             	return new MetricValue(Integer.valueOf(count));            	
+            } else if (metricName.equals("RunningInstances")) {
+            	CloudApplication app = cf.getApplication(appName);
+            	int count = app.getRunningInstances();
+            	return new MetricValue(Integer.valueOf(count));
             }
         } catch (PluginException e) {
             if (metric.isAvail()) {

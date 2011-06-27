@@ -220,7 +220,13 @@
 				interval="300000"
 				indicator="true" />
 
-			<metric name="Number Of Instances"
+			<metric name="Total Instances"
+	    		template="cloudfoundry:${api-connection},app=%resource.name%:${alias}"
+				interval="300000"
+				category="UTILIZATION"
+				indicator="true" />
+
+			<metric name="Running Instances"
 	    		template="cloudfoundry:${api-connection},app=%resource.name%:${alias}"
 				interval="300000"
 				category="UTILIZATION"
