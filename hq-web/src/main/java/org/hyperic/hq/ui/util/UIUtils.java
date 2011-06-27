@@ -41,8 +41,10 @@ public interface UIUtils {
     public void setResourceFlags(AppdefResourceValue resource, boolean config, HttpServletRequest request,
                                  ServletContext ctx) throws Exception;
 
-    List<AppdefResourceValue> getFavoriteResources(ServletContext ctx, WebUser user);
+    public List<AppdefResourceValue> getFavoriteResources(ServletContext ctx, WebUser user);
 
-    List getResourceTypes(ServletContext ctx, Integer sessionId) throws PermissionException,
+    public List getResourceTypes(ServletContext ctx, Integer sessionId) throws PermissionException,
         SessionTimeoutException, SessionNotFoundException, RemoteException;
+    
+    public boolean isResourceAlertable(AppdefResourceValue rv);
 }

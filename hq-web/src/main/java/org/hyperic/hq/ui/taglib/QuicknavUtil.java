@@ -35,6 +35,7 @@ import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.common.ProductProperties;
 import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.util.UIUtils;
 
 public class QuicknavUtil {
 
@@ -67,22 +68,13 @@ public class QuicknavUtil {
     }
 
     public static boolean isAlertable(AppdefResourceValue rv, PageContext ctx) {
-        switch (rv.getEntityId().getType()) {
-            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                return true;
-            case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-                //TODO below if stmt is how we know we are running in EE.  We need a better way
-                if (ProductProperties.getPropertyInstance("eeUiUtils") != null) {
-                    AppdefGroupValue group = (AppdefGroupValue) rv;
-                    return AppdefEntityConstants
-                                .isGroupCompat(group.getGroupType());
-                }
-                return false;
-            default:
-                return false;
-        }
+    	UIUtils uiUtils = (UIUtils) ProductProperties.getPropertyInstance("hyperic.hq.ui.utils");
+    	
+    	if (uiUtils == null) {
+    		return false;
+    	}
+    	
+    	return uiUtils.isResourceAlertable(rv);
     }
 
     public static boolean canControl(AppdefResourceValue rv,
