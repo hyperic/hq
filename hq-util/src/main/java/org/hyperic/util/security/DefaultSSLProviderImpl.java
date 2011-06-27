@@ -41,6 +41,7 @@ public class DefaultSSLProviderImpl implements SSLProvider {
 	private SSLContext sslContext;
 	private SSLSocketFactory sslSocketFactory;
 	
+	@Deprecated
     private KeyStore getKeyStore(KeystoreConfig keystoreConfig) throws KeyStoreException, IOException {
     	FileInputStream keyStoreFileInputStream = null;
     	
@@ -89,6 +90,7 @@ public class DefaultSSLProviderImpl implements SSLProvider {
         }
     }
 
+	@Deprecated
     private void generateInternalKeystore(File trustStoreFile, String alias, String password) {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         String javaHome = System.getProperty("java.home");
@@ -196,7 +198,8 @@ public class DefaultSSLProviderImpl implements SSLProvider {
     public DefaultSSLProviderImpl(final KeystoreConfig keystoreConfig, final boolean acceptUnverifiedCertificates ){
 
         try{  
-            final KeyStore trustStore = getKeyStore(keystoreConfig);
+            KeystoreManager keystoreMgr = KeystoreManager.getKeystoreManager();
+            final KeyStore trustStore = keystoreMgr.getKeyStore(keystoreConfig);
             KeyManagerFactory keyManagerFactory = getKeyManagerFactory(trustStore, keystoreConfig.getFilePassword());
             TrustManagerFactory trustManagerFactory = getTrustManagerFactory(trustStore);
        

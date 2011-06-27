@@ -30,6 +30,7 @@ public class KeystoreConfig {
     private String filePath;
     private String filePassword;
     private boolean hqDefault;
+    private String keyCN="";//not required, just for keystore generation
 
     public KeystoreConfig(){   
     }
@@ -41,6 +42,20 @@ public class KeystoreConfig {
         this.hqDefault = hqDefault;
     }
     
+    /**
+     * @return the keyCN
+     */
+    public String getKeyCN() {
+        return keyCN;
+    }
+
+    /**
+     * @param keyCN the keyCN to set
+     */
+    public void setKeyCN(String keyCN) {
+        this.keyCN = keyCN;
+    }
+
     /**
      * @return the hqDefault
      */
