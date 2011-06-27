@@ -14,6 +14,7 @@
 
 	<properties>
 		<hq.version>4.6.0.BUILD-SNAPSHOT</hq.version>
+        <hqapi.version>5.0.0.M1</hqapi.version>
 		<json.version>20080701</json.version>
 		<spring.framework.version>3.0.5.RELEASE</spring.framework.version>
 		<sigar.version>1.6.4</sigar.version>
@@ -33,6 +34,12 @@
 			<artifactId>hq-agent-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+        <dependency>
+            <groupId>org.hyperic.hq.hqapi</groupId>
+            <artifactId>hqapi1</artifactId>
+            <version>${hqapi.version}</version>
+            <scope>compile</scope>
+        </dependency>
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>

@@ -55,7 +55,7 @@ public class CloudApplicationControlPlugin extends ControlPlugin {
     }
 
     private String getAppName() {
-        return _props.getProperty("application.name");
+        return _props.getProperty("resource.name");
     }
     
     public void doAction(String action, String[] args)

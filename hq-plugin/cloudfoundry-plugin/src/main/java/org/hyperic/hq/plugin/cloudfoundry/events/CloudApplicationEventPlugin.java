@@ -85,7 +85,7 @@ public class CloudApplicationEventPlugin extends LogTrackPlugin implements Runna
             CloudFoundryClient cf = CloudFoundryFactory.getCloudFoundryClient(_props);
         	
         	if (cf != null) {
-        		String appName = getConfig("application.name");
+        		String appName = getConfig("resource.name");
         		CrashesInfo info = cf.getCrashes(appName);
         		if (info != null) {
         			crashes = info.getCrashes();
