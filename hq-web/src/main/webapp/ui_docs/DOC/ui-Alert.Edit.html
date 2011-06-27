@@ -16,7 +16,7 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 21, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
@@ -27,11 +27,11 @@
 <p>The <b>Alert Definition</b> page, which appears when you save a new alert definition or edit an existing alert definition, is similar to the <b>New Alert</b> page, with the addition of <b>Edit</b> controls in the "Alert Properties" and "Condition Set" sections, and a set of tabs at the bottom of the page for defining alert actions.</p>
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1307466850332 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1307466850332 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1307466850332 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1308685884860 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1308685884860 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1308685884860 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1307466850332'>
+/*]]>*/</style><div class='rbtoc1308685884860'>
 <ul>
     <li><a href='#ui-Alert.Edit-EditAlertProperties'>Edit Alert Properties</a></li>
     <li><a href='#ui-Alert.Edit-EditAlertConditionSet'>Edit Alert Condition Set</a></li>
@@ -56,13 +56,9 @@ div.rbtoc1307466850332 li {margin-left: 0px;padding-left: 0px;}
 </ul></div>
 
 
-<p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
-
-
-
 <h2><a name="ui-Alert.Edit-EditAlertProperties"></a>Edit Alert Properties</h2>
 
-<p>Click <span class="image-wrap" style=""><img src="attachments/76284812/76578988.gif" style="border: 0px solid black"/></span> in "Alert Properties" section.&nbsp;</p>
+<p>Click <span class="image-wrap" style=""><img src="attachments/77464616/77660898.gif" style="border: 0px solid black"/></span> in "Alert Properties" section.&nbsp;</p>
 
 <ul>
 	<li><b>Name</b> &#45; Name assigned by the user creating an alert definition. A fired alert is identified, in the HQ user interface and alert notifications, by the alert definition name and a timestamp. An alert definition name should clearly communicate the nature of the problem. For example, "Down" for an alert on availability, or "Low Memory" for an alert on free memory.</li>
@@ -86,7 +82,7 @@ div.rbtoc1307466850332 li {margin-left: 0px;padding-left: 0px;}
 
 <h2><a name="ui-Alert.Edit-EditAlertConditionSet"></a>Edit Alert Condition Set</h2>
 
-<p>Click <span class="image-wrap" style=""><img src="attachments/76284812/76578988.gif" style="border: 0px solid black"/></span> in "Condition Set" section.</p>
+<p>Click <span class="image-wrap" style=""><img src="attachments/77464616/77660898.gif" style="border: 0px solid black"/></span> in "Condition Set" section.</p>
 <h3><a name="ui-Alert.Edit-ConditionSet"></a>Condition Set</h3>
 
 <p>An alert condition specifies a resource metric value or event that will initiate the alert firing process.</p>
@@ -101,7 +97,7 @@ div.rbtoc1307466850332 li {margin-left: 0px;padding-left: 0px;}
 		<li>Define the rule for evaluating the metric value.&nbsp; You can:
 		<ul>
 			<li><ins>Compare metric value to an absolute value</ins>. Select an operator: <b>&gt;(greater than)</b>, <b>&lt;(less than)</b>, <b>=(equal to)</b>, or <b>&#33;= (not equal to)</b>, and enter a metric value. If the metric value is a percentage, specify it as a float value. For example, enter <tt>.99</tt> for <tt>99%</tt>, <tt>1.0</tt> for 100%. Use a period (.) as a decimal separator, rather than a comma (,).</li>
-			<li><ins>Compare metric value to its minimum, baseline, or maximum value</ins> <font color="red">&#42;</font>, in HQ Enterprise only. Select an operator: <b>&gt;(greater than)</b>, <b>&lt;(less than)</b>, <b>=(equal to)</b>, or <b>&#33;= (not equal to)</b>, and choose "Min Value", "Baseline Value" or "Max Value". Baselining must be enabled. For more information, see <a href="http://support.hyperic.com/display/DOCS46/Baselines" title="Baselines">Baselines</a>.</li>
+			<li><ins>Compare metric value to its minimum, baseline, or maximum value</ins> <font color="red">&#42;</font>, in HQ Enterprise only. Select an operator: <b>&gt;(greater than)</b>, <b>&lt;(less than)</b>, <b>=(equal to)</b>, or <b>&#33;= (not equal to)</b>, and choose "Min Value", "Baseline Value" or "Max Value". Baselining must be enabled. For more information, see <a href="http://support.hyperic.com/display/DOCS46/Metric+Baselines+in+vFabric+Hyperic" title="Metric Baselines in vFabric Hyperic">Metric Baselines in vFabric Hyperic</a>.</li>
 			<li><ins>Fire upon change in metric value</ins>.&nbsp; Click <b>value changes</b>.</li>
 		</ul>
 		</li>
@@ -146,7 +142,7 @@ div.rbtoc1307466850332 li {margin-left: 0px;padding-left: 0px;}
 
 <p>To designate the alert you're defining as a recovery alert, select the primary alert definition from the pulldown.</p>
 
-<p>A recovery alert condition should detect when the condition that fired the primary alert is no longer true. When a recovery alert fires, it marks the primary alert "Fixed", and the primary alert definition is re-enabled. The primary alert definition should be configured to <b>Generate one alert and then disable alert definition until fixed,</b> as described below. For more information, see <a href="http://support.hyperic.com/display/DOCS46/Recovery+Alerts" title="Recovery Alerts">Recovery Alerts</a>.</p>
+<p>A recovery alert condition should detect when the condition that fired the primary alert is no longer true. When a recovery alert fires, it marks the primary alert "Fixed", and the primary alert definition is re-enabled. The primary alert definition should be configured to <b>Generate one alert and then disable alert definition until fixed,</b> as described below. For more information, see <a href="Define a Recovery Alert for a Resource Alert.html" title="Define a Recovery Alert for a Resource Alert">Define a Recovery Alert for a Resource Alert</a>.</p>
 
 <h3><a name="ui-Alert.Edit-EnableActions"></a>Enable Actions</h3>
 <p><a name="ui-Alert.Edit-EnableActions"></a></p>
@@ -172,7 +168,7 @@ div.rbtoc1307466850332 li {margin-left: 0px;padding-left: 0px;}
 
 <p>This option eliminates redundant firing for the same problem. If you do not choose this option, the alert will fire repeatedly as long as the triggering condition is still true.&nbsp;&nbsp;</p>
 
-<p>In HQ Enterprise this configuration option &#45;&nbsp; used in conjunction with recovery alerts &#45;&nbsp; automates the process of disabling and re-enabling an alert definition.&nbsp; Result:&nbsp; (1) no redundant alerts for the same problem, and (2) you don't have manually "fix" an alert triggered by a transient problem.&nbsp; For more information, see <a href="http://support.hyperic.com/display/DOCS46/Recovery+Alerts" title="Recovery Alerts">Recovery Alerts</a>.</p>
+<p>In HQ Enterprise this configuration option &#45;&nbsp; used in conjunction with recovery alerts &#45;&nbsp; automates the process of disabling and re-enabling an alert definition.&nbsp; Result:&nbsp; (1) no redundant alerts for the same problem, and (2) you don't have manually "fix" an alert triggered by a transient problem.</p>
 
 <h4><a name="ui-Alert.Edit-DisregardControlActionsforRelatedAlerts."></a>Disregard Control Actions for Related Alerts.</h4>
 <p><a name="ui-Alert.Edit-DisregardControlActions"></a></p>
@@ -195,7 +191,7 @@ div.rbtoc1307466851328 {margin-left: 1.5em;padding: 0px;}
 div.rbtoc1307466851328 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
 div.rbtoc1307466851328 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1307466851328'>
+/*]] >*/</style><div class='rbtoc1307466851328'>
 <ul>
     <li><a href='#ui-Alert.Edit-Escalation'>Escalation</a></li>
     <li><a href='#ui-Alert.Edit-ControlAction'>Control Action</a></li>
@@ -216,7 +212,7 @@ div.rbtoc1307466851328 li {margin-left: 0px;padding-left: 0px;}
 
 <h3><a name="ui-Alert.Edit-Escalation"></a>Escalation</h3>
 
-<p>Select an escalation from the "Escalation Scheme" pulldown; the tab refreshes and shows the escalation steps. You must define an escalation before you can assign it to an alert definition. Using an escalation that is configured to repeat until the alert is fixed is a good way to prevent redundant alerts firing for the same problem. To create an escalation, click <b>Escalation Schemes Configuration</b> on the <b>Administration</b> tab. For more information about escalations, see <a href="http://support.hyperic.com/display/DOCS46/Understanding+Escalations" title="Understanding Escalations">Understanding Escalations</a>.</p>
+<p>Select an escalation from the "Escalation Scheme" pulldown; the tab refreshes and shows the escalation steps. You must define an escalation before you can assign it to an alert definition. Using an escalation that is configured to repeat until the alert is fixed is a good way to prevent redundant alerts firing for the same problem. To create an escalation, click <b>Escalation Schemes Configuration</b> on the <b>Administration</b> tab. For more information about escalations, see <a href="Configure and Manage Escalations.html" title="Configure and Manage Escalations">Configure and Manage Escalations</a>.</p>
 
 <h3><a name="ui-Alert.Edit-ControlAction"></a>Control Action</h3>
 <p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
@@ -225,7 +221,7 @@ div.rbtoc1307466851328 li {margin-left: 0px;padding-left: 0px;}
 
 <p><a name="ui-Alert.Edit-AlertControlAction"></a></p>
 
-<p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 608x185" href='http://support.hyperic.com/download/attachments/76285170/AddControlAction.png'><img src="attachments/thumbnails/76285170/76579508" style="border: 0px solid black"/></a></span></p>
+<p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 608x185" href='http://support.hyperic.com/download/attachments/77463605/AddControlAction.png'><img src="attachments/thumbnails/77463605/77660383" style="border: 0px solid black"/></a></span></p>
 
 <h3><a name="ui-Alert.Edit-NotifyRoles"></a>Notify Roles</h3>
 
@@ -318,19 +314,19 @@ div.rbtoc1307466851328 li {margin-left: 0px;padding-left: 0px;}
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/76284812/76578984.gif">tbb_removefromlist.gif</a> (image/gif)
+                                <a href="attachments/77464616/77660879.gif">tbb_removefromlist.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/76284812/76578985.gif">tbb_addtolist.gif</a> (image/gif)
+                                <a href="attachments/77464616/77660876.gif">tbb_addtolist.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/76284812/76578986.gif">tbb_set.gif</a> (image/gif)
+                                <a href="attachments/77464616/77660877.gif">tbb_set.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/76284812/76578987.gif">tbb_remove.gif</a> (image/gif)
+                                <a href="attachments/77464616/77660899.gif">tbb_remove.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/76284812/76578988.gif">tbb_edit.gif</a> (image/gif)
+                                <a href="attachments/77464616/77660898.gif">tbb_edit.gif</a> (image/gif)
                                 <br/>
                                                     </div>
 				    
@@ -342,7 +338,7 @@ div.rbtoc1307466851328 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jun 14, 2011 15:09</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 27, 2011 16:38</font></td>
 		    </tr>
 	    </table>
     </body>

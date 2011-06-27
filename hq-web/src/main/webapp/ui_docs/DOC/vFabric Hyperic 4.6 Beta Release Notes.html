@@ -16,17 +16,17 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 21, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 24, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p>These release notes are for the beta release of vFabric Hyperic 4.6. </p>
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1308676863576 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1308676863576 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1308676863576 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1308957176549 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1308957176549 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1308957176549 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1308676863576'>
+/*]]>*/</style><div class='rbtoc1308957176549'>
 <ul>
     <li><a href='#vFabricHyperic4.6BetaReleaseNotes-vFabricHyperic4.6Features'>vFabric Hyperic 4.6 Features</a></li>
 <ul>
@@ -35,6 +35,7 @@ div.rbtoc1308676863576 li {margin-left: 0px;padding-left: 0px;}
     <li><a href='#vFabricHyperic4.6BetaReleaseNotes-ScheduleMaintenanceDowntimeforaResource'>Schedule Maintenance Downtime for a Resource</a></li>
     <li><a href='#vFabricHyperic4.6BetaReleaseNotes-ProductPluginforSpringInsightOperations'>Product Plugin for Spring Insight Operations</a></li>
 </ul>
+    <li><a href='#vFabricHyperic4.6BetaReleaseNotes-NewLicensingScheme'>New Licensing Scheme</a></li>
 </ul>
     <li><a href='#vFabricHyperic4.6BetaReleaseNotes-HypericHQ4.6Features'>Hyperic HQ 4.6 Features</a></li>
 <ul>
@@ -69,7 +70,7 @@ div.rbtoc1308676863576 li {margin-left: 0px;padding-left: 0px;}
 
 <p>Note: In addition to the features described in this section vFabric Hyperic 4.6 also includes the features described in <a href="#vFabricHyperic4.6BetaReleaseNotes-HypericHQ4.6Features">Hyperic HQ 4.6 Features</a>. </p>
 
-<h3><a name="vFabricHyperic4.6BetaReleaseNotes-EnhancedLDAPSupport"></a>Enhanced LDAP Support </h3>
+<h2><a name="vFabricHyperic4.6BetaReleaseNotes-EnhancedLDAPSupport"></a>Enhanced LDAP Support </h2>
 
 <p>In vFabric Hyperic 4.6, a Hyperic user can be automatically assigned to Hyperic roles based on groups the user is assinged to in your LDAP system. If your LDAP groups correspond well &#8212; in terms of membership &#8212; to the roles you will set up in Hyperic, you can use this feature to automate the process of assigning Hyperic roles to a new user. </p>
 
@@ -87,62 +88,102 @@ div.rbtoc1308676863576 li {margin-left: 0px;padding-left: 0px;}
 
 <p>Note that subsequent changes to the LDAP user's group membership are not reflected in the associated Hyperic user's role assignments. </p>
 
-<h3><a name="vFabricHyperic4.6BetaReleaseNotes-ScheduleMaintenanceDowntimeforaResource"></a>Schedule Maintenance Downtime for a Resource </h3>
+<h2><a name="vFabricHyperic4.6BetaReleaseNotes-ScheduleMaintenanceDowntimeforaResource"></a>Schedule Maintenance Downtime for a Resource </h2>
 
 <p>In vFabric Hyperic 4.6, you can scheduled downtime for an individual resource. In previous releases, downtime could only be scheduled for a resource group. The <b>Schedule Downtime</b> command is available on the <b>Tools</b> menu for a platform, server, service, or group. </p>
 
 
-
-<h3><a name="vFabricHyperic4.6BetaReleaseNotes-ProductPluginforSpringInsightOperations"></a>Product Plugin for Spring Insight Operations </h3>
+<h2><a name="vFabricHyperic4.6BetaReleaseNotes-ProductPluginforSpringInsightOperations"></a>Product Plugin for Spring Insight Operations </h2>
 
 <p>Spring Insight is a web application that runs in tcServer Developer Edition and analyzes the runtime performance of applications running in the container and provides visibility into it activity on a request-by-request basis. Spring Insight Operations ships as a template with tcServer.</p>
 
 <p>vFabric Hyperic 4.6's Spring Insight plugin collects application metrics from Spring Insight Operations. The plugin provides a user interface that correlates the performance of an application with the performance of the application server in runs in, and also with the platform that hosts the application server. Given a performance problem that appears to be at the application level, you can jump from the Hyperic Insight Applications view into the Insight Operations Dashboard, into the same application context as the problem occurred, to diagnose the underlying problem. </p>
 
-<p>For plugin documentation, see <a href="Spring Insight.html" title="Spring Insight">Spring Insight</a>. For information about the Spring Insight view in the Hyperic user interface, see the <a href="http://support.hyperic.com/display/DOCS46/ui-Resources.Insight.Applications" title="ui-Resources.Insight.Applications">help page</a>.</p> 
+<p>For plugin documentation, see <a href="Spring Insight.html" title="Spring Insight">Spring Insight</a>. For information about the Spring Insight view in the Hyperic user interface, see the <a href="ui-Resources.Insight.Applications.html" title="ui-Resources.Insight.Applications">help page</a>.</p>
+
+<h2><a name="vFabricHyperic4.6BetaReleaseNotes-NewLicensingScheme"></a>New Licensing Scheme</h2>
+
+<p>vFabric Hyperic 4.6 is available as a component of vFabric Platform 5, in addition to as a stand-alone product.  The Hyperic licensing scheme is changed in Hyperic 4.6 to support vFabric Platform 5's network licensing, as well as use of a local license for stand-alone vFabric Hyperic deployments.  </p>
+
+<p>From the perspective a user performing an Hyperic installation, the key differences are:</p>
+
+<ul>
+	<li>You not longer install a <tt>license.xml</tt> file into <tt>&lt;ServerHome/conf</tt>.  Instead:
+	<ul>
+		<li>For a standalone Hyperic 4.6 deployment, you install a serial number file in <tt>&lt;ServerHome/conf</tt>.</li>
+		<li>For a vFabric Platform deployment of Hyperic 4.6 you either:
+		<ul>
+			<li>Install a serial number file in <tt>&lt;ServerHome/conf</tt>, or</li>
+			<li>Configure the location of the VMware License Server that administers the network license for vFabric Platform. If Hyperic Server is running on a physical machine, rather than a VM managed by VMware vCenter, you must use this option.</li>
+		</ul>
+		</li>
+	</ul>
+	</li>
+</ul>
+
+ 
 
 <h1><a name="vFabricHyperic4.6BetaReleaseNotes-HypericHQ4.6Features"></a>Hyperic HQ 4.6 Features </h1>
 
 <p>The Hyperic HQ 4.6 features described below are also in vFabric Hyperic 4.6. </p>
 
-<h3><a name="vFabricHyperic4.6BetaReleaseNotes-ProductPluginManagementandDeployment"></a>Product Plugin Management and Deployment </h3>
+<h2><a name="vFabricHyperic4.6BetaReleaseNotes-ProductPluginManagementandDeployment"></a>Product Plugin Management and Deployment </h2>
 
 <p>Hyperic 4.6 provides new features that ease the process of deploying and managing product plugins. These features, described in the paragraphs below, include a user interface for managing product plugins, and new Hyperic Server and Hyperic Agent behaviors for ensuring consistent plugin deployment across a Hyperic environment. </p>
 
-<h4><a name="vFabricHyperic4.6BetaReleaseNotes-PluginManager"></a>Plugin Manager </h4>
+<h3><a name="vFabricHyperic4.6BetaReleaseNotes-PluginManager"></a>Plugin Manager </h3>
 
 <p><b>Plugin Manager</b> is a new user interface that enables you to deploy and manage plugins across a Hyperic deployment from the Hyperic user interface. You can use <b>Plugin Manager</b> to deploy and remove plugins on the Hyperic Server and all agents reporting to the server. </p>
 
-<h4><a name="vFabricHyperic4.6BetaReleaseNotes-ServerAgentPluginSynchronization"></a>Server-Agent Plugin Synchronization </h4>
+<h3><a name="vFabricHyperic4.6BetaReleaseNotes-ServerAgentPluginSynchronization"></a>Server-Agent Plugin Synchronization </h3>
 
 <p>The new Server-Agent Plugin Synchronization (SAPS) feature ensures that product plugins are consistently deployed across a Hyperic deployment. SAPS is enabled by new behaviors on the Hyperic Server and Hyperic Agent. When a Hyperic 4.6 Agent starts up, it sends a plugin status report to the Hyperic Server. If an agent's deployed plugins do not exactly match those deployed on the Hyperic server, the server updates the agent's plugins appropriately. Similarly, each time the Hyperic Server is restarted, it compares the product plugins it deploys to most recent plugin status reported by each agent &#8212; if an agent's deployed plugins do not exactly match those deployed on the Hyperic server, the server updates the agent's plugins appropriately. SAPS is enabled by default; it can be disabled using the new <tt>server.pluginsync.enable</tt> server property, described below. </p>
 
-<h4><a name="vFabricHyperic4.6BetaReleaseNotes-NewHypericServerPropertytoEnableandDisableSAPS"></a>New Hyperic Server Property to Enable and Disable SAPS </h4>
+<h3><a name="vFabricHyperic4.6BetaReleaseNotes-NewHypericServerPropertytoEnableandDisableSAPS"></a>New Hyperic Server Property to Enable and Disable SAPS </h3>
 
 <p>Hyperic 4.6 provides a new Hyperic Server property, <tt>server.pluginsync.enable</tt>, which you can use to disable the SAPS feature described in the previous section. To disable SAPS, add <tt>server.pluginsync.enable=false</tt> to <tt>ServerHome/conf/hq-server.conf</tt>, and restart the Hyperic Server. </p>
 
-<h4><a name="vFabricHyperic4.6BetaReleaseNotes-NewPluginDescriptorElementtoSupportSAPS"></a>New Plugin Descriptor Element to Support SAPS </h4>
+<h3><a name="vFabricHyperic4.6BetaReleaseNotes-NewPluginDescriptorElementtoSupportSAPS"></a>New Plugin Descriptor Element to Support SAPS </h3>
 
 <p>As of Hyperic 4.6, all product plugins must have a version. A new attribute &#8212; <tt>version</tt> &#8212; is required in the root <tt>&lt;plugin&gt;</tt> element in the XML descriptor for a product plugin. </p>
 
-<h3><a name="vFabricHyperic4.6BetaReleaseNotes-iPadandiPhoneSupport"></a>iPad and iPhone Support </h3>
+<h2><a name="vFabricHyperic4.6BetaReleaseNotes-iPadandiPhoneSupport"></a>iPad and iPhone Support </h2>
 
 <p>The Hyperic 4.6 user interface can be access from iPads and iPhones.  </p>
 
-<h3><a name="vFabricHyperic4.6BetaReleaseNotes-UpdatedPlugins"></a>Updated Plugins </h3>
+<h2><a name="vFabricHyperic4.6BetaReleaseNotes-UpdatedPlugins"></a>Updated Plugins </h2>
 
-<p>All Hyperic plugins have been updated to include the <tt>version</tt> attribute in the root <tt>&lt;plugin&gt;</tt> element, required for SAPS. </p>
+<p>All Hyperic plugins' XML descriptors have been updated to define the version of the plugin as a <tt>&lt;property&gt;</tt> element named "version".  </p>
 
 <p>In addition, the following Hyperic plugins are updated with new functionality, or to support more recent versions of the managed product: </p>
 <ul>
 	<li>GemFire</li>
-	<li>RabbitMQ &#8212; In Hyperic 4.6, the RabbitMQ plugin no long requires access the <tt>erlang.cookie</tt> file &#8212; the plugin now uses the <tt>rabbitmq-management</tt> plugin. The configuration process has changed, and additional metrics are available. For more information see Monitoring RabbitMQ &#45; Hyperic 4.6.</li>
+	<li>RabbitMQ &#8212; In Hyperic 4.6, the RabbitMQ plugin no long requires access the <tt>erlang.cookie</tt> file &#8212; the plugin now uses the <tt>rabbitmq-management</tt> plugin. The configuration process has changed, and additional metrics are available. For more information see <a href="RabbitMQ.html" title="RabbitMQ">RabbitMQ</a>.</li>
 	<li>tc Server &#8212; Support for tc Server 7.0 added.</li>
 	<li>Jboss &#8212; Support for Jboss 5.1 and 6.0 added.</li>
 	<li>PostgreSQL &#8212; Support for PostgreSQL 9.0 added.</li>
 	<li>WebSphere</li>
 	<li>WebLogic Server Plugin &#8212; In Hyperic 4.6, the plugin for managing WebLogic Server is enhanced to enable discovery of node managers and managed servers in a WebLogic domain without accessing the Administration Server for the domain. In previous releases, it was necessary to discover the Administration Server for a domain, and then configure that resource with WebLogic Server credentials, in order to discover the node manager and managed servers in the domain.</li>
 </ul>
+
+
+<h2><a name="vFabricHyperic4.6BetaReleaseNotes-HQApiUpdates"></a>HQApi Updates</h2>
+<p>Hyperic 4.6 includes HQApi 5.0. Changes include:</p>
+
+<ul>
+	<li><tt>client.properties</tt> &#8212; In HQApi 5.0, <tt>client.properties</tt> supports encrypted passwords, and can be stored in either <tt>~/.hq</tt> or <tt>hqapi1-client-n.n.n/conf</tt>. In previous versions, the APIs look for server connection properties in  <tt>&#126;/.hq/client.properties</tt>; to use a connection properties in a different location you had to supply the path to the <tt>client.properties</tt> on the command line, using the <tt>--properties</tt> command qualifier. (Supplying the properties file location on the command line is still supported.) For more information about specifing connection properties in a file, see <a href="HQApi Command-Line Tools.html" title="HQApi Command-Line Tools">HQApi Command&#45;Line Tools</a></li>
+</ul>
+
+
+<ul>
+	<li><b>groovyshell</b> &#8212; This new API allow you to run Groovy scripts from the command shell.</li>
+</ul>
+
+
+<ul>
+	<li><b>maintenance</b> &#8212; This API is updated to enable maintenance downtime to be scheduled for individual resources. In previous releases, maintenance could only be scheduled for a group of resources.</li>
+</ul>
+
  
 
 
@@ -325,7 +366,7 @@ div.rbtoc1308676863576 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jun 22, 2011 15:13</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 27, 2011 16:37</font></td>
 		    </tr>
 	    </table>
     </body>

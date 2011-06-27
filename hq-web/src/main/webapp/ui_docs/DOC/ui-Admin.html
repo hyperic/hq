@@ -16,18 +16,18 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 13, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 21, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1307981726972 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1307981726972 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1307981726972 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1308686337402 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1308686337402 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1308686337402 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1307981726972'>
+/*]]>*/</style><div class='rbtoc1308686337402'>
 <ul>
     <li><a href='#ui-Admin-AdministrationPage'> Administration Page</a></li>
 <ul>
@@ -37,10 +37,6 @@ div.rbtoc1307981726972 li {margin-left: 0px;padding-left: 0px;}
     <li><a href='#ui-Admin-HQLicenseInformation'>HQ License Information</a></li>
 </ul>
 </ul></div>
-
-
-<p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
-
 
 
 <h1><a name="ui-Admin-AdministrationPage"></a><a name="ui-Admin-top"></a>Administration Page</h1>
@@ -69,27 +65,26 @@ div.rbtoc1307981726972 li {margin-left: 0px;padding-left: 0px;}
 
 
 <ul>
-	<li><b>Escalation Schemes Configuration</b> &#8212; Use this page to create and manage escalation schemes for use in alert definitions. For more information see the associated <a href="ui-Admin.Escalation.html" title="ui-Admin.Escalation">help page</a>.</li>
+	<li><b>Escalation Schemes Configuration</b> &#8212; Use this page to create and manage escalation schemes for use in alert definitions. For more information, see the associated <a href="ui-Admin.Escalation.html" title="ui-Admin.Escalation">help page</a>.</li>
 </ul>
 
 
 <ul>
-	<li><b>Plugin Manager</b> &#8212; A user interface for deployment-wide management of product plugins; it displays all plugins deployed to the Hyperic Server, and a summary of agent deployment status for the plugin. You can use Plugin Manager to deploy new or updated plugins and to remove plugins on Hyperic Agents version 4.6 or later.</li>
+	<li><b>Plugin Manager</b> &#8212; A user interface for deployment-wide management of product plugins; it displays all plugins deployed to the Hyperic Server, and a summary of agent deployment status for the plugin. You can use Plugin Manager to deploy new or updated plugins and to remove plugins on Hyperic Agents version 4.6 or later.  For more information, see <a href="Plugin Deployment and Management.html" title="Plugin Deployment and Management">Plugin Deployment and Management</a>.</li>
 </ul>
 
 
 <h2><a name="ui-Admin-Plugins"></a>Plugins</h2>
 
 <p>This section is an attachment point for HQU plugins.</p>
-<div class="panel" style="border-width: 1px;"><div class="panelContent">
-<p>HQU plugins are Groovy-based HQ extensions that can be attached:</p>
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Learn About HQU Plugins</b><br />HQU plugins are Groovy-based HQ extensions that can be attached:
 <ul>
 	<li>to the <b>Views</b> tab for a resource type,</li>
 	<li>as an item on a Masthead tab menu, or</li>
 	<li>to the "Plugins" section of HQ's <b>Administration</b> tab.<br/>
 HQ has a number of built-in HQU plugins. Users can also develop and deploy custom HQU plugins. For more information see <a href="vFabric Hyperic HQU Plugin Development.html" title="vFabric Hyperic HQU Plugin Development">vFabric Hyperic HQU Plugin Development</a>.</li>
 </ul>
-</div></div>
+</td></tr></table></div>
 <p>The HQU plugins available here are:</p>
 <ul>
 	<li><b>Network and Host Dependency Manager</b> <font color="red">*</font> &#8212; In vFabric Hyperic, you can use this plugin to define the relationship between platforms and network hosts or devices. For more information see the associated <a href="ui-Admin.Dependency.html" title="ui-Admin.Dependency">help page</a>.</li>
@@ -120,9 +115,8 @@ HQ has a number of built-in HQU plugins. Users can also develop and deploy custo
 
 <p>This section lists the license information for the HQ server:</p>
 <ul>
-	<li><b>Name</b> &#8212; The name on the license.</li>
 	<li><b>Expires</b> &#8212;  The date the license expires.</li>
-	<li><b>Platform Limit</b> &#8212;  The number of platforms (network boxes) the license allows HQ to manage.</li>
+	<li><b>Platform Limit</b> &#8212;  The number of platforms the license allows HQ to manage.</li>
 	<li><b>Current Platform Count</b> &#8212; The number of platforms that are currently managed by HQ.
 	<ul>
 		<li>Typically, a single agent consumes a single license. If an agent manages a vSphere vCenter instance, it consumes a license for the platform that hosts vCenter, a license for each vSphere vHost administered by the vCenter instance, and —-- if an agent is installed in each VM &#8212; a license for each vSphere VM on each vHost.</li>
@@ -140,7 +134,7 @@ HQ has a number of built-in HQU plugins. Users can also develop and deploy custo
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jun 14, 2011 15:09</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 27, 2011 16:38</font></td>
 		    </tr>
 	    </table>
     </body>

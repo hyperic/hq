@@ -16,18 +16,18 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 21, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 27, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1308676705287 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1308676705287 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1308676705287 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1309214983102 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1309214983102 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1309214983102 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1308676705287'>
+/*]]>*/</style><div class='rbtoc1309214983102'>
 <ul>
     <li><a href='#HQApiCommand-LineTools-CommandLineToolsOverview'>Command-Line Tools Overview</a></li>
     <li><a href='#HQApiCommand-LineTools-InvokingCommandLineTools'>Invoking Command-Line Tools</a></li>
@@ -40,6 +40,7 @@ div.rbtoc1308676705287 li {margin-left: 0px;padding-left: 0px;}
     <li><a href='#HQApiCommand-LineTools-RequiredCommandQualifiersandHowtoSupplyThem'>Required Command Qualifiers and How to Supply Them</a></li>
 <ul>
     <li><a href='#HQApiCommand-LineTools-DefineaConnectionPropertiesFile'>Define a Connection Properties File</a></li>
+    <li><a href='#HQApiCommand-LineTools-EncryptHypericPassword'>Encrypt Hyperic Password</a></li>
     <li><a href='#HQApiCommand-LineTools-SupplyPropertiesFilePathonCommandLine'>Supply Properties File Path on Command Line</a></li>
 </ul>
     <li><a href='#HQApiCommand-LineTools-TipsandRemindersforCLITools'>Tips and Reminders for CLI Tools</a></li>
@@ -69,6 +70,10 @@ div.rbtoc1308676705287 li {margin-left: 0px;padding-left: 0px;}
 <td class='confluenceTd'> List, update, create, and delete resource and resource type alert definitions. An alert definition specifies the alert details and the resource or resource type to which it is assigned. </td>
 </tr>
 <tr>
+<td class='confluenceTd'> <a href="HQApi alert command.html" title="HQApi alert command">alert</a> </td>
+<td class='confluenceTd'> List information for fired alerts, fix an alert,acknowledge an alert in escalation, or delete an alert. </td>
+</tr>
+<tr>
 <td class='confluenceTd'> <a href="HQApi application command.html" title="HQApi application command">applications</a></td>
 <td class='confluenceTd'> Create, list, and update applications configured in HQ. </td>
 </tr>
@@ -93,12 +98,16 @@ div.rbtoc1308676705287 li {margin-left: 0px;padding-left: 0px;}
 <td class='confluenceTd'> List information about events &#8211; alerts, resource control actions, log events, or configuration events &#8211; that have been logged for a resource, or for all resources. </td>
 </tr>
 <tr>
+<td class='confluenceTd'> groovyshell </td>
+<td class='confluenceTd'> Run Groovy scripts from the command shell.  </td>
+</tr>
+<tr>
 <td class='confluenceTd'> <a href="HQApi group command.html" title="HQApi group command">group</a> </td>
 <td class='confluenceTd'> List resource group definitions, create or update groups, and delete groups. </td>
 </tr>
 <tr>
 <td class='confluenceTd'> <a href="HQApi maintenance command.html" title="HQApi maintenance command">maintenance</a><font color="red">&#42;</font> </td>
-<td class='confluenceTd'> Specify downtime periods for a compatible group, during which alerts on group members will not fire. Supported in HQ Enterprise only. </td>
+<td class='confluenceTd'> Specify downtime periods for a resource or group, during which alerts on the resource(s) will not fire. Supported in HQ Enterprise only. </td>
 </tr>
 <tr>
 <td class='confluenceTd'> <a href="HQApi metric command.html" title="HQApi metric command">metric</a> </td>
@@ -113,8 +122,12 @@ div.rbtoc1308676705287 li {margin-left: 0px;padding-left: 0px;}
 <td class='confluenceTd'> Output metric collection configuration for a specified resource type. </td>
 </tr>
 <tr>
-<td class='confluenceTd'> <a href="HQApi 4.0 resource command.html" title="HQApi 4.0 resource command">resource</a> </td>
+<td class='confluenceTd'> <a href="HQApi resource Command.html" title="HQApi resource Command">resource</a> </td>
 <td class='confluenceTd'> Output resource data, create or update resources, and delete resources. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <a href="HQApi resourceprototype command.html" title="HQApi resourceprototype command">resourceprototype</a> </td>
+<td class='confluenceTd'> Return the internal HQ ID and the name for resource types. </td>
 </tr>
 <tr>
 <td class='confluenceTd'> <a href="HQApi role command.html" title="HQApi role command">role</a> </td>
@@ -243,8 +256,15 @@ div.rbtoc1308676705287 li {margin-left: 0px;padding-left: 0px;}
 
 
 <h2><a name="HQApiCommand-LineTools-DefineaConnectionPropertiesFile"></a>Define a Connection Properties File</h2>
+<p><font color="blue">This section has not been reviewed for correctness.</font></p>
 
-<p>To avoid specifying the connection parameters each time you run a command, you can specify them in <tt>&#126;/.hq/client.properties</tt> (create the directory and file if they do not already exist). Under Windows, you can create the .hq directory from a DOS shell. Use the <b>mkdir</b> command to create .hq under your home home directory.</p>
+<p>To avoid specifying the connection parameters each time you run a command, you can specify them in:</p>
+<ul>
+	<li><tt>hqapi1-client-n.n.n/conf/client.properties</tt> &#8212; The APIs honor this directory first.</li>
+	<li><tt>&#126;/.hq/client.properties</tt> &#8212; Create the directory if it does not exist. Under Windows, you can create the <tt>.hq</tt> directory from a DOS shell. Use the <b>mkdir</b> command to create .hq under your home home directory.</li>
+</ul>
+
+
 
 <p>For example:</p>
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
@@ -257,13 +277,44 @@ password=hqadmin</pre>
 		</div>
 </div></div>
 
+<p>or if you have encrypted the Hyperic password, as described below in <a href="#HQApiCommand-LineTools-EncryptHypericPassword">Encrypt Hyperic Password</a>.</p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">host=localhost
+port=7443
+secure=true
+user=hqadmin
+encryptedPassword=ENC(5EJNmq7JLKcIkTVlcahLrg==)
+encryptionKey=popcorns</pre>
+		</div>
+</div></div>
+<h2><a name="HQApiCommand-LineTools-EncryptHypericPassword"></a>Encrypt Hyperic Password</h2>
+
+<p><font color="blue">This section has not been reviewed for correctness.</font></p>
+
+<p><tt>client.properties</tt> supports encrypted passwords.</p>
+
+<p>Use the <tt>hqapi1-client-n.n.n/hq-encrypt-password.sh</tt>, or under Windows <tt>hqapi1-client-n.n.n/hq-encrypt-password.bat</tt> to encrypt your password. You enter your password twice, and they supply an encryption key. For example:</p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">$ sh bin/hq-encrypt-password.sh
+Enter password:********
+Re-Enter password:********
+Encryption Key: popcorns
+The encrypted password is ENC(5EJNmq7JLKcIkTVlcahLrg==)</pre>
+		</div>
+</div></div>
+
+<p>Define the encrypted password and encryption key in <tt>client.properties</tt>, as described in the previous section.</p>
+
 <h2><a name="HQApiCommand-LineTools-SupplyPropertiesFilePathonCommandLine"></a>Supply Properties File Path on Command Line</h2>
-<div class='panelMacro'><table class='noteMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/warning.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>New in 3.0</b><br />This feature was introduced in HQApi v3.0,available in HQ v4.3.</td></tr></table></div>
-<p>By default, the APIs look for server connection properties in  <tt>&#126;/.hq/client.properties</tt>. If you want to put <tt>client.properties</tt> in a different location, you can do so, and then supply the path to the file on the command line, using the <tt>--properties</tt> command qualifier. </p>
 
-<p>The ability to specify the location of <tt>client.properties</tt> from the command line is useful if you use HQApi to administer multiple HQ Server instances. You can create a properties file for each HQ Server instance &#8212; after than, when you run an API from the command line, you can specify the location of the file with the appropriate connection properties.  </p>
+<p>The APIs look for server connection properties in <tt>hqapi1-client-n.n.n/conf</tt>, and if not found there, in <tt>&#126;/.hq/client.properties</tt>. </p>
 
-<div class="scroll-pagebreak"></div>
+<p>If you want to put <tt>client.properties</tt> in a different location, you can do so, and then supply the path to the file on the command line, using the <tt>--properties</tt> command qualifier. </p>
+
 <h1><a name="HQApiCommand-LineTools-TipsandRemindersforCLITools"></a>Tips and Reminders for CLI Tools</h1>
 
 <h2><a name="HQApiCommand-LineTools-SyncwithCaution"></a>Sync with Caution</h2>
@@ -335,7 +386,7 @@ When you run an HQ API command that operates on a particular resource you must i
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jun 22, 2011 15:14</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 27, 2011 16:38</font></td>
 		    </tr>
 	    </table>
     </body>

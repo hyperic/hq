@@ -16,47 +16,66 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 27, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <h3><a name="HypericHQ4.6Features-ProductPluginManagementandDeployment"></a>Product Plugin Management and Deployment </h3>
+				    <h2><a name="HypericHQ4.6Features-ProductPluginManagementandDeployment"></a>Product Plugin Management and Deployment </h2>
 
 <p>Hyperic 4.6 provides new features that ease the process of deploying and managing product plugins. These features, described in the paragraphs below, include a user interface for managing product plugins, and new Hyperic Server and Hyperic Agent behaviors for ensuring consistent plugin deployment across a Hyperic environment. </p>
 
-<h4><a name="HypericHQ4.6Features-PluginManager"></a>Plugin Manager </h4>
+<h3><a name="HypericHQ4.6Features-PluginManager"></a>Plugin Manager </h3>
 
 <p><b>Plugin Manager</b> is a new user interface that enables you to deploy and manage plugins across a Hyperic deployment from the Hyperic user interface. You can use <b>Plugin Manager</b> to deploy and remove plugins on the Hyperic Server and all agents reporting to the server. </p>
 
-<h4><a name="HypericHQ4.6Features-ServerAgentPluginSynchronization"></a>Server-Agent Plugin Synchronization </h4>
+<h3><a name="HypericHQ4.6Features-ServerAgentPluginSynchronization"></a>Server-Agent Plugin Synchronization </h3>
 
 <p>The new Server-Agent Plugin Synchronization (SAPS) feature ensures that product plugins are consistently deployed across a Hyperic deployment. SAPS is enabled by new behaviors on the Hyperic Server and Hyperic Agent. When a Hyperic 4.6 Agent starts up, it sends a plugin status report to the Hyperic Server. If an agent's deployed plugins do not exactly match those deployed on the Hyperic server, the server updates the agent's plugins appropriately. Similarly, each time the Hyperic Server is restarted, it compares the product plugins it deploys to most recent plugin status reported by each agent &#8212; if an agent's deployed plugins do not exactly match those deployed on the Hyperic server, the server updates the agent's plugins appropriately. SAPS is enabled by default; it can be disabled using the new <tt>server.pluginsync.enable</tt> server property, described below. </p>
 
-<h4><a name="HypericHQ4.6Features-NewHypericServerPropertytoEnableandDisableSAPS"></a>New Hyperic Server Property to Enable and Disable SAPS </h4>
+<h3><a name="HypericHQ4.6Features-NewHypericServerPropertytoEnableandDisableSAPS"></a>New Hyperic Server Property to Enable and Disable SAPS </h3>
 
 <p>Hyperic 4.6 provides a new Hyperic Server property, <tt>server.pluginsync.enable</tt>, which you can use to disable the SAPS feature described in the previous section. To disable SAPS, add <tt>server.pluginsync.enable=false</tt> to <tt>ServerHome/conf/hq-server.conf</tt>, and restart the Hyperic Server. </p>
 
-<h4><a name="HypericHQ4.6Features-NewPluginDescriptorElementtoSupportSAPS"></a>New Plugin Descriptor Element to Support SAPS </h4>
+<h3><a name="HypericHQ4.6Features-NewPluginDescriptorElementtoSupportSAPS"></a>New Plugin Descriptor Element to Support SAPS </h3>
 
 <p>As of Hyperic 4.6, all product plugins must have a version. A new attribute &#8212; <tt>version</tt> &#8212; is required in the root <tt>&lt;plugin&gt;</tt> element in the XML descriptor for a product plugin. </p>
 
-<h3><a name="HypericHQ4.6Features-iPadandiPhoneSupport"></a>iPad and iPhone Support </h3>
+<h2><a name="HypericHQ4.6Features-iPadandiPhoneSupport"></a>iPad and iPhone Support </h2>
 
 <p>The Hyperic 4.6 user interface can be access from iPads and iPhones.  </p>
 
-<h3><a name="HypericHQ4.6Features-UpdatedPlugins"></a>Updated Plugins </h3>
+<h2><a name="HypericHQ4.6Features-UpdatedPlugins"></a>Updated Plugins </h2>
 
-<p>All Hyperic plugins have been updated to include the <tt>version</tt> attribute in the root <tt>&lt;plugin&gt;</tt> element, required for SAPS. </p>
+<p>All Hyperic plugins' XML descriptors have been updated to define the version of the plugin as a <tt>&lt;property&gt;</tt> element named "version".  </p>
 
 <p>In addition, the following Hyperic plugins are updated with new functionality, or to support more recent versions of the managed product: </p>
 <ul>
 	<li>GemFire</li>
-	<li>RabbitMQ &#8212; In Hyperic 4.6, the RabbitMQ plugin no long requires access the <tt>erlang.cookie</tt> file &#8212; the plugin now uses the <tt>rabbitmq-management</tt> plugin. The configuration process has changed, and additional metrics are available. For more information see Monitoring RabbitMQ &#45; Hyperic 4.6.</li>
+	<li>RabbitMQ &#8212; In Hyperic 4.6, the RabbitMQ plugin no long requires access the <tt>erlang.cookie</tt> file &#8212; the plugin now uses the <tt>rabbitmq-management</tt> plugin. The configuration process has changed, and additional metrics are available. For more information see <a href="RabbitMQ.html" title="RabbitMQ">RabbitMQ</a>.</li>
 	<li>tc Server &#8212; Support for tc Server 7.0 added.</li>
 	<li>Jboss &#8212; Support for Jboss 5.1 and 6.0 added.</li>
 	<li>PostgreSQL &#8212; Support for PostgreSQL 9.0 added.</li>
 	<li>WebSphere</li>
 	<li>WebLogic Server Plugin &#8212; In Hyperic 4.6, the plugin for managing WebLogic Server is enhanced to enable discovery of node managers and managed servers in a WebLogic domain without accessing the Administration Server for the domain. In previous releases, it was necessary to discover the Administration Server for a domain, and then configure that resource with WebLogic Server credentials, in order to discover the node manager and managed servers in the domain.</li>
 </ul>
+
+
+<h2><a name="HypericHQ4.6Features-HQApiUpdates"></a>HQApi Updates</h2>
+<p>Hyperic 4.6 includes HQApi 5.0. Changes include:</p>
+
+<ul>
+	<li><tt>client.properties</tt> &#8212; In HQApi 5.0, <tt>client.properties</tt> supports encrypted passwords, and can be stored in either <tt>~/.hq</tt> or <tt>hqapi1-client-n.n.n/conf</tt>. In previous versions, the APIs look for server connection properties in  <tt>&#126;/.hq/client.properties</tt>; to use a connection properties in a different location you had to supply the path to the <tt>client.properties</tt> on the command line, using the <tt>--properties</tt> command qualifier. (Supplying the properties file location on the command line is still supported.) For more information about specifing connection properties in a file, see <a href="HQApi Command-Line Tools.html" title="HQApi Command-Line Tools">HQApi Command&#45;Line Tools</a></li>
+</ul>
+
+
+<ul>
+	<li><b>groovyshell</b> &#8212; This new API allow you to run Groovy scripts from the command shell.</li>
+</ul>
+
+
+<ul>
+	<li><b>maintenance</b> &#8212; This API is updated to enable maintenance downtime to be scheduled for individual resources. In previous releases, maintenance could only be scheduled for a group of resources.</li>
+</ul>
+
 
 
 				    
@@ -68,7 +87,7 @@
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jun 22, 2011 15:13</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 27, 2011 16:37</font></td>
 		    </tr>
 	    </table>
     </body>

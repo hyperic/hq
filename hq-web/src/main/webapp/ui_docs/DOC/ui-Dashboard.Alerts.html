@@ -16,7 +16,7 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 16, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
@@ -30,43 +30,39 @@
 
 
 
-<p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
-
-
-
 <h1><a name="ui-Dashboard.Alerts-AbouttheRecentAlertsPortlet"></a>About the Recent Alerts Portlet</h1>
 
 <p>The <b>Recent Alerts</b> portlet presents a list of recently fired alerts. The following information is shown for each alert:</p>
 
 <ul>
-	<li>Date/Time - When the alert fired. &nbsp;Click to view the <b>Alert Detail</b> page.</li>
-	<li>Alert Name - Name of the alert definition.</li>
-	<li>Resource Name - The resource where the alert fired.</li>
-	<li>Fixed - Whether the alert has been marked "fixed".</li>
-	<li>Ack - If the alert</li>
+	<li><b>Date/Time</b> - When the alert fired. &nbsp;Click to view the <b>Alert Detail</b> page.</li>
+	<li><b>Alert Name</b> - Name of the alert definition.</li>
+	<li><b>Resource Name</b> - The resource where the alert fired.</li>
+	<li><b>Fixed</b> - Whether the alert has been marked "fixed".</li>
+	<li><b>Ack</b> - whether the alert has been acknowledged.</li>
 </ul>
 
 
-<p><span class="image-wrap" style=""><img src="attachments/76285170/76579492.png" style="border: 0px solid black"/></span></p>
+<p><span class="image-wrap" style=""><img src="attachments/77463605/77660368.png" style="border: 0px solid black"/></span></p>
 
 <h1><a name="ui-Dashboard.Alerts-ConfiguretheRecentAlertsPortlet"></a>Configure the Recent Alerts Portlet</h1>
 
 <ol>
 	<li>Click the gear icon in the upper right corner of the <b>Recent Alerts</b> portlet.</li>
 	<li>The <b>HQ Dashboard Settings: Recent Alerts</b> page appears.<br/>
-<span class="image-wrap" style=""><img src="attachments/76285170/76579486.png" style="border: 0px solid black"/></span></li>
+<span class="image-wrap" style=""><img src="attachments/77463605/77660358.png" style="border: 0px solid black"/></span></li>
 	<li>In the <b>Display Settings</b> section:
 	<ul>
 		<li>Description &#8212; (optional) Enter a description, if desired. The description will appear at the top of the portlet.</li>
 		<li>Alert Range &#8212;  Select:
 		<ul>
 			<li>Maximum length of the alert list: 4, 10, 20 or 30.</li>
-			<li>The minimum <a href="http://support.hyperic.com/display/DOCS46/Hyperic+Glossary#HypericGlossary-priority">priority</a> of the alerts to include.</li>
+			<li>The minimum priority of the alerts to include.</li>
 			<li>Timeframe of interest; choices range from 30 minutes to a month.</li>
 			<li>Resources of interest:
 			<ul>
 				<li>all resources - With this this setting, alerts (that meet the priority and timeframe criteria) on <em>any</em> resource can appear in the list.</li>
-				<li>selected resources - With this this setting, alerts that appear in the list are limited to alerts on resources listed in the &#42;Selected Resources &#42;section lets that appear are limited to &nbsp;alerts (that meet the priority and timeframe criteria)i f you wish to limit the alerts listed to certain resources.</li>
+				<li>selected resources - With this this setting, the alert list contains only resources listed in the <b>Selected Resources</b> section that meet the priority and timeframe criteria.</li>
 			</ul>
 			</li>
 		</ul>
@@ -74,12 +70,12 @@
 	</ul>
 	</li>
 	<li>If desired, define a set of resources of interest in the <b>Selected Resources</b> section.
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>The content of the portlet will be limited to alerts that fired on resources in the <b>Selected Resources</b> <em>only</em> when the "all resources/selected resources" switch is set to "selected resources". The contents of the&nbsp;<b>Selected Resources</b> section is ignored when the "all resources/selected resources" switch is set to "selected resources".</td></tr></table></div>
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>The content of the portlet will be limited to alerts that fired on resources in the <b>Selected Resources</b> <em>only</em> when the "all resources/selected resources" switch is set to "selected resources". The contents of the <b>Selected Resources</b> section is ignored when the "all resources/selected resources" switch is set to "selected resources".</td></tr></table></div>
 	<ol>
 		<li>If the the&nbsp;<b>Selected Resources</b>&nbsp;section contains resources not of interest, check the box next to them and click <b>Remove from List</b>.</li>
 		<li>If you wish to add resources to <b>Selected Resources</b> click <b>Add to List</b>.</li>
 		<li>The <b>Dashboard Settings: Alerts Add/Remove Resources</b> page appears.<br/>
-<span class="image-wrap" style=""><img src="attachments/76285170/76579488.png" width="950" style="border: 0px solid black"/></span></li>
+<span class="image-wrap" style=""><img src="attachments/77463605/77660356.png" width="950" style="border: 0px solid black"/></span></li>
 		<li>In the <b>Resources</b> column:
 		<ol>
 			<li>Use the <b>View</b> filters to filter by inventory type, resource type, or both, as desired.</li>
@@ -105,16 +101,16 @@
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/76284878/76579114.gif">tbb_removefromlist.gif</a> (image/gif)
+                                <a href="attachments/77464679/77660499.gif">tbb_removefromlist.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/76284878/76579115.gif">tbb_addtolist.gif</a> (image/gif)
+                                <a href="attachments/77464679/77660493.gif">tbb_addtolist.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/76284878/76579116.gif">fb_ok.gif</a> (image/gif)
+                                <a href="attachments/77464679/77660494.gif">fb_ok.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/76284878/76579117.png">properties.png</a> (image/png)
+                                <a href="attachments/77464679/77660495.png">properties.png</a> (image/png)
                                 <br/>
                                                     </div>
 				    
@@ -126,7 +122,7 @@
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jun 14, 2011 15:09</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 27, 2011 16:38</font></td>
 		    </tr>
 	    </table>
     </body>

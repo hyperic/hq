@@ -23,11 +23,11 @@
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1307639564536 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1307639564536 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1307639564536 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1308678469435 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1308678469435 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1308678469435 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1307639564536'>
+/*]]>*/</style><div class='rbtoc1308678469435'>
 <ul>
     <li><a href='#DefineanAlertforaResourceType-DefineaResourceTypeAlert'>Define a Resource Type Alert</a></li>
 <ul>
@@ -58,10 +58,6 @@ div.rbtoc1307639564536 li {margin-left: 0px;padding-left: 0px;}
 </ul>
 </ul>
 </ul></div>
-
-
-
-<p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
 
 
 
@@ -121,7 +117,7 @@ div.rbtoc1307639564536 li {margin-left: 0px;padding-left: 0px;}
 		<li>Define the rule for evaluating the metric value.&nbsp; You can:
 		<ul>
 			<li><ins>Compare metric value to an absolute value</ins>. Select an operator: <b>&gt;(greater than)</b>, <b>&lt;(less than)</b>, <b>=(equal to)</b>, or <b>&#33;= (not equal to)</b>, and enter a metric value. If the metric value is a percentage, specify it as a float value. For example, enter <tt>.99</tt> for <tt>99%</tt>, <tt>1.0</tt> for 100%. Use a period (.) as a decimal separator, rather than a comma (,).</li>
-			<li><ins>Compare metric value to its minimum, baseline, or maximum value</ins> <font color="red">&#42;</font>, in HQ Enterprise only. Select an operator: <b>&gt;(greater than)</b>, <b>&lt;(less than)</b>, <b>=(equal to)</b>, or <b>&#33;= (not equal to)</b>, and choose "Min Value", "Baseline Value" or "Max Value". Baselining must be enabled. For more information, see <a href="http://support.hyperic.com/display/DOCS46/Baselines" title="Baselines">Baselines</a>.</li>
+			<li><ins>Compare metric value to its minimum, baseline, or maximum value</ins> <font color="red">&#42;</font>, in HQ Enterprise only. Select an operator: <b>&gt;(greater than)</b>, <b>&lt;(less than)</b>, <b>=(equal to)</b>, or <b>&#33;= (not equal to)</b>, and choose "Min Value", "Baseline Value" or "Max Value". Baselining must be enabled. For more information, see <a href="http://support.hyperic.com/display/DOCS46/Metric+Baselines+in+vFabric+Hyperic" title="Metric Baselines in vFabric Hyperic">Metric Baselines in vFabric Hyperic</a>.</li>
 			<li><ins>Fire upon change in metric value</ins>.&nbsp; Click <b>value changes</b>.</li>
 		</ul>
 		</li>
@@ -166,7 +162,7 @@ div.rbtoc1307639564536 li {margin-left: 0px;padding-left: 0px;}
 
 <p>To designate the alert you're defining as a recovery alert, select the primary alert definition from the pulldown.</p>
 
-<p>A recovery alert condition should detect when the condition that fired the primary alert is no longer true. When a recovery alert fires, it marks the primary alert "Fixed", and the primary alert definition is re-enabled. The primary alert definition should be configured to <b>Generate one alert and then disable alert definition until fixed,</b> as described below. For more information, see <a href="http://support.hyperic.com/display/DOCS46/Recovery+Alerts" title="Recovery Alerts">Recovery Alerts</a>.</p>
+<p>A recovery alert condition should detect when the condition that fired the primary alert is no longer true. When a recovery alert fires, it marks the primary alert "Fixed", and the primary alert definition is re-enabled. The primary alert definition should be configured to <b>Generate one alert and then disable alert definition until fixed,</b> as described below. For more information, see <a href="Define a Recovery Alert for a Resource Alert.html" title="Define a Recovery Alert for a Resource Alert">Define a Recovery Alert for a Resource Alert</a>.</p>
 
 <h3><a name="ui-Admin.Monitor.NewResourceTypeAlert-EnableActions"></a>Enable Actions</h3>
 <p><a name="ui-Admin.Monitor.NewResourceTypeAlert-EnableActions"></a></p>
@@ -192,7 +188,7 @@ div.rbtoc1307639564536 li {margin-left: 0px;padding-left: 0px;}
 
 <p>This option eliminates redundant firing for the same problem. If you do not choose this option, the alert will fire repeatedly as long as the triggering condition is still true.&nbsp;&nbsp;</p>
 
-<p>In HQ Enterprise this configuration option &#45;&nbsp; used in conjunction with recovery alerts &#45;&nbsp; automates the process of disabling and re-enabling an alert definition.&nbsp; Result:&nbsp; (1) no redundant alerts for the same problem, and (2) you don't have manually "fix" an alert triggered by a transient problem.&nbsp; For more information, see <a href="http://support.hyperic.com/display/DOCS46/Recovery+Alerts" title="Recovery Alerts">Recovery Alerts</a>.</p>
+<p>In HQ Enterprise this configuration option &#45;&nbsp; used in conjunction with recovery alerts &#45;&nbsp; automates the process of disabling and re-enabling an alert definition.&nbsp; Result:&nbsp; (1) no redundant alerts for the same problem, and (2) you don't have manually "fix" an alert triggered by a transient problem.</p>
 
 <h4><a name="ui-Admin.Monitor.NewResourceTypeAlert-DisregardControlActionsforRelatedAlerts."></a>Disregard Control Actions for Related Alerts.</h4>
 <p><a name="ui-Admin.Monitor.NewResourceTypeAlert-DisregardControlActions"></a></p>
@@ -220,7 +216,7 @@ div.rbtoc1307639564536 li {margin-left: 0px;padding-left: 0px;}
 
 <h3><a name="ui-Admin.Monitor.NewResourceTypeAlert-Escalation"></a>Escalation</h3>
 
-<p>Select an escalation from the "Escalation Scheme" pulldown; the tab refreshes and shows the escalation steps. You must define an escalation before you can assign it to an alert definition. Using an escalation that is configured to repeat until the alert is fixed is a good way to prevent redundant alerts firing for the same problem. To create an escalation, click <b>Escalation Schemes Configuration</b> on the <b>Administration</b> tab. For more information about escalations, see <a href="http://support.hyperic.com/display/DOCS46/Understanding+Escalations" title="Understanding Escalations">Understanding Escalations</a>.</p>
+<p>Select an escalation from the "Escalation Scheme" pulldown; the tab refreshes and shows the escalation steps. You must define an escalation before you can assign it to an alert definition. Using an escalation that is configured to repeat until the alert is fixed is a good way to prevent redundant alerts firing for the same problem. To create an escalation, click <b>Escalation Schemes Configuration</b> on the <b>Administration</b> tab. For more information about escalations, see <a href="Configure and Manage Escalations.html" title="Configure and Manage Escalations">Configure and Manage Escalations</a>.</p>
 
 <h3><a name="ui-Admin.Monitor.NewResourceTypeAlert-ControlAction"></a>Control Action</h3>
 <p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
@@ -229,7 +225,7 @@ div.rbtoc1307639564536 li {margin-left: 0px;padding-left: 0px;}
 
 <p><a name="ui-Admin.Monitor.NewResourceTypeAlert-AlertControlAction"></a></p>
 
-<p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 608x185" href='http://support.hyperic.com/download/attachments/76285170/AddControlAction.png'><img src="attachments/thumbnails/76285170/76579508" style="border: 0px solid black"/></a></span></p>
+<p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 608x185" href='http://support.hyperic.com/download/attachments/77463605/AddControlAction.png'><img src="attachments/thumbnails/77463605/77660383" style="border: 0px solid black"/></a></span></p>
 
 <h3><a name="ui-Admin.Monitor.NewResourceTypeAlert-NotifyRoles"></a>Notify Roles</h3>
 
@@ -324,7 +320,7 @@ div.rbtoc1307639564536 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jun 14, 2011 15:09</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 27, 2011 16:38</font></td>
 		    </tr>
 	    </table>
     </body>
