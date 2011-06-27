@@ -74,7 +74,7 @@ public class QuicknavUtil {
                 return true;
             case AppdefEntityConstants.APPDEF_TYPE_GROUP:
                 //TODO below if stmt is how we know we are running in EE.  We need a better way
-                if (ProductProperties.getPropertyInstance("eeUiUtils") != null) {
+                if (ProductProperties.getPropertyInstance("hyperic.hq.ui.utils") != null) {
                     AppdefGroupValue group = (AppdefGroupValue) rv;
                     return AppdefEntityConstants
                                 .isGroupCompat(group.getGroupType());
