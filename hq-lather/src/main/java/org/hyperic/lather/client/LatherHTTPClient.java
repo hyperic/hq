@@ -91,7 +91,7 @@ public class LatherHTTPClient
     		
     		
             AgentConfig cfg;
-            final String propFile = System.getProperty(AgentConfig.DEFAULT_PROPFILE);
+            final String propFile = System.getProperty(AgentConfig.PROP_PROPFILE,AgentConfig.DEFAULT_PROPFILE);
             try {
                 cfg = AgentConfig.newInstance(propFile);
             } catch(IOException exc){

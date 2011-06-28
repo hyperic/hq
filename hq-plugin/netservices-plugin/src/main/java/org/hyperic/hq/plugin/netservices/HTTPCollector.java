@@ -278,7 +278,7 @@ public class HTTPCollector extends SocketChecker {
 		HttpConfig config = new HttpConfig(getTimeoutMillis(), getTimeoutMillis(), proxyHost, proxyPort);
 
         AgentConfig cfg;
-        final String propFile = System.getProperty(AgentConfig.DEFAULT_PROPFILE);
+        final String propFile = System.getProperty(AgentConfig.PROP_PROPFILE,AgentConfig.DEFAULT_PROPFILE);
         try {
             cfg = AgentConfig.newInstance(propFile);
         } catch(IOException exc){
