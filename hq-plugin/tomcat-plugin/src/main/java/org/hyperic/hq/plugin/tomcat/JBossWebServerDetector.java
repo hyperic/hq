@@ -85,7 +85,7 @@ public class JBossWebServerDetector extends TomcatServerDetector {
 
     @Override
     public List getServerResources(ConfigResponse platformConfig) throws PluginException {
-        getLog().debug("[getServerResources]");
+        getLog().debug("[getServerResources] platformConfig="+platformConfig);
         List servers = new ArrayList();
 
         List procs = getServerProcessList();
@@ -94,11 +94,14 @@ public class JBossWebServerDetector extends TomcatServerDetector {
 
             String config = "default";
             List args = Arrays.asList(process.getArgs());
+            getLog().debug("[getServerResources] args="+args);
             if (args.contains("-c")) {
                 config = (String) args.get(args.indexOf("-c") + 1);
             }
-
-            if (isInstallTypeVersion(process.getInstallPath() + "/../server/" + config)) {
+            
+            final String fileVersion = process.getInstallPath() + "/../server/" + config;
+            getLog().debug("[getServerResources] fileVersion="+fileVersion);
+            if (isInstallTypeVersion(fileVersion)) {
                 ServerResource server = getServerResource(process);
                 ConfigResponse cfg = new ConfigResponse();
                 cfg.setValue("jmx.url", "jnp://127.0.0.1:1099");
@@ -131,7 +134,7 @@ public class JBossWebServerDetector extends TomcatServerDetector {
         }
 
         ok = v.startsWith(jbossVersion);
-        getLog().debug("[isInstallTypeVersion] ok=" + ok + " version" + v + "(" + jbossVersion + ") file=" + f);
+        getLog().debug("[isInstallTypeVersion] ok=" + ok + " version=" + v + "(" + jbossVersion + ") file=" + f);
         return ok;
     }
 
