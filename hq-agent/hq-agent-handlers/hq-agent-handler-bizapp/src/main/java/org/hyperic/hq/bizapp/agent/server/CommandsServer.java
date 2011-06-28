@@ -323,7 +323,8 @@ public class CommandsServer
             String filePass = cfg.getBootProperties().getProperty(AgentConfig.SSL_KEYPASS);
             String alias = cfg.getBootProperties().getProperty(AgentConfig.SSL_KEY_ALIAS);
             boolean isDefault = AgentConfig.PROP_KEYSTORE[1].equals(filePath);//see if the config value is default value
-            KeystoreConfig  keystoreConfig = new KeystoreConfig(alias, filePath, filePass, isDefault);            
+            KeystoreConfig  keystoreConfig = new KeystoreConfig(alias, filePath, filePass, isDefault);  
+            keystoreConfig.setKeyCN(genAgentName());
             keystore     = KeystoreManager.getKeystoreManager().getKeyStore(keystoreConfig);
             keyManagers  = this.getKeyManagers(keystore,filePass);
             listener     = new SSLConnectionListener(cfg, this.tokenManager);
