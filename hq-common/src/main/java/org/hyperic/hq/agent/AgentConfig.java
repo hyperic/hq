@@ -106,7 +106,7 @@ public class AgentConfig {
     { "agent.logDir", System.getProperty("agent.logDir", PROP_INSTALLHOME[1] + "/log") };
     public static final String[] PROP_DATADIR = 
     { "agent.dataDir", System.getProperty("agent.dataDir", PROP_INSTALLHOME[1] + "/data") };
-    public static final String[] PROP_ALIAS = 
+    public static final String[] PROP_KEY_ALIAS = 
     { SSL_KEY_ALIAS, "hq-agent" };
     public static final String[] PROP_KEYSTORE = 
     { SSL_KEYSTORE, PROP_DATADIR[1] + "/keystore" };
@@ -163,6 +163,7 @@ public class AgentConfig {
         PROP_TMPDIR,
         PROP_LOGDIR,
         PROP_DATADIR,
+        PROP_KEY_ALIAS,
         PROP_KEYSTORE,
         PROP_KEYPASS,
         PROP_LIB_HANDLERS,
