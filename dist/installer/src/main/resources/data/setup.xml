@@ -598,6 +598,7 @@ ${errMsg}
   <target name="generate-hq-server-conf" unless="setup.upgrade">
     <substProps src="${install.dir}/data/hq-server.conf"
                 dest="${conf-dir}/hq-server.conf"/>
+  	<replace file="${conf-dir}/hq-server.conf" token="@SERVER_CONF@" value="${conf-dir}" />
   </target>
 	
 	<target name="unpack-server">
@@ -623,8 +624,8 @@ ${errMsg}
     <echo>^^^INFO: Creating server configuration files...</echo>
     <property name="conf-dir" value="${server.product.dir}/conf"/>
     <antcall target="copy-license"/>
+	<antcall target="copy-keystore" />
     <antcall target="generate-hq-server-conf"/>
-
     <property name="tomcat.home"
               value="${server.product.dir}/hq-engine"/>
    
@@ -701,10 +702,16 @@ ${errMsg}
     <antcall target="debug-setup"/>
   </target>
 
-  <target name="copy-license" unless="setup.upgrade">
-    <copy file="${install.dir}/data/license.xml" todir="${conf-dir}"
-          failonerror="false"/>
-  </target>
+	  <target name="copy-license" unless="setup.upgrade">
+	    <copy file="${install.dir}/data/license.xml" todir="${conf-dir}"
+	          failonerror="false"/>
+	  </target>
+
+	  <target name="copy-keystore" unless="setup.upgrade">
+	    <copy file="${install.dir}/data/hyperic.keystore" todir="${conf-dir}"
+	          failonerror="false"/>
+	  	<delete file="${install.dir}/data/hyperic.keystore" />
+	  </target>
 
   <!-- If server.overwrite is not set or is false, check for an
        existing HQ server installation -->

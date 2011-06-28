@@ -148,7 +148,7 @@ public class KeystoreManager {
                 msg = "timeout after " + timeout + "ms";
             }
             //can't have password in log
-            throw new KeyStoreException("Failed to create keystore:"+keystoreConfig.getAlias()+","+msg);
+            throw new KeyStoreException("Failed to create keystore:"+keystoreConfig.getAlias()+", "+msg);
         }
     }
 }
