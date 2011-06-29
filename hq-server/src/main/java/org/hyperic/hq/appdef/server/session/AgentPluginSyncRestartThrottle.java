@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -140,17 +141,32 @@ public class AgentPluginSyncRestartThrottle {
     private void startThrottlerThread() {
         taskScheduler.schedule(new Runnable() {
             public void run() {
+                final AgentManager agentManager = Bootstrap.getBean(AgentManager.class);
                 while (!shutdown.get()) {
                     try {
-                        int restarts = 0;
+                        Set<Integer> toRestart;
                         synchronized (LOCK) {
                             // wait 10 secs
                             LOCK.wait(10000);
-                            restarts = restartAgents();
+                            toRestart = getAgentsToRestart();
                         }
-                        if (restarts > 0) {
+                        final long now = now();
+                        for (final Integer agentId : toRestart) {
+                            try {
+                                // restart agents out of the LOCK since it blocks while
+                                // communicating to them
+                                agentManager.restartAgent(overlord, agentId);
+                            } catch (Exception e) {
+                                log.error(e,e);
+                            } finally {
+                                synchronized (LOCK) {
+                                    agentRestartTimestampMap.put(agentId, now);
+                                }
+                            }
+                        }
+                        if (!toRestart.isEmpty()) {
                             concurrentStatsCollector.addStat(
-                                restarts, ConcurrentStatsCollector.AGENT_PLUGIN_SYNC_RESTARTS);
+                                toRestart.size(), ConcurrentStatsCollector.AGENT_PLUGIN_SYNC_RESTARTS);
                         }
                     } catch (Throwable t) {
                         log.error(t,t);
@@ -160,18 +176,17 @@ public class AgentPluginSyncRestartThrottle {
         }, new Date(System.currentTimeMillis() + 5000));
     }
 
-    private int restartAgents() {
+    private Set<Integer> getAgentsToRestart() {
+        final Set<Integer> rtn = new HashSet<Integer>();
         synchronized (LOCK) {
             final int numRestarts = getNumRecords(false);
             if (pendingRestarts.isEmpty()) {
-                return 0;
+                return Collections.emptySet();
             }
             if (numRestarts >= MAX_CONCURRENT_RESTARTS) {
-                return 0;
+                return Collections.emptySet();
             }
             final int max = MAX_CONCURRENT_RESTARTS - numRestarts;
-            final long now = now();
-            final AgentManager agentManager = Bootstrap.getBean(AgentManager.class);
             int i=0;
             for (i=0; i<max; i++) {
                 Integer agentId = pendingRestarts.pollFirst();
@@ -182,14 +197,9 @@ public class AgentPluginSyncRestartThrottle {
                     pendingRestarts.add(agentId);
                     continue;
                 }
-                try {
-                    agentManager.restartAgent(overlord, agentId);
-                    agentRestartTimestampMap.put(agentId, now);
-                } catch (Exception e) {
-                    log.error(e,e);
-                }
+                rtn.add(agentId);
             }
-            return i;
+            return rtn;
         }
     }
     
