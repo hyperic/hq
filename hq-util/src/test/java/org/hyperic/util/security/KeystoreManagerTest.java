@@ -93,9 +93,36 @@ public class KeystoreManagerTest {
         } catch (IOException e) {
             assertTrue("Should get IOException",true);
         }
-
-        
-        
     }
+    /**
+     *  1. test create keystore (hq default)
+           pre-condition: keystore("test_HQ","testKeystore","111111")
+           post-cond: keystore("test_HQ","testKeystore","111111"), no exception thrown    
+     */
+    @Test
+    public void testCreateExistingDefaultKeystore() {
+        KeystoreManager tester = KeystoreManager.getKeystoreManager();
 
+        KeystoreConfig config = new KeystoreConfig("test_HQ",
+            "testKeystore","111111",true);
+        try {
+            tester.getKeyStore(config);//keystore is created here
+            tester.getKeyStore(config);
+            //TODO verify the password.
+
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+            fail("KeystoreException");
+        } catch (IOException e) {
+            e.printStackTrace();
+            fail("IOException");
+        } finally{
+            File key = new File(config.getFilePath());
+            if(key.exists()){
+                key.delete();
+            }else{
+                fail("File does not exist");
+            }
+        }
+    }
 }

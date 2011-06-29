@@ -66,6 +66,25 @@ public class KeystoreManager {
         String filePath = keystoreConfig.getFilePath();
         String filePassword = keystoreConfig.getFilePassword();
         
+        //check if keystoreConfig valid (block if it's null or "")
+        String errorMsg="";
+        if(keystoreConfig.getAlias()==null){
+            errorMsg+=" alias is null. ";
+        }
+        if(keystoreConfig.getFilePath()==null){
+            errorMsg+=" filePath is null. ";
+        }
+        if(keystoreConfig.getFilePassword()==null){
+            errorMsg+=" password is null. ";
+        }
+        if(keystoreConfig.getFilePassword().length()<6){
+            errorMsg+=" password should be more than 6 characters. ";
+        }
+        if(!"".equals(errorMsg)){
+            throw new KeyStoreException(errorMsg);
+        }
+    
+        
         try {
             KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
             File file = new File(filePath);
@@ -90,15 +109,13 @@ public class KeystoreManager {
         } catch (NoSuchAlgorithmException e) {
             // can't check integrity of keystore, if this happens we're kind of screwed
             // is there anything we can do to self heal this problem?
-            e.printStackTrace();
-
-            throw new IOException(e);
+            errorMsg = "The algorithm used to check the integrity of the keystore cannot be found.";
+            throw new KeyStoreException(errorMsg,e);
         } catch (CertificateException e) {
             // there are some corrupted certificates in the keystore, a bad thing
             // is there anything we can do to self heal this problem?
-            e.printStackTrace();
-
-            throw new IOException(e);
+            errorMsg = "Keystore cannot be loaded. One possibility is that the password is incorrect.";
+            throw new KeyStoreException(errorMsg, e);
         } finally {
             if (keyStoreFileInputStream != null) {
                 keyStoreFileInputStream.close();
