@@ -30,6 +30,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Iterator;
 import java.util.List;
@@ -152,31 +153,41 @@ class SSLConnectionListener
     }
 
     public AgentServerConnection getNewConnection()
-        throws AgentConnectionException, InterruptedIOException
-    {
+    throws AgentConnectionException, InterruptedIOException {
         AgentServerConnection res;
         SSLSocket inConn = null;
         boolean success = false;
-
         try {
             inConn  = (SSLSocket)this.listenSock.accept();
+            inConn.setSoTimeout(30000);
             res     = this.handleNewConn(inConn);
             success = true;
+        } catch(SocketException exc){
+            // The SocketException should only be thrown when a timeout occurs on the socket
+            InterruptedIOException toThrow = new InterruptedIOException();
+            toThrow.initCause(exc);
+            log.debug(exc,exc);
+            throw toThrow;
         } catch(InterruptedIOException exc){
             throw exc;
         } catch(IOException exc){
             throw new AgentConnectionException(exc.getMessage(), exc);
         } finally {
-            if(success == false && inConn != null){
-                try {
-                    inConn.close();
-                } catch(IOException exc){
-                    log.debug(exc,exc);
-                }
+            if(!success) {
+                close(inConn);
             }
         }
-
         return res;
+    }
+
+    private void close(SSLSocket socket) {
+        if (socket != null){
+            try {
+                socket.close();
+            } catch(IOException exc){
+                log.debug(exc,exc);
+            }
+        }
     }
 
     public void setup(int timeout)

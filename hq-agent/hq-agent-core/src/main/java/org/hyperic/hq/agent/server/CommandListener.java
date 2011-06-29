@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -55,8 +56,10 @@ public class CommandListener
     private CommandDispatcher dispatcher; // Dispatcher which handles commands
     private Log               logger;     // Logger object (der)
 
-    private          boolean  running;    // Are we currently blocked, waiting?
-    private volatile boolean  shouldDie;  // Does someone want us to die?
+    /** Represents if thread are currently blocked, waiting? */
+    private AtomicBoolean running = new AtomicBoolean(false);
+    /** Does someone want us to die? */
+    private AtomicBoolean shouldDie = new AtomicBoolean(false);
 
     private volatile AgentConnectionListener listener;
 
@@ -76,17 +79,16 @@ public class CommandListener
     CommandListener(CommandDispatcher dispatcher) {
         this.dispatcher = dispatcher;
         this.logger     = LogFactory.getLog(CommandListener.class);
-        this.running    = false;
-        this.shouldDie  = false;
+        this.running.set(false);
+        this.shouldDie.set(false);
         this.listener   = null;
     }
 
     void setConnectionListener(final AgentConnectionListener listener)
         throws AgentRunningException
     {
-        if(this.running == true){
-            throw new AgentRunningException("Cannot replace listener while " +
-                                            "running");
+        if (running.get()){
+            throw new AgentRunningException("Cannot replace listener while running");
         }
         this.listener = listener;
         Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -110,13 +112,13 @@ public class CommandListener
     void die() 
         throws AgentRunningException 
     {
-        if(this.running == false){
+        if (!running.get()){
             throw new AgentRunningException("CommandListener not listening");
         }
 
         // Note, Java defines operations such as this to be atomic, so we
         // don't need to do any synchronization.
-        this.shouldDie = true;
+        this.shouldDie.set(true);
     }
 
     /**
@@ -144,10 +146,10 @@ public class CommandListener
     void listenLoop(){
         long lastRequestTime;
 
-        this.running = true;
+        running.set(true);
 
         lastRequestTime = 0;
-        while(true){
+        while (!shouldDie.get()){
             
             AgentServerConnection conn = null;
             InputStream           inputStream;
@@ -166,9 +168,9 @@ public class CommandListener
                     conn = this.listener.getNewConnection();
                 } catch(InterruptedIOException exc){
                     // Timeout occurred
-                    if(this.shouldDie == true){
-                        this.running   = false;
-                        this.shouldDie = false;
+                    if (this.shouldDie.get()){
+                        this.running.set(false);
+                        this.shouldDie.set(false);
                         this.listener.cleanup();
                         return;
                     }
@@ -194,12 +196,8 @@ public class CommandListener
                 cmd = null;
                 try {
                     cmd = conn.readCommand();
-                    this.logger.debug("Dispatching request for '" + 
-                                      cmd.getCommand() + "'");
-
-                    dispatchResult = 
-                        this.dispatcher.processRequest(cmd, inputStream,
-                                                       outputStream);
+                    this.logger.debug("Dispatching request for '" + cmd.getCommand() + "'");
+                    dispatchResult = this.dispatcher.processRequest(cmd, inputStream, outputStream);
                 } catch(AgentConnectionException exc){
                     this.stat_numConnFailures++;
                     this.logger.error("Failed to read method/args from client",

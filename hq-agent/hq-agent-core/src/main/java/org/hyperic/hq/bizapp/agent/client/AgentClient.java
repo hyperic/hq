@@ -52,6 +52,7 @@ import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.agent.AgentConfigException;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
+import org.hyperic.hq.agent.AgentUpgradeManager;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.client.LegacyAgentCommandsClientImpl;
 import org.hyperic.hq.agent.server.AgentDaemon;
@@ -130,6 +131,7 @@ public class AgentClient {
     private Log                 log;                 
     private boolean             nuking;
     private boolean             redirectedOutputs = false;
+    private static Thread agentDaemonThread;
 
     private AgentClient(AgentConfig config, SecureAgentConnection conn){
         this.agtCommands = new LegacyAgentCommandsClientImpl(conn);
@@ -1010,6 +1012,10 @@ public class AgentClient {
         }
     }
     
+    public static Thread getAgentDaemonThread() {
+        return agentDaemonThread;
+    }
+
     private int cmdStart(boolean force) 
         throws AgentInvokeException
     {
@@ -1049,12 +1055,14 @@ public class AgentClient {
             throw new AgentInvokeException("Invalid notify up port: "+startupSock.getLocalPort());
         }
                 
-        Thread t = new Thread(new AgentDaemon.RunnableAgent(this.config));
-        t.start();
+        agentDaemonThread = new Thread(new AgentDaemon.RunnableAgent(this.config));
+        agentDaemonThread.setName("AgentDaemonMain");
+        AgentUpgradeManager.setAgentDaemonThread(agentDaemonThread);
+        agentDaemonThread.setDaemon(true);
+        agentDaemonThread.start();
         SYSTEM_OUT.println("- Agent thread running");
 
-        /* Now comes the painful task of figuring out if the agent
-           started correctly. */
+        /* Now comes the painful task of figuring out if the agent started correctly. */
         SYSTEM_OUT.println("- Verifying if agent is running...");
         this.verifyAgentRunning(startupSock);
         SYSTEM_OUT.println("- Agent is running");            
