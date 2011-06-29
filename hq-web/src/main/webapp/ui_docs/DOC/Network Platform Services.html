@@ -16,18 +16,18 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 21, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 29, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1308679215760 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1308679215760 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1308679215760 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1309376682056 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1309376682056 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1309376682056 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1308679215760'>
+/*]]>*/</style><div class='rbtoc1309376682056'>
 <ul>
     <li><a href='#NetworkPlatformServices-HypericNetworkServiceMonitoringCapabilities'>Hyperic Network Service Monitoring Capabilities</a></li>
     <li><a href='#NetworkPlatformServices-ConfigurationRequirementsandOptionsforMonitoringNetworkServices'>Configuration Requirements and Options for Monitoring Network Services</a></li>
@@ -41,7 +41,7 @@ div.rbtoc1308679215760 li {margin-left: 0px;padding-left: 0px;}
 
 <p>A Hyperic Agent can monitor a variety of remote services over the network. To enable monitoring of a service on the network, you configure a platform service on an operating system platform. The platform service you configure is a proxy for the remote service - in the HQ user interface, the remote service appears as a "child" of the platform whose agent monitors it. For information about how different sorts of managed resources map to a resource hierarchy in HQ, see <a href="Resources, Resource Types and Inventory Types.html" title="Resources, Resource Types and Inventory Types">Resources, Resource Types and Inventory Types</a>.</p>
 
-<p>The screenshot below lists the platform services on a selected platform. The resources marked with an arrow are network services that have been configured as platform services on the platform. The network services on the plaform include multiple HTTP services, an IMAP service, an RPC service, and an SSH service. The resource named "HTTP" is an autogroup that represents all of the HTTP services configured on the platform. (HQ's autogrouping behavior is described in <a href="http://support.hyperic.com/display/DOCS46/HQ+Inventory+Model#HQInventoryModel-PlatformHierarchyInHQUserInterface">Platform Hierarchy in HQ User Interface</a>.) The other platform services in the list are local services (CPUs, FileServer Mounts, and NetworkServer Interfaces) that the agent auto-discovered.</p>
+<p>The screenshot below lists the platform services on a selected platform. The resources marked with an arrow are network services that have been configured as platform services on the platform. The network services on the plaform include multiple HTTP services, an IMAP service, an RPC service, and an SSH service. The resource named "HTTP" is an autogroup that represents all of the HTTP services configured on the platform. (HQ's autogrouping behavior is described in [<a href="Resources, Resource Types and Inventory Types.html" title="Resources, Resource Types and Inventory Types">Resources, Resource Types and Inventory Types</a>.) The other platform services in the list are local services (CPUs, FileServer Mounts, and NetworkServer Interfaces) that the agent auto-discovered.</p>
 
 <p>The availability of each network service, and each autogroup of network services, is indicated by an icon:</p>
 <ul>
@@ -95,8 +95,8 @@ div.rbtoc1308679215760 li {margin-left: 0px;padding-left: 0px;}
 <p>Most network services are monitored by classes in HQ's netservices plugin. (Notable exception: if you monitor a remote SNMP agent, HQ's <tt>SNMPMeasurementPlugin</tt> performs most of the metric collection.)</p>
 
 <h1><a name="NetworkPlatformServices-ServicesHQCanMonitorOvertheNetwork"></a>Services HQ Can Monitor Over the Network</h1>
-
-<p>The links below correspond to the resource types that HQ can monitor over the network. Click a link for information on how to configure a platform service resource of that type, and for information on supported metrics and default monitoring settings.</p>
+<p><a name="NetworkPlatformServices-services"></a><br/>
+The links below correspond to the resource types that HQ can monitor over the network. Click a link for information on how to configure a platform service resource of that type, and for information on supported metrics and default monitoring settings.</p>
 <ul>
 	<li><a href="RPC Platform Service.html" title="RPC Platform Service">RPC Platform Service</a></li>
 	<li><a href="HTTP Platform Service.html" title="HTTP Platform Service">HTTP Platform Service</a></li>
@@ -124,7 +124,7 @@ div.rbtoc1308679215760 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jun 28, 2011 15:26</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 29, 2011 14:48</font></td>
 		    </tr>
 	    </table>
     </body>

@@ -16,15 +16,15 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 29, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1307466541641 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1307466541641 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1307466541641 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1309377981573 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1309377981573 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1309377981573 li {margin-left: 0px;padding-left: 0px;}
 
-/*]] >*/</style><div class='rbtoc1307466541641'>
+/*]]>*/</style><div class='rbtoc1309377981573'>
 <ul>
     <li><a href='#ScriptPluginTutorial-ScriptMeasurementPlugin'> Script Measurement Plugin</a></li>
     <li><a href='#ScriptPluginTutorial-HowthePluginFitsIntoHQ%27sInventoryModel'>How the Plugin Fits Into HQ's Inventory Model</a></li>
@@ -379,7 +379,7 @@ category="AVAILABILITY" indicator="true" units="percentage" collectionType="dyna
 </tr>
 <tr>
 <td class='confluenceTd'> <tt>indicator</tt> </td>
-<td class='confluenceTd'> Whether or not this metric should be treated as an <a href="http://support.hyperic.com/display/DOCS46/Hyperic+Glossary#HypericGlossary-indicatormetric">indicator metric</a> in HQ </td>
+<td class='confluenceTd'> Whether or not this metric should be treated as an indicator metric in HQ </td>
 <td class='confluenceTd'> Y </td>
 <td class='confluenceTd'> true, false </td>
 </tr>
@@ -544,100 +544,6 @@ indicator="true"/&gt;
 
 
 				    
-                                            <div class="tabletitle">
-                            <a name="comments">
-                                <h2>Comments:</h2>
-                            </a>
-                        </div>
-
-                        <table border="0" width="100%">
-                                                        <tr>
-                                <td >
-                                    <a name="comment-77465017"></a>
-                                    <font class="smallfont"><p>I think the single command doesn't test your plugin and output the metrics:</p>
-
-<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
-<div id="root">
-		<pre class="theme: Confluence; brush: java; gutter: false">java -jar &lt;Agent Directory&gt;/pdk/lib/hq-product.jar -Dplugins.include=yourPluginName -m metric</pre>
-		</div>
-</div></div>
-
-<p>You have to follow the Wiki page <a href="http://support.hyperic.com/display/DOCS46/Invoking+Plugins+Standalone" title="Invoking Plugins Standalone">Invoking Plugins Standalone</a> and create a plugin properties file. Based on this properties you can collect metrics:</p>
-
-<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
-<div id="root">
-		<pre class="theme: Confluence; brush: java; gutter: false">java -jar pdk/lib/hq-product.jar -m discover -p yourPluginName -a properties
-java -jar &lt;Agent Directory&gt;/pdk/lib/hq-product.jar -Dplugins.include=yourPluginName -m metric plugin-properties/yourServername</pre>
-		</div>
-</div></div>
-
-</font>
-                                    <div align="left" class="smallfont" style="color: #666666; width: 98%; margin-bottom: 10px;">
-                                        <img src="images/icons/comment_16.gif" height="16" width="16" border="0" align="absmiddle"/>
-                                        Posted by excowboy at Nov 12, 2008 15:03
-                                    </div>
-                                </td>
-                            </tr>
-                                                        <tr>
-                                <td  style="border-top: 1px dashed #666666">
-                                    <a name="comment-77465014"></a>
-                                    <font class="smallfont"><p>Thank you, Mirko - I was going crazy trying to figure out how to get my server plugin to run, and your comment saved my sanity.</p></font>
-                                    <div align="left" class="smallfont" style="color: #666666; width: 98%; margin-bottom: 10px;">
-                                        <img src="images/icons/comment_16.gif" height="16" width="16" border="0" align="absmiddle"/>
-                                        Posted by timcharper at Jan 12, 2009 15:58
-                                    </div>
-                                </td>
-                            </tr>
-                                                        <tr>
-                                <td  style="border-top: 1px dashed #666666">
-                                    <a name="comment-77465013"></a>
-                                    <font class="smallfont"><p>The autoinventory magic (having a plugin automatically recognize that it's applicable for a server) is in these two tags:</p>
-
-<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
-<div id="root">
-		<pre class="theme: Confluence; brush: java; gutter: false">&lt;property name="PROC_QUERY" value="State.Name.eq=sendmail"/&gt;
-  &lt;plugin type="autoinventory" class="org.hyperic.hq.product.DaemonDetector"/&gt;</pre>
-		</div>
-</div></div>
-
-<p>It appears that the DaemonDetector (a java class shipped with the hq-agent) will look automatically for the PROC_QUERY property, and run the query.  The query is in sigar syntax, and is the equivalent of running "ps State.Name.eq=sendmail" from the sigar console.  If the query returns one or more rows, DaemonDetector considers it to be true.</p>
-
-<p>You can learn all about the sigar query language over here.</p>
-
-<p><a href="http://support.hyperic.com/display/SIGAR/PTQL">http://support.hyperic.com/display/SIGAR/PTQL</a></p></font>
-                                    <div align="left" class="smallfont" style="color: #666666; width: 98%; margin-bottom: 10px;">
-                                        <img src="images/icons/comment_16.gif" height="16" width="16" border="0" align="absmiddle"/>
-                                        Posted by timcharper at Jan 13, 2009 15:15
-                                    </div>
-                                </td>
-                            </tr>
-                                                        <tr>
-                                <td  style="border-top: 1px dashed #666666">
-                                    <a name="comment-77465015"></a>
-                                    <font class="smallfont"><p>I actually found you can invoke a service within a server by using the -t command.  If you want to run the metrics for the service (and assuming the plugin example is saved as /opt/hq-plugins/sendmail-plugin.xml, the hyperic agent is installed to /opt/hyperic-agent/, and you're using the bundled jre):</p>
-
-<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
-<div id="root">
-		<pre class="theme: Confluence; brush: java; gutter: false">cd /opt/hyperic-agent &amp;&amp; jre/bin/java -jar bundles/agent-4.0.2-939/pdk/lib/hq-product.jar -p sendmail -t "SendMail"</pre>
-		</div>
-</div></div>
-
-<p>To run the metrics for one of SendMail's services, you concatenate the server name and service name, separated by a space:</p>
-
-<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
-<div id="root">
-		<pre class="theme: Confluence; brush: java; gutter: false">cd /opt/hyperic-agent &amp;&amp; jre/bin/java -jar bundles/agent-4.0.2-939/pdk/lib/hq-product.jar -p sendmail -t "SendMail SendMail Message Submission Process"</pre>
-		</div>
-</div></div>
-
-<p>The service name "SendMail Message Submission Process" should probably be "Message Submission Process" to remove the redundancy, but that's how the example provides the name.</p></font>
-                                    <div align="left" class="smallfont" style="color: #666666; width: 98%; margin-bottom: 10px;">
-                                        <img src="images/icons/comment_16.gif" height="16" width="16" border="0" align="absmiddle"/>
-                                        Posted by timcharper at Jan 13, 2009 15:21
-                                    </div>
-                                </td>
-                            </tr>
-                                                    </table>
                     			    </td>
 		    </tr>
 	    </table>
@@ -646,7 +552,7 @@ java -jar &lt;Agent Directory&gt;/pdk/lib/hq-product.jar -Dplugins.include=yourP
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jun 28, 2011 15:26</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 29, 2011 14:49</font></td>
 		    </tr>
 	    </table>
     </body>

@@ -16,12 +16,12 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 29, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <h1><a name="ScriptPlugin-ScriptPlugin"></a>Script Plugin</h1>
 
-<p>The Hyperic Agent can run script-based plugins. You create monitoring logic in a script, configure a platform server as a proxy resource under which script results are reported.</p>
+<p>The Hyperic Agent can run script-based plugins. You create monitoring logic in a script, configure a platform service as a proxy resource under which script results are reported.</p>
 
 
 <h2><a name="ScriptPlugin-ScriptPluginMetrics"></a>Script Plugin Metrics</h2>
@@ -105,7 +105,7 @@
 </tbody></table>
 </div>
 
-<p>Another option is to click the "New Server" link and choose <b>Nagios</b> from the drop-down.  You can optionally import an existing nagios configuration file by checking the <b>Auto-Discover Plugins</b> check box or create them by clicking the "New Service" link and selecting <b>Nagios Plugin</b> from the drop-down.  The <b>Nagios Plugin</b> service type has the same functionality as the platform <b>Script</b> service.  Note that HQ has several built-in services for <a href="http://support.hyperic.com/display/hypcomm/Network+Services" title="Network Services">network protocols</a> which do not require any Nagios plugins to use.</p>
+<p>Another option is to click the "New Server" link and choose <b>Nagios</b> from the drop-down.  You can optionally import an existing nagios configuration file by checking the <b>Auto-Discover Plugins</b> check box or create them by clicking the "New Service" link and selecting <b>Nagios Plugin</b> from the drop-down.  The <b>Nagios Plugin</b> service type has the same functionality as the platform <b>Script</b> service.  Note that HQ has several built-in services for network protocols that do not require any Nagios plugins to use. See <a href="Network Platform Services.html" title="Network Platform Services">Network Platform Services</a>.</p>
 
 <p><font color="#000000"><b>Script-Based Plugins</b></font></p>
 
@@ -113,9 +113,9 @@
 
 <p>A script plugin includes an XML descriptor and at least one script, which can be defined externally or embedded in the XML file. The plugin can use multiple scripts or a single script; the script must output <em>key=value</em> pairs. These pairs are parsed by the script executor and are collected as metrics using the keys within the metric templates. The scripts can be written in any language. You can even use Nagios plugins out of the box.</p>
 
-<p>Learn more about the <a href="http://support.hyperic.com/display/DOCS46/Plugin+XML+Descriptor" title="Plugin XML Descriptor">XML descriptor</a>.</p>
+<p>For information about XML descriptors, see <a href="Plugin Descriptors.html" title="Plugin Descriptors">Plugin Descriptors</a>.</p>
 
-<p>As an example, we will create an <a href="http://support.hyperic.com/display/hypcomm/io-device-plugin.xml" title="io-device-plugin.xml"><em>I/O Device</em></a> service which uses an <a href="http://perso.orange.fr/sebastien.godard/index.html">iostat</a> script wrapper to format the data.  Most Linux admins are familar with the <b>iostat</b> command which reports CPU and I/O stats for devices and partitions:</p>
+<p>As an example, we will create an I/O Device service which uses an iostate script wrapper to format the data.  Most Linux admins are familar with the <b>iostat</b> command which reports CPU and I/O stats for devices and partitions:</p>
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
 		<pre class="theme: Confluence; brush: java; gutter: false">% iostat -d -x
@@ -137,7 +137,7 @@ Device:    rrqm/s wrqm/s   r/s   w/s   rsec/s   wsec/s avgrq-sz avgqu-sz   await
 sda          0.02   0.59  0.07  0.54     2.00     9.06    17.95     0.00    4.21   1.75   0.11</pre>
 		</div>
 </div></div>
-<p>The <a href="http://support.hyperic.com/download/attachments/59375678/device_iostat.pl?version=1&amp;modificationDate=1151101764000">wrapper script</a> will invoke <b>iostat</b> with the arguments given above and parse the tabular output into key value pairs like so:</p>
+<p>The wrapper script will invoke <b>iostat</b> with the arguments given above and parse the tabular output into key value pairs like so:</p>
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
 		<pre class="theme: Confluence; brush: java; gutter: false">% ./pdk/scripts/device_iostat.pl sda
@@ -254,7 +254,7 @@ I/O Device CPU Usage:
 
 <h4><a name="ScriptPlugin-CreateanIODeviceservice"></a>Create an IO Device service</h4>
 
-<p>After you have <a href="http://support.hyperic.com/display/DOCS46/Plugin+Development+Center#PluginDevelopmentCenter-PluginDevelopmentCenterdeployment">deployed</a> the iodevice plugin, instances of the service must be created manually.  Using the HQ GUI:</p>
+<p>After you have deployed the iodevice plugin, instances of the service must be created manually.  Using the HQ GUI:</p>
 <ul>
 	<li>Navigate to the platform view of choice and click the "New Platform Service" link</li>
 	<li>Enter a <b>Name</b> of your choice</li>
@@ -267,20 +267,6 @@ I/O Device CPU Usage:
 
 
 <p>Your service and now configured and metric data will be viewable from the <b>Monitor</b> tab.</p>
-
-<p><a name="ScriptPlugin-iodevicesources"></a></p>
-
-<h4><a name="ScriptPlugin-IODevicepluginsources"></a>IO Device plugin sources</h4>
-
-<ul>
-	<li>The <a href="http://support.hyperic.com/display/hypcomm/io-device-plugin.xml" title="io-device-plugin.xml">io-device-plugin.xml</a> HQ plugin descriptor (<a href="http://support.hyperic.com/download/attachments/59375678/io-device-plugin.xml?version=1&amp;modificationDate=1151101752000">Download</a>)</li>
-</ul>
-
-
-<ul>
-	<li>The iostat wrapper script (<a href="http://support.hyperic.com/download/attachments/59375678/device_iostat.pl?version=1&amp;modificationDate=1151101764000">Download</a>)</li>
-</ul>
-
 
 <h3><a name="ScriptPlugin-HowOftenScriptsareExecuted"></a>How Often Scripts are Executed</h3>
 
@@ -357,69 +343,6 @@ I/O Device CPU Usage:
                                 <br/>
                                                     </div>
 				    
-                                            <div class="tabletitle">
-                            <a name="comments">
-                                <h2>Comments:</h2>
-                            </a>
-                        </div>
-
-                        <table border="0" width="100%">
-                                                        <tr>
-                                <td >
-                                    <a name="comment-77464905"></a>
-                                    <font class="smallfont"><p>After copying plugin from examples to plugin directory, I got error saying IllegalArgument exception.<br/>
-Changed command to <br/>
-java -Dagent.bundle.home=$PWD -jar pdk/lib/hq-product.jar -Dplugins.include=io-device -Ddevice=sda -t "I/O Device"<br/>
-notice &#45;Dagent.bundle.home</p></font>
-                                    <div align="left" class="smallfont" style="color: #666666; width: 98%; margin-bottom: 10px;">
-                                        <img src="images/icons/comment_16.gif" height="16" width="16" border="0" align="absmiddle"/>
-                                        Posted by  at Mar 17, 2009 05:10
-                                    </div>
-                                </td>
-                            </tr>
-                                                        <tr>
-                                <td  style="border-top: 1px dashed #666666">
-                                    <a name="comment-77464904"></a>
-                                    <font class="smallfont"><p>hi,</p>
-
-<p>Thanks for the help.<br/>
-when i m trying to test from the console m getting blank output.<br/>
-plugins]# java -jar ../../pdk/lib/hq-product.jar -Dplugins.include=io-device -Ddevice=hda</p>
-
-<p>where as when i execute the perl script with print statements stats are displaying.</p>
-
-<p>Thanks,<br/>
-Naren.</p></font>
-                                    <div align="left" class="smallfont" style="color: #666666; width: 98%; margin-bottom: 10px;">
-                                        <img src="images/icons/comment_16.gif" height="16" width="16" border="0" align="absmiddle"/>
-                                        Posted by naren at Feb 08, 2010 03:09
-                                    </div>
-                                </td>
-                            </tr>
-                                                        <tr>
-                                <td  style="border-top: 1px dashed #666666">
-                                    <a name="comment-77464902"></a>
-                                    <font class="smallfont"><p>In the script regexp search with ":device" where as output as "device".<br/>
-Now its working.</p></font>
-                                    <div align="left" class="smallfont" style="color: #666666; width: 98%; margin-bottom: 10px;">
-                                        <img src="images/icons/comment_16.gif" height="16" width="16" border="0" align="absmiddle"/>
-                                        Posted by naren at Feb 08, 2010 22:43
-                                    </div>
-                                </td>
-                            </tr>
-                                                        <tr>
-                                <td  style="border-top: 1px dashed #666666">
-                                    <a name="comment-77464914"></a>
-                                    <font class="smallfont"><p>while configuring plugins in Inventory-&gt;config properties.<br/>
-Path: ? is it pl path or xml path.<br/>
-prefix: ? need to add anything for the above script.</p></font>
-                                    <div align="left" class="smallfont" style="color: #666666; width: 98%; margin-bottom: 10px;">
-                                        <img src="images/icons/comment_16.gif" height="16" width="16" border="0" align="absmiddle"/>
-                                        Posted by naren at Feb 08, 2010 22:46
-                                    </div>
-                                </td>
-                            </tr>
-                                                    </table>
                     			    </td>
 		    </tr>
 	    </table>
@@ -428,7 +351,7 @@ prefix: ? need to add anything for the above script.</p></font>
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jun 28, 2011 15:26</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 29, 2011 14:49</font></td>
 		    </tr>
 	    </table>
     </body>

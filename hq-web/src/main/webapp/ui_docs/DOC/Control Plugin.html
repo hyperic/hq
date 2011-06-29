@@ -16,7 +16,7 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 29, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <h1><a name="ControlPlugin-ControlPlugins"></a>Control Plugins</h1>
@@ -132,13 +132,15 @@ description="Apache Service Name"/&gt;</pre>
 
 <h4><a name="ControlPlugin-ControlPlugin.doActionMethod"></a>ControlPlugin.doAction Method</h4>
 
-<p>Control actions are defined in the <a href="http://support.hyperic.com/display/DOCS46/Plugin+XML+Descriptor" title="Plugin XML Descriptor">Plugin XML Descriptor</a>. Server and Service resources can include an <b>&lt;actions&gt;</b> tag that will define the control actions that resource supports. Multiple control actions can be defined by separating the actions with a comma. For example:</p>
+<p>Control actions are defined in the plugin descriptor. Server and Service resources can include an <b>&lt;actions&gt;</b> tag that will define the control actions that resource supports. Multiple control actions can be defined by separating the actions with a comma. For example:</p>
 <div class="code panel" style="border-width: 1px;"><div class="codeHeader panelHeader" style="border-bottom-width: 1px;"><b>Defining Control Actions</b></div><div class="codeContent panelContent">
 <div id="root">
-		<pre class="theme: Confluence; brush: java; gutter: false">&lt;actions include="start,stop,restart"/&gt;</pre>
+		<pre class="theme: Confluence; brush: java; gutter: false">&lt;actions include="start,stop,restart"/&gt;
+
+For more information, see [Plugin Descriptors].</pre>
 		</div>
 </div></div>
-<p>These actions are passed into doAction as a String argument. The plugin can then act accordingly. Each resource that supports control will have its own ControlPlugin instance. Configuration parameters defined within the <a href="http://support.hyperic.com/display/DOCS46/Plugin+XML+Descriptor" title="Plugin XML Descriptor">Plugin XML Descriptor</a> <b>&lt;config&gt;</b> tags can be retrieved using the ControlPlugin.getConfig method.</p>
+<p>These actions are passed into doAction as a String argument. The plugin can then act accordingly. Each resource that supports control will have its own ControlPlugin instance. Configuration parameters defined in the plugin descriptor  <b>&lt;config&gt;</b> tags can be retrieved using the <tt>ControlPlugin.getConfig</tt> method.</p>
 
 <p>An example using a JBoss JMS Destination, which uses JMX for its control actions:</p>
 <div class="code panel" style="border-width: 1px;"><div class="codeHeader panelHeader" style="border-bottom-width: 1px;"><b>hq-plugin.xml</b></div><div class="codeContent panelContent">
@@ -186,76 +188,6 @@ description="Apache Service Name"/&gt;</pre>
 <div class="scroll-pagebreak"></div>
 
 				    
-                                            <div class="tabletitle">
-                            <a name="comments">
-                                <h2>Comments:</h2>
-                            </a>
-                        </div>
-
-                        <table border="0" width="100%">
-                                                        <tr>
-                                <td >
-                                    <a name="comment-77464960"></a>
-                                    <font class="smallfont"><p>Does the Script Execution Control plugin allow us to configure two control programs, for example, one for Start and one for Stop. I have an application which I want to control but has a separate script for starting and stopping the application. </p>
-
-<p>&#8211; EDIT &#8211;<br/>
-By the way, I am using XML form of plugin deployment.</p></font>
-                                    <div align="left" class="smallfont" style="color: #666666; width: 98%; margin-bottom: 10px;">
-                                        <img src="images/icons/comment_16.gif" height="16" width="16" border="0" align="absmiddle"/>
-                                        Posted by shrinidhi@live.com at Feb 04, 2009 16:49
-                                    </div>
-                                </td>
-                            </tr>
-                                                        <tr>
-                                <td  style="border-top: 1px dashed #666666">
-                                    <a name="comment-77464957"></a>
-                                    <font class="smallfont"><p>Hi,</p>
-
-<p>sorry but you can only configure one control program. What do you think about using a wrapper that executes your scripts ?</p>
-
-<p>Cheers,<br/>
-Mirko</p></font>
-                                    <div align="left" class="smallfont" style="color: #666666; width: 98%; margin-bottom: 10px;">
-                                        <img src="images/icons/comment_16.gif" height="16" width="16" border="0" align="absmiddle"/>
-                                        Posted by excowboy at Feb 04, 2009 19:11
-                                    </div>
-                                </td>
-                            </tr>
-                                                        <tr>
-                                <td  style="border-top: 1px dashed #666666">
-                                    <a name="comment-77464963"></a>
-                                    <font class="smallfont"><p>Yea. Thats what I am planning to do. Thanks for replying.</p></font>
-                                    <div align="left" class="smallfont" style="color: #666666; width: 98%; margin-bottom: 10px;">
-                                        <img src="images/icons/comment_16.gif" height="16" width="16" border="0" align="absmiddle"/>
-                                        Posted by shrinidhi@live.com at Feb 04, 2009 19:26
-                                    </div>
-                                </td>
-                            </tr>
-                                                        <tr>
-                                <td  style="border-top: 1px dashed #666666">
-                                    <a name="comment-77464961"></a>
-                                    <font class="smallfont"><p>Great, please use the forums (<a href="http://forums.hyperic.com">http://forums.hyperic.com</a>) if there are any upcoming questions about implementing your Control Actions.</p>
-
-<p>Cheers,<br/>
-Mirko</p></font>
-                                    <div align="left" class="smallfont" style="color: #666666; width: 98%; margin-bottom: 10px;">
-                                        <img src="images/icons/comment_16.gif" height="16" width="16" border="0" align="absmiddle"/>
-                                        Posted by excowboy at Feb 05, 2009 01:10
-                                    </div>
-                                </td>
-                            </tr>
-                                                        <tr>
-                                <td  style="border-top: 1px dashed #666666">
-                                    <a name="comment-77464967"></a>
-                                    <font class="smallfont"><p>A short context of how the "action" string gets invoked might be helpful. Especially of interest would be how to nest plugins such that a supporting plugin might be invoked by another such. e.g.  If a measurement plugin (which is not simple) needs information to be refreshed, how might IT pass this string to a control plugin?  </p>
-</font>
-                                    <div align="left" class="smallfont" style="color: #666666; width: 98%; margin-bottom: 10px;">
-                                        <img src="images/icons/comment_16.gif" height="16" width="16" border="0" align="absmiddle"/>
-                                        Posted by redshift at Apr 30, 2009 18:04
-                                    </div>
-                                </td>
-                            </tr>
-                                                    </table>
                     			    </td>
 		    </tr>
 	    </table>
@@ -264,7 +196,7 @@ Mirko</p></font>
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jun 28, 2011 15:26</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 29, 2011 14:49</font></td>
 		    </tr>
 	    </table>
     </body>

@@ -16,18 +16,18 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 28, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 29, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
  
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1309291927561 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1309291927561 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1309291927561 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1309373058954 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1309373058954 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1309373058954 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1309291927561'>
+/*]]>*/</style><div class='rbtoc1309373058954'>
 <ul>
     <li><a href='#vSphere-vSpherePluginOverview'>vSphere Plugin Overview</a></li>
 <ul>
@@ -213,7 +213,7 @@ div.rbtoc1309291927561 li {margin-left: 0px;padding-left: 0px;}
 
 
 <ul>
-	<li><b>Event Tracking</b> &#45;&nbsp;The <tt>org.hyperic.hq.plugin.vsphere.VSphereHostEventPlugin</tt> obtains events for vSphere hosts every 5 minutes. See <a href="http://support.hyperic.com/display/DOCS46/Events" title="Events">vSphere Events</a> for a list of all vCenter events. For each event, the following data is returned:
+	<li><b>Event Tracking</b> &#45;&nbsp;The <tt>org.hyperic.hq.plugin.vsphere.VSphereHostEventPlugin</tt> obtains events for vSphere hosts every 5 minutes. See <a href="Events.html" title="Events">vSphere Events</a> for a list of all vCenter events. For each event, the following data is returned:
 	<ul>
 		<li>Log Level</li>
 		<li>Event ID</li>
@@ -294,7 +294,7 @@ div.rbtoc1309291927561 li {margin-left: 0px;padding-left: 0px;}
 
 
 <ul>
-	<li><b>Event Tracking</b> &#45; The <tt>org.hyperic.hq.plugin.vsphere.VSphereVmEventPlugin</tt> class obtains events (for VMs that have an HQ Agent) using the vCenter SDK, in accordance with the log tracking options configured for vSphere VMs. If log tracking is enabled, an event will be logged for any control action performed. In addition, vCenter events that meet the log tracking filter criteria will be tracked. (See <a href="http://support.hyperic.com/display/DOCS46/Events" title="Events">vSphere Events</a> for a list of all vCenter events.) For each event, the following data is logged:
+	<li><b>Event Tracking</b> &#45; The <tt>org.hyperic.hq.plugin.vsphere.VSphereVmEventPlugin</tt> class obtains events (for VMs that have an HQ Agent) using the vCenter SDK, in accordance with the log tracking options configured for vSphere VMs. If log tracking is enabled, an event will be logged for any control action performed. In addition, vCenter events that meet the log tracking filter criteria will be tracked. (See <a href="Events.html" title="Events">vSphere Events</a> for a list of all vCenter events.) For each event, the following data is logged:
 	<ul>
 		<li>Log Level</li>
 		<li>Event ID</li>
@@ -352,7 +352,7 @@ div.rbtoc1309291927561 li {margin-left: 0px;padding-left: 0px;}
 
 <h2><a name="vSphere-Step1InstallHQAgentonvCenterPlatform"></a>Step 1 - Install HQ Agent on vCenter Platform </h2>
 
-<p>Install an HQ Agent on the platform where vCenter Server runs. For instructions, see <a href="http://support.hyperic.com/display/DOCS46/Install+HQ+Agent" title="Install HQ Agent">Install HQ Agent</a> </p>
+<p>Install an HQ Agent on the platform where vCenter Server runs. For instructions, see <a href="Installing an Agent-Only Package.html" title="Installing an Agent-Only Package">Installing an Agent&#45;Only Package</a> </p>
 
 <div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Interactive Agent Configuration is Not Supported</b><br />You must configure the HQ Agent in its properties file. <b>Do not start the HQ Agent until you have configured its startup setting in its</b> <tt><b>agent.properties</b></tt> <b>file, as described in the following section</b>.</td></tr></table></div> 
 
@@ -414,7 +414,7 @@ agent.setup.unidirectional=no</pre>
 
 <p>You can enable log tracking for vSphere Hosts and VMs. If you do, the agent will log an event for vCenter events that match the criteria you specify. Note that if you enable log tracking for vSphere VMs, HQ will log an event for each control action command performed on the VM from HQ. If log tracking is not enabled for a VM, control actions will not be tracked as events. </p>
 
-<p><b>Note:</b> This version of the vSphere plugin returns all events as level INFO. You cannot define filter criteria based on severity level in this version of the vSphere plugin. You can only filter based on message content - you can track events based on whether it matches or does not match a regular repression. See <a href="http://support.hyperic.com/display/DOCS46/Events" title="Events">vSphere Events</a> for a list of all vCenter events. </p>
+<p><b>Note:</b> This version of the vSphere plugin returns all events as level INFO. You cannot define filter criteria based on severity level in this version of the vSphere plugin. You can only filter based on message content - you can track events based on whether it matches or does not match a regular repression. See <a href="Events.html" title="Events">vSphere Events</a> for a list of all vCenter events. </p>
 
 <p>To enable log tracking, click the <b>Enable Log Tracking</b> box in the <b>Monitoring</b> section of the <b>Configuration Properties</b> page. </p>
 
@@ -449,7 +449,7 @@ agent.setup.unidirectional=no</pre>
 
 <p>Installing an HQ Agent in each VM enables you to manage HQ-supported server types running in it. &nbsp;In HQ Enterprise, this enables you to correlate the behavior of resources throughout the managed resource hierarchy - from vCenter to managed servers in the VM.&nbsp;&nbsp; </p>
 
-<p>For installation instructions, see <a href="http://support.hyperic.com/display/DOCS46/Install+HQ+Agent" title="Install HQ Agent">Install HQ Agent</a>. </p>
+<p>For installation instructions, see <a href="Installing an Agent-Only Package.html" title="Installing an Agent-Only Package">Installing an Agent&#45;Only Package</a>. </p>
 
 <p><b>Note:</b> If you run an HQ Agent in a VM, HQ creates an operating system type platform type for it in inventory. For instance, if you run and agent in a VM running Linux, HQ creates a platform of type "Linux" for the system, in addition to the platform of type "vSphere VM" create for the VM itself. </p>
 
@@ -1128,7 +1128,7 @@ While a VM may&nbsp;have been configured to use 4 GB of RAM, as an example, it m
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jun 28, 2011 15:26</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 29, 2011 14:48</font></td>
 		    </tr>
 	    </table>
     </body>

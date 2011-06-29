@@ -16,15 +16,15 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 21, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 29, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1308693681132 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1308693681132 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1308693681132 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1309375638827 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1309375638827 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1309375638827 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1308693681132'>
+/*]]>*/</style><div class='rbtoc1309375638827'>
 <ul>
     <li><a href='#IntroductiontoPluginDevelopment-PluginDevelopmentCenter'> Plugin Development Center</a></li>
     <li><a href='#IntroductiontoPluginDevelopment-WhatPluginsDo'>What Plugins Do</a></li>
@@ -48,7 +48,7 @@ div.rbtoc1308693681132 li {margin-left: 0px;padding-left: 0px;}
 
 <p>All HQ bundled plugins are available in both the Enterprise and Open Source versions of HQ. The only difference is that, as reflected in the HQ feature list, plugins in the Enterprise version enable more management features.</p>
 
-<p>For a soup-to-nuts lesson on writing your own custom plugins, please see our <a href="Plugins Tutorial.html" title="Plugins Tutorial">Plugins Tutorial</a>.</p>
+<p>For a soup-to-nuts lesson on writing your own custom plugins, please see <a href="Plugins Tutorial.html" title="Plugins Tutorial">Plugins Tutorial</a>.</p>
 
 
 
@@ -56,25 +56,25 @@ div.rbtoc1308693681132 li {margin-left: 0px;padding-left: 0px;}
 
 <h1><a name="IntroductiontoPluginDevelopment-WhatPluginsDo"></a>What Plugins Do</h1>
 
-<p>Proper development and functioning of HQ plugins rely on a thorough understanding of the HQ inventory model and of the four HQ functions that plugins implement:</p>
+<p>Plugin development requires an understanding of the HQ inventory model, described in <a href="Resources, Resource Types and Inventory Types.html" title="Resources, Resource Types and Inventory Types">Resources, Resource Types and Inventory Types</a> and of the management functions that plugins implement. For an overview of Hyperic management functions, see <a href="Introduction to Hyperic Monitoring.html" title="Introduction to Hyperic Monitoring">Introduction to Hyperic Monitoring</a>. Hyperic management functions include</p>
 
 <ul>
-	<li><em>Auto-Discovery</em>: Plugins can implement HQ auto-discovery|Auto-Discovery] of servers and services (<em>not</em> platforms, which are discovered via the <a href="Product Plugin.html" title="Product Plugin">Product plugin</a>). Custom plugins will usually just call Hyperic's built-in  <a href="ServerDetector.html" title="ServerDetector">ServerDetector</a> class.</li>
+	<li>Auto-Discovery &#8212; Plugins can implement auto-discovery of servers and services (<em>not</em> platforms, which are discovered via the <a href="Product Plugin.html" title="Product Plugin">Product plugin</a>). Custom plugins will usually just call Hyperic's built-in  <a href="ServerDetector.html" title="ServerDetector">ServerDetector</a> class. For more information about auto-discovery, see <a href="Resource Auto-Discovery Processes.html" title="Resource Auto-Discovery Processes">Resource Auto&#45;Discovery Processes</a>.</li>
 </ul>
 
 
 <ul>
-	<li><em>Monitoring</em>: Plugins can implement HQ <a href="http://support.hyperic.com/display/DOCS46/Monitoring+Overview" title="Monitoring Overview">monitoring</a>, defining and collecting metrics and configuring them for display in the UI. <a href="Measurement Plugin.html" title="Measurement Plugin">Measurement plugins</a> implement monitoring.</li>
+	<li><em>Monitoring</em>: Plugins can implement metric collection, defining and collecting metrics and configuring them for display in the UI. <a href="Measurement Plugin.html" title="Measurement Plugin">Measurement plugins</a> implement monitoring.</li>
 </ul>
 
 
 <ul>
-	<li><em>Control</em>: Plugins can implement the HQ <a href="http://support.hyperic.com/display/DOCS46/Controlling+Resources" title="Controlling Resources">control</a> feature, defining control actions used to control resources. <a href="Control Plugin.html" title="Control Plugin">Control plugins</a> implement control.</li>
+	<li><em>Control</em>: Plugins can implement Hyperic's resource control feature, defining control actions used to control resources. For more information, see <a href="Resource Control in Hyperic.html" title="Resource Control in Hyperic">Resource Control in Hyperic</a>. <a href="Control Plugin.html" title="Control Plugin">Control plugins</a> implement control.</li>
 </ul>
 
 
 <ul>
-	<li><em>Event Management</em></li>
+	<li><em>Event Traclomg</em></li>
 </ul>
 
 
@@ -91,46 +91,20 @@ div.rbtoc1308693681132 li {margin-left: 0px;padding-left: 0px;}
 <p>The Agent does the work of gathering all the data from resources and generally communicating with the resource. Using the plugin, the Agent can:</p>
 
 <ul>
-	<li><em>Auto-discover a resource.</em> In the case of a server, say, the plugin can also auto-discover all the server's hosted services. (<a href="http://support.hyperic.com/display/DOCS46/Auto-Discovery" title="Auto-Discovery">Learn more</a> about auto-discovery.)</li>
-</ul>
-
-
-<ul>
-	<li><em>Gather metrics from a resource</em>. (Learn more about <a href="http://support.hyperic.com/display/DOCS46/Monitoring+Overview" title="Monitoring Overview">monitoring and measuring resource behavior</a>.) See the <a href="http://support.hyperic.com/display/DOCS46/Plugin+XML+Descriptor#PluginXMLDescriptor-metric">XML descriptor syntax</a> for defining and gathering metrics.</li>
-</ul>
-
-
-<ul>
-	<li><em>Control a resource.</em> (<a href="http://support.hyperic.com/display/DOCS46/Controlling+Resources" title="Controlling Resources">Learn more</a> about controlling resources.)</li>
+	<li>Auto-discover resources</li>
+	<li>Collect resource metrics</li>
+	<li>Perform supported control actions</li>
 </ul>
 
 
 <p>The Server deals in meta-data, which is to say, it knows about:</p>
 
 <ul>
-	<li><em>Platform, server, and service resource types</em> and how the plugin's targeted resources map to the inventory model. See the XML descriptor syntax for specifying <a href="http://support.hyperic.com/display/DOCS46/Plugin+XML+Descriptor#PluginXMLDescriptor-server">servers</a> and <a href="http://support.hyperic.com/display/DOCS46/Plugin+XML+Descriptor#PluginXMLDescriptor-service">services</a>.</li>
+	<li>Platform, server, and service resource types and how the plugin's targeted resources map to the inventory model.</li>
+	<li>The configuration schema for each resource.</li>
+	<li>Presentation of resource data and metrics in the Hyperic user interface.</li>
+	<li>Definition of control actions.</li>
 </ul>
-
-
-<ul>
-	<li><em>The configuration schema</em> for each resource type (the same data you see displayed on the "<a href="ui-Inventory.Configuration.html" title="ui-Inventory.Configuration">Resource Configuration</a>" screen). See the <a href="http://support.hyperic.com/display/DOCS46/Plugin+XML+Descriptor#PluginXMLDescriptor-config">XML descriptor syntax</a> for specifying configuring properties.</li>
-</ul>
-
-
-<ul>
-	<li><em>Data Display</em></li>
-</ul>
-
-
-<ul>
-	<li><em>Resource-type-specific help text</em> that instructs users how to set up their environment to properly run the plugin</li>
-</ul>
-
-
-<ul>
-	<li><em>Definitions of control actions</em>.</li>
-</ul>
-
 
 
 <h1><a name="IntroductiontoPluginDevelopment-TechnicalOverview"></a>Technical Overview</h1>
@@ -162,10 +136,6 @@ div.rbtoc1308693681132 li {margin-left: 0px;padding-left: 0px;}
 	<li><a href="Write an SNMP Plugin.html" title="Write an SNMP Plugin">SNMP</a></li>
 </ul>
 
-
-<ul>
-	<li>...</li>
-</ul>
 
 
 <h1><a name="IntroductiontoPluginDevelopment-UsingSupportClassestoSimplifyYourPlugin"></a>Using Support Classes to Simplify Your Plugin</h1>
@@ -207,11 +177,11 @@ div.rbtoc1308693681132 li {margin-left: 0px;padding-left: 0px;}
 <tr>
 <td class='confluenceTd'> SIGAR </td>
 <td class='confluenceTd'> System, Process, Netstat </td>
-<td class='confluenceTd'> To communicate with an operating system. <a href="http://support.hyperic.com/display/SIGAR/Home" title="Home">SIGAR</a> is HQ's proprietary OS-independent API. </td>
+<td class='confluenceTd'> To communicate with an operating system. SIGAR is HQ's proprietary OS-independent API. For more information see <a href="http://support.hyperic.com/display/SIGAR/Home">http://support.hyperic.com/display/SIGAR/Home</a>. </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Net Protocols </td>
-<td class='confluenceTd'> HTTP, FTP, SMTP, etc. (A full list can be found on the "<a href="ui-Inventory.Service.New.html" title="ui-Inventory.Service.New">Add New Platform Service</a>" screen, in <ins>Service Type</ins>.) </td>
+<td class='confluenceTd'> HTTP, FTP, SMTP, etc. For more information see <a href="Network Platform Services.html" title="Network Platform Services">Network Platform Services</a>.</td>
 <td class='confluenceTd'> To communicate with platform services that HQ already has built-in, but you might want to gather additional metrics from it </td>
 </tr>
 <tr>
@@ -221,10 +191,6 @@ div.rbtoc1308693681132 li {margin-left: 0px;padding-left: 0px;}
 </tr>
 </tbody></table>
 </div>
-
-
-
-
 
 
 <h1><a name="IntroductiontoPluginDevelopment-WritingaPlugin"></a>Writing a Plugin</h1>
@@ -249,7 +215,7 @@ div.rbtoc1308693681132 li {margin-left: 0px;padding-left: 0px;}
 
 <h1><a name="IntroductiontoPluginDevelopment-DeployingYourPlugin"></a>Deploying Your Plugin</h1>
 
-<p>Please see <a href="Deploy Plugin.html" title="Deploy Plugin">Deploy Plugin</a>.</p>
+<p>Please see <a href="Plugin Deployment and Management.html" title="Plugin Deployment and Management">Plugin Deployment and Management</a>.</p>
 
 
 
@@ -262,7 +228,7 @@ div.rbtoc1308693681132 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jun 28, 2011 15:26</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 29, 2011 14:49</font></td>
 		    </tr>
 	    </table>
     </body>

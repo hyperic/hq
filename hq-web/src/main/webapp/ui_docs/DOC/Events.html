@@ -1,0 +1,2433 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>Hyperic 4.6 Documentation : Events</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            Hyperic 4.6 Documentation : Events
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<td class='confluenceTd'> AccountCreatedEvent </td>
+<td class='confluenceTd'> This event records that an account was created on a host. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.AccountCreatedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> AccountRemovedEvent </td>
+<td class='confluenceTd'> This event records that an account was removed from a host. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.AccountRemovedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> AccountUpdatedEvent </td>
+<td class='confluenceTd'> This event records that an account was updated on a host. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.AccountUpdatedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> AdminPasswordNotChangedEvent </td>
+<td class='confluenceTd'> Default password for the Admin user on the host has not been changed. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.AdminPasswordNotChangedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> AlarmActionTriggeredEvent </td>
+<td class='confluenceTd'> This event records that an alarm was triggered. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.AlarmActionTriggeredEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> AlarmCreatedEvent </td>
+<td class='confluenceTd'> This event records the creation of an alarm. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.AlarmCreatedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> AlarmEmailCompletedEvent </td>
+<td class='confluenceTd'> This event records the completion of an alarm email notification. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.AlarmEmailCompletedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> AlarmEmailFailedEvent </td>
+<td class='confluenceTd'> This event records a failure to complete an alarm email notification. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.AlarmEmailFailedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> AlarmReconfiguredEvent </td>
+<td class='confluenceTd'> This event records the reconfiguration of an alarm. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.AlarmReconfiguredEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'>AlarmRemovedEvent</td>
+<td class='confluenceTd'> This event records the removal of an alarm. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.AlarmRemovedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> AlarmScriptCompleteEvent </td>
+<td class='confluenceTd'> This event records the completion of an alarm-triggered script. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.AlarmScriptCompleteEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> AlarmScriptFailedEvent </td>
+<td class='confluenceTd'> This event records a failure to complete an alarm-triggered script. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.AlarmScriptFailedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> AlarmSnmpCompletedEvent </td>
+<td class='confluenceTd'> This event records the completion of an alarm SNMP notification. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.AlarmSnmpCompletedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> AlarmSnmpFailedEvent </td>
+<td class='confluenceTd'> This event records a failure to complete an alarm SNMP notification. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.AlarmSnmpFailedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> AlarmStatusChangedevent </td>
+<td class='confluenceTd'> This event records that an entity (such as a host or VM) has changed its overall status because an alarm was triggered. The event will show which entity and will indicate which alarm was triggered. A host's or VM's alarm status changing from "green"/ "yellow" / "red" to "gray" may indicate that the host or VM has been shutdown. If the alarm status is "yellow" or "red" then the icons in the VI Client will change (see the host and VM samples below). </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.AlarmStatusChangedevent.html">vCenter Reference</a> </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> AllVirtualMachinesLicensedevent </td>
+<td class='confluenceTd'> This event records that the previously unlicensed virtual machines on the specified host are now licensed. After this event is entered into the event log, we expect to see that the configuration issue removed from the host managed object. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.AllVirtualMachinesLicensedevent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> AlreadyAuthenticatedSessionEvent </td>
+<td class='confluenceTd'> This event records a failed user logon due to the user already being logged on. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.AlreadyAuthenticatedSessionEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> BadUsernameSessionEvent </td>
+<td class='confluenceTd'> This event records a failed user logon. Failed logons are due to no match existing between the provided user name and password combination and the combinations stored for authentication. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.BadUsernameSessionEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> CanceledHostOperationEvent </td>
+<td class='confluenceTd'> An operation performed on the host was canceled. Typically, a previous event in the sequence of events contains more information about the cause of this cancellation. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.CanceledHostOperationEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> ClusterComplianceCheckedEvent </td>
+<td class='confluenceTd'> This event records that a compliance check was triggered on the cluster. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.ClusterComplianceCheckedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> ClusterCreatedEvent </td>
+<td class='confluenceTd'> This event records when a cluster is created. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.ClusterCreatedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> ClusterDestroyedEvent </td>
+<td class='confluenceTd'> This event records when a cluster is destroyed. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.ClusterDestroyedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> ClusterOvercommittedEvent </td>
+<td class='confluenceTd'> This event records when a cluster's host capacity cannot satisfy resource configuration constraints. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.ClusterOvercommittedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> ClusterReconfiguredEvent </td>
+<td class='confluenceTd'> This event records when a cluster is reconfigured. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.ClusterReconfiguredEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> ClusterStatusChangedEvent </td>
+<td class='confluenceTd'> This event records when a cluster's overall status changed. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.ClusterStatusChangedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> com.vmware.license.AddLicenseEvent </td>
+<td class='confluenceTd'> Added License </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.com.vmware.license.AddLicenseEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> com.vmware.license.AssignLicenseEvent </td>
+<td class='confluenceTd'> Assigned License </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.com.vmware.license.AssignLicenseEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> com.vmware.license.LicenseAssignFailedEvent </td>
+<td class='confluenceTd'> License assignment faults </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.com.vmware.license.LicenseAssignFailedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> com.vmware.license.LicenseExpiryEvent </td>
+<td class='confluenceTd'> License Expiry </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.com.vmware.license.LicenseExpiryEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> com.vmware.license.RemoveLicenseEvent </td>
+<td class='confluenceTd'> Removed License </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.com.vmware.license.RemoveLicenseEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> com.vmware.license.UnassignLicenseEvent </td>
+<td class='confluenceTd'> Unassigned License </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.com.vmware.license.UnassignLicenseEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> com.vmware.vc.cim.CIMGroupHealthStateChanged </td>
+<td class='confluenceTd'> Hardware Health Changed </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.com.vmware.vc.cim.CIMGroupHealthStateChanged.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> CustomFieldDefAddedEvent </td>
+<td class='confluenceTd'> This event records the addition of a custom field definition. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.CustomFieldDefAddedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> CustomFieldDefEvent </td>
+<td class='confluenceTd'> This event records a custom field definition event. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.CustomFieldDefEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> CustomFieldDefRemovedEvent </td>
+<td class='confluenceTd'> This event records the removal of a custom field definition. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.CustomFieldDefRemovedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> CustomFieldDefRenamedEvent </td>
+<td class='confluenceTd'> This event records the renaming of a custom field definition. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.CustomFieldDefRenamedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> CustomFieldValueChangedEvent </td>
+<td class='confluenceTd'> This event records a change to a custom field value for a particular entity. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.CustomFieldValueChangedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> CustomizationFailed </td>
+<td class='confluenceTd'> The customization sequence completed unsuccessfully in the guest. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.CustomizationFailed.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> CustomizationLinuxIdentityFailedEvent </td>
+<td class='confluenceTd'>Failed to set Linux identity. Refer to the log file specified in the event message</td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.CustomizationLinuxIdentityFailedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> CustomizationNetworkSetupFailedEvent </td>
+<td class='confluenceTd'>Network setup failed in the guest during customization. Refer to the log file specified in the event message</td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.CustomizationNetworkSetupFailedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> CustomizationStartedEvent </td>
+<td class='confluenceTd'> The customization sequence has started in the VM guest. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.CustomizationStartedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> CustomizationSucceeded </td>
+<td class='confluenceTd'>The customization sequence completed successfully in the guest. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.CustomizationSucceeded.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> CustomizationSysprepFailedEvent </td>
+<td class='confluenceTd'>Sysprep failed to run in the guest during customization. This will most like have been caused by the fact that the wrong sysprep was used for the guest, so we include the version information in the event. Refer to the log file specified in the event message </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.CustomizationSysprepFailedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> CustomizationUnknownFailureEvent</td>
+<td class='confluenceTd'>The customization sequence failed unexpectedly in the guest. Refer to the log file specified in the event message </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.CustomizationUnknownFailureEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DasAdmissionControlDisabledEvent </td>
+<td class='confluenceTd'> This event records when admission control checks have been disabled in a HA cluster. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DasAdmissionControlDisabledEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DasAdmissionControlEnabledEvent </td>
+<td class='confluenceTd'> This event records when admission control checks have been enabled in a HA cluster. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DasAdmissionControlEnabledEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DasAgentFoundEvent </td>
+<td class='confluenceTd'> This event records that vCenter has re-established contact with a primary host in this HA cluster. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DasAgentFoundEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DasAgentUnavailableEvent </td>
+<td class='confluenceTd'> This event records that vCenter cannot contact any primary host in this HA cluster. HA designates some hosts as primary hosts in the HA cluster. When adding a new host to an existing cluster, HA needs to contact one of the primary hosts to finish the configuration. vCenter has lost contact with all primary nodes in the connected state. Attempts to configure HA on a host in this cluster will fail until a DasAgentFoundEvent is logged or unless this is the first node to be configured. For example, if all the other hosts are disconnected first. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DasAgentUnavailableEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DasClusterIsolatedEvent </td>
+<td class='confluenceTd'> This event records that all hosts have been isolated from the network in a HA cluster. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DasClusterIsolatedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DasDisabledEvent </td>
+<td class='confluenceTd'> This event records when a cluster has been disabled for HA. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DasDisabledEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DasEnabledEvent </td>
+<td class='confluenceTd'> This event records when a cluster has been enabled for HA. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DasEnabledEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DasHostFailedEvent </td>
+<td class='confluenceTd'> This event records when a host failure has been detected by HA. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DasHostFailedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DasHostIsolatedEvent </td>
+<td class='confluenceTd'> This event records that a host has been isolated from the network in a HA cluster. Since an isolated host cannot be distinguished from a failed host except by the isolated host itself, this event is logged when the isolated host regains network connectivity. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DasHostIsolatedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DatacenterCreatedEvent </td>
+<td class='confluenceTd'> This event records when a datacenter object has been created. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DatacenterCreatedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DatacenterRenamedEvent </td>
+<td class='confluenceTd'> This event is generated whenever a datacenter is renamed. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DatacenterRenamedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DatastoreCapacityIncreasedEvent </td>
+<td class='confluenceTd'> This event records when increase in a datastore's capacity is observed. It may happen due to different reasons, like extending or expanding a datastore. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DatastoreCapacityIncreasedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DatastoreDestroyedEvent </td>
+<td class='confluenceTd'> This event records when a datastore is removed from vCenter. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DatastoreDestroyedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DatastoreDiscoveredEvent </td>
+<td class='confluenceTd'> This event records when a host is added to vCenter and datastores are discovered. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DatastoreDiscoveredEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DatastoreDuplicatedEvent </td>
+<td class='confluenceTd'> This event records when a duplicate datastore name is found. This event is used in vCenter 1.x and is included for backward compability. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DatastoreDuplicatedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DatastoreFileCopiedEvent </td>
+<td class='confluenceTd'> This event records copy of a file or directory. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DatastoreFileCopiedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DatastoreFileDeletedEvent </td>
+<td class='confluenceTd'> This event records deletion of a file or directory. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DatastoreFileDeletedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DatastoreFileMovedEvent </td>
+<td class='confluenceTd'> This event records move of a file or directory. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DatastoreFileMovedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DatastorePrincipalConfigured </td>
+<td class='confluenceTd'> This event records that a datastore principal was configured on a host. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DatastorePrincipalConfigured.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DatastoreRemovedOnHostEvent </td>
+<td class='confluenceTd'> This event records when a datastore is removed from a host but not from vCenter. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DatastoreRemovedOnHostEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DatastoreRenamedEvent </td>
+<td class='confluenceTd'> This event records the renaming of a datastore. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DatastoreRenamedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DatastoreRenamedOnHostEvent </td>
+<td class='confluenceTd'> This event records when a datastore is added to vCenter and is renamed by vCenter because this datastore already exists in vCenter with a different name, or because the name conflicts with another datastore in vCenter. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DatastoreRenamedOnHostEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DrsDisabledEvent </td>
+<td class='confluenceTd'> This event records when DRS is disabled on a cluster. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DrsDisabledEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DrsEnabledEvent </td>
+<td class='confluenceTd'> This event records when DRS is enabled on a cluster. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DrsEnabledEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DrsEnteredStandbyModeEvent </td>
+<td class='confluenceTd'> This event records that the host has completely put into standby mode by Distributed Power Management. A host in this mode has no running virtual machines and no provisioning operations are occurring. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DrsEnteredStandbyModeEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DrsEnteringStandbyModeEvent </td>
+<td class='confluenceTd'> This event records that a host has begun the process of entering standby mode initiated by Distributed Power Management. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DrsEnteringStandbyModeEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DrsExitedStandbyModeEvent </td>
+<td class='confluenceTd'> This event records that Distributed Power Management has brought this host out of standby mode. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DrsExitedStandbyModeEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DrsExitingStandbyModeEvent </td>
+<td class='confluenceTd'> This event records that a host has begun the process of exiting standby mode initiated by Distributed Power Management. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DrsExitingStandbyModeEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DrsExitStandbyModeFailedEvent </td>
+<td class='confluenceTd'> This event records that Distributed Power Managment tried to bring a host out from standby mode, but the host failed to exit standby mode. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DrsExitStandbyModeFailedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DrsInvocationFailedEvent </td>
+<td class='confluenceTd'> This event records DRS invocation failure. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DrsInvocationFailedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DrsRecoveredFromFailureEvent </td>
+<td class='confluenceTd'> This event records that DRS has recovered from failure. It is triggered by a successful DRS invocation after repeated failure. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DrsRecoveredFromFailureEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DrsResourceConfigureFailedEvent </td>
+<td class='confluenceTd'> This event records when resource configuration specification synchronization fails on a host. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DrsResourceConfigureFailedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DrsResourceConfigureSyncedEvent </td>
+<td class='confluenceTd'> This event records when resource configuration specification returns to synchronized from previous failure. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DrsResourceConfigureSyncedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DrsVmMigratedEvent </td>
+<td class='confluenceTd'> This event records a virtual machine migration that was recommended by DRS. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DrsVmMigratedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DrsVmPoweredOnEvent </td>
+<td class='confluenceTd'> This event records when a virtual machine is powered on by DRS. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DrsVmPoweredOnEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DuplicateIpDetectedEvent </td>
+<td class='confluenceTd'> This event records that a duplicate IP address has been observed in conflict with the vmotion or IP storage interface configured on the host. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DuplicateIpDetectedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DVPortgroupCreatedEvent </td>
+<td class='confluenceTd'> Two distributed virtual portgroup was created. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DVPortgroupCreatedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DVPortgroupDestroyedEvent </td>
+<td class='confluenceTd'> Two distributed virtual portgroup was destroyed. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DVPortgroupDestroyedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DVPortgroupReconfiguredEvent </td>
+<td class='confluenceTd'> Two distributed virtual portgroup was reconfigured. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DVPortgroupReconfiguredEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DVPortgroupRenamedEvent </td>
+<td class='confluenceTd'> Two distributed virtual portgroup was renamed. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DVPortgroupRenamedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DvsCreatedEvent </td>
+<td class='confluenceTd'> A distributed virtual switch was created. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DvsCreatedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DvsDestroyedEvent </td>
+<td class='confluenceTd'> A distributed virtual switch was destroyed. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DvsDestroyedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DvsEvent </td>
+<td class='confluenceTd'> These are dvs-related events. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DvsEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DvsHostBackInSyncEvent </td>
+<td class='confluenceTd'> The DVS configuration on the host was synchronized with that of the vCenter Server and the configuration is the same on the host and vCenter Server. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DvsHostBackInSyncEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DvsHostJoinedEvent </td>
+<td class='confluenceTd'> A host joined the distributed virtual switch. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DvsHostJoinedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DvsHostLeftEvent </td>
+<td class='confluenceTd'> A host left the distributed virtual switch. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DvsHostLeftEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DvsHostWentOutOfSyncEvent </td>
+<td class='confluenceTd'> The DVS configuration on the host diverged from that of the Virtual Center Server. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DvsHostWentOutOfSyncEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DvsMergedEvent </td>
+<td class='confluenceTd'> Two distributed virtual switches was merged. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DvsMergedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DvsPortBlockedEvent </td>
+<td class='confluenceTd'> A port is blocked in the distributed virtual switch. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DvsPortBlockedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DvsPortConnectedEvent </td>
+<td class='confluenceTd'> A port is connected in the distributed virtual switch. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DvsPortConnectedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DvsPortCreatedEvent </td>
+<td class='confluenceTd'> New ports are created in the distributed virtual switch. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DvsPortCreatedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DvsPortDeletedEvent </td>
+<td class='confluenceTd'> Existing ports are deleted in the distributed virtual switch. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DvsPortDeletedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DvsPortDisconnectedEvent </td>
+<td class='confluenceTd'> A port is disconnected in the distributed virtual switch. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DvsPortDisconnectedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DvsPortJoinPortgroupEvent </td>
+<td class='confluenceTd'> A port was moved into the distributed virtual portgroup. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DvsPortJoinPortgroupEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DvsPortLeavePortgroupEvent </td>
+<td class='confluenceTd'> A port was moved out of the distributed virtual portgroup. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DvsPortLeavePortgroupEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DvsPortLinkDownEvent </td>
+<td class='confluenceTd'> A port of which link status is changed to down in the distributed virtual switch. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DvsPortLinkDownEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DvsPortLinkUpEvent </td>
+<td class='confluenceTd'> A port of which link status is changed to up in the distributed virtual switch. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DvsPortLinkUpEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DvsPortReconfiguredEvent </td>
+<td class='confluenceTd'> Existing ports are reconfigured in the distributed virtual switch. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DvsPortReconfiguredEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DvsPortUnblockedEvent </td>
+<td class='confluenceTd'> A port is blocked in the distributed virtual switch. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DvsPortUnblockedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DvsReconfiguredEvent </td>
+<td class='confluenceTd'> A distributed virtual switch was reconfigured. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DvsReconfiguredEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DvsRenamedEvent </td>
+<td class='confluenceTd'> A distributed virtual switch was renamed. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DvsRenamedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DvsUpgradeAvailableEvent </td>
+<td class='confluenceTd'> An upgrade for the distributed virtual switch is available. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DvsUpgradeAvailableEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DvsUpgradedEvent </td>
+<td class='confluenceTd'> The distributed virtual switch was upgraded. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DvsUpgradedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DvsUpgradeInProgressEvent </td>
+<td class='confluenceTd'> An upgrade for the distributed virtual switch is in progress. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DvsUpgradeInProgressEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> DvsUpgradeRejectedEvent </td>
+<td class='confluenceTd'> An upgrade for the distributed virtual switch is rejected. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.DvsUpgradeRejectedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> EnteredMaintenanceModeEvent </td>
+<td class='confluenceTd'> This event records that the host has completely entered maintenance mode. A host in this mode has no running virtual machines and no provisioning operations are occuring. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.EnteredMaintenanceModeEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> EnteredStandbyModeEvent </td>
+<td class='confluenceTd'> This event records that the host has completely entered standby mode. A host in this mode has no running virtual machines and no provisioning operations are occurring. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.EnteredStandbyModeEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> EnteringMaintenanceModeEvent </td>
+<td class='confluenceTd'> This event records that a host has begun the process of entering maintenance mode. All virtual machine operations are blocked, except for the following: MigrateVM, PowerOffVM, SuspendVM, ShutdownGuest, StandbyGuest </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.EnteringMaintenanceModeEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> EnteringStandbyModeEvent </td>
+<td class='confluenceTd'> This event records that a host has begun the process of entering standby mode. All virtual machine operations are blocked, except for the following: MigrateVM, PowerOffVM, SuspendVM, ShutdownGuest, StandbyGuest </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.EnteringStandbyModeEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> ErrorUpgradeEvent </td>
+<td class='confluenceTd'> This event is a general error event from upgrade. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.ErrorUpgradeEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> ExitedStandbyModeEvent </td>
+<td class='confluenceTd'> This event records that the host is no longer in standby mode. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.ExitedStandbyModeEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> ExitingStandbyModeEvent </td>
+<td class='confluenceTd'> This event records that a host has begun the process of exiting standby mode. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.ExitingStandbyModeEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> ExitMaintenanceModeEvent </td>
+<td class='confluenceTd'> This event records that the host is no longer in maintenance mode. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.ExitMaintenanceModeEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> ExitStandbyModeFailedEvent </td>
+<td class='confluenceTd'> This event records that the host failed to exit standby mode. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.ExitStandbyModeFailedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> FailoverLevelRestored </td>
+<td class='confluenceTd'> This event records that the amount of cluster resources has increased and is now sufficient to satisfy the configured HA failover level. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.FailoverLevelRestored.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> GeneralEvent </td>
+<td class='confluenceTd'> This is actually the base class for general events and should not be seen. The derived general events are the ones that will be generated. See VMware's documentation for the complete list of these events. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.GeneralEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> GeneralHostErrorEvent </td>
+<td class='confluenceTd'> This event is the general error event for a host. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.GeneralHostErrorEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> GeneralHostInfoEvent </td>
+<td class='confluenceTd'> This event is the general information event for a host. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.GeneralHostInfoEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> GeneralHostWarningEvent </td>
+<td class='confluenceTd'> This event is the general warning event for a host. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.GeneralHostWarningEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> GeneralUserEvent </td>
+<td class='confluenceTd'> This event is the general user event type. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.GeneralUserEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> GeneralVmErrorEvent </td>
+<td class='confluenceTd'> This event is the general error event for a virtual machine. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.GeneralVmErrorEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> GeneralVmInfoEvent </td>
+<td class='confluenceTd'> This event is the general information event for a virtual machine. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.GeneralVmInfoEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> GeneralVmWarningEvent </td>
+<td class='confluenceTd'> This event is the general warning event for a virtual machine. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.GeneralVmWarningEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> GhostDvsProxySwitchDetectedEvent </td>
+<td class='confluenceTd'> This event records when vCenter server found DVS proxy switches on the host that don't match any DVS defined in vCenter. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.GhostDvsProxySwitchDetectedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> GhostDvsProxySwitchRemovedEvent </td>
+<td class='confluenceTd'> This event records when the ghost DVS proxy switches (a.k.a host proxy switches that don't match any DVS defined in vCenter) were removed on the host. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.GhostDvsProxySwitchRemovedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> GlobalMessageChangedEvent </td>
+<td class='confluenceTd'> This event records a change to the global message. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.GlobalMessageChangedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HealthStatusChangedEvent </td>
+<td class='confluenceTd'> used to report change in health status of vCenter components. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HealthStatusChangedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostAddedEvent </td>
+<td class='confluenceTd'> This event records the addition of a host to vCenter. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostAddedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostAddFailedEvent </td>
+<td class='confluenceTd'> This event records that adding a host failed. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostAddFailedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostAdminDisableEvent </td>
+<td class='confluenceTd'> This event records that the permission on the host has been changed such that only the user account used for vCenter operation will have Administrator permission. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostAdminDisableEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostAdminEnableEvent </td>
+<td class='confluenceTd'> This event records that the administrator permission has been restored. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostAdminEnableEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostCnxFailedAccountFailedEvent </td>
+<td class='confluenceTd'> This event records a failure to connect to a host due to a failure to set up a management account. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostCnxFailedAccountFailedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostCnxFailedAlreadyManagedEvent </td>
+<td class='confluenceTd'> This event records a failure to connect to a host due to the host being managed by a different vCenter server. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostCnxFailedAlreadyManagedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostCnxFailedBadCcagentEvent </td>
+<td class='confluenceTd'> This event records a failure to connect to a host due to no response being received from the host agent. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostCnxFailedBadCcagentEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostCnxFailedBadUsernameEvent </td>
+<td class='confluenceTd'> This event records a failure to connect to a host due to an invalid user name and password combination. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostCnxFailedBadUsernameEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostCnxFailedBadVersionEvent </td>
+<td class='confluenceTd'> This event records a failure to connect to a host due to an incompatible client version. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostCnxFailedBadVersionEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostCnxFailedCcagentUpgradeEvent </td>
+<td class='confluenceTd'> This event records a failure to connect to a host due to a conflict with an upgrade or installation of the host agent. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostCnxFailedCcagentUpgradeEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostCnxFailedEvent </td>
+<td class='confluenceTd'> This event records a failure to connect to a host due to an unspecified condition. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostCnxFailedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostCnxFailedNetworkErrorEvent </td>
+<td class='confluenceTd'> This event records a failure to connect to a host due to a network error. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostCnxFailedNetworkErrorEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostCnxFailedNoAccessEvent </td>
+<td class='confluenceTd'> This event records a failure to connect to a host due to insufficient account privileges. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostCnxFailedNoAccessEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostCnxFailedNoConnectionEvent </td>
+<td class='confluenceTd'> This event records a failure to connect to a host due to a host not being present on the network. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostCnxFailedNoConnectionEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostCnxFailedNoLicenseEvent </td>
+<td class='confluenceTd'> This event records a failure to connect to a host due to a licensing issue. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostCnxFailedNoLicenseEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostCnxFailedNotFoundEvent </td>
+<td class='confluenceTd'> This event records a failure to connect to a host due to a failure to resolve the host name. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostCnxFailedNotFoundEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostCnxFailedTimeoutEvent </td>
+<td class='confluenceTd'> This event records a failure to connect to a host due to a timeout on the connection attempt. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostCnxFailedTimeoutEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostComplianceCheckedEvent </td>
+<td class='confluenceTd'> This event records that a compliance check was triggered on the host. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostComplianceCheckedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostCompliantEvent </td>
+<td class='confluenceTd'> This event records that host is in compliance. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostCompliantEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostConfigAppliedEvent </td>
+<td class='confluenceTd'> This event records that a configuration was applied on a host. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostConfigAppliedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostConnectedEvent </td>
+<td class='confluenceTd'> This event records a successful host connection. After this event is generated, there will also be a VmConnectedEvent generated for each VM on the host, regardless of the VM's power state. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostConnectedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostConnectionLostEvent </td>
+<td class='confluenceTd'> This event records the (unexpected) loss of a host connection. This might occur if a ESX system was powered down, for example. After this event is generated, there will also be a VmDisconnectedEvent generated for each VM on the host, regardless of the VM's power state. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostConnectionLostEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostDasDisabledEvent </td>
+<td class='confluenceTd'> This event records when HA has been disabled on a host. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostDasDisabledEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostDasDisablingEvent </td>
+<td class='confluenceTd'> This event records when HA is being disabled on a host. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostDasDisablingEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostDasEnabledEvent </td>
+<td class='confluenceTd'> This event records when HA has been enabled on a host. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostDasEnabledEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostDasEnablingEvent </td>
+<td class='confluenceTd'> This event records when HA has been enabled on a host. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostDasEnablingEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostDasErrorEvent </td>
+<td class='confluenceTd'> This event records when there is a HA error on a host. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostDasErrorEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostDasOkEvent </td>
+<td class='confluenceTd'> This event records when HA on a host returns to normal after an error. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostDasOkEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostDisconnectedEvent </td>
+<td class='confluenceTd'> This event records the completion of a user requested disconnect of a host. Following this event, there will be a VmDisconnectedEvent generated for each VM on the host, regardless of the VM's power state. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostDisconnectedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostEnableAdminFailedEvent </td>
+<td class='confluenceTd'> This event records the failure to restore some of the administrator's permissions. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostEnableAdminFailedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostExtraNetworksEvent </td>
+<td class='confluenceTd'> This event records the fact that a host has extra networks not used by other hosts for HA communication. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostExtraNetworksEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostGetShortNameFailedEvent </td>
+<td class='confluenceTd'> This event records that hostname &#45;s failed or returned a name containing '.'. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostGetShortNameFailedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostInventoryFullEvent </td>
+<td class='confluenceTd'> This event records if the inventory of hosts has reached the capacity of the current version of vCenter. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostInventoryFullEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostInventoryUnreadableEventEventindicating that the virtual machine inventory file on the host is damaged or unreadable. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostInventoryUnreadableEventEventindicating that the virtual machine inventory file on the host is damaged or unreadable..html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostIpChangedEvent </td>
+<td class='confluenceTd'> This event records a change in host IP address. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostIpChangedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostIpInconsistentEvent </td>
+<td class='confluenceTd'> This event records that the IP address resolution returned different addresses on the host. Please check your host's network configuration. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostIpInconsistentEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostIpToShortNameFailedEvent </td>
+<td class='confluenceTd'> This event records that the host's IP address could not be resolved to a short name. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostIpToShortNameFailedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostIsolationIpPingFailedEvent </td>
+<td class='confluenceTd'> This event records that the isolation address could not be pinged. The default isolation address is the service console's default gateway. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostIsolationIpPingFailedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostLicenseExpiredEvent </td>
+<td class='confluenceTd'> This event records an expired host license. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostLicenseExpiredEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostMissingNetworksEvent </td>
+<td class='confluenceTd'> This event records the fact that a host is missing networks that other hosts are using for HA communication. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostMissingNetworksEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostMonitoringStateChangedEvent </td>
+<td class='confluenceTd'> This event records when host monitoring state has changed. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostMonitoringStateChangedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostNoAvailableNetworksEvent </td>
+<td class='confluenceTd'> This event records the fact that a host does not have any available networks for HA communication. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostNoAvailableNetworksEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostNoHAEnabledPortGroupsEvent </td>
+<td class='confluenceTd'> This event records the fact that a host does not have any HA-enabled port groups. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostNoHAEnabledPortGroupsEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostNonCompliantEvent </td>
+<td class='confluenceTd'> This event records that host went out of compliance. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostNonCompliantEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostNoRedundantManagementNetworkEvent </td>
+<td class='confluenceTd'> This event records the fact that a host does not have a redundant management network. It is recommended that host management networks be configured with redundancy. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostNoRedundantManagementNetworkEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostNotInClusterEvent </td>
+<td class='confluenceTd'> This event records that the host is not a cluster member. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostNotInClusterEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostOvercommittedEvent </td>
+<td class='confluenceTd'> This event records when a host's capacity cannot satisfy resource configuration constraints. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostOvercommittedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostPrimaryAgentNotShortNameEvent </td>
+<td class='confluenceTd'> This event records that the primary agent specified is not a short name. The name of the primary agent is usually stored as a short name. You should not normally see this error. Please check the network configurations of your hosts. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostPrimaryAgentNotShortNameEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostProfileAppliedEvent </td>
+<td class='confluenceTd'> This event records that a Profile application was done on the host. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostProfileAppliedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostReconnectionFailedEvent </td>
+<td class='confluenceTd'> This event records a failed attempt to re-establish a host connection. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostReconnectionFailedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostRemovedEvent </td>
+<td class='confluenceTd'> This event records the removal of a host from vCenter. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostRemovedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostShortNameInconsistentEvent </td>
+<td class='confluenceTd'> This event records that host name resolution returned different names on the host. Please check your host's network configuration and your DNS configuration. There may be duplicate entries. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostShortNameInconsistentEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostShortNameToIpFailedEvent </td>
+<td class='confluenceTd'> This event records that host name resolution returned different names on the host. Please check your host's network configuration and your DNS configuration. There may be duplicate entries. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostShortNameToIpFailedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostShutdownEvent </td>
+<td class='confluenceTd'> This event records the shutdown of a host. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostShutdownEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostStatusChangedEvent </td>
+<td class='confluenceTd'> This event records when a host's overall status changed. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostStatusChangedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostSyncFailedEvent </td>
+<td class='confluenceTd'> This event records a failure to sync up with the vCenter agent on the host. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostSyncFailedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostUpgradeFailedEvent </td>
+<td class='confluenceTd'> This event records a failure to connect to a host due to an installation or upgrade issue. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostUpgradeFailedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostUserWorldSwapNotEnabledEvent </td>
+<td class='confluenceTd'> This event records that the userworld swap is not enabled on the host. HA needs userworld swap to be configured on embedded ESX hosts to function. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostUserWorldSwapNotEnabledEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostVnicConnectedToCustomizedDVPortEvent </td>
+<td class='confluenceTd'> This event records when some host vnics were reconfigured to use DVPorts with port level configuration, which might be different from the DVportgroup. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostVnicConnectedToCustomizedDVPortEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostWwnChangedEvent </td>
+<td class='confluenceTd'> This event records a change in a host's WWN (World Wide Name). </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostWwnChangedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> HostWwnConflictEvent </td>
+<td class='confluenceTd'> This event records a conflict of host WWNs (World Wide Name). </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.HostWwnConflictEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> IncorrectHostInformationEvent </td>
+<td class='confluenceTd'> This event records if the host did not provide the information needed to acquire the correct set of licenses. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.IncorrectHostInformationEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> InfoUpgradeEvent </td>
+<td class='confluenceTd'> This event is a general information event from upgrade. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.InfoUpgradeEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> InsufficientFailoverResourcesEvent </td>
+<td class='confluenceTd'> This event records that the cluster resources are insufficient to satisfy the configured HA failover level. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.InsufficientFailoverResourcesEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> InvalidEditionEvent </td>
+<td class='confluenceTd'> This event records if the license edition is set to an invalid value. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.InvalidEditionEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> LicenseExpiredEvent </td>
+<td class='confluenceTd'> This event records the expiration of a license. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.LicenseExpiredEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> LicenseNonComplianceEvent </td>
+<td class='confluenceTd'> This event records that the inventory is not license compliant. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.LicenseNonComplianceEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> LicenseRestrictedEvent </td>
+<td class='confluenceTd'> This event records if the required licenses could not be reserved because of a restriction in the option file. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.LicenseRestrictedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> LicenseServerAvailableEvent </td>
+<td class='confluenceTd'> This event is reported if the LicenseServer was previously unreachable and is now reachable. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.LicenseServerAvailableEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> LicenseServerUnavailableEvent </td>
+<td class='confluenceTd'> This event is reported if the LicenseServer becomes unreachable. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.LicenseServerUnavailableEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> LocalDatastoreCreatedEvent </td>
+<td class='confluenceTd'> This event records when a local datastore is created. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.LocalDatastoreCreatedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> LockerMisconfiguredEvent </td>
+<td class='confluenceTd'> Locker has not been configured properly. This event is fired when the datastore configured to back the locker does not exist or when connectivity to the datastore is lost. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.LockerMisconfiguredEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> LockerReconfiguredEvent </td>
+<td class='confluenceTd'> Locker has not been configured properly. This event is fired when the datastore configured to back the locker does not exist or when connectivity to the datastore is lost. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.LockerReconfiguredEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> MigrationErrorEvent </td>
+<td class='confluenceTd'> A migration error occurred. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.MigrationErrorEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> MigrationHostErrorEvent </td>
+<td class='confluenceTd'> This records a migration error that includes the destination host. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.MigrationHostErrorEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> MigrationHostWarningEvent </td>
+<td class='confluenceTd'> This records a migration warning that includes the destination host. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.MigrationHostWarningEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> MigrationResourceErrorEvent </td>
+<td class='confluenceTd'> This records a migration error that includes both the destination host and resource pool. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.MigrationResourceErrorEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> MigrationResourceWarningEvent </td>
+<td class='confluenceTd'> This records a migration warning that includes both the destination host and resource pool. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.MigrationResourceWarningEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> MigrationWarningEvent </td>
+<td class='confluenceTd'> This records a migration warning. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.MigrationWarningEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> NASDatastoreCreatedEvent </td>
+<td class='confluenceTd'> This event records when a NAS datastore is created. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.NASDatastoreCreatedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> NoAccessUserEvent </td>
+<td class='confluenceTd'> This event records a failed user logon due to insufficient access permission. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.NoAccessUserEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> NoDatastoresConfiguredEvent </td>
+<td class='confluenceTd'> No datastores have been configured on the host. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.NoDatastoresConfiguredEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> NoLicenseEvent </td>
+<td class='confluenceTd'> A NoLicenseEvent is reported if the required licenses could not be reserved. Each feature that is not fully licensed is reported. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.NoLicenseEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> NoMaintenanceModeDrsRecommendationForVM </td>
+<td class='confluenceTd'> This event records that DRS did not recommend a migration for a powered on virtual machine, even though its host is going into maintenance mode. DRS may not be able to recommend a migration for a virtual machine for reasons, include but not limited to: No other connected host is compatible with this virtual machine. None of the other compatible hosts have sufficient resources to satisfy the reservation requirements of this virtual machine. Moving to any other host would violate a DRS rule. For example, all other compatible hosts have some incompatible virtual machines running. DRS is disabled on this virtual machine. This virtual machine was still in the process of migrating into the host going into maintenance mode and was not considered by DRS. This virtual machine was in the process of migrating to another host when the host tried to enter maintenance mode. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.NoMaintenanceModeDrsRecommendationForVM.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> NotEnoughResourcesToStartVmEvent </td>
+<td class='confluenceTd'> This event records when the HA does not find sufficient resources to failover a virtual machine. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.NotEnoughResourcesToStartVmEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> OutOfSyncDvsHost </td>
+<td class='confluenceTd'> The list of hosts that have the DVS configuration on the host diverged from that of the vCenter Server. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.OutOfSyncDvsHost.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> PermissionAddedEvent </td>
+<td class='confluenceTd'> This event records the creation of a permission. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.PermissionAddedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> PermissionRemovedEvent </td>
+<td class='confluenceTd'> This event records the removal of a permission. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.PermissionRemovedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> PermissionUpdatedEvent </td>
+<td class='confluenceTd'> This event records the update of a permission. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.PermissionUpdatedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> ProfileAssociatedEvent </td>
+<td class='confluenceTd'> This event records that a Profile was associated with a managed entitiy. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.ProfileAssociatedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> ProfileChangedEvent </td>
+<td class='confluenceTd'> This event records that the profile has beed edited. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.ProfileChangedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> ProfileCreatedEvent </td>
+<td class='confluenceTd'> This event records that a Profile was created. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.ProfileCreatedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> ProfileDissociatedEvent </td>
+<td class='confluenceTd'> This event records that a Profile was dissassociated from a managed entity. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.ProfileDissociatedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> ProfileEvent </td>
+<td class='confluenceTd'> This event records a Profile specific event. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.ProfileEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> ProfileReferenceHostChangedEvent </td>
+<td class='confluenceTd'> This event records that the reference host associated with this profile has changed. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.ProfileReferenceHostChangedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> ProfileRemovedEvent </td>
+<td class='confluenceTd'> This event records that a Profile was removed. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.ProfileRemovedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> ResourcePoolCreatedEvent </td>
+<td class='confluenceTd'> This event records when a new resource pool is created. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.ResourcePoolCreatedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> ResourcePoolDestroyedEvent </td>
+<td class='confluenceTd'> This event records when a resource pool is destroyed. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.ResourcePoolDestroyedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> ResourcePoolMovedEvent </td>
+<td class='confluenceTd'> This event records when a resource pool is moved. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.ResourcePoolMovedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> ResourcePoolReconfiguredEvent </td>
+<td class='confluenceTd'> This event records when a resource pool configuration is changed. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.ResourcePoolReconfiguredEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> ResourceViolatedEvent </td>
+<td class='confluenceTd'> This event records when a conflict with a resource pool's resource configuration is detected. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.ResourceViolatedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> RoleAddedEvent </td>
+<td class='confluenceTd'> This event records the creation of a role. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.RoleAddedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> RoleRemovedEvent </td>
+<td class='confluenceTd'> This class records the removal of a role. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.RoleRemovedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> RoleUpdatedEvent </td>
+<td class='confluenceTd'> This event records the creation of a role. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.RoleUpdatedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> ScheduledTaskCompletedEvent </td>
+<td class='confluenceTd'> This event records the completion of a scheduled task. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.ScheduledTaskCompletedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> ScheduledTaskCreatedEvent </td>
+<td class='confluenceTd'> This event records the creation of a scheduled task. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.ScheduledTaskCreatedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> ScheduledTaskEmailCompletedEvent </td>
+<td class='confluenceTd'> This event records the sending of a notification via email for a scheduled task. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.ScheduledTaskEmailCompletedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> ScheduledTaskEmailFailedEvent </td>
+<td class='confluenceTd'> This event records the failure of an attempt to send a notification via email for a scheduled task. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.ScheduledTaskEmailFailedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> ScheduledTaskEvent </td>
+<td class='confluenceTd'> This event records the completion of a scheduled task. The name of the task is indicated. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.ScheduledTaskEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> ScheduledTaskFailedEvent </td>
+<td class='confluenceTd'> This event records the failure of a scheduled task. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.ScheduledTaskFailedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> ScheduledTaskReconfiguredEvent </td>
+<td class='confluenceTd'> This event records the reconfiguration of a scheduled task. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.ScheduledTaskReconfiguredEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> ScheduledTaskRemovedEvent </td>
+<td class='confluenceTd'> This event records the removal of a scheduled task. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.ScheduledTaskRemovedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> ScheduledTaskStartedEvent </td>
+<td class='confluenceTd'> This event records when a scheduled task started. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.ScheduledTaskStartedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> ServerLicenseExpiredEvent </td>
+<td class='confluenceTd'> This event records an expired vCenter server license. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.ServerLicenseExpiredEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> ServerStartedSessionEvent </td>
+<td class='confluenceTd'> This event records the starting of the vCenter server. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.ServerStartedSessionEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> SessionTerminatedEvent </td>
+<td class='confluenceTd'> This event records the termination of a session. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.SessionTerminatedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> TaskEvent </td>
+<td class='confluenceTd'> This event records the completion of a manually triggered task. The name of the task is indicated. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.TaskEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> TaskTimeoutEvent </td>
+<td class='confluenceTd'> This event records when a task is cleaned up because of a timeout. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.TaskTimeoutEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> TemplateBeingUpgradedEvent </td>
+<td class='confluenceTd'> This event records the start of a template upgrade. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.TemplateBeingUpgradedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> TemplateUpgradedEvent </td>
+<td class='confluenceTd'> This event records that the template upgrade succeeded. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.TemplateUpgradedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> TemplateUpgradeFailedEvent </td>
+<td class='confluenceTd'> This event records that the template upgrade failed. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.TemplateUpgradeFailedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> TimedOutHostOperationEvent </td>
+<td class='confluenceTd'> This event indicates that an operation performed on the host timed out. Typically, a previous event in the sequence of events contains more information about the cause of the operation timing out. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.TimedOutHostOperationEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> UnlicensedVirtualMachinesEvent </td>
+<td class='confluenceTd'> This event records that we have unlicensed virtual machines on the specified host. This can be both a Config issue and an entry in the event log. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.UnlicensedVirtualMachinesEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> UnlicensedVirtualMachinesFoundEvent </td>
+<td class='confluenceTd'> This event records that we discovered unlicensed virtual machines on the specified host. After this event is entered into the event log, we expect to see a corresponding UnlicensedVirtualMachinesEvent configIssue on the host. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.UnlicensedVirtualMachinesFoundEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> UpdatedAgentBeingRestartedEvent </td>
+<td class='confluenceTd'> This event records that the agent has been patched and will be restarted. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.UpdatedAgentBeingRestartedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> UpgradeEvent </td>
+<td class='confluenceTd'> This event records that the agent has been patched and will be restarted. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.UpgradeEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> UserAssignedToGroup </td>
+<td class='confluenceTd'> This event records that a user account membership was added to a group. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.UserAssignedToGroup.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> UserLoginSessionEvent </td>
+<td class='confluenceTd'> This event records a user logon. Because these are so prolific, they are ignored (by default) by the nworks VMware Collector. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.UserLoginSessionEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> UserLogoutSessionEvent </td>
+<td class='confluenceTd'> This event records a user logout. Because these are so numerous, they are ignored (by default) by the nworks VMware Collector. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.UserLogoutSessionEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> UserPasswordChanged </td>
+<td class='confluenceTd'> This event records that a user password changed. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.UserPasswordChanged.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> UserUnassignedFromGroup </td>
+<td class='confluenceTd'> This event records that a user account membership was removed from a group. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.UserUnassignedFromGroup.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> UserUpgradeEvent </td>
+<td class='confluenceTd'> This event is a general user event from upgrade. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.UserUpgradeEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VcAgentUninstalledEvent </td>
+<td class='confluenceTd'> This event records when the vCenter agent on a host is uninstalled. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VcAgentUninstalledEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VcAgentUninstallFailedEvent </td>
+<td class='confluenceTd'> This event records when the vCenter agent on a host failed to uninstall. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VcAgentUninstallFailedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VcAgentUpgradedEvent </td>
+<td class='confluenceTd'> This event records when the vCenter agent on a host upgraded. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VcAgentUpgradedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VcAgentUpgradeFailedEvent </td>
+<td class='confluenceTd'> This event records when the vCenter agent on a host failed to upgrade. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VcAgentUpgradeFailedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VimAccountPasswordChangedEvent </td>
+<td class='confluenceTd'> Password for the Vim account user on the host has been changed. This is an account created by vCenter and used to manage the host. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VimAccountPasswordChangedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmAcquiredMksTicketEvent </td>
+<td class='confluenceTd'> This event records a user successfully acquiring an MKS ticket (i.e., a mouse-keyboard-screen connection ticket). </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmAcquiredMksTicketEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmAutoRenameEvent </td>
+<td class='confluenceTd'> This event records that a virtual machine was automatically renamed because of a name conflict. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmAutoRenameEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmBeingClonedEvent </td>
+<td class='confluenceTd'> This event records a virtual machine being cloned. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmBeingClonedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmBeingCreatedEvent </td>
+<td class='confluenceTd'> This event records a virtual machine being created. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmBeingCreatedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmBeingDeployedEvent </td>
+<td class='confluenceTd'> This event records a virtual machine being deployed from a template. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmBeingDeployedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmBeingHotMigratedEvent </td>
+<td class='confluenceTd'> This event records that a virtual machine is being hot-migrated. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmBeingHotMigratedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmBeingMigratedEvent </td>
+<td class='confluenceTd'> This event records that a virtual machine is being migrated. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmBeingMigratedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmBeingRelocatedEvent </td>
+<td class='confluenceTd'> This event records that a virtual machine is being relocated. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmBeingRelocatedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmClonedEvent </td>
+<td class='confluenceTd'> This event records the completion of a virtual machine cloning operation. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmClonedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmCloneFailedEvent </td>
+<td class='confluenceTd'> This event records a failure to clone a virtual machine. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmCloneFailedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmConfigMissingEvent </td>
+<td class='confluenceTd'> This event records if the configuration file can not be found. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmConfigMissingEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmConnectedEvent </td>
+<td class='confluenceTd'> This event is generated by the VC for each VM on a host whenever the host is reconnected to the VC. One event per VM will be generated, regardless of the power state of the VM. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmConnectedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmCreatedEvent </td>
+<td class='confluenceTd'> This event records that a virtual machine was successfully created. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmCreatedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmDasBeingResetEvent </td>
+<td class='confluenceTd'> This event records when a virtual machine is reset by HA VM Health Monitoring on hosts that do not support the create screenshot api or if the createscreenshot api fails. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmDasBeingResetEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmDasBeingResetWithScreenshotEvent </td>
+<td class='confluenceTd'> This event records when a virtual machine is reset by HA VM Health Monitoring on hosts that support the create screenshot api. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmDasBeingResetWithScreenshotEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmDasResetFailedEvent </td>
+<td class='confluenceTd'> This event records when HA VM Health Monitoring fails to reset a virtual machine after failure. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmDasResetFailedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmDasUpdateErrorEvent </td>
+<td class='confluenceTd'> The event records that an error occured when updating the HA agents with the current state of the virtual machine. If this occurs during a powerOn operation, the virtual machine will not be failed over in the event of a host failure. If it occurs during a powerOff, the virtual machine will be automatically powered on if the host it was last running on crashes. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmDasUpdateErrorEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmDasUpdateOkEvent </td>
+<td class='confluenceTd'> This event records that HA agents have been updated with the current state of the virtual machine. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmDasUpdateOkEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmDateRolledBackEvent </td>
+<td class='confluenceTd'> This event records when the vCenter server date rolled back. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmDateRolledBackEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmDeployedEvent </td>
+<td class='confluenceTd'> This event records the completion of a virtual machine deployment operation. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmDeployedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmDeployFailedEvent </td>
+<td class='confluenceTd'> This event records a failure to deploy from a template. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmDeployFailedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmDisconnectedEvent </td>
+<td class='confluenceTd'> This event is generated by the VC for each VM on a host whenever the host becomes disconnected from the VC. One event per VM will be generated, regardless of the power state of the VM.<br class="atl-forced-newline" /> "Disconnection" of the host includes both planned disconnections (indicated by HostDisconnectedEvent) and unplanned disconnections (indicated by HostConnectionLostEvent).</td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.Since VI API 2.0 ..html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmDiscoveredEvent </td>
+<td class='confluenceTd'> This event records a virtual machine discovery. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmDiscoveredEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmDiskFailedEvent </td>
+<td class='confluenceTd'> This event records a failure to create a virtual disk in a virtual machine. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmDiskFailedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmEmigratingEvent </td>
+<td class='confluenceTd'> This event records a virtual machine migration. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmEmigratingEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmEndRecordingEvent </td>
+<td class='confluenceTd'> This event indicates the end of a recording session on a virtual machine. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmEndRecordingEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmEndReplayingEvent </td>
+<td class='confluenceTd'> This event indicates the end of a replay session on a virtual machine. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmEndReplayingEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmEvent </td>
+<td class='confluenceTd'> This is a catch-all event for various VM events (the type of event is listed in the event). See VMware's documentation for the list of possible events. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmFailedMigrateEvent </td>
+<td class='confluenceTd'> This event records a failure to migrate a virtual machine. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmFailedMigrateEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmFailedRelayoutEvent </td>
+<td class='confluenceTd'> This event records a specific failure to re-layout a virtual machine, such as a failure to access the disk. "Layout" refers to the reformatting of the data on the disk to match VMware's latest VMFS3 structure. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmFailedRelayoutEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmFailedRelayoutOnVmfs2DatastoreEvent </td>
+<td class='confluenceTd'> This event records a failure to re-layout a virtual machine when the virtual machine still has disks on a VMFS2 volume. "Layout" refers to the reformatting of the data on the disk to match VMware's latest VMFS3 structure. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmFailedRelayoutOnVmfs2DatastoreEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmFailedStartingSecondaryEvent </td>
+<td class='confluenceTd'> This event records vmotion failure when starting a secondary VM. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmFailedStartingSecondaryEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmFailedToPowerOffEvent </td>
+<td class='confluenceTd'> This event records a failure to power off a virtual machine. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmFailedToPowerOffEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmFailedToPowerOnEvent </td>
+<td class='confluenceTd'> This event records a failure to power on a virtual machine. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmFailedToPowerOnEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmFailedToRebootGuestEvent </td>
+<td class='confluenceTd'> This event records a failure to reboot the guest on a virtual machine. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmFailedToRebootGuestEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmFailedToResetEvent </td>
+<td class='confluenceTd'> This event records a failure to reset a virtual machine. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmFailedToResetEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmFailedToShutdownGuestEvent </td>
+<td class='confluenceTd'> This event records a failure to shut down the guest on a virtual machine. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmFailedToShutdownGuestEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmFailedToStandbyGuestEvent </td>
+<td class='confluenceTd'> This event records a failure to set the guest on a virtual machine toa standby state. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmFailedToStandbyGuestEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmFailedToSuspendEvent </td>
+<td class='confluenceTd'> This event records a failure to suspend a virtual machine. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmFailedToSuspendEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmFailedUpdatingSecondaryConfig </td>
+<td class='confluenceTd'> This event records after a failover the new new primary failed to update the config of the secondary vm. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmFailedUpdatingSecondaryConfig.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmFailoverFailed </td>
+<td class='confluenceTd'> This event records when a virtual machine failover was unsuccessful. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmFailoverFailed.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmFaultToleranceStateChangedEvent </td>
+<td class='confluenceTd'> This event records a fault tolerance state change. A default alarm will be triggered upon this event, which would change the vm state: the vm state is red if the newState is needSecondary; the vm state is yellow if the newState is disabled; the vm state is green if the newState is notConfigured, starting, enabled or running. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmFaultToleranceStateChangedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmFaultToleranceTurnedOffEvent </td>
+<td class='confluenceTd'> This event records that all secondary virtual machines have been removed and fault tolerance protection turned off for this virtual machine. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmFaultToleranceTurnedOffEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmFaultToleranceVmTerminatedEvent </td>
+<td class='confluenceTd'> This event records a secondary or primary VM is terminated. The reason could be : divergence, lost connection to secondary, partial hardware failure of secondary, or by user. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmFaultToleranceVmTerminatedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VMFSDatastoreCreatedEvent </td>
+<td class='confluenceTd'> This event records when a VMFS datastore is created. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VMFSDatastoreCreatedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VMFSDatastoreExpandedEvent </td>
+<td class='confluenceTd'> This event records when a datastore is expanded. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VMFSDatastoreExpandedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VMFSDatastoreExtendedEvent </td>
+<td class='confluenceTd'> This event records when a datastore is extended. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VMFSDatastoreExtendedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmGuestRebootEvent </td>
+<td class='confluenceTd'> This is a virtual machine guest reboot request event. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmGuestRebootEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmGuestShutdownEvent </td>
+<td class='confluenceTd'> This is a virtual machine guest shutdown request event. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmGuestShutdownEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmGuestStandbyEvent </td>
+<td class='confluenceTd'> This is a virtual machine guest standby request event. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmGuestStandbyEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmHealthMonitoringStateChangedEvent </td>
+<td class='confluenceTd'> This event records when host monitoring state has changed. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmHealthMonitoringStateChangedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmInstanceUuidAssignedEvent </td>
+<td class='confluenceTd'> This event records the assignment of a new instance UUID to a virtual machine. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmInstanceUuidAssignedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmInstanceUuidChangedEvent </td>
+<td class='confluenceTd'> This event records a change in a virtual machine's instance UUID. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmInstanceUuidChangedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmInstanceUuidConflictEvent </td>
+<td class='confluenceTd'> This event records a conflict of virtual machine instance UUIDs. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmInstanceUuidConflictEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmMacAssignedEvent </td>
+<td class='confluenceTd'> This event records the assignment of a new MAC address to a virtual network adapter. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmMacAssignedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmMacChangedEvent </td>
+<td class='confluenceTd'> This event records a change in a virtual machine's MAC address. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmMacChangedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmMacConflictEvent </td>
+<td class='confluenceTd'> This event records a MAC address conflict for a virtual machine. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmMacConflictEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmMaxFTRestartCountReached </td>
+<td class='confluenceTd'> This event is fired when FT VM reached the max restart count. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmMaxFTRestartCountReached.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmMaxRestartCountReached </td>
+<td class='confluenceTd'> This event is fired when the VM reached the max restart count. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmMaxRestartCountReached.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmMessageErrorEvent </td>
+<td class='confluenceTd'> This event records when an error message (consisting of a collection of "observations") is thrown by the virtual machine. This is a generic event for such messages. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmMessageErrorEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmMessageEvent </td>
+<td class='confluenceTd'> This event records when a message is thrown by the virtual machine. This is a generic event for such messages. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmMessageEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmMessageWarningEvent </td>
+<td class='confluenceTd'> This event records when a warning message (consisting of a collection of "observations") is thrown by the virtual machine. This is a generic event for such messages. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmMessageWarningEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmMigratedEvent </td>
+<td class='confluenceTd'> This event records a virtual machine migration. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmMigratedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmNoCompatibleHostForSecondaryEvent </td>
+<td class='confluenceTd'> This event records that no compatible host was found to place a secondary VM. A default alarm will be triggered upon this event, which by default would trigger a SNMP trap. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmNoCompatibleHostForSecondaryEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmNoNetworkAccessEvent </td>
+<td class='confluenceTd'> This event records a migration failure when the destination host is not on the same network as the source host. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmNoNetworkAccessEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmOrphanedEvent </td>
+<td class='confluenceTd'> This event records a virtual machine for which no host is responsible. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmOrphanedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VMotionLicenseExpiredEvent </td>
+<td class='confluenceTd'> This event records an expired VMotion license. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VMotionLicenseExpiredEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmPoweredOffEvent </td>
+<td class='confluenceTd'> This event records when a virtual machine finished powering off. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmPoweredOffEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmPoweredOnEvent </td>
+<td class='confluenceTd'> This event records when a virtual machine finished powering on. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmPoweredOnEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmPoweringOnWithCustomizedDVPortEvent </td>
+<td class='confluenceTd'> This event records when a virtual machine was powering on using DVPorts with port level configuration, which might be different from the DVportgroup. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmPoweringOnWithCustomizedDVPortEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmPowerOffOnIsolationEvent </td>
+<td class='confluenceTd'> This event records when a virtual machine has been powered off on an isolated host in a HA cluster. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmPowerOffOnIsolationEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmPrimaryFailoverEvent </td>
+<td class='confluenceTd'> This event records an fault tolerance failover. The reason could be : lost connection to primary, partial hardware failure of primary or by user. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmPrimaryFailoverEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmReconfiguredEvent </td>
+<td class='confluenceTd'> This event records a reconfiguration of the virtual machine. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmReconfiguredEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmRegisteredEvent </td>
+<td class='confluenceTd'> This event records that a virtual machine was successfully registered. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmRegisteredEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmRelayoutSuccessfulEvent </td>
+<td class='confluenceTd'> This event records that a virtual machine was successfully converted to the new virtual machine format on a VMFS3 volume. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmRelayoutSuccessfulEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmRelayoutUpToDateEvent </td>
+<td class='confluenceTd'> This event records that a virtual machine is already in the correct format. No re-layout is necessary. "Layout" refers to the reformatting of the data on the disk to match VMware's latest VMFS3 structure. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmRelayoutUpToDateEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmRelocatedEvent </td>
+<td class='confluenceTd'> This event records the completion of a virtual machine relocation. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmRelocatedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmRelocateFailedEvent </td>
+<td class='confluenceTd'> This event records a failure to relocate a virtual machine. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmRelocateFailedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmRemoteConsoleConnectedEvent </td>
+<td class='confluenceTd'> This event records that a remote console was connected to the VM. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmRemoteConsoleConnectedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmRemoteConsoleDisconnectedEvent </td>
+<td class='confluenceTd'> This event records that a remote console was disconnected from the VM. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmRemoteConsoleDisconnectedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmRemovedEvent </td>
+<td class='confluenceTd'> This event records a virtual machine removed from vCenter management. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmRemovedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmRenamedEvent </td>
+<td class='confluenceTd'> This event records the renaming of a virtual machine. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmRenamedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmResettingEvent </td>
+<td class='confluenceTd'> This event records a virtual machine resetting. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmResettingEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmResourcePoolMovedEvent </td>
+<td class='confluenceTd'> This event records when a virtual machine is moved from one resource pool to another. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmResourcePoolMovedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmResourceReallocatedEvent </td>
+<td class='confluenceTd'> This event records a change in resource allocation of a virtual machine. The name of the virtual machine is in the event. This event is generated typically in DRS configurations when VC detects that the available resources (such as CPU) are changing. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmResourceReallocatedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmRestartedOnAlternateHostEvent </td>
+<td class='confluenceTd'> This event records that the virtual machine was restarted on a host, since its original host had failed. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmRestartedOnAlternateHostEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmResumingEvent </td>
+<td class='confluenceTd'> This event records a virtual machine resuming. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmResumingEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmSecondaryAddedEvent </td>
+<td class='confluenceTd'> This event records a secondary VM is added. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmSecondaryAddedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmSecondaryDisabledBySystemEvent </td>
+<td class='confluenceTd'> This event records that a fault tolerance secondary VM has been disabled by vCenter because the VM could not be powered on. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmSecondaryDisabledBySystemEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmSecondaryDisabledEvent </td>
+<td class='confluenceTd'> This event records a secondary VM is disabled. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmSecondaryDisabledEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmSecondaryEnabledEvent </td>
+<td class='confluenceTd'> This event records a secondary VM is enabled. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmSecondaryEnabledEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmSecondaryStartedEvent </td>
+<td class='confluenceTd'> This event records a secondary VM is started successfully. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmSecondaryStartedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmShutdownOnIsolationEvent </td>
+<td class='confluenceTd'> This event records when a virtual machine has been shut down on an isolated host in a HA cluster. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmShutdownOnIsolationEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmStartingEvent </td>
+<td class='confluenceTd'> This event records a virtual machine powering on. It typically will be followed by a VmPoweredOnEvent. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmStartingEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmStartingSecondaryEvent </td>
+<td class='confluenceTd'> This event records a vmotion to start a secondary VM. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmStartingSecondaryEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmStartRecordingEvent </td>
+<td class='confluenceTd'> This event indicates the start of a recording session on a virtual machine. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmStartRecordingEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmStartReplayingEvent </td>
+<td class='confluenceTd'> This event indicates the start of a replay session on a virtual machine. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmStartReplayingEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmStaticMacConflictEvent </td>
+<td class='confluenceTd'> This event records a static MAC address conflict for a virtual machine. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmStaticMacConflictEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmStoppingEvent </td>
+<td class='confluenceTd'> This event records a virtual machine stopping. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmStoppingEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmSuspendedEvent </td>
+<td class='confluenceTd'> This event records when a virtual machine finished suspending. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmSuspendedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmSuspendingEvent </td>
+<td class='confluenceTd'> This event records a virtual machine suspending. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmSuspendingEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmTimedoutStartingSecondaryEvent </td>
+<td class='confluenceTd'> This event records timeout when starting a secondary VM. A default alarm will be triggered upon this event, which by default would trigger a SNMP trap. </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmTimedoutStartingSecondaryEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmUnsupportedStartingEvent </td>
+<td class='confluenceTd'> This event records when an unsupported guest is powering on. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmUnsupportedStartingEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmUpgradeCompleteEvent </td>
+<td class='confluenceTd'> This event records the successful completion of an upgrade operation. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmUpgradeCompleteEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmUpgradeFailedEvent </td>
+<td class='confluenceTd'> This event records a failure to upgrade virtual hardware. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmUpgradeFailedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmUpgradingEvent </td>
+<td class='confluenceTd'> This event records the process of upgrading the virtual hardware on a virtual machine. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmUpgradingEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmUuidAssignedEvent </td>
+<td class='confluenceTd'> This event records the assignment of a new BIOS UUID to a virtual machine. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmUuidAssignedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmUuidChangedEvent </td>
+<td class='confluenceTd'> This event records a change in a virtual machine's BIOS UUID. nworks has observed that during migrations this event may be generated even though the UUID is not changing. A sample event is included below (note that on this version of ESX the name of the VM is missing after the word "for", and the UUID is actually not changing). Changed BIOS UUID from 500e3054-23fd-6ff6-58a7-037500940891 to 500e3054-23fd-6ff6-58a7-037500940891 for on esx04.seattle.nworks.local in SEATTLE VmUuidChangedEvent </td>
+<th class='confluenceTh'> Since VI API 2.0 . </th>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmUuidChangedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmUuidConflictEvent </td>
+<td class='confluenceTd'> This event records a conflict of virtual machine BIOS UUIDs. That is, a virtual machine has been detected with a duplicate UUID (Universally Unique Identifier). When a VM is cloned, its UUID is also clone and will remain with the same UUID until 2 VMs with the same UUID are powered on. Only when the VM is running is the uniqueness of UUIDs assured. When the hypervisor detects a VM powering up has a duplicate UUID it will change it and issue this event. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmUuidConflictEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmWwnAssignedEvent </td>
+<td class='confluenceTd'> This event records the assignment of a new WWN (World Wide Name) to a virtual machine. </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmWwnAssignedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmWwnChangedEvent </td>
+<td class='confluenceTd'> This event records a change in a virtual machine's WWN (World Wide Name). </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmWwnChangedEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> VmWwnConflictEvent </td>
+<td class='confluenceTd'> This event records a conflict of virtual machine WWNs (World Wide Name). </td>
+<td class='confluenceTd'> Since VI API 2.5 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.VmWwnConflictEvent.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> vprob.net.connectivity.lost </td>
+<td class='confluenceTd'> Lost Network Connectivity </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.vprob.net.connectivity.lost.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> vprob.net.e1000.tso6.notsupported </td>
+<td class='confluenceTd'> No IPv6 TSO support </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.vprob.net.e1000.tso6.notsupported.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> vprob.net.migrate.bindtovmk </td>
+<td class='confluenceTd'> Invalid vmknic specified in /Migrate/Vmknic </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.vprob.net.migrate.bindtovmk.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> vprob.net.proxyswitch.port.unavailable </td>
+<td class='confluenceTd'> VNic connect to switch failed </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.vprob.net.proxyswitch.port.unavailable.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> vprob.net.redundancy.degraded </td>
+<td class='confluenceTd'> Network Redundancy Degraded </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.vprob.net.redundancy.degraded.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> vprob.net.redundancy.lost </td>
+<td class='confluenceTd'> Lost Network Redundancy </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.vprob.net.redundancy.lost.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> vprob.storage.connectivity.lost </td>
+<td class='confluenceTd'> Lost Storage Connectivity </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.vprob.storage.connectivity.lost.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> vprob.storage.redundancy.degraded </td>
+<td class='confluenceTd'> Degraded Storage Path Redundancy </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.vprob.storage.redundancy.degraded.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> vprob.storage.redundancy.lost </td>
+<td class='confluenceTd'> Lost Storage Path Redundancy </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.vprob.storage.redundancy.lost.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> vprob.vmfs.heartbeat.recovered </td>
+<td class='confluenceTd'> VMFS Volume Connectivity Restored </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.vprob.vmfs.heartbeat.recovered.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> vprob.vmfs.heartbeat.timedout </td>
+<td class='confluenceTd'> VMFS Volume Connectivity Degraded </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.vprob.vmfs.heartbeat.timedout.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> vprob.vmfs.heartbeat.unrecoverable </td>
+<td class='confluenceTd'> VMFS Volume Connectivity Lost </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.vprob.vmfs.heartbeat.unrecoverable.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> vprob.vmfs.journal.createfailed </td>
+<td class='confluenceTd'> No Space To Create VMFS Journal </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.vprob.vmfs.journal.createfailed.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> vprob.vmfs.lock.corruptondisk </td>
+<td class='confluenceTd'> VMFS Lock Corruption Detected </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.vprob.vmfs.lock.corruptondisk.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> vprob.vmfs.nfs.server.disconnect </td>
+<td class='confluenceTd'> Lost connection to NFS server </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.vprob.vmfs.nfs.server.disconnect.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> vprob.vmfs.nfs.server.restored </td>
+<td class='confluenceTd'> Restored connection to NFS server </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.vprob.vmfs.nfs.server.restored.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> vprob.vmfs.resource.corruptondisk </td>
+<td class='confluenceTd'> VMFS Resource Corruption Detected </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.vprob.vmfs.resource.corruptondisk.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> vprob.vmfs.volume.locked </td>
+<td class='confluenceTd'> VMFS Locked By Remote Host </td>
+<td class='confluenceTd'> Since VI API 4.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.vprob.vmfs.volume.locked.html">vCenter Reference</a> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> WarningUpgradeEvent </td>
+<td class='confluenceTd'> This event is a general warning event from upgrade. </td>
+<td class='confluenceTd'> Since VI API 2.0 . </td>
+<td class='confluenceTd'> See <a href="http://www.vmware.com/support/developer/vc-sdk/visdk400pubs/ReferenceGuide/vim.event.WarningUpgradeEvent.html">vCenter Reference</a> </td>
+</tr>
+</tbody></table>
+</div>
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jun 29, 2011 14:48</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>
