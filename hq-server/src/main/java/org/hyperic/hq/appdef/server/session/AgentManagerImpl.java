@@ -1014,7 +1014,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         throws PermissionException, AgentNotFoundException, AgentConnectionException,
         AgentRemoteException, FileNotFoundException, IOException, ConfigPropertyException {
 
-        log.info("Upgrading to agent bundle  " + bundleFileName + " on agent " + aid.getID());
+        log.info("Upgrading to agent bundle  " + bundleFileName + " on agent " + aid.toString());
 
         permissionManager.checkCreatePlatformPermission(subject);
 
