@@ -230,6 +230,7 @@
 			<props>
 				<prop key="server.keystore.path">${server.keystore.path}</prop>
 				<prop key="server.keystore.password">${server.keystore.password}</prop>
+				<prop key="accept.unverified.certificates">${accept.unverified.certificates}</prop>
 			</props>
 		</property>	
 	</bean>
