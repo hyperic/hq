@@ -697,19 +697,146 @@ ${errMsg}
 
     <!-- Mark executables as executable -->
 	<echo>^^^INFO: Setting permissions on ${server.product.dir}...</echo>
+
+    <!-- Must break things up into chunks to avoid overly-long argument lists.  The webapps, in the hq-server
+         hierarchy, are the directories with the most files, so narrow down to them -->
     <chmod perm="go-rwx" type="both">
-		<fileset dir="${server.product.dir}">
-	  		<include name="**/bin/*" />
-	  		<include name="**/conf/*" />
-	  		<include name="**/data/*" />
-	  		<include name="**/hqdb/*" />
-	  		<include name="**/hq-engine/hq-server/bin/*" />
-			<include name="**/hq-engine/hq-server/conf/*" />
-			<include name="**/hq-engine/hq-server/webapps/ROOT/WEB-INF/*" />
-			<include name="**/hq-engine/hq-server/webapps/ROOT/WEB-INF/classes/*" />
-			<include name="**/hq-engine/hq-server/webapps/ROOT/WEB-INF/license/*" />
-  		</fileset>
-	</chmod>    
+        <fileset dir="${server.product.dir}">
+            <exclude name="hq-engine/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine">
+            <exclude name="hq-server/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server">
+            <exclude name="webapps/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps">
+            <exclude name="ROOT/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT">
+            <exclude name="WEB-INF/**" />
+            <exclude name="images/**" />
+            <exclude name="portal/**" />
+            <exclude name="resource/**" />
+            <exclude name="static/**" />
+            <exclude name="ui_docs/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT">
+            <include name="WEB-INF/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT">
+            <include name="images/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT">
+            <include name="portal/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT">
+            <include name="resource/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/static">
+            <exclude name="js/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/static/js">
+            <exclude name="dojo/1.5/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/static/js/dojo/1.5">
+            <exclude name="dojox/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/static/js/dojo/1.5/dojox">
+            <exclude name="atom/**" />
+            <exclude name="charting/**" />
+            <exclude name="drawing/**" />
+            <exclude name="editor/**" />
+            <exclude name="form/**" />
+            <exclude name="grid/**" />
+            <exclude name="widget/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/static/js/dojo/1.5/dojox">
+            <include name="atom/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/static/js/dojo/1.5/dojox">
+            <include name="charting/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/static/js/dojo/1.5/dojox">
+            <include name="drawing/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/static/js/dojo/1.5/dojox">
+            <include name="editor/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/static/js/dojo/1.5/dojox">
+            <include name="form/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/static/js/dojo/1.5/dojox">
+            <include name="grid/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/static/js/dojo/1.5/dojox">
+            <include name="widget/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT">
+            <include name="ui_docs/**" />
+        </fileset>
+    </chmod>    
+
 	<echo>^^^INFO: Setting permissions on server binaries...</echo>
     <antcall target="chmod-exec">
       <param name="chmod.dir" value="${server.product.dir}"/>
