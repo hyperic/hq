@@ -43,7 +43,6 @@ public class ServerKeystoreConfig
     
     @Autowired
     public ServerKeystoreConfig(ConfigBoss configBoss,
-                                @Value("#{securityProperties['server.keyAlias']}") String keyAlias,
                                 @Value("#{securityProperties['server.keystore']}") String keystore,
                                 @Value("#{securityProperties['server.keypass']}") String keypass) throws ConfigPropertyException{
         super();
@@ -51,7 +50,6 @@ public class ServerKeystoreConfig
         if(StringUtils.hasText(keyAlias) ||StringUtils.hasText(keystore) ||StringUtils.hasText(keypass) ){
 
             if(StringUtils.hasText(keyAlias) && StringUtils.hasText(keystore) &&StringUtils.hasText(keypass) ){
-                super.setAlias(keyAlias);
                 super.setFilePath(keystore);
                 super.setFilePassword(keypass);
                 super.setHqDefault(false);
@@ -66,7 +64,6 @@ public class ServerKeystoreConfig
         }else{
             //use hq default value
             try{
-                super.setAlias(configBoss.getConfig().getProperty(HQConstants.SSL_SERVER_KEY_ALIAS));
                 super.setFilePath(configBoss.getConfig().getProperty(HQConstants.SSL_SERVER_KEYSTORE));
                 super.setFilePassword(configBoss.getConfig().getProperty(HQConstants.SSL_SERVER_KEYPASS));
                 super.setHqDefault(true);

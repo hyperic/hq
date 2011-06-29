@@ -228,7 +228,6 @@
 		class="org.springframework.beans.factory.config.PropertiesFactoryBean">
 		<property name="properties">
 			<props>
-				<prop key="server.keyAlias">${server.keyAlias}</prop>
 				<prop key="server.keystore">${server.keystore}</prop>
 				<prop key="server.keypass">${server.keypass}</prop>
 			</props>
