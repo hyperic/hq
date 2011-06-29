@@ -92,7 +92,7 @@ class HtmlUtil {
                 resourceContext = opts.resourceContext
                 opts.remove('resourceContext')
             }
-            res += '/' + opts['resource'].urlFor(resourceContext)
+            res += opts['resource'].urlFor(resourceContext)
             opts.remove('resource')
         }
         
