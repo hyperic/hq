@@ -109,13 +109,13 @@ public class BackfillPointsServiceImpl implements BackfillPointsService {
                 return;
             }
         }
-        // [HHQ-4937] allow agents up to 1 minute after they checkin to start sending availability
+        // [HHQ-4937] allow agents up to 2 minutes after they checkin to start sending availability
         // before marking them down
         final Map<Integer, Long> lastCheckins = agentPluginSyncRestartThrottle.getLastCheckinInfo();
         for (final Entry<Integer, Long> entry : lastCheckins.entrySet()) {
             final Integer agentId = entry.getKey();
             final long lastCheckin = entry.getValue();
-            if ((lastCheckin + MINUTE) < now || processed.contains(agentId)) {
+            if ((lastCheckin + (2*MINUTE)) < now || processed.contains(agentId)) {
                 continue;
             }
             removeAssociatedPlatforms(agentId, backfillData, lastCheckin, false);
