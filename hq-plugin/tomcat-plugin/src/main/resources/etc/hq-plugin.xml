@@ -97,7 +97,7 @@
             alias="ProcessCpuTime"
             indicator="true"
             template="${OBJECT_NAME}:${alias}"
-            units="ms"
+            units="ns"
             collectionType="trendsup"/>
     <metric name="Open File Descriptor Count"
             alias="OpenFileDescriptorCount"
