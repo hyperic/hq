@@ -43,35 +43,22 @@ public class ServerKeystoreConfig
     
     @Autowired
     public ServerKeystoreConfig(ConfigBoss configBoss,
-                                @Value("#{securityProperties['server.keystore']}") String keystore,
-                                @Value("#{securityProperties['server.keypass']}") String keypass) throws ConfigPropertyException{
+                                @Value("#{securityProperties['server.keystore.path']}") String keystore,
+                                @Value("#{securityProperties['server.keystore.password']}") String keypass) throws ConfigPropertyException{
         super();
-        //see if user sets default value
-        if(StringUtils.hasText(keyAlias) ||StringUtils.hasText(keystore) ||StringUtils.hasText(keypass) ){
-
-            if(StringUtils.hasText(keyAlias) && StringUtils.hasText(keystore) &&StringUtils.hasText(keypass) ){
-                super.setFilePath(keystore);
-                super.setFilePassword(keypass);
-                super.setHqDefault(false);
-            }else{
-                String errorMsg="Server keystore setting is not complete. ";
-                if(! StringUtils.hasText(keyAlias)) errorMsg+="server.keyAlias ";
-                if(! StringUtils.hasText(keystore)) errorMsg+="server.keystore ";
-                if(! StringUtils.hasText(keypass)) errorMsg+="server.keypass ";
-                log.error(errorMsg+" property(ies) is/are missing. It can be set in hq-server.conf");
-                throw new ConfigPropertyException(errorMsg+" property(ies) is/are missing. It can be set in hq-server.conf");
-            }
+        if(StringUtils.hasText(keystore) &&StringUtils.hasText(keypass) ){
+            super.setAlias("hq");
+            super.setFilePath(keystore);
+            super.setFilePassword(keypass);
+            //The server should never generate the keystore. It should already have a keystore running.
+            //As a result, it's "custom" setting.
+            super.setHqDefault(false);
         }else{
-            //use hq default value
-            try{
-                super.setFilePath(configBoss.getConfig().getProperty(HQConstants.SSL_SERVER_KEYSTORE));
-                super.setFilePassword(configBoss.getConfig().getProperty(HQConstants.SSL_SERVER_KEYPASS));
-                super.setHqDefault(true);
-
-            }catch(ConfigPropertyException e){
-                log.error("ConfigPropertyException fetching the default value for server keystore");
-                throw e;
-            }
+            String errorMsg="Server keystore setting is not complete. ";
+            if(! StringUtils.hasText(keystore)) errorMsg+="keystore path(server.keystore.path) ";
+            if(! StringUtils.hasText(keypass)) errorMsg+="keystore password(server.keystore.password) ";
+            log.error(errorMsg+" property(ies) is/are missing. It can be set in hq-server.conf");
+            throw new ConfigPropertyException(errorMsg+" property(ies) is/are missing. It can be set in hq-server.conf");
         }
     }
 }

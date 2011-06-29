@@ -228,8 +228,8 @@
 		class="org.springframework.beans.factory.config.PropertiesFactoryBean">
 		<property name="properties">
 			<props>
-				<prop key="server.keystore">${server.keystore}</prop>
-				<prop key="server.keypass">${server.keypass}</prop>
+				<prop key="server.keystore.path">${server.keystore.path}</prop>
+				<prop key="server.keystore.password">${server.keystore.password}</prop>
 			</props>
 		</property>	
 	</bean>
