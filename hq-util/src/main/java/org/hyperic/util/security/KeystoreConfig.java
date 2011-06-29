@@ -30,6 +30,7 @@ public class KeystoreConfig {
     private String filePath;
     private String filePassword;
     private boolean hqDefault;
+    private boolean acceptUnverifiedCert = false;
     private String keyCN="";//not required, just for keystore generation
 
     public KeystoreConfig(){   
@@ -42,6 +43,20 @@ public class KeystoreConfig {
         this.hqDefault = hqDefault;
     }
     
+    /**
+     * @return the acceptUnverifiedCert
+     */
+    public boolean isAcceptUnverifiedCert() {
+        return acceptUnverifiedCert;
+    }
+
+    /**
+     * @param acceptUnverifiedCert the acceptUnverifiedCert to set
+     */
+    public void setAcceptUnverifiedCert(boolean acceptUnverifiedCert) {
+        this.acceptUnverifiedCert = acceptUnverifiedCert;
+    }
+
     /**
      * @return the keyCN
      */
