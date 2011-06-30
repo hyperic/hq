@@ -31,6 +31,7 @@ import org.hyperic.hq.security.ServerKeystoreConfig;
 import org.hyperic.hq.transport.AgentProxyFactory;
 import org.hyperic.util.security.KeystoreConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -42,23 +43,25 @@ public class AgentCommandsClientFactory {
 	
     private final AgentProxyFactory agentProxyFactory;
     private KeystoreConfig keystoreConfig;
+	// TODO Remove this code once we no longer support HQ version less than 4.6
+    //      This is solely to maintain backwards compatibility with older HQ agents
+    //      that don't handle SSL communication correctly
+    private boolean acceptUnverifiedCertificates;
     
     @Autowired
-    public AgentCommandsClientFactory(AgentProxyFactory agentProxyFactory, ServerKeystoreConfig serverKeystoreConfig) {
+    public AgentCommandsClientFactory(AgentProxyFactory agentProxyFactory, ServerKeystoreConfig serverKeystoreConfig, 
+    		@Value("#{securityProperties['accept.unverified.certificates']}")boolean acceptUnverifiedCertificates) {
         this.agentProxyFactory = agentProxyFactory;
-        keystoreConfig = serverKeystoreConfig;
+        this.keystoreConfig = serverKeystoreConfig;
+        this.acceptUnverifiedCertificates = acceptUnverifiedCertificates;
     }
 
     public AgentCommandsClient getClient(Agent agent) {
         if (agent.isNewTransportAgent()) {
             return new AgentCommandsClientImpl(agent, agentProxyFactory);
         } else {
-
-        	// Grab config setting, that specifies auto accepting
-        	boolean acceptCertificates = Boolean.parseBoolean(System.getProperty("accept.unverified.certificates", "false"));
-
             return new LegacyAgentCommandsClientImpl(new SecureAgentConnection(agent.getAddress(),
-                agent.getPort(), agent.getAuthToken(),keystoreConfig,acceptCertificates));
+                agent.getPort(), agent.getAuthToken(),keystoreConfig,acceptUnverifiedCertificates));
 
         }
     }

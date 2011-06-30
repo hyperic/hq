@@ -141,6 +141,13 @@ public class ServerConfig
         ConfigSchema schema = super.getUpgradeSchema(previous, iterationCount);
         if (schema == null)
             schema = new ConfigSchema();
+
+        // TODO Remove this code once we no longer support HQ version less than 4.6
+        //      This is solely to maintain backwards compatibility with older HQ agents
+        //      that don't handle SSL communication correctly.
+        //      For the upgrade case, we want to automatically import unverified certificates
+        schema.addOption(new HiddenConfigOption("accept.unverified.certificates", Boolean.TRUE.toString()));
+
         switch (iterationCount) {
             case 0:
                 schema.addOption(new HiddenConfigOption("server.overwrite", YesNoConfigOption.NO));
@@ -174,6 +181,12 @@ public class ServerConfig
 
         // Do we have an builtin-postgresql packaged with us?
         boolean haveBuiltinDB = getReleaseHasBuiltinDB();
+
+        // TODO Remove this code once we no longer support HQ version less than 4.6
+        //      This is solely to maintain backwards compatibility with older HQ agents
+        //      that don't handle SSL communication correctly
+        //      For the new install case, we do not want to automatically import unverified certificates
+        schema.addOption(new HiddenConfigOption("accept.unverified.certificates", Boolean.FALSE.toString()));
 
         switch (iterationCount) {
             case 0:
