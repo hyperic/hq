@@ -651,43 +651,10 @@ function editEscalation (row) {
     }
 
     function sendEscForm() {
-        var adId;
-        var gadId;
-        var eId;
-        var aetId;
         var escFormSerial = Form.serialize('EscalationForm');
         var url = '<html:rewrite action="/escalation/saveEscalation"/>';
-        if (dojo11.byId('gad')) {
-           gadId = dojo11.byId('gad').value;
-        } else {
-            gadId = '';
-        }
-        if (dojo11.byId('ad')){
-            adId = dojo11.byId('ad').value;
-        } else {
-            adId = '';
-        }
-        if (dojo11.byId('eid')){
-            eID = dojo11.byId('eid').value;
-        } else {
-           eId = '';
-        }
-        if (dojo11.byId('aetid')) {
-            aetId = dojo11.byId('aetid').value;
-        } else {
-            aetId = '';
-        }
-
-        var pars = {
-        	"rowOrder": 0,
-        	"escForm": escFormSerial,
-        	"ad": adId,
-        	"gad": gadId,
-        	"eid": eId,
-        	"aetid": aetId		
-        };
         
-        new Ajax.Request( url, {method: 'post', parameters: pars, onComplete: showResponse, onFailure: reportError} );
+        new Ajax.Request( url, {method: 'post', parameters: escFormSerial, onComplete: showResponse, onFailure: reportError} );
     }
 
     function configure(id) {
