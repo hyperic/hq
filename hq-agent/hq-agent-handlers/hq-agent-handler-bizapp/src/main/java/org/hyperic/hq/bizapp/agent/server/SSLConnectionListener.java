@@ -202,8 +202,6 @@ class SSLConnectionListener
             this.listenSock = (SSLServerSocket) sFactory.createServerSocket(port, 50, addr);
             
             this.listenSock.setSoTimeout(timeout);
-            // TODO make configurable
-            this.listenSock.setNeedClientAuth(true);
         } catch(IOException exc){
             throw new AgentStartException("Failed to listen at " + cfg.getListenIp() + ":" + port + ": " + exc.getMessage());
         }
