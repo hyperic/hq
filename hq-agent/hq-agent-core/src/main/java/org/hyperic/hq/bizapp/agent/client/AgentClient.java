@@ -28,9 +28,7 @@ package org.hyperic.hq.bizapp.agent.client;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
@@ -40,12 +38,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.security.KeyStore;
-import java.security.cert.Certificate;
-import java.security.cert.X509Certificate;
 import java.util.Properties;
 
-import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLPeerUnverifiedException;
 
 import org.apache.commons.logging.Log;
@@ -59,6 +53,7 @@ import org.apache.log4j.RollingFileAppender;
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.agent.AgentConfigException;
 import org.hyperic.hq.agent.AgentConnectionException;
+import org.hyperic.hq.agent.AgentKeystoreConfig;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.client.LegacyAgentCommandsClientImpl;
@@ -79,9 +74,7 @@ import org.hyperic.sigar.FileWatcherThread;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
 import org.hyperic.util.StringUtil;
-import org.hyperic.util.security.KeystoreConfig;
 import org.hyperic.util.security.SecurityUtil;
-import org.hyperic.util.security.UntrustedSSLCertificateException;
 import org.tanukisoftware.wrapper.WrapperManager;
 
 import sun.misc.Signal;
@@ -97,6 +90,7 @@ public class AgentClient {
     private static final PrintStream SYSTEM_OUT = System.out;
 
     private static final String PRODUCT = "HQ";
+    
 
     // The following QPROP_* defines are properties which can be
     // placed in the agent properties file to perform automatic setup
@@ -430,7 +424,7 @@ public class AgentClient {
         BizappCallbackClient bizapp;
         Properties bootP = this.config.getBootProperties();
         long start = System.currentTimeMillis();
-        boolean acceptUnverifiedCertificates = false;
+        boolean acceptUnverifiedCertificates = "true".equalsIgnoreCase(bootP.getProperty(AgentConfig.SSL_KEYSTORE_ACCEPT_UNVERIFIED_CERT));
         
         while (true) {
             String sec = secure ? "secure" : "insecure";
@@ -453,7 +447,7 @@ public class AgentClient {
                 	String question = "Are you sure you want to continue connecting?";
 	                	
 	                try {
-	                	if (askYesNoQuestion(question, false, "accept.certificate")) {
+	                	if (askYesNoQuestion(question, false, "agent.setup.acceptUnverifiedCertificate")) {
 		               		acceptUnverifiedCertificates = true;
 		               		
 		               		// try again
@@ -815,7 +809,7 @@ public class AgentClient {
 	    	            						  "\nAre you sure you want to continue connecting?";
 	    	                	
 	    		                try {
-	    		                	if (askYesNoQuestion(question, false, "accept.certificate")) {
+	    		                	if (askYesNoQuestion(question, false, "agent.setup.acceptUnverifiedCertificate")) {
 	    			               		acceptUnverifiedCertificates = true;
 	    			               		
 	    			               		// try again
@@ -890,7 +884,7 @@ public class AgentClient {
 	            						  "\nAre you sure you want to continue connecting?";
 	                	
 		                try {
-		                	if (askYesNoQuestion(question, false, "accept.certificate")) {
+		                	if (askYesNoQuestion(question, false, "agent.setup.acceptUnverifiedCertificate")) {
 			               		acceptUnverifiedCertificates = true;
 			               		
 			               		// try again
@@ -1268,13 +1262,7 @@ public class AgentClient {
                                listenIp + "'");
             return null;
         }
-        
-        String filePath = cfg.getBootProperties().getProperty(AgentConfig.SSL_KEYSTORE);
-        String filePass = cfg.getBootProperties().getProperty(AgentConfig.SSL_KEYPASS);
-        String alias = cfg.getBootProperties().getProperty(AgentConfig.SSL_KEY_ALIAS);
-        boolean isDefault = AgentConfig.PROP_KEYSTORE[1].equals(filePath);//see if the config value is default value
-        KeystoreConfig  keystoreConfig = new KeystoreConfig(alias, filePath, filePass, isDefault);
-        
+        AgentKeystoreConfig keystoreConfig =new AgentKeystoreConfig();
         String tokenFile = cfg.getTokenFile();
         if (generateToken) {
             try {
@@ -1298,7 +1286,6 @@ public class AgentClient {
                                " to talk to agent: " + exc.getMessage());
                 return null;
             }
-
             conn = new SecureAgentConnection(connIp, cfg.getListenPort(), authToken, keystoreConfig, false);
             return new AgentClient(cfg, conn);
                 
