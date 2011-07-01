@@ -56,7 +56,7 @@ public class BizappCallbackClient
                                String.valueOf(config.getProxyPort()));
         }
         
-        String keyStorePropName = AgentConfig.PROP_KEYSTORE[0];
+        String keyStorePropName = AgentConfig.PROP_KEYSTORE_PATH[0];
         
         System.setProperty(keyStorePropName, config.getBootProperties().getProperty(keyStorePropName));       
     }
