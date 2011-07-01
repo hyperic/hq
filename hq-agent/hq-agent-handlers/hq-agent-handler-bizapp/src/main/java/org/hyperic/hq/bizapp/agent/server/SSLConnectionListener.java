@@ -41,6 +41,7 @@ import javax.net.ssl.SSLSocket;
 
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.agent.AgentConnectionException;
+import org.hyperic.hq.agent.AgentKeystoreConfig;
 import org.hyperic.hq.agent.server.AgentConnectionListener;
 import org.hyperic.hq.agent.server.AgentServerConnection;
 import org.hyperic.hq.agent.server.AgentStartException;
@@ -48,7 +49,6 @@ import org.hyperic.hq.bizapp.agent.TokenData;
 import org.hyperic.hq.bizapp.agent.TokenManager;
 import org.hyperic.hq.bizapp.agent.TokenNotFoundException;
 import org.hyperic.util.security.DefaultSSLProviderImpl;
-import org.hyperic.util.security.KeystoreConfig;
 import org.hyperic.util.security.SSLProvider;
 
 import org.apache.commons.logging.Log;
@@ -178,13 +178,8 @@ class SSLConnectionListener
 
     public void setup(int timeout) throws AgentStartException {
         AgentConfig cfg = this.getConfig();
-        String filePath = cfg.getBootProperties().getProperty(AgentConfig.SSL_KEYSTORE);
-        String filePass = cfg.getBootProperties().getProperty(AgentConfig.SSL_KEYPASS);
-        String alias = cfg.getBootProperties().getProperty(AgentConfig.SSL_KEY_ALIAS);
-        boolean isDefault = AgentConfig.PROP_KEYSTORE[1].equals(filePath);//see if the config value is default value
-        KeystoreConfig  keystoreConfig = new KeystoreConfig(alias, filePath, filePass, isDefault);
-        
-    	SSLProvider provider = new DefaultSSLProviderImpl(keystoreConfig,false);
+
+    	SSLProvider provider = new DefaultSSLProviderImpl(new AgentKeystoreConfig(),false);
         SSLContext context = provider.getSSLContext();
     	SSLServerSocketFactory sFactory = context.getServerSocketFactory();
         

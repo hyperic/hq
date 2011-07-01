@@ -45,6 +45,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentAPIInfo;
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.agent.AgentConfigException;
+import org.hyperic.hq.agent.AgentKeystoreConfig;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentRemoteValue;
 import org.hyperic.hq.agent.AgentStartupCallback;
@@ -319,14 +320,10 @@ public class CommandsServer
             this.keyAlg =
                 bootConfig.getProperty("agent.keyalg", "RSA");
             
-            String filePath = cfg.getBootProperties().getProperty(AgentConfig.SSL_KEYSTORE);
-            String filePass = cfg.getBootProperties().getProperty(AgentConfig.SSL_KEYPASS);
-            String alias = cfg.getBootProperties().getProperty(AgentConfig.SSL_KEY_ALIAS);
-            boolean isDefault = AgentConfig.PROP_KEYSTORE[1].equals(filePath);//see if the config value is default value
-            KeystoreConfig  keystoreConfig = new KeystoreConfig(alias, filePath, filePass, isDefault);  
+             KeystoreConfig  keystoreConfig = new AgentKeystoreConfig();
             keystoreConfig.setKeyCN(genAgentName());
-            keystore     = KeystoreManager.getKeystoreManager().getKeyStore(keystoreConfig);
-            keyManagers  = this.getKeyManagers(keystore,filePass);
+            keystore     = KeystoreManager.getKeystoreManager().getKeyStore(keystoreConfig );
+            keyManagers  = this.getKeyManagers(keystore,keystoreConfig.getFilePassword());
             listener     = new SSLConnectionListener(cfg, this.tokenManager);
             agent.setConnectionListener(listener);
         } catch(Exception exc){

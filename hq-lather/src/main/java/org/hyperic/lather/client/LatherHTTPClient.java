@@ -35,6 +35,7 @@ import java.util.Map;
 
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.agent.AgentConfigException;
+import org.hyperic.hq.agent.AgentKeystoreConfig;
 import org.hyperic.lather.LatherRemoteException;
 import org.hyperic.lather.LatherValue;
 import org.hyperic.lather.xcode.LatherXCoder;
@@ -88,26 +89,8 @@ public class LatherHTTPClient
     		config.setSocketTimeout(timeoutData);
     		config.setProxyHostname(proxyHostname);
     		config.setProxyPort(proxyPort);
-    		
-    		
-            AgentConfig cfg;
-            final String propFile = System.getProperty(AgentConfig.PROP_PROPFILE,AgentConfig.DEFAULT_PROPFILE);
-            try {
-                cfg = AgentConfig.newInstance(propFile);
-            } catch(IOException exc){
-                System.err.println("Error: " + exc);
-                return ;
-            } catch(AgentConfigException exc){
-                System.err.println("Agent Properties error: " + exc.getMessage());
-                return ;
-            }     
-            String filePath = cfg.getBootProperties().getProperty(AgentConfig.SSL_KEYSTORE);
-            String filePass = cfg.getBootProperties().getProperty(AgentConfig.SSL_KEYPASS);
-            String alias = cfg.getBootProperties().getProperty(AgentConfig.SSL_KEY_ALIAS);
-            boolean isDefault = AgentConfig.PROP_KEYSTORE[1].equals(filePath);//see if the config value is default value
-            KeystoreConfig  keyConfig = new KeystoreConfig(alias, filePath, filePass, isDefault);
-    		
-	        this.client = new HQHttpClient(keyConfig, config, acceptUnverifiedCertificates);
+
+	        this.client = new HQHttpClient(new AgentKeystoreConfig(), config, acceptUnverifiedCertificates);
 			this.baseURL = baseURL;
 	        this.xCoder  = new LatherXCoder();
     	} catch(Exception e) {
