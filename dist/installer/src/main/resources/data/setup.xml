@@ -736,8 +736,108 @@ ${errMsg}
     </chmod>    
 
     <chmod perm="go-rwx" type="both">
-        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT">
-            <include name="WEB-INF/**" />
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF">
+            <exclude name="classes/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/classes">
+            <exclude name="org/hyperic/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/classes/org/hyperic">
+            <exclude name="hq/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/classes/org/hyperic/hq">
+            <exclude name="ui/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/classes/org/hyperic/hq/ui">
+            <exclude name="action/**" />
+            <exclude name="beans/**" />
+            <exclude name="exception/**" />
+            <exclude name="json/**" />
+            <exclude name="security/**" />
+            <exclude name="server/**" />
+            <exclude name="servlet/**" />
+            <exclude name="shared/**" />
+            <exclude name="taglib/**" />
+            <exclude name="util/**" />
+            <exclude name="validator/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/classes/org/hyperic/hq/ui">
+            <include name="action/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/classes/org/hyperic/hq/ui">
+            <include name="beans/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/classes/org/hyperic/hq/ui">
+            <include name="exception/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/classes/org/hyperic/hq/ui">
+            <include name="json/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/classes/org/hyperic/hq/ui">
+            <include name="security/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/classes/org/hyperic/hq/ui">
+            <include name="server/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/classes/org/hyperic/hq/ui">
+            <include name="servlet/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/classes/org/hyperic/hq/ui">
+            <include name="shared/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/classes/org/hyperic/hq/ui">
+            <include name="taglib/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/classes/org/hyperic/hq/ui">
+            <include name="util/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/classes/org/hyperic/hq/ui">
+            <include name="validator/**" />
         </fileset>
     </chmod>    
 
@@ -832,8 +932,8 @@ ${errMsg}
     </chmod>    
 
     <chmod perm="go-rwx" type="both">
-        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT">
-            <include name="ui_docs/**" />
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/ui_docs">
+            <exclude name="DOC/**" />
         </fileset>
     </chmod>    
 
