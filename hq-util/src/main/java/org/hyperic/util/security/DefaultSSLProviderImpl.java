@@ -26,6 +26,8 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.conn.ssl.AbstractVerifier;
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.SSLSocketFactory;
@@ -40,97 +42,8 @@ import org.springframework.util.StringUtils;
 public class DefaultSSLProviderImpl implements SSLProvider {
 	private SSLContext sslContext;
 	private SSLSocketFactory sslSocketFactory;
+	private final Log log= LogFactory.getLog(DefaultSSLProviderImpl.class);
 	
-	@Deprecated
-    private KeyStore getKeyStore(KeystoreConfig keystoreConfig) throws KeyStoreException, IOException {
-    	FileInputStream keyStoreFileInputStream = null;
-    	
-    	String alias = keystoreConfig.getAlias();
-    	String filePath = keystoreConfig.getFilePath();
-    	String filePassword = keystoreConfig.getFilePassword();
-    	
-        try {
-        	KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-        	File file = new File(filePath);
-            char[] password = null;
-            
-            if (!file.exists()) {
-            	// ...if file doesn't exist, and path was user specified throw IOException...
-            	if (StringUtils.hasText(filePath) && !keystoreConfig.isHqDefault()) {
-            		throw new IOException("User specified keystore [" + filePath + "] does not exist.");
-            	}
-            	
-            	password = filePassword.toCharArray();
-            	generateInternalKeystore(file, alias, filePassword);
-            }
-            
-            // ...keystore exist, so init the file input stream...
-            keyStoreFileInputStream = new FileInputStream(file);
-            
-            keystore.load(keyStoreFileInputStream, password);
-
-            return keystore;
-        } catch (NoSuchAlgorithmException e) {
-        	// can't check integrity of keystore, if this happens we're kind of screwed
-        	// is there anything we can do to self heal this problem?
-			e.printStackTrace();
-
-			throw new IOException(e);
-		} catch (CertificateException e) {
-			// there are some corrupted certificates in the keystore, a bad thing
-			// is there anything we can do to self heal this problem?
-			e.printStackTrace();
-
-			throw new IOException(e);
-		} finally {
-            if (keyStoreFileInputStream != null) {
-            	keyStoreFileInputStream.close();
-            	keyStoreFileInputStream = null;
-            }
-        }
-    }
-
-	@Deprecated
-    private void generateInternalKeystore(File trustStoreFile, String alias, String password) {
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        String javaHome = System.getProperty("java.home");
-        String keytool = javaHome + File.separator + "bin" + File.separator + "keytool";
-        String[] args = {
-            keytool,
-            "-genkey",
-            "-dname",     "CN=" + alias + "_" + getFQDN() +  " (HQ Self-Signed Cert), OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=Unknown",
-            "-alias",     alias,
-            "-keystore",  trustStoreFile.getAbsolutePath(),
-            "-storepass", password,
-            "-keypass",   password,
-            "-keyalg",    "RSA"
-        };
-
-        int timeout = 5 * 60 * 1000; //5min
-        ExecuteWatchdog wdog = new ExecuteWatchdog(timeout);
-        Execute exec = new Execute(new PumpStreamHandler(output), wdog);
-        
-        exec.setCommandline(args);
-
-        int rc;
-        
-		try {
-			rc = exec.execute();
-		} catch (Exception e) {
-			rc = -1;
-		}
-        
-        if (rc != 0) {
-            String msg = output.toString().trim();
-
-            if (msg.length() == 0) {
-                msg = "timeout after " + timeout + "ms";
-            }
-            
-            throw new IllegalStateException(msg);
-        }
-    }
-
     private String getFQDN() {
         String address;
         final String loopback = "127.0.0.1";
@@ -196,7 +109,7 @@ public class DefaultSSLProviderImpl implements SSLProvider {
     }
             
     public DefaultSSLProviderImpl(final KeystoreConfig keystoreConfig, final boolean acceptUnverifiedCertificates ){
-
+        log.info("acceptUnverifiedCertificates="+acceptUnverifiedCertificates);
         try{  
             KeystoreManager keystoreMgr = KeystoreManager.getKeystoreManager();
             final KeyStore trustStore = keystoreMgr.getKeyStore(keystoreConfig);
@@ -206,6 +119,7 @@ public class DefaultSSLProviderImpl implements SSLProvider {
 	        final X509TrustManager defaultTrustManager = (X509TrustManager) trustManagerFactory.getTrustManagers()[0];
 	        
 	        X509TrustManager customTrustManager = new X509TrustManager() {
+	            private final Log log = LogFactory.getLog(X509TrustManager.class);
 				public X509Certificate[] getAcceptedIssuers() {
 					return defaultTrustManager.getAcceptedIssuers();
 				}
@@ -214,11 +128,11 @@ public class DefaultSSLProviderImpl implements SSLProvider {
 					try {
 						defaultTrustManager.checkServerTrusted(chain, authType);
 					} catch(Exception e) {
-						boolean acceptOverride = Boolean.parseBoolean(System.getProperty("accept.unverified.certificates", "true"));
-			        	
-						if (!acceptUnverifiedCertificates && !acceptOverride) {
+			        	log.info("cert is not trusted, acceptUnverifiedCertificates="+acceptUnverifiedCertificates);
+						if (!acceptUnverifiedCertificates) {
 							throw new CertificateException(e);
 						} else {
+						    log.info("import the cert");
 							importCertificate(chain);
 						}
 					}

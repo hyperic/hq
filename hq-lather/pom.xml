@@ -17,11 +17,6 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
-			<artifactId>hq-util</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-common</artifactId>
 			<version>${project.version}</version>
 		</dependency>
