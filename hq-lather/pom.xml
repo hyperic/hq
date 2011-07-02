@@ -17,12 +17,12 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.hyperic.hq</groupId>
-			<artifactId>hq-util</artifactId>
+			<artifactId>hq-common</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>commons-httpclient</groupId>
-			<artifactId>commons-httpclient</artifactId>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>

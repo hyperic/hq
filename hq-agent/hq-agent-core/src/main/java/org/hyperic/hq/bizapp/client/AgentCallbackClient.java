@@ -29,6 +29,8 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.util.HashSet;
 
+import javax.net.ssl.SSLException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.bizapp.agent.ProviderInfo;
@@ -139,12 +141,17 @@ public abstract class AgentCallbackClient {
     protected LatherValue invokeLatherCall(ProviderInfo provider,
                                            String methodName,
                                            LatherValue args)
-        throws AgentCallbackClientException
-    {
+    throws AgentCallbackClientException {
+    	return invokeLatherCall(provider, methodName, args, false);
+    }
+       
+    protected LatherValue invokeLatherCall(ProviderInfo provider,
+                                           String methodName,
+                                           LatherValue args,
+                                           final boolean acceptUnverifiedCertificates)
+    throws AgentCallbackClientException {
         LatherHTTPClient client;
-        String addr;
-
-        addr = provider.getProviderAddress();
+        String addr = provider.getProviderAddress();
 
         if(this.secureCommands.contains(methodName)){
             final String agentToken = provider.getAgentToken();
@@ -152,49 +159,64 @@ public abstract class AgentCallbackClient {
             ((SecureAgentLatherValue)args).setAgentToken(agentToken);
         }
 
-        client = new LatherHTTPClient(addr, TIMEOUT_CONN, TIMEOUT_DATA);
         try {
+        	client = new LatherHTTPClient(addr, TIMEOUT_CONN, TIMEOUT_DATA, acceptUnverifiedCertificates);
+        	
             return client.invoke(methodName, args);
-        } catch(ConnectException exc){
+        } catch(SSLException e) {
+        	log.debug(e.getMessage());
+        	
+        	throw new AgentCallbackClientException(e);
+        } catch(ConnectException exc) {
             // All exceptions are logged as debug.  If the caller wants to
             // log the exception message, it can.
             final String eMsg = "Unable to contact server @ " + addr + ": " +
                 exc.getMessage();
         
             this.log.debug(eMsg);
+            
             throw new AgentCallbackClientException(eMsg);
-        } catch(IOException exc){
+        } catch(IOException exc) {
             String msg = exc.getMessage();
 
-            if(msg != null){
+            if (msg != null) {
                 String eMsg;
-                if(msg.indexOf("Service Unavailable") != -1){
-                    eMsg = "Unable to contact server -- it has no more " +
-                        "free connections";
+                
+                if (msg.indexOf("Service Unavailable") != -1) {
+                    eMsg = "Unable to contact server -- it has no more free connections";
+                    
                     this.log.debug(eMsg);
                 } else {
                     eMsg = "IO error: " + exc.getMessage();
+                    
                     this.log.debug(eMsg);
                 }
+                
                 throw new AgentCallbackClientException(eMsg);
             }
+            
             this.log.debug("IO error", exc);
-            throw new AgentCallbackClientException("IO error: " +
-                                                   exc.getMessage());
-        } catch(LatherRemoteException exc){
+            
+            throw new AgentCallbackClientException("IO error: " + exc.getMessage());
+        } catch(LatherRemoteException exc) {
             String eMsg;
 
-            if(exc.getMessage().indexOf("Unauthorized agent denied") != -1){
-                eMsg = "Unable to invoke '" + methodName + 
-                    "':  Permission denied";
+            if (exc.getMessage().indexOf("Unauthorized agent denied") != -1) {
+                eMsg = "Unable to invoke '" + methodName + "':  Permission denied";
+                
                 this.log.debug(eMsg);
             } else {
                 eMsg = "Remote error while invoking '" + methodName + ": " + 
                     exc.getMessage();
+                
                 this.log.debug(eMsg);
             } 
 
             throw new AgentCallbackClientException(eMsg, exc);
+        } catch(IllegalStateException e) {
+        	log.debug("Could not create the LatherHTTPClient instance", e);
+        	
+        	throw new AgentCallbackClientException(e);
         }
     }
 }

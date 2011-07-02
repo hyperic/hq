@@ -120,7 +120,9 @@ public class ServerConfig
     public static final String Q_ADMIN_USER = "What should the username be for the initial admin user?";
     public static final String Q_ADMIN_PASSWORD = "What should the password be for the initial admin user?";
     public static final String Q_ADMIN_EMAIL = "What should the email address be for the initial admin user?";
-
+    public static final String Q_USE_CUSTOM_KEYSTORE = "Would you like us to use a user managed java keystore?";
+    public static final String Q_SERVER_KEYSTORE_PATH = "What is the file path to your java keystore?";
+    public static final String Q_SERVER_KEYSTORE_PASSWORD = "What is the password to your java keystore?";
     private static final String SERVER_DATABASE_UPGRADE_CHOICE = "server.database.upgrade.choice";
 
     // convenience constants
@@ -139,6 +141,13 @@ public class ServerConfig
         ConfigSchema schema = super.getUpgradeSchema(previous, iterationCount);
         if (schema == null)
             schema = new ConfigSchema();
+
+        // TODO Remove this code once we no longer support HQ version less than 4.6
+        //      This is solely to maintain backwards compatibility with older HQ agents
+        //      that don't handle SSL communication correctly.
+        //      For the upgrade case, we want to automatically import unverified certificates
+        schema.addOption(new HiddenConfigOption("accept.unverified.certificates", Boolean.TRUE.toString()));
+
         switch (iterationCount) {
             case 0:
                 schema.addOption(new HiddenConfigOption("server.overwrite", YesNoConfigOption.NO));
@@ -172,6 +181,12 @@ public class ServerConfig
 
         // Do we have an builtin-postgresql packaged with us?
         boolean haveBuiltinDB = getReleaseHasBuiltinDB();
+
+        // TODO Remove this code once we no longer support HQ version less than 4.6
+        //      This is solely to maintain backwards compatibility with older HQ agents
+        //      that don't handle SSL communication correctly
+        //      For the new install case, we do not want to automatically import unverified certificates
+        schema.addOption(new HiddenConfigOption("accept.unverified.certificates", Boolean.FALSE.toString()));
 
         switch (iterationCount) {
             case 0:
@@ -223,6 +238,26 @@ public class ServerConfig
                         Q_PORT_WEBAPP_SECURE, new Integer(7443)));
 
                 }
+                
+                if (installMode.isQuick()) {
+                	schema.addOption(new HiddenConfigOption("server.use.custom.keystore", YesNoConfigOption.NO));
+                } else {
+                	schema.addOption(new YesNoConfigOption("server.use.custom.keystore", Q_USE_CUSTOM_KEYSTORE, YesNoConfigOption.NO));
+                }
+
+            	
+            	String useCustomKeystore = previous.getValue("server.use.custom.keystore");
+
+            	if ("YES".equals(useCustomKeystore) && !installMode.isQuick()) {
+                	schema.addOption(new StringConfigOption("server.keystore.path", Q_SERVER_KEYSTORE_PATH, ""));
+                	schema.addOption(new StringConfigOption("server.keystore.password", Q_SERVER_KEYSTORE_PASSWORD, ""));                	
+            	} else {
+            		// TODO not sure if there's a cleaner way to do this.  The problem is we technically don't know the real install path bc 
+            		// the archive hasn't been unzipped at this point.  So we use a token and replace it later in the ant script with the real path
+            		schema.addOption(new HiddenConfigOption("server.keystore.path", "@SERVER_CONF@/hyperic.keystore"));
+                	schema.addOption(new HiddenConfigOption("server.keystore.password", "hyperic"));
+            	}
+
                 break;
 
             case 4:

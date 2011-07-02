@@ -30,12 +30,10 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.InetAddress;
-import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
@@ -43,13 +41,15 @@ import javax.net.ssl.SSLSocket;
 
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.agent.AgentConnectionException;
+import org.hyperic.hq.agent.AgentKeystoreConfig;
 import org.hyperic.hq.agent.server.AgentConnectionListener;
 import org.hyperic.hq.agent.server.AgentServerConnection;
 import org.hyperic.hq.agent.server.AgentStartException;
-import org.hyperic.hq.bizapp.agent.CommonSSL;
 import org.hyperic.hq.bizapp.agent.TokenData;
 import org.hyperic.hq.bizapp.agent.TokenManager;
 import org.hyperic.hq.bizapp.agent.TokenNotFoundException;
+import org.hyperic.util.security.DefaultSSLProviderImpl;
+import org.hyperic.util.security.SSLProvider;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -59,17 +59,13 @@ class SSLConnectionListener
 {
     private SSLServerSocket listenSock;
     private Log             log;
-    private KeyManager[]    kManagers;
     private TokenManager    tokenManager;
 
-    public SSLConnectionListener(AgentConfig cfg, 
-                                 KeyManager[] kManagers,
-                                 TokenManager tokenManager)
+    public SSLConnectionListener(AgentConfig cfg, TokenManager tokenManager)
     {
         super(cfg);
         this.listenSock   = null;
         this.log          = LogFactory.getLog(SSLConnectionListener.class);
-        this.kManagers    = kManagers;
         this.tokenManager = tokenManager;
     }
 
@@ -157,6 +153,7 @@ class SSLConnectionListener
         AgentServerConnection res;
         SSLSocket inConn = null;
         boolean success = false;
+
         try {
             inConn  = (SSLSocket)this.listenSock.accept();
             inConn.setSoTimeout(30000);
@@ -177,6 +174,7 @@ class SSLConnectionListener
                 close(inConn);
             }
         }
+
         return res;
     }
 
@@ -190,43 +188,29 @@ class SSLConnectionListener
         }
     }
 
-    public void setup(int timeout)
-        throws AgentStartException
-    {
-        SSLServerSocketFactory sFactory;
-        AgentConfig cfg;
-        SSLContext context;
-        InetAddress addr;
-        int port;
-            
-        try {
-            context = CommonSSL.getSSLContext();
-            context.init(this.kManagers, null, null);
-        } catch(Exception exc){
-            throw new AgentStartException("Unable to setup SSL context: " + 
-                                          exc.getMessage());
-        }
+    public void setup(int timeout) throws AgentStartException {
+        AgentConfig cfg = this.getConfig();
 
-        sFactory = context.getServerSocketFactory();
+    	SSLProvider provider = new DefaultSSLProviderImpl(new AgentKeystoreConfig(),false);
+        SSLContext context = provider.getSSLContext();
+    	SSLServerSocketFactory sFactory = context.getServerSocketFactory();
         
-        cfg = this.getConfig();
+        InetAddress addr;
+        
         try {
             addr = cfg.getListenIpAsAddr();
         } catch(UnknownHostException exc){
-            throw new AgentStartException("Failed to setup listen socket " +
-                                          " on '" + cfg.getListenIp() + "': "+
-                                          "unknown host");
+            throw new AgentStartException("Failed to setup listen socket on '" + cfg.getListenIp() + "': unknown host");
         }
 
-        port = cfg.getListenPort();
+        int port = cfg.getListenPort();
+
         try {
-            this.listenSock = 
-                (SSLServerSocket)sFactory.createServerSocket(port, 50, addr);
+            this.listenSock = (SSLServerSocket) sFactory.createServerSocket(port, 50, addr);
+            
             this.listenSock.setSoTimeout(timeout);
         } catch(IOException exc){
-            throw new AgentStartException("Failed to listen at " +
-                                          cfg.getListenIp() + ":" + port +
-                                          ": " + exc.getMessage());
+            throw new AgentStartException("Failed to listen at " + cfg.getListenIp() + ":" + port + ": " + exc.getMessage());
         }
     }
 

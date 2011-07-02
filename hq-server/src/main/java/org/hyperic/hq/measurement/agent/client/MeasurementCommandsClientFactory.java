@@ -30,8 +30,11 @@ import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.agent.client.SecureAgentConnection;
+import org.hyperic.hq.security.ServerKeystoreConfig;
 import org.hyperic.hq.transport.AgentProxyFactory;
+import org.hyperic.util.security.KeystoreConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -44,12 +47,16 @@ public class MeasurementCommandsClientFactory {
     private AgentManager agentManager;
     
     private AgentProxyFactory agentProxyFactory;
-    
+    private KeystoreConfig keystoreConfig;
     
     @Autowired
-    public MeasurementCommandsClientFactory(AgentManager agentManager, AgentProxyFactory agentProxyFactory) { 
+    public MeasurementCommandsClientFactory(AgentManager agentManager, 
+                                            AgentProxyFactory agentProxyFactory,
+                                            ServerKeystoreConfig serverKeystoreConfig) {
+
         this.agentManager = agentManager;
         this.agentProxyFactory = agentProxyFactory;
+        keystoreConfig = serverKeystoreConfig;
     }
 
     public MeasurementCommandsClient getClient(AppdefEntityID aid) 
@@ -72,7 +79,7 @@ public class MeasurementCommandsClientFactory {
         if (agent.isNewTransportAgent()) {
             return new MeasurementCommandsClientImpl(agent, agentProxyFactory);
         } else {
-            return new LegacyMeasurementCommandsClientImpl(new SecureAgentConnection(agent.getAddress(),agent.getPort(),agent.getAuthToken()));            
+            return new LegacyMeasurementCommandsClientImpl(new SecureAgentConnection(keystoreConfig,agent.getAddress(),agent.getPort(),agent.getAuthToken()));            
         }         
     }
 

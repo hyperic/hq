@@ -50,10 +50,10 @@
          executor="tomcatThreadPool" maxHttpHeaderSize="8192"
          emptySessionPath="true" protocol="HTTP/1.1" SSLEnabled="true"
          scheme="https" secure="true" clientAuth="false" 
-         keystoreFile="${catalina.base}/conf/hyperic.keystore"
-         keystorePass="hyperic"
-         truststoreFile="${catalina.base}/conf/hyperic.keystore"
-         truststorePass="hyperic" 
+         keystoreFile="${server.keystore.path}"
+         keystorePass="${server.keystore.password}"
+         truststoreFile="${server.keystore.path}"
+         truststorePass="${server.keystore.password}" 
          sslProtocol = "TLS" />
     
 

@@ -29,18 +29,16 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.X509TrustManager;
 
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.hyperic.hq.agent.AgentConfig;
+import org.hyperic.hq.agent.AgentConfigException;
 import org.hyperic.hq.agent.client.AgentConnection;
-import org.hyperic.hq.bizapp.agent.CommonSSL;
-import org.hyperic.util.JDK;
-import org.hyperic.util.security.BogusTrustManager;
+import org.hyperic.util.security.DefaultSSLProviderImpl;
+import org.hyperic.util.security.KeystoreConfig;
+import org.hyperic.util.security.SSLProvider;
 
 /**
  * An object which wraps an AgentConnection object, so as to provide
@@ -58,82 +56,29 @@ public class SecureAgentConnection
     private String agentAddress;
     private int    agentPort;
     private String authToken;
+    private boolean acceptUnverifiedCertificate = false;
 
-   
+    private KeystoreConfig keystoreConfig;
 
-    public SecureAgentConnection(String agentAddress, int agentPort,
-                              String authToken)
-    {
+    public SecureAgentConnection(KeystoreConfig keystoreConfig, String agentAddress, int agentPort, String authToken) {
         super(agentAddress, agentPort);
         this.agentAddress = agentAddress;
         this.agentPort    = agentPort;
         this.authToken    = authToken;
+        this.keystoreConfig = keystoreConfig;
     }
+    
+    public SecureAgentConnection(String agentAddress, int agentPort, String authToken, KeystoreConfig keystoreConfig, boolean acceptUnverifiedCertificate) {
+    	this(keystoreConfig, agentAddress, agentPort, authToken);
 
-    private SSLSocket getSSLSocket(SSLSocketFactory factory,
-                                   String host, int port,
-                                   int readTimeout,
-                                   int postHandshakeTimeout)
-        throws IOException {
-
-        SSLSocket socket;
-
-        //this approach breaks in the IBM 1.4 JRE
-        //http://www-128.ibm.com/developerworks/forums/dw_thread.jsp?
-        //message=13695343&cat=10&thread=73546&treeDisplayType=threadmode1&forum=178#13695343
-        //XXX we could check if the jre is at the required patch level
-        if (!JDK.IS_IBM) {
-            socket = (SSLSocket)factory.createSocket();
-            socket.connect(new InetSocketAddress(host, port), readTimeout);
-        }
-        else {
-            socket = (SSLSocket)factory.createSocket(host, port);
-        }
-
-        // Set the socket timeout during the initial handshake to detect
-        // connection issues with the agent.  
-        socket.setSoTimeout(readTimeout);
-        socket.startHandshake();
-        // [HHQ-3694] The timeout is set to a post handshake value.
-        socket.setSoTimeout(postHandshakeTimeout);
-        
-        return socket;
+    	this.acceptUnverifiedCertificate = acceptUnverifiedCertificate;
     }
     
     protected Socket getSocket()
         throws IOException
     {
-        SSLSocketFactory factory;
-        SSLContext context;
-        SSLSocket sock;
+        SSLSocket socket;
 
-        try {
-            context = CommonSSL.getSSLContext();
-        } catch(NoSuchAlgorithmException exc){
-            IOException toThrow = new IOException("Unable to get SSL context: " + exc.getMessage());
-            // call initCause instead of constructor to be java 1.5 compat
-            toThrow.initCause(exc);
-            throw toThrow;
-        }
-
-        // Initialize the SSL context with the bogus trust manager so that
-        // we can connect to servers with a self-signed certificate
-        //
-        // YYY -- Note, that this implies that we do NOT validate the
-        //        server's authenticity, and this is therefore subject to
-        //        a man-in-the-middle attack.
-        try {
-            BogusTrustManager trustMan;
-
-            trustMan = new BogusTrustManager();
-            context.init(null, new X509TrustManager[] { trustMan }, null);
-        } catch(KeyManagementException exc){
-            IOException toThrow =
-                new IOException("Unable to initialize trust manager: " + exc.getMessage());
-            // call initCause instead of constructor to be java 1.5 compat
-            toThrow.initCause(exc);
-            throw toThrow;
-        }
 
         try {
             // Check for configured agent read timeout from System properties
@@ -154,11 +99,25 @@ public class SecureAgentConnection
             } catch (NumberFormatException e) {
                 postHandshakeTimeout = POST_HANDSHAKE_TIMEOUT;
             }
-      
+            SSLProvider sslProvider = new DefaultSSLProviderImpl(keystoreConfig, acceptUnverifiedCertificate);
 
-            factory = context.getSocketFactory();
-            sock = getSSLSocket(factory, this.agentAddress,
-                                this.agentPort, readTimeout, postHandshakeTimeout);
+            SSLSocketFactory factory = sslProvider.getSSLSocketFactory();
+            
+        	// See the following links...
+        	// http://www.apache.org/dist/httpcomponents/httpcore/RELEASE_NOTES-4.1.x.txt
+        	// http://www-128.ibm.com/developerworks/forums/dw_thread.jsp?message=13695343&cat=10&thread=73546&treeDisplayType=threadmode1&forum=178#13695343
+        	// In any case, it would seem as though the bug has since been fixed in IBM's JRE, no need to work around it anymore...
+            socket = (SSLSocket) factory.createSocket();
+
+            socket.connect(new InetSocketAddress( this.agentAddress, this.agentPort), readTimeout);
+            
+            // Set the socket timeout during the initial handshake to detect
+            // connection issues with the agent.  
+            socket.setSoTimeout(readTimeout);
+            socket.startHandshake();
+
+            // [HHQ-3694] The timeout is set to a post handshake value.
+            socket.setSoTimeout(postHandshakeTimeout);
         } catch(IOException exc){
             IOException toThrow = new IOException("Unable to connect to " +
                                   this.agentAddress + ":" +
@@ -173,7 +132,7 @@ public class SecureAgentConnection
         try {
             DataOutputStream dOs;
             
-            dOs = new DataOutputStream(sock.getOutputStream());
+            dOs = new DataOutputStream(socket.getOutputStream());
             dOs.writeUTF(this.authToken);
         } catch(IOException exc){
             IOException toThrow = new IOException("Unable to write auth params to server");
@@ -182,7 +141,7 @@ public class SecureAgentConnection
             throw toThrow;
         }
 
-        return sock;
+        return socket;
     }
 
     public String toString(){

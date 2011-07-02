@@ -78,7 +78,12 @@ public class AgentConfig {
     public static final String PDK_WORK_DIR_KEY = "agent.pdkWorkDir";
     public static final String AGENT_BUNDLE_HOME = "agent.bundle.home";
   
-
+    //Property name for keystore
+    public static final String SSL_KEYSTORE_PATH = "agent.keystore.path";
+    public static final String SSL_KEYSTORE_PASSWORD = "agent.keystore.password";
+    public static final String SSL_KEYSTORE_ALIAS = "agent.keystore.alias";
+    public static final String SSL_KEYSTORE_ACCEPT_UNVERIFIED_CERT = "accept.unverified.certificates";
+    
     // The following final objects are the properties which are usable
     // within the configuation object.  The first element in the array
     // is the property name, the second is the default value
@@ -102,8 +107,14 @@ public class AgentConfig {
     { "agent.logDir", System.getProperty("agent.logDir", PROP_INSTALLHOME[1] + "/log") };
     public static final String[] PROP_DATADIR = 
     { "agent.dataDir", System.getProperty("agent.dataDir", PROP_INSTALLHOME[1] + "/data") };
-    public static final String[] PROP_KEYSTORE = 
-    { "agent.keystore", PROP_DATADIR[1] + "/keystore" };
+    public static final String[] PROP_KEY_ALIAS = 
+    { SSL_KEYSTORE_ALIAS, "hq-agent" };
+    public static final String[] PROP_KEYSTORE_ACCEPT_UNVERIFIED_CERT = 
+    { SSL_KEYSTORE_ACCEPT_UNVERIFIED_CERT, "true" }; //for pre-4.6 version upgrade only. Should be changed to "false" once pre-4.6 is not supported. 
+    public static final String[] PROP_KEYSTORE_PATH = 
+    { SSL_KEYSTORE_PATH, PROP_DATADIR[1] + "/keystore" };
+    public static final String[] PROP_KEYSTORE_PASSWORD = 
+    { SSL_KEYSTORE_PASSWORD, "storePW" };    
     public static final String[] PROP_LIB_HANDLERS = 
     { "agent.lib.handlers", PROP_BUNDLEHOME[1] + "/lib/handlers" };
     public static final String[] PROP_LIB_HANDLERS_LIB = 
@@ -155,7 +166,10 @@ public class AgentConfig {
         PROP_TMPDIR,
         PROP_LOGDIR,
         PROP_DATADIR,
-        PROP_KEYSTORE,
+        PROP_KEYSTORE_ACCEPT_UNVERIFIED_CERT,
+        PROP_KEY_ALIAS,
+        PROP_KEYSTORE_PATH,
+        PROP_KEYSTORE_PASSWORD,
         PROP_LIB_HANDLERS,
         PROP_LIB_HANDLERS_LIB,
         PROP_PDK_DIR,

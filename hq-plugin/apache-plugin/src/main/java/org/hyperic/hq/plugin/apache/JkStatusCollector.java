@@ -34,9 +34,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpResponse;
 
 import org.hyperic.hq.plugin.netservices.HTTPCollector;
 import org.hyperic.hq.product.Metric;
@@ -98,10 +98,10 @@ public class JkStatusCollector extends HTTPCollector
         initConstants();
     }
 
-    protected void parseResults(HttpMethod method)
+    protected void parseResults(HttpResponse response)
     {
         try {
-            parse(method);
+            parse(response);
         }
         catch (IOException e) {
             log.error("Exception parsing: " + getURL(), e);
@@ -116,11 +116,11 @@ public class JkStatusCollector extends HTTPCollector
         return _workers;
     }
 
-    private void parse(HttpMethod method) throws IOException
+    private void parse(HttpResponse response) throws IOException
     {
         _lbs.clear();
         _workers.clear();
-        InputStream is = method.getResponseBodyAsStream();
+        InputStream is = response.getEntity().getContent();
         String line;
         BufferedReader bf = new BufferedReader(new InputStreamReader(is));
         final String prefix = "worker.";

@@ -39,7 +39,8 @@ public abstract class AgentInfo_args
     private static final String PROP_UNIDIRECTIONAL = "isUnidirectional";
     private static final String PROP_NEWTRANSPORTTYPE = "isNewTransportAgent";
     private static final String PROP_AGENTTOKEN = "agentToken";
-
+    private static final String PROP_ACCEPT_CERTIFICATES = "acceptCertificates";
+    
     public AgentInfo_args(){
         super();
     }
@@ -115,6 +116,25 @@ public abstract class AgentInfo_args
         return this.getStringValue(PROP_AGENTTOKEN);
     }
 
+    public void setAcceptCertificates(boolean acceptCertificates) {
+    	this.setStringValue(PROP_ACCEPT_CERTIFICATES, String.valueOf(acceptCertificates));
+    }
+    
+    public boolean isAcceptCertificates() {
+       boolean acceptCertificates = false;
+        
+        try {
+        	acceptCertificates = 
+                Boolean.valueOf(getStringValue(PROP_ACCEPT_CERTIFICATES)).booleanValue();
+        } catch (LatherKeyNotFoundException e) {
+            // this is an older agent that does not support the ssl validation
+        	// auto accept the certificate in this case...
+        	acceptCertificates = true;
+        }
+        
+        return acceptCertificates;
+    }
+    
     public void validate()
         throws LatherRemoteException
     {

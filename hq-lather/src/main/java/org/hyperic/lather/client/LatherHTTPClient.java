@@ -30,19 +30,26 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.hyperic.hq.agent.AgentConfig;
+import org.hyperic.hq.agent.AgentConfigException;
+import org.hyperic.hq.agent.AgentKeystoreConfig;
 import org.hyperic.lather.LatherRemoteException;
 import org.hyperic.lather.LatherValue;
 import org.hyperic.lather.xcode.LatherXCoder;
 
 import org.hyperic.util.encoding.Base64;
-import org.hyperic.util.security.UntrustedSSLProtocolSocketFactory;
+import org.hyperic.util.http.HQHttpClient;
+import org.hyperic.util.http.HttpConfig;
+import org.hyperic.util.security.KeystoreConfig;
 
-import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.protocol.Protocol;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.util.EntityUtils;
 
 /**
  * The LatherClient is the base object which is used to invoke
@@ -57,104 +64,87 @@ public class LatherHTTPClient
     public static final String HDR_ERROR      = "X-error-response";
     public static final String HDR_VALUECLASS = "X-latherValue-class";
 
+    private HQHttpClient client;
     private LatherXCoder xCoder;
     private String       baseURL;
-    private int          timeoutConn, timeoutData;
-
-    public LatherHTTPClient(String baseURL){
+    
+    public LatherHTTPClient(String baseURL) throws Exception {
         this(baseURL, TIMEOUT_CONN, TIMEOUT_DATA);
     }
 
-    public LatherHTTPClient(String baseURL, int timeoutConn, int timeoutData){
-        Protocol mySSLProt;
-
-        this.baseURL = baseURL;
-        this.xCoder  = new LatherXCoder();
-
-        mySSLProt = new Protocol("https",
-                                 new UntrustedSSLProtocolSocketFactory(),
-                                 443);
-        Protocol.registerProtocol("https", mySSLProt);
-        this.timeoutConn = timeoutConn;
-        this.timeoutData = timeoutData;
-    }
-
-    public LatherValue invoke(String method, LatherValue args)
-        throws IOException, LatherRemoteException
-    {
-        ByteArrayOutputStream bOs;
-        DataOutputStream dOs;
-        HttpClient client;
-        PostMethod meth;
-        String encodedArgs, responseBody;
-        byte[] rawData;
-
-        bOs    = new ByteArrayOutputStream();
-        dOs    = new DataOutputStream(bOs);
-
-        this.xCoder.encode(args, dOs);
-        rawData     = bOs.toByteArray();
-        encodedArgs = Base64.encode(rawData);
-
-        client = new HttpClient();
-        client.setConnectionTimeout(this.timeoutConn);
-        client.setTimeout(this.timeoutData);
-        client.setHttpConnectionFactoryTimeout(this.timeoutConn);
-        configureProxy(client);
-
-        meth   = new PostMethod(baseURL);
-
-        meth.addParameter("method",    method);
-        meth.addParameter("args",      encodedArgs);
-        meth.addParameter("argsClass", args.getClass().getName());
-        
-        client.executeMethod(meth);
-
-        responseBody = meth.getResponseBodyAsString();
-        meth.releaseConnection();
-
-        if(meth.getStatusCode() == HttpStatus.SC_OK){
-            ByteArrayInputStream bIs;
-            DataInputStream dIs;
-            Header errHeader = meth.getResponseHeader(HDR_ERROR);
-            Header clsHeader = meth.getResponseHeader(HDR_VALUECLASS);
-            Class resClass;
-
-            if(errHeader != null){
-                throw new LatherRemoteException(responseBody);
-            }
-            
-            if(clsHeader == null){
-                throw new IOException("Server returned malformed result:  " +
-                                      "did not contain a value class header");
-            }
-
-            try {
-                resClass = Class.forName(clsHeader.getValue());
-            } catch(ClassNotFoundException exc){
-                throw new LatherRemoteException("Server returned a class '" +
-                                                clsHeader.getValue() + 
-                                                "' which the client did not " +
-                                                "have access to");
-            }
-
-            bIs = new ByteArrayInputStream(Base64.decode(responseBody));
-            dIs = new DataInputStream(bIs);
-
-            return this.xCoder.decode(dIs, resClass);
-        } else {
-            throw new IOException("Connection failure: " + 
-                                  meth.getStatusLine().toString());
-        }
+    public LatherHTTPClient(String baseURL, int timeoutConn, int timeoutData) {
+    	this(baseURL, timeoutConn, timeoutData, false);
     }
     
-    private void configureProxy(HttpClient client) {                
-        String proxyHost = System.getProperty("lather.proxyHost");
-        int proxyPort = Integer.getInteger("lather.proxyPort", new Integer(-1)).intValue();
+    public LatherHTTPClient(String baseURL, int timeoutConn, int timeoutData, final boolean acceptUnverifiedCertificates) {
+    	try {
+    		// get proxy info
+    		String proxyHostname = System.getProperty("lather.proxyHost", null);
+	        int proxyPort = Integer.getInteger("lather.proxyPort", new Integer(-1)).intValue();
+	        
+	        // setup http client config
+    		HttpConfig config = new HttpConfig();
+    		
+    		config.setConnectionTimeout(timeoutConn);
+    		config.setSocketTimeout(timeoutData);
+    		config.setProxyHostname(proxyHostname);
+    		config.setProxyPort(proxyPort);
+
+	        this.client = new HQHttpClient(new AgentKeystoreConfig(), config, acceptUnverifiedCertificates);
+			this.baseURL = baseURL;
+	        this.xCoder  = new LatherXCoder();
+    	} catch(Exception e) {
+    		throw new IllegalStateException(e);
+    	}
+    }
+
+    public LatherValue invoke(String method, LatherValue args) throws IOException, LatherRemoteException {
+        ByteArrayOutputStream bOs = new ByteArrayOutputStream();
+        DataOutputStream dOs = new DataOutputStream(bOs);
         
-        if (proxyHost != null & proxyPort != -1) {
-            client.getHostConfiguration().setProxy(proxyHost, proxyPort);
-            return;
-        }
+        this.xCoder.encode(args, dOs);
+        
+        byte[] rawData = bOs.toByteArray();
+        String encodedArgs = Base64.encode(rawData);
+        Map<String, String> postParams = new HashMap<String, String>();
+        
+        postParams.put("method", method);
+        postParams.put("args", encodedArgs);
+        postParams.put("argsClass", args.getClass().getName());
+        
+        HttpResponse response = client.post(baseURL, postParams);
+        
+        if (response != null && response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+            ByteArrayInputStream bIs;
+            DataInputStream dIs;
+            Header errHeader = response.getFirstHeader(HDR_ERROR);
+            Header clsHeader = response.getFirstHeader(HDR_VALUECLASS);
+            HttpEntity entity = response.getEntity();
+            String responseBody = EntityUtils.toString(entity);
+
+            if (errHeader != null) {
+                throw new LatherRemoteException(responseBody);
+            }
+
+            if (clsHeader == null) {
+                throw new IOException("Server returned malformed result: did not contain a value class header");
+            }
+	
+            Class<?> resClass;
+	
+            try {
+            	resClass = Class.forName(clsHeader.getValue());
+	        } catch(ClassNotFoundException exc){
+	            throw new LatherRemoteException("Server returned a class '" + clsHeader.getValue() + 
+	                                            "' which the client did not have access to");
+	        }
+	
+	        bIs = new ByteArrayInputStream(Base64.decode(responseBody));
+	        dIs = new DataInputStream(bIs);
+	
+	        return this.xCoder.decode(dIs, resClass);
+	    } else {
+	        throw new IOException("Connection failure: " + response.getStatusLine());
+	    }
     }
 }
