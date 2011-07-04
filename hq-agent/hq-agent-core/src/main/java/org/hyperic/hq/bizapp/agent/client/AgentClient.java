@@ -1305,7 +1305,7 @@ public class AgentClient {
             while (initializeStartTime > (System.currentTimeMillis() - startupTimeout)) {
                 try {
                     authToken = AgentClientUtil.getLocalAuthToken(tokenFile);
-                    conn = new SecureAgentConnection(connIp, cfg.getListenPort(), authToken, keystoreConfig, false);
+                    conn = new SecureAgentConnection(connIp, cfg.getListenPort(), authToken, keystoreConfig, keystoreConfig.isAcceptUnverifiedCert());
                     return new AgentClient(cfg, conn);
                 } catch(FileNotFoundException exc){
                     SYSTEM_ERR.println("- No token file found, waiting for " +

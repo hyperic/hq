@@ -142,7 +142,7 @@ public abstract class AgentCallbackClient {
                                            String methodName,
                                            LatherValue args)
     throws AgentCallbackClientException {
-    	return invokeLatherCall(provider, methodName, args, false);
+    	return invokeLatherCall(provider, methodName, args, (new AgentKeystoreConfig()).isAcceptUnverifiedCert());
     }
        
     protected LatherValue invokeLatherCall(ProviderInfo provider,

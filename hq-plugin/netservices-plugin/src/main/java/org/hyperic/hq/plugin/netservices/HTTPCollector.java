@@ -278,8 +278,8 @@ public class HTTPCollector extends SocketChecker {
 		boolean isHEAD = getMethod().equals(METHOD_HEAD);
 		HttpConfig config = new HttpConfig(getTimeoutMillis(), getTimeoutMillis(), proxyHost, proxyPort);
 
-        
-		HttpClient client = new HQHttpClient (new AgentKeystoreConfig(), config);
+		AgentKeystoreConfig keystoreConfig = new AgentKeystoreConfig();
+		HttpClient client = new HQHttpClient (keystoreConfig, config, keystoreConfig.isAcceptUnverifiedCert());
 		HttpParams params = client.getParams();
 		
 		params.setParameter(CoreProtocolPNames.USER_AGENT, this.useragent);

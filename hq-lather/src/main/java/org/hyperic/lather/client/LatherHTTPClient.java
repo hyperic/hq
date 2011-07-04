@@ -73,7 +73,7 @@ public class LatherHTTPClient
     }
 
     public LatherHTTPClient(String baseURL, int timeoutConn, int timeoutData) {
-    	this(baseURL, timeoutConn, timeoutData, false);
+        this(baseURL, timeoutConn, timeoutData,new AgentKeystoreConfig().isAcceptUnverifiedCert());
     }
     
     public LatherHTTPClient(String baseURL, int timeoutConn, int timeoutData, final boolean acceptUnverifiedCertificates) {

@@ -191,8 +191,8 @@ class SSLConnectionListener
 
     public void setup(int timeout) throws AgentStartException {
         AgentConfig cfg = this.getConfig();
-
-    	SSLProvider provider = new DefaultSSLProviderImpl(new AgentKeystoreConfig(),false);
+        AgentKeystoreConfig keystoreConfig = new AgentKeystoreConfig();
+    	SSLProvider provider = new DefaultSSLProviderImpl(keystoreConfig,keystoreConfig.isAcceptUnverifiedCert());
         SSLContext context = provider.getSSLContext();
     	SSLServerSocketFactory sFactory = context.getServerSocketFactory();
         
