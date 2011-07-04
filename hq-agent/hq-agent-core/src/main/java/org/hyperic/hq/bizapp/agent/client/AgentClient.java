@@ -1294,7 +1294,7 @@ public class AgentClient {
                                " to talk to agent: " + exc.getMessage());
                 return null;
             }
-            conn = new SecureAgentConnection(connIp, cfg.getListenPort(), authToken, keystoreConfig, false);
+            conn = new SecureAgentConnection(connIp, cfg.getListenPort(), authToken, keystoreConfig, keystoreConfig.isAcceptUnverifiedCert());
             return new AgentClient(cfg, conn);
                 
         } else {
