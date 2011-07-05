@@ -1,0 +1,23 @@
+<metric name="clientRegistrations" alias="clientRegistrations" indicator="true" defaultOn="true" description="Number of clients that have registered for updates"/>
+
+<metric name="clientRegistrationTime" alias="clientRegistrationTime" units="ns" description="Total time spent doing client registrations"/>
+
+<metric name="clientHealthMonitorRegister" alias="clientHealthMonitorRegister" description="Number of client Register"/>
+
+<metric name="clientHealthMonitorUnRegister" alias="clientHealthMonitorUnRegister" description="Number of client UnRegister"/>
+
+<metric name="compiledQueryCount" alias="compiledQueryCount" description="Number of compiled queries maintained."/>
+
+<metric name="compiledQueryUsedCount" alias="compiledQueryUsedCount" description="Number of times compiled queries are used"/>
+
+<metric name="cqProcessingTime" alias="cqProcessingTime" units="ns" description="Total time spent by the cache client notifier processing cqs"/>
+
+<metric name="durableReconnectionCount" alias="durableReconnectionCount" description="Number of times the same durable client connects to the server"/>
+
+<metric name="eventProcessingTime" alias="eventProcessingTime" indicator="true" defaultOn="true" units="ns" description="Total time spent by the cache client notifier processing events"/>
+
+<metric name="events" alias="events" description="Number of events processed by the cache client notifier"/>
+
+<metric name="eventsEnqueuedWhileClientAwayCount" alias="eventsEnqueuedWhileClientAwayCount" indicator="true" defaultOn="true" description="Number of events enqueued in queue for a durable client"/>
+
+<metric name="queueDroppedCount" alias="queueDroppedCount" description="Number of times client queue for a particular durable client is dropped"/>

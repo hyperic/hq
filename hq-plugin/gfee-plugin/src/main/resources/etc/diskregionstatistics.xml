@@ -1,0 +1,25 @@
+<metric name="entriesInVM" alias="entriesInVM" indicator="true" defaultOn="true" description="The current number of entries whose value resides in the VM. The value may also have been written to disk."/>
+
+<metric name="entriesOnlyOnDisk" alias="entriesOnlyOnDisk" indicator="true" defaultOn="true" description="The current number of entries whose value is on disk and is not in memory. This is true of overflowed entries. It is also true of recovered entries that have not yet been faulted in."/>
+
+<metric name="localInitializations" alias="localInitializations" description="The number of times that this region has been initialized solely from the local disk files (0 or 1)"/>
+
+<metric name="readBytes" alias="readBytes" units="B" description="The total number of bytes that have been read from disk"/>
+
+<metric name="readTime" alias="readTime" units="ns" description="The total amount of time spent reading from disk"/>
+
+<metric name="reads" alias="reads" description="The total number of region entries that have been read from disk"/>
+
+<metric name="remoteInitializations" alias="remoteInitializations" description="The number of times that this region has been initialized by doing GII from a peer (0 or 1)"/>
+
+<metric name="removeTime" alias="removeTime" units="ns" description="The total amount of time spent removing from disk"/>
+
+<metric name="removes" alias="removes" indicator="true" defaultOn="true" description="The total number of region entries that have been removed from disk"/>
+
+<metric name="writeTime" alias="writeTime" units="ns" description="The total amount of time spent writing to disk"/>
+
+<metric name="writes" alias="writes" indicator="true" defaultOn="true" description="The total number of region entries that have been written to disk. A write is done every time an entry is created on disk or every time its value is modified on disk."/>
+
+<metric name="writesInProgress" alias="writesInProgress" description="current number of oplog writes that are in progress"/>
+
+<metric name="writtenBytes" alias="writtenBytes" units="B" description="The total number of bytes that have been written to disk"/>

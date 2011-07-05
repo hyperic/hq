@@ -1,0 +1,3 @@
+<metric name="diskSpace" alias="diskSpace" indicator="true" defaultOn="true" units="B" description="The total number of bytes currently being used on disk in this directory for oplog files"/>
+
+<metric name="maximumSpace" alias="maximumSpace" defaultOn="true" units="B" description="The configured maximum number of bytes allowed in this directory for oplog files. Note that some product configurations allow this maximum to be exceeded"/>

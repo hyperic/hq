@@ -1,0 +1,159 @@
+<metric name="getRequests" alias="getRequests" indicator="true" defaultOn="true" description="Number of cache client operations get requests."/>
+
+<metric name="putRequests" alias="putRequests" indicator="true" defaultOn="true" description="Number of cache client operations put requests."/>
+
+<metric name="putAllRequests" alias="putAllRequests" defaultOn="true" description="Number of cache client operations putAll requests."/>
+
+<metric name="destroyRequests" alias="destroyRequests" defaultOn="true" description="Number of cache client operations destroy requests."/>
+
+<metric name="queryRequests" alias="queryRequests" defaultOn="true" description="Number of cache client operations query requests."/>
+
+<metric name="destroyRegionRequests" alias="destroyRegionRequests" defaultOn="true" description="Number of cache client operations destroyRegion requests."/>
+
+<metric name="containsKeyRequests" alias="containsKeyRequests" indicator="true" defaultOn="true" description="Number of cache client operations containsKey requests."/>
+
+<metric name="processBatchRequests" alias="processBatchRequests" defaultOn="true" description="Number of cache client operations processBatch requests."/>
+
+<metric name="clearRegionRequests" alias="clearRegionRequests" defaultOn="true" description="Number of cache client operations clearRegion requests."/>
+
+<metric name="clientNotificationRequests" alias="clientNotificationRequests" defaultOn="true" description="Number of cache client operations notification requests."/>
+
+<metric name="updateClientNotificationRequests" alias="updateClientNotificationRequests" defaultOn="true" description="Number of cache client notification update requests."/>
+
+<metric name="closeConnectionRequests" alias="closeConnectionRequests" defaultOn="true" description="Number of cache client close connection operations requests."/>
+
+<metric name="connectionLoad" alias="connectionLoad" indicator="true" defaultOn="true" description="The load from client to server connections as reported by the load probe installed in this server."/>
+
+<metric name="readGetRequestTime" alias="readGetRequestTime" units="ns" description="Total time, in nanoseconds, spent in reading get requests."/>
+
+<metric name="processGetTime" alias="processGetTime" units="ns" description="Total time, in nanoseconds, spent in processing a cache client get request, including the time to get an object from the cache."/>
+
+<metric name="getResponses" alias="getResponses" description="Number of getResponses written to the cache client."/>
+
+<metric name="writeGetResponseTime" alias="writeGetResponseTime" units="ns" description="Total time, in nanoseconds, spent in writing get responses."/>
+
+<metric name="readPutRequestTime" alias="readPutRequestTime" units="ns" description="Total time, in nanoseconds, spent in reading put requests."/>
+
+<metric name="processPutTime" alias="processPutTime" units="ns" description="Total time, in nanoseconds, spent in processing a cache client put request, including the time to put an object into the cache."/>
+
+<metric name="putResponses" alias="putResponses" description="Number of putResponses written to the cache client."/>
+
+<metric name="writePutResponseTime" alias="writePutResponseTime" units="ns" description="Total time, in nanoseconds, spent in writing put responses."/>
+
+<metric name="readPutAllRequestTime" alias="readPutAllRequestTime" units="ns" description="Total time, in nanoseconds, spent in reading putAll requests."/>
+
+<metric name="processPutAllTime" alias="processPutAllTime" units="ns" description="Total time, in nanoseconds, spent in processing a cache client putAll request, including the time to put all objects into the cache."/>
+
+<metric name="putAllResponses" alias="putAllResponses" description="Number of putAllResponses written to the cache client."/>
+
+<metric name="writePutAllResponseTime" alias="writePutAllResponseTime" units="ns" description="Total time, in nanoseconds, spent in writing putAll responses."/>
+
+<metric name="readDestroyRequestTime" alias="readDestroyRequestTime" units="ns" description="Total time, in nanoseconds, spent in reading destroy requests."/>
+
+<metric name="processDestroyTime" alias="processDestroyTime" units="ns" description="Total time, in nanoseconds, spent in processing a cache client destroy request, including the time to destroy an object from the cache."/>
+
+<metric name="destroyResponses" alias="destroyResponses" description="Number of destroy responses written to the cache client."/>
+
+<metric name="writeDestroyResponseTime" alias="writeDestroyResponseTime" units="ns" description="Total time, in nanoseconds, spent in writing destroy responses."/>
+
+<metric name="readQueryRequestTime" alias="readQueryRequestTime" units="ns" description="Total time, in nanoseconds, spent in reading query requests."/>
+
+<metric name="processQueryTime" alias="processQueryTime" units="ns" description="Total time, in nanoseconds, spent in processing a cache client query request, including the time to destroy an object from the cache."/>
+
+<metric name="queryResponses" alias="queryResponses" description="Number of query responses written to the cache client."/>
+
+<metric name="writeQueryResponseTime" alias="writeQueryResponseTime" units="ns" description="Total time, in nanoseconds, spent in writing query responses."/>
+
+<metric name="readDestroyRegionRequestTime" alias="readDestroyRegionRequestTime" units="ns" description="Total time, in nanoseconds, spent in reading destroyRegion requests."/>
+
+<metric name="processDestroyRegionTime" alias="processDestroyRegionTime" units="ns" description="Total time, in nanoseconds, spent in processing a cache client destroyRegion request, including the time to destroy the region from the cache."/>
+
+<metric name="destroyRegionResponses" alias="destroyRegionResponses" description="Number of destroyRegion responses written to the cache client."/>
+
+<metric name="writeDestroyRegionResponseTime" alias="writeDestroyRegionResponseTime" units="ns" description="Total time, in nanoseconds, spent in writing destroyRegion responses."/>
+
+<metric name="readContainsKeyRequestTime" alias="readContainsKeyRequestTime" units="ns" description="Total time, in nanoseconds, spent reading containsKey requests."/>
+
+<metric name="processContainsKeyTime" alias="processContainsKeyTime" units="ns" description="Total time spent, in nanoseconds, processing a containsKey request."/>
+
+<metric name="containsKeyResponses" alias="containsKeyResponses" description="Number of containsKey responses written to the cache cli­ent."/>
+
+<metric name="writeContainsKeyResponseTime" alias="writeContainsKeyResponseTime" units="ns" description="Total time, in nanoseconds, spent writing containsKey responses."/>
+
+<metric name="readProcessBatchRequestTime" alias="readProcessBatchRequestTime" units="ns" description="Total time, in nanoseconds, spent in reading processBatch requests."/>
+
+<metric name="processBatchTime" alias="processBatchTime" units="ns" description="Total time, in nanoseconds, spent in processing a cache client processBatch request."/>
+
+<metric name="processBatchResponses" alias="processBatchResponses" description="Number of processBatch responses written to the cache client."/>
+
+<metric name="writeProcessBatchResponseTime" alias="writeProcessBatchResponseTime" units="ns" description="Total time, in nanoseconds, spent in writing processBatch responses."/>
+
+<metric name="batchSize" alias="batchSize" units="B" description="The size (in bytes) of the batches received."/>
+
+<metric name="readClearRegionRequestTime" alias="readClearRegionRequestTime" units="ns" description="Total time, in nanoseconds, spent in reading clearRegion requests."/>
+
+<metric name="processClearRegionTime" alias="processClearRegionTime" units="ns" description="Total time, in nanoseconds, spent in processing a cache client clearRegion request, including the time to clear the region from the cache."/>
+
+<metric name="clearRegionResponses" alias="clearRegionResponses" description="Number of clearRegion responses written to the cache cli­ent."/>
+
+<metric name="writeClearRegionResponseTime" alias="writeClearRegionResponseTime" units="ns" description="Total time, in nanoseconds, spent in writing clearRegion responses."/>
+
+<metric name="readClientNotificationRequestTime" alias="readClientNotificationRequestTime" units="ns" description="Total time, in nanoseconds, spent in reading client notifica­tion requests."/>
+
+<metric name="processClientNotificationTime" alias="processClientNotificationTime" units="ns" description="Total time, in nanoseconds, spent in processing a cache client notification request."/>
+
+<metric name="readUpdateClientNotificationRequestTime" alias="readUpdateClientNotificationRequestTime" units="ns" description="Total time, in nanoseconds, spent in reading client notifica­tion update requests."/>
+
+<metric name="processUpdateClientNotificationTime" alias="processUpdateClientNotificationTime" units="ns" description="Total time, in nanoseconds, spent in processing a client notifi­cation update request."/>
+
+<metric name="clientReadyRequests" alias="clientReadyRequests" description="Number of cache client ready requests."/>
+
+<metric name="readClientReadyRequestTime" alias="readClientReadyRequestTime" units="ns" description="Total time, in nanoseconds, spent in reading cache client ready requests."/>
+
+<metric name="processClientReadyTime" alias="processClientReadyTime" units="ns" description="Total time, in nanoseconds, spent in processing a cache client ready request, including the time to destroy an object from the cache."/>
+
+<metric name="clientReadyResponses" alias="clientReadyResponses" description="Number of client ready responses written to the cache client."/>
+
+<metric name="writeClientReadyResponseTime" alias="writeClientReadyResponseTime" units="ns" description="Total time, in nanoseconds, spent in writing client ready responses."/>
+
+<metric name="readCloseConnectionRequestTime" alias="readCloseConnectionRequestTime" units="ns" description="Total time, in nanoseconds, spent in reading close connection requests."/>
+
+<metric name="processCloseConnectionTime" alias="processCloseConnectionTime" units="ns" description="Total time, in nanoseconds, spent in processing a cache client close connection request."/>
+
+<metric name="failedConnectionAttempts" alias="failedConnectionAttempts" description="Number of failed connection attempts."/>
+
+<metric name="currentClientConnections" alias="currentClientConnections" description="Number of sockets accepted."/>
+
+<metric name="currentClients" alias="currentClients" description="Number of client virtual machines (clients) connected."/>
+
+<metric name="outOfOrderGatewayBatchIds" alias="outOfOrderGatewayBatchIds" description="Number of Out of Order batch IDs (batches)."/>
+
+<metric name="abandonedWriteRequests" alias="abandonedWriteRequests" description="Number of write operations (requests) abandoned by clients"/>
+
+<metric name="abandonedReadRequests" alias="abandonedReadRequests" description="Number of read operations (requests) abandoned by clients"/>
+
+<metric name="receivedBytes" alias="receivedBytes" units="B" description="Total number of bytes received from clients."/>
+
+<metric name="sentBytes" alias="sentBytes" units="B" description="Total number of bytes sent to clients."/>
+
+<metric name="messagesBeingReceived" alias="messagesBeingReceived" description="Current number of messages being received off the network or being processed after reception."/>
+
+<metric name="messageBytesBeingReceived" alias="messageBytesBeingReceived" units="B" description="Current number of bytes consumed by messages being received or processed."/>
+
+<metric name="connectionsTimedOut" alias="connectionsTimedOut" description="Total number of connections that have been timed out by the server because of client inactivity."/>
+
+<metric name="threadQueueSize" alias="threadQueueSize" description="Current number of connections waiting for a thread to start processing their message."/>
+
+<metric name="acceptsInProgress" alias="acceptsInProgress" description="Current number of server accepts that are attempting to do the initial handshake with the client."/>
+
+<metric name="acceptThreadStarts" alias="acceptThreadStarts" description="Total number of threads created (starts) to deal with an accepted socket. Note, this is not the current number of threads."/>
+
+<metric name="connectionThreadStarts" alias="connectionThreadStarts" description="Total number of threads created (starts) to deal with a client connection. Note, this is not the current number of threads."/>
+
+<metric name="connectionThreads" alias="connectionThreads" description="Current number of threads dealing with a client connection."/>
+
+<metric name="loadPerConnection" alias="loadPerConnection" description="The estimate of how much load i.s added for each new con­nection as reported by the load probe installed in this server."/>
+
+<metric name="queueLoad" alias="queueLoad" description="The load from subscription queues as reported by the load probe installed in this server"/>
+
+<metric name="loadPerQueue" alias="loadPerQueue" description="The estimate of how much load would be added for each new subscription connection as reported by the load probe installed in this server"/>

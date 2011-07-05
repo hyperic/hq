@@ -1,0 +1,89 @@
+<metric name="backupsCompleted" alias="backupsCompleted" description="The number of backups of this disk store that have been taking while this VM was alive"/>
+
+<metric name="backupsInProgress" alias="backupsInProgress" description="The current number of backups in progress on this disk store"/>
+
+<metric name="compactDeleteTime" alias="compactDeleteTime" units="ns" description="Total amount of time, in nanoseconds, spent doing deletes during a compact"/>
+
+<metric name="compactDeletes" alias="compactDeletes" description="Total number of times an oplog compact did a delete"/>
+
+<metric name="compactInsertTime" alias="compactInsertTime" units="ns" description="Total amount of time, in nanoseconds, spent doing inserts during a compact"/>
+
+<metric name="compactInserts" alias="compactInserts" description="Total number of times an oplog compact did a db insert"/>
+
+<metric name="compactTime" alias="compactTime" units="ns" description="Total amount of time, in nanoseconds, spent compacting oplogs"/>
+
+<metric name="compactUpdateTime" alias="compactUpdateTime" units="ns" description="Total amount of time, in nanoseconds, spent doing updates during a compact"/>
+
+<metric name="compactUpdates" alias="compactUpdates" description="Total number of times an oplog compact did an update"/>
+
+<metric name="compactableOplogs" alias="compactableOplogs" description="Current number of oplogs ready to be compacted"/>
+
+<metric name="compacts" alias="compacts" description="Total number of completed oplog compacts"/>
+
+<metric name="compactsInProgress" alias="compactsInProgress" description="current number of oplog compacts that are in progress"/>
+
+<metric name="flushedBytes" alias="flushedBytes" units="B" description="The total number of bytes written to disk by async queue flushes."/>
+
+<metric name="flushTime" alias="flushTime" units="ns" description="The total amount of time spent doing an async queue flush."/>
+
+<metric name="flushes" alias="flushes" description="The total number of times the an entry has been flushed from the async queue."/>
+
+<metric name="Average Flush Time" units="ns" alias="custom_ratio_flushTime_flushes" description="Average flush time."/>
+
+<metric name="flushesInProgress" alias="flushesInProgress" description="current number of oplog flushes that are in progress"/>
+
+<metric name="inactiveOplogs" alias="inactiveOplogs" description="Current number of oplogs that are no longer being written but are not ready ready to compact"/>
+
+<metric name="openOplogs" alias="openOplogs" description="Current number of open oplogs this region has"/>
+
+<metric name="oplogReads" alias="oplogReads" description="Total number of oplog reads"/>
+
+<metric name="oplogRecoveredBytes" alias="oplogRecoveredBytes" units="B" description="The total number of bytes that have been read from oplogs during a recovery"/>
+
+<metric name="oplogRecoveries" alias="oplogRecoveries" description="The total number of oplogs recovered"/>
+
+<metric name="oplogRecoveryTime" alias="oplogRecoveryTime" units="ns" description="The total amount of time spent doing an oplog recovery"/>
+
+<metric name="oplogSeeks" alias="oplogSeeks" description="Total number of oplog seeks"/>
+
+<metric name="queueSize" indicator="true" defaultOn="true" alias="queueSize" description="The current number of entries in the async queue waiting to be flushed to disk"/>
+
+<metric name="readBytes" alias="readBytes" units="B" description="The total number of bytes that have been read from disk"/>
+
+<metric name="readTime " alias="readTime" units="ns" description="The total amount of time spent reading from disk"/>
+
+<metric name="reads" indicator="true" defaultOn="true" alias="reads" description="The total number of region entries that have been read from disk"/>
+
+<metric name="Average Read Time" units="ns" alias="custom_ratio_readTime_reads" description="Average read time."/>
+
+<metric name="recoveredBytes" alias="recoveredBytes" units="B" description="The total number of bytes that have been read from disk during a recovery"/>
+
+<metric name="recoveredEntryCreates" alias="recoveredEntryCreates" description="The total number of entry create records processed while recovering oplog data."/>
+
+<metric name="recoveredEntryDestroys" alias="recoveredEntryDestroys" description="The total number of entry destroy records processed while recovering oplog data."/>
+
+<metric name="recoveredEntryUpdates" alias="recoveredEntryUpdates" description="The total number of entry update records processed while recovering oplog data."/>
+
+<metric name="recoveredValuesSkippedDueToLRU" alias="recoveredValuesSkippedDueToLRU" description="The total number of entry values that did not need to be recovered due to the LRU."/>
+
+<metric name="recoveriesInProgress" alias="recoveriesInProgress" description="current number of persistent regions being recovered from disk"/>
+
+<metric name="recoveryRecordsSkipped" alias="recoveryRecordsSkipped" description="The total number of oplog records skipped during recovery."/>
+
+<metric name="recoveryTime" alias="recoveryTime" units="ns" description="The total amount of time spent doing a recovery"/>
+
+<metric name="removeTime" alias="removeTime" units="ns" description="The total amount of time spent removing from disk"/>
+
+<metric name="removes" indicator="true" defaultOn="true" alias="removes" description="The total number of region entries that have been removed from disk"/>
+
+<metric name="uncreatedRecoveredRegions" alias="uncreatedRecoveredRegions" description="The current number of regions that have been recovered but have not yet been created."/>
+
+<metric name="writeTime" alias="writeTime" units="ns" description="The total amount of time spent writing to disk"/>
+
+<metric name="writes" indicator="true" defaultOn="true" alias="writes" description="The total number of region entries that have been written to disk. A write is done every time an entry is created on disk or every time its value is modified on disk."/>
+
+<metric name="Average Write Time" units="ns" alias="custom_ratio_writeTime_writes" description="Average write time."/>
+
+<metric name="writesInProgress" alias="writesInProgress" description="current number of oplog writes that are in progress"/>
+
+<metric name="writtenBytes" alias="writtenBytes" units="B" description="The total number of bytes that have been written to disk"/>

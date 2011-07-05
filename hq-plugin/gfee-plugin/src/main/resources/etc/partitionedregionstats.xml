@@ -1,0 +1,179 @@
+<metric name="PartitionMessagesProcessed" alias="PartitionMessagesProcessed" description="Number of PartitionMessages Processed."/>
+
+<metric name="PartitionMessagesReceived" alias="PartitionMessagesReceived" description="Number of PartitionMessages Received."/>
+
+<metric name="PartitionMessagesSent" alias="PartitionMessagesSent" description="Number of PartitionMessages Sent."/>
+
+<metric name="actualRedundantCopies" alias="actualRedundantCopies" description="Actual number of redundant copies for this partitioned region."/>
+
+<metric name="applyReplicationCompleted" alias="applyReplicationCompleted" description="completed ops"/>
+
+<metric name="applyReplicationInProgress" alias="applyReplicationInProgress" description="in progress ops"/>
+
+<metric name="applyReplicationTime" alias="applyReplicationTime" units="ns" description="Total time spent"/>
+
+<metric name="avgBucketSize" indicator="true" defaultOn="true" alias="avgBucketSize" description="Average entries per bucket."/>
+
+<metric name="bucketCount" indicator="true" defaultOn="true" alias="bucketCount" description="Number of buckets in this node."/>
+
+<metric name="bucketCreateTime" alias="bucketCreateTime" units="ns" description="Total time spent performing bucket create operations for rebalancing."/>
+
+<metric name="bucketCreatesCompleted" alias="bucketCreatesCompleted" description="Total number of bucket create operations performed for rebalancing."/>
+
+<metric name="bucketCreatesFailed" alias="bucketCreatesFailed" description="Total number of bucket create operations performed for rebalancing that failed."/>
+
+<metric name="bucketCreatesInProgress" alias="bucketCreatesInProgress" description="Current number of bucket create operations being performed for rebalancing."/>
+
+<metric name="configuredRedundantCopies" alias="configuredRedundantCopies" description="Configured number of redundant copies for this partitioned region."/>
+
+<metric name="containsKeyCompleted" alias="containsKeyCompleted" description="Number of containsKeys completed."/>
+
+<metric name="containsKeyOpsRetried" alias="containsKeyOpsRetried" description="Number of containsKey or containsValueForKey operations which had to be retried due to failures."/>
+
+<metric name="containsKeyRetries" alias="containsKeyRetries" description="Total number of times containsKey or containsValueForKey operations had to be retried."/>
+
+<metric name="containsKeyTime" alias="containsKeyTime" units="ns" description="Total time spent performing containsKey operations."/>
+
+<metric name="containsValueForKeyCompleted" alias="containsValueForKeyCompleted" description="Number of containsValueForKeys completed."/>
+
+<metric name="containsValueForKeyTime" alias="containsValueForKeyTime" units="ns" description="Total time spent performing containsValueForKey operations."/>
+
+<metric name="createOpsRetried" alias="createOpsRetried" description="Number of create operations which had to be retried due to failures."/>
+
+<metric name="createRetries" alias="createRetries" description="Total number of times put operations had to be retried."/>
+
+<metric name="createTime" alias="createTime" units="ns" description="Total time spent doing create operations."/>
+
+<metric name="createsCompleted" alias="createsCompleted" description="Number of creates completed."/>
+
+<metric name="dataStoreBytesInUse" alias="dataStoreBytesInUse" units="B" description="The current number of bytes stored in this Cache for the named Partitioned Region"/>
+
+<metric name="dataStoreEntryCount" alias="dataStoreEntryCount" description="The number of entries stored in this Cache for the named Partitioned Region"/>
+
+<metric name="destroyOpsRetried" alias="destroyOpsRetried" description="Number of destroy operations which had to be retried due to failures."/>
+
+<metric name="destroyRetries" alias="destroyRetries" description="Total number of times destroy operations had to be retried."/>
+
+<metric name="destroyTime" alias="destroyTime" units="ns" description="Total time spent doing destroys."/>
+
+<metric name="destroysCompleted" alias="destroysCompleted" description="Number of destroys completed."/>
+
+<metric name="getEntryCompleted" alias="getEntryCompleted" description="Number of getEntry operations completed."/>
+
+<metric name="getEntryTime" alias="getEntryTime" units="ns" description="Total time spent performing getEntry operations."/>
+
+<metric name="getOpsRetried" alias="getOpsRetried" description="Number of get operations which had to be retried due to failures."/>
+
+<metric name="getRetries" alias="getRetries" description="Total number of times get operations had to be retried."/>
+
+<metric name="getTime" alias="getTime" units="ns" description="Total time spent performing get operations."/>
+
+<metric name="getsCompleted" alias="getsCompleted" description="Number of gets completed."/>
+
+<metric name="invalidateOpsRetried" alias="invalidateOpsRetried" description="Number of invalidate operations which had to be retried due to failures."/>
+
+<metric name="invalidateRetries" alias="invalidateRetries" description="Total number of times invalidate operations had to be retried."/>
+
+<metric name="invalidateTime" alias="invalidateTime" units="ns" description="Total time spent doing invalidates."/>
+
+<metric name="invalidatesCompleted" alias="invalidatesCompleted" description="Number of invalidates completed."/>
+
+<metric name="lowRedundancyBucketCount" alias="lowRedundancyBucketCount" description="Current number of buckets without full redundancy."/>
+
+<metric name="maxBucketCount" alias="maxBucketCount" description="The maximum number of buckets."/>
+
+<metric name="maxBucketSize" alias="maxBucketSize" description="Maximum number of entries in a bucket."/>
+
+<metric name="minBucketSize" alias="minBucketSize" description="Minimum number of entries in a bucket."/>
+
+<metric name="partitionMessagesProcessingTime" alias="partitionMessagesProcessingTime" units="ns" description="Total time spent on PartitionMessages processing."/>
+
+<metric name="prMetaDataSentCount" alias="prMetaDataSentCount" description="total number of times meta data refreshed sent on client's request."/>
+
+<metric name="preferredReadLocal" alias="preferredReadLocal" description="Number of reads satisfied from local store"/>
+
+<metric name="preferredReadRemote" alias="preferredReadRemote" description="Number of reads satisfied from remote store"/>
+
+<metric name="primaryBucketCount" alias="primaryBucketCount" indicator="true" defaultOn="true" description="Current number of primary buckets hosted locally."/>
+
+<metric name="primaryTransferTime" alias="primaryTransferTime" units="ns" description="Total time spent performing primary transfer operations for rebalancing."/>
+
+<metric name="primaryTransfersCompleted" alias="primaryTransfersCompleted" description="Total number of primary transfer operations performed for rebalancing."/>
+
+<metric name="primaryTransfersFailed" alias="primaryTransfersFailed" description="Total number of primary transfer operations performed for rebalancing that failed."/>
+
+<metric name="primaryTransfersInProgress" alias="primaryTransfersInProgress" description="Current number of primary transfer operations being performed for rebalancing."/>
+
+<metric name="putAllMsgsRetried" alias="putAllMsgsRetried" description="Number of putAll messages which had to be retried due to failures."/>
+
+<metric name="putAllRetries" alias="putAllRetries" description="Total number of times putAll messages had to be retried."/>
+
+<metric name="putAllTime" alias="putAllTime" units="ns" description="Total time spent doing putAlls."/>
+
+<metric name="putAllsCompleted" alias="putAllsCompleted" description="Number of putAlls completed."/>
+
+<metric name="putLocalCompleted" alias="putLocalCompleted" description="completed ops"/>
+
+<metric name="putLocalInProgress" alias="putLocalInProgress" description="in progress ops"/>
+
+<metric name="putLocalTime" alias="putLocalTime" units="ns" description="Total time spent"/>
+
+<metric name="putOpsRetried" alias="putOpsRetried" description="Number of put operations which had to be retried due to failures."/>
+
+<metric name="putRemoteCompleted" alias="putRemoteCompleted" description="completed ops"/>
+
+<metric name="putRemoteInProgress" alias="putRemoteInProgress" description="in progress ops"/>
+
+<metric name="putRemoteTime" alias="putRemoteTime" units="ns" description="Total time spent"/>
+
+<metric name="putRetries" alias="putRetries" description="Total number of times put operations had to be retried."/>
+
+<metric name="putTime" alias="putTime" units="ns" description="Total time spent doing puts."/>
+
+<metric name="putsCompleted" alias="putsCompleted" description="Number of puts completed."/>
+
+<metric name="rebalanceBucketCreateTime" alias="rebalanceBucketCreateTime" units="ns" description="Total time spent performing bucket create operations for rebalancing."/>
+
+<metric name="rebalanceBucketCreatesCompleted" alias="rebalanceBucketCreatesCompleted" description="Total number of bucket create operations performed for rebalancing."/>
+
+<metric name="rebalanceBucketCreatesFailed" indicator="true" defaultOn="true" alias="rebalanceBucketCreatesFailed" description="Total number of bucket create operations performed for rebalancing that failed."/>
+
+<metric name="rebalanceBucketCreatesInProgress" alias="rebalanceBucketCreatesInProgress" description="Current number of bucket create operations being performed for rebalancing."/>
+
+<metric name="rebalancePrimaryTransferTime" alias="rebalancePrimaryTransferTime" units="ns" description="Total time spent performing primary transfer operations for rebalancing."/>
+
+<metric name="rebalancePrimaryTransfersCompleted" alias="rebalancePrimaryTransfersCompleted" description="Total number of primary transfer operations performed for rebalancing."/>
+
+<metric name="rebalancePrimaryTransfersFailed" indicator="true" defaultOn="true" alias="rebalancePrimaryTransfersFailed" description="Total number of primary transfer operations performed for rebalancing that failed."/>
+
+<metric name="rebalancePrimaryTransfersInProgress" alias="rebalancePrimaryTransfersInProgress" description="Current number of primary transfer operations being performed for rebalancing."/>
+
+<metric name="recoveriesCompleted" alias="recoveriesCompleted" description="Total number of redundancy recovery operations performed on this region."/>
+
+<metric name="recoveriesInProgress" alias="recoveriesInProgress" description="Current number of redundancy recovery operations in progress for this region."/>
+
+<metric name="recoveryTime" alias="recoveryTime" units="ns" description="Total number time spent recovering redundancy."/>
+
+<metric name="sendReplicationCompleted" alias="sendReplicationCompleted" description="completed ops"/>
+
+<metric name="sendReplicationInProgress" alias="sendReplicationInProgress" description="in progress ops"/>
+
+<metric name="sendReplicationTime" alias="sendReplicationTime" units="ns" description="Total time spent"/>
+
+<metric name="totalBucketSize" alias="totalBucketSize" description="Total number of entries in buckets."/>
+
+<metric name="volunteeringBecamePrimary" alias="volunteeringBecamePrimary" description="Total number of attempts to volunteer that ended when this member became primary."/>
+
+<metric name="volunteeringBecamePrimaryTime" alias="volunteeringBecamePrimaryTime" units="ns" description="Total time spent volunteering that ended when this member became primary."/>
+
+<metric name="volunteeringClosed" alias="volunteeringClosed" description="Total number of attempts to volunteer that ended when this member's bucket closed."/>
+
+<metric name="volunteeringClosedTime" alias="volunteeringClosedTime" units="ns" description="Total time spent volunteering that ended when this member's bucket closed."/>
+
+<metric name="volunteeringInProgress" alias="volunteeringInProgress" description="Current number of attempts to volunteer for primary of a bucket."/>
+
+<metric name="volunteeringOtherPrimary" alias="volunteeringOtherPrimary" description="Total number of attempts to volunteer that ended when this member discovered other primary."/>
+
+<metric name="volunteeringOtherPrimaryTime" alias="volunteeringOtherPrimaryTime" units="ns" description="Total time spent volunteering that ended when this member discovered other primary."/>
+
+<metric name="volunteeringThreads" alias="volunteeringThreads" description="Current number of threads volunteering for primary."/>

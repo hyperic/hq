@@ -1,0 +1,54 @@
+
+<metric name="Daemon Threads" alias="vmstats-daemonThreads" description="Current number of live daemon threads in this VM."/>
+
+<metric name="Loaded Classes" alias="vmstats-loadedClasses" description="Total number of classes loaded since vm started."/>
+
+<metric name="Number of CPUs" alias="vmstats-cpus" description="Number of cpus available to the java VM on its machine."/>
+
+<metric name="File Descriptor Limit" alias="vmstats-fdLimit" description="Maximum number of file descriptors"/>
+
+<metric name="Open File Descriptors" alias="vmstats-fdsOpen" indicator="true" defaultOn="true" description="Current number of open file descriptors"/>
+
+<metric name="Free Memory" alias="vmstats-freeMemory" indicator="true" defaultOn="true" units="B" description="An approximation fo the total amount of memory currently available for future allocated objects, measured in bytes."/>
+
+<metric name="Max Memory" alias="vmstats-maxMemory" units="B" description="The maximum amount of memory that the VM will attempt to use, measured in bytes."/>
+
+<metric name="Peak Threads" alias="vmstats-peakThreads" description="High water mark of live threads in this VM."/>
+
+<metric name="Pending Finalization" alias="vmstats-pendingFinalization" description="Number of objects that are pending finalization in the java VM."/>
+
+<metric name="Process Cpu Time" alias="vmstats-processCpuTime" units="ns" description="CPU timed used by the process in nanoseconds."/>
+
+<metric name="Thread Starts" alias="vmstats-threadStarts" description="Total number of times a thread has been started since this vm started."/>
+
+<metric name="Number of Threads" alias="vmstats-threads" description="Current number of live threads (both daemon and non-daemon) in this VM."/>
+
+<metric name="Total Memory" alias="vmstats-totalMemory" units="B" description="The total amount of memory currently available for current and future objects, measured in bytes."/>
+
+<metric name="Unloaded Classes" alias="vmstats-unloadedClasses" description="Total number of classes unloaded since vm started."/>
+
+<metric name="Heap Committed Memory" alias="vmheapmemorystats-committedMemory" indicator="true" defaultOn="true" units="B" description="The amount of committed memory for this area, measured in bytes."/>
+
+<metric name="Non-Heap Committed Memory" alias="vmnonheapmemorystats-committedMemory" units="B" description="The amount of committed memory for this area, measured in bytes."/>
+
+<metric name="Code Cache Non-Heap Used Memory" alias="codecache-currentUsedMemory" units="B" description="The estimated amount of used memory currently in use for this pool, measured in bytes."/>
+
+<metric name="Eden Heap Used Memory" alias="youngeden-currentUsedMemory" indicator="true" defaultOn="true" units="B" description="The estimated amount of used memory currently in use for this pool, measured in bytes."/>
+
+<metric name="Survivor Heap Used Memory" alias="youngsurvivor-currentUsedMemory" indicator="true" defaultOn="true" units="B" description="The estimated amount of used memory currently in use for this pool, measured in bytes."/>
+
+<metric name="Tenured Gen Heap Used Memory" alias="oldtenured-currentUsedMemory" indicator="true" defaultOn="true" units="B" description="The estimated amount of used memory currently in use for this pool, measured in bytes."/>
+
+<metric name="Perm Gen Non-Heap Used Memory" alias="oldpermanent-currentUsedMemory" indicator="true" defaultOn="true" units="B" description="The estimated amount of used memory currently in use for this pool, measured in bytes."/>
+
+<metric name="Scavenge Collection Time" alias="gccheap-collectionTime" units="ms" description="Approximate elapsed time spent doing collections by this garbage collector."/>
+
+<metric name="MarkSweep Collection Time" alias="gcexpensive-collectionTime" units="ms" description="Approximate elapsed time spent doing collections by this garbage collector."/>
+
+<metric name="Scavenge Collections" alias="gccheap-collections" collectionType="trendsup" rate="1m" description="Total number of collections this garbage collector has done."/>
+
+<metric name="MarkSweep Collections" alias="gcexpensive-collections" collectionType="trendsup" rate="1m" description="Total number of collections this garbage collector has done."/>
+
+<metric name="Average Scavenge Collection Time" units="ms" alias="custom_ratio_gccheap-collectionTime_gccheap-collections" description="Average collection time per collection."/>
+
+<metric name="Average MarkSweep Collection Time" units="ms" alias="custom_ratio_gcexpensive-collectionTime_gcexpensive-collections" description="Average collection time per collection."/>

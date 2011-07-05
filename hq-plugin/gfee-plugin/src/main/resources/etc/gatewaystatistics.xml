@@ -1,0 +1,34 @@
+
+<metric name="batchDistributionTime" alias="batchDistributionTime" units="ns" description="Total time, in nanoseconds, spent distributing batches of events to other gateways."/>
+                     
+<metric name="batchesDistributed" alias="batchesDistributed" indicator="true" defaultOn="true" description="Number of batches of events operations removed from the event queue and sent."/>
+                  
+<metric name="batchesRedistributed" alias="batchesRedistributed" indicator="true" defaultOn="true" description="Number of batches of events operations removed from the event queue and resent."/>
+
+<metric name="conflationIndexesSize" alias="conflationIndexesSize" description=""/>
+
+<metric name="eventQueueSize" alias="eventQueueSize" indicator="true" defaultOn="true" description="Size of the event operations queue."/>
+
+<metric name="eventQueueTime" alias="eventQueueTime" defaultOn="true" units="ns" description="Total time, in nanoseconds, spent queueing events."/>
+
+<metric name="eventsDistributed" alias="eventsDistributed" indicator="true" defaultOn="true" description="Number of events operations removed from the event queue and sent."/>
+
+<metric name="eventsNotQueuedConflated" alias="eventsNotQueuedConflated" indicator="true" defaultOn="true" description="Number of events operations received but not added to the event queue because the queue already contains an event with the event's key."/>
+
+<metric name="eventsQueued" alias="eventsQueued" indicator="true" defaultOn="true" description="Number of events operations added to the event queue."/>
+
+<metric name="unprocessedEventMapSize" alias="unprocessedEventMapSize" description="Current number of events entries in the secondary's unprocessed event map."/>
+                    
+<metric name="unprocessedEventsRemovedByTimeout" alias="unprocessedEventsRemovedByTimeout" description="Number of events removed from the secondary's unprocessed event map by a timeout."/>
+
+<metric name="unprocessedEventsAddedBySecondary" alias="unprocessedEventsAddedBySecondary" description="Number of events added to the secondary's unprocessed event  map by the secondary."/>
+
+<metric name="unprocessedEventsRemovedByPrimary" alias="unprocessedEventsRemovedByPrimary" description="Number of events removed through a listener from the secondary's unprocessed event map by the primary."/>
+
+<metric name="unprocessedTokensAddedByPrimary" alias="unprocessedTokensAddedByPrimary" description="Number of tokens added through a listener to the secondary's  unprocessed token map by the primary."/>
+
+<metric name="unprocessedTokensRemovedBySecondary" alias="unprocessedTokensRemovedBySecondary" description="Number of tokens removed from the secondary's unprocessed token map by the secondary."/>
+
+<metric name="unprocessedTokensRemovedByTimeout" alias="unprocessedTokensRemovedByTimeout" description="Number of tokens removed from the secondary's unprocessed token map by a timeout."/>
+                       
+<metric name="unprocessedTokenMapSize" alias="unprocessedTokenMapSize" description="Current number of tokens entries in the secondary's unprocessed token map."/>
