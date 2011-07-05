@@ -33,6 +33,7 @@ import javax.net.ssl.SSLException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.AgentKeystoreConfig;
 import org.hyperic.hq.bizapp.agent.ProviderInfo;
 import org.hyperic.hq.bizapp.shared.lather.CommandInfo;
 import org.hyperic.hq.bizapp.shared.lather.SecureAgentLatherValue;
