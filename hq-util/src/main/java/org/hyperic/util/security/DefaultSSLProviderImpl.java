@@ -1,8 +1,5 @@
 package org.hyperic.util.security;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -34,10 +31,6 @@ import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
-import org.hyperic.util.exec.Execute;
-import org.hyperic.util.exec.ExecuteWatchdog;
-import org.hyperic.util.exec.PumpStreamHandler;
-import org.springframework.util.StringUtils;
 
 public class DefaultSSLProviderImpl implements SSLProvider {
 	private SSLContext sslContext;
@@ -71,7 +64,7 @@ public class DefaultSSLProviderImpl implements SSLProvider {
         return address;
     }
     
-    private KeyManagerFactory getKeyManagerFactory(final KeyStore keystore, final String password) throws KeyStoreException, IOException {
+    private KeyManagerFactory getKeyManagerFactory(final KeyStore keystore, final String password) throws KeyStoreException {
     	try {
     		KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
     		
@@ -81,14 +74,12 @@ public class DefaultSSLProviderImpl implements SSLProvider {
 		} catch (NoSuchAlgorithmException e) {
 			// no support for algorithm, if this happens we're kind of screwed
         	// we're using the default so it should never happen
-			e.printStackTrace();
-
-			throw new IOException(e);
+		    log.info("The algorithm is not supported. Error message:"+e.getMessage());
+			throw new KeyStoreException(e);
 		} catch (UnrecoverableKeyException e) {
 			// invalid password, should never happen
-			e.printStackTrace();
-			
-			throw new IOException(e);
+            log.info("Password for the keystore is invalid. Error message:"+e.getMessage());			
+			throw new KeyStoreException(e);
 		}
     }
     
@@ -102,14 +93,15 @@ public class DefaultSSLProviderImpl implements SSLProvider {
     	} catch (NoSuchAlgorithmException e) {
     		// no support for algorithm, if this happens we're kind of screwed
         	// we're using the default so it should never happen
-			e.printStackTrace();
-
-			throw new IOException(e);
+            log.info("The algorithm is not supported. Error message:"+e.getMessage());
+            throw new KeyStoreException(e);
 		}
     }
             
     public DefaultSSLProviderImpl(final KeystoreConfig keystoreConfig, final boolean acceptUnverifiedCertificates ){
-        log.info("acceptUnverifiedCertificates="+acceptUnverifiedCertificates);
+        log.debug("Keystore info: alias="+keystoreConfig.getAlias()+
+            ", path:"+keystoreConfig.getFilePath()+
+            ", acceptUnverifiedCertificates="+acceptUnverifiedCertificates);
         try{  
             KeystoreManager keystoreMgr = KeystoreManager.getKeystoreManager();
             final KeyStore trustStore = keystoreMgr.getKeyStore(keystoreConfig);
@@ -126,13 +118,17 @@ public class DefaultSSLProviderImpl implements SSLProvider {
 				
 				public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
 					try {
-						defaultTrustManager.checkServerTrusted(chain, authType);
+					    defaultTrustManager.checkServerTrusted(chain, authType);
+					    log.info("The server is trusted.");
 					} catch(Exception e) {
-			        	log.info("cert is not trusted, acceptUnverifiedCertificates="+acceptUnverifiedCertificates);
+			        	log.info("Receiving certificate is not trusted by keystore: alias="+keystoreConfig.getAlias()+
+			        	    ", path="+keystoreConfig.getFilePath()+ " , acceptUnverifiedCertificates="+acceptUnverifiedCertificates);
+
 						if (!acceptUnverifiedCertificates) {
+						    log.info("Fail the connection.");
 							throw new CertificateException(e);
 						} else {
-						    log.info("import the cert");
+						    log.info("Import the certification.");
 							importCertificate(chain);
 						}
 					}
@@ -144,7 +140,6 @@ public class DefaultSSLProviderImpl implements SSLProvider {
 				
 				private void importCertificate(X509Certificate[] chain) throws CertificateException {
 					FileOutputStream keyStoreFileOutputStream = null;
-			        int i=0;
 			        
 			        try {
 			        	keyStoreFileOutputStream = new FileOutputStream(keystoreConfig.getFilePath());
@@ -152,23 +147,17 @@ public class DefaultSSLProviderImpl implements SSLProvider {
 				        for (X509Certificate cert : chain) {
 				        	String[] cnValues = AbstractVerifier.getCNs(cert);
 				        	String alias = cnValues[0];
-				        	
 				        	trustStore.setCertificateEntry(alias, cert);
 				        }
-				        
 				        trustStore.store(keyStoreFileOutputStream, keystoreConfig.getFilePassword().toCharArray());
 			        } catch (FileNotFoundException fnfe) {
-						// Bad news here
-						fnfe.printStackTrace();
-					} catch (KeyStoreException ke) {
-						// TODO Auto-generated catch block
-						ke.printStackTrace();
-					} catch (NoSuchAlgorithmException nsae) {
-						// TODO Auto-generated catch block
-						nsae.printStackTrace();
-					} catch (IOException ioe) {
-						// TODO Auto-generated catch block
-						ioe.printStackTrace();
+						// Can't find the keystore in the path
+						log.info("Can't find the keystore in "+keystoreConfig.getFilePath()+". Error message:"+fnfe.getMessage());
+					} catch (NoSuchAlgorithmException e) {
+				        log.info("The algorithm is not supported. Error message:"+e.getMessage());
+                    } catch (Exception e) {
+                        //expect KeyStoreException, IOException
+                        log.info("Exception when trying to import certificate: "+e.getMessage());
 					} finally {
 			        	if (keyStoreFileOutputStream != null) {
 			        		try { 

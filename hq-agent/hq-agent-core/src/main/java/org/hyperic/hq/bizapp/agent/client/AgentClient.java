@@ -433,6 +433,7 @@ public class AgentClient {
             SYSTEM_OUT.print("- Testing " + sec  + " connection ... ");
 
             try {
+                log.info("test connection with accept unverified certificates flag set to "+acceptUnverifiedCertificates);
                 bizapp = this.testProvider(provider, acceptUnverifiedCertificates);
                 SYSTEM_OUT.println("Success");
                 return bizapp;

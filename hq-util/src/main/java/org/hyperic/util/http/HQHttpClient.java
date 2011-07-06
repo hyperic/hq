@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -22,13 +24,17 @@ import org.hyperic.util.security.SSLProvider;
 import org.springframework.util.Assert;
 
 public class HQHttpClient extends DefaultHttpClient {
-
+    private Log log;
+    
     public HQHttpClient(final KeystoreConfig keyConfig, final HttpConfig config) {
         this(keyConfig, config, keyConfig.isAcceptUnverifiedCert());
     }
     public HQHttpClient(final KeystoreConfig keyConfig, final HttpConfig config, final boolean acceptUnverifiedCertificates) {
     	super();
-    	
+    	log = LogFactory.getLog(HQHttpClient.class);
+        log.debug("Keystore info: Alias="+keyConfig.getAlias()+
+            ", acceptUnverifiedCert="+acceptUnverifiedCertificates);
+
    		SSLProvider sslProvider = new DefaultSSLProviderImpl(keyConfig, acceptUnverifiedCertificates);
         Scheme sslScheme = new Scheme("https", 443, sslProvider.getSSLSocketFactory());
 			

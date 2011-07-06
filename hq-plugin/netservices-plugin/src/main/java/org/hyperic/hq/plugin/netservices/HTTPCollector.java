@@ -37,6 +37,8 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
@@ -53,15 +55,12 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
-import org.hyperic.hq.agent.AgentConfig;
-import org.hyperic.hq.agent.AgentConfigException;
 import org.hyperic.hq.agent.AgentKeystoreConfig;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.http.HQHttpClient;
 import org.hyperic.util.http.HttpConfig;
-import org.hyperic.util.security.KeystoreConfig;
 import org.springframework.util.StringUtils;
 
 public class HTTPCollector extends SocketChecker {
@@ -74,9 +73,11 @@ public class HTTPCollector extends SocketChecker {
 	private List<String> matches = new ArrayList<String>();
 	private String proxyHost = null;
 	private int proxyPort = 8080;
+	private Log log;
 
 	protected void init() throws PluginException {
 		super.init();
+		log = LogFactory.getLog(HTTPCollector.class);
 		Properties props = getProperties();
 
 		boolean isSSL = isSSL();
@@ -279,6 +280,8 @@ public class HTTPCollector extends SocketChecker {
 		HttpConfig config = new HttpConfig(getTimeoutMillis(), getTimeoutMillis(), proxyHost, proxyPort);
 
 		AgentKeystoreConfig keystoreConfig = new AgentKeystoreConfig();
+        log.debug("isAcceptUnverifiedCert:"+keystoreConfig.isAcceptUnverifiedCert());
+
 		HttpClient client = new HQHttpClient (keystoreConfig, config, keystoreConfig.isAcceptUnverifiedCert());
 		HttpParams params = client.getParams();
 		
