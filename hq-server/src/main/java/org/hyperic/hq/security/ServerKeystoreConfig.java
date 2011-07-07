@@ -52,12 +52,7 @@ public class ServerKeystoreConfig
             super.setFilePassword(keypass);
             //The server should never generate the keystore. It should already have a keystore running.
             //As a result, it's "custom" setting.
-            //But we still need to see if it's the default value defined in app-context for integration-test
-            if("hyperic.keystore".equals(keystore)) {
-                super.setHqDefault(true);
-            }else{
-                super.setHqDefault(false);
-            }
+            super.setHqDefault(false);
         }else{
             String errorMsg="Server keystore setting is not complete. ";
             if(! StringUtils.hasText(keystore)) errorMsg+="keystore path(server.keystore.path) ";
