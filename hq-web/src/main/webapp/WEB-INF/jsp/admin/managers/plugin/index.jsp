@@ -135,10 +135,6 @@
 	<ul id="agentList"></ul>
 	
 	<div id="statusButtonBar">
-	    <span style="float:left">&nbsp;&nbsp;
-	    						  &nbsp;<img src="<spring:url value="/static/images/alert.png"/>" alt="in progress"/> <fmt:message key="admin.managers.Plugin.tip.icon.in.progress"/>
-	   							  &nbsp;<img src="<spring:url value="/static/images/icon_available_red.gif"/>" alt="failure"/> <fmt:message key="admin.managers.Plugin.tip.icon.error"/>
-	    </span>
 		<a href="#" class="cancelLink"><fmt:message key="admin.managers.plugin.button.close" /></a>
 	</div>
 </div>
@@ -293,6 +289,12 @@
     	            	"Accept": "application/json"
                     }
 			};
+			if (status === "error"){
+				hqDojo.style(hqDojo.byId("agentStatusHelp"), "visibility", "visible");
+			}else if (status === "inprogress"){
+				hqDojo.style(hqDojo.byId("agentStatusHelp"), "visibility", "hidden");
+			}
+			
 			hqDojo.xhrGet(xhrArgs);			
 			hqDojo.byId("showStatusPanelDialog_title").innerHTML=hqDojo.byId("pluginName").value + "&nbsp;-&nbsp;"+ "<fmt:message key="admin.managers.Plugin.tip.status.title" />";
 		}
@@ -333,12 +335,13 @@
 		showStatusDialog.setContent(showStatusPanel);
 		hqDojo.style(showStatusPanel, "visibility", "visible");
         var showStatusPanelContent = hqDojo.query("#showStatusPanelDialog .dijitDialogPaneContent")[0];
+
         hqDojo.create("span",{
 		                     "class":"helpLink",
 		                     "id":"agentStatusHelp",
-			                 "innerHTML":"<fmt:message key="header.Help"/>"
+			                 "innerHTML":"<fmt:message key="admin.managers.Plugin.troubleshooting"/>"
 			             },showStatusPanelContent);	
-		 
+		
 		hqDojo.connect(hqDojo.byId("searchText"),"onkeyup",function(e){
 			var pluginId = hqDojo.byId("pluginId").value;
 			var status = hqDojo.byId("status").value;
@@ -357,7 +360,7 @@
         hqDojo.create("span",{
 		                     "class":"helpLink",
 		                     "id":"agentSummaryHelp",
-			                 "innerHTML":"<fmt:message key="header.Help"/>"
+			                 "innerHTML":"<fmt:message key="admin.managers.Plugin.troubleshooting"/>"
 			             },summaryContent);	
 		
 		hqDojo.style(agentSummaryPanel,"visibility","visible");
@@ -396,14 +399,14 @@
 			},
 			"#agentStatusHelp":{
 			    onclick: function(e){
-		             var helpHref = "<hq:help key='.Status'/>";
+		             var helpHref = "<hq:help key='.Troubleshooting'/>";
 			         var helpWin=window.open(helpHref,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');
                      helpWin.focus();
 		        }
 			},
 			"#agentSummaryHelp":{
 			    onclick: function(e){
-		    		var helpHref = "<hq:help key='.Status'/>";
+		    		var helpHref = "<hq:help key='.Troubleshooting'/>";
 					var helpWin=window.open(helpHref,'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');
             		helpWin.focus();
 	            }
