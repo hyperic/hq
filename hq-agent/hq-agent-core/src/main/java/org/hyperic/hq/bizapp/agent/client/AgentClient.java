@@ -625,7 +625,7 @@ public class AgentClient {
             secure = askYesNoQuestion("Should Agent communications " +
                                       "to " + PRODUCT + " always " +
                                       "be secure", 
-                                      false, QPROP_SECURE);
+                                      true, QPROP_SECURE);
             if (secure) {
                 // Always secure.  Ask for SSL port and verify
                 port = this.askIntQuestion("What is the " + PRODUCT +
