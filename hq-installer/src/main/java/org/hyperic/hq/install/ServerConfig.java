@@ -246,10 +246,12 @@ public class ServerConfig
                 }
 
             	
+                break;
+            case 4:
             	String useCustomKeystore = previous.getValue("server.use.custom.keystore");
 
-            	if ("YES".equals(useCustomKeystore) && !installMode.isQuick()) {
                 	schema.addOption(new StringConfigOption("server.keystore.path", Q_SERVER_KEYSTORE_PATH, ""));
+            	if (YesNoConfigOption.YES.equals(useCustomKeystore)) {   //yes implies it's not a quick install (default is no)
                 	schema.addOption(new StringConfigOption("server.keystore.password", Q_SERVER_KEYSTORE_PASSWORD, ""));                	
             	} else {
             		// TODO not sure if there's a cleaner way to do this.  The problem is we technically don't know the real install path bc 
@@ -260,7 +262,7 @@ public class ServerConfig
 
                 break;
 
-            case 4:
+            case 5:
                 portChoice = previous.getValue("server.webapp.port");
                 fqdn = computeFQDN();
                 domain = computeDomain(fqdn);
@@ -290,7 +292,7 @@ public class ServerConfig
 
                 break;
 
-            case 5:
+            case 6:
                 if (installMode.isOracle()) {
                     schema.addOption(new HiddenConfigOption("server.database.choice", DBC_ORA10));
                 } else if (installMode.isPostgres()) {
@@ -323,7 +325,7 @@ public class ServerConfig
                 }
                 break;
 
-            case 6:
+            case 7:
                 // determine server.database from server.database.choice...
                 dbChoiceStr = previous.getValue("server.database.choice");
                 if (dbChoiceStr.equals(DBC_ORA10))
@@ -433,7 +435,7 @@ public class ServerConfig
                 
                 break;
 
-            case 7:
+            case 8:
                 // Get encryption key
                 String encryptionKey = previous.getValue("server.encryption-key");
 
@@ -449,7 +451,7 @@ public class ServerConfig
                 schema.addOption(encryptedPwOption);
                 break;
 
-            case 8:
+            case 9:
                 // For servers using the builtinDB we have only gotten the port
                 // at
                 // this point. Now we setup the url based on the port selection
@@ -461,7 +463,7 @@ public class ServerConfig
                 }
                 break;
 
-            case 9:
+            case 10:
                 // Now that they have made their jdbc selections, do a sanity
                 // check:
                 // If we are in "quick" mode and the database already exists,
@@ -485,7 +487,7 @@ public class ServerConfig
                 }
                 break;
 
-            case 10:
+            case 11:
                 String dbUpgradeChoice = previous.getValue(SERVER_DATABASE_UPGRADE_CHOICE);
                 if (dbUpgradeChoice.equals(DB_CHOICE_OVERWRITE)) {
                     schema.addOption(new HiddenConfigOption("server.database.create",
@@ -498,7 +500,7 @@ public class ServerConfig
                                                  + "Exiting installer.");
                 }
                 break;            
-            case 11:
+            case 12:
                 if(isEEInstall) {
                     schema.addOption(new HiddenConfigOption("accept.eula",YesNoConfigOption.NO));
                 }
