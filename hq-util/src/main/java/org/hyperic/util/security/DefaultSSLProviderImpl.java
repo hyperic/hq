@@ -3,8 +3,6 @@ package org.hyperic.util.security;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -29,40 +27,11 @@ import org.apache.http.conn.ssl.AbstractVerifier;
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
-import org.hyperic.sigar.Sigar;
-import org.hyperic.sigar.SigarException;
 
 public class DefaultSSLProviderImpl implements SSLProvider {
 	private SSLContext sslContext;
 	private SSLSocketFactory sslSocketFactory;
 	private final Log log= LogFactory.getLog(DefaultSSLProviderImpl.class);
-	
-    private String getFQDN() {
-        String address;
-        final String loopback = "127.0.0.1";
-
-        try {
-            address = InetAddress.getLocalHost().getCanonicalHostName();
-            
-            if (!loopback.equals(address)) {
-                return address;
-            }
-        } catch(UnknownHostException e) {
-            //hostname not in DNS or /etc/hosts
-        }
-
-        Sigar sigar = new Sigar();
-        
-        try {
-            address = sigar.getFQDN();
-        } catch (SigarException e) {
-            address = loopback;
-        } finally {
-            sigar.close();
-        }
-
-        return address;
-    }
     
     private KeyManagerFactory getKeyManagerFactory(final KeyStore keystore, final String password) throws KeyStoreException {
     	try {
@@ -119,7 +88,6 @@ public class DefaultSSLProviderImpl implements SSLProvider {
 				public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
 					try {
 					    defaultTrustManager.checkServerTrusted(chain, authType);
-					    log.info("The server is trusted.");
 					} catch(Exception e) {
 			        	log.info("Receiving certificate is not trusted by keystore: alias="+keystoreConfig.getAlias()+
 			        	    ", path="+keystoreConfig.getFilePath()+ " , acceptUnverifiedCertificates="+acceptUnverifiedCertificates);
