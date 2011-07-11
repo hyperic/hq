@@ -114,7 +114,13 @@ public class HTTPCollector extends SocketChecker {
 
 		// to allow self-signed server certs
 		if (isSSL) {
-			// UntrustedSSLProtocolSocketFactory.register();
+			// Try to get grab and accept the certificate
+			try {
+				getSocketWrapper(true);
+			} catch (IOException e) {
+				log.warn(e);
+				// ...log it but probably going to be a problem later...
+			}
 		}
 
 		String pattern = props.getProperty("pattern");
@@ -302,8 +308,7 @@ public class HTTPCollector extends SocketChecker {
 			if (realm.length() == 0) {
 				// send header w/o challenge
 				boolean isProxied = (StringUtils.hasText(proxyHost) && proxyPort != -1);
-				Header authenticationHeader = BasicScheme.authenticate(credentials, 
-						(String) method.getParams().getParameter(AuthPNames.CREDENTIAL_CHARSET), isProxied);
+				Header authenticationHeader = BasicScheme.authenticate(credentials, "UTF-8", isProxied);
 
 				method.addHeader(authenticationHeader);
 			} else {
@@ -331,7 +336,12 @@ public class HTTPCollector extends SocketChecker {
 
 			avail = getAvail(statusCode);
 
-			String msg = statusCode + " " + EntityUtils.toString(response.getEntity());
+			String msg = String.valueOf(statusCode);
+			
+			// ...HEAD requests have no body...
+			if (!isHEAD) {
+				msg += " " + EntityUtils.toString(response.getEntity());
+			}
 
 			Header header = response.getFirstHeader("Server");
 			

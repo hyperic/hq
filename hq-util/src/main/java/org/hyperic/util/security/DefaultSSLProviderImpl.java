@@ -43,11 +43,11 @@ public class DefaultSSLProviderImpl implements SSLProvider {
 		} catch (NoSuchAlgorithmException e) {
 			// no support for algorithm, if this happens we're kind of screwed
         	// we're using the default so it should never happen
-		    log.info("The algorithm is not supported. Error message:"+e.getMessage());
+		    log.error("The algorithm is not supported. Error message:"+e.getMessage());
 			throw new KeyStoreException(e);
 		} catch (UnrecoverableKeyException e) {
 			// invalid password, should never happen
-            log.info("Password for the keystore is invalid. Error message:"+e.getMessage());			
+            log.error("Password for the keystore is invalid. Error message:"+e.getMessage());			
 			throw new KeyStoreException(e);
 		}
     }
@@ -62,7 +62,7 @@ public class DefaultSSLProviderImpl implements SSLProvider {
     	} catch (NoSuchAlgorithmException e) {
     		// no support for algorithm, if this happens we're kind of screwed
         	// we're using the default so it should never happen
-            log.info("The algorithm is not supported. Error message:"+e.getMessage());
+            log.error("The algorithm is not supported. Error message:"+e.getMessage());
             throw new KeyStoreException(e);
 		}
     }
@@ -89,14 +89,14 @@ public class DefaultSSLProviderImpl implements SSLProvider {
 					try {
 					    defaultTrustManager.checkServerTrusted(chain, authType);
 					} catch(Exception e) {
-			        	log.info("Receiving certificate is not trusted by keystore: alias="+keystoreConfig.getAlias()+
+			        	log.debug("Receiving certificate is not trusted by keystore: alias="+keystoreConfig.getAlias()+
 			        	    ", path="+keystoreConfig.getFilePath()+ " , acceptUnverifiedCertificates="+acceptUnverifiedCertificates);
 
 						if (!acceptUnverifiedCertificates) {
-						    log.info("Fail the connection.");
+						    log.debug("Fail the connection.");
 							throw new CertificateException(e);
 						} else {
-						    log.info("Import the certification.");
+						    log.debug("Import the certification.");
 							importCertificate(chain);
 						}
 					}
@@ -120,12 +120,12 @@ public class DefaultSSLProviderImpl implements SSLProvider {
 				        trustStore.store(keyStoreFileOutputStream, keystoreConfig.getFilePassword().toCharArray());
 			        } catch (FileNotFoundException fnfe) {
 						// Can't find the keystore in the path
-						log.info("Can't find the keystore in "+keystoreConfig.getFilePath()+". Error message:"+fnfe.getMessage());
+						log.error("Can't find the keystore in "+keystoreConfig.getFilePath()+". Error message:"+fnfe.getMessage());
 					} catch (NoSuchAlgorithmException e) {
-				        log.info("The algorithm is not supported. Error message:"+e.getMessage());
+				        log.error("The algorithm is not supported. Error message:"+e.getMessage());
                     } catch (Exception e) {
                         //expect KeyStoreException, IOException
-                        log.info("Exception when trying to import certificate: "+e.getMessage());
+                        log.error("Exception when trying to import certificate: "+e.getMessage());
 					} finally {
 			        	if (keyStoreFileOutputStream != null) {
 			        		try { 
