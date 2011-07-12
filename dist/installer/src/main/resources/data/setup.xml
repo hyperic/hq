@@ -532,11 +532,20 @@ ${errMsg}
     <serverConfigUpgrade existing="${server.upgradedir}/conf/hq-server.conf" 
     	new="${server.product.dir}/conf/hq-server.conf" upgradeDir="${server.upgradedir}"/>
   	
+  	<replace file="${server.product.dir}/conf/hq-server.conf" token="@SERVER_CONF@" value="${server.product.dir}/conf" />
+  		
     <!-- Copy the existing license file, if there is one -->
+  	<!-- Disable copying of license.xml file for 4.6 upgrade bc it's now different, post 4.6 upgrades should
+  	     copying the serial file, if one exists...
     <echo>^^^INFO: Copying existing license file</echo>
     <copy file="${server.upgradedir}/conf/license.xml"
           todir="${server.product.dir}/conf"
           failonerror="false"/>
+  	-->
+  	
+  	<echo>^^^INFO: Copying keystore</echo>
+  	<available file="${server.upgradedir}/conf/hyperic.keystore" property="keystore.exists"/>
+  	<antcall target="copy-keystore-upgrade" />
   	
   	<!-- Copy log4j.xml from evolution or later -->
     <copy file="${server.upgradedir}/conf/log4j.xml"
@@ -963,6 +972,24 @@ ${errMsg}
 	  	<delete file="${install.dir}/data/hyperic.keystore" />
 	  </target>
 
+	  <target name="copy-keystore-upgrade">
+	    <antcall target="copy-generated-keystore" />
+	  	<antcall target="copy-existing-keystore" />
+	  </target>
+	
+	  <target name="copy-generated-keystore" unless="keystore.exists">
+	  	<copy file="${install.dir}/data/hyperic.keystore" 
+	  		tofile="${server.product.dir}/conf/hyperic.keystore"
+	  		failonerror="false"/>
+	  	<delete file="${install.dir}/data/hyperic.keystore" />
+	  </target>
+	
+	  <target name="copy-existing-keystore" if="keystore.exists">
+	  	<copy file="${server.upgradedir}/conf/hyperic.keystore"
+	  	  	            tofile="${server.product.dir}/conf/hyperic.keystore"
+	  	  	            failonerror="false"/>
+	  </target>
+	
   <!-- If server.overwrite is not set or is false, check for an
        existing HQ server installation -->
   <target name="fail-if--server.alreadyInstalled"

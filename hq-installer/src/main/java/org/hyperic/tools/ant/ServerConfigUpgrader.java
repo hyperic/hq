@@ -41,8 +41,10 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
+import org.hyperic.util.config.HiddenConfigOption;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.jasypt.properties.PropertyValueEncryptionUtils;
+import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -250,6 +252,19 @@ public class ServerConfigUpgrader
             serverProps.setProperty("server.database-password", encryptPassword("defaultkey",
                 serverProps.getProperty("server.database-password")));
         }
+        
+        // Add new SSL properties for upgrade
+        if (!StringUtils.hasText(serverProps.getProperty("accept.unverified.certificates"))) {
+        	serverProps.setProperty("accept.unverified.certificates", "true");
+        }
+
+        if (!StringUtils.hasText(serverProps.getProperty("server.keystore.path"))) {
+        	serverProps.setProperty("server.keystore.path", "@SERVER_CONF@/hyperic.keystore");
+        }
+        
+        if (!StringUtils.hasText(serverProps.getProperty("server.keystore.password"))) {
+        	serverProps.setProperty("server.keystore.password", "hyperic");
+        }        
     }
 
     private String encryptPassword(String encryptionKey, String clearTextPassword) {
