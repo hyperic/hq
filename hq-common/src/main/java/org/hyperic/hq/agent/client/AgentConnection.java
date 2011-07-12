@@ -50,6 +50,7 @@ public class AgentConnection {
     private static final Log log = LogFactory.getLog(AgentConnection.class);
     private static final int MAX_RETRIES = 5;
     private static final long SLEEP_TIME = 3000;
+    private static final int SOCKET_TIMEOUT = 60000;
     private String   _agentAddress;
     private int      _agentPort;
     private AgentAPI _agentAPI;
@@ -91,6 +92,7 @@ public class AgentConnection {
             toThrow.initCause(exc);
             throw toThrow;
         }
+        s.setSoTimeout(SOCKET_TIMEOUT);
         return s;
     }
 
