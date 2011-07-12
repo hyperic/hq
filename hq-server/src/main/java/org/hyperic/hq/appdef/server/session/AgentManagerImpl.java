@@ -168,9 +168,19 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                     final Runnable runner = new Runnable() {
                         public void run() {
                             final Integer agentId = am.updateAgentPluginStatus(zevent.getPluginReport());
+                            try {
+                                // since updateAgentPluginStatus may update the agent obj,
+                                // I want to make sure that it is still in cache since it is
+                                // extremely critical for ReportProcessor
+                                am.getAgent(zevent.getPluginReport().getAgentToken());
+                            } catch (AgentNotFoundException e) {
+                                log.debug(e,e);
+                            }
                             // want to check in after transaction is committed
                             if (agentId != null) {
                                 agentPluginSyncRestartThrottle.checkinAfterRestart(agentId);
+                            } else {
+                                log.warn("received a null agentId from token=" + zevent.getPluginReport().getAgentToken());
                             }
                         }
                     };
@@ -1239,6 +1249,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     throws AgentConnectionException, AgentRemoteException, PermissionException {
         permissionManager.checkIsSuperUser(subject);
         AgentCommandsClient client = agentCommandsClientFactory.getClient(agent);
+        concurrentStatsCollector.addStat(filenames.size(), ConcurrentStatsCollector.AGENT_PLUGIN_REMOVE);
         return client.agentRemoveFile(filenames);
     }
     
