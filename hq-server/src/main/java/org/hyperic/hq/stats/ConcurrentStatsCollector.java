@@ -104,6 +104,7 @@ public final class ConcurrentStatsCollector {
     						   JDBC_HQ_DS_IN_USE = "JDBC_HQ_DS_IN_USE",
                                AVAIL_BACKFILLER_TIME = "AVAIL_BACKFILLER_TIME",
                                AGENT_PLUGIN_TRANSFER = "AGENT_PLUGIN_TRANSFER",
+                               AGENT_PLUGIN_REMOVE = "AGENT_PLUGIN_REMOVE",
                                AGENT_SYNC_JOB_QUEUE_ADDS = "AGENT_SYNC_JOB_QUEUE_ADDS",
                                AVAIL_BACKFILLER_NUMPLATFORMS = "AVAIL_BACKFILLER_NUMPLATFORMS",
                                AGENT_PLUGIN_SYNC_PENDING_RESTARTS = "AGENT_PLUGIN_SYNC_PENDING_RESTARTS",
@@ -503,10 +504,14 @@ public final class ConcurrentStatsCollector {
                 try {
                     if (_isComposite) {
                         long val = getComposite(_names[i]);
-                        return (_isTrend) ? (_last = val - _last) : val;
+                        long rtn = (_isTrend) ? (val - _last) : val;
+                        _last = val;
+                        return rtn;
                     } else {
                         long val = getValue(_names[i]);
-                        return (_isTrend) ? (_last = val - _last) : val;
+                        long rtn = (_isTrend) ? (val - _last) : val;
+                        _last = val;
+                        return rtn;
                     }
                 } catch (Exception e) {
                     exception = e;
