@@ -46,7 +46,7 @@ public class ServerKeystoreConfig
                                 @Value("#{securityProperties['server.keystore.path']}") String keystore,
                                 @Value("#{securityProperties['server.keystore.password']}") String keypass) throws ConfigPropertyException{
         super();
-        if(StringUtils.hasText(keystore) &&StringUtils.hasText(keypass) ){
+        if(StringUtils.hasText(keystore)){
             super.setAlias("hq");
             super.setFilePath(keystore);
             super.setFilePassword(keypass);
@@ -54,11 +54,7 @@ public class ServerKeystoreConfig
             //As a result, it's "custom" setting.
             super.setHqDefault(false);
         }else{
-            String errorMsg="Server keystore setting is not complete. ";
-            if(! StringUtils.hasText(keystore)) errorMsg+="keystore path(server.keystore.path) ";
-            if(! StringUtils.hasText(keypass)) errorMsg+="keystore password(server.keystore.password) ";
-            log.error(errorMsg+" property(ies) is/are missing. It can be set in hq-server.conf");
-            throw new ConfigPropertyException(errorMsg+" property(ies) is/are missing. It can be set in hq-server.conf");
+            throw new ConfigPropertyException("Keystore path (server.keystore.path) is empty");
         }
     }
 }
