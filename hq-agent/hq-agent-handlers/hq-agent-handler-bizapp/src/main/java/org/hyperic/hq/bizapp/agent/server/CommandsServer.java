@@ -209,10 +209,6 @@ public class CommandsServer
                                           "for " + KEYSTORE_TYPE);
         }
     }
-
-    private String genAgentName(){
-        return "AGENT-" + SecurityUtil.generateRandomToken();
-    }
     
     private KeyManager[] getKeyManagers(KeyStore useStore,String filePass)
         throws AgentStartException
@@ -320,8 +316,7 @@ public class CommandsServer
             this.keyAlg =
                 bootConfig.getProperty("agent.keyalg", "RSA");
             
-             KeystoreConfig  keystoreConfig = new AgentKeystoreConfig();
-            keystoreConfig.setKeyCN(genAgentName());
+            KeystoreConfig  keystoreConfig = new AgentKeystoreConfig();
             keystore     = KeystoreManager.getKeystoreManager().getKeyStore(keystoreConfig );
             keyManagers  = this.getKeyManagers(keystore,keystoreConfig.getFilePassword());
             listener     = new SSLConnectionListener(cfg, this.tokenManager);

@@ -10,6 +10,7 @@ import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.UUID;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -114,7 +115,7 @@ public class DefaultSSLProviderImpl implements SSLProvider {
 			        	
 				        for (X509Certificate cert : chain) {
 				        	String[] cnValues = AbstractVerifier.getCNs(cert);
-				        	String alias = cnValues[0];
+				        	String alias = cnValues[0]+"_"+UUID.randomUUID();
 				        	trustStore.setCertificateEntry(alias, cert);
 				        }
 				        trustStore.store(keyStoreFileOutputStream, keystoreConfig.getFilePassword().toCharArray());

@@ -55,8 +55,7 @@ public class KeystoreManager {
     
     private String getDName(KeystoreConfig keystoreConfig){
         
-        return "CN=" + keystoreConfig.getAlias() + 
-                ("".equals(keystoreConfig.getKeyCN())? "": "_"+keystoreConfig.getKeyCN())+
+        return "CN=" + keystoreConfig.getKeyCN()+
                 " (HQ Self-Signed Cert), OU=HQ, O=hyperic.net, L=Unknown, ST=Unknown, C=US";
     }
     

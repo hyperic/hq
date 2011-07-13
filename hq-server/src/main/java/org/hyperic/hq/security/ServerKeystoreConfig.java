@@ -28,7 +28,6 @@ package org.hyperic.hq.security;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
-import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.security.KeystoreConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +52,7 @@ public class ServerKeystoreConfig
             //The server should never generate the keystore. It should already have a keystore running.
             //As a result, it's "custom" setting.
             super.setHqDefault(false);
+            super.setKeyCN("Hyperic Server");
         }else{
             throw new ConfigPropertyException("Keystore path (server.keystore.path) is empty");
         }
