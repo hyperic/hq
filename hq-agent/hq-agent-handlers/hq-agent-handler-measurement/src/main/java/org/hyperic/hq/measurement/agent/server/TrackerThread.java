@@ -96,9 +96,7 @@ class TrackerThread implements Runnable {
         // Create list early since we want a larger recordsize than the default of 1k.
         try {
             this.storage.createList(LOGTRACK_LISTNAME, LOGTRACK_RECSIZE);
-            this.storage.createList(CONFIGTRACK_LISTNAME, LOGTRACK_RECSIZE);
         } catch (AgentStorageException ignore) {
-            log.error(ignore,ignore);
             // Most likely an agent update where the existing spool
             // already exists.  Will fall back to the old 1k size.
         }

@@ -41,9 +41,9 @@ import java.io.DataOutputStream;
 public class TrackEvent implements java.io.Serializable {
 
     //maxlen as defined in schema (sql/events/EventLog.hbm.xml)
-    //events are also encoded and stored on disk with a max size of 5120
-    //see AgentDListProvider.LOGTRACK_RECSIZE
-    public static final int MESSAGE_MAXLEN = 5120;
+    //events are also encoded and stored on disk with a max size of 4000
+    //see AgentDListProvider.RECSIZE
+    public static final int MESSAGE_MAXLEN = 3500;
     public static final int SOURCE_MAXLEN  = 100;
 
     private AppdefEntityID id;  // The appdef id.
