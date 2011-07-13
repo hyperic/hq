@@ -132,7 +132,8 @@ public class KeystoreManager {
             "-keystore",  keystoreConfig.getFilePath(),
             "-storepass", keystoreConfig.getFilePassword(),
             "-keypass",   keystoreConfig.getFilePassword(),
-            "-keyalg",    "RSA"
+            "-keyalg",    "RSA",
+            "-validity", "3650"  //10 years
         };
 
         int timeout = 5 * 60 * 1000; //5min
