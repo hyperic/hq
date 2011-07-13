@@ -81,7 +81,6 @@ public class AgentConfig {
     //Property name for keystore
     public static final String SSL_KEYSTORE_PATH = "agent.keystore.path";
     public static final String SSL_KEYSTORE_PASSWORD = "agent.keystore.password";
-    public static final String SSL_KEYSTORE_ALIAS = "agent.keystore.alias";
     public static final String SSL_KEYSTORE_ACCEPT_UNVERIFIED_CERT = "accept.unverified.certificates";
     
     // The following final objects are the properties which are usable
@@ -107,8 +106,6 @@ public class AgentConfig {
     { "agent.logDir", System.getProperty("agent.logDir", PROP_INSTALLHOME[1] + "/log") };
     public static final String[] PROP_DATADIR = 
     { "agent.dataDir", System.getProperty("agent.dataDir", PROP_INSTALLHOME[1] + "/data") };
-    public static final String[] PROP_KEY_ALIAS = 
-    { SSL_KEYSTORE_ALIAS, "hq-agent" };
     public static final String[] PROP_KEYSTORE_ACCEPT_UNVERIFIED_CERT = 
     { SSL_KEYSTORE_ACCEPT_UNVERIFIED_CERT, "true" }; //for pre-4.6 version upgrade only. Should be changed to "false" once pre-4.6 is not supported. 
     public static final String[] PROP_KEYSTORE_PATH = 
