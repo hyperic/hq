@@ -120,7 +120,7 @@ public class ServerConfig
     public static final String Q_ADMIN_USER = "What should the username be for the initial admin user?";
     public static final String Q_ADMIN_PASSWORD = "What should the password be for the initial admin user?";
     public static final String Q_ADMIN_EMAIL = "What should the email address be for the initial admin user?";
-    public static final String Q_USE_CUSTOM_KEYSTORE = "Would you like us to use a user managed java keystore?";
+    public static final String Q_USE_CUSTOM_KEYSTORE = "Would you like to use your own java keystore?";
     public static final String Q_SERVER_KEYSTORE_PATH = "What is the file path to your java keystore?";
     public static final String Q_SERVER_KEYSTORE_PASSWORD = "What is the password to your java keystore?";
     private static final String SERVER_DATABASE_UPGRADE_CHOICE = "server.database.upgrade.choice";

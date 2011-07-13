@@ -77,9 +77,6 @@ public class KeystoreManager {
         if(keystoreConfig.getFilePassword()==null){
             errorMsg+=" password is null. ";
         }
-        if(keystoreConfig.getFilePassword().length()<6){
-            errorMsg+=" password should be more than 6 characters. ";
-        }
         if(!"".equals(errorMsg)){
             throw new KeyStoreException(errorMsg);
         }
