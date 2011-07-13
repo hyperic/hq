@@ -4,6 +4,7 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.core;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -12,7 +13,7 @@ import java.util.Map;
  */
 public class RabbitOverview implements RabbitStatsObject{
 
-    private Map<String, Integer> queueTotals;
+    private Map<String, Integer> queueTotals=new HashMap<String, Integer>();
     private MessageStats messageStats;
 
     /**

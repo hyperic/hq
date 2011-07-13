@@ -44,6 +44,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthPolicy;
@@ -67,6 +69,8 @@ public final class HypericRabbitAdmin {
     private String user;
     private String pass;
     private int port;
+    private boolean VHOSTS_2_1_1 = false;
+    private boolean NODES_2_1_1 = false;
 
     public HypericRabbitAdmin(Properties props) throws PluginException {
         this.port = Integer.parseInt(props.getProperty(DetectorConstants.PORT));
@@ -85,7 +89,11 @@ public final class HypericRabbitAdmin {
         client.getParams().setAuthenticationPreemptive(true);
 
         RabbitOverview overview = getOverview();
-        if(overview==null) throw new PluginException("Connection to '"+addr+":"+port+"' fails");
+        if (overview == null) {
+            throw new PluginException("Connection to '" + addr + ":" + port + "' fails");
+        }
+
+        checkLegacy();
     }
 
     public HypericRabbitAdmin(ConfigResponse props) throws PluginException {
@@ -97,7 +105,17 @@ public final class HypericRabbitAdmin {
     }
 
     public List<RabbitVirtualHost> getVirtualHosts() throws PluginException {
-        return Arrays.asList(get("/api/vhosts", RabbitVirtualHost[].class));
+        List<RabbitVirtualHost> res;
+        if (VHOSTS_2_1_1) {
+            res = new ArrayList<RabbitVirtualHost>();
+            List<String> names = Arrays.asList(get("/api/vhosts", String[].class));
+            for (String name : names) {
+                res.add(new RabbitVirtualHost(name));
+            }
+        } else {
+            res = Arrays.asList(get("/api/vhosts", RabbitVirtualHost[].class));
+        }
+        return res;
     }
 
     public List<RabbitQueue> getQueues(RabbitVirtualHost vh) throws PluginException {
@@ -148,7 +166,15 @@ public final class HypericRabbitAdmin {
         } catch (UnsupportedEncodingException ex) {
             throw new RuntimeException(ex);
         }
-        return get("/api/vhosts/" + vhName, RabbitVirtualHost.class);
+
+        RabbitVirtualHost res;
+        if (VHOSTS_2_1_1) {
+            String name = get("/api/vhosts/" + vhName, String.class);
+            res = new RabbitVirtualHost(name);
+        } else {
+            res = get("/api/vhosts/" + vhName, RabbitVirtualHost.class);
+        }
+        return res;
     }
 
     public RabbitQueue getVirtualQueue(String vhName, String qName) throws PluginException {
@@ -174,13 +200,19 @@ public final class HypericRabbitAdmin {
     }
 
     public RabbitNode getNode(String node) throws PluginException {
-        try {
-            node = URLEncoder.encode(node, "UTF-8");
-        } catch (UnsupportedEncodingException ex) {
-            throw new RuntimeException(ex);
-        }
+        RabbitNode res;
+        if (NODES_2_1_1) {
+            res = get("/api/overview/", RabbitNode.class);
+        } else {
+            try {
+                node = URLEncoder.encode(node, "UTF-8");
+            } catch (UnsupportedEncodingException ex) {
+                throw new RuntimeException(ex);
+            }
 
-        return get("/api/nodes/" + node, RabbitNode.class);
+            res = get("/api/nodes/" + node, RabbitNode.class);
+        }
+        return res;
     }
 
     private <T extends Object> T get(String api, Class<T> classOfT) throws PluginException {
@@ -212,10 +244,26 @@ public final class HypericRabbitAdmin {
                 }
             }
         } catch (IOException ex) {
-            logger.debug(ex.getMessage(),ex);
-            throw new PluginException(ex.getMessage(),ex);
+            logger.debug(ex.getMessage(), ex);
+            throw new PluginException(ex.getMessage(), ex);
         }
         return res;
+    }
+
+    private void checkLegacy() {
+        try {
+            get("/api/vhosts", RabbitVirtualHost[].class);
+        } catch (Exception ex) {
+            logger.debug("[checkLegacy] HypericRabbitAdmin runnig on VHOSTS_2_1_1 mode. error:" + ex.getMessage());
+            VHOSTS_2_1_1 = true;
+        }
+        
+        try {
+            get("/api/nodes", RabbitNode[].class);
+        } catch (Exception ex) {
+            logger.debug("[checkLegacy] HypericRabbitAdmin runnig on NODES_2_1_1 mode. error:" + ex.getMessage());
+            NODES_2_1_1 = true;
+        }
     }
 
     private class DateTimeDeserializer implements JsonDeserializer<Date> {
