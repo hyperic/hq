@@ -26,6 +26,8 @@
 package org.hyperic.hq.agent;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -53,8 +55,16 @@ public class AgentKeystoreConfig
         }
         super.setFilePath(cfg.getBootProperties().getProperty(AgentConfig.SSL_KEYSTORE_PATH));
         super.setFilePassword(cfg.getBootProperties().getProperty(AgentConfig.SSL_KEYSTORE_PASSWORD));
-        super.setAlias(cfg.getBootProperties().getProperty(AgentConfig.SSL_KEYSTORE_ALIAS));
+        super.setAlias("hq-agent");
         super.setHqDefault(AgentConfig.PROP_KEYSTORE_PATH[1].equals(getFilePath()));
         super.setAcceptUnverifiedCert("true".equals(cfg.getBootProperties().getProperty(AgentConfig.SSL_KEYSTORE_ACCEPT_UNVERIFIED_CERT)));
+        String address = "";
+        try {
+            address = InetAddress.getLocalHost().getCanonicalHostName();
+        } catch (UnknownHostException e) {
+            log.error(e);
+        }
+        
+        super.setKeyCN("Hyperic Agent_"+address);
     }
 }

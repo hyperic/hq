@@ -164,7 +164,6 @@ public class AgentConfig {
         PROP_LOGDIR,
         PROP_DATADIR,
         PROP_KEYSTORE_ACCEPT_UNVERIFIED_CERT,
-        PROP_KEY_ALIAS,
         PROP_KEYSTORE_PATH,
         PROP_KEYSTORE_PASSWORD,
         PROP_LIB_HANDLERS,
