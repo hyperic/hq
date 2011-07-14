@@ -80,6 +80,10 @@
 			<artifactId>ant</artifactId>
 			<scope>test</scope>
 		</dependency>	
+		<dependency>
+			<groupId>com.gemstone.gemfire</groupId>
+			<artifactId>gemfire</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
