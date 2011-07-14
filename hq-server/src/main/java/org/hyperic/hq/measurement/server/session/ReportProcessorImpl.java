@@ -243,7 +243,12 @@ public class ReportProcessorImpl implements ReportProcessor {
             log.error(e,e);
             return;
         }
-        final Resource platformRes = platformManager.getPlatformByAgentId(agent.getId()).getResource();
+        if (agent == null) {
+            log.error("agent associated with token=" + agentToken + " is null, ignoring report");
+            return;
+        }
+        final Platform platform = platformManager.getPlatformByAgentId(agent.getId());
+        final Resource platformRes = (platform == null) ? null : platform.getResource();
         /** idea here is that if an agent checks in don't wait for its platform availability
             to come in.  We know that the platform is up if the agent checks in. */
         boolean setPlatformAvail = true;
@@ -270,7 +275,7 @@ public class ReportProcessorImpl implements ReportProcessor {
                 }
                 continue;
             }
-            if (platformRes.getId().equals(res.getId())) {
+            if (platformRes == null || platformRes.getId().equals(res.getId())) {
                 setPlatformAvail = false;
             }
             
@@ -339,7 +344,7 @@ public class ReportProcessorImpl implements ReportProcessor {
             }
         }
 
-        if (setPlatformAvail) {
+        if (platformRes != null && setPlatformAvail) {
             zEventManager.enqueueEventAfterCommit(new PlatformAvailZevent(platformRes.getId()));
         }
         if (agentToken != null && !toUnschedule.isEmpty()) {
