@@ -235,7 +235,7 @@ table border on left side - do not remove */
 }
 
 .alertHighlight {
-    background-color: #fad0c9;
+    background-color: #fad0c9 !important;
 }
 
 .severityIcon {
