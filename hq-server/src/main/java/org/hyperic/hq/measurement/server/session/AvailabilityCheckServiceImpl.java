@@ -51,7 +51,6 @@ import org.springframework.stereotype.Service;
 public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
     private final Log log = LogFactory.getLog(AvailabilityCheckServiceImpl.class);
     private static final String AVAIL_BACKFILLER_TIME = ConcurrentStatsCollector.AVAIL_BACKFILLER_TIME;
-    private static final String AVAIL_BACKFILLER_NUMPLATFORMS = ConcurrentStatsCollector.AVAIL_BACKFILLER_NUMPLATFORMS;
 
     private long startTime = 0;
     private long wait = 5 * MeasurementConstants.MINUTE;
@@ -77,7 +76,6 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
     @PostConstruct
     public void initStats() {
         concurrentStatsCollector.register(AVAIL_BACKFILLER_TIME);
-        concurrentStatsCollector.register(AVAIL_BACKFILLER_NUMPLATFORMS);
     }
 
     public void backfill() {
@@ -135,9 +133,6 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
             throw new SystemException(e);
         } finally {
             concurrentStatsCollector.addStat(now() - start, AVAIL_BACKFILLER_TIME);
-            if (backfillPoints != null) {
-                concurrentStatsCollector.addStat(backfillPoints.size(), AVAIL_BACKFILLER_NUMPLATFORMS);
-            }
         }
     }
 

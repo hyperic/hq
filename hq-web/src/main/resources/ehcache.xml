@@ -249,6 +249,12 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.appdef.Agent.platforms"
+         maxElementsInMemory="5000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.appdef.AgentType"
          maxElementsInMemory="2"
          eternal="true"
@@ -277,6 +283,12 @@
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.appdef.server.session.Platform"
          maxElementsInMemory="2000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="Platform.findByAgent"
+         maxElementsInMemory="5000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
@@ -923,6 +935,12 @@
   <!-- Plugin caches -->
   <cache name="org.hyperic.hq.appdef.server.session.AgentPluginStatus"
          maxElementsInMemory="100000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+  <cache name="org.hyperic.hq.product.Plugin.findAll"
+         maxElementsInMemory="10"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"

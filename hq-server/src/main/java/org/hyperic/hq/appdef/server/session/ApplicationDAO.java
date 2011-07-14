@@ -189,11 +189,19 @@ public class ApplicationDAO
             .uniqueResult();
     }
 
+    @SuppressWarnings("unchecked")
     public Collection<Application> findByServiceId_orderName(Integer serviceId) {
-        String sql = "select a from Application a " + " join fetch a.appServices s "
-                     + "where s.service.id=? " + "order by a.resource.sortName";
-        return getSession().createQuery(sql).setInteger(0, serviceId.intValue()).setCacheable(true)
-            .setCacheRegion("Application.findByServiceId_orderName").list();
+        String sql = new StringBuilder()
+            .append("select a from Application a ")
+            .append(" join fetch a.appServices s ")
+            .append("where s.service.id=? ")
+            .append("order by a.resource.sortName")
+            .toString();
+        return getSession().createQuery(sql)
+                           .setInteger(0, serviceId.intValue())
+                           .setCacheable(true)
+                           .setCacheRegion("Application.findByServiceId_orderName")
+                           .list();
     }
 
     public Collection<Application> findByServiceIdOrClusterId_orderName(Integer serviceId,

@@ -205,13 +205,23 @@ class SSLConnectionListener
         }
 
         int port = cfg.getListenPort();
-
-        try {
-            this.listenSock = (SSLServerSocket) sFactory.createServerSocket(port, 50, addr);
-            
-            this.listenSock.setSoTimeout(timeout);
-        } catch(IOException exc){
-            throw new AgentStartException("Failed to listen at " + cfg.getListenIp() + ":" + port + ": " + exc.getMessage());
+        // Better to retry until this succeeds rather than give up and not allowing
+        // the agent to start
+        while (true) {
+            try {
+                listenSock = (SSLServerSocket)sFactory.createServerSocket(port, 50, addr);
+                listenSock.setSoTimeout(timeout);
+                break;
+            } catch(IOException exc){
+                log.warn("Failed to listen at " + cfg.getListenIp() +
+                         ":" + port + ": " + exc.getMessage() + ".  Will retry until up.");
+                log.debug(exc,exc);
+                try {
+                    Thread.sleep(30000);
+                } catch (InterruptedException e) {
+                    log.debug(e,e);
+                }
+            }
         }
     }
 

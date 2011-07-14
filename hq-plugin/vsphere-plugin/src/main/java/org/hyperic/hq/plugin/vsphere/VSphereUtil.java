@@ -35,11 +35,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
+import org.hyperic.hq.agent.AgentKeystoreConfig;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.security.DefaultSSLProviderImpl;
+import org.hyperic.util.security.SSLProvider;
 import org.hyperic.util.timer.StopWatch;
 
 import com.vmware.vim25.HostHardwareSummary;
@@ -91,7 +97,13 @@ public class VSphereUtil extends ServiceInstance {
         String password = props.getProperty(VSphereCollector.PROP_PASSWORD); 
 
         try {
-            return new VSphereUtil(new URL(url), username, password, true);
+            AgentKeystoreConfig keystoreConfig = new AgentKeystoreConfig();
+    		SSLProvider sslProvider = new DefaultSSLProviderImpl(keystoreConfig, keystoreConfig.isAcceptUnverifiedCert());
+    		SSLContext sslContext = sslProvider.getSSLContext();
+    	    HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
+    		HttpsURLConnection.setDefaultHostnameVerifier(new AllowAllHostnameVerifier());
+
+            return new VSphereUtil(new URL(url), username, password, false);
         } catch (Exception e) {
             throw new PluginException("ServiceInstance(" + url + ", " +
                                       username + "): " + e, e);

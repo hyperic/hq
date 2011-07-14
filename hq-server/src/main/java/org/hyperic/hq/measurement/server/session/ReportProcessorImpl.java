@@ -28,10 +28,13 @@ package org.hyperic.hq.measurement.server.session;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -51,6 +54,7 @@ import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
@@ -61,7 +65,11 @@ import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.ReportProcessor;
 import org.hyperic.hq.measurement.shared.SRNManager;
 import org.hyperic.hq.product.MetricValue;
+import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
+import org.hyperic.hq.zevents.ZeventListener;
+import org.hyperic.hq.zevents.ZeventPayload;
+import org.hyperic.hq.zevents.ZeventSourceId;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -84,13 +92,16 @@ public class ReportProcessorImpl implements ReportProcessor {
     private AgentManager agentManager;
     private ZeventEnqueuer zEventManager;
 
+    private ResourceManager resourceManager;
+
     @Autowired
     public ReportProcessorImpl(MeasurementManager measurementManager,
                                PlatformManager platformManager, ServerManager serverManager,
                                ServiceManager serviceManager, SRNManager srnManager,
                                ReportStatsCollector reportStatsCollector,
                                MeasurementInserterHolder measurementInserterManager,
-                               AgentManager agentManager, ZeventEnqueuer zEventManager) {
+                               AgentManager agentManager, ZeventEnqueuer zEventManager,
+                               ResourceManager resourceManager) {
         this.measurementManager = measurementManager;
         this.platformManager = platformManager;
         this.serverManager = serverManager;
@@ -100,13 +111,49 @@ public class ReportProcessorImpl implements ReportProcessor {
         this.measurementInserterManager = measurementInserterManager;
         this.agentManager = agentManager;
         this.zEventManager = zEventManager;
+        this.resourceManager = resourceManager;
+    }
+    
+    @PostConstruct
+    public void init() {
+        zEventManager.addBufferedListener(PlatformAvailZevent.class,
+            new ZeventListener<PlatformAvailZevent>() {
+                public void processEvents(List<PlatformAvailZevent> events) {
+                    final DataInserter a = measurementInserterManager.getAvailDataInserter();
+                    final boolean debug = log.isDebugEnabled();
+                    for (final PlatformAvailZevent event : events) {
+                        final Integer rid = event.getResourceId();
+                        if (debug) log.debug("adding platform availability pt for resId=" + rid);
+                        if (rid == null) {
+                            continue;
+                        }
+                        final Resource r = resourceManager.getResourceById(rid);
+                        final Measurement m = measurementManager.getAvailabilityMeasurement(r);
+                        final long now = TimingVoodoo.roundDownTime(now(), m.getInterval());
+                        final DataPoint avail =
+                            new DataPoint(m.getId(), MeasurementConstants.AVAIL_UP, now);
+                        try {
+                            sendMetricDataToDB(a, Collections.singletonList(avail), true);
+                        } catch (DataInserterException e) {
+                            log.warn(e);
+                            log.debug(e,e);
+                        }
+                    }
+                }
+            }
+        );
     }
 
-    private void addPoint(List<DataPoint> points, List<DataPoint> priorityPts, Measurement m, MetricValue[] vals) {
+    private long now() {
+        return System.currentTimeMillis();
+    }
+
+    private void addPoint(List<DataPoint> points, List<DataPoint> priorityPts, Measurement m,
+                          MetricValue[] vals) {
         final boolean debug = log.isDebugEnabled();
         final StopWatch watch = new StopWatch();
         for (MetricValue val : vals) {
-            final long now = TimingVoodoo.roundDownTime(System.currentTimeMillis(), MINUTE);
+            final long now = TimingVoodoo.roundDownTime(now(), MINUTE);
             try {
                 // this is just to check if the metricvalue is valid
                 // will throw a NumberFormatException if there is a problem
@@ -189,7 +236,23 @@ public class ReportProcessorImpl implements ReportProcessor {
         final boolean debug = log.isDebugEnabled();
         final StopWatch watch = new StopWatch();
         final Set<AppdefEntityID> toUnschedule = new HashSet<AppdefEntityID>();
-        for (DSNList dsnList : dsnLists) {
+        Agent agent = null;
+        try {
+            agent = agentManager.getAgent(agentToken);
+        } catch (AgentNotFoundException e) {
+            log.error(e,e);
+            return;
+        }
+        if (agent == null) {
+            log.error("agent associated with token=" + agentToken + " is null, ignoring report");
+            return;
+        }
+        final Platform platform = platformManager.getPlatformByAgentId(agent.getId());
+        final Resource platformRes = (platform == null) ? null : platform.getResource();
+        /** idea here is that if an agent checks in don't wait for its platform availability
+            to come in.  We know that the platform is up if the agent checks in. */
+        boolean setPlatformAvail = true;
+        for (final DSNList dsnList : dsnLists) {
             Integer dmId = new Integer(dsnList.getClientId());
             if (debug) watch.markTimeBegin("getMeasurement");
             Measurement m = measurementManager.getMeasurement(dmId);
@@ -204,33 +267,25 @@ public class ReportProcessorImpl implements ReportProcessor {
             if (m == null || !m.isEnabled()) {
                 continue;
             }
-            // Need to check if resource was asynchronously deleted (type ==
-            // null)
-            if (debug) watch.markTimeBegin("getResource");
+            // Need to check if resource was asynchronously deleted (type == null)
             final Resource res = m.getResource();
-            if (debug) watch.markTimeEnd("getResource");
             if (res == null || res.isInAsyncDeleteState()) {
                 if (debug) {
                     log.debug("dropping metricId=" + m.getId() + " since resource is in async delete state");
                 }
                 continue;
             }
+            if (platformRes == null || platformRes.getId().equals(res.getId())) {
+                setPlatformAvail = false;
+            }
             
             if (debug) watch.markTimeBegin("resMatchesAgent");
             // TODO reosurceMatchesAgent() and the call to getAgent() can be
             // consolidated, the agent match can be checked by getting the agent
             // for the instanceID from the resource
-            if (!resourceMatchesAgent(res, agentToken)) {
-                String ipAddr = "<Unknown IP address>";
-                String portString = "<Unknown port>";
-                try {
-                    Agent agt = agentManager.getAgent(agentToken);
-                    ipAddr = agt.getAddress();
-                    portString = agt.getPort().toString();
-                } catch (AgentNotFoundException e) {
-                    // leave values as default
-                    log.debug("Error trying to construct string for WARN message below", e);
-                }
+            if (!resourceMatchesAgent(res, agent)) {
+                String ipAddr = agent.getAddress();
+                String portString = agent.getPort().toString();
                              
                 log.warn("measurement (id=" + m.getId() + ", name=" +
                           m.getTemplate().getName() + ") was sent to the " +
@@ -289,6 +344,9 @@ public class ReportProcessorImpl implements ReportProcessor {
             }
         }
 
+        if (platformRes != null && setPlatformAvail) {
+            zEventManager.enqueueEventAfterCommit(new PlatformAvailZevent(platformRes.getId()));
+        }
         if (agentToken != null && !toUnschedule.isEmpty()) {
         	// Better tell the agent to stop reporting non-existent entities
             zEventManager.enqueueEventAfterCommit(new AgentUnscheduleZevent(toUnschedule, agentToken));
@@ -305,7 +363,7 @@ public class ReportProcessorImpl implements ReportProcessor {
     /**
      * checks if the agentToken matches resource's agentToken
      */
-    private boolean resourceMatchesAgent(Resource resource, String agentToken) {
+    private boolean resourceMatchesAgent(Resource resource, Agent agent) {
         if (resource == null || resource.isInAsyncDeleteState()) {
             return false;
         }
@@ -322,7 +380,7 @@ public class ReportProcessorImpl implements ReportProcessor {
                 if (a == null) {
                     return false;
                 }
-                return a.getAgentToken().equals(agentToken);
+                return a.getId().equals(agent.getId());
             } else if (resType.equals(AuthzConstants.authzServer)) {
                 Server server = serverManager.findServerById(aeid);
                 Resource r = server.getResource();
@@ -341,7 +399,7 @@ public class ReportProcessorImpl implements ReportProcessor {
                 if (a == null) {
                     return false;
                 }
-                return a.getAgentToken().equals(agentToken);
+                return a.getId().equals(agent.getId());
             } else if (resType.equals(AuthzConstants.authzService)) {
                Service service =serviceManager.findServiceById(aeid);
                Resource r = service.getResource();
@@ -368,7 +426,7 @@ public class ReportProcessorImpl implements ReportProcessor {
                if (a == null) {
                    return false;
                }
-               return a.getAgentToken().equals(agentToken);
+               return a.getId().equals(agent.getId());
             }
         } catch (PlatformNotFoundException e) {
             log.warn("Platform not found Id=" + aeid);
@@ -391,10 +449,22 @@ public class ReportProcessorImpl implements ReportProcessor {
         try {
             d.insertMetrics(dataPoints, isPriority);
             int size = dataPoints.size();
-            long ts = System.currentTimeMillis();
+            long ts = now();
             reportStatsCollector.getCollector().add(size, ts);
         } catch (InterruptedException e) {
             throw new SystemException("Interrupted while attempting to " + "insert data");
+        }
+    }
+    
+    private class PlatformAvailZevent extends Zevent {
+        private final Integer resourceId;
+        @SuppressWarnings("serial")
+        public PlatformAvailZevent(Integer resourceId) {
+            super(new ZeventSourceId() {}, new ZeventPayload() {});
+            this.resourceId = resourceId;
+        }
+        private Integer getResourceId() {
+            return resourceId;
         }
     }
 }

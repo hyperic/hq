@@ -34,6 +34,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.Agent;
@@ -47,6 +49,7 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.product.MetricValue;
+import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.util.TimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -67,29 +70,42 @@ public class BackfillPointsServiceImpl implements BackfillPointsService {
     private static final double AVAIL_PAUSED = MeasurementConstants.AVAIL_PAUSED;
     private static final double AVAIL_NULL = MeasurementConstants.AVAIL_NULL;
     private static final long MINUTE = MeasurementConstants.MINUTE;
+    private static final String AVAIL_BACKFILLER_NUMPLATFORMS =
+        ConcurrentStatsCollector.AVAIL_BACKFILLER_NUMPLATFORMS;
     private final Log log = LogFactory.getLog(BackfillPointsServiceImpl.class);
     private AvailabilityManager availabilityManager;
     private PermissionManager permissionManager;
     private AvailabilityCache availabilityCache;
     private AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle;
     private AgentDAO agentDAO;
+    private ConcurrentStatsCollector concurrentStatsCollector;
 
     @Autowired
     public BackfillPointsServiceImpl(AvailabilityManager availabilityManager,
                                      PermissionManager permissionManager,
                                      AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle,
                                      AgentDAO agentDAO,
-                                     AvailabilityCache availabilityCache) {
+                                     AvailabilityCache availabilityCache,
+                                     ConcurrentStatsCollector concurrentStatsCollector) {
         this.availabilityManager = availabilityManager;
         this.permissionManager = permissionManager;
         this.availabilityCache = availabilityCache;
         this.agentPluginSyncRestartThrottle = agentPluginSyncRestartThrottle;
         this.agentDAO = agentDAO;
+        this.concurrentStatsCollector = concurrentStatsCollector;
+    }
+
+    @PostConstruct
+    public void initStats() {
+        concurrentStatsCollector.register(AVAIL_BACKFILLER_NUMPLATFORMS);
     }
 
     public Map<Integer, DataPoint> getBackfillPoints(long current) {
         Map<Integer, ResourceDataPoint> downPlatforms = getDownPlatforms(current);
         removeRestartingAgents(downPlatforms);
+        if (downPlatforms != null) {
+            concurrentStatsCollector.addStat(downPlatforms.size(), AVAIL_BACKFILLER_NUMPLATFORMS);
+        }
         return getBackfillPts(downPlatforms, current);
     }
 
@@ -109,13 +125,13 @@ public class BackfillPointsServiceImpl implements BackfillPointsService {
                 return;
             }
         }
-        // [HHQ-4937] allow agents up to 2 minutes after they checkin to start sending availability
+        // [HHQ-4937] allow agents up to 3 minutes after they checkin to start sending availability
         // before marking them down
         final Map<Integer, Long> lastCheckins = agentPluginSyncRestartThrottle.getLastCheckinInfo();
         for (final Entry<Integer, Long> entry : lastCheckins.entrySet()) {
             final Integer agentId = entry.getKey();
             final long lastCheckin = entry.getValue();
-            if ((lastCheckin + (2*MINUTE)) < now || processed.contains(agentId)) {
+            if ((lastCheckin + (10*MINUTE)) < now || processed.contains(agentId)) {
                 continue;
             }
             removeAssociatedPlatforms(agentId, backfillData, lastCheckin, false);
@@ -159,8 +175,8 @@ public class BackfillPointsServiceImpl implements BackfillPointsService {
         final List<Measurement> platformResources = availabilityManager.getPlatformResources();
         final long now = TimingVoodoo.roundDownTime(timeInMillis, MINUTE);
         final String nowTimestamp = TimeUtil.toString(now);
-        final Map<Integer, ResourceDataPoint> rtn = new HashMap<Integer, ResourceDataPoint>(
-            platformResources.size());
+        final Map<Integer, ResourceDataPoint> rtn =
+            new HashMap<Integer, ResourceDataPoint>(platformResources.size());
         Resource resource = null;
         synchronized (availabilityCache) {
             for (final Measurement meas : platformResources) {

@@ -25,6 +25,7 @@
  */
 package org.hyperic.hq.appdef.server.session;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -32,9 +33,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+
 import org.hibernate.Hibernate;
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.type.IntegerType;
 import org.hibernate.type.StringType;
@@ -43,6 +48,8 @@ import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.product.server.session.PluginDAO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.orm.hibernate3.HibernateCallback;
+import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -56,6 +63,16 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
         super(AgentPluginStatus.class, factory);
         this.agentDAO = agentDAO;
         this.pluginDAO = pluginDAO;
+    }
+    
+    @PostConstruct
+    public void initCache() {
+        new HibernateTemplate(sessionFactory, true).execute(new HibernateCallback<Object>() {
+            public Object doInHibernate(Session session) throws HibernateException, SQLException {
+                session.createQuery("from AgentPluginStatus").list();
+                return null;
+            }
+        });
     }
     
     public void saveOrUpdate(AgentPluginStatus agentPluginStatus) {
@@ -417,6 +434,12 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
             .createQuery(hql)
             .setParameterList("statuses", vals, new StringType())
             .list();
+    }
+    
+    @SuppressWarnings("unchecked")
+    public List<Integer> getAllIds() {
+        final String hql = "select id from AgentPluginStatus";
+        return getSession().createQuery(hql).list();
     }
 
 }

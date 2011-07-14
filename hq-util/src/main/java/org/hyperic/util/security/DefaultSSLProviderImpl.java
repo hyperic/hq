@@ -10,6 +10,7 @@ import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.UUID;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -43,12 +44,10 @@ public class DefaultSSLProviderImpl implements SSLProvider {
 		} catch (NoSuchAlgorithmException e) {
 			// no support for algorithm, if this happens we're kind of screwed
         	// we're using the default so it should never happen
-		    log.error("The algorithm is not supported. Error message:"+e.getMessage());
-			throw new KeyStoreException(e);
+			throw new KeyStoreException("The algorithm is not supported. Error message:"+e.getMessage());
 		} catch (UnrecoverableKeyException e) {
 			// invalid password, should never happen
-            log.error("Password for the keystore is invalid. Error message:"+e.getMessage());			
-			throw new KeyStoreException(e);
+			throw new KeyStoreException("Password for the keystore is invalid. Error message:"+e.getMessage());
 		}
     }
     
@@ -114,7 +113,7 @@ public class DefaultSSLProviderImpl implements SSLProvider {
 			        	
 				        for (X509Certificate cert : chain) {
 				        	String[] cnValues = AbstractVerifier.getCNs(cert);
-				        	String alias = cnValues[0];
+				        	String alias = cnValues[0]+"_"+UUID.randomUUID();
 				        	trustStore.setCertificateEntry(alias, cert);
 				        }
 				        trustStore.store(keyStoreFileOutputStream, keystoreConfig.getFilePassword().toCharArray());

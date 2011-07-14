@@ -55,8 +55,7 @@ public class KeystoreManager {
     
     private String getDName(KeystoreConfig keystoreConfig){
         
-        return "CN=" + keystoreConfig.getAlias() + 
-                ("".equals(keystoreConfig.getKeyCN())? "": "_"+keystoreConfig.getKeyCN())+
+        return "CN=" + keystoreConfig.getKeyCN()+
                 " (HQ Self-Signed Cert), OU=HQ, O=hyperic.net, L=Unknown, ST=Unknown, C=US";
     }
     
@@ -76,9 +75,6 @@ public class KeystoreManager {
         }
         if(keystoreConfig.getFilePassword()==null){
             errorMsg+=" password is null. ";
-        }
-        if(keystoreConfig.getFilePassword().length()<6){
-            errorMsg+=" password should be more than 6 characters. ";
         }
         if(!"".equals(errorMsg)){
             throw new KeyStoreException(errorMsg);
@@ -136,7 +132,8 @@ public class KeystoreManager {
             "-keystore",  keystoreConfig.getFilePath(),
             "-storepass", keystoreConfig.getFilePassword(),
             "-keypass",   keystoreConfig.getFilePassword(),
-            "-keyalg",    "RSA"
+            "-keyalg",    "RSA",
+            "-validity", "3650"  //10 years
         };
 
         int timeout = 5 * 60 * 1000; //5min

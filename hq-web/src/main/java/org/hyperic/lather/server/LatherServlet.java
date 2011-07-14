@@ -291,17 +291,15 @@ public class LatherServlet
                                                          
                 issueSuccessResponse(this.resp, this.xcoder, res);
             }  catch(IllegalArgumentException exc){
-                this.log.error("IllegalArgumentException when invoking LatherDispatcher." , exc);
+                log.error("IllegalArgumentException when invoking LatherDispatcher from Ip=" + ctx.getCallerIP() +
+                          ", method=" + method, exc);
                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             } catch(RuntimeException exc){
-                this.log.error("RuntimeException when invoking LatherDispatcher." , exc);
+                log.error("RuntimeException when invoking LatherDispatcher from Ip=" + ctx.getCallerIP() +
+                          ", method=" + method, exc);
                 issueErrorResponse(resp, exc.toString());
             } catch(LatherRemoteException exc){
-                
-                
-                
-                    issueErrorResponse(resp, exc.toString());
-               
+                issueErrorResponse(resp, exc.toString());
             }
         }
 

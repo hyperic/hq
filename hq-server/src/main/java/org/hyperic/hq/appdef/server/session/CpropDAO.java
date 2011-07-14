@@ -221,7 +221,8 @@ public class CpropDAO
     public Properties getEntries(AppdefEntityID aID, String column) {
         Properties res = new Properties();
        
-        List<Map<String, Object>> props = jdbcTemplate.queryForList("SELECT A." + column + ", B.propvalue FROM " + CPROPKEY_TABLE +
+        List<Map<String, Object>> props = jdbcTemplate.queryForList(
+            "SELECT A." + column + ", B.propvalue FROM " + CPROPKEY_TABLE +
             " A, " + CPROP_TABLE + " B WHERE " +
             "B.keyid=A.id AND A.appdef_type=? " + "AND B.appdef_id=? " +
             "ORDER BY B.value_idx",aID.getType(),aID.getId());

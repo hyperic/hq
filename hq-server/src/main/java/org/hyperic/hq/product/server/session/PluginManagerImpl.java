@@ -86,6 +86,7 @@ import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.hq.zevents.ZeventPayload;
 import org.hyperic.hq.zevents.ZeventSourceId;
+import org.hyperic.util.timer.StopWatch;
 import org.jdom.Document;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
@@ -645,12 +646,18 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
     }
 
     public Map<Integer, Map<AgentPluginStatusEnum, Integer>> getPluginRollupStatus() {
+        final StopWatch watch = new StopWatch();
+        final boolean debug = log.isDebugEnabled();
         final Map<String, Plugin> pluginsByName = getAllPluginsByName();
-        final List<AgentPluginStatus> statuses = agentPluginStatusDAO.findAll();
+        final List<Integer> statusIds = agentPluginStatusDAO.getAllIds();
         final Map<Integer, Map<AgentPluginStatusEnum, Integer>> rtn =
-            new HashMap<Integer, Map<AgentPluginStatusEnum, Integer>>();
-        for (final AgentPluginStatus status : statuses) {
-            if (status.getAgent().getPlatforms().isEmpty()) {
+            new HashMap<Integer, Map<AgentPluginStatusEnum, Integer>>(statusIds.size());
+        if (debug) watch.markTimeBegin("loop");
+        for (final Integer statusId : statusIds) {
+            if (debug) watch.markTimeBegin("get");
+            final AgentPluginStatus status = agentPluginStatusDAO.get(statusId);
+            if (debug) watch.markTimeEnd("get");
+            if (status == null || status.getAgent().getPlatforms().isEmpty()) {
                 continue;
             }
             final String name = status.getPluginName();
@@ -658,8 +665,12 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
             if (plugin == null) {
                 continue;
             }
+            if (debug) watch.markTimeBegin("setPluginRollup");
             setPluginRollup(status, plugin.getId(), rtn);
+            if (debug) watch.markTimeEnd("setPluginRollup");
         }
+        if (debug) watch.markTimeEnd("loop");
+        if (debug) log.debug(watch);
         return rtn;
     }
     
