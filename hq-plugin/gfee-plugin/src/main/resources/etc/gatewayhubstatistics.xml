@@ -1,12 +1,12 @@
 
-<metric name="eventsReceived" alias="eventsReceived" indicator="true" defaultOn="true" description="Number of events operations received by this hub."/>
+<metric name="eventsReceived" alias="eventsReceived" collectionType="trendsup" rate="1m" indicator="true" defaultOn="true" description="Number of events operations received by this hub."/>
 
-<metric name="eventsQueued" alias="eventsQueued" indicator="true" defaultOn="true" description="Number of events operations added to the event queue by this hub."/>
+<metric name="eventsQueued" alias="eventsQueued" collectionType="trendsup" rate="1m" indicator="true" defaultOn="true" description="Number of events operations added to the event queue by this hub."/>
 
 <metric name="eventQueueTime" alias="eventQueueTime" defaultOn="true" units="ns" description="Total time, in nanoseconds, spent queueing events."/>
 
 <metric name="eventQueueSize" alias="eventQueueSize" defaultOn="true" description="Size of the event operations queue."/>
 
-<metric name="eventsProcessed" alias="eventsProcessed" defaultOn="true" description="Number of events operations removed from the event queue and processed by this hub."/>
+<metric name="eventsProcessed" alias="eventsProcessed" collectionType="trendsup" rate="1m" defaultOn="true" description="Number of events operations removed from the event queue and processed by this hub."/>
 
 <metric name="numberOfGateways" alias="numberOfGateways" indicator="true" defaultOn="true" description="Number of gateways operations known to this hub."/>

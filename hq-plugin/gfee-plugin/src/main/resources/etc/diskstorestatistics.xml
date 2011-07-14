@@ -22,11 +22,11 @@
 
 <metric name="compactsInProgress" alias="compactsInProgress" description="current number of oplog compacts that are in progress"/>
 
-<metric name="flushedBytes" alias="flushedBytes" units="B" description="The total number of bytes written to disk by async queue flushes."/>
+<metric name="flushedBytes" alias="flushedBytes" collectionType="trendsup" rate="1m" units="B" description="The total number of bytes written to disk by async queue flushes."/>
 
 <metric name="flushTime" alias="flushTime" units="ns" description="The total amount of time spent doing an async queue flush."/>
 
-<metric name="flushes" alias="flushes" description="The total number of times the an entry has been flushed from the async queue."/>
+<metric name="flushes" alias="flushes" collectionType="trendsup" rate="1m" description="The total number of times the an entry has been flushed from the async queue."/>
 
 <metric name="Average Flush Time" units="ns" alias="custom_ratio_flushTime_flushes" description="Average flush time."/>
 
@@ -48,11 +48,11 @@
 
 <metric name="queueSize" indicator="true" defaultOn="true" alias="queueSize" description="The current number of entries in the async queue waiting to be flushed to disk"/>
 
-<metric name="readBytes" alias="readBytes" units="B" description="The total number of bytes that have been read from disk"/>
+<metric name="readBytes" alias="readBytes" collectionType="trendsup" rate="1m" units="B" description="The total number of bytes that have been read from disk"/>
 
 <metric name="readTime " alias="readTime" units="ns" description="The total amount of time spent reading from disk"/>
 
-<metric name="reads" indicator="true" defaultOn="true" alias="reads" description="The total number of region entries that have been read from disk"/>
+<metric name="reads" indicator="true" defaultOn="true" alias="reads" collectionType="trendsup" rate="1m" description="The total number of region entries that have been read from disk"/>
 
 <metric name="Average Read Time" units="ns" alias="custom_ratio_readTime_reads" description="Average read time."/>
 
@@ -80,10 +80,10 @@
 
 <metric name="writeTime" alias="writeTime" units="ns" description="The total amount of time spent writing to disk"/>
 
-<metric name="writes" indicator="true" defaultOn="true" alias="writes" description="The total number of region entries that have been written to disk. A write is done every time an entry is created on disk or every time its value is modified on disk."/>
+<metric name="writes" indicator="true" defaultOn="true" alias="writes" collectionType="trendsup" rate="1m" description="The total number of region entries that have been written to disk. A write is done every time an entry is created on disk or every time its value is modified on disk."/>
 
 <metric name="Average Write Time" units="ns" alias="custom_ratio_writeTime_writes" description="Average write time."/>
 
 <metric name="writesInProgress" alias="writesInProgress" description="current number of oplog writes that are in progress"/>
 
-<metric name="writtenBytes" alias="writtenBytes" units="B" description="The total number of bytes that have been written to disk"/>
+<metric name="writtenBytes" alias="writtenBytes" collectionType="trendsup" rate="1m" units="B" description="The total number of bytes that have been written to disk"/>

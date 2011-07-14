@@ -85,9 +85,11 @@
 
 <metric name="eventThreads" alias="eventThreads" description="The number of threads currently processing events."/>
 
-<metric name="queryExecutions" alias="queryExecutions" description="Total number of times some query has been executed."/>
+<metric name="queryExecutions" alias="queryExecutions" collectionType="trendsup" rate="1m" description="Total number of times some query has been executed."/>
 
 <metric name="queryExecutionTime" alias="queryExecutionTime" units="ns" description="Total time spent executing queries."/>
+
+<metric name="Average Query Execution Time" units="ns" alias="custom_ratio_queryExecutionTime_queryExecutions" description="Average query execution time."/>
 
 <metric name="reliableQueuedOps" alias="reliableQueuedOps" description="Current number of cache operations queued for distribution to required roles."/>
 
