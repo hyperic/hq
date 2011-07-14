@@ -131,7 +131,7 @@ public class BackfillPointsServiceImpl implements BackfillPointsService {
         for (final Entry<Integer, Long> entry : lastCheckins.entrySet()) {
             final Integer agentId = entry.getKey();
             final long lastCheckin = entry.getValue();
-            if ((lastCheckin + (3*MINUTE)) < now || processed.contains(agentId)) {
+            if ((lastCheckin + (10*MINUTE)) < now || processed.contains(agentId)) {
                 continue;
             }
             removeAssociatedPlatforms(agentId, backfillData, lastCheckin, false);
