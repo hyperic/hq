@@ -25,6 +25,8 @@
  */
 package org.hyperic.hq.security;
 
+import java.io.File;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
@@ -47,7 +49,29 @@ public class ServerKeystoreConfig
         super();
         if(StringUtils.hasText(keystore)){
             super.setAlias("hq");
-            super.setFilePath(keystore);
+            
+            File keystoreFile = new File(keystore);
+            
+            if (!keystoreFile.isAbsolute()) {
+            	// ...assume we're relative to the user.dir...
+            	StringBuilder basePath = new StringBuilder(System.getProperty("catalina.base"));
+
+           		if (basePath.length() == 0) {
+           			throw new ConfigPropertyException("Cannot determine base path using catalina.base");
+           		}
+            	
+            	// ...append the keystore path value...
+            	basePath.append("/").append(keystore);
+            	
+            	keystoreFile = new File(basePath.toString());
+            }
+
+            // ...make sure this exists
+        	if (!keystoreFile.exists()) {
+        		throw new ConfigPropertyException("The keystore path [" + keystoreFile.getPath() + "] does not exist. If setting a relative path, it must be relative to the server's hq-server directory.");
+        	}
+            
+        	super.setFilePath(keystoreFile.getPath());
             super.setFilePassword(keypass);
             //The server should never generate the keystore. It should already have a keystore running.
             //As a result, it's "custom" setting.

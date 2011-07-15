@@ -531,8 +531,6 @@ ${errMsg}
     <!-- Copy the existing config -->
     <serverConfigUpgrade existing="${server.upgradedir}/conf/hq-server.conf" 
     	new="${server.product.dir}/conf/hq-server.conf" upgradeDir="${server.upgradedir}"/>
-  	
-  	<replace file="${server.product.dir}/conf/hq-server.conf" token="@SERVER_CONF@" value="${server.product.dir}/conf" />
   		
     <!-- Copy the existing license file, if there is one -->
   	<!-- Disable copying of license.xml file for 4.6 upgrade bc it's now different, post 4.6 upgrades should
