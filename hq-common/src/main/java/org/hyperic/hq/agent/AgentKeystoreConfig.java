@@ -39,9 +39,8 @@ import org.hyperic.util.security.KeystoreConfig;
  */
 public class AgentKeystoreConfig
     extends KeystoreConfig {
-    private Log log;
+    private Log log = LogFactory.getLog(AgentKeystoreConfig.class);
     public AgentKeystoreConfig(){
-        this.log = LogFactory.getLog(AgentKeystoreConfig.class);
         AgentConfig cfg;
         final String propFile = System.getProperty(AgentConfig.PROP_PROPFILE,AgentConfig.DEFAULT_PROPFILE);
         try {
