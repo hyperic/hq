@@ -28,6 +28,7 @@ package org.hyperic.hq.bizapp.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -49,6 +50,7 @@ import org.hyperic.hq.appdef.shared.ResourcesCleanupZevent;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
@@ -137,7 +139,7 @@ public class ResourceCleanupEventListener implements ZeventListener<ResourcesCle
         if (events != null && !events.isEmpty()) {
             try {
                 Map<Integer,List<AppdefEntityID>> agentCache = buildAsyncDeleteAgentCache(events);
-                removeDeletedResources(agentCache);
+                removeDeletedResources(agentCache, typeNames);
                 if (!typeNames.isEmpty()) {
                     resourceManager.removeResourceTypes(typeNames);
                 }
@@ -178,25 +180,34 @@ public class ResourceCleanupEventListener implements ZeventListener<ResourcesCle
         return masterCache;
     }
     
-    private void removeDeletedResources(Map<Integer, List<AppdefEntityID>> agentCache)
+    @SuppressWarnings("unchecked")
+    private void removeDeletedResources(Map<Integer, List<AppdefEntityID>> agentCache,
+                                        Collection<String> typeNames)
         throws ApplicationException, VetoException {
+        final boolean debug = log.isDebugEnabled();
         final StopWatch watch = new StopWatch();
         final AuthzSubject subject = authzSubjectManager.findSubjectById(AuthzConstants.overlordId);
-        watch.markTimeBegin("unscheduleMeasurementsForAsyncDelete");
+        if (debug) watch.markTimeBegin("unscheduleMeasurementsForAsyncDelete");
         unscheduleMeasurementsForAsyncDelete(agentCache);
-        watch.markTimeEnd("unscheduleMeasurementsForAsyncDelete");
+        if (debug) watch.markTimeEnd("unscheduleMeasurementsForAsyncDelete");
         
         // Look through services, servers, platforms, applications, and groups
-        watch.markTimeBegin("removeApplications");
+        if (debug) watch.markTimeBegin("removeApplications");
         Collection<Application> applications = applicationManager.findDeletedApplications();
         removeApplications(subject, applications);
-        watch.markTimeEnd("removeApplications");
+        if (debug) watch.markTimeEnd("removeApplications");
 
-        watch.markTimeBegin("removeResourceGroups");
+        if (debug) watch.markTimeBegin("removeResourceGroups");
         Collection<ResourceGroup> groups = resourceGroupManager.findDeletedGroups();
         removeResourceGroups(subject, groups);
+        if (debug) watch.markTimeEnd("removeResourceGroups");
 
-        watch.markTimeEnd("removeResourceGroups");
+        typeNames = (typeNames == null) ? Collections.EMPTY_LIST : typeNames;
+        if (debug) watch.markTimeBegin("removeGroupsCompatibleWith");
+        for (String name : typeNames) {
+            resourceGroupManager.removeGroupsCompatibleWith(name);
+        }
+        if (debug) watch.markTimeEnd("removeGroupsCompatibleWith");
 
         Collection<Service> services = serviceManager.findDeletedServices();
         removeServices(subject, services);
@@ -204,13 +215,11 @@ public class ResourceCleanupEventListener implements ZeventListener<ResourcesCle
         Collection<Server> servers = serverManager.findDeletedServers();
         removeServers(subject, servers);
 
-        watch.markTimeBegin("removePlatforms");
+        if (debug) watch.markTimeBegin("removePlatforms");
         Collection<Platform> platforms = platformManager.findDeletedPlatforms();
         removePlatforms(subject, platforms);
-        watch.markTimeEnd("removePlatforms");
-        if (log.isDebugEnabled()) {
-            log.debug("removeDeletedResources: " + watch);
-        }
+        if (debug) watch.markTimeEnd("removePlatforms");
+        if (debug) log.debug("removeDeletedResources: " + watch);
     }
     
     /**
