@@ -213,6 +213,13 @@ class SSLConnectionListener
                 listenSock.setSoTimeout(timeout);
                 break;
             } catch(IOException exc){
+                if (listenSock != null) {
+                    try {
+                        listenSock.close();
+                    } catch (IOException e1) {
+                        log.debug(e1,e1);
+                    }
+                }
                 log.warn("Failed to listen at " + cfg.getListenIp() +
                          ":" + port + ": " + exc.getMessage() + ".  Will retry until up.");
                 log.debug(exc,exc);

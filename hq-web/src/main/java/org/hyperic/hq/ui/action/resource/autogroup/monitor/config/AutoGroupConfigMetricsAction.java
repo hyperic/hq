@@ -38,7 +38,6 @@ import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
-import org.hyperic.hq.common.shared.TransactionRetry;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.resource.common.monitor.config.ConfigMetricsAction;
 import org.hyperic.hq.ui.action.resource.common.monitor.config.MonitoringConfigForm;
@@ -55,9 +54,8 @@ public class AutoGroupConfigMetricsAction
     private final Log log = LogFactory.getLog(ConfigMetricsAction.class.getName());
 
     @Autowired
-    public AutoGroupConfigMetricsAction(MeasurementBoss measurementBoss,
-                                        TransactionRetry transactionRetry) {
-        super(measurementBoss, transactionRetry);
+    public AutoGroupConfigMetricsAction(MeasurementBoss measurementBoss) {
+        super(measurementBoss);
 
     }
 

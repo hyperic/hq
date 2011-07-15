@@ -314,6 +314,11 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         }
     }
 
+    public void removeGroupsCompatibleWith(String resourceType) throws VetoException {
+        Resource proto = resourceManager.findResourcePrototypeByName(resourceType);
+        removeGroupsCompatibleWith(proto);
+    }
+
     /**
      * Remove all groups compatable with the specified resource prototype.
      * 
