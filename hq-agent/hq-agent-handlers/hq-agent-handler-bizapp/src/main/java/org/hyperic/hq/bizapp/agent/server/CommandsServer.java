@@ -73,8 +73,6 @@ import org.hyperic.util.security.SecurityUtil;
 public class CommandsServer 
     implements AgentServerHandler, TokenStorer, AgentNotificationHandler
 {
-    //private static final String KEYSTORE_PW = "storePW";
-
     private static final long   TOKEN_TIMEOUT = 20 * 1000;   // 20 seconds
 
     private CommandsAPIInfo      verAPI;

@@ -144,7 +144,7 @@ public class KeystoreManager {
         
         //TODO shouldn't have password in log
         log.debug("Generating keystore: " +
-            exec.getCommandLineString());
+        		keystoreConfig.getFilePath());
 
         int rc;
         

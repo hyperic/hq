@@ -808,7 +808,7 @@ public class AgentClient {
 	                                                  acceptUnverifiedCertificates);
 	                    if (response != null) {
 	                        if (response.contains("java.security.cert.CertificateException")) {
-	    	            		String question = "The server to agent communication channel is using a self-signed certificate and not be verified" +
+	    	            		String question = "The server to agent communication channel is using a self-signed certificate and can not be verified" +
 	    	            						  "\nAre you sure you want to continue connecting?";
 	    	                	
 	    		                try {
