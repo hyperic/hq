@@ -374,20 +374,28 @@ class DojoUtil {
 		var ${sortOrderVar}; 
         var ${refreshTimeoutVar};
 		var ${tableVar};
+		var ${tableVar}_canSortList = new Array();
 		
         hqDojo.ready(function() {
         	var ${tableVar}_layout = [""")
-		
+		def canSortList = new StringBuffer()
+        def columnIndex = 1
             for (c in params.schema.columns) {
 				def field     = c.field
 			    def header    = c.header
 			    def label     = field.value
-			    def fieldName = field.description 
+			    def fieldName = field.description
+                def canSort   = field.sortable
 			
 			    if (label == null && field['getValue'] != null) {
 					label = field.getValue()
 			    }
-			            
+			    if (canSort == null && field['isSortable']!=null){
+                    canSort = field.isSortable()                    
+                }        
+                canSortList <<""" ${tableVar}_canSortList[""" << columnIndex++ << """]=""" << canSort <<""";
+                """
+
 			    if (header) {
 					if (header in Closure) {
 			            label = header()
@@ -416,6 +424,12 @@ class DojoUtil {
             	escapeHTMLInData: false,
             	selectionMode: "none"
             }, hqDojo.byId("${id}"));
+            """
+           
+            res.append(canSortList)
+            
+            res << """
+			${tableVar}.canSort = function canSort(col){ return ${tableVar}_canSortList[Math.abs(col)]; }
 			
 			${id}_refreshTable();           	
             
