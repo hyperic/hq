@@ -965,8 +965,12 @@ ${errMsg}
 	  </target>
 
 	  <target name="copy-keystore" unless="setup.upgrade">
-	    <copy file="${install.dir}/data/hyperic.keystore" todir="${conf-dir}"
+	    <copy file="${install.dir}/data/hyperic.keystore" 
+	    	tofile="${server.product.dir}/conf/hyperic.keystore"
 	          failonerror="false"/>
+	  	<copy file="${install.dir}/data/hyperic.keystore" 
+	  		tofile="${server.product.dir}/conf/hyperic.keystore.backup.DO.NOT.DELETE"
+	  	              failonerror="false"/>
 	  	<delete file="${install.dir}/data/hyperic.keystore" />
 	  </target>
 
@@ -979,13 +983,19 @@ ${errMsg}
 	  	<copy file="${install.dir}/data/hyperic.keystore" 
 	  		tofile="${server.product.dir}/conf/hyperic.keystore"
 	  		failonerror="false"/>
+        <copy file="${install.dir}/data/hyperic.keystore" 
+            tofile="${server.product.dir}/conf/hyperic.keystore.backup.DO.NOT.DELETE"
+                      failonerror="false"/>
 	  	<delete file="${install.dir}/data/hyperic.keystore" />
 	  </target>
 	
 	  <target name="copy-existing-keystore" if="keystore.exists">
-	  	<copy file="${server.upgradedir}/conf/hyperic.keystore"
-	  	  	            tofile="${server.product.dir}/conf/hyperic.keystore"
-	  	  	            failonerror="false"/>
+        <copy file="${server.upgradedir}/conf/hyperic.keystore"
+                    tofile="${server.product.dir}/conf/hyperic.keystore"
+                    failonerror="false"/>
+	    <copy file="${server.upgradedir}/conf/hyperic.keystore.backup.DO.NOT.DELETE"
+                    tofile="${server.product.dir}/conf/hyperic.keystore.backup.DO.NOT.DELETE"
+                    failonerror="false"/>
 	  </target>
 	
   <!-- If server.overwrite is not set or is false, check for an
