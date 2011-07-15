@@ -420,6 +420,13 @@ class DojoUtil {
 			${id}_refreshTable();           	
             
             ${tableVar}.startup();
+            
+            hqDojo.connect(${tableVar}, 'onStyleRow' , this, function(row) {
+				var it=${tableVar}.getItem(row.index);
+				if(it!=null){
+					row.customClasses += " "+it.styleClass;
+				}
+			});
         });    
 
         // Allows the caller to specify a callback which will return 
