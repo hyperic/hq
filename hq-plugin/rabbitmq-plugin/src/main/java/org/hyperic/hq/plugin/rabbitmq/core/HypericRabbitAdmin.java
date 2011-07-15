@@ -33,6 +33,7 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
 import java.net.URLEncoder;
@@ -44,15 +45,19 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.params.AuthPolicy;
 import org.apache.http.auth.AuthScope;
-import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.AuthCache;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.protocol.ClientContext;
+import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.BasicAuthCache;
+import org.apache.http.protocol.BasicHttpContext;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 
@@ -71,6 +76,7 @@ public final class HypericRabbitAdmin {
     private int port;
     private boolean VHOSTS_2_1_1 = false;
     private boolean NODES_2_1_1 = false;
+    private BasicHttpContext localcontext;
 
     public HypericRabbitAdmin(Properties props) throws PluginException {
         this.port = Integer.parseInt(props.getProperty(DetectorConstants.PORT));
@@ -79,14 +85,20 @@ public final class HypericRabbitAdmin {
         this.pass = props.getProperty(DetectorConstants.PASSWORD);
 
         client = new DefaultHttpClient();
-        client.getState().setCredentials(
+        client.getCredentialsProvider().setCredentials(
                 new AuthScope(addr, port, "Management: Web UI"),
                 new UsernamePasswordCredentials(user, pass));
         List authPrefs = new ArrayList(1);
         authPrefs.add("Management: Web UI");
-        client.getHttpConnectionManager().getParams().setConnectionTimeout(5000);
-        client.getParams().setParameter(AuthPolicy.AUTH_SCHEME_PRIORITY, authPrefs);
-        client.getParams().setAuthenticationPreemptive(true);
+
+        HttpHost targetHost = new HttpHost(addr, port, "http");
+
+        AuthCache authCache = new BasicAuthCache();
+        BasicScheme basicAuth = new BasicScheme();
+        authCache.put(targetHost, basicAuth);
+
+        localcontext = new BasicHttpContext();
+        localcontext.setAttribute(ClientContext.AUTH_CACHE, authCache);
 
         RabbitOverview overview = getOverview();
         if (overview == null) {
@@ -218,13 +230,13 @@ public final class HypericRabbitAdmin {
     private <T extends Object> T get(String api, Class<T> classOfT) throws PluginException {
         T res = null;
         try {
-            GetMethod get = new GetMethod("http://" + addr + ":" + port + api);
-            get.setDoAuthentication(true);
-            int r = client.executeMethod(get);
+            HttpGet get = new HttpGet("http://" + addr + ":" + port + api);
+            HttpResponse response = client.execute(get,localcontext);
+            int r = response.getStatusLine().getStatusCode();
             if (r != 200) {
                 throw new PluginException("[" + api + "] http error code: '" + r + "'");
             }
-            String responseBody = get.getResponseBodyAsString();
+            String responseBody = readInputString(response.getEntity().getContent());
             if (logger.isDebugEnabled()) {
                 logger.debug("[" + api + "] -(" + r + ")-> " + responseBody);
             }
@@ -257,7 +269,7 @@ public final class HypericRabbitAdmin {
             logger.debug("[checkLegacy] HypericRabbitAdmin runnig on VHOSTS_2_1_1 mode. error:" + ex.getMessage());
             VHOSTS_2_1_1 = true;
         }
-        
+
         try {
             get("/api/nodes", RabbitNode[].class);
         } catch (Exception ex) {
@@ -292,5 +304,14 @@ public final class HypericRabbitAdmin {
             }
             return res;
         }
+    }
+
+    public static String readInputString(InputStream in) throws IOException {
+        StringBuilder out = new StringBuilder();
+        byte[] b = new byte[4096];
+        for (int n; (n = in.read(b)) != -1;) {
+            out.append(new String(b, 0, n));
+        }
+        return out.toString();
     }
 }
