@@ -46,10 +46,10 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.auth.AuthPolicy;
-import org.apache.commons.httpclient.auth.AuthScope;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.params.AuthPolicy;
+import org.apache.http.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -64,7 +64,7 @@ import org.hyperic.util.config.ConfigResponse;
 public final class HypericRabbitAdmin {
 
     private static final Log logger = LogFactory.getLog(HypericRabbitAdmin.class);
-    private final HttpClient client;
+    private final DefaultHttpClient client;
     private String addr;
     private String user;
     private String pass;
@@ -78,7 +78,7 @@ public final class HypericRabbitAdmin {
         this.user = props.getProperty(DetectorConstants.USERNAME);
         this.pass = props.getProperty(DetectorConstants.PASSWORD);
 
-        client = new HttpClient();
+        client = new DefaultHttpClient();
         client.getState().setCredentials(
                 new AuthScope(addr, port, "Management: Web UI"),
                 new UsernamePasswordCredentials(user, pass));
