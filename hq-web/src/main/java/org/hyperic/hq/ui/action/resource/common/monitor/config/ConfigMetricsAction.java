@@ -37,9 +37,7 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
-import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
-import org.hyperic.hq.common.shared.TransactionRetry;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
@@ -53,13 +51,11 @@ public class ConfigMetricsAction
     extends BaseAction {
     protected MeasurementBoss measurementBoss;
     private final Log log = LogFactory.getLog(ConfigMetricsAction.class.getName());
-    private TransactionRetry transactionRetry;
 
     @Autowired
-    public ConfigMetricsAction(MeasurementBoss measurementBoss, TransactionRetry transactionRetry) {
+    public ConfigMetricsAction(MeasurementBoss measurementBoss) {
         super();
         this.measurementBoss = measurementBoss;
-        this.transactionRetry = transactionRetry;
     }
 
     public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
@@ -69,7 +65,7 @@ public class ConfigMetricsAction
 
         HashMap<String, Object> parms = new HashMap<String, Object>(2);
 
-        final int sessionId = RequestUtils.getSessionId(request).intValue();
+        int sessionId = RequestUtils.getSessionId(request).intValue();
         MonitoringConfigForm mForm = (MonitoringConfigForm) form;
         // this action will be passed an entityTypeId OR an entityId
         AppdefEntityTypeID aetid = null;
@@ -88,7 +84,7 @@ public class ConfigMetricsAction
             parms.put("aetid", aetid.getAppdefKey());
         }
 
-        final Integer[] midsToUpdate = mForm.getMids();
+        Integer[] midsToUpdate = mForm.getMids();
 
         ActionForward forward = checkSubmit(request, mapping, form, parms);
 
@@ -109,7 +105,7 @@ public class ConfigMetricsAction
 
         // take the list of pending metric ids (mids),
         // and update them.);
-        final long interval = mForm.getIntervalTime();
+        long interval = mForm.getIntervalTime();
 
         // don't make any back-end call if user has not selected any metrics.
         if (midsToUpdate.length == 0)
@@ -122,18 +118,8 @@ public class ConfigMetricsAction
             if (mForm.isIndSelected()) {
                 measurementBoss.updateIndicatorMetrics(sessionId, aetid, midsToUpdate);
                 confirmation = "resource.common.monitor.visibility.config.IndicatorMetrics.Confirmation";
-            } else {
-                final Runnable runner = new Runnable() {
-                    public void run() {
-                        try {
-                            measurementBoss.updateMetricDefaultInterval(sessionId, midsToUpdate, interval);
-                        } catch (SessionException e) {
-                            log.error(e,e);
-                        }
-                    }
-                };
-                transactionRetry.runTransaction(runner, 3, 1000);
-            }
+            } else
+                measurementBoss.updateMetricDefaultInterval(sessionId, midsToUpdate, interval);
         }
         RequestUtils.setConfirmation(request, confirmation);
 
