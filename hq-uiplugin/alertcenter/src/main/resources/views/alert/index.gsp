@@ -67,11 +67,9 @@ hqDojo.ready( function(){
 });
 </script>
 <div id="fullBody" style="clear:both">
-<% dojoTabContainer(id:'mainTabContainer', style:'width: 100%; height:500px;') { %>
+<% dojoTabContainer(id:'mainTabContainer', style:'width:100%;height:500px;') { %>
 	<% dojoTabPane(id:'alertsContentPane', label:'Alerts') { %>
-		<table border="0" width="100%" cellpadding="0" cellspacing="2">
-			<tr align="top">
-				<td width="100%" style="padding-top:10px;padding-right:10px;">
+			<div style="padding:5px;">
 				<div style="float:left;width:200px;margin-right:10px;">
 	        		<div class="filters">
 	          			<div class="BlockTitle">${l.AlertFilter}</div>
@@ -190,14 +188,10 @@ hqDojo.ready( function(){
 			          	});
 		      		</script>
 		      	</div>
-				</td>
-			</tr>
-		</table>
+		     </div>
   	<% } %>
 	<% dojoTabPane(id:'definitionsContentPane', label:'Definition') { %>
-		<table border="0" width="100%" cellpadding="0" cellspacing="2">
-			<tr align="top">
-				<td width="100%" style="padding-top:10px;padding-right:10px;">
+			<div style="padding:5px;">
 				<div style="float:left;width:200px;margin-right:10px;">
 	        		<div class="filters">
 	          			<div class="BlockTitle">${l.DefFilter}</div>
@@ -253,9 +247,7 @@ hqDojo.ready( function(){
 	                        	readOnly:true) %>
 	        		</div>
 	        	</div>    
-				</td>
-			</tr>
-		</table>
+			</div>
 	<% } %>
 <% } %>
 </div>
