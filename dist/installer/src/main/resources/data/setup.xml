@@ -287,10 +287,10 @@ __ll__
 		<echo>^^^INFO: Setting permissions on ${agent-dir}...</echo>
 	  	<chmod perm="go-rwx" type="both">
 	  		<fileset dir="${agent-dir}">
-	  			<include name="**/bin/*" />
-	  			<include name="**/conf/*" />
-	  			<include name="**/bundles/**/bin/*" />
-	  			<include name="**/bundles/**/conf/*" />
+	  			<include name="**/bin" />
+	  			<include name="**/conf" />
+	  			<include name="**/log" />
+	  			<include name="**/wrapper" />
 	  		</fileset>
 	  	</chmod>
 	  	<echo>^^^INFO: Setting permissions on agent binaries...</echo>
@@ -711,6 +711,8 @@ ${errMsg}
     <chmod perm="go-rwx" type="both">
         <fileset dir="${server.product.dir}">
             <exclude name="hq-engine/**" />
+        	<exclude name="jre/**" />
+        	<exclude name="hqdb/**" />
         </fileset>
     </chmod>    
 
@@ -723,6 +725,7 @@ ${errMsg}
     <chmod perm="go-rwx" type="both">
         <fileset dir="${server.product.dir}/hq-engine/hq-server">
             <exclude name="webapps/**" />
+        	<exclude name="work/**" />
         </fileset>
     </chmod>    
 
@@ -882,7 +885,49 @@ ${errMsg}
     <chmod perm="go-rwx" type="both">
         <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/static/js/dojo/1.5">
             <exclude name="dojox/**" />
+            <exclude name="dijit/**" />
         </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/static/js/dojo/1.5/dijit">
+            <exclude name="nls/**" />
+            <exclude name="themes/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/static/js/dojo/1.5/dijit/nls" />
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/static/js/dojo/1.5/dijit/themes">
+            <exclude name="a11y/**" />
+            <exclude name="claro/**" />
+            <exclude name="nihilo/**" />
+            <exclude name="soria/**" />
+            <exclude name="tundra**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/static/js/dojo/1.5/dijit/themes/a11y" />
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/static/js/dojo/1.5/dijit/themes/claro" />
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/static/js/dojo/1.5/dijit/themes/nihilo" />
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/static/js/dojo/1.5/dijit/themes/soria" />
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/static/js/dojo/1.5/dijit/themes/tundra" />
     </chmod>    
 
     <chmod perm="go-rwx" type="both">
