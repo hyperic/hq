@@ -91,7 +91,7 @@ class SSLConnectionListener
             authToken = dIs.readUTF();
         } catch(IOException exc){
             throw new AgentConnectionException("Error negotiating auth: " +
-                                               exc.getMessage());
+                                               exc.getMessage(), exc);
         }
 
         // Set the token from pending to locked, if need be
