@@ -2,21 +2,21 @@
 
 <metric name="entriesOnlyOnDisk" alias="entriesOnlyOnDisk" indicator="true" defaultOn="true" description="The current number of entries whose value is on disk and is not in memory. This is true of overflowed entries. It is also true of recovered entries that have not yet been faulted in."/>
 
-<metric name="localInitializations" alias="localInitializations" description="The number of times that this region has been initialized solely from the local disk files (0 or 1)"/>
+<metric name="localInitializations" alias="localInitializations" collectionType="trendsup" rate="1m" description="The number of times that this region has been initialized solely from the local disk files (0 or 1)"/>
 
 <metric name="readBytes" alias="readBytes" collectionType="trendsup" rate="1m" units="B" description="The total number of bytes that have been read from disk"/>
 
-<metric name="readTime" alias="readTime" units="ns" description="The total amount of time spent reading from disk"/>
+<metric name="readTime" alias="readTime" collectionType="trendsup" rate="1m" units="ns" description="The total amount of time spent reading from disk"/>
 
 <metric name="reads" alias="reads" collectionType="trendsup" rate="1m" description="The total number of region entries that have been read from disk"/>
 
-<metric name="remoteInitializations" alias="remoteInitializations" description="The number of times that this region has been initialized by doing GII from a peer (0 or 1)"/>
+<metric name="remoteInitializations" alias="remoteInitializations" collectionType="trendsup" rate="1m" description="The number of times that this region has been initialized by doing GII from a peer (0 or 1)"/>
 
-<metric name="removeTime" alias="removeTime" units="ns" description="The total amount of time spent removing from disk"/>
+<metric name="removeTime" alias="removeTime" collectionType="trendsup" rate="1m" units="ns" description="The total amount of time spent removing from disk"/>
 
-<metric name="removes" alias="removes" indicator="true" defaultOn="true" description="The total number of region entries that have been removed from disk"/>
+<metric name="removes" alias="removes" collectionType="trendsup" rate="1m" indicator="true" defaultOn="true" description="The total number of region entries that have been removed from disk"/>
 
-<metric name="writeTime" alias="writeTime" units="ns" description="The total amount of time spent writing to disk"/>
+<metric name="writeTime" alias="writeTime" collectionType="trendsup" rate="1m" units="ns" description="The total amount of time spent writing to disk"/>
 
 <metric name="writes" alias="writes" collectionType="trendsup" rate="1m" indicator="true" defaultOn="true" description="The total number of region entries that have been written to disk. A write is done every time an entry is created on disk or every time its value is modified on disk."/>
 

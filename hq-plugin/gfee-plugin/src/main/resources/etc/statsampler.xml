@@ -1,7 +1,7 @@
 <metric name="delayDuration" alias="delayDuration" indicator="true" defaultOn="true" units="ns" description="Actual duration of sampling delay taken before taking this sample."/>
 
-<metric name="sampleCount" alias="sampleCount" indicator="true" defaultOn="true" description="Total number of samples taken by this sampler."/>
+<metric name="sampleCount" alias="sampleCount" collectionType="trendsup" rate="1m" indicator="true" defaultOn="true" description="Total number of samples taken by this sampler."/>
 
-<metric name="sampleTime" alias="sampleTime" indicator="true" defaultOn="true" units="ns" description="Total amount of time spent taking samples."/>
+<metric name="sampleTime" alias="sampleTime" collectionType="trendsup" rate="1m" indicator="true" defaultOn="true" units="ns" description="Total amount of time spent taking samples."/>
 
 <metric name="statResources" alias="statResources" indicator="true" defaultOn="true" description="Current number of statistic resources being sampled by this sampler."/>

@@ -1,17 +1,17 @@
-<metric name="functionExecutionsCompleted" indicator="true" defaultOn="true" alias="functionExecutionsCompleted" description="Total number of completed function.execute() calls for given function"/>
+<metric name="functionExecutionsCompleted" indicator="true" defaultOn="true" alias="functionExecutionsCompleted" collectionType="trendsup" rate="1m" description="Total number of completed function.execute() calls for given function"/>
 
-<metric name="functionExecutionsCompletedProcessingTime" indicator="true" defaultOn="true" units="ns" alias="functionExecutionsCompletedProcessingTime" description="Total time consumed for all completed invocations of the given function"/>
+<metric name="functionExecutionsCompletedProcessingTime" indicator="true" defaultOn="true" units="ns" alias="functionExecutionsCompletedProcessingTime" collectionType="trendsup" rate="1m" description="Total time consumed for all completed invocations of the given function"/>
 
 <metric name="functionExecutionsRunning" alias="functionExecutionsRunning" description="Number of currently running invocations of the given function"/>
 
-<metric name="resultsSentToResultCollector" alias="resultsSentToResultCollector" description="Total number of results sent to the ResultCollector"/>
+<metric name="resultsSentToResultCollector" alias="resultsSentToResultCollector" collectionType="trendsup" rate="1m" description="Total number of results sent to the ResultCollector"/>
 
-<metric name="resultsReceived" alias="resultsReceived" description="Total number of results received and passed to the ResultCollector"/>
+<metric name="resultsReceived" alias="resultsReceived" collectionType="trendsup" rate="1m" description="Total number of results received and passed to the ResultCollector"/>
 
-<metric name="functionExecutionsHasResultCompletedProcessingTime" alias="functionExecutionsHasResultCompletedProcessingTime" units="ns" description="Total time consumed for all completed given function.execute() calls where hasResult() returns true."/>
+<metric name="functionExecutionsHasResultCompletedProcessingTime" alias="functionExecutionsHasResultCompletedProcessingTime" collectionType="trendsup" rate="1m" units="ns" description="Total time consumed for all completed given function.execute() calls where hasResult() returns true."/>
 
 <metric name="functionExecutionsHasResultRunning" alias="functionExecutionsHasResultRunning" description="A gauge indicating the number of currently active execute() calls for functions where hasResult() returns true."/>
 
-<metric name="functionExecutionsExceptions" indicator="true" defaultOn="true" alias="functionExecutionsExceptions" description="Total number of Exceptions Occured while executing function"/>
+<metric name="functionExecutionsExceptions" indicator="true" defaultOn="true" alias="functionExecutionsExceptions" collectionType="trendsup" rate="1m" description="Total number of Exceptions Occured while executing function"/>
 
-<metric name="functionExecutionCalls" alias="functionExecutionCalls" description="Total number of FunctionService.execute() calls for given function"/>
+<metric name="functionExecutionCalls" alias="functionExecutionCalls" collectionType="trendsup" rate="1m" description="Total number of FunctionService.execute() calls for given function"/>

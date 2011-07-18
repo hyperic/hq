@@ -1,7 +1,7 @@
 
 <metric name="Daemon Threads" alias="vmstats-daemonThreads" description="Current number of live daemon threads in this VM."/>
 
-<metric name="Loaded Classes" alias="vmstats-loadedClasses" description="Total number of classes loaded since vm started."/>
+<metric name="Loaded Classes" alias="vmstats-loadedClasses" collectionType="trendsup" rate="1m" description="Total number of classes loaded since vm started."/>
 
 <metric name="Number of CPUs" alias="vmstats-cpus" description="Number of cpus available to the java VM on its machine."/>
 
@@ -19,13 +19,13 @@
 
 <metric name="Process Cpu Time" alias="vmstats-processCpuTime" units="ns" description="CPU timed used by the process in nanoseconds."/>
 
-<metric name="Thread Starts" alias="vmstats-threadStarts" description="Total number of times a thread has been started since this vm started."/>
+<metric name="Thread Starts" alias="vmstats-threadStarts" collectionType="trendsup" rate="1m" description="Total number of times a thread has been started since this vm started."/>
 
 <metric name="Number of Threads" alias="vmstats-threads" description="Current number of live threads (both daemon and non-daemon) in this VM."/>
 
 <metric name="Total Memory" alias="vmstats-totalMemory" units="B" description="The total amount of memory currently available for current and future objects, measured in bytes."/>
 
-<metric name="Unloaded Classes" alias="vmstats-unloadedClasses" description="Total number of classes unloaded since vm started."/>
+<metric name="Unloaded Classes" alias="vmstats-unloadedClasses" collectionType="trendsup" rate="1m" description="Total number of classes unloaded since vm started."/>
 
 <metric name="Heap Committed Memory" alias="vmheapmemorystats-committedMemory" indicator="true" defaultOn="true" units="B" description="The amount of committed memory for this area, measured in bytes."/>
 

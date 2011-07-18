@@ -1,56 +1,56 @@
-<metric name="clientOpFailures" alias="clientOpFailures" description="Total number of clientOp attempts that have failed"/>
+<metric name="clientOpFailures" alias="clientOpFailures" collectionType="trendsup" rate="1m" description="Total number of clientOp attempts that have failed"/>
 
-<metric name="clientOpSendFailures" alias="clientOpSendFailures" description="Total number of clientOp sends that have failed"/>
+<metric name="clientOpSendFailures" alias="clientOpSendFailures" collectionType="trendsup" rate="1m" description="Total number of clientOp sends that have failed"/>
 
-<metric name="clientOpSendTime" alias="clientOpSendTime" units="ns" description="Total amount of time, in nanoseconds spent doing clientOp sends"/>
+<metric name="clientOpSendTime" alias="clientOpSendTime" collectionType="trendsup" rate="1m" units="ns" description="Total amount of time, in nanoseconds spent doing clientOp sends"/>
 
-<metric name="clientOpSends" alias="clientOpSends" description="Total number of clientOp sends that have completed successfully"/>
+<metric name="clientOpSends" alias="clientOpSends" collectionType="trendsup" rate="1m" description="Total number of clientOp sends that have completed successfully"/>
 
 <metric name="clientOpSendsInProgress" alias="clientOpSendsInProgress" description="Current number of clientOp sends being executed"/>
 
-<metric name="clientOpTime" alias="clientOpTime" units="ns" description="Total amount of time, in nanoseconds spent doing clientOps"/>
+<metric name="clientOpTime" alias="clientOpTime" collectionType="trendsup" rate="1m" units="ns" description="Total amount of time, in nanoseconds spent doing clientOps"/>
 
-<metric name="clientOpTimeouts" alias="clientOpTimeouts" description="Total number of clientOp attempts that have timed out"/>
+<metric name="clientOpTimeouts" alias="clientOpTimeouts" collectionType="trendsup" rate="1m" description="Total number of clientOp attempts that have timed out"/>
 
-<metric name="clientOps" alias="clientOps" description="Total number of clientOps completed successfully"/>
+<metric name="clientOps" alias="clientOps" collectionType="trendsup" rate="1m" description="Total number of clientOps completed successfully"/>
 
 <metric name="clientOpsInProgress" alias="clientOpsInProgress" description="Current number of clientOps being executed"/>
 
-<metric name="connectionWaitTime" alias="connectionWaitTime" indicator="true" defaultOn="true" units="ns" description="Total number of nanoseconds spent waiting for a connection."/>
+<metric name="connectionWaitTime" alias="connectionWaitTime" collectionType="trendsup" rate="1m" indicator="true" defaultOn="true" units="ns" description="Total number of nanoseconds spent waiting for a connection."/>
 
-<metric name="connectionWaits" alias="connectionWaits" indicator="true" defaultOn="true" description="Total number of times a thread completed waiting for a connection (by timing out or by getting a connection)."/>
+<metric name="connectionWaits" alias="connectionWaits" collectionType="trendsup" rate="1m" indicator="true" defaultOn="true" description="Total number of times a thread completed waiting for a connection (by timing out or by getting a connection)."/>
 
 <metric name="connectionWaitsInProgress" alias="connectionWaitsInProgress" indicator="true" defaultOn="true" description="Current number of threads waiting for a connection"/>
 
 <metric name="connections" alias="connections" description="Current number of connections"/>
 
-<metric name="connects" alias="connects" description="Total number of times a connection has been created."/>
+<metric name="connects" alias="connects" collectionType="trendsup" rate="1m" description="Total number of times a connection has been created."/>
 
-<metric name="disconnects" alias="disconnects" description="Total number of times a connection has been destroyed."/>
+<metric name="disconnects" alias="disconnects" collectionType="trendsup" rate="1m" description="Total number of times a connection has been destroyed."/>
 
-<metric name="idleChecks" alias="idleChecks" description="Total number of checks done for idle expiration."/>
+<metric name="idleChecks" alias="idleChecks" collectionType="trendsup" rate="1m" description="Total number of checks done for idle expiration."/>
 
-<metric name="idleDisconnects" alias="idleDisconnects" indicator="true" defaultOn="true" description="Total number of disconnects done due to idle expiration."/>
+<metric name="idleDisconnects" alias="idleDisconnects" collectionType="trendsup" rate="1m" indicator="true" defaultOn="true" description="Total number of disconnects done due to idle expiration."/>
 
 <metric name="initialContactCount" alias="initialContactCount" description="Number of contacts initially by user"/>
 
-<metric name="loadConditioningChecks" alias="loadConditioningChecks" description="Total number of checks done for load conditioning expiration."/>
+<metric name="loadConditioningChecks" alias="loadConditioningChecks" collectionType="trendsup" rate="1m" description="Total number of checks done for load conditioning expiration."/>
 
-<metric name="loadConditioningConnects" alias="loadConditioningConnects" description="Total number of connects done due to load conditioning."/>
+<metric name="loadConditioningConnects" alias="loadConditioningConnects" collectionType="trendsup" rate="1m" description="Total number of connects done due to load conditioning."/>
 
-<metric name="loadConditioningDisconnects" alias="loadConditioningDisconnects" description="Total number of disconnects done due to load conditioning expiration."/>
+<metric name="loadConditioningDisconnects" alias="loadConditioningDisconnects" collectionType="trendsup" rate="1m" description="Total number of disconnects done due to load conditioning expiration."/>
 
-<metric name="loadConditioningExtensions" alias="loadConditioningExtensions" description="Total number of times a connection's load conditioning has been extended because the servers are still balanced."/>
+<metric name="loadConditioningExtensions" alias="loadConditioningExtensions" collectionType="trendsup" rate="1m" description="Total number of times a connection's load conditioning has been extended because the servers are still balanced."/>
 
-<metric name="loadConditioningReplaceTimeouts" alias="loadConditioningReplaceTimeouts" description="Total number of times a load conditioning connect was done but was not used."/>
+<metric name="loadConditioningReplaceTimeouts" alias="loadConditioningReplaceTimeouts" collectionType="trendsup" rate="1m" description="Total number of times a load conditioning connect was done but was not used."/>
 
-<metric name="locatorRequests" alias="locatorRequests" description="Number of requests from this connection pool to a locator"/>
+<metric name="locatorRequests" alias="locatorRequests" collectionType="trendsup" rate="1m" description="Number of requests from this connection pool to a locator"/>
 
-<metric name="locatorResponses" alias="locatorResponses" description="Number of responses from the locator to this connection pool"/>
+<metric name="locatorResponses" alias="locatorResponses" collectionType="trendsup" rate="1m" description="Number of responses from the locator to this connection pool"/>
 
 <metric name="locators" alias="locators" description="Current number of locators discovered"/>
 
-<metric name="minPoolSizeConnects" alias="minPoolSizeConnects" description="Total number of connects done to maintain minimum pool size."/>
+<metric name="minPoolSizeConnects" alias="minPoolSizeConnects" collectionType="trendsup" rate="1m" description="Total number of connects done to maintain minimum pool size."/>
 
 <metric name="poolConnections" alias="poolConnections" description="Current number of pool connections"/>
 

@@ -1,17 +1,17 @@
 
-<metric name="batchDistributionTime" alias="batchDistributionTime" units="ns" description="Total time, in nanoseconds, spent distributing batches of events to other gateways."/>
+<metric name="batchDistributionTime" alias="batchDistributionTime" collectionType="trendsup" rate="1m" units="ns" description="Total time, in nanoseconds, spent distributing batches of events to other gateways."/>
                      
-<metric name="batchesDistributed" alias="batchesDistributed" indicator="true" defaultOn="true" description="Number of batches of events operations removed from the event queue and sent."/>
+<metric name="batchesDistributed" alias="batchesDistributed" collectionType="trendsup" rate="1m" indicator="true" defaultOn="true" description="Number of batches of events operations removed from the event queue and sent."/>
                   
 <metric name="Average Batch Distribution Time" units="ns" alias="custom_ratio_batchDistributionTime_batchesDistributed" description="Average batch distribution time."/>
 
-<metric name="batchesRedistributed" alias="batchesRedistributed" indicator="true" defaultOn="true" description="Number of batches of events operations removed from the event queue and resent."/>
+<metric name="batchesRedistributed" alias="batchesRedistributed" collectionType="trendsup" rate="1m" indicator="true" defaultOn="true" description="Number of batches of events operations removed from the event queue and resent."/>
 
 <metric name="conflationIndexesSize" alias="conflationIndexesSize" description=""/>
 
 <metric name="eventQueueSize" alias="eventQueueSize" indicator="true" defaultOn="true" description="Size of the event operations queue."/>
 
-<metric name="eventQueueTime" alias="eventQueueTime" defaultOn="true" units="ns" description="Total time, in nanoseconds, spent queueing events."/>
+<metric name="eventQueueTime" alias="eventQueueTime" collectionType="trendsup" rate="1m" defaultOn="true" units="ns" description="Total time, in nanoseconds, spent queueing events."/>
 
 <metric name="eventsDistributed" alias="eventsDistributed" collectionType="trendsup" rate="1m" indicator="true" defaultOn="true" description="Number of events operations removed from the event queue and sent."/>
 
@@ -21,16 +21,16 @@
 
 <metric name="unprocessedEventMapSize" alias="unprocessedEventMapSize" description="Current number of events entries in the secondary's unprocessed event map."/>
                     
-<metric name="unprocessedEventsRemovedByTimeout" alias="unprocessedEventsRemovedByTimeout" description="Number of events removed from the secondary's unprocessed event map by a timeout."/>
+<metric name="unprocessedEventsRemovedByTimeout" alias="unprocessedEventsRemovedByTimeout" collectionType="trendsup" rate="1m" description="Number of events removed from the secondary's unprocessed event map by a timeout."/>
 
-<metric name="unprocessedEventsAddedBySecondary" alias="unprocessedEventsAddedBySecondary" description="Number of events added to the secondary's unprocessed event  map by the secondary."/>
+<metric name="unprocessedEventsAddedBySecondary" alias="unprocessedEventsAddedBySecondary" collectionType="trendsup" rate="1m" description="Number of events added to the secondary's unprocessed event  map by the secondary."/>
 
-<metric name="unprocessedEventsRemovedByPrimary" alias="unprocessedEventsRemovedByPrimary" description="Number of events removed through a listener from the secondary's unprocessed event map by the primary."/>
+<metric name="unprocessedEventsRemovedByPrimary" alias="unprocessedEventsRemovedByPrimary" collectionType="trendsup" rate="1m" description="Number of events removed through a listener from the secondary's unprocessed event map by the primary."/>
 
-<metric name="unprocessedTokensAddedByPrimary" alias="unprocessedTokensAddedByPrimary" description="Number of tokens added through a listener to the secondary's  unprocessed token map by the primary."/>
+<metric name="unprocessedTokensAddedByPrimary" alias="unprocessedTokensAddedByPrimary" collectionType="trendsup" rate="1m" description="Number of tokens added through a listener to the secondary's  unprocessed token map by the primary."/>
 
-<metric name="unprocessedTokensRemovedBySecondary" alias="unprocessedTokensRemovedBySecondary" description="Number of tokens removed from the secondary's unprocessed token map by the secondary."/>
+<metric name="unprocessedTokensRemovedBySecondary" alias="unprocessedTokensRemovedBySecondary" collectionType="trendsup" rate="1m" description="Number of tokens removed from the secondary's unprocessed token map by the secondary."/>
 
-<metric name="unprocessedTokensRemovedByTimeout" alias="unprocessedTokensRemovedByTimeout" description="Number of tokens removed from the secondary's unprocessed token map by a timeout."/>
+<metric name="unprocessedTokensRemovedByTimeout" alias="unprocessedTokensRemovedByTimeout" collectionType="trendsup" rate="1m" description="Number of tokens removed from the secondary's unprocessed token map by a timeout."/>
                        
 <metric name="unprocessedTokenMapSize" alias="unprocessedTokenMapSize" description="Current number of tokens entries in the secondary's unprocessed token map."/>

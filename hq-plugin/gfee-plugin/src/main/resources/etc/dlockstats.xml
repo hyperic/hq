@@ -16,101 +16,101 @@
 
 <metric name="lockWaitsInProgress" alias="lockWaitsInProgress" indicator="true" defaultOn="true" description="Current number of threads waiting for a distributed lock."/>
 
-<metric name="lockWaitsCompleted" alias="lockWaitsCompleted" description="Total number of times distributed lock wait has completed by successfully obtaining the lock."/>
+<metric name="lockWaitsCompleted" alias="lockWaitsCompleted" collectionType="trendsup" rate="1m" description="Total number of times distributed lock wait has completed by successfully obtaining the lock."/>
 
-<metric name="lockWaitTime" alias="lockWaitTime" indicator="true" defaultOn="true" units="ns" description="Total time spent waiting for a distributed lock that was obtained."/>
+<metric name="lockWaitTime" alias="lockWaitTime" collectionType="trendsup" rate="1m" indicator="true" defaultOn="true" units="ns" description="Total time spent waiting for a distributed lock that was obtained."/>
 
-<metric name="lockWaitsFailed" alias="lockWaitsFailed" description="Total time spent waiting for a distributed lock that failed to be obtained."/>
+<metric name="lockWaitsFailed" alias="lockWaitsFailed" collectionType="trendsup" rate="1m" description="Total time spent waiting for a distributed lock that failed to be obtained."/>
 
-<metric name="lockWaitFailedTime" alias="lockWaitFailedTime" description="Total number of times distributed lock wait has completed by failing to obtain the lock."/>
+<metric name="lockWaitFailedTime" alias="lockWaitFailedTime" collectionType="trendsup" rate="1m" description="Total number of times distributed lock wait has completed by failing to obtain the lock."/>
 
 <metric name="grantWaitsInProgress" alias="grantWaitsInProgress" description="Current number of distributed lock requests being granted."/>
 
-<metric name="grantWaitsCompleted" alias="grantWaitsCompleted" description="Total number of times granting of a lock request has com­pleted by successfully granting the lock."/>
+<metric name="grantWaitsCompleted" alias="grantWaitsCompleted" collectionType="trendsup" rate="1m" description="Total number of times granting of a lock request has com­pleted by successfully granting the lock."/>
 
-<metric name="grantWaitTime" alias="grantWaitTime" description="Total time spent attempting to grant a distributed lock."/>
+<metric name="grantWaitTime" alias="grantWaitTime" collectionType="trendsup" rate="1m" description="Total time spent attempting to grant a distributed lock."/>
 
-<metric name="grantWaitsNotGrantor" alias="grantWaitsNotGrantor" description="Total number of times granting of lock request failed because not grantor."/>
+<metric name="grantWaitsNotGrantor" alias="grantWaitsNotGrantor" collectionType="trendsup" rate="1m" description="Total number of times granting of lock request failed because not grantor."/>
 
-<metric name="grantWaitNotGrantorTime" alias="grantWaitNotGrantorTime" description="Total time spent granting of lock requests that failed because not grantor."/>
+<metric name="grantWaitNotGrantorTime" alias="grantWaitNotGrantorTime" collectionType="trendsup" rate="1m" description="Total time spent granting of lock requests that failed because not grantor."/>
 
-<metric name="grantWaitsTimeout" alias="grantWaitsTimeout" description="Total number of times granting of lock request failed because of a timeout."/>
+<metric name="grantWaitsTimeout" alias="grantWaitsTimeout" collectionType="trendsup" rate="1m" description="Total number of times granting of lock request failed because of a timeout."/>
 
-<metric name="grantWaitTimeoutTime" alias="grantWaitTimeoutTime" description="Total time spent granting of lock requests that failed because of a timeout."/>
+<metric name="grantWaitTimeoutTime" alias="grantWaitTimeoutTime" collectionType="trendsup" rate="1m" description="Total time spent granting of lock requests that failed because of a timeout."/>
 
-<metric name="grantWaitsNotHolder" alias="grantWaitsNotHolder" description="Total number of times granting of lock request failed because reentrant was not holder."/>
+<metric name="grantWaitsNotHolder" alias="grantWaitsNotHolder" collectionType="trendsup" rate="1m" description="Total number of times granting of lock request failed because reentrant was not holder."/>
 
-<metric name="grantWaitNotHolderTime" alias="grantWaitNotHolderTime" description="Total time spent granting of lock requests that failed because reentrant was not holder."/>
+<metric name="grantWaitNotHolderTime" alias="grantWaitNotHolderTime" collectionType="trendsup" rate="1m" description="Total time spent granting of lock requests that failed because reentrant was not holder."/>
 
-<metric name="grantWaitsFailed" alias="grantWaitsFailed" description="Total number of times granting of lock request failed because try locks failed."/>
+<metric name="grantWaitsFailed" alias="grantWaitsFailed" collectionType="trendsup" rate="1m" description="Total number of times granting of lock request failed because try locks failed."/>
 
-<metric name="grantWaitFailedTime" alias="grantWaitFailedTime" description="Total time spent granting of lock requests that failed because try locks failed."/>
+<metric name="grantWaitFailedTime" alias="grantWaitFailedTime" collectionType="trendsup" rate="1m" description="Total time spent granting of lock requests that failed because try locks failed."/>
 
-<metric name="grantWaitsSuspended" alias="grantWaitsSuspended" description="Total number of times granting of lock request failed because lock service was suspended."/>
+<metric name="grantWaitsSuspended" alias="grantWaitsSuspended" collectionType="trendsup" rate="1m" description="Total number of times granting of lock request failed because lock service was suspended."/>
 
-<metric name="grantWaitSuspendedTime" alias="grantWaitSuspendedTime" description="Total time spent granting of lock requests that failed because lock service was suspended."/>
+<metric name="grantWaitSuspendedTime" alias="grantWaitSuspendedTime" collectionType="trendsup" rate="1m" description="Total time spent granting of lock requests that failed because lock service was suspended."/>
 
-<metric name="grantWaitsDestroyed" alias="grantWaitsDestroyed" description="Total number of times granting of lock request failed because lock service was destroyed."/>
+<metric name="grantWaitsDestroyed" alias="grantWaitsDestroyed" collectionType="trendsup" rate="1m" description="Total number of times granting of lock request failed because lock service was destroyed."/>
 
-<metric name="grantWaitDestroyedTime" alias="grantWaitDestroyedTime" description="Total time spent granting of lock requests that failed because lock service was destroyed."/>
+<metric name="grantWaitDestroyedTime" alias="grantWaitDestroyedTime" collectionType="trendsup" rate="1m" description="Total time spent granting of lock requests that failed because lock service was destroyed."/>
 
 <metric name="createGrantorsInProgress" alias="createGrantorsInProgress" description="Current number of initial grantors being created in this pro­cess."/>
 
-<metric name="createGrantorsCompleted" alias="createGrantorsCompleted" description="Total number of initial grantors created in this process."/>
+<metric name="createGrantorsCompleted" alias="createGrantorsCompleted" collectionType="trendsup" rate="1m" description="Total number of initial grantors created in this process."/>
 
-<metric name="createGrantorTime" alias="createGrantorTime" description="Total time spent waiting create the initial grantor for lock ser­vices."/>
+<metric name="createGrantorTime" alias="createGrantorTime" collectionType="trendsup" rate="1m" description="Total time spent waiting create the initial grantor for lock ser­vices."/>
 
 <metric name="serviceCreatesInProgress" alias="serviceCreatesInProgress" description="Current number of lock services being created in this process."/>
 
-<metric name="serviceCreatesCompleted" alias="serviceCreatesCompleted" description="Total number of lock services created in this process."/>
+<metric name="serviceCreatesCompleted" alias="serviceCreatesCompleted" collectionType="trendsup" rate="1m" description="Total number of lock services created in this process."/>
 
-<metric name="serviceCreateLatchTime" alias="serviceCreateLatchTime" description="Total time spent creating lock services before releasing create latches."/>
+<metric name="serviceCreateLatchTime" alias="serviceCreateLatchTime" collectionType="trendsup" rate="1m" description="Total time spent creating lock services before releasing create latches."/>
 
-<metric name="serviceInitLatchTime" alias="serviceInitLatchTime" description="Total time spent creating lock services before releasing init latches."/>
+<metric name="serviceInitLatchTime" alias="serviceInitLatchTime" collectionType="trendsup" rate="1m" description="Total time spent creating lock services before releasing init latches."/>
 
 <metric name="grantorWaitsInProgress" alias="grantorWaitsInProgress" description="Current number of threads waiting for grantor latch to open."/>
 
-<metric name="grantorWaitsCompleted" alias="grantorWaitsCompleted" description="Total number of times waiting threads completed waiting for the grantor latch to open."/>
+<metric name="grantorWaitsCompleted" alias="grantorWaitsCompleted" collectionType="trendsup" rate="1m" description="Total number of times waiting threads completed waiting for the grantor latch to open."/>
 
-<metric name="grantorWaitTime" alias="grantorWaitTime" description="Total time spent waiting for the grantor latch which resulted in success."/>
+<metric name="grantorWaitTime" alias="grantorWaitTime" collectionType="trendsup" rate="1m" description="Total time spent waiting for the grantor latch which resulted in success."/>
 
-<metric name="grantorWaitsFailed" alias="grantorWaitsFailed" description="Total number of times waiting threads failed to finish waiting for the grantor latch to open."/>
+<metric name="grantorWaitsFailed" alias="grantorWaitsFailed" collectionType="trendsup" rate="1m" description="Total number of times waiting threads failed to finish waiting for the grantor latch to open."/>
 
-<metric name="grantorWaitFailedTime" alias="grantorWaitFailedTime" description="Total time spent waiting for the grantor latch which resulted in failure."/>
+<metric name="grantorWaitFailedTime" alias="grantorWaitFailedTime" collectionType="trendsup" rate="1m" description="Total time spent waiting for the grantor latch which resulted in failure."/>
 
 <metric name="grantorThreadsInProgress" alias="grantorThreadsInProgress" description="Current iterations of work performed by grantor thread."/>
 
-<metric name="grantorThreadsCompleted" alias="grantorThreadsCompleted" description="Total number of iterations of work performed by grantor thread(s)."/>
+<metric name="grantorThreadsCompleted" alias="grantorThreadsCompleted" collectionType="trendsup" rate="1m" description="Total number of iterations of work performed by grantor thread(s)."/>
 
-<metric name="grantorThreadExpireAndGrantLocksTime" alias="grantorThreadExpireAndGrantLocksTime" description="Total time spent by grantor thread(s) performing expireAndGrantLocks tasks."/>
+<metric name="grantorThreadExpireAndGrantLocksTime" alias="grantorThreadExpireAndGrantLocksTime" collectionType="trendsup" rate="1m" units="ns" description="Total time spent by grantor thread(s) performing expireAndGrantLocks tasks."/>
 
-<metric name="grantorThreadHandleRequestTimeoutsTime" alias="grantorThreadHandleRequestTimeoutsTime" description="Total time spent by grantor thread(s) performing handleRequestTimeouts tasks."/>
+<metric name="grantorThreadHandleRequestTimeoutsTime" alias="grantorThreadHandleRequestTimeoutsTime" collectionType="trendsup" rate="1m" units="ns" description="Total time spent by grantor thread(s) performing handleRequestTimeouts tasks."/>
 
-<metric name="grantorThreadRemoveUnusedTokensTime" alias="grantorThreadRemoveUnusedTokensTime" units="ns" description="Total time spent by grantor thread(s) performing removeUnusedTokens tasks."/>
+<metric name="grantorThreadRemoveUnusedTokensTime" alias="grantorThreadRemoveUnusedTokensTime" collectionType="trendsup" rate="1m" units="ns" description="Total time spent by grantor thread(s) performing removeUnusedTokens tasks."/>
 
-<metric name="grantorThreadTime" alias="grantorThreadTime" description="Total time spent by grantor thread(s) performing all grantor tasks."/>
+<metric name="grantorThreadTime" alias="grantorThreadTime" collectionType="trendsup" rate="1m" units="ns" description="Total time spent by grantor thread(s) performing all grantor tasks."/>
 
 <metric name="pendingRequests" alias="pendingRequests" indicator="true" defaultOn="true" description="The current number of pending lock requests queued by grantors in this process."/>
 
 <metric name="destroyReadWaitsInProgress" alias="destroyReadWaitsInProgress" description="Current number of threads waiting for a DLockService destroy read lock."/>
 
-<metric name="destroyReadWaitsCompleted" alias="destroyReadWaitsCompleted" description="Total number of times a DLockService destroy read lock wait has completed successfully."/>
+<metric name="destroyReadWaitsCompleted" alias="destroyReadWaitsCompleted" collectionType="trendsup" rate="1m" description="Total number of times a DLockService destroy read lock wait has completed successfully."/>
 
-<metric name="destroyReadWaitTime" alias="destroyReadWaitTime" description="Total time spent waiting for a DLockService destroy read lock that was obtained."/>
+<metric name="destroyReadWaitTime" alias="destroyReadWaitTime" collectionType="trendsup" rate="1m" units="ns" description="Total time spent waiting for a DLockService destroy read lock that was obtained."/>
 
-<metric name="destroyReadWaitsFailed" alias="destroyReadWaitsFailed" description="Total number of times a DLockService destroy read lock wait has completed unsuccessfully."/>
+<metric name="destroyReadWaitsFailed" alias="destroyReadWaitsFailed" collectionType="trendsup" rate="1m" description="Total number of times a DLockService destroy read lock wait has completed unsuccessfully."/>
 
-<metric name="destroyReadWaitFailedTime" alias="destroyReadWaitFailedTime" description="Total time spent waiting for a DLockService destroy read lock that was not obtained."/>
+<metric name="destroyReadWaitFailedTime" alias="destroyReadWaitFailedTime" collectionType="trendsup" rate="1m" units="ns" description="Total time spent waiting for a DLockService destroy read lock that was not obtained."/>
 
 <metric name="destroyWriteWaitsInProgress" alias="destroyWriteWaitsInProgress" description="Current number of writes waiting for a DLockService destroy write lock."/>
 
-<metric name="destroyWriteWaitsCompleted" alias="destroyWriteWaitsCompleted" description="Total number of times a DLockService destroy write lock wait has completed successfully."/>
+<metric name="destroyWriteWaitsCompleted" alias="destroyWriteWaitsCompleted" collectionType="trendsup" rate="1m" description="Total number of times a DLockService destroy write lock wait has completed successfully."/>
 
-<metric name="destroyWriteWaitTime" alias="destroyWriteWaitTime" description="Total time spent waiting for a DLockService destroy write lock that was obtained."/>
+<metric name="destroyWriteWaitTime" alias="destroyWriteWaitTime" collectionType="trendsup" rate="1m" units="ns" description="Total time spent waiting for a DLockService destroy write lock that was obtained."/>
 
-<metric name="destroyWriteWaitsFailed" alias="destroyWriteWaitsFailed" description="Total number of times a DLockService destroy write lock wait has completed unsuccessfully."/>
+<metric name="destroyWriteWaitsFailed" alias="destroyWriteWaitsFailed" collectionType="trendsup" rate="1m" description="Total number of times a DLockService destroy write lock wait has completed unsuccessfully."/>
 
-<metric name="destroyWriteWaitFailedTime" alias="destroyWriteWaitFailedTime" description="Total time spent waiting for a DLockService destroy write lock that was not obtained."/>
+<metric name="destroyWriteWaitFailedTime" alias="destroyWriteWaitFailedTime" collectionType="trendsup" rate="1m" units="ns" description="Total time spent waiting for a DLockService destroy write lock that was not obtained."/>
 
 <metric name="destroyReads" alias="destroyReads" description="The current number of DLockService destroy read locks held by this process."/>
 
@@ -118,8 +118,8 @@
 
 <metric name="lockReleasesInProgress" alias="lockReleasesInProgress" description="Current number of threads releasing a distributed lock."/>
 
-<metric name="lockReleasesCompleted" alias="lockReleasesCompleted" description="Total number of times distributed lock release has completed."/>
+<metric name="lockReleasesCompleted" alias="lockReleasesCompleted" collectionType="trendsup" rate="1m" description="Total number of times distributed lock release has completed."/>
 
-<metric name="lockReleaseTime" alias="lockReleaseTime" description="Total time spent releasing a distributed lock."/>
+<metric name="lockReleaseTime" alias="lockReleaseTime" collectionType="trendsup" rate="1m" units="ns" description="Total time spent releasing a distributed lock."/>
 
-<metric name="becomeGrantorRequests" alias="becomeGrantorRequests" description="Total number of times this member has explicitly requested to become lock grantor."/>
+<metric name="becomeGrantorRequests" alias="becomeGrantorRequests" collectionType="trendsup" rate="1m" description="Total number of times this member has explicitly requested to become lock grantor."/>

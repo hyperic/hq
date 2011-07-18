@@ -1,77 +1,77 @@
 
-<metric name="serializationTime" alias="serializationTime" defaultOn="true" units="ns" description="Total amount of time, in nanoseconds, spent serializing objects."/>
+<metric name="serializationTime" alias="serializationTime" collectionType="trendsup" rate="1m" defaultOn="true" units="ns" description="Total amount of time, in nanoseconds, spent serializing objects."/>
 
-<metric name="serializations" alias="serializations" indicator="true" defaultOn="true" description="Total number of object serialization calls."/>
+<metric name="serializations" alias="serializations" collectionType="trendsup" rate="1m" indicator="true" defaultOn="true" description="Total number of object serialization calls."/>
 
-<metric name="deserializationTime" alias="deserializationTime" defaultOn="true" units="ns" description="Total amount of time, in nanoseconds, spent deserializing objects."/>
+<metric name="deserializationTime" alias="deserializationTime" collectionType="trendsup" rate="1m" defaultOn="true" units="ns" description="Total amount of time, in nanoseconds, spent deserializing objects."/>
 
-<metric name="deserializations" alias="deserializations" indicator="true" defaultOn="true" description="Total number of object deserialization calls."/>
+<metric name="deserializations" alias="deserializations" collectionType="trendsup" rate="1m" indicator="true" defaultOn="true" description="Total number of object deserialization calls."/>
 
 <metric name="asyncQueues" alias="asyncQueues" indicator="true" defaultOn="true" description="Current number of queues for asynchronous messaging."/>
 
-<metric name="asyncQueueSizeExceeded" alias="asyncQueueSizeExceeded" defaultOn="true" description="Total number of asynchronous queues that have exceeded the maximum size."/>
+<metric name="asyncQueueSizeExceeded" alias="asyncQueueSizeExceeded" collectionType="trendsup" rate="1m" defaultOn="true" description="Total number of asynchronous queues that have exceeded the maximum size."/>
 
-<metric name="asyncQueuedMsgs" alias="asyncQueuedMsgs" defaultOn="true" description="The total number of queued messages used for asynchronous queues."/>
+<metric name="asyncQueuedMsgs" alias="asyncQueuedMsgs" collectionType="trendsup" rate="1m" defaultOn="true" description="The total number of queued messages used for asynchronous queues."/>
 
 <metric name="overflowQueueSize" alias="overflowQueueSize" indicator="true" defaultOn="true" description="The number of normal distribution messages currently wait­ing to be processed."/>
 
 <metric name="partitionedRegionQueueSize" alias="partitionedRegionQueueSize" defaultOn="true" description="The number of high priority distribution messages currently waiting to be processed."/>
 
-<metric name="partitionedRegionQueueThrottleCount" alias="partitionedRegionQueueThrottleCount" description="The total number of times a thread was delayed in adding a normal message to the high priority queue."/>
+<metric name="partitionedRegionQueueThrottleCount" alias="partitionedRegionQueueThrottleCount" collectionType="trendsup" rate="1m" description="The total number of times a thread was delayed in adding a normal message to the high priority queue."/>
 
-<metric name="partitionedRegionQueueThrottleTime" alias="partitionedRegionQueueThrottleTime" units="ns" description="The total amount of time, in nanoseconds, spent delayed by the high priority queue throttle."/>
+<metric name="partitionedRegionQueueThrottleTime" alias="partitionedRegionQueueThrottleTime" collectionType="trendsup" rate="1m" units="ns" description="The total amount of time, in nanoseconds, spent delayed by the high priority queue throttle."/>
 
-<metric name="partitionedRegionThreadStarts" alias="partitionedRegionThreadStarts" description="Total number of times a thread has been created for the pool handling partitioned region messages."/>
+<metric name="partitionedRegionThreadStarts" alias="partitionedRegionThreadStarts" collectionType="trendsup" rate="1m" description="Total number of times a thread has been created for the pool handling partitioned region messages."/>
 
 <metric name="partitionedRegionThreadJobs" alias="partitionedRegionThreadJobs" description="The number of messages currently being processed by partitioned region threads"/>
 
 <metric name="partitionedRegionThreads" alias="partitionedRegionThreads" description="The number of threads currently processing partitioned region messages."/>
 
-<metric name="sentCommitMessages" alias="commitMessages" description="The number of transaction commit messages that the Gem­Fire system has created to be sent. Note, it is possible for a commit to only create one message even though it will end up being sent to multiple recipients."/>
+<metric name="sentCommitMessages" alias="commitMessages" collectionType="trendsup" rate="1m" description="The number of transaction commit messages that the Gem­Fire system has created to be sent. Note, it is possible for a commit to only create one message even though it will end up being sent to multiple recipients."/>
 
-<metric name="commitWaits" alias="commitWaits" description="The number of transaction commits that had to wait for a response before they could complete."/>
+<metric name="commitWaits" alias="commitWaits" collectionType="trendsup" rate="1m" description="The number of transaction commits that had to wait for a response before they could complete."/>
 
-<metric name="sentMessagesTime" units="ns" alias="sentMessagesTime" description="The total amount of time this distribution manager has spent sending messages, which includes broadcastMessagesTime."/>
+<metric name="sentMessagesTime" units="ns" alias="sentMessagesTime" collectionType="trendsup" rate="1m" description="The total amount of time this distribution manager has spent sending messages, which includes broadcastMessagesTime."/>
 
 <metric name="sentMessagesMaxTime" units="ns" alias="sentMessagesMaxTime" description="The highest amount of time this distribution manager has spent distributing a single message to the network."/>
 
-<metric name="broadcastMessages" alias="broadcastMessages" description="The number of distribution messages that the GemFire sys­tem has broadcast. A broadcast message is one sent to every other manager in the group."/>
+<metric name="broadcastMessages" alias="broadcastMessages" collectionType="trendsup" rate="1m" description="The number of distribution messages that the GemFire sys­tem has broadcast. A broadcast message is one sent to every other manager in the group."/>
 
-<metric name="broadcastMessagesTime" units="ns" alias="broadcastMessagesTime" description="The total amount of time this distribution manager has spent broadcasting messages. A broadcast message is one sent to every other manager in the group."/>
+<metric name="broadcastMessagesTime" units="ns" alias="broadcastMessagesTime" collectionType="trendsup" rate="1m" description="The total amount of time this distribution manager has spent broadcasting messages. A broadcast message is one sent to every other manager in the group."/>
 
-<metric name="receivedMessages" alias="receivedMessages" description="The number of distribution messages that the GemFire sys­tem has received."/>
+<metric name="receivedMessages" alias="receivedMessages" collectionType="trendsup" rate="1m" description="The number of distribution messages that the GemFire sys­tem has received."/>
 
-<metric name="receivedBytes" alias="receivedBytes" units="B" description="The number of distribution message bytes that the GemFire system has received."/>
+<metric name="receivedBytes" alias="receivedBytes" collectionType="trendsup" rate="1m" units="B" description="The number of distribution message bytes that the GemFire system has received."/>
 
-<metric name="sentBytes" alias="sentBytes" units="B" description="The number of distribution message bytes that the GemFire system has sent."/>
+<metric name="sentBytes" alias="sentBytes" collectionType="trendsup" rate="1m" units="B" description="The number of distribution message bytes that the GemFire system has sent."/>
 
-<metric name="processedMessages" alias="processedMessages" description="The number of distribution messages that the GemFire sys­tem has processed."/>
+<metric name="processedMessages" alias="processedMessages" collectionType="trendsup" rate="1m" description="The number of distribution messages that the GemFire sys­tem has processed."/>
 
-<metric name="processedMessagesTime" alias="processedMessagesTime" units="ns" description="The amount of time this distribution manager has spent in message.process()."/>
+<metric name="processedMessagesTime" alias="processedMessagesTime" collectionType="trendsup" rate="1m" units="ns" description="The amount of time this distribution manager has spent in message.process()."/>
 
-<metric name="messageProcessingScheduleTime" alias="messageProcessingScheduleTime" units="ns" description="The amount of time this distribution manager has spent dis­patching a message to processor threads."/>
+<metric name="messageProcessingScheduleTime" alias="messageProcessingScheduleTime" collectionType="trendsup" rate="1m" units="ns" description="The amount of time this distribution manager has spent dis­patching a message to processor threads."/>
 
 <metric name="waitingQueueSize" alias="waitingQueueSize" description="The number of distribution messages currently waiting for some other resource before they can be processed."/>
 
-<metric name="overflowQueueThrottleTime" alias="overflowQueueThrottleTime" units="ns" description="The total amount of time, in nanoseconds, spent delayed by the overflow queue throttle."/>
+<metric name="overflowQueueThrottleTime" alias="overflowQueueThrottleTime" collectionType="trendsup" rate="1m" units="ns" description="The total amount of time, in nanoseconds, spent delayed by the overflow queue throttle."/>
 
-<metric name="overflowQueueThrottleCount" alias="overflowQueueThrottleCount" description="The total number of times a thread was delayed in adding a normal message to the overflow queue."/>
+<metric name="overflowQueueThrottleCount" alias="overflowQueueThrottleCount" collectionType="trendsup" rate="1m" description="The total number of times a thread was delayed in adding a normal message to the overflow queue."/>
 
 <metric name="highPriorityQueueSize" alias="highPriorityQueueSize" description="The number of high priority distribution messages currently waiting to be processed."/>
 
-<metric name="highPriorityQueueThrottleTime" alias="highPriorityQueueThrottleTime" units="ns" description="The total amount of time, in nanoseconds, spent delayed by the high priority queue throttle."/>
+<metric name="highPriorityQueueThrottleTime" alias="highPriorityQueueThrottleTime" collectionType="trendsup" rate="1m" units="ns" description="The total amount of time, in nanoseconds, spent delayed by the high priority queue throttle."/>
 
-<metric name="highPriorityQueueThrottleCount" alias="highPriorityQueueThrottleCount" description="The total number of times a thread was delayed in adding a normal message to the high priority queue."/>
+<metric name="highPriorityQueueThrottleCount" alias="highPriorityQueueThrottleCount" collectionType="trendsup" rate="1m" description="The total number of times a thread was delayed in adding a normal message to the high priority queue."/>
 
 <metric name="serialQueueSize" alias="serialQueueSize" description="The number of serial distribution messages currently waiting to be processed."/>
 
 <metric name="serialQueueBytes" alias="serialQueueBytes" units="B" description="The approximate number of bytes consumed by serial distri­bution messages currently waiting to be processed."/>
 
-<metric name="serialPooledThread" alias="serialPooledThread" description="The number of threads created in the SerialQueuedExecutor­Pool."/>
+<metric name="serialPooledThread" alias="serialPooledThread" collectionType="trendsup" rate="1m" description="The number of threads created in the SerialQueuedExecutor­Pool."/>
 
-<metric name="serialQueueThrottleTime" alias="serialQueueThrottleTime" units="ns" description="The total amount of time, in nanoseconds, spent delayed by the serial queue throttle."/>
+<metric name="serialQueueThrottleTime" alias="serialQueueThrottleTime" collectionType="trendsup" rate="1m" units="ns" description="The total amount of time, in nanoseconds, spent delayed by the serial queue throttle."/>
 
-<metric name="serialQueueThrottleCount" alias="serialQueueThrottleCount" description="The total number of times a thread was delayed in adding a ordered message to the serial queue."/>
+<metric name="serialQueueThrottleCount" alias="serialQueueThrottleCount" collectionType="trendsup" rate="1m" description="The total number of times a thread was delayed in adding a ordered message to the serial queue."/>
 
 <metric name="serialThreads" alias="serialThreads" description="The number of threads currently processing serial/ordered messages."/>
 
@@ -83,31 +83,31 @@
 
 <metric name="waitingThreads" alias="waitingThreads" description="The number of threads currently processing messages that had to wait for a resource."/>
 
-<metric name="messageChannelTime" alias="messageChannelTime" units="ns" description="The total amount of time received messages spent in the dis­tribution channel."/>
+<metric name="messageChannelTime" alias="messageChannelTime" collectionType="trendsup" rate="1m" units="ns" description="The total amount of time received messages spent in the dis­tribution channel."/>
 
-<metric name="replyMessageTime" alias="replyMessageTime" units="ns" description="The amount of time spent processing reply messages: final String distributeMessageTimeDesc = The amount of time it takes to prepare a message and send it on the network. This includes sentMessagesTime."/>
+<metric name="replyMessageTime" alias="replyMessageTime" collectionType="trendsup" rate="1m" units="ns" description="The amount of time spent processing reply messages: final String distributeMessageTimeDesc = The amount of time it takes to prepare a message and send it on the network. This includes sentMessagesTime."/>
 
 <metric name="nodes" alias="nodes" description="The current number of nodes in this distributed system."/>
 
 <metric name="replyWaitsInProgress" alias="replyWaitsInProgress" description="Current number of threads waiting for a reply."/>
 
-<metric name="replyWaitsCompleted" alias="replyWaitsCompleted" description="Total number of times waits for a reply have completed."/>
+<metric name="replyWaitsCompleted" alias="replyWaitsCompleted" collectionType="trendsup" rate="1m" description="Total number of times waits for a reply have completed."/>
 
-<metric name="replyWaitTime" alias="replyWaitTime" units="ns" description="Total time spent waiting for a reply to a message."/>
+<metric name="replyWaitTime" alias="replyWaitTime" collectionType="trendsup" rate="1m" units="ns" description="Total time spent waiting for a reply to a message."/>
 
 <metric name="replyWaitMaxTime" alias="replyWaitMaxTime" units="ns" description="Maximum time spent transmitting and then waiting for a reply to a message. See sentMessagesMaxTime for related information."/>
 
-<metric name="replyTimeouts" alias="replyTimeouts" description="Total number of message replies that have timed out."/>
+<metric name="replyTimeouts" alias="replyTimeouts" collectionType="trendsup" rate="1m" description="Total number of message replies that have timed out."/>
 
 <metric name="receiverConnections" alias="receivers" description="Current number of sockets dedicated to receiving messages."/>
 
-<metric name="failedAccepts" alias="failedAccepts" description="Total number of times an accept (receiver creation) of a connect from some other member has failed."/>
+<metric name="failedAccepts" alias="failedAccepts" collectionType="trendsup" rate="1m" description="Total number of times an accept (receiver creation) of a connect from some other member has failed."/>
 
-<metric name="failedConnects" alias="failedConnects" description="Total number of times a connect (sender creation) to some other member has failed."/>
+<metric name="failedConnects" alias="failedConnects" collectionType="trendsup" rate="1m" description="Total number of times a connect (sender creation) to some other member has failed."/>
 
-<metric name="reconnectAttempts" alias="reconnectAttempts" description="Total number of times an established connection was lost and a reconnect was attempted."/>
+<metric name="reconnectAttempts" alias="reconnectAttempts" collectionType="trendsup" rate="1m" description="Total number of times an established connection was lost and a reconnect was attempted."/>
 
-<metric name="lostConnectionLease" alias="senderTimeouts" description="Total number of times an unshared sender socket has remained idle long enough that its lease expired."/>
+<metric name="lostConnectionLease" alias="senderTimeouts" collectionType="trendsup" rate="1m" description="Total number of times an unshared sender socket has remained idle long enough that its lease expired."/>
 
 <metric name="sharedOrderedSenderConnections" alias="sendersSO" description="Current number of shared sockets dedicated to sending ordered messages."/>
 
@@ -119,27 +119,27 @@
 
 <metric name="asyncQueueFlushesInProgress" alias="asyncQueueFlushesInProgress" description="Current number of asynchronous queues being flushed."/>
 
-<metric name="asyncQueueFlushesCompleted" alias="asyncQueueFlushesCompleted" description="Total number of asynchronous queue flushes completed."/>
+<metric name="asyncQueueFlushesCompleted" alias="asyncQueueFlushesCompleted" collectionType="trendsup" rate="1m" description="Total number of asynchronous queue flushes completed."/>
 
-<metric name="asyncQueueFlushTime" alias="asyncQueueFlushTime" units="ns" description="Total time spent flushing asynchronous queues."/>
+<metric name="asyncQueueFlushTime" alias="asyncQueueFlushTime" collectionType="trendsup" rate="1m" units="ns" description="Total time spent flushing asynchronous queues."/>
 
-<metric name="asyncQueueTimeoutExceeded" alias="asyncQueueTimeoutExceeded" description="Total number of asynchronous queues that have timed out by being blocked for more than async-queue-timeout millisec­onds."/>
+<metric name="asyncQueueTimeoutExceeded" alias="asyncQueueTimeoutExceeded" collectionType="trendsup" rate="1m" description="Total number of asynchronous queues that have timed out by being blocked for more than async-queue-timeout millisec­onds."/>
 
-<metric name="asyncDistributionTimeoutExceeded" alias="asyncDistributionTimeoutExceeded" description="Total number of times the async-distribution-timeout has been exceeded during a socket write."/>
+<metric name="asyncDistributionTimeoutExceeded" alias="asyncDistributionTimeoutExceeded" collectionType="trendsup" rate="1m" description="Total number of times the async-distribution-timeout has been exceeded during a socket write."/>
 
 <metric name="asyncQueueSize" alias="asyncQueueSize" units="B" description="Current size in bytes used for asynchronous queues."/>
 
-<metric name="asyncDequeuedMsgs" alias="asyncDequeuedMsgs" description="The total number of queued messages that have been removed from the queue and successfully sent."/>
+<metric name="asyncDequeuedMsgs" alias="asyncDequeuedMsgs" collectionType="trendsup" rate="1m" description="The total number of queued messages that have been removed from the queue and successfully sent."/>
 
-<metric name="asyncConflatedMsgs" alias="asyncConflatedMsgs" description="The total number of queued conflated messages used for asynchronous queues."/>
+<metric name="asyncConflatedMsgs" alias="asyncConflatedMsgs" collectionType="trendsup" rate="1m" description="The total number of queued conflated messages used for asynchronous queues."/>
 
 <metric name="asyncThreads" alias="asyncThreads" description="Total number of asynchronous message queue threads."/>
 
 <metric name="asyncThreadInProgress" alias="asyncThreadInProgress" description="Current iterations of work performed by asynchronous mes­sage queue threads."/>
 
-<metric name="asyncThreadCompleted" alias="asyncThreadCompleted" description="Total number of iterations of work performed by asynchro­nous message queue threads."/>
+<metric name="asyncThreadCompleted" alias="asyncThreadCompleted" collectionType="trendsup" rate="1m" description="Total number of iterations of work performed by asynchro­nous message queue threads."/>
 
-<metric name="asyncThreadTime" alias="asyncThreadTime" units="ns" description="Total time spent by asynchronous message queue threads per­forming iterations."/>
+<metric name="asyncThreadTime" alias="asyncThreadTime" collectionType="trendsup" rate="1m" units="ns" description="Total time spent by asynchronous message queue threads per­forming iterations."/>
 
 <metric name="receiverDirectBufferSize" alias="receiverDirectBufferSize" units="B" description="Current number of bytes allocated from direct memory as buffers for incoming messages."/>
 
@@ -149,7 +149,7 @@
 
 <metric name="senderHeapBufferSize" alias="senderHeapBufferSize" units="B" description="Current number of bytes allocated from Java heap memory as buffers for outgoing messages."/>
 
-<metric name="replyHandoffTime" alias="replyHandoffTime" units="sec" description="Total number of seconds to switch thread contexts from pro­cessing thread to application thread."/>
+<metric name="replyHandoffTime" alias="replyHandoffTime" collectionType="trendsup" rate="1m" units="sec" description="Total number of seconds to switch thread contexts from pro­cessing thread to application thread."/>
 
 <metric name="partitionedRegionThreadJobs" alias="partitionedRegionThreadJobs" description="The number of messages currently being processed by parti­tioned region threads."/>
 
@@ -169,65 +169,65 @@
 
 <metric name="syncSocketWritesInProgress" alias="syncSocketWritesInProgress" description="Current number of synchronous/blocking socket write calls in progress."/>
 
-<metric name="syncSocketWriteTime" alias="syncSocketWriteTime" units="ns" description="Total amount of time, in nanoseconds, spent in synchro­nous/blocking socket write calls."/>
+<metric name="syncSocketWriteTime" alias="syncSocketWriteTime" collectionType="trendsup" rate="1m" units="ns" description="Total amount of time, in nanoseconds, spent in synchro­nous/blocking socket write calls."/>
 
-<metric name="syncSocketWrites" alias="syncSocketWrites" description="Total number of completed synchronous/blocking socket write calls."/>
+<metric name="syncSocketWrites" alias="syncSocketWrites" collectionType="trendsup" rate="1m" description="Total number of completed synchronous/blocking socket write calls."/>
 
-<metric name="syncSocketWriteBytes" alias="syncSocketWriteBytes" units="B" description="Total number of bytes sent out in synchronous/blocking mode on sockets."/>
+<metric name="syncSocketWriteBytes" alias="syncSocketWriteBytes" collectionType="trendsup" rate="1m" units="B" description="Total number of bytes sent out in synchronous/blocking mode on sockets."/>
 
-<metric name="ucastReads" alias="ucastReads" description="Total number of unicast datagrams received."/>
+<metric name="ucastReads" alias="ucastReads" collectionType="trendsup" rate="1m" description="Total number of unicast datagrams received."/>
 
-<metric name="ucastReadBytes" alias="ucastReadBytes" units="B" description="Total number of bytes received in unicast datagrams."/>
+<metric name="ucastReadBytes" alias="ucastReadBytes" collectionType="trendsup" rate="1m" units="B" description="Total number of bytes received in unicast datagrams."/>
 
-<metric name="ucastWriteTime" alias="ucastWriteTime" units="ns" description="Total amount of time, in nanoseconds, spent in unicast data­gram socket write calls."/>
+<metric name="ucastWriteTime" alias="ucastWriteTime" collectionType="trendsup" rate="1m" units="ns" description="Total amount of time, in nanoseconds, spent in unicast data­gram socket write calls."/>
 
-<metric name="ucastWrites" alias="ucastWrites" description="Total number of unicast datagram socket write calls."/>
+<metric name="ucastWrites" alias="ucastWrites" collectionType="trendsup" rate="1m" description="Total number of unicast datagram socket write calls."/>
 
-<metric name="ucastWriteBytes" alias="ucastWriteBytes" units="B" description="Total number of bytes sent out on unicast datagram sockets."/>
+<metric name="ucastWriteBytes" alias="ucastWriteBytes" collectionType="trendsup" rate="1m" units="B" description="Total number of bytes sent out on unicast datagram sockets."/>
 
-<metric name="ucastRetransmits" alias="ucastRetransmits" description="Total number of unicast datagram socket retransmissions."/>
+<metric name="ucastRetransmits" alias="ucastRetransmits" collectionType="trendsup" rate="1m" description="Total number of unicast datagram socket retransmissions."/>
 
-<metric name="mcastReads" alias="mcastReads" description="Total number of multicast datagrams received."/>
+<metric name="mcastReads" alias="mcastReads" collectionType="trendsup" rate="1m" description="Total number of multicast datagrams received."/>
 
-<metric name="mcastReadBytes" alias="mcastReadBytes" units="B" description="Total number of bytes received in multicast datagrams."/>
+<metric name="mcastReadBytes" alias="mcastReadBytes" collectionType="trendsup" rate="1m" units="B" description="Total number of bytes received in multicast datagrams."/>
 
-<metric name="mcastWriteTime" alias="mcastWriteTime" units="ns" description="Total amount of time, in nanoseconds, spent in multicast dat­agram socket write calls."/>
+<metric name="mcastWriteTime" alias="mcastWriteTime" collectionType="trendsup" rate="1m" units="ns" description="Total amount of time, in nanoseconds, spent in multicast dat­agram socket write calls."/>
 
-<metric name="mcastWrites" alias="mcastWrites" description="Total number of multicast datagram socket write calls."/>
+<metric name="mcastWrites" alias="mcastWrites" collectionType="trendsup" rate="1m" description="Total number of multicast datagram socket write calls."/>
 
-<metric name="mcastWriteBytes" alias="mcastWriteBytes" units="B" description="Total number of bytes sent out on multicast datagram sockets."/>
+<metric name="mcastWriteBytes" alias="mcastWriteBytes" collectionType="trendsup" rate="1m" units="B" description="Total number of bytes sent out on multicast datagram sockets."/>
 
-<metric name="mcastRetransmits" alias="mcastRetransmits" description="Total number of multicast datagram socket retransmissions."/>
+<metric name="mcastRetransmits" alias="mcastRetransmits" collectionType="trendsup" rate="1m" description="Total number of multicast datagram socket retransmissions."/>
 
-<metric name="mcastRetransmitRequests" alias="mcastRetransmitRequests" description="Total number of multicast datagram socket retransmission requests sent to other processes."/>
+<metric name="mcastRetransmitRequests" alias="mcastRetransmitRequests" collectionType="trendsup" rate="1m" description="Total number of multicast datagram socket retransmission requests sent to other processes."/>
 
-<metric name="serializedBytes" alias="serializedBytes" units="B" description="Total number of bytes produced by object serialization."/>
+<metric name="serializedBytes" alias="serializedBytes" collectionType="trendsup" rate="1m" units="B" description="Total number of bytes produced by object serialization."/>
 
-<metric name="deserializedBytes" alias="deserializedBytes" units="B" description="Total number of bytes consumed by object deserialization."/>
+<metric name="deserializedBytes" alias="deserializedBytes" collectionType="trendsup" rate="1m" units="B" description="Total number of bytes consumed by object deserialization."/>
 
-<metric name="msgSerializationTime" alias="msgSerializationTime" units="ns" description="Total amount of time, in nanoseconds, spent serializing mes­sages."/>
+<metric name="msgSerializationTime" alias="msgSerializationTime" collectionType="trendsup" rate="1m" units="ns" description="Total amount of time, in nanoseconds, spent serializing mes­sages."/>
 
-<metric name="msgDeserializationTime" alias="msgDeserializationTime" units="ns" description="Total amount of time, in nanoseconds, spent deserializing messages."/>
+<metric name="msgDeserializationTime" alias="msgDeserializationTime" collectionType="trendsup" rate="1m" units="ns" description="Total amount of time, in nanoseconds, spent deserializing messages."/>
 
-<metric name="batchSendTime" alias="batchSendTime" units="ns" description="Total amount of time, in nanoseconds, spent queueing and flushing message batches."/>
+<metric name="batchSendTime" alias="batchSendTime" collectionType="trendsup" rate="1m" units="ns" description="Total amount of time, in nanoseconds, spent queueing and flushing message batches."/>
 
 <metric name="batchWaitTime" alias="batchWaitTime" description="Reserved for future use"/>
 
-<metric name="batchCopyTime" alias="batchCopyTime" units="ns" description="Total amount of time, in nanoseconds, spent copying mes­sages for batched transmission."/>
+<metric name="batchCopyTime" alias="batchCopyTime" collectionType="trendsup" rate="1m" units="ns" description="Total amount of time, in nanoseconds, spent copying mes­sages for batched transmission."/>
 
-<metric name="batchFlushTime" alias="batchFlushTime" units="ns" description="Total amount of time, in nanoseconds, spent flushing batched messages to the network."/>
+<metric name="batchFlushTime" alias="batchFlushTime" collectionType="trendsup" rate="1m" units="ns" description="Total amount of time, in nanoseconds, spent flushing batched messages to the network."/>
 
-<metric name="ucastFlushes" alias="ucastFlushes" description="Total number of flushes of the unicast datagram protocol, prior to sending a multicast message."/>
+<metric name="ucastFlushes" alias="ucastFlushes" collectionType="trendsup" rate="1m" description="Total number of flushes of the unicast datagram protocol, prior to sending a multicast message."/>
 
-<metric name="ucastFlushTime" alias="ucastFlushTime" units="ns" description="Total amount of time, in nanoseconds, spent waiting for acknowledgements for outstanding unicast datagram mes­sages."/>
+<metric name="ucastFlushTime" alias="ucastFlushTime" collectionType="trendsup" rate="1m" units="ns" description="Total amount of time, in nanoseconds, spent waiting for acknowledgements for outstanding unicast datagram mes­sages."/>
 
-<metric name="flowControlRequests" alias="flowControlRequests" description="Total number of flow control credit requests sent to other pro­cesses."/>
+<metric name="flowControlRequests" alias="flowControlRequests" collectionType="trendsup" rate="1m" description="Total number of flow control credit requests sent to other pro­cesses."/>
 
-<metric name="flowControlResponses" alias="flowControlResponses" description="Total number of flow control credit responses sent to a requestor."/>
+<metric name="flowControlResponses" alias="flowControlResponses" collectionType="trendsup" rate="1m" description="Total number of flow control credit responses sent to a requestor."/>
 
 <metric name="flowControlWaitsInProgress" alias="flowControlWaitsInProgress" description="Number of threads blocked waiting for flow-control recharges from other processes."/>
 
-<metric name="flowControlWaitTime" alias="flowControlWaitTime" units="ns" description="Total amount of time, in nanoseconds, spent waiting for other processes to recharge the flow of the control meter."/>
+<metric name="flowControlWaitTime" alias="flowControlWaitTime" collectionType="trendsup" rate="1m" units="ns" description="Total amount of time, in nanoseconds, spent waiting for other processes to recharge the flow of the control meter."/>
 
 <metric name="flowControlThrottleWaitsInProgress" alias="flowControlThrottleWaitsInProgress" description="Number of threads blocked waiting due to flow-control throt­tle requests from other members."/>
 
@@ -241,139 +241,139 @@
 
 <metric name="jgUNICASTsentHighPriorityMessages" alias="jgUNICASTsentHighPriorityMessages" description="Number of un-acked high priority messages"/>
 
-<metric name="jgUNICASTdataReceivedTime" alias="jgUNICASTdataReceivedTime" description="Amount of time spent in JGroups UNICAST send."/>
+<metric name="jgUNICASTdataReceivedTime" alias="jgUNICASTdataReceivedTime" collectionType="trendsup" rate="1m" description="Amount of time spent in JGroups UNICAST send."/>
 
-<metric name="jgSTABLEsuspendTime" alias="jgSTABLEsuspendTime" description="Amount of time JGroups STABLE is suspended."/>
+<metric name="jgSTABLEsuspendTime" alias="jgSTABLEsuspendTime" collectionType="trendsup" rate="1m" description="Amount of time JGroups STABLE is suspended."/>
 
-<metric name="jgSTABLEmessages" alias="jgSTABLEmessages" description="Number of STABLE messages received by JGroups."/>
+<metric name="jgSTABLEmessages" alias="jgSTABLEmessages" collectionType="trendsup" rate="1m" description="Number of STABLE messages received by JGroups."/>
 
-<metric name="jgSTABLEmessagesSent" alias="jgSTABLEmessagesSent" description="Number of STABLE messages sent by JGroups."/>
+<metric name="jgSTABLEmessagesSent" alias="jgSTABLEmessagesSent" collectionType="trendsup" rate="1m" description="Number of STABLE messages sent by JGroups."/>
 
-<metric name="jgSTABILITYmessages" alias="jgSTABILITYmessages" description="Number of STABILITY messages received by JGroups."/>
+<metric name="jgSTABILITYmessages" alias="jgSTABILITYmessages" collectionType="trendsup" rate="1m" description="Number of STABILITY messages received by JGroups."/>
 
-<metric name="jgUDPupTime" alias="jgUDPupTime" units="ns" description="Time, in nanosecnds, spent in JGroups UDP processing up events."/>
+<metric name="jgUDPupTime" alias="jgUDPupTime" collectionType="trendsup" rate="1m" units="ns" description="Time, in nanosecnds, spent in JGroups UDP processing up events."/>
 
-<metric name="jgUDPdownTime" alias="jgUDPdownTime" units="ns" description="Time, in nanoseconds, spent in JGroups UDP processing down events."/>
+<metric name="jgUDPdownTime" alias="jgUDPdownTime" collectionType="trendsup" rate="1m" units="ns" description="Time, in nanoseconds, spent in JGroups UDP processing down events."/>
 
-<metric name="jgNAKACKupTime" alias="jgNAKACKupTime" units="ns" description="Time, in nanoseconds, spent in JGroups NAKACK process­ing up events."/>
+<metric name="jgNAKACKupTime" alias="jgNAKACKupTime" collectionType="trendsup" rate="1m" units="ns" description="Time, in nanoseconds, spent in JGroups NAKACK process­ing up events."/>
 
-<metric name="jgNAKACKdownTime" alias="jgNAKACKdownTime" units="ns" description="Time, in nanoseconds, spent in JGroups NAKACK process­ing down events."/>
+<metric name="jgNAKACKdownTime" alias="jgNAKACKdownTime" collectionType="trendsup" rate="1m" units="ns" description="Time, in nanoseconds, spent in JGroups NAKACK process­ing down events."/>
 
-<metric name="jgUNICASTupTime" alias="jgUNICASTupTime" units="ns" description="Time, in nanoseconds, spent in JGroups UNICAST process­ing up events."/>
+<metric name="jgUNICASTupTime" alias="jgUNICASTupTime" collectionType="trendsup" rate="1m" units="ns" description="Time, in nanoseconds, spent in JGroups UNICAST process­ing up events."/>
 
-<metric name="jgUNICASTdownTime" alias="jgUNICASTdownTime" units="ns" description="Time, in nanoseconds, spent in JGroups UNICAST process­ing down events."/>
+<metric name="jgUNICASTdownTime" alias="jgUNICASTdownTime" collectionType="trendsup" rate="1m" units="ns" description="Time, in nanoseconds, spent in JGroups UNICAST process­ing down events."/>
 
-<metric name="jgSTABLEupTime" alias="jgSTABLEupTime" units="ns" description="Time, in nanoseconds, spent in JGroups STABLE processing up events."/>
+<metric name="jgSTABLEupTime" alias="jgSTABLEupTime" collectionType="trendsup" rate="1m" units="ns" description="Time, in nanoseconds, spent in JGroups STABLE processing up events."/>
 
-<metric name="jgSTABLEdownTime" alias="jgSTABLEdownTime" units="ns" description="Time, in nanoseconds, spent in JGroups STABLE processing down events."/>
+<metric name="jgSTABLEdownTime" alias="jgSTABLEdownTime" collectionType="trendsup" rate="1m" units="ns" description="Time, in nanoseconds, spent in JGroups STABLE processing down events."/>
 
-<metric name="jgFRAG2upTime" alias="jgFRAG2upTime" units="ns" description="Time, in nanoseconds, spent in JGroups FRAG2 processing up events."/>
+<metric name="jgFRAG2upTime" alias="jgFRAG2upTime" collectionType="trendsup" rate="1m" units="ns" description="Time, in nanoseconds, spent in JGroups FRAG2 processing up events."/>
 
-<metric name="jgFRAG2downTime" alias="jgFRAG2downTime" units="ns" description="Time, in nanoseconds, spent in JGroups FRAG2 processing down events."/>
+<metric name="jgFRAG2downTime" alias="jgFRAG2downTime" collectionType="trendsup" rate="1m" units="ns" description="Time, in nanoseconds, spent in JGroups FRAG2 processing down events."/>
 
-<metric name="jgGMSupTime" alias="jgGMSupTime" units="ns" description="Time, in nanoseconds, spent in JGroups GMS processing up events."/>
+<metric name="jgGMSupTime" alias="jgGMSupTime" collectionType="trendsup" rate="1m" units="ns" description="Time, in nanoseconds, spent in JGroups GMS processing up events."/>
 
-<metric name="jgGMSdownTime" alias="jgGMSdownTime" units="ns" description="Time, in nanoseconds, spent in JGroups GMS processing down events."/>
+<metric name="jgGMSdownTime" alias="jgGMSdownTime" collectionType="trendsup" rate="1m" units="ns" description="Time, in nanoseconds, spent in JGroups GMS processing down events."/>
 
-<metric name="jgFCupTime" alias="jgFCupTime" units="ns" description="Time, in nanoseconds, spent in JGroups FC processing up events."/>
+<metric name="jgFCupTime" alias="jgFCupTime" collectionType="trendsup" rate="1m" units="ns" description="Time, in nanoseconds, spent in JGroups FC processing up events."/>
 
-<metric name="jgFCdownTime" alias="jgFCdownTime" units="ns" description="Time, in nanoseconds, spent in JGroups FC processing down events."/>
+<metric name="jgFCdownTime" alias="jgFCdownTime" collectionType="trendsup" rate="1m" units="ns" description="Time, in nanoseconds, spent in JGroups FC processing down events."/>
 
-<metric name="jgDirAckupTime" alias="jgDirAckupTime" units="ns" description="Time, in nanoseconds, spent in JGroups DirAck processing up events."/>
+<metric name="jgDirAckupTime" alias="jgDirAckupTime" collectionType="trendsup" rate="1m" units="ns" description="Time, in nanoseconds, spent in JGroups DirAck processing up events."/>
 
-<metric name="jgDirAckdownTime" alias="jgDirAckdownTime" units="ns" description="Time, in nanoseconds, spent in JGroups DirAck processing down events."/>
+<metric name="jgDirAckdownTime" alias="jgDirAckdownTime" collectionType="trendsup" rate="1m" units="ns" description="Time, in nanoseconds, spent in JGroups DirAck processing down events."/>
 
-<metric name="jgVIEWSYNCdownTime" alias="jgVIEWSYNCdownTime" units="ns" description="Time, in nanoseconds, spent in JGroups VIEWSYNC pro­cessing down events."/>
+<metric name="jgVIEWSYNCdownTime" alias="jgVIEWSYNCdownTime" collectionType="trendsup" rate="1m" units="ns" description="Time, in nanoseconds, spent in JGroups VIEWSYNC pro­cessing down events."/>
 
-<metric name="jgVIEWSYNCupTime" alias="jgVIEWSYNCupTime" units="ns" description="Time, in nanoseconds, spent in JGroups VIEWSYNC pro­cessing up events."/>
+<metric name="jgVIEWSYNCupTime" alias="jgVIEWSYNCupTime" collectionType="trendsup" rate="1m" units="ns" description="Time, in nanoseconds, spent in JGroups VIEWSYNC pro­cessing up events."/>
 
-<metric name="jgFDdownTime" alias="jgFDdownTime" units="ns" description="Time, in nanoseconds, spent in JGroups FD processing down events."/>
+<metric name="jgFDdownTime" alias="jgFDdownTime" collectionType="trendsup" rate="1m" units="ns" description="Time, in nanoseconds, spent in JGroups FD processing down events."/>
 
-<metric name="jgFDupTime" alias="jgFDupTime" units="ns" description="Time, in nanoseconds, spent in JGroups FD processing up events."/>
+<metric name="jgFDupTime" alias="jgFDupTime" collectionType="trendsup" rate="1m" units="ns" description="Time, in nanoseconds, spent in JGroups FD processing up events."/>
 
-<metric name="jgTCPGOSSIPdownTime" alias="jgTCPGOSSIPdownTime" units="ns" description="Time, in nanoseconds, spent in JGroups TCPGOSSIP pro­cessing down events."/>
+<metric name="jgTCPGOSSIPdownTime" alias="jgTCPGOSSIPdownTime" collectionType="trendsup" rate="1m" units="ns" description="Time, in nanoseconds, spent in JGroups TCPGOSSIP pro­cessing down events."/>
 
-<metric name="jgTCPGOSSIPupTime" alias="jgTCPGOSSIPupTime" units="ns" description="Time, in nanoseconds, spent in JGroups TCPGOSSIP pro­cessing up events."/>
+<metric name="jgTCPGOSSIPupTime" alias="jgTCPGOSSIPupTime" collectionType="trendsup" rate="1m" units="ns" description="Time, in nanoseconds, spent in JGroups TCPGOSSIP pro­cessing up events."/>
 
-<metric name="jgDISCOVERYdownTime" alias="jgDISCOVERYdownTime" units="ns" description="Time, in nanoseconds, spent in JGroups DISCOVERY pro­cessing down events."/>
+<metric name="jgDISCOVERYdownTime" alias="jgDISCOVERYdownTime" collectionType="trendsup" rate="1m" units="ns" description="Time, in nanoseconds, spent in JGroups DISCOVERY pro­cessing down events."/>
 
-<metric name="jgDISCOVERYupTime" alias="jgDISCOVERYupTime" units="ns" description="Time, in nanoseconds, spent in JGroups DISCOVERY pro­cessing up events."/>
+<metric name="jgDISCOVERYupTime" alias="jgDISCOVERYupTime" collectionType="trendsup" rate="1m" units="ns" description="Time, in nanoseconds, spent in JGroups DISCOVERY pro­cessing up events."/>
 
-<metric name="jgDownTime" alias="jgDownTime" description="Down Time spent in JGroups stacks."/>
+<metric name="jgDownTime" alias="jgDownTime" collectionType="trendsup" rate="1m" description="Down Time spent in JGroups stacks."/>
 
-<metric name="jgUpTime" alias="jgUpTime" description="Up Time spent in JGroups stacks."/>
+<metric name="jgUpTime" alias="jgUpTime" collectionType="trendsup" rate="1m" description="Up Time spent in JGroups stacks."/>
 
-<metric name="jChannelUpTime" alias="jChannelUpTime" description="Up Time spent in JChannel including jgroup stack."/>
+<metric name="jChannelUpTime" alias="jChannelUpTime" collectionType="trendsup" rate="1m" description="Up Time spent in JChannel including jgroup stack."/>
 
-<metric name="jgFCsendBlocks" alias="jgFCsendBlocks" description="Number of times JGroups FC halted send events due to back­pressure."/>
+<metric name="jgFCsendBlocks" alias="jgFCsendBlocks" collectionType="trendsup" rate="1m" description="Number of times JGroups FC halted send events due to back­pressure."/>
 
-<metric name="jgFCautoRequests" alias="jgFCautoRequests" description="Number of times JGroups FC automatically sent replenish­ment requests."/>
+<metric name="jgFCautoRequests" alias="jgFCautoRequests" collectionType="trendsup" rate="1m" description="Number of times JGroups FC automatically sent replenish­ment requests."/>
 
-<metric name="jgFCreplenish" alias="jgFCreplenish" description="Number of times JGroups FC received replenishments mes­sages from receivers."/>
+<metric name="jgFCreplenish" alias="jgFCreplenish" collectionType="trendsup" rate="1m" description="Number of times JGroups FC received replenishments mes­sages from receivers."/>
 
-<metric name="jgFCresumes" alias="jgFCresumes" description="Number of times JGroups FC resumed sends events due to backpressure."/>
+<metric name="jgFCresumes" alias="jgFCresumes" collectionType="trendsup" rate="1m" description="Number of times JGroups FC resumed sends events due to backpressure."/>
 
-<metric name="jgFCsentCredits" alias="jgFCsentCredits" description="Number of times JGroups FC sent credits events to a sender."/>
+<metric name="jgFCsentCredits" alias="jgFCsentCredits" collectionType="trendsup" rate="1m" description="Number of times JGroups FC sent credits events to a sender."/>
 
-<metric name="jgFCsentThrottleRequests" alias="jgFCsentThrottleRequests" description="Number of times JGroups FC sent throttle events requests to a sender."/>
+<metric name="jgFCsentThrottleRequests" alias="jgFCsentThrottleRequests" collectionType="trendsup" rate="1m" description="Number of times JGroups FC sent throttle events requests to a sender."/>
 
 <metric name="asyncSocketWritesInProgress" alias="asyncSocketWritesInProgress" description="Current number of non-blocking socket write calls in progress."/>
 
-<metric name="asyncSocketWrites" alias="asyncSocketWrites" description="Total number of non-blocking socket write calls completed."/>
+<metric name="asyncSocketWrites" alias="asyncSocketWrites" collectionType="trendsup" rate="1m" description="Total number of non-blocking socket write calls completed."/>
 
-<metric name="asyncSocketWriteRetries" alias="asyncSocketWriteRetries" description="Total number of retries needed to write a single block of data using non-blocking socket write calls."/>
+<metric name="asyncSocketWriteRetries" alias="asyncSocketWriteRetries" collectionType="trendsup" rate="1m" description="Total number of retries needed to write a single block of data using non-blocking socket write calls."/>
 
-<metric name="asyncSocketWriteTime" alias="asyncSocketWriteTime" units="ns" description="Total amount of time, in nanoseconds, spent in non-blocking socket write calls."/>
+<metric name="asyncSocketWriteTime" alias="asyncSocketWriteTime" collectionType="trendsup" rate="1m" units="ns" description="Total amount of time, in nanoseconds, spent in non-blocking socket write calls."/>
 
-<metric name="asyncSocketWriteBytes" alias="asyncSocketWriteBytes" units="B" description="Total number of bytes sent out on non-blocking sockets."/>
+<metric name="asyncSocketWriteBytes" alias="asyncSocketWriteBytes" collectionType="trendsup" rate="1m" units="B" description="Total number of bytes sent out on non-blocking sockets."/>
 
-<metric name="asyncQueueAddTime" alias="asyncQueueAddTime" units="ns" description="Total amount of time, in nanoseconds, spent in adding mes­sages to async queue."/>
+<metric name="asyncQueueAddTime" alias="asyncQueueAddTime" collectionType="trendsup" rate="1m" units="ns" description="Total amount of time, in nanoseconds, spent in adding mes­sages to async queue."/>
 
-<metric name="asyncQueueRemoveTime" alias="asyncQueueRemoveTime" units="ns" description="Total amount of time, in nanoseconds, spent in removing messages from async queue."/>
+<metric name="asyncQueueRemoveTime" alias="asyncQueueRemoveTime" collectionType="trendsup" rate="1m" units="ns" description="Total amount of time, in nanoseconds, spent in removing messages from async queue."/>
 
-<metric name="jgDirAcksReceived" alias="jgDirAcksReceived" description="Number of DirAck acks received."/>
+<metric name="jgDirAcksReceived" alias="jgDirAcksReceived" collectionType="trendsup" rate="1m" description="Number of DirAck acks received."/>
 
-<metric name="jgFragmentationsPerformed" alias="jgFragmentationsPerformed" description="Number of message fragmentation operations performed."/>
+<metric name="jgFragmentationsPerformed" alias="jgFragmentationsPerformed" collectionType="trendsup" rate="1m" description="Number of message fragmentation operations performed."/>
 
-<metric name="jgFragmentsCreated" alias="jgFragmentsCreated" description="Number of message fragments created."/>
+<metric name="jgFragmentsCreated" alias="jgFragmentsCreated" collectionType="trendsup" rate="1m" description="Number of message fragments created."/>
 
-<metric name="socketLocks" alias="socketLocks" description="Total number of times a socket has been locked."/>
+<metric name="socketLocks" alias="socketLocks" collectionType="trendsup" rate="1m" description="Total number of times a socket has been locked."/>
 
-<metric name="socketLockTime" alias="socketLockTime" units="ns" description="Total amount of time, in nanoseconds, spent locking a socket."/>
+<metric name="socketLockTime" alias="socketLockTime" collectionType="trendsup" rate="1m" units="ns" description="Total amount of time, in nanoseconds, spent locking a socket."/>
 
 <metric name="bufferAcquiresInProgress" alias="bufferAcquiresInProgress" description="Current number of threads waiting to acquire a buffer."/>
 
-<metric name="bufferAcquires" alias="bufferAcquires" description="Total number of times a buffer has been acquired."/>
+<metric name="bufferAcquires" alias="bufferAcquires" collectionType="trendsup" rate="1m" description="Total number of times a buffer has been acquired."/>
 
-<metric name="bufferAcquireTime" alias="bufferAcquireTime" units="ns" description="Total amount of time, in nanoseconds, spent acquiring a socket."/>
+<metric name="bufferAcquireTime" alias="bufferAcquireTime" collectionType="trendsup" rate="1m" units="ns" description="Total amount of time, in nanoseconds, spent acquiring a socket."/>
 
 <metric name="messagesBeingReceived" alias="messagesBeingReceived" description="Current number of messages being received off the network or being processed after reception."/>
 
 <metric name="messageBytesBeingReceived" alias="messageBytesBeingReceived" units="B" description="Current number of bytes consumed by messages being received or processed."/>
 
-<metric name="serialThreadStarts" alias="serialThreadStarts" description="Total number of times a thread has been created for the serial message executor."/>
+<metric name="serialThreadStarts" alias="serialThreadStarts" collectionType="trendsup" rate="1m" description="Total number of times a thread has been created for the serial message executor."/>
 
-<metric name="viewThreadStarts" alias="viewThreadStarts" description="Total number of times a thread has been created for the view message executor."/>
+<metric name="viewThreadStarts" alias="viewThreadStarts" collectionType="trendsup" rate="1m" description="Total number of times a thread has been created for the view message executor."/>
 
-<metric name="processingThreadStarts" alias="processingThreadStarts" description="Total number of times a thread has been created for the pool processing normal messages."/>
+<metric name="processingThreadStarts" alias="processingThreadStarts" collectionType="trendsup" rate="1m" description="Total number of times a thread has been created for the pool processing normal messages."/>
 
-<metric name="highPriorityThreadStarts" alias="highPriorityThreadStarts" description="Total number of times a thread has been created for the pool handling high priority messages."/>
+<metric name="highPriorityThreadStarts" alias="highPriorityThreadStarts" collectionType="trendsup" rate="1m" description="Total number of times a thread has been created for the pool handling high priority messages."/>
 
-<metric name="waitingThreadStarts" alias="waitingThreadStarts" description="Total number of times a thread has been created for the wait­ing pool."/>
+<metric name="waitingThreadStarts" alias="waitingThreadStarts" collectionType="trendsup" rate="1m" description="Total number of times a thread has been created for the wait­ing pool."/>
 
-<metric name="partitionedRegionThreadStarts" alias="partitionedRegionThreadStarts" description="Total number of times a thread has been created for the pool handling partitioned region messages."/>
+<metric name="partitionedRegionThreadStarts" alias="partitionedRegionThreadStarts" collectionType="trendsup" rate="1m" description="Total number of times a thread has been created for the pool handling partitioned region messages."/>
 
-<metric name="serialPooledThreadStarts" alias="serialPooledThreadStarts" description="Total number of times a thread has been created for the serial pool(s)."/>
+<metric name="serialPooledThreadStarts" alias="serialPooledThreadStarts" collectionType="trendsup" rate="1m" description="Total number of times a thread has been created for the serial pool(s)."/>
 
-<metric name="TOSentMsgs" alias="TOSentMsgs" description="Total number of messages sent on thread owned senders."/>
+<metric name="TOSentMsgs" alias="TOSentMsgs" collectionType="trendsup" rate="1m" description="Total number of messages sent on thread owned senders."/>
 
 <metric name="functionExecutionQueueSize" alias="functionExecutionQueueSize" description="The number of high priority distribution messages currently waiting to be processed."/>
 
-<metric name="functionExecutionQueueThrottleCount" alias="functionExecutionQueueThrottleCount" description="The total number of times a thread was delayed in adding a normal message to the high priority queue."/>
+<metric name="functionExecutionQueueThrottleCount" alias="functionExecutionQueueThrottleCount" collectionType="trendsup" rate="1m" description="The total number of times a thread was delayed in adding a normal message to the high priority queue."/>
 
-<metric name="functionExecutionQueueThrottleTime" alias="functionExecutionQueueThrottleTime" description="The total amount of time, in nanoseconds, spent delayed by the high priority queue throttle."/>
+<metric name="functionExecutionQueueThrottleTime" alias="functionExecutionQueueThrottleTime" collectionType="trendsup" rate="1m" description="The total amount of time, in nanoseconds, spent delayed by the high priority queue throttle."/>
 
-<metric name="functionExecutionThreadStarts" alias="functionExecutionThreadStarts" description="Total number of times a thread has been created for the pool handling function execution messages."/>
+<metric name="functionExecutionThreadStarts" alias="functionExecutionThreadStarts" collectionType="trendsup" rate="1m" description="Total number of times a thread has been created for the pool handling function execution messages."/>
 
 <metric name="functionExecutionThreadJobs" alias="functionExecutionThreadJobs" description="The number of messages currently being processed by function execution threads"/>
 

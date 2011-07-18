@@ -3,7 +3,7 @@
 
 <metric name="eventsQueued" alias="eventsQueued" collectionType="trendsup" rate="1m" indicator="true" defaultOn="true" description="Number of events operations added to the event queue by this hub."/>
 
-<metric name="eventQueueTime" alias="eventQueueTime" defaultOn="true" units="ns" description="Total time, in nanoseconds, spent queueing events."/>
+<metric name="eventQueueTime" alias="eventQueueTime" collectionType="trendsup" rate="1m" defaultOn="true" units="ns" description="Total time, in nanoseconds, spent queueing events."/>
 
 <metric name="eventQueueSize" alias="eventQueueSize" defaultOn="true" description="Size of the event operations queue."/>
 
