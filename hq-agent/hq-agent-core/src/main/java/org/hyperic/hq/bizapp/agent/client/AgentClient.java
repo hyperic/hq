@@ -1297,11 +1297,8 @@ public class AgentClient {
                 return null;
             }
             conn = new SecureAgentConnection(connIp, cfg.getListenPort(), authToken, keystoreConfig, keystoreConfig.isAcceptUnverifiedCert());
-            try {
-                conn.getSocket().setSoTimeout(30000);
-            } catch (IOException e) {
-                SYSTEM_ERR.println("unable to set socket timeout: " + e.getMessage());
-            }
+            // TODO need to figure out where the connection should be closed AND close it! }:^(
+            
             return new AgentClient(cfg, conn);
                 
         } else {
@@ -1313,11 +1310,8 @@ public class AgentClient {
                 try {
                     authToken = AgentClientUtil.getLocalAuthToken(tokenFile);
                     conn = new SecureAgentConnection(connIp, cfg.getListenPort(), authToken, keystoreConfig, keystoreConfig.isAcceptUnverifiedCert());
-                    try {
-                        conn.getSocket().setSoTimeout(30000);
-                    } catch (IOException e) {
-                        SYSTEM_ERR.println("unable to set socket timeout: " + e.getMessage());
-                    }
+                    // TODO need to figure out where the connection should be closed AND close it! }:^(
+                    
                     return new AgentClient(cfg, conn);
                 } catch(FileNotFoundException exc){
                     SYSTEM_ERR.println("- No token file found, waiting for " +
