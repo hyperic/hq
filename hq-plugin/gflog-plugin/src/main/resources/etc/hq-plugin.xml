@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+
+<plugin name="gflog">
+
+  <service name="GemFire Log File">
+
+    <config>
+      <option name="path"
+              description="Path to log file"/>      
+      <option name="force.error"
+              optional="true"
+              description="Regex to force error level"/>      
+      <option name="force.warn"
+              optional="true"
+              description="Regex to force warn level"/>      
+      <option name="force.info"
+              optional="true"
+              description="Regex to force info level"/>      
+    </config>
+    
+    <plugin type="measurement"
+            class="org.hyperic.hq.plugin.gflog.GFLogMeasurementPlugin"/>
+    
+    <plugin type="log_track"
+            class="org.hyperic.hq.plugin.gflog.GFLogfileTailPlugin"/>
+    
+    <metric name="Availability"
+            alias="Availability"
+            template="gflog.avail:Type=FileInfo,Arg=%path%:Size"
+            category="AVAILABILITY"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/>
+
+    <metric name="Size"
+            alias="Size"
+            template="sigar:Type=FileInfo,Arg=%path%:Size"
+            category="UTILIZATION"
+            indicator="true"
+            units="B"
+            collectionType="dynamic"/>
+    
+    
+    <metric name="Last Modified Time"
+            alias="LastModified"
+            template="sigar:Type=FileInfo,Arg=%path%:Mtime"
+            category="UTILIZATION"
+            units="epoch-millis"
+            collectionType="static"/>
+
+    <metric name="Last Change Time"
+            alias="LastChange"
+            template="sigar:Type=FileInfo,Arg=%path%:Ctime"
+            category="UTILIZATION"
+            units="epoch-millis"
+            collectionType="static"/>
+
+    <metric name="Last Access Time"
+            alias="LastAccess"
+            template="sigar:Type=FileInfo,Arg=%path%:Atime"
+            category="UTILIZATION"
+            units="epoch-millis"
+            collectionType="static"/>
+
+    <metric name="Permissions"
+            alias="Permissions"
+            template="sigar:Type=FileInfo,Arg=%path%:Mode"
+            category="UTILIZATION"
+            units="none"
+            collectionType="static"/>
+
+    <metric name="Owner User Id"
+            alias="Uid"
+            template="sigar:Type=FileInfo,Arg=%path%:Uid"
+            category="UTILIZATION"
+            units="none"
+            collectionType="static"/>
+
+    <metric name="Owner Group Id"
+            alias="Gid"
+            template="sigar:Type=FileInfo,Arg=%path%:Gid"
+            category="UTILIZATION"
+            units="none"
+            collectionType="static"/>
+    
+  
+  </service>
+
+</plugin>
