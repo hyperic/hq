@@ -3620,6 +3620,10 @@ hyperic.alert_center = function(title_name) {
 					
 				// submit next selection
 				if (++alertIndex < ealerts.length) {
+					if (data.actionToken) {
+						// use new CSRF token for subsequent batch POST requests
+						myForm.action = data.actionToken;
+					}
 					that.xhrBatchSubmit(myDialog, alertIndex);
 				} else {
 					that.current.dialog.hide();
