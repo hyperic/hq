@@ -755,7 +755,6 @@
 					<module>hq-installer</module>
 					<module>hq-bootstrap</module>
 					<module>hq-web</module>
-					<module>dist/agent</module>
 			</modules>
 		</profile>
         <profile>

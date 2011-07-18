@@ -26,7 +26,10 @@
 package org.hyperic.hq.plugin.system;
 
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.hyperic.sigar.CpuPerc;
 import org.hyperic.sigar.ProcCpu;
@@ -74,6 +77,8 @@ public class ProcessData {
     private long _cpuTotal;
     private double _cpuPerc;
     private String _name;
+    private String[] _args;
+    private Map _env;
 
     private ProcState _procState;
     private ProcCredName _procCredName;
@@ -84,6 +89,18 @@ public class ProcessData {
 
     public void populate(SigarProxy sigar, long pid)
         throws SigarException {
+
+        try {
+            _args = sigar.getProcArgs(pid);
+        } catch (SigarException e) {
+            _args = new String[] {};
+        }
+
+        try {
+            _env = sigar.getProcEnv(pid);
+        } catch (SigarException e) {
+            _env = new HashMap();
+        }
 
         _procState = sigar.getProcState(pid);
         final String unknown = "???";
@@ -132,6 +149,14 @@ public class ProcessData {
         ProcessData data = new ProcessData();
         data.populate(sigar, pid);
         return data;
+    }
+
+    public String[] getProcArgs() {
+        return _args;
+    }
+
+    public Map getProcEnv() {
+        return Collections.unmodifiableMap(_env);
     }
 
     public ProcState getProcState() {

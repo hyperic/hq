@@ -38,7 +38,6 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.RenditServer;
 import org.hyperic.hq.hqu.ViewDescriptor;
@@ -73,8 +72,8 @@ public class UIPluginManagerImpl implements UIPluginManager {
         this.resourceGroupManager = resourceGroupManager;
     }
 
-    public UIPlugin createPlugin(String name, String ver) {
-        return uiPluginDAO.create(name, ver);
+    public UIPlugin createPlugin(String name, String version) {
+        return uiPluginDAO.create(name, version);
     }
 
     public UIPlugin createOrUpdate(String name, String version) {
@@ -82,7 +81,7 @@ public class UIPluginManagerImpl implements UIPluginManager {
 
         if (p == null) {
             log.info("Creating plugin [" + name + "]");
-            p = uiPluginDAO.create(name, version);
+            p = createPlugin(name, version);
         } else {
             log.info("Updating plugin [" + name + "]");
             updatePlugin(p, version);
@@ -140,7 +139,6 @@ public class UIPluginManagerImpl implements UIPluginManager {
      */
     public void deletePlugin(UIPlugin p) {
         log.info("Deleting plugin " + p);
-
         uiPluginDAO.remove(p);
     }
 
@@ -170,28 +168,33 @@ public class UIPluginManagerImpl implements UIPluginManager {
         log.info("Attaching [" + view + "] via [" + cat + "]");
     }
 
+    @SuppressWarnings("unchecked")
     public void attachView(ViewResource view, ViewResourceCategory cat, Resource r) {
         for (Iterator<AttachmentResource> i = view.getAttachments().iterator(); i.hasNext();) {
             AttachmentResource a = i.next();
-
             if (a.getCategory().equals(cat) && a.getResource().equals(r)) {
                 throw new IllegalArgumentException("View [" + view + "] is " + "already attached to [" + r + "] in [" +
                                                    cat + "]");
             }
         }
-
         view.addAttachment(new AttachmentResource(view, cat, r));
-
         log.info("Attaching [" + view + "] to [" + r + "] via [" + cat + "]");
     }
 
     public void updatePlugin(UIPlugin p, String version) {
+        // On update, we need to clean the previous views out and recreate.
+        // Recreation of views will be done when deploy is called on the plugin.
+        Collection views = p.getViewsBag();
+        if (!views.isEmpty()){
+            views.clear();
+            // need to flush the session to allow for adding the views back during deploy
+            // within the same transaction.
+            uiPluginDAO.flushSession();
+        }
         if (!p.getPluginVersion().equals(version)) {
+            log.info("Updating plugin version to " + version);
             p.setPluginVersion(version);
         }
-
-        // TODO: What do we do here if the views for a particular plugin
-        // have changed? Work it out.
     }
 
     /**
@@ -204,11 +207,11 @@ public class UIPluginManagerImpl implements UIPluginManager {
 
     /**
      * Find all the views attached via a specific attach type
-     * 
+     * TODO This does not appear to be used anywhere. Delete?
      * @return a collection of {@link AttachType}s
      */
     @Transactional(readOnly=true)
-    public Collection<AttachType> findViews(AttachType type) {
+    public Collection<View> findViews(AttachType type) {
         return viewDAO.findFor(type);
     }
 
@@ -220,7 +223,6 @@ public class UIPluginManagerImpl implements UIPluginManager {
     @Transactional(readOnly=true)
     public Collection<AttachmentDescriptor> findAttachments(AttachType type, AuthzSubject user) {
         Resource root = resourceManager.findRootResource();
-
         return convertAttachmentsToDescriptors(attachmentDAO.findFor(type), root, user);
     }
 

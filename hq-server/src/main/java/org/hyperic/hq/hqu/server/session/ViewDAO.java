@@ -41,7 +41,8 @@ public class ViewDAO
         super(View.class, f);
     }
 
-    Collection findFor(AttachType type) {
+    @SuppressWarnings("unchecked")
+    Collection<View> findFor(AttachType type) {
         return createCriteria().add(Restrictions.eq("attachTypeEnum", new Integer(type.getCode())))
             .list();
     }

@@ -3,7 +3,6 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-
 	<groupId>org.hyperic.hq.plugin</groupId>
 	<artifactId>jboss-plugin</artifactId>
 	<packaging>jar</packaging>
@@ -158,6 +157,11 @@
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
+		</repository>
+		<repository>
+			<id>jboss-repository</id>
+			<name>JBoss Public Repository</name>
+			<url>http://repository.jboss.org/nexus/content/groups/public-jboss</url>
 		</repository>
 	</repositories>
 
