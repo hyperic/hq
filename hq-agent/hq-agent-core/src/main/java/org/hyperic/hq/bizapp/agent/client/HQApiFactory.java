@@ -76,22 +76,26 @@ public class HQApiFactory {
 	}
 	
 	private static void configureSSLKeystore() {
-		// TODO: Refactor later so that Java system properties do not need to be set
-		
-    	String keyStorePath = System.getProperty(JAVA_SSL_KEYSTORE);
-    	String keyStorePassword = System.getProperty(JAVA_SSL_KEYSTORE_PASSWORD);
-    	
-    	if (keyStorePath == null && keyStorePassword == null) {
-    		AgentKeystoreConfig keystoreConfig = new AgentKeystoreConfig();
-    		String filePath = keystoreConfig.getFilePath();
-    		System.setProperty(JAVA_SSL_KEYSTORE, filePath);
-    		System.setProperty(JAVA_SSL_KEYSTORE_PASSWORD, keystoreConfig.getFilePassword()); 
-    		
-    		if (_log.isDebugEnabled()) {
-    			_log.debug("Setting Java system property " + JAVA_SSL_KEYSTORE
-    							+ " to " + filePath);
-    		}
-    	}
+		// TODO: Refactor later so that Java system properties do not need to be set.
+		// Ideally, we should be able to pass the DefaultSSLProviderImpl to HQApi.
+
+		AgentKeystoreConfig keystoreConfig = new AgentKeystoreConfig();
+
+		if (!keystoreConfig.isAcceptUnverifiedCert()) {
+	    	String keyStorePath = System.getProperty(JAVA_SSL_KEYSTORE);
+	    	String keyStorePassword = System.getProperty(JAVA_SSL_KEYSTORE_PASSWORD);
+	    	
+	    	if (keyStorePath == null || keyStorePassword == null) {
+	    		String filePath = keystoreConfig.getFilePath();
+	    		System.setProperty(JAVA_SSL_KEYSTORE, filePath);
+	    		System.setProperty(JAVA_SSL_KEYSTORE_PASSWORD, keystoreConfig.getFilePassword()); 
+	    		
+	    		if (_log.isDebugEnabled()) {
+	    			_log.debug("Setting Java system property " + JAVA_SSL_KEYSTORE
+	    							+ " to " + filePath);
+	    		}
+	    	}
+		}
 	}
 
 }

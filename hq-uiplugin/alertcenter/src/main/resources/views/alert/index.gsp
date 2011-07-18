@@ -67,11 +67,10 @@ hqDojo.ready( function(){
 });
 </script>
 <div id="fullBody" style="clear:both">
-<% dojoTabContainer(id:'mainTabContainer', style:'width: 100%; height:500px;') { %>
+<% dojoTabContainer(id:'mainTabContainer', style:'width:100%;height:500px;') { %>
 	<% dojoTabPane(id:'alertsContentPane', label:'Alerts') { %>
-		<table border="0" width="100%" cellpadding="0" cellspacing="2">
-			<tr>
-				<td width="20%" valign="top">
+			<div style="padding:5px;">
+				<div style="float:left;width:200px;margin-right:10px;">
 	        		<div class="filters">
 	          			<div class="BlockTitle">${l.AlertFilter}</div>
 	          			<div class="filterBox">
@@ -124,9 +123,9 @@ hqDojo.ready( function(){
 	            			</div>
 	            		</div>
 					</div>
-				</td>
-				<td width="80%" valign="top">
-	        		<div id="alertsTable" style="display:none;">
+				</div>
+				<div style="width:auto;height: 445px;overflow-x: hidden; overflow-y: auto;">
+	        		<div id="alertsTable" style="width:auto;display:none;">
 	          			<form id="Alerts_FixForm" name="Alerts_FixForm" method="POST" action="<%= urlFor(absolute:"/alerts/RemoveAlerts.do", encodeUrl:true) %>">
 	          				<div id="Alerts_DataDiv" style="height: 400px;overflow-x: hidden; overflow-y: auto;">
 	          					<%= dojoTable(id:'Alerts', title:l.ClassicAlertsTable,
@@ -188,14 +187,12 @@ hqDojo.ready( function(){
 			          		hqDojo.connect("GroupAlerts_refreshTable", function() { MyAlertCenter.resetAlertTable(hqDojo.byId('GroupAlerts_FixForm')); });         		
 			          	});
 		      		</script>
-				</td>
-			</tr>
-		</table>
+		      	</div>
+		     </div>
   	<% } %>
 	<% dojoTabPane(id:'definitionsContentPane', label:'Definition') { %>
-		<table border="0" width="100%" cellpadding="0" cellspacing="2">
-			<tr>
-				<td width="20%" valign="top">
+			<div style="padding:5px;">
+				<div style="float:left;width:200px;margin-right:10px;">
 	        		<div class="filters">
 	          			<div class="BlockTitle">${l.DefFilter}</div>
 	          			<div class="filterBox">
@@ -225,8 +222,8 @@ hqDojo.ready( function(){
 	            			</div>
 	          			</div>
 	        		</div>
-				</td>
-				<td width="80%" valign="top">
+				</div>
+				<div style="width:auto;height: 445px;overflow-x: hidden; overflow-y: auto;">
 	        		<div id="defsTable" style="display:none;">
 	          			<%= dojoTable(id:'Defs', title:l.ClassicDefsTable,
 	                        url:urlFor(action:'defData'),
@@ -248,10 +245,9 @@ hqDojo.ready( function(){
 	                        	schema:galertDefSchema, 
 	                        	numRows:15,
 	                        	readOnly:true) %>
-	        		</div>    
-				</td>
-			</tr>
-		</table>
+	        		</div>
+	        	</div>    
+			</div>
 	<% } %>
 <% } %>
 </div>

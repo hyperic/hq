@@ -223,7 +223,12 @@ public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAw
                     try {
                         job.execute();
                     } catch (Throwable e) {
-                        log.error(e,e);
+                        if (e instanceof InterruptedException) {
+                            log.warn("jobdesc=" + job.getJobDescription() + " was interrupted: " + e);
+                            log.debug(e,e);
+                        } else {
+                            log.error(e,e);
+                        }
                     }
                     return;
                 } else {

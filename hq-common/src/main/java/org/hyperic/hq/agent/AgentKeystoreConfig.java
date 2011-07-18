@@ -34,23 +34,22 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.util.security.KeystoreConfig;
 
 /**
- * @author achen
- *
+ * This class will get the keystore property in agent's default property file (usually it's agent.properties)
+ * and create a keystoreConfig for SSL communication (Should only be used for agent side code).
  */
 public class AgentKeystoreConfig
     extends KeystoreConfig {
-    private Log log;
+    private Log log = LogFactory.getLog(AgentKeystoreConfig.class);
     public AgentKeystoreConfig(){
-        this.log = LogFactory.getLog(AgentKeystoreConfig.class);
         AgentConfig cfg;
         final String propFile = System.getProperty(AgentConfig.PROP_PROPFILE,AgentConfig.DEFAULT_PROPFILE);
         try {
             cfg = AgentConfig.newInstance(propFile);
         } catch(IOException exc){
-            System.err.println("Error: " + exc);
+            log.error("Error: " + exc);
             return ;
         } catch(AgentConfigException exc){
-            System.err.println("Agent Properties error: " + exc.getMessage());
+            log.error("Agent Properties error: " + exc.getMessage());
             return ;
         }
         super.setFilePath(cfg.getBootProperties().getProperty(AgentConfig.SSL_KEYSTORE_PATH));

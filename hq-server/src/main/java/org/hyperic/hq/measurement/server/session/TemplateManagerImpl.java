@@ -38,7 +38,6 @@ import java.util.Map;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
@@ -319,37 +318,41 @@ public class TemplateManagerImpl implements TemplateManager {
      */
     public void updateTemplateDefaultInterval(AuthzSubject subject, Integer[] templIds,
                                               long interval) {
-        final HashSet<AppdefEntityID> toReschedule = new HashSet<AppdefEntityID>();
-        final Map<Integer, Collection<Measurement>> measTemplMap =
-            measurementDAO.getMeasurementsByTemplateIds(templIds);
+        HashSet<AppdefEntityID> toReschedule = new HashSet<AppdefEntityID>();
         for (int i = 0; i < templIds.length; i++) {
-            final MeasurementTemplate template = measurementTemplateDAO.get(templIds[i]);
-            if (template == null) {
-                continue;
-            }
+            MeasurementTemplate template = measurementTemplateDAO.findById(templIds[i]);
+
             if (interval != template.getDefaultInterval()) {
                 template.setDefaultInterval(interval);
             }
+
             if (!template.isDefaultOn()) {
                 template.setDefaultOn(interval != 0);
             }
-            final Collection<Measurement> measurements = measTemplMap.get(template.getId());
-            if (measurements == null) {
-                continue;
-            }
-            for (final Measurement m : measurements) {
+            final List<Measurement> measurements = measurementDAO.findByTemplate(template.getId());
+            for (Measurement m : measurements) {
                 m.setEnabled(template.isDefaultOn());
                 m.setInterval(template.getDefaultInterval());
-                AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(m.getResource());
-                toReschedule.add(aeid);
             }
+
+            List<AppdefEntityID> appdefEntityIds = measurementDAO
+                .findAppdefEntityIdsByTemplate(template.getId());
+
+            toReschedule.addAll(appdefEntityIds);
         }
-        for (final AppdefEntityID id : toReschedule) {
-            final ScheduleRevNum srn = srnCache.get(id);
+
+        int count = 0;
+        for (AppdefEntityID id : toReschedule) {
+            ScheduleRevNum srn = srnCache.get(id);
             if (srn != null) {
                 srnManager.incrementSrn(id, Math.min(interval, srn.getMinInterval()));
+                if (++count % 100 == 0) {
+                    scheduleRevNumDAO.flushSession();
+                }
             }
         }
+
+        scheduleRevNumDAO.flushSession();
     }
 
     /**

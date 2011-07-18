@@ -36,6 +36,7 @@ import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Properties;
@@ -808,7 +809,7 @@ public class AgentClient {
 	                                                  acceptUnverifiedCertificates);
 	                    if (response != null) {
 	                        if (response.contains("java.security.cert.CertificateException")) {
-	    	            		String question = "The server to agent communication channel is using a self-signed certificate and not be verified" +
+	    	            		String question = "The server to agent communication channel is using a self-signed certificate and can not be verified" +
 	    	            						  "\nAre you sure you want to continue connecting?";
 	    	                	
 	    		                try {
@@ -1296,6 +1297,11 @@ public class AgentClient {
                 return null;
             }
             conn = new SecureAgentConnection(connIp, cfg.getListenPort(), authToken, keystoreConfig, keystoreConfig.isAcceptUnverifiedCert());
+            try {
+                conn.getSocket().setSoTimeout(30000);
+            } catch (IOException e) {
+                SYSTEM_ERR.println("unable to set socket timeout: " + e.getMessage());
+            }
             return new AgentClient(cfg, conn);
                 
         } else {
@@ -1307,6 +1313,11 @@ public class AgentClient {
                 try {
                     authToken = AgentClientUtil.getLocalAuthToken(tokenFile);
                     conn = new SecureAgentConnection(connIp, cfg.getListenPort(), authToken, keystoreConfig, keystoreConfig.isAcceptUnverifiedCert());
+                    try {
+                        conn.getSocket().setSoTimeout(30000);
+                    } catch (IOException e) {
+                        SYSTEM_ERR.println("unable to set socket timeout: " + e.getMessage());
+                    }
                     return new AgentClient(cfg, conn);
                 } catch(FileNotFoundException exc){
                     SYSTEM_ERR.println("- No token file found, waiting for " +

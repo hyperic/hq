@@ -256,7 +256,7 @@ public class ServerConfig
             	} else {
             		// TODO not sure if there's a cleaner way to do this.  The problem is we technically don't know the real install path bc 
             		// the archive hasn't been unzipped at this point.  So we use a token and replace it later in the ant script with the real path
-            		schema.addOption(new HiddenConfigOption("server.keystore.path", "@SERVER_CONF@/hyperic.keystore"));
+            		schema.addOption(new HiddenConfigOption("server.keystore.path", "../../conf/hyperic.keystore"));
                 	schema.addOption(new HiddenConfigOption("server.keystore.password", "hyperic"));
             	}
 
