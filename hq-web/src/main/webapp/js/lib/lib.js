@@ -3554,6 +3554,10 @@ hyperic.alert_center = function(title_name) {
 	    	content: myParam,
 	    	handleAs: 'json',
 	    	load: function(data) {
+				if (data.actionToken) {
+					// use new CSRF token for subsequent POST requests
+					myInput.form.action = data.actionToken;
+				}
 	    		that.startAutoRefresh(that.dialogs.AckAlert.data.subgroup);
 	    	},
 	    	error: function(data){
