@@ -81,9 +81,20 @@ public class VSphereUtil extends ServiceInstance {
     public VSphereUtil(URL url, String username, String password, boolean ignoreCert)
         throws RemoteException, MalformedURLException {
         super(url, username, password, ignoreCert);
+        if (!ignoreCert) {
+        	configureSSLKeystore();
+        }
         _url = url.toString();
     }
 
+    private void configureSSLKeystore() {
+        AgentKeystoreConfig keystoreConfig = new AgentKeystoreConfig();
+		SSLProvider sslProvider = new DefaultSSLProviderImpl(keystoreConfig, keystoreConfig.isAcceptUnverifiedCert());
+		SSLContext sslContext = sslProvider.getSSLContext();
+	    HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
+		HttpsURLConnection.setDefaultHostnameVerifier(new AllowAllHostnameVerifier());
+    }
+    
     static VSphereUtil getInstance(Properties props)
         throws PluginException {
 
@@ -97,12 +108,6 @@ public class VSphereUtil extends ServiceInstance {
         String password = props.getProperty(VSphereCollector.PROP_PASSWORD); 
 
         try {
-            AgentKeystoreConfig keystoreConfig = new AgentKeystoreConfig();
-    		SSLProvider sslProvider = new DefaultSSLProviderImpl(keystoreConfig, keystoreConfig.isAcceptUnverifiedCert());
-    		SSLContext sslContext = sslProvider.getSSLContext();
-    	    HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
-    		HttpsURLConnection.setDefaultHostnameVerifier(new AllowAllHostnameVerifier());
-
             return new VSphereUtil(new URL(url), username, password, false);
         } catch (Exception e) {
             throw new PluginException("ServiceInstance(" + url + ", " +

@@ -149,7 +149,7 @@ public class VSphereConnection {
         }
         if (vim == null) {
             try {
-                vim = new VSphereUtil(new URL(url), username, password, true);
+                vim = new VSphereUtil(new URL(url), username, password, false);
             } catch (Exception e) {
                 throw new PluginException(e);
             }
