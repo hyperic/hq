@@ -3570,6 +3570,10 @@ hyperic.alert_center = function(title_name) {
 	    	content: Form.serialize(myForm,true),
 	    	handleAs: 'json',
 	    	load: function(data){
+				if (data.actionToken) {
+					// use new CSRF token for subsequent POST requests
+					myForm.action = data.actionToken;
+				}
 				that.current.dialog.hide();
 	    		that.startAutoRefresh(that.current.dialog.data.subgroup);
 	    	},
@@ -3621,7 +3625,7 @@ hyperic.alert_center = function(title_name) {
 				// submit next selection
 				if (++alertIndex < ealerts.length) {
 					if (data.actionToken) {
-						// use new CSRF token for subsequent batch POST requests
+						// use new CSRF token for subsequent POST requests
 						myForm.action = data.actionToken;
 					}
 					that.xhrBatchSubmit(myDialog, alertIndex);
