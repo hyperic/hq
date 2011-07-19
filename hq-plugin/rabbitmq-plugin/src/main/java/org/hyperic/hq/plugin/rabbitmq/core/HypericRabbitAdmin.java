@@ -58,8 +58,11 @@ import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.protocol.BasicHttpContext;
+import org.hyperic.hq.agent.AgentKeystoreConfig;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.http.HQHttpClient;
+import org.hyperic.util.http.HttpConfig;
 
 /**
  * A HypericRabbitAdmin is created for each node/virtualHost.
@@ -70,28 +73,28 @@ public final class HypericRabbitAdmin {
 
     private static final Log logger = LogFactory.getLog(HypericRabbitAdmin.class);
     private final DefaultHttpClient client;
-    private String addr;
     private String user;
     private String pass;
-    private int port;
     private boolean VHOSTS_2_1_1 = false;
     private boolean NODES_2_1_1 = false;
     private BasicHttpContext localcontext;
+    private HttpHost targetHost;
 
     public HypericRabbitAdmin(Properties props) throws PluginException {
-        this.port = Integer.parseInt(props.getProperty(DetectorConstants.PORT));
-        this.addr = props.getProperty(DetectorConstants.ADDR);
+        int port = Integer.parseInt(props.getProperty(DetectorConstants.PORT));
+        String addr = props.getProperty(DetectorConstants.ADDR);
+        boolean https = "true".equals(props.getProperty(DetectorConstants.HTTPS));
         this.user = props.getProperty(DetectorConstants.USERNAME);
         this.pass = props.getProperty(DetectorConstants.PASSWORD);
 
-        client = new DefaultHttpClient();
+        targetHost = new HttpHost(addr, port, https ? "https" : "http");
+        client = new HQHttpClient(new AgentKeystoreConfig(), new HttpConfig(5000, 5000, null, 0));
         client.getCredentialsProvider().setCredentials(
-                new AuthScope(addr, port, "Management: Web UI"),
+                new AuthScope(targetHost.getHostName(), targetHost.getPort(), "Management: Web UI"),
                 new UsernamePasswordCredentials(user, pass));
         List authPrefs = new ArrayList(1);
         authPrefs.add("Management: Web UI");
 
-        HttpHost targetHost = new HttpHost(addr, port, "http");
 
         AuthCache authCache = new BasicAuthCache();
         BasicScheme basicAuth = new BasicScheme();
@@ -230,8 +233,8 @@ public final class HypericRabbitAdmin {
     private <T extends Object> T get(String api, Class<T> classOfT) throws PluginException {
         T res = null;
         try {
-            HttpGet get = new HttpGet("http://" + addr + ":" + port + api);
-            HttpResponse response = client.execute(get,localcontext);
+            HttpGet get = new HttpGet(targetHost.toURI() + api);
+            HttpResponse response = client.execute(get, localcontext);
             int r = response.getStatusLine().getStatusCode();
             if (r != 200) {
                 throw new PluginException("[" + api + "] http error code: '" + r + "'");

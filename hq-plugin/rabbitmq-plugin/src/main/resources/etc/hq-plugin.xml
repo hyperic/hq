@@ -30,7 +30,7 @@
 <plugin class="org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin">
     <property name="PLUGIN_VERSION" value="@project.version@"/>
 
-    <filter name="server-connection" value="node=%node%,addr=%addr%,port=%port%,username=%username%,password=%password%"/>
+    <filter name="server-connection" value="node=%node%,addr=%addr%,port=%port%,username=%username%,password=%password%,https=%https%"/>
 
     <server name="RabbitMQ" description="RabbitMQ">
 
@@ -78,6 +78,7 @@
             <option name="node" description="node"/>
             <option name="addr" description="Http Address" default="localhost"/>
             <option name="port" description="Http Port" default="55672"/>
+            <option name="https" description="Use SSL" default="false" type="boolean"/>
             <option name="username" description="Username" default="guest"/>
             <option name="password" description="Password" default="guest"/>
             <option name="nodurable" description="Discover Nondurable Objects" type="boolean" default="false"/>
