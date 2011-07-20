@@ -33,12 +33,11 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.cloudfoundry.util.CloudFoundryFactory;
+import org.hyperic.hq.plugin.cloudfoundry.util.CloudFoundryProxy;
 import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 
-import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CrashInfo;
 import org.cloudfoundry.client.lib.CrashesInfo;
 
@@ -82,7 +81,7 @@ public class CloudApplicationEventPlugin extends LogTrackPlugin implements Runna
     	List<CrashInfo> crashes = null;
         
     	try {        	
-            CloudFoundryClient cf = CloudFoundryFactory.getCloudFoundryClient(_props);
+    		CloudFoundryProxy cf = new CloudFoundryProxy(_props);
         	
         	if (cf != null) {
         		String appName = getConfig("resource.name");

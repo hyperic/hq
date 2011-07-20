@@ -37,6 +37,7 @@ import org.cloudfoundry.client.lib.CloudApplication;
 import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CloudInfo;
 import org.cloudfoundry.client.lib.CloudService;
+import org.cloudfoundry.client.lib.CrashesInfo;
 import org.hyperic.hq.product.PluginException;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -56,13 +57,15 @@ public class CloudFoundryProxy {
 	
     private static Map<String, ObjectCache<CloudAccount>> cloudCache = new HashMap<String, ObjectCache<CloudAccount>>();
         
-    private CloudAccount cloud = null;    
+    private CloudAccount cloud = null;
+    private Properties config = null;
 	
 	public CloudFoundryProxy(Properties config) throws PluginException {
 		this(config, true);
 	}
 
 	public CloudFoundryProxy(Properties config, boolean useCache) throws PluginException {
+		this.config = config;
 		String key = getKey(config);
 				
 		synchronized (cloudCache) {
@@ -103,6 +106,29 @@ public class CloudFoundryProxy {
 	
 	public CloudService getService(String serviceName) {
 		return cloud.getService(serviceName);
+	}
+	
+	public CrashesInfo getCrashes(String appName) {
+		CloudFoundryClient cf = null;		
+		CrashesInfo info = null;
+		
+		try {
+			cf = getCloudFoundryClient(this.config);
+			info = cf.getCrashes(appName);
+		} catch (PluginException e1) {
+			if (_log.isDebugEnabled()) {
+				_log.debug("Error getting app crashes. Re-trying with new connection.", e1);
+			}
+			
+			try {
+				cf = getNewCloudFoundryClient(this.config);
+				info = cf.getCrashes(appName);
+			} catch (PluginException e2) {
+				_log.error("Error getting app crashes.", e2);
+			}
+		}
+		
+		return info;
 	}
 	
 	private CloudFoundryClient getCloudFoundryClient(Properties config) 
