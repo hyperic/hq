@@ -1,5 +1,5 @@
 <plugin name="cloudfoundry" class="org.hyperic.hq.plugin.cloudfoundry.product.CloudFoundryProductPlugin" >
-	<property name="PLUGIN_VERSION" value="1.0.0.M5"/>
+	<property name="PLUGIN_VERSION" value="1.0.0.M6"/>
 	
 	<config name="login">
 		<option name="email"

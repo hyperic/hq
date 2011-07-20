@@ -30,7 +30,7 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.cloudfoundry.util.CloudFoundryFactory;
+import org.hyperic.hq.plugin.cloudfoundry.util.CloudFoundryProxy;
 import org.hyperic.hq.product.MeasurementPlugin;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricNotFoundException;
@@ -40,7 +40,6 @@ import org.hyperic.hq.product.PluginException;
 
 import org.cloudfoundry.client.lib.ApplicationStats;
 import org.cloudfoundry.client.lib.CloudApplication;
-import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CloudInfo;
 import org.cloudfoundry.client.lib.InstanceStats;
 
@@ -52,14 +51,15 @@ public class CloudFoundryMeasurementPlugin extends MeasurementPlugin {
     public MetricValue getValue(Metric metric)
     throws PluginException, MetricNotFoundException, MetricUnreachableException {
         try {
-        	String metricName = metric.getAttributeName();            
-            CloudFoundryClient cf = CloudFoundryFactory.getCloudFoundryClient(metric.getObjectProperties());
+        	String metricName = metric.getAttributeName();
+            CloudFoundryProxy cf = null;
             
-            if (cf == null) {
+            try {
+            	cf = new CloudFoundryProxy(metric.getObjectProperties());
+            } catch (Exception e) {
                 if (metric.isAvail()) {
                 	return new MetricValue(Metric.AVAIL_DOWN);                	
                 }
-                
                 // TODO: update message
                 throw new MetricUnreachableException("Cannot validate connection");
             }
@@ -100,7 +100,7 @@ public class CloudFoundryMeasurementPlugin extends MeasurementPlugin {
             	double percent = services/max;
             	return new MetricValue(percent);
             }
-        } catch (PluginException e) {
+        } catch (Exception e) {
             if (metric.isAvail()) {
                 return new MetricValue(Metric.AVAIL_DOWN);
             }

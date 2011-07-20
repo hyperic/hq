@@ -66,11 +66,15 @@ public class CloudFoundryFactory {
             } catch (Exception ex) {
                 _log.info(ex.getMessage());
                 throw new PluginException(ex);
+            } finally {
+            	if (_log.isDebugEnabled()) {
+            		_log.debug("email=" + email + ", token=" + token);
+            	}
             }
-            
-            return cf;
         } else {
-            return null;
+            throw new PluginException("Missing Cloud Foundry account information");
         }
+        
+        return cf;
     }
 }

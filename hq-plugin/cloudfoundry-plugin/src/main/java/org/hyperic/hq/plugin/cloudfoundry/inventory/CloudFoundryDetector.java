@@ -41,7 +41,7 @@ import org.hyperic.hq.agent.server.ConfigStorage;
 import org.hyperic.hq.agent.AgentCommand;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.autoinventory.agent.client.AICommandsUtils;
-import org.hyperic.hq.plugin.cloudfoundry.util.CloudFoundryFactory;
+import org.hyperic.hq.plugin.cloudfoundry.util.CloudFoundryProxy;
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.MetricUnreachableException;
 import org.hyperic.hq.product.PluginException;
@@ -56,7 +56,6 @@ import org.json.JSONObject;
 
 import org.cloudfoundry.client.lib.ApplicationStats;
 import org.cloudfoundry.client.lib.CloudApplication;
-import org.cloudfoundry.client.lib.CloudFoundryClient;
 import org.cloudfoundry.client.lib.CloudInfo;
 import org.cloudfoundry.client.lib.CloudService;
 import org.cloudfoundry.client.lib.InstanceStats;
@@ -187,7 +186,7 @@ public class CloudFoundryDetector extends ServerDetector implements AutoServerDe
     private void discoverServerConfig(ServerResource server) {        
         try {
             ConfigResponse serverConfig = server.getProductConfig();
-	    	CloudFoundryClient cf = CloudFoundryFactory.getCloudFoundryClient(serverConfig.toProperties());
+            CloudFoundryProxy cf = new CloudFoundryProxy(serverConfig.toProperties());
 	    	
 	    	if (cf != null) {
 	            ConfigResponse custom = new ConfigResponse();
@@ -215,27 +214,24 @@ public class CloudFoundryDetector extends ServerDetector implements AutoServerDe
         throws PluginException {
     	    	
         List<ServiceResource> services = new ArrayList<ServiceResource>();
-    	CloudFoundryClient cf = CloudFoundryFactory.getCloudFoundryClient(serverConfig.toProperties());
+        CloudFoundryProxy cf = new CloudFoundryProxy(serverConfig.toProperties(), false);
 
-    	if (cf != null) {
-    		services.addAll(discoverCloudApplications(cf, serverConfig));
-    		services.addAll(discoverCloudServices(cf, serverConfig));
-    		
-    		// TODO: what if all apps and services were deleted in cloud foundry
-    		if (!services.isEmpty()) {
-    			syncServices(serverConfig, services);
-    		}
-    	}
+		services.addAll(discoverCloudApplications(cf, serverConfig));
+		services.addAll(discoverCloudServices(cf, serverConfig));
+		
+		// TODO: what if all apps and services were deleted in cloud foundry
+		if (!services.isEmpty()) {
+			syncServices(serverConfig, services);
+		}
+
         return services;    	
     }
     
-    private List<ServiceResource> discoverCloudApplications(CloudFoundryClient cf,
+    private List<ServiceResource> discoverCloudApplications(CloudFoundryProxy cf,
     														ConfigResponse serverConfig) {
         List<ServiceResource> services = new ArrayList<ServiceResource>();
-
-		List<CloudApplication> apps = cf.getApplications();
         
-		for (CloudApplication app : apps) {
+		for (CloudApplication app : cf.getApplications()) {
 			try {
 	        	JSONObject jsonConfig = discoverResourceHierarchy(app);
 	        	JSONArray jsonServices = jsonConfig.getJSONArray("service");
@@ -317,12 +313,11 @@ public class CloudFoundryDetector extends ServerDetector implements AutoServerDe
     	return jsonConfig;
     }
     
-    private List<ServiceResource> discoverCloudServices(CloudFoundryClient cf,
+    private List<ServiceResource> discoverCloudServices(CloudFoundryProxy cf,
     													ConfigResponse serverConfig) {
     	List<ServiceResource> services = new ArrayList<ServiceResource>();    	
-    	List<CloudService> cloudServices = cf.getServices();
     	    	
-    	for (CloudService cs : cloudServices) {
+    	for (CloudService cs : cf.getServices()) {
             ServiceResource service = new ServiceResource();
             String vendor = cs.getVendor();
             
