@@ -48,15 +48,19 @@ public class AICommandsClientFactory {
     
     private final AgentProxyFactory agentProxyFactory;
     private KeystoreConfig keystoreConfig;
+    private boolean acceptUnverifiedCertificates;
     
     @Autowired 
     public AICommandsClientFactory(AgentManager agentManager, 
                                    AgentProxyFactory agentProxyFactory,
-                                   ServerKeystoreConfig serverKeystoreConfig) {
+                                   ServerKeystoreConfig serverKeystoreConfig,
+                                   @Value("#{securityProperties['accept.unverified.certificates']}")
+                                   boolean acceptUnverifiedCertificates) {
 
         this.agentManager = agentManager;
         this.agentProxyFactory = agentProxyFactory;
         keystoreConfig = serverKeystoreConfig;
+        this.acceptUnverifiedCertificates = acceptUnverifiedCertificates;
     }
 
     public AICommandsClient getClient(AppdefEntityID aid) throws AgentNotFoundException {
@@ -78,8 +82,10 @@ public class AICommandsClientFactory {
 
             return new AICommandsClientImpl(agent, agentProxyFactory);
         } else {
-            return new LegacyAICommandsClientImpl(new SecureAgentConnection(keystoreConfig,agent.getAddress(), agent.getPort(), agent
-                .getAuthToken()));
+            return new LegacyAICommandsClientImpl(
+                new SecureAgentConnection(agent.getAddress(), agent.getPort(),
+                                          agent.getAuthToken(), keystoreConfig,
+                                          acceptUnverifiedCertificates));
         }
     }
 

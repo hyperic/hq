@@ -60,7 +60,8 @@ public class SecureAgentConnection
 
     private KeystoreConfig keystoreConfig;
 
-    public SecureAgentConnection(KeystoreConfig keystoreConfig, String agentAddress, int agentPort, String authToken) {
+    private SecureAgentConnection(KeystoreConfig keystoreConfig, String agentAddress, int agentPort,
+                                  String authToken) {
         super(agentAddress, agentPort);
         this.agentAddress = agentAddress;
         this.agentPort    = agentPort;
@@ -68,9 +69,10 @@ public class SecureAgentConnection
         this.keystoreConfig = keystoreConfig;
     }
     
-    public SecureAgentConnection(String agentAddress, int agentPort, String authToken, KeystoreConfig keystoreConfig, boolean acceptUnverifiedCertificate) {
+    public SecureAgentConnection(String agentAddress, int agentPort, String authToken,
+                                 KeystoreConfig keystoreConfig,
+                                 boolean acceptUnverifiedCertificate) {
     	this(keystoreConfig, agentAddress, agentPort, authToken);
-
     	this.acceptUnverifiedCertificate = acceptUnverifiedCertificate;
     }
     
