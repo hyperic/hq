@@ -43,7 +43,6 @@ import org.hyperic.sigar.NetStat;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
 import org.hyperic.util.security.DefaultSSLProviderImpl;
-import org.hyperic.util.security.KeystoreConfig;
 import org.hyperic.util.security.SSLProvider;
 
 public abstract class NetServicesCollector extends Collector {
@@ -54,7 +53,7 @@ public abstract class NetServicesCollector extends Collector {
     private int defaultPort, defaultSSLPort;
     private boolean isSSL, enableNetstat;
     private String sslProtcol;
-    private KeystoreConfig keystoreConfig;
+    private AgentKeystoreConfig keystoreConfig;
     private String user, pass;
 
     private boolean hasCredentials;
