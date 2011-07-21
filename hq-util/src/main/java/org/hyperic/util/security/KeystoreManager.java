@@ -44,7 +44,7 @@ import org.springframework.util.StringUtils;
 public class KeystoreManager {
     private Log log;
     private static KeystoreManager keystoreManager= new KeystoreManager();
-
+    
     private KeystoreManager(){
         this.log = LogFactory.getLog(KeystoreManager.class);
     }
@@ -79,45 +79,44 @@ public class KeystoreManager {
         if(!"".equals(errorMsg)){
             throw new KeyStoreException(errorMsg);
         }
-    
         
-        try {
-            KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-            File file = new File(filePath);
-            char[] password = null;
-            
-            if (!file.exists()) {
-                // ...if file doesn't exist, and path was user specified throw IOException...
-                if (StringUtils.hasText(filePath) && !keystoreConfig.isHqDefault()) {
-                    throw new IOException("User specified keystore [" + filePath + "] does not exist.");
-                }
-                
-                password = filePassword.toCharArray();
-                createInternalKeystore(keystoreConfig);
-            }
-            
-            // ...keystore exist, so init the file input stream...
-            keyStoreFileInputStream = new FileInputStream(file);
-            
-            keystore.load(keyStoreFileInputStream, password);
-
-            return keystore;
-        } catch (NoSuchAlgorithmException e) {
-            // can't check integrity of keystore, if this happens we're kind of screwed
-            // is there anything we can do to self heal this problem?
-            errorMsg = "The algorithm used to check the integrity of the keystore cannot be found.";
-            throw new KeyStoreException(errorMsg,e);
-        } catch (CertificateException e) {
-            // there are some corrupted certificates in the keystore, a bad thing
-            // is there anything we can do to self heal this problem?
-            errorMsg = "Keystore cannot be loaded. One possibility is that the password is incorrect.";
-            throw new KeyStoreException(errorMsg, e);
-        } finally {
-            if (keyStoreFileInputStream != null) {
-                keyStoreFileInputStream.close();
-                keyStoreFileInputStream = null;
-            }
-        }
+	    try {
+	        KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+	        File file = new File(filePath);
+	        char[] password = null;
+	            
+	        if (!file.exists()) {
+	        	// ...if file doesn't exist, and path was user specified throw IOException...
+	            if (StringUtils.hasText(filePath) && !keystoreConfig.isHqDefault()) {
+	            	throw new IOException("User specified keystore [" + filePath + "] does not exist.");
+	            }
+	                
+	            password = filePassword.toCharArray();
+	            createInternalKeystore(keystoreConfig);
+	        }
+	            
+	        // ...keystore exist, so init the file input stream...
+	        keyStoreFileInputStream = new FileInputStream(file);
+	            
+	        keystore.load(keyStoreFileInputStream, password);
+	
+	        return keystore;
+	    } catch (NoSuchAlgorithmException e) {
+	    	// can't check integrity of keystore, if this happens we're kind of screwed
+	    	// is there anything we can do to self heal this problem?
+	    	errorMsg = "The algorithm used to check the integrity of the keystore cannot be found.";
+	    	throw new KeyStoreException(errorMsg,e);
+	    } catch (CertificateException e) {
+	    	// there are some corrupted certificates in the keystore, a bad thing
+	    	// is there anything we can do to self heal this problem?
+	    	errorMsg = "Keystore cannot be loaded. One possibility is that the password is incorrect.";
+	    	throw new KeyStoreException(errorMsg, e);
+	    } finally {
+	    	if (keyStoreFileInputStream != null) {
+	    		keyStoreFileInputStream.close();
+	    		keyStoreFileInputStream = null;
+	    	}
+	    }        
     }
     
     private void createInternalKeystore(KeystoreConfig keystoreConfig) throws KeyStoreException{
@@ -161,8 +160,15 @@ public class KeystoreManager {
             if (msg.length() == 0) {
                 msg = "timeout after " + timeout + "ms";
             }
-            //can't have password in log
-            throw new KeyStoreException("Failed to create keystore:"+keystoreConfig.getAlias()+", "+msg);
+
+            // TODO This is super fugly but considering how we're creating the keystore file, there isn't a clean way of accomplishing this
+            //      Basically, there is a small window of opportunity where two agent processes could discover no keystore file and try to
+            //      generate one using the ExceuteWatchdog.  One will succeed, the other will fail, if that happens we shouldn't kill the process.  
+            //      For any other exception throw it...
+            if (!msg.toLowerCase().contains("key pair not generated, alias <" + keystoreConfig.getAlias().toLowerCase() + "> already exists")) {
+            	//can't have password in log
+            	throw new KeyStoreException("Failed to create keystore:"+keystoreConfig.getAlias()+", "+msg);
+            }
         }
     }
 }
