@@ -67,7 +67,9 @@ public class AgentRunner
                       dataDir.getAbsolutePath() + "|m|100|20|50");  
         p.setProperty(AgentConfig.PROP_DATADIR[0], dataDir.getAbsolutePath());
         p.setProperty(AgentConfig.PROP_KEYSTORE_PATH[0], 
-                      new File(dataDir, AgentConfig.PROP_KEYSTORE_PATH[0]).getAbsolutePath());
+                      new File(dataDir, "keystore").getAbsolutePath());
+        p.setProperty(AgentConfig.SSL_KEYSTORE_PASSWORD, AgentConfig.PROP_KEYSTORE_PASSWORD[1]);
+        p.setProperty(AgentConfig.PROP_KEYSTORE_ACCEPT_UNVERIFIED_CERT[0], "true");
         
         try {
             AgentConfig cfg = AgentConfig.newInstance(p);

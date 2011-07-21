@@ -39,7 +39,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.util.exec.Execute;
 import org.hyperic.util.exec.ExecuteWatchdog;
 import org.hyperic.util.exec.PumpStreamHandler;
-import org.springframework.util.StringUtils;
 
 public class KeystoreManager {
     private Log log;
@@ -88,7 +87,7 @@ public class KeystoreManager {
             
             if (!file.exists()) {
                 // ...if file doesn't exist, and path was user specified throw IOException...
-                if (StringUtils.hasText(filePath) && !keystoreConfig.isHqDefault()) {
+                if (filePath.trim().length() > 0 && !keystoreConfig.isHqDefault()) {
                     throw new IOException("User specified keystore [" + filePath + "] does not exist.");
                 }
                 

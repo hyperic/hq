@@ -28,11 +28,13 @@ package org.hyperic.hq.bizapp.client;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.util.HashSet;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.net.ssl.SSLException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.agent.AgentKeystoreConfig;
 import org.hyperic.hq.bizapp.agent.ProviderInfo;
 import org.hyperic.hq.bizapp.shared.lather.CommandInfo;
@@ -53,6 +55,10 @@ public abstract class AgentCallbackClient {
 
     private ProviderFetcher fetcher;        // Storage of provider info
     private HashSet         secureCommands; // Secure commands
+private static final AtomicReference<AgentConfig> config = new AtomicReference<AgentConfig>();
+public static void setAgentConfig(AgentConfig cfg) {
+    config.set(cfg);
+}
 
     public AgentCallbackClient(ProviderFetcher fetcher,
                                String[] secureCommands) {
@@ -143,7 +149,7 @@ public abstract class AgentCallbackClient {
                                            String methodName,
                                            LatherValue args)
     throws AgentCallbackClientException {
-    	return invokeLatherCall(provider, methodName, args, (new AgentKeystoreConfig()).isAcceptUnverifiedCert());
+    	return invokeLatherCall(provider, methodName, args, (new AgentKeystoreConfig(config.get())).isAcceptUnverifiedCert());
     }
        
     protected LatherValue invokeLatherCall(ProviderInfo provider,
@@ -161,7 +167,7 @@ public abstract class AgentCallbackClient {
         }
 
         try {
-        	client = new LatherHTTPClient(addr, TIMEOUT_CONN, TIMEOUT_DATA, acceptUnverifiedCertificates);
+        	client = new LatherHTTPClient(addr, TIMEOUT_CONN, TIMEOUT_DATA, config.get());
         	
             return client.invoke(methodName, args);
         } catch(SSLException e) {

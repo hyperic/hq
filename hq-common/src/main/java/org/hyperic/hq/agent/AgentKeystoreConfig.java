@@ -25,7 +25,6 @@
  */
 package org.hyperic.hq.agent;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -40,18 +39,18 @@ import org.hyperic.util.security.KeystoreConfig;
 public class AgentKeystoreConfig
     extends KeystoreConfig {
     private Log log = LogFactory.getLog(AgentKeystoreConfig.class);
-    public AgentKeystoreConfig(){
-        AgentConfig cfg;
-        final String propFile = System.getProperty(AgentConfig.PROP_PROPFILE,AgentConfig.DEFAULT_PROPFILE);
-        try {
-            cfg = AgentConfig.newInstance(propFile);
-        } catch(IOException exc){
-            log.error("Error: " + exc);
-            return ;
-        } catch(AgentConfigException exc){
-            log.error("Agent Properties error: " + exc.getMessage());
-            return ;
-        }
+    public AgentKeystoreConfig(AgentConfig cfg){
+//        AgentConfig cfg;
+//        final String propFile = System.getProperty(AgentConfig.PROP_PROPFILE,AgentConfig.DEFAULT_PROPFILE);
+//        try {
+//            cfg = AgentConfig.newInstance(propFile);
+//        } catch(IOException exc){
+//            log.error("Error: " + exc);
+//            return ;
+//        } catch(AgentConfigException exc){
+//            log.error("Agent Properties error: " + exc.getMessage());
+//            return ;
+//        }
         super.setFilePath(cfg.getBootProperties().getProperty(AgentConfig.SSL_KEYSTORE_PATH));
         super.setFilePassword(cfg.getBootProperties().getProperty(AgentConfig.SSL_KEYSTORE_PASSWORD));
         super.setAlias("hq-agent");
