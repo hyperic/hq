@@ -26,9 +26,6 @@ import org.springframework.util.Assert;
 public class HQHttpClient extends DefaultHttpClient {
     private Log log;
     
-    public HQHttpClient(final KeystoreConfig keyConfig, final HttpConfig config) {
-        this(keyConfig, config, keyConfig.isAcceptUnverifiedCert());
-    }
     public HQHttpClient(final KeystoreConfig keyConfig, final HttpConfig config, final boolean acceptUnverifiedCertificates) {
     	super();
     	log = LogFactory.getLog(HQHttpClient.class);

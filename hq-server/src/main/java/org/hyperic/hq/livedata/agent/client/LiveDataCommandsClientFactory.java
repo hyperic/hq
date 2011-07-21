@@ -63,7 +63,6 @@ public class LiveDataCommandsClientFactory {
         this.agentManager = agentManager;
         this.agentProxyFactory = agentProxyFactory;
         keystoreConfig = serverKeystoreConfig;
-        keystoreConfig.setAcceptUnverifiedCert(acceptUnverifiedCertificates);
         this.acceptUnverifiedCertificates = acceptUnverifiedCertificates;
     }
 

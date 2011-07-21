@@ -85,7 +85,7 @@ public class UpdateBossImpl implements UpdateBoss {
     private static final int HTTP_TIMEOUT_MILLIS = 30000;
     private DataSource dataSource;
     private KeystoreConfig keystoreConf;
- 
+    private boolean acceptUnverifiedCertificates;
 
     @Autowired
     public UpdateBossImpl(
@@ -98,7 +98,9 @@ public class UpdateBossImpl implements UpdateBoss {
                           ServerConfigAuditFactory serverConfigAuditFactory,
                           DataSource dataSource,
                           @Value("#{tweakProperties['hq.updateNotify.url'] }") String updateNotifyUrl,
-                          ServerKeystoreConfig serverKeystoreConfig) {
+                          ServerKeystoreConfig serverKeystoreConfig,
+                          @Value("#{securityProperties['accept.unverified.certificates']}")
+                          boolean acceptUnverifiedCertificates) {
         this.updateDAO = updateDAO;
         this.serverConfigManager = serverConfigManager;
         this.platformManager = platformManager;
@@ -109,6 +111,7 @@ public class UpdateBossImpl implements UpdateBoss {
         this.dataSource = dataSource;
         this.updateNotifyUrl = updateNotifyUrl;
         keystoreConf =  serverKeystoreConfig;
+        this.acceptUnverifiedCertificates = acceptUnverifiedCertificates;
     }
 
     protected Properties getRequestInfo(UpdateStatus status) {
@@ -198,7 +201,7 @@ public class UpdateBossImpl implements UpdateBoss {
         
         try {
 	        HttpConfig config = new HttpConfig(HTTP_TIMEOUT_MILLIS, HTTP_TIMEOUT_MILLIS, null, -1);
-	        HQHttpClient client = new HQHttpClient(keystoreConf, config);
+	        HQHttpClient client = new HQHttpClient(keystoreConf, config, acceptUnverifiedCertificates);
 	        HttpPost post = new HttpPost(updateNotifyUrl);
 	        
 	        post.addHeader("x-hq-guid", req.getProperty("hq.guid"));

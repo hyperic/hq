@@ -40,6 +40,7 @@ import org.hyperic.util.security.KeystoreConfig;
 public class AgentKeystoreConfig
     extends KeystoreConfig {
     private Log log = LogFactory.getLog(AgentKeystoreConfig.class);
+    private boolean acceptUnverifiedCert;
     public AgentKeystoreConfig(){
         AgentConfig cfg;
         final String propFile = System.getProperty(AgentConfig.PROP_PROPFILE,AgentConfig.DEFAULT_PROPFILE);
@@ -56,14 +57,17 @@ public class AgentKeystoreConfig
         super.setFilePassword(cfg.getBootProperties().getProperty(AgentConfig.SSL_KEYSTORE_PASSWORD));
         super.setAlias("hq-agent");
         super.setHqDefault(AgentConfig.PROP_KEYSTORE_PATH[1].equals(getFilePath()));
-        super.setAcceptUnverifiedCert("true".equals(cfg.getBootProperties().getProperty(AgentConfig.SSL_KEYSTORE_ACCEPT_UNVERIFIED_CERT)));
+        String prop = cfg.getBootProperties().getProperty(AgentConfig.SSL_KEYSTORE_ACCEPT_UNVERIFIED_CERT);
+        this.acceptUnverifiedCert = Boolean.parseBoolean(prop);
         String address = "";
         try {
             address = InetAddress.getLocalHost().getCanonicalHostName();
         } catch (UnknownHostException e) {
             log.error(e);
         }
-        
         super.setKeyCN("Hyperic Agent_"+address);
+    }
+    public boolean isAcceptUnverifiedCert() {
+        return acceptUnverifiedCert;
     }
 }
