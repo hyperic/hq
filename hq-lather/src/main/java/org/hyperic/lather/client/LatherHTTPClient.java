@@ -65,14 +65,10 @@ public class LatherHTTPClient
     private String       baseURL;
     
     public LatherHTTPClient(String baseURL) throws Exception {
-        this(baseURL, TIMEOUT_CONN, TIMEOUT_DATA);
-    }
-
-    public LatherHTTPClient(String baseURL, int timeoutConn, int timeoutData) {
-        this(baseURL, timeoutConn, timeoutData,new AgentKeystoreConfig().isAcceptUnverifiedCert());
+        this(baseURL, TIMEOUT_CONN, TIMEOUT_DATA, null);
     }
     
-    public LatherHTTPClient(String baseURL, int timeoutConn, int timeoutData, final boolean acceptUnverifiedCertificates) {
+    public LatherHTTPClient(String baseURL, int timeoutConn, int timeoutData, AgentConfig agtCfg) {
     	try {
     		// get proxy info
     		String proxyHostname = System.getProperty("lather.proxyHost", null);
@@ -86,7 +82,8 @@ public class LatherHTTPClient
     		config.setProxyHostname(proxyHostname);
     		config.setProxyPort(proxyPort);
 
-	        this.client = new HQHttpClient(new AgentKeystoreConfig(), config, acceptUnverifiedCertificates);
+	        AgentKeystoreConfig agentKeystoreConfig = new AgentKeystoreConfig(agtCfg);
+	        this.client = new HQHttpClient(agentKeystoreConfig, config, agentKeystoreConfig.isAcceptUnverifiedCert());
 			this.baseURL = baseURL;
 	        this.xCoder  = new LatherXCoder();
     	} catch(Exception e) {

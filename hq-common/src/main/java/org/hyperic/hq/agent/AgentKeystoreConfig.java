@@ -25,7 +25,6 @@
  */
 package org.hyperic.hq.agent;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -42,18 +41,18 @@ public class AgentKeystoreConfig extends KeystoreConfig {
     private static final String SSL_KEYSTORE_ALIAS = AgentConfig.SSL_KEYSTORE_ALIAS;
     private Log log = LogFactory.getLog(AgentKeystoreConfig.class);
     private boolean acceptUnverifiedCert;
-    public AgentKeystoreConfig(){
-        AgentConfig cfg;
-        final String propFile = System.getProperty(AgentConfig.PROP_PROPFILE,AgentConfig.DEFAULT_PROPFILE);
-        try {
-            cfg = AgentConfig.newInstance(propFile);
-        } catch(IOException exc){
-            log.error("Error: " + exc, exc);
-            return ;
-        } catch(AgentConfigException exc){
-            log.error("Agent Properties error: " + exc.getMessage(), exc);
-            return ;
-        }
+    public AgentKeystoreConfig(AgentConfig cfg){
+//        AgentConfig cfg;
+//        final String propFile = System.getProperty(AgentConfig.PROP_PROPFILE,AgentConfig.DEFAULT_PROPFILE);
+//        try {
+//            cfg = AgentConfig.newInstance(propFile);
+//        } catch(IOException exc){
+//            log.error("Error: " + exc);
+//            return ;
+//        } catch(AgentConfigException exc){
+//            log.error("Agent Properties error: " + exc.getMessage());
+//            return ;
+//        }
         super.setFilePath(cfg.getBootProperties().getProperty(AgentConfig.SSL_KEYSTORE_PATH));
         super.setFilePassword(cfg.getBootProperties().getProperty(AgentConfig.SSL_KEYSTORE_PASSWORD));
         super.setAlias(cfg.getBootProperties().getProperty(SSL_KEYSTORE_ALIAS, DEFAULT_SSL_KEYSTORE_ALIAS));

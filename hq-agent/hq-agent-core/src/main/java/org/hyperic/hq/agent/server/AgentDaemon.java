@@ -41,6 +41,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
@@ -60,6 +61,7 @@ import org.hyperic.hq.agent.server.monitor.AgentMonitorException;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorInterface;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorSimple;
 import org.hyperic.hq.agent.stats.AgentStatsWriter;
+import org.hyperic.hq.bizapp.client.AgentCallbackClient;
 import org.hyperic.hq.bizapp.client.PlugininventoryCallbackClient;
 import org.hyperic.hq.bizapp.client.StorageProviderFetcher;
 import org.hyperic.hq.product.GenericPlugin;
@@ -184,7 +186,8 @@ public class AgentDaemon
     public static AgentDaemon newInstance(AgentConfig cfg) throws AgentConfigException {
         AgentDaemon res = new AgentDaemon(cfg);
         try {
-            res.configure();
+            res.configure(cfg);
+            AgentCallbackClient.setAgentConfig(cfg);
         } catch(AgentRunningException exc){
             throw new AgentAssertionException("New agent should not be running", exc);
         } 

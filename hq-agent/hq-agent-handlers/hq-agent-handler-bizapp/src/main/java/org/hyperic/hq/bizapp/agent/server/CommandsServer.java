@@ -204,7 +204,7 @@ public class CommandsServer
             return KeyStore.getInstance(KEYSTORE_TYPE);
         } catch(KeyStoreException exc){
             throw new AgentStartException("Unable to get keystore instance " +
-                                          "for " + KEYSTORE_TYPE);
+                                          "for " + KEYSTORE_TYPE, exc);
         }
     }
     
@@ -220,7 +220,7 @@ public class CommandsServer
             res.init(useStore, filePass.toCharArray());
         } catch(Exception exc){
             throw new AgentStartException("Unable to get default key " +
-                                          "manager: " + exc.getMessage());
+                                          "manager: " + exc.getMessage(), exc);
         }
         return res.getKeyManagers();
     }
@@ -237,7 +237,7 @@ public class CommandsServer
             }
         } catch(Exception exc){
             throw new AgentStartException("Unable to get listen IP as addr: " +
-                                          exc.getMessage());
+                                          exc.getMessage(), exc);
         }
         
         return new TokenData(SecurityUtil.generateRandomToken(), 
@@ -314,7 +314,7 @@ public class CommandsServer
             this.keyAlg =
                 bootConfig.getProperty("agent.keyalg", "RSA");
             
-            KeystoreConfig  keystoreConfig = new AgentKeystoreConfig();
+            KeystoreConfig  keystoreConfig = new AgentKeystoreConfig(cfg);
             keystore     = KeystoreManager.getKeystoreManager().getKeyStore(keystoreConfig );
             keyManagers  = this.getKeyManagers(keystore,keystoreConfig.getFilePassword());
             listener     = new SSLConnectionListener(cfg, this.tokenManager);

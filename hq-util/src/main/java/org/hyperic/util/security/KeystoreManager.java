@@ -91,12 +91,12 @@ public class KeystoreManager {
         }
         
 	    try {
-            KeyStore keystore = DbKeyStore.getInstance(KeyStore.getDefaultType(), isDB);
+                KeyStore keystore = DbKeyStore.getInstance(KeyStore.getDefaultType(), isDB);
 	        File file = new File(filePath);
 	        char[] password = null;
 	            
 	        if (!file.exists()) {
-	        	// ...if file doesn't exist, and path was user specified throw IOException...
+                    // ...if file doesn't exist, and path was user specified throw IOException...
 	            if (StringUtils.hasText(filePath) && !keystoreConfig.isHqDefault()) {
 	            	throw new IOException("User specified keystore [" + filePath + "] does not exist.");
 	            }

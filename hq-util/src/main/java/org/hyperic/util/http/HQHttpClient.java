@@ -21,7 +21,6 @@ import org.apache.http.params.CoreConnectionPNames;
 import org.hyperic.util.security.DefaultSSLProviderImpl;
 import org.hyperic.util.security.KeystoreConfig;
 import org.hyperic.util.security.SSLProvider;
-import org.springframework.util.Assert;
 
 public class HQHttpClient extends DefaultHttpClient {
     private Log log;
@@ -58,8 +57,6 @@ public class HQHttpClient extends DefaultHttpClient {
     }
     
     public HttpResponse post(String url, Map<String, String> headers, Map<String, String> params) throws ClientProtocolException, IOException {
-    	Assert.hasText(url);
-    	
     	HttpPost post = new HttpPost(url);
         
     	if (headers != null && !headers.isEmpty()) {
