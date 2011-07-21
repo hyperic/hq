@@ -88,7 +88,8 @@ public final class HypericRabbitAdmin {
         this.pass = props.getProperty(DetectorConstants.PASSWORD);
 
         targetHost = new HttpHost(addr, port, https ? "https" : "http");
-        client = new HQHttpClient(new AgentKeystoreConfig(), new HttpConfig(5000, 5000, null, 0));
+        AgentKeystoreConfig config = new AgentKeystoreConfig();
+        client = new HQHttpClient(config, new HttpConfig(5000, 5000, null, 0), config.isAcceptUnverifiedCert());
         client.getCredentialsProvider().setCredentials(
                 new AuthScope(targetHost.getHostName(), targetHost.getPort(), "Management: Web UI"),
                 new UsernamePasswordCredentials(user, pass));

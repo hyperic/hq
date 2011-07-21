@@ -51,15 +51,19 @@ public class LiveDataCommandsClientFactory {
 
     private final AgentProxyFactory agentProxyFactory;
     private KeystoreConfig keystoreConfig;
+    private boolean acceptUnverifiedCertificates;
     
     @Autowired
     public LiveDataCommandsClientFactory(AgentManager agentManager, 
                                          AgentProxyFactory agentProxyFactory,
-                                         ServerKeystoreConfig serverKeystoreConfig) {
+                                         ServerKeystoreConfig serverKeystoreConfig,
+                                         @Value("#{securityProperties['accept.unverified.certificates']}")
+                                         boolean acceptUnverifiedCertificates) {
 
         this.agentManager = agentManager;
         this.agentProxyFactory = agentProxyFactory;
         keystoreConfig = serverKeystoreConfig;
+        this.acceptUnverifiedCertificates = acceptUnverifiedCertificates;
     }
 
     public LiveDataCommandsClient getClient(AppdefEntityID aid) throws AgentNotFoundException {
@@ -80,8 +84,12 @@ public class LiveDataCommandsClientFactory {
         if (agent.isNewTransportAgent()) {
             return new LiveDataCommandsClientImpl(agent, agentProxyFactory);
         } else {
-            return new LegacyLiveDataCommandsClientImpl(new SecureAgentConnection(keystoreConfig,agent.getAddress(), agent.getPort(),
-                agent.getAuthToken()));
+            SecureAgentConnection conn = new SecureAgentConnection(agent.getAddress(),
+                                                                   agent.getPort(),
+                                                                   agent.getAuthToken(),
+                                                                   keystoreConfig,
+                                                                   acceptUnverifiedCertificates);
+            return new LegacyLiveDataCommandsClientImpl(conn);
         }
     }
 

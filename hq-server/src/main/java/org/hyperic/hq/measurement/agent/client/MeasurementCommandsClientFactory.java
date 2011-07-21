@@ -48,15 +48,18 @@ public class MeasurementCommandsClientFactory {
     
     private AgentProxyFactory agentProxyFactory;
     private KeystoreConfig keystoreConfig;
+    private boolean acceptUnverifiedCertificates;
     
     @Autowired
     public MeasurementCommandsClientFactory(AgentManager agentManager, 
                                             AgentProxyFactory agentProxyFactory,
-                                            ServerKeystoreConfig serverKeystoreConfig) {
-
+                                            ServerKeystoreConfig serverKeystoreConfig,
+                                            @Value("#{securityProperties['accept.unverified.certificates']}")
+                                            boolean acceptUnverifiedCertificates) {
         this.agentManager = agentManager;
         this.agentProxyFactory = agentProxyFactory;
         keystoreConfig = serverKeystoreConfig;
+        this.acceptUnverifiedCertificates = acceptUnverifiedCertificates;
     }
 
     public MeasurementCommandsClient getClient(AppdefEntityID aid) 
@@ -79,7 +82,9 @@ public class MeasurementCommandsClientFactory {
         if (agent.isNewTransportAgent()) {
             return new MeasurementCommandsClientImpl(agent, agentProxyFactory);
         } else {
-            return new LegacyMeasurementCommandsClientImpl(new SecureAgentConnection(keystoreConfig,agent.getAddress(),agent.getPort(),agent.getAuthToken()));            
+            return new LegacyMeasurementCommandsClientImpl(
+                new SecureAgentConnection(agent.getAddress(),agent.getPort(),agent.getAuthToken(),
+                                          keystoreConfig, acceptUnverifiedCertificates));
         }         
     }
 

@@ -1,5 +1,5 @@
 <plugin name="cloudfoundry" class="org.hyperic.hq.plugin.cloudfoundry.product.CloudFoundryProductPlugin" >
-	<property name="PLUGIN_VERSION" value="1.0.0.M5"/>
+	<property name="PLUGIN_VERSION" value="1.0.0.M6"/>
 	
 	<config name="login">
 		<option name="email"
@@ -276,7 +276,54 @@
 				units="percentage"
 				category="UTILIZATION"
 				indicator="true" />
+				
+		    <help>
+		        <![CDATA[
+		              <p>
+		                <h2>Configure Monitoring of Cloud Foundry Applications</h2>
+				
+		                  <h3>Event Tracking of Cloud Foundry Application Crashes</h3>
+		                    Application crashes are logged with a <font color="red">Warn</font> log level.
+		                    To enable event tracking of application crashes, check the <b>Enable Log Tracking</b> checkbox
+		                    and select the <font color="red">Warn</font> <b>Track event log level</b> option.
+		              </p>
+		        ]]>
+		    </help>
 		</service>
+
+	    <help>
+	        <![CDATA[
+	              <p>
+	                <h2>Configure Cloud Foundry for Monitoring</h2>
+	
+	                  <h3>Prerequisites and Support</h3>
+	                    The Cloud Foundry plugin is compatible with Hyperic 4.5.1 and later.
+	
+	                  <h3>Auto-Discovery and Auto-Syncing Configuration Requirements</h3>
+	                    The Cloud Foundry plugin uses HQApi to do advanced auto-discovery and auto-syncing of Cloud Foundry resources.
+	                    This requires connection properties between the Hyperic agent and server to be supplied in the <b>agent.properties</b> file.
+	                    
+	                    <ol>
+	                    	<li>Edit the following lines in the <b>agent.properties</b> file to supply the correct values for your environment.
+	                    		<ul>
+	                    			<li><b>agent.setup.camLogin</b>=yourHypericUser</li>
+	                    			<li><b>agent.setup.camPword</b>=yourHypericPassword</li>
+	                    		</ul>
+	                    	</li>
+	                    </ol>
+	                    
+	                    Auto-discovery and auto-syncing of Cloud Foundry resources occur during the agent default scan (every 15 minutes by default).
+	                    
+	                    <ol>
+	                    	<li>You can update this time interval by uncommenting and updating the following line in the <b>agent.properties</b> file:
+	                    		<ul>
+	                    			<li><b>autoinventory.defaultScan.interval.millis</b>=900000</li>
+	                    		</ul>
+	                    	</li>
+	                    </ol>
+	              </p>
+	        ]]>
+	    </help>
 
 	</server>
 

@@ -30,7 +30,7 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.cloudfoundry.util.CloudFoundryFactory;
+import org.hyperic.hq.plugin.cloudfoundry.util.CloudFoundryProxy;
 import org.hyperic.hq.product.MeasurementPlugin;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricNotFoundException;
@@ -50,15 +50,15 @@ public class CloudServiceMeasurementPlugin extends MeasurementPlugin {
     throws PluginException, MetricNotFoundException, MetricUnreachableException {
         try {
         	String metricName = metric.getAttributeName();        	        	        	
-            final long start = System.currentTimeMillis();
+            CloudFoundryProxy cf = null;
             
-            CloudFoundryClient cf = CloudFoundryFactory.getCloudFoundryClient(metric.getObjectProperties());
-            
-            if (cf == null) {
+            try {
+            	cf = new CloudFoundryProxy(metric.getObjectProperties());
+            } catch (Exception e) {
                 if (metric.isAvail()) {
                 	return new MetricValue(Metric.AVAIL_DOWN);                	
                 }
-                
+                // TODO: update message
                 throw new MetricUnreachableException("Cannot validate connection");
             }
             
@@ -80,7 +80,7 @@ public class CloudServiceMeasurementPlugin extends MeasurementPlugin {
             	
             	return new MetricValue(uptime);
             }
-        } catch (PluginException e) {
+        } catch (Exception e) {
             if (metric.isAvail()) {
                 return new MetricValue(Metric.AVAIL_DOWN);
             }
