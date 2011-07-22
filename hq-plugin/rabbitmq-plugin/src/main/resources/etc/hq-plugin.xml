@@ -53,11 +53,24 @@
                             <li><b>node</b>: RabbitMQ node name (rabbit_X@servername)</li>
                             <li><b>addr</b>: Management HTTP IP/HostName (usualy: localhost)</li>
                             <li><b>port</b>: Management HTTP Listen Port</li>
+                            <li><b>https</b>: Use https/ssl</li>
                             <li><b>username</b>: Administrator User name</li>
                             <li><b>password</b>: Administrator User password</li>
                             <li><b>nodurable</b>: If checked, all nondurable objetcs (Channels, Queue, etc.) will be auto-discovered</li>
                             <li><b>autosync</b>: If checked, all unavailable objetcs (Channels, Queue, etc.) will be auto-delete (but not the idle ones, shows as paused)</li>
                         </ol>
+                        <h3>SSL Configuration Requirements (Hyperic 4.6 and later)</h3>
+                        There are new SSL configuration requirements for secure communication between a Hyperic 4.6 agent and a VMware vCenter server.
+                        <ul>
+                            <li>If the <b>accept.unverified.certificates</b> property is <b>false</b> (default value) in the <b>agent.properties</b> file, 
+                            the VMware vCenter server's SSL certificate needs to be manually imported to a keystore that the Hyperic 4.6 agent can access.
+                            Otherwise, secure communication between the Hyperic 4.6 agent and VMware vCenter server will fail.
+                            </li>
+                            <li>If the <b>accept.unverified.certificates</b> property is <b>true</b> in the <b>agent.properties</b> file, the vSphere plugin will automatically
+                            import the unverified SSL certificate of the VMware vCenter server to the keystore accessible to the Hyperic 4.6 agent.
+                            <u>This is not recommended</u> because it is less secure and will expose the Hyperic agent to man-in-the-middle attacks.
+                            </li>
+                        </ul> 
                   </p>
                   <p>
                     <h3>Help Docs</h3>
