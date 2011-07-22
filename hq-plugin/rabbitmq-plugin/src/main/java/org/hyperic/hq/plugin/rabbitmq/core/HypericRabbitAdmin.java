@@ -237,12 +237,16 @@ public final class HypericRabbitAdmin {
             HttpGet get = new HttpGet(targetHost.toURI() + api);
             HttpResponse response = client.execute(get, localcontext);
             int r = response.getStatusLine().getStatusCode();
-            if (r != 200) {
-                throw new PluginException("[" + api + "] http error code: '" + r + "'");
-            }
+            // response must be read in order to "close" the conection.
+            // https://jira.hyperic.com/browse/HHQ-5063#comment-154101
             String responseBody = readInputString(response.getEntity().getContent());
+            
             if (logger.isDebugEnabled()) {
                 logger.debug("[" + api + "] -(" + r + ")-> " + responseBody);
+            }
+
+            if (r != 200) {
+                throw new PluginException("[" + api + "] http error code: '" + r + "'");
             }
 
             GsonBuilder gsb = new GsonBuilder();
