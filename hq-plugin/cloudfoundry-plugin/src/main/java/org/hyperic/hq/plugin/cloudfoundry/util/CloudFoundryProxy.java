@@ -24,7 +24,6 @@
  */
 package org.hyperic.hq.plugin.cloudfoundry.util;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,78 +52,163 @@ public class CloudFoundryProxy {
     private static final String PASSWORD = "password";
     private static final String URI = "uri";
 	
-    private static Map<String, CloudFoundryClient> clientCache = new HashMap<String, CloudFoundryClient>();
+    private static Map<String, String> tokenCache = new HashMap<String, String>();
 	
-    private static Map<String, ObjectCache<CloudAccount>> cloudCache = new HashMap<String, ObjectCache<CloudAccount>>();
-        
-    private CloudAccount cloud = null;
     private Properties config = null;
+	private CloudFoundryClient cf = null;		
 	
 	public CloudFoundryProxy(Properties config) throws PluginException {
-		this(config, true);
-	}
-
-	public CloudFoundryProxy(Properties config, boolean useCache) throws PluginException {
 		this.config = config;
-		String key = getKey(config);
-				
-		synchronized (cloudCache) {
-			ObjectCache<CloudAccount> cached = cloudCache.get(key);
-			
-			if (!useCache || cached == null || cached.isExpired()) {
-				cached = new ObjectCache<CloudAccount>(getCloudAccount(config), CACHE_TIMEOUT);
-				cloudCache.put(key, cached);
-				
-				if (_log.isDebugEnabled()) {
-					_log.debug("Updating cache with key = " + key);
-				}				
-			}
-			
-			this.cloud = cached.getEntity();			
-		}
+		this.cf = getCloudFoundryClient(this.config);
 	}
 
 	public CloudInfo getCloudInfo() {
-		return cloud.getCloudInfo();
-	}
-	
-	public Collection<CloudApplication> getApplications() {
-		return cloud.getApplications();
-	}
-	
-	public CloudApplication getApplication(String appName) {
-		return cloud.getApplication(appName);
-	}
-	
-	public ApplicationStats getApplicationStats(String appName) {
-		return cloud.getApplicationStats(appName);
-	}
-	
-	public Collection<CloudService> getServices() {
-		return cloud.getServices();
-	}
-	
-	public CloudService getService(String serviceName) {
-		return cloud.getService(serviceName);
-	}
-	
-	public CrashesInfo getCrashes(String appName) {
-		CloudFoundryClient cf = null;		
-		CrashesInfo info = null;
+		CloudInfo info = null;
 		
 		try {
-			cf = getCloudFoundryClient(this.config);
-			info = cf.getCrashes(appName);
-		} catch (PluginException e1) {
+			info = this.cf.getCloudInfo();
+		} catch (Exception e1) {
 			if (_log.isDebugEnabled()) {
-				_log.debug("Error getting app crashes. Re-trying with new connection.", e1);
+				_log.debug("Error getting cloud info. Re-trying with new client.", e1);
 			}
 			
 			try {
-				cf = getNewCloudFoundryClient(this.config);
-				info = cf.getCrashes(appName);
+				this.cf = getNewCloudFoundryClient(this.config);
+				info = this.cf.getCloudInfo();
 			} catch (PluginException e2) {
-				_log.error("Error getting app crashes.", e2);
+				_log.error("Error getting cloud info", e2);
+			}
+		}
+		
+		return info;
+	}
+	
+	public List<CloudApplication> getApplications() {
+		List<CloudApplication> apps = null;
+		
+		try {
+			apps = this.cf.getApplications();
+		} catch (Exception e1) {
+			if (_log.isDebugEnabled()) {
+				_log.debug("Error getting apps. Re-trying with new client.", e1);
+			}
+			
+			try {
+				this.cf = getNewCloudFoundryClient(this.config);
+				apps = this.cf.getApplications();
+			} catch (PluginException e2) {
+				_log.error("Error getting services", e2);
+			}
+		}
+		
+		return apps;
+	}
+	
+	public CloudApplication getApplication(String appName) {
+		CloudApplication app = null;
+		
+		try {
+			app = this.cf.getApplication(appName);
+		} catch (Exception e1) {
+			if (_log.isDebugEnabled()) {
+				_log.debug("Error getting app " + appName 
+							+ ". Re-trying with new client.", e1);
+			}
+			
+			try {
+				this.cf = getNewCloudFoundryClient(this.config);
+				app = this.cf.getApplication(appName);
+			} catch (PluginException e2) {
+				_log.error("Error getting app " + appName, e2);
+			}
+		}
+		
+		return app;
+	}
+	
+	public ApplicationStats getApplicationStats(String appName) {
+		ApplicationStats stats = null;
+
+		try {
+			stats = this.cf.getApplicationStats(appName);
+		} catch (Exception e1) {
+			if (_log.isDebugEnabled()) {
+				_log.debug("Error getting app stats for "
+							+ appName + ". Re-trying with new client.", e1);
+			}
+			
+			try {
+				this.cf = getNewCloudFoundryClient(this.config);
+				stats = this.cf.getApplicationStats(appName);
+			} catch (PluginException e2) {
+				_log.error("Error getting app stats for "
+							+ appName, e2);
+			}
+		}
+		
+		return stats;
+	}
+	
+	public List<CloudService> getServices() {
+		List<CloudService> services = null;
+
+		try {
+			services = this.cf.getServices();
+		} catch (Exception e1) {
+			if (_log.isDebugEnabled()) {
+				_log.debug("Error getting services. Re-trying with new client.", e1);
+			}
+			
+			try {
+				this.cf = getNewCloudFoundryClient(this.config);
+				services = this.cf.getServices();
+			} catch (PluginException e2) {
+				_log.error("Error getting services", e2);
+			}
+		}
+		
+		return services;
+	}
+	
+	public CloudService getService(String serviceName) {		
+		CloudService service = null;
+		
+		try {
+			service = this.cf.getService(serviceName);
+		} catch (Exception e1) {
+			if (_log.isDebugEnabled()) {
+				_log.debug("Error getting service " 
+							+ serviceName + ". Re-trying with new client.", e1);
+			}
+			
+			try {
+				this.cf = getNewCloudFoundryClient(this.config);
+				service = this.cf.getService(serviceName);
+			} catch (PluginException e2) {
+				_log.error("Error getting service " + serviceName, e2);
+			}
+		}	
+		
+		return service;	
+	}
+	
+	public CrashesInfo getCrashes(String appName) {
+		CrashesInfo info = null;
+		
+		try {
+			info = this.cf.getCrashes(appName);
+		} catch (Exception e1) {
+			if (_log.isDebugEnabled()) {
+				_log.debug("Error getting app crashes for "
+							+ appName + ". Re-trying with new client.", e1);
+			}
+			
+			try {
+				this.cf = getNewCloudFoundryClient(this.config);
+				info = this.cf.getCrashes(appName);
+			} catch (PluginException e2) {
+				_log.error("Error getting app crashes for "
+							+ appName, e2);
 			}
 		}
 		
@@ -135,16 +219,24 @@ public class CloudFoundryProxy {
 		throws PluginException {
 		
 		CloudFoundryClient cf = null;
-		String key = getKey(config);
+		JSONObject key = getJSONKey(config);
 		
-		synchronized (clientCache) {
-			cf = clientCache.get(key);
+		synchronized (tokenCache) {
+			String token = tokenCache.get(key.toString());
 		
-			if (cf == null) {
+			if (token == null) {
 				cf = getNewCloudFoundryClient(config);
 			} else {
-				if (_log.isDebugEnabled()) {
-					_log.debug("Using cached CloudFoundryClient " + cf);
+				try {
+					String uri = key.getString(URI);
+					// generate new client with the cached token
+					// to ensure data is fresh
+					cf = new CloudFoundryClient(token, uri);
+					if (_log.isDebugEnabled()) {
+						_log.debug("Using cached token = " + token);
+					}
+				} catch (Exception e) {
+					throw new PluginException("Error creating CloudFoundryClient", e);
 				}
 			}
 		}
@@ -155,20 +247,34 @@ public class CloudFoundryProxy {
 	private CloudFoundryClient getNewCloudFoundryClient(Properties config) 
 		throws PluginException {
 		
-		String key = getKey(config);
+		JSONObject key = getJSONKey(config);
 		CloudFoundryClient cf = CloudFoundryFactory.getCloudFoundryClient(config);
-		
-		synchronized (clientCache) {
-			clientCache.put(key, cf);
+
+    	String token = null;
+        try {
+            token = cf.login();                
+        } catch (Exception ex) {
+            _log.info(ex.getMessage());
+
+    		synchronized (tokenCache) {
+    			tokenCache.remove(key);
+    		}
+    		
+            throw new PluginException("Login error", ex);
+        }
+        
+		synchronized (tokenCache) {
+			tokenCache.put(key.toString(), token);
 		}
 		
 		if (_log.isDebugEnabled()) {
-			_log.debug("Using new CloundFoundryClient " + cf);
+    		_log.debug("key=" + key + ", new token=" + token);
 		}
 		
 		return cf;
 	}
 	
+	/*
 	private CloudAccount getCloudAccount(Properties config) 
 		throws PluginException {
 		
@@ -178,7 +284,7 @@ public class CloudFoundryProxy {
 		try {
 			info = cf.getCloudInfo();
 		} catch (Exception e) {
-			_log.info("Error loading cache", e);
+			_log.info("Error getting cloud info. Re-trying with new client.", e);
 			
 			cf = getNewCloudFoundryClient(config);
 			info = cf.getCloudInfo();
@@ -201,9 +307,10 @@ public class CloudFoundryProxy {
 		
 		return cloud;
 	}
+	*/
 
-    private String getKey(Properties config) {
-    	String key = null;
+    private JSONObject getJSONKey(Properties config) {
+    	JSONObject jsonKey = null;
 
         String email = config.getProperty(EMAIL);
         String cloudControllerUrl = config.getProperty(URI);
@@ -211,17 +318,16 @@ public class CloudFoundryProxy {
         if (email.length() > 0 
         		&& cloudControllerUrl.length() > 0) {
         	try {
-        		JSONObject jsonKey = new JSONObject();
+        		jsonKey = new JSONObject();
         		jsonKey.put(EMAIL, email);
         		jsonKey.put(URI, cloudControllerUrl);
-        		key = jsonKey.toString();
         	} catch (JSONException je) {
         		throw new IllegalArgumentException(je);
         	}
         } else {
-        	throw new IllegalArgumentException("Missing Cloud Foundry account information");
+        	throw new IllegalArgumentException("Missing Cloud Foundry credentials");
         }
 
-        return key;
+        return jsonKey;
     }
 }
