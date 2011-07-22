@@ -171,21 +171,18 @@ public class DefaultSSLProviderImpl implements SSLProvider {
                 String authType) throws CertificateException {
                 try {
                     defaultTrustManager.checkServerTrusted(chain, authType);
-                } catch (Exception e) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Receiving certificate is not trusted by keystore: alias="
+                } catch (CertificateException e){
+                    if (acceptUnverifiedCertificates) {
+                        log.info("Import the certification. (Received certificate is not trusted by keystore)");
+                        importCertificate(chain);
+                    }else{
+                        log.error("Fail the connection because received certificate is not trusted by keystore: alias="
                             + keystoreConfig.getAlias()
                             + ", path="
                             + keystoreConfig.getFilePath()
                             + " , acceptUnverifiedCertificates="
-                            + acceptUnverifiedCertificates);
-                    }
-                    if (!acceptUnverifiedCertificates) {
-                        log.debug("Fail the connection.");
+                            + acceptUnverifiedCertificates,e);
                         throw new CertificateException(e);
-                    } else {
-                        log.debug("Import the certification.");
-                        importCertificate(chain);
                     }
                 }
             }

@@ -33,17 +33,13 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hyperic.hq.agent.AgentConfig;
-import org.hyperic.hq.agent.AgentConfigException;
 import org.hyperic.hq.agent.AgentKeystoreConfig;
 import org.hyperic.lather.LatherRemoteException;
 import org.hyperic.lather.LatherValue;
 import org.hyperic.lather.xcode.LatherXCoder;
-
 import org.hyperic.util.encoding.Base64;
 import org.hyperic.util.http.HQHttpClient;
 import org.hyperic.util.http.HttpConfig;
-import org.hyperic.util.security.KeystoreConfig;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
