@@ -237,10 +237,10 @@ public final class HypericRabbitAdmin {
             HttpGet get = new HttpGet(targetHost.toURI() + api);
             HttpResponse response = client.execute(get, localcontext);
             int r = response.getStatusLine().getStatusCode();
-            // response must be read in order to "close" the conection.
+            // response must be read in order to "close" the connection.
             // https://jira.hyperic.com/browse/HHQ-5063#comment-154101
             String responseBody = readInputString(response.getEntity().getContent());
-            
+
             if (logger.isDebugEnabled()) {
                 logger.debug("[" + api + "] -(" + r + ")-> " + responseBody);
             }
@@ -251,6 +251,8 @@ public final class HypericRabbitAdmin {
 
             GsonBuilder gsb = new GsonBuilder();
             gsb.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
+            gsb.registerTypeAdapter(Integer.class, new IntegerDeserializer());
+            gsb.registerTypeAdapter(int.class, new IntegerDeserializer());
             gsb.registerTypeAdapter(Date.class, new DateTimeDeserializer());
             gsb.registerTypeAdapter(MessageStats.class, new MessageStatsDeserializer());
             Gson gson = gsb.create();
@@ -293,6 +295,22 @@ public final class HypericRabbitAdmin {
             try {
                 return (Date) formatter.parse(json.getAsString());
             } catch (ParseException ex) {
+                throw new JsonParseException(ex.getMessage(), ex);
+            }
+        }
+    }
+
+    private class IntegerDeserializer implements JsonDeserializer<Integer> {
+
+        public Integer deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
+            try {
+                return json.getAsInt();
+            } catch (NumberFormatException ex) {
+                if (json.getAsString().equals("install_handle_from_sysinternals")) {
+                    logger.debug("'Handle V3.42 (sysinternals)' is required by 'rabbitmq-management-agent' plugin on Windows Platforms. "
+                            + ex.getMessage());
+                    return null;
+                }
                 throw new JsonParseException(ex.getMessage(), ex);
             }
         }
