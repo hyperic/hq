@@ -47,7 +47,14 @@ public class CloudApplicationCollector extends Collector {
     @Override
     protected void init() throws PluginException {
         Properties props = getProperties();
-        _log.debug("[init] props=" + props);
+        
+        if (_log.isDebugEnabled()) {
+        	_log.debug("[init] props=" + props);
+        }
+        
+        // validate configuration
+        CloudFoundryProxy cf = new CloudFoundryProxy(props);
+
         super.init();
     }
     

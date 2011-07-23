@@ -260,7 +260,7 @@ public class CloudFoundryProxy {
     			tokenCache.remove(key);
     		}
     		
-            throw new PluginException("Login error", ex);
+            throw new PluginException("Invalid Cloud Foundry credentials", ex);
         }
         
 		synchronized (tokenCache) {
