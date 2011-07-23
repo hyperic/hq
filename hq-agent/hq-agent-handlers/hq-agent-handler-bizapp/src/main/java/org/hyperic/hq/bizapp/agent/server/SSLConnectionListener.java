@@ -30,7 +30,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.InetAddress;
-import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.Iterator;
 import java.util.List;
@@ -40,6 +40,8 @@ import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentKeystoreConfig;
@@ -52,12 +54,18 @@ import org.hyperic.hq.bizapp.agent.TokenNotFoundException;
 import org.hyperic.util.security.DefaultSSLProviderImpl;
 import org.hyperic.util.security.SSLProvider;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 class SSLConnectionListener
     extends AgentConnectionListener
 {
+    
+    private static final String PROP_READ_TIMEOUT = "agent.readTimeOut";
+    private static int READ_TIMEOUT = 120000;
+    static {
+        try {
+            READ_TIMEOUT = Integer.parseInt(System.getProperty(PROP_READ_TIMEOUT));
+        } catch (NumberFormatException e) {
+        }
+    }
     private SSLServerSocket listenSock;
     private Log             log;
     private TokenManager    tokenManager;
@@ -71,8 +79,7 @@ class SSLConnectionListener
     }
 
     private SSLServerConnection handleNewConn(SSLSocket sock)
-        throws AgentConnectionException
-    {
+    throws AgentConnectionException, SocketTimeoutException {
         SSLServerConnection res;
         InetAddress remoteAddr;
         TokenData token;
@@ -89,6 +96,8 @@ class SSLConnectionListener
 
             dIs = new DataInputStream(sock.getInputStream());
             authToken = dIs.readUTF();
+        } catch(SocketTimeoutException exc) {
+            throw exc;
         } catch(IOException exc){
             throw new AgentConnectionException("Error negotiating auth: " +
                                                exc.getMessage(), exc);
@@ -154,14 +163,13 @@ class SSLConnectionListener
         AgentServerConnection res;
         SSLSocket inConn = null;
         boolean success = false;
-
         try {
             inConn  = (SSLSocket)this.listenSock.accept();
-            inConn.setSoTimeout(30000);
+            inConn.setSoTimeout(READ_TIMEOUT);
             res     = this.handleNewConn(inConn);
             success = true;
-        } catch(SocketException exc){
-            // The SocketException should only be thrown when a timeout occurs on the socket
+        } catch(SocketTimeoutException exc){
+            // The SocketTimeoutException should only be thrown when a timeout occurs on the socket
             InterruptedIOException toThrow = new InterruptedIOException();
             toThrow.initCause(exc);
             log.debug(exc,exc);

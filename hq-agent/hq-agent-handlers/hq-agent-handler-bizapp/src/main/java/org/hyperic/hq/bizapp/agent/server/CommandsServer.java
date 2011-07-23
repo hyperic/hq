@@ -290,8 +290,8 @@ public class CommandsServer
             agent.registerNotifyHandler(this, AgentDaemon.NOTIFY_AGENT_FAILED_START);
         }
         catch (AgentConfigException e) {
-            this.log.warn("Failure to find startup " +
-                            "reporting port in sys properties");
+            log.warn("Failure to find startup reporting port in sys properties: " + e);
+            log.debug(e,e);
         }
         catch (IOException e) {
             throw new AgentStartException("Wrapped Exception", e);
@@ -321,8 +321,7 @@ public class CommandsServer
             agent.setConnectionListener(listener);
         } catch(Exception exc){
             //This catch is intended to catch AgentRunningException, KeyStoreException, IOException
-            throw new AgentStartException("Unable to initialize SSL: " +
-                                          exc.getMessage());
+            throw new AgentStartException("Unable to initialize SSL: " + exc.getMessage(), exc);
         }
         this.log.info("Commands Server started up");
     }
