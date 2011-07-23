@@ -567,6 +567,7 @@ public class PlatformManagerImpl implements PlatformManager {
         ConfigResponseDB config = configResponseDAO.createPlatform();
 
         Platform platform = platType.create(aipValue, subject.getName(), config, agent);
+        agent.getPlatforms().add(platform);
         platformDAO.save(platform);
 
         // AUTHZ CHECK
