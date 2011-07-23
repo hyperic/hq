@@ -56,6 +56,7 @@ import org.apache.http.conn.ssl.AbstractVerifier;
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
+import org.hyperic.util.timer.StopWatch;
 
 public class DefaultSSLProviderImpl implements SSLProvider {
     private SSLContext sslContext;
@@ -105,6 +106,8 @@ public class DefaultSSLProviderImpl implements SSLProvider {
                       ", acceptUnverifiedCertificates="+acceptUnverifiedCertificates);
         }
         boolean hasLock = false;
+        final boolean debug = log.isDebugEnabled();
+        final StopWatch watch = new StopWatch();
         try {
             KeystoreManager keystoreMgr = KeystoreManager.getKeystoreManager();
             KEYSTORE_READER_LOCK.lockInterruptibly();
@@ -129,6 +132,7 @@ public class DefaultSSLProviderImpl implements SSLProvider {
             throw new IllegalStateException(e);
         } finally {
             if (hasLock) KEYSTORE_READER_LOCK.unlock();
+            if (debug) log.debug("readCert: " + watch);
         }
     }
     
@@ -214,6 +218,8 @@ public class DefaultSSLProviderImpl implements SSLProvider {
                 throws CertificateException {
                 FileOutputStream keyStoreFileOutputStream = null;
                 boolean hasLock = false;
+                final boolean debug = log.isDebugEnabled();
+                final StopWatch watch = new StopWatch();
                 try {
                     KEYSTORE_WRITER_LOCK.lockInterruptibly();
                     hasLock = true;
@@ -242,8 +248,10 @@ public class DefaultSSLProviderImpl implements SSLProvider {
                 } finally {
                     close(keyStoreFileOutputStream);
                     keyStoreFileOutputStream = null;
-                    if (hasLock)
+                    if (hasLock) {
                         KEYSTORE_WRITER_LOCK.unlock();
+                    }
+                    if (debug) log.debug("importCert: " + watch);
                 }
             }
 
