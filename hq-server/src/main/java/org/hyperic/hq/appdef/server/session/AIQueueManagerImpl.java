@@ -373,6 +373,12 @@ public class AIQueueManagerImpl implements AIQueueManager {
         if (aiPlat == null) {
             return;
         }
+        try {
+            aiPlat.getAgentToken();
+        } catch (ObjectNotFoundException e) {
+            log.debug(e,e);
+            return;
+        }
         aiPlatformDAO.remove(aiPlat);
     }
 
@@ -674,7 +680,12 @@ public class AIQueueManagerImpl implements AIQueueManager {
     @Transactional(readOnly = true)
     public AIPlatformValue getAIPlatformByPlatformID(AuthzSubject subject, Integer platformID) {
         AIPlatform aip = getAIPlatformByPlatformID(platformID);
-        return (aip == null) ? null : aip.getAIPlatformValue();
+        try {
+            return (aip == null) ? null : aip.getAIPlatformValue();
+        } catch (ObjectNotFoundException e) {
+            log.debug(e,e);
+            return null;
+        }
     }
 
     private AIPlatform getAIPlatformByPlatformID(Integer platformID) {
