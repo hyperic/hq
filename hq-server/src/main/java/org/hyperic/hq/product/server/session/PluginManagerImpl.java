@@ -74,6 +74,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.shared.TransactionRetry;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.server.session.MonitorableType;
 import org.hyperic.hq.measurement.server.session.MonitorableTypeDAO;
@@ -133,10 +134,12 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
     private ResourceManager resourceManager;
     private AuthzSubjectManager authzSubjectManager;
     private ZeventManager zeventManager;
+    private TransactionRetry transactionRetry;
 
     private ApplicationContext ctx;
 
     private File customPluginDir;
+
 
     @Autowired
     public PluginManagerImpl(PluginDAO pluginDAO, AgentPluginStatusDAO agentPluginStatusDAO,
@@ -146,7 +149,8 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
                              AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle,
                              AgentSynchronizer agentSynchronizer,
                              AuthzSubjectManager authzSubjectManager,
-                             ZeventManager zeventManager) {
+                             ZeventManager zeventManager,
+                             TransactionRetry transactionRetry) {
         this.pluginDAO = pluginDAO;
         this.agentPluginStatusDAO = agentPluginStatusDAO;
         this.monitorableTypeDAO = monitorableTypeDAO;
@@ -156,6 +160,7 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         this.resourceManager = resourceManager;
         this.authzSubjectManager = authzSubjectManager;
         this.zeventManager = zeventManager;
+        this.transactionRetry = transactionRetry;
     }
 
     @PostConstruct
@@ -173,14 +178,19 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
             new ZeventListener<PluginRemoveZevent>() {
                 public void processEvents(List<PluginRemoveZevent> events) {
                     for (final PluginRemoveZevent event : events) {
-                        Collection<String> pluginFileNames = event.getPluginFileNames();
-                        AuthzSubject subj = event.getAuthzSubject();
-                        PluginManager pluginManager = Bootstrap.getBean(PluginManager.class);
-                        try {
-                            pluginManager.removePlugins(subj, pluginFileNames);
-                        } catch (PluginDeployException e) {
-                            log.error(e,e);
-                        }
+                        final Collection<String> pluginFileNames = event.getPluginFileNames();
+                        final AuthzSubject subj = event.getAuthzSubject();
+                        final PluginManager pluginManager = ctx.getBean(PluginManager.class);
+                        final Runnable runner = new Runnable() {
+                            public void run() {
+                                try {
+                                    pluginManager.removePlugins(subj, pluginFileNames);
+                                } catch (PluginDeployException e) {
+                                    log.error(e,e);
+                                }
+                            }
+                        };
+                        transactionRetry.runTransaction(runner, 3, 1000);
                     }
                 }
             }
