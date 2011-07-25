@@ -107,6 +107,8 @@ public class VSphereUtil extends ServiceInstance {
         	configureSSLKeystore();
             return new VSphereUtil(new URL(url), username, password, false);
         } catch (Exception e) {
+        	VSphereConnection.evict(url);
+        	
             throw new PluginException("ServiceInstance(" + url + ", " +
                                       username + "): " + e, e);
         }
@@ -122,18 +124,24 @@ public class VSphereUtil extends ServiceInstance {
     public boolean isSessionValid() {
         try {
             //make sure session is still valid. XXX better way?
-            Calendar clock = getServerClock();
+            Calendar clock = currentTime();
             if (clock == null) {
-                _log.debug(_url + " session invalid, clock=NULL");
+            	if (_log.isDebugEnabled()) {
+            		_log.debug(_url + " session invalid, clock=NULL");
+            	}
                 return false;
             }
             else {
-                _log.debug(_url + " session valid, clock=" +
-                           new Date(clock.getTimeInMillis()));
+            	if (_log.isDebugEnabled()) {
+            		_log.debug(_url + " session valid, clock=" +
+            					new Date(clock.getTimeInMillis()));
+            	}
                 return true;
             }
         } catch (Exception e) {
-            _log.debug(_url + " session invalid, clock=" + e, e);
+        	if (_log.isDebugEnabled()) {
+        		_log.debug(_url + " session invalid: " + e.getMessage(), e);
+        	}
             return false;
         }
     }
