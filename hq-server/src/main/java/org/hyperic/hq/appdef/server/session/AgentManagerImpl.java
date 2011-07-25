@@ -923,7 +923,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         Agent agent = agentDao.get(agentId);
         int i=0;
         for (final String filename : filenames) {
-            log.info("Transferring server plugin  " + filename + " to agent " + agent);
+            if (debug) log.debug("Transferring server plugin " + filename + " to agent " + agent);
             File customPlugin = new File(pluginManager.getCustomPluginDir(), filename);
             File src;
             if (!customPlugin.exists()) {
@@ -1076,7 +1076,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     throws PermissionException, AgentNotFoundException, AgentConnectionException,
            AgentRemoteException, FileNotFoundException, IOException, ConfigPropertyException {
         Agent agent = agentDao.get(agentId);
-        log.info("Restarting agent " + agent);
+        if (log.isDebugEnabled()) log.debug("Restarting agent " + agent);
         permissionManager.checkCreatePlatformPermission(subject);
         AgentCommandsClient client = agentCommandsClientFactory.getClient(agent);
         client.restart();
