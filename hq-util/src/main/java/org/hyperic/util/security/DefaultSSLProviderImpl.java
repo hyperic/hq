@@ -68,7 +68,7 @@ public class DefaultSSLProviderImpl implements SSLProvider {
 
     private KeyManagerFactory getKeyManagerFactory(final KeyStore keystore, final String password) throws KeyStoreException {
         try {
-            KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
+            KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
             
             keyManagerFactory.init(keystore, password.toCharArray());
             
