@@ -166,24 +166,25 @@ class SSLConnectionListener
         try {
             inConn  = (SSLSocket)this.listenSock.accept();
             inConn.setSoTimeout(READ_TIMEOUT);
-            res     = this.handleNewConn(inConn);
-            success = true;
-        } catch(SocketTimeoutException exc){
-            // The SocketTimeoutException should only be thrown when a timeout occurs on the socket
-            InterruptedIOException toThrow = new InterruptedIOException();
-            toThrow.initCause(exc);
-            log.debug(exc,exc);
-            throw toThrow;
         } catch(InterruptedIOException exc){
             throw exc;
         } catch(IOException exc){
             throw new AgentConnectionException(exc.getMessage(), exc);
+        }
+        try {
+            res     = handleNewConn(inConn);
+            success = true;
+        } catch (SocketTimeoutException e) {
+            InterruptedIOException toThrow = new InterruptedIOException();
+            toThrow.initCause(e);
+            log.warn("socket timed out while handling a command from the server: " + e);
+            log.debug(e,e);
+            throw toThrow;
         } finally {
             if(!success) {
                 close(inConn);
             }
         }
-
         return res;
     }
 
