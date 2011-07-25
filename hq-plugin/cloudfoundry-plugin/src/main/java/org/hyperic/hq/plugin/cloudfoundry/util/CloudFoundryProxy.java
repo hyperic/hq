@@ -246,31 +246,30 @@ public class CloudFoundryProxy {
 	
 	private CloudFoundryClient getNewCloudFoundryClient(Properties config) 
 		throws PluginException {
+
+		CloudFoundryClient cf = null;
 		
-		JSONObject key = getJSONKey(config);
-		CloudFoundryClient cf = CloudFoundryFactory.getCloudFoundryClient(config);
-
-    	String token = null;
-        try {
-            token = cf.login();                
-        } catch (Exception ex) {
-            _log.info(ex.getMessage());
-
-    		synchronized (tokenCache) {
-    			tokenCache.remove(key);
-    		}
-    		
-            throw new PluginException("Invalid Cloud Foundry credentials", ex);
-        }
-        
 		synchronized (tokenCache) {
+			JSONObject key = getJSONKey(config);
+			tokenCache.remove(key);
+
+			cf = CloudFoundryFactory.getCloudFoundryClient(config);
+	
+	    	String token = null;
+	        try {
+	            token = cf.login();
+	        } catch (Exception ex) {
+	            _log.info(ex.getMessage());
+	            throw new PluginException("Invalid Cloud Foundry credentials", ex);
+	        }
+	        
 			tokenCache.put(key.toString(), token);
+						
+			if (_log.isDebugEnabled()) {
+	    		_log.debug("key=" + key + ", new token=" + token);
+			}
 		}
-		
-		if (_log.isDebugEnabled()) {
-    		_log.debug("key=" + key + ", new token=" + token);
-		}
-		
+				
 		return cf;
 	}
 	
