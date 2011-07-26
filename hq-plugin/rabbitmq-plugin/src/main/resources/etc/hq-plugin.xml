@@ -64,8 +64,8 @@
                         There are new SSL configuration requirements for secure communication between a Hyperic 4.6 agent and a RabbitMQ-management.
                         <ul>
                             <li>If the <b>accept.unverified.certificates</b> property is <b>false</b> (default value) in the <b>agent.properties</b> file, 
-                            the VRabbitMQ-management's SSL certificate needs to be manually imported to a keystore that the Hyperic 4.6 agent can access.
-                            Otherwise, secure communication between the Hyperic 4.6 agent and VMware vCenter server will fail.
+                            the RabbitMQ-management's unverified SSL certificate needs to be manually imported to a keystore that the Hyperic 4.6 agent can access.
+                            Otherwise, secure communication between the Hyperic 4.6 agent and RabbitMQ-management will fail.
                             </li>
                             <li>If the <b>accept.unverified.certificates</b> property is <b>true</b> in the <b>agent.properties</b> file, the RabbitMQ plugin will automatically
                             import the unverified SSL certificate of the RabbitMQ-management to the keystore accessible to the Hyperic 4.6 agent.
