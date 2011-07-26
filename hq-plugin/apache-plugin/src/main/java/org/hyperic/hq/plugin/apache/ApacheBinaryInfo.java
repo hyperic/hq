@@ -45,6 +45,8 @@ import org.hyperic.util.file.FileUtil;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.product.GenericPlugin;
+import org.hyperic.hq.product.PlatformDetector;
 
 public class ApacheBinaryInfo {
 
@@ -288,6 +290,11 @@ public class ApacheBinaryInfo {
             new Execute(new PumpStreamHandler(stdOut, stdErr),
                         watchdog);
 
+        if (!PlatformDetector.isWin32()) {
+            File lib = new File(new File(binary).getParentFile().getParentFile(), "lib");
+            String[] env = {"LD_LIBRARY_PATH=" + lib.getAbsolutePath()};
+            ex.setEnvironment(env);
+        }
         ex.setCommandline(new String[] { binary, "-V" });
         BufferedReader is = null;
         

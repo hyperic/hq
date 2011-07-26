@@ -149,9 +149,14 @@ public class ErsApacheServerDetector
         }
 
         List servers = new ArrayList();
-        List binaries = getServerProcessList("2.", PTQL_QUERIES_20);
+        List binaries = new ArrayList();
+        
+        final String version = getTypeInfo().getVersion();
 
-        if (getTypeInfo().getVersion().equals("3.x")) {
+        if (version.equals("4.x")) {
+            binaries.addAll(getServerProcessList("2.2", PTQL_QUERIES_20));
+        }else if (version.equals("3.x")) {
+            binaries.addAll(getServerProcessList("2.0", PTQL_QUERIES_20));
             List binaries_13 =
                 getServerProcessList("1.3", PTQL_QUERIES_13);
             if (binaries_13 != null) {
