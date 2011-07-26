@@ -134,6 +134,7 @@ public class OpenLDAPMeasurementPlugin
         catch (CommunicationException e) {
             // [HHQ-4986] Force ctx to reconnect case of connection issue
             this.ctx = null;
+            throw new MetricNotFoundException("Service "+objectName+", "+alias+" not found", e);
         }
         catch (NamingException e) {
             throw new MetricNotFoundException("Service "+objectName+", "+alias+" not found", e);
