@@ -195,14 +195,27 @@ public class ErsApacheServerDetector
      * The path argument here is a path to an apache_startup.sh script.
      * So the corresponding ERS server base dir is two dirs up from that.
      */
+    @Override
     public List getServerResources(ConfigResponse platformConfig, String path) throws PluginException {
         String version = getTypeInfo().getVersion();
-        ApacheBinaryInfo binary = ApacheBinaryInfo.getInfo(path, version);
+        ApacheBinaryInfo binary = ApacheBinaryInfo.getInfo(path);
+
         if (binary == null) {
             getLog().debug("[getServerResources] no Binary Info path=" + path + " version=" + version);
             return null; //does not match our server type version
         }
-        return getServerList(getParentDir(path, 3), binary);
+        if (version.equals("4.x") && !binary.version.startsWith("2.2")) {
+            getLog().debug("[getServerResources] Binary Info path=" + path + " version=" + version + " no ERS4.x");
+            return null; //does not match our server type version
+        }
+        if (version.equals("3.x") && !binary.version.startsWith("2.0")) {
+            getLog().debug("[getServerResources] Binary Info path=" + path + " version=" + version + " no ERS4.x");
+            return null; //does not match our server type version
+        }
+
+        getLog().debug("[getServerResources] Binary Info path=" + path + " version=" + version + " IS ERS ="+version);
+        
+        return getServerList(getParentDir(binary.binary, 3), binary);
     }
 
     /**
@@ -214,41 +227,7 @@ public class ErsApacheServerDetector
      */
     public List getServerResources(ConfigResponse platformConfig, String path, RegistryKey current)
         throws PluginException {
-        String version = getTypeInfo().getVersion();
-        String key = current.getSubKeyName();
-        getLog().info("[getServerResources] ("+version+") RegistryKey="+key+" path="+path);
-
-
-        if (key.toLowerCase().indexOf("apache") == -1) {
-            return null; //e.g. Covalent$hostnameTomcatERS2.4
-        }
-
-        if (version.equals("4.x")) {
-            if (!key.contains("apache2.2")) {
-                getLog().debug("[getServerResources] no ERS "+version);
-                return null;
-            }
-        } else {
-            if (!key.endsWith(version)) {
-                // e.g. 2.4, but 2.3 detector..
-                getLog().debug("[getServerResources] no ERS "+version);
-                return null;
-            }
-        }
-
-        ApacheBinaryInfo binary = ApacheBinaryInfo.getInfo(path, version);
-        if (binary == null) {
-            getLog().debug("[getServerResources] no Binary Info path=" + path + " version=" + version);
-            return null; //does not match our server type version
-        }
-        
-        //convert:
-        //"C:\Program Files\covalent\ers\apache\bin\httpsd.exe" -k runservice
-        //to:
-        //C:\Program Files\covalent\ers
-        path = getCanonicalPath(path);
-
-        return getServerList(getParentDir(path, 3),binary);
+        return getServerResources(platformConfig, path);
     }
 
     private String getAIID (String serverRoot) {

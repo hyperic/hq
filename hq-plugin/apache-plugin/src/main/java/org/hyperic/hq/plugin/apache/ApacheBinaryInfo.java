@@ -92,29 +92,20 @@ public class ApacheBinaryInfo {
     }
 
     public static synchronized ApacheBinaryInfo getInfo(String binary) {
-        if (cache == null) {
-            cache = new HashMap();
+        ApacheBinaryInfo info = new ApacheBinaryInfo();
+
+        if (binary.startsWith("\"")) {
+            binary = binary.substring(1, binary.indexOf("\"", 1));
         }
 
-        ApacheBinaryInfo info = (ApacheBinaryInfo)cache.get(binary);
-
-        long lastModified = new File(binary).lastModified();
-
-        if ((info == null) || (lastModified != info.lastModified)) {
-            info = new ApacheBinaryInfo();
-            info.binary = binary;
-            info.ctl = binary;
-            info.lastModified = lastModified;
-            cache.put(binary, info);
-
-            try {
-                info.getApacheBinaryInfo(binary);
-            } catch (IOException e) {
-                info.errmsg = e.getMessage();
-            }
+        info.binary = binary;
+        info.ctl = binary;
+        try {
+            info.getApacheBinaryInfo(binary);
+        } catch (IOException e) {
+            log.debug(e, e);
         }
-
-        return new ApacheBinaryInfo(info);
+        return info;
     }
 
     public static ApacheBinaryInfo getInfo(String binary,
@@ -348,6 +339,7 @@ public class ApacheBinaryInfo {
                 } catch (IOException e) {}
             }
         }
+        log.debug("[getVersionCmdInfo] this="+this);
     }
 
     private void getApacheBinaryInfo(String binary)

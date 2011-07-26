@@ -370,6 +370,14 @@ public class ApacheServerDetector
             }
             metricConfig = getSnmpConfig(snmpConfig);
             productConfig = getProductConfig(metricConfig);
+            if (binary.conf == null) {
+                for (String conf : defaultConfs) {
+                    File cf = new File(installpath, conf);
+                    if (cf.exists() && cf.isFile()) {
+                        binary.conf = cf.getAbsolutePath();
+                    }
+                }
+            }
             productConfig.setValue("ServerConf", binary.conf);
 
             if (productConfig != null) {
