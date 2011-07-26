@@ -458,7 +458,7 @@
                     
                     <ul>
                     	<li>If the <b>accept.unverified.certificates</b> property is <b>false</b> (default value) in the <b>agent.properties</b> file, 
-                    		the VMware vCenter server's SSL certificate needs to be manually imported to a keystore that the Hyperic 4.6 agent can access.
+                    		the VMware vCenter server's unverified SSL certificate needs to be manually imported to a keystore that the Hyperic 4.6 agent can access.
                     		Otherwise, secure communication between the Hyperic 4.6 agent and VMware vCenter server will fail.
                     	</li>
                     	<li>If the <b>accept.unverified.certificates</b> property is <b>true</b> in the <b>agent.properties</b> file, the vSphere plugin will automatically
