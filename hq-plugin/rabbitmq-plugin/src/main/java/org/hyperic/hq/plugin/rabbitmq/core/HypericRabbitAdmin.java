@@ -75,8 +75,6 @@ public final class HypericRabbitAdmin {
     private final DefaultHttpClient client;
     private String user;
     private String pass;
-    private boolean VHOSTS_2_1_1 = false;
-    private boolean NODES_2_1_1 = false;
     private BasicHttpContext localcontext;
     private HttpHost targetHost;
 
@@ -103,13 +101,6 @@ public final class HypericRabbitAdmin {
 
         localcontext = new BasicHttpContext();
         localcontext.setAttribute(ClientContext.AUTH_CACHE, authCache);
-
-        RabbitOverview overview = getOverview();
-        if (overview == null) {
-            throw new PluginException("Connection to '" + addr + ":" + port + "' fails");
-        }
-
-        checkLegacy();
     }
 
     public HypericRabbitAdmin(ConfigResponse props) throws PluginException {
@@ -122,14 +113,15 @@ public final class HypericRabbitAdmin {
 
     public List<RabbitVirtualHost> getVirtualHosts() throws PluginException {
         List<RabbitVirtualHost> res;
-        if (VHOSTS_2_1_1) {
+        try {
+            res = Arrays.asList(get("/api/vhosts", RabbitVirtualHost[].class));
+        } catch (PluginException ex) {
+            logger.debug("[getVirtualHosts] " + ex.getLocalizedMessage(),ex);
             res = new ArrayList<RabbitVirtualHost>();
             List<String> names = Arrays.asList(get("/api/vhosts", String[].class));
             for (String name : names) {
                 res.add(new RabbitVirtualHost(name));
             }
-        } else {
-            res = Arrays.asList(get("/api/vhosts", RabbitVirtualHost[].class));
         }
         return res;
     }
@@ -184,11 +176,12 @@ public final class HypericRabbitAdmin {
         }
 
         RabbitVirtualHost res;
-        if (VHOSTS_2_1_1) {
+        try {
+            res = get("/api/vhosts/" + vhName, RabbitVirtualHost.class);
+        } catch (PluginException ex) {
+            logger.debug("[getVirtualHost] " + ex.getLocalizedMessage(),ex);
             String name = get("/api/vhosts/" + vhName, String.class);
             res = new RabbitVirtualHost(name);
-        } else {
-            res = get("/api/vhosts/" + vhName, RabbitVirtualHost.class);
         }
         return res;
     }
@@ -217,16 +210,16 @@ public final class HypericRabbitAdmin {
 
     public RabbitNode getNode(String node) throws PluginException {
         RabbitNode res;
-        if (NODES_2_1_1) {
-            res = get("/api/overview/", RabbitNode.class);
-        } else {
-            try {
-                node = URLEncoder.encode(node, "UTF-8");
-            } catch (UnsupportedEncodingException ex) {
-                throw new RuntimeException(ex);
-            }
-
+        try {
+            node = URLEncoder.encode(node, "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            throw new RuntimeException(ex);
+        }
+        try {
             res = get("/api/nodes/" + node, RabbitNode.class);
+        } catch (PluginException ex) {
+            logger.debug("[getVirtualHost] " + ex.getLocalizedMessage(),ex);
+            res = get("/api/overview/", RabbitNode.class);
         }
         return res;
     }
@@ -270,22 +263,6 @@ public final class HypericRabbitAdmin {
             throw new PluginException(ex.getMessage(), ex);
         }
         return res;
-    }
-
-    private void checkLegacy() {
-        try {
-            get("/api/vhosts", RabbitVirtualHost[].class);
-        } catch (Exception ex) {
-            logger.debug("[checkLegacy] HypericRabbitAdmin runnig on VHOSTS_2_1_1 mode. error:" + ex.getMessage());
-            VHOSTS_2_1_1 = true;
-        }
-
-        try {
-            get("/api/nodes", RabbitNode[].class);
-        } catch (Exception ex) {
-            logger.debug("[checkLegacy] HypericRabbitAdmin runnig on NODES_2_1_1 mode. error:" + ex.getMessage());
-            NODES_2_1_1 = true;
-        }
     }
 
     private class DateTimeDeserializer implements JsonDeserializer<Date> {

@@ -328,7 +328,7 @@
                     collectionType="dynamic"/>
 
             <plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.QueueCollector"/>
-            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+            <plugin type="measurement" class="org.hyperic.hq.plugin.rabbitmq.collect.RabbitServerMeasurement"/>
             <plugin type="autoinventory"/>
             <properties>
                 <property description="Durable" name="durable"/>
@@ -410,7 +410,7 @@
                     collectionType="dynamic"/>
 
             <plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.ChannelCollector"/>
-            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+            <plugin type="measurement" class="org.hyperic.hq.plugin.rabbitmq.collect.RabbitServerMeasurement"/>
             <plugin type="autoinventory"/>
 
             <properties>
@@ -477,7 +477,7 @@
                     collectionType="dynamic"/>
 
             <plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.ConnectionCollector"/>
-            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+            <plugin type="measurement" class="org.hyperic.hq.plugin.rabbitmq.collect.RabbitServerMeasurement"/>
             <plugin type="autoinventory"/>
 
             <properties>
@@ -518,7 +518,7 @@
                     indicator="true"/>
 
             <plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.ExchangeCollector"/>
-            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+            <plugin type="measurement" class="org.hyperic.hq.plugin.rabbitmq.collect.RabbitServerMeasurement"/>
             <plugin type="autoinventory"/>
 
             <properties>
@@ -558,7 +558,7 @@
                     collectionType="dynamic"/>
 
             <plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.VirtualHostCollector"/>
-            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+            <plugin type="measurement" class="org.hyperic.hq.plugin.rabbitmq.collect.RabbitServerMeasurement"/>
             <plugin type="autoinventory"/>
 
             <properties>

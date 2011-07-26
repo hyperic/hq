@@ -6,7 +6,9 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 
 import java.util.Properties;
 import org.apache.commons.logging.Log;
+import org.hyperic.hq.plugin.rabbitmq.core.DetectorConstants;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitOverview;
 import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.PluginException;
 
@@ -27,6 +29,8 @@ public abstract class RabbitMQDefaultCollector extends Collector {
         }
 
         admin = new HypericRabbitAdmin(props);
+        admin.getOverview(); // test the connection.
+
     }
 
     public final void collect() {
@@ -40,6 +44,11 @@ public abstract class RabbitMQDefaultCollector extends Collector {
         } catch (Throwable ex) {
             setAvailability(false);
             getLog().debug(ex.getMessage(), ex);
+            admin = null;
+        }
+
+        boolean https = "true".equals(getProperties().getProperty(DetectorConstants.HTTPS));
+        if (https) {
             admin = null;
         }
     }

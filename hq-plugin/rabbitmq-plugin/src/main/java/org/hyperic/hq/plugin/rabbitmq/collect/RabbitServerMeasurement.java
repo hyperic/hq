@@ -51,7 +51,15 @@ public class RabbitServerMeasurement extends SigarMeasurementPlugin {
                 throw ex;
             }
         } else {
+            try{
             res = Collector.getValue(this, metric);
+            }catch(PluginException ex){
+                if(metric.isAvail()){
+                    res=new MetricValue(Metric.AVAIL_DOWN);
+                }else{
+                    throw ex;
+                }
+            }
         }
         return res;
     }
