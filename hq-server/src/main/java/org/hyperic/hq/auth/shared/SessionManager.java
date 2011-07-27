@@ -92,7 +92,13 @@ public class SessionManager {
         } while (_cache.containsKey(key));
         
         if (_log.isDebugEnabled()) {
-            _log.debug("adding session with user=" + subject.getName() +
+        	String name = null;
+        	
+        	if (subject != null) {
+        		name = subject.getName();
+        	}
+        	
+            _log.debug("adding session with user=" + name +
                 ",sessionId=" + key + ",timeout=" + timeout);
         }
         _cache.put(key, new AuthSession(subject, timeout));
@@ -196,8 +202,14 @@ public class SessionManager {
     public synchronized void invalidate(int sessionId) {
         AuthSession sess = (AuthSession)_cache.remove(sessionId);
         if (_log.isDebugEnabled()) {
+        	String name = null;
+        	
+        	if (sess != null && sess.getAuthzSubject() != null) {
+        		name = sess.getAuthzSubject().getName();
+        	}
+        	
             _log.debug("removed session sessionId=" + sessionId +
-                ",user=" + sess.getAuthzSubject().getName());
+                ",user=" + name);
         }
     }
     
