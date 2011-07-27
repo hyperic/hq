@@ -57,6 +57,7 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
 import org.hyperic.hq.agent.AgentKeystoreConfig;
 import org.hyperic.hq.common.shared.ProductProperties;
+import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.http.HQHttpClient;
@@ -144,6 +145,11 @@ public class HTTPCollector extends SocketChecker {
 			
 			this.proxyHost = proxy;
 		}
+
+        collect();
+        if (getLogLevel() == LogTrackPlugin.LOGLEVEL_ERROR) {
+            throw new PluginException(getMessage());
+        }
 	}
 
 	protected String getURL() {
