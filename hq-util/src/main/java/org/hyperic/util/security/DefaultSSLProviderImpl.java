@@ -227,7 +227,7 @@ public class DefaultSSLProviderImpl implements SSLProvider {
                         keystoreConfig.getFilePath());
                     for (X509Certificate cert : chain) {
                         String[] cnValues = AbstractVerifier.getCNs(cert);
-                        String alias = cnValues[0];
+                        String alias = cnValues[0] + "-ts=" + System.currentTimeMillis();
                         trustStore.setCertificateEntry(alias, cert);
                     }
                     trustStore.store(keyStoreFileOutputStream, keystoreConfig

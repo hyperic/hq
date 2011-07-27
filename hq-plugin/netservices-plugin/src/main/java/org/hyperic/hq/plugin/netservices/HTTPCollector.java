@@ -57,6 +57,7 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
 import org.hyperic.hq.agent.AgentKeystoreConfig;
 import org.hyperic.hq.common.shared.ProductProperties;
+import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.http.HQHttpClient;
@@ -144,6 +145,11 @@ public class HTTPCollector extends SocketChecker {
 			
 			this.proxyHost = proxy;
 		}
+
+        collect();
+        if (getLogLevel() == LogTrackPlugin.LOGLEVEL_ERROR) {
+            throw new PluginException(getMessage());
+        }
 	}
 
 	protected String getURL() {
@@ -338,11 +344,6 @@ public class HTTPCollector extends SocketChecker {
 
 			String msg = String.valueOf(statusCode);
 			
-			// ...HEAD requests have no body...
-			if (!isHEAD) {
-				msg += " " + EntityUtils.toString(response.getEntity());
-			}
-
 			Header header = response.getFirstHeader("Server");
 			
 			if (header != null) {
