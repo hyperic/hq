@@ -1,7 +1,9 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-    <head>
-        <title>Hyperic 4.6 Documentation : vSphere</title>
+ <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
+<p>      
+<p>
+        <title>vFabric Hyperic 4.6 : vSphere</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,27 +14,27 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Hyperic 4.6 Documentation : vSphere
+                            vFabric Hyperic 4.6 : vSphere
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 29, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jul 27, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
  
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1309373058954 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1309373058954 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1309373058954 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1311786243996 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1311786243996 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1311786243996 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1309373058954'>
+/*]]>*/</style><div class='rbtoc1311786243996'>
 <ul>
     <li><a href='#vSphere-vSpherePluginOverview'>vSphere Plugin Overview</a></li>
 <ul>
     <li><a href='#vSphere-SupportedVersionsandRequirements'>Supported Versions and Requirements</a></li>
-    <li><a href='#vSphere-vSphereResourcesandtheHQInventoryModel'>vSphere Resources and the HQ Inventory Model</a></li>
+    <li><a href='#vSphere-vSphereResourcesandtheHypericInventoryModel'>vSphere Resources and the Hyperic Inventory Model</a></li>
     <li><a href='#vSphere-ConfigurationOverview'>Configuration Overview</a></li>
     <li><a href='#vSphere-ResourceTypesandManagementFunctions'>Resource Types and Management Functions</a></li>
 <ul>
@@ -53,14 +55,16 @@ div.rbtoc1309373058954 li {margin-left: 0px;padding-left: 0px;}
 </ul>
     <li><a href='#vSphere-ConfigurationInstructions'>Configuration Instructions</a></li>
 <ul>
-    <li><a href='#vSphere-Step1InstallHQAgentonvCenterPlatform'>Step 1 - Install HQ Agent on vCenter Platform</a></li>
-    <li><a href='#vSphere-Step2ConfigureAgentSetupPropertiesFile'>Step 2 - Configure Agent Setup Properties File</a></li>
-    <li><a href='#vSphere-Step3ConfigurevCenterServerAccessCredentials'>Step 3 - Configure vCenter Server Access Credentials</a></li>
-    <li><a href='#vSphere-Step4SetEventTrackingOptions'>Step 4 - Set Event Tracking Options</a></li>
-    <li><a href='#vSphere-Step5ConfigurevCenterStatisticsLevel'>Step 5 - Configure vCenter Statistics Level</a></li>
-    <li><a href='#vSphere-Step6TailorPluginMonitoringDefaults'>Step 6 - Tailor Plugin Monitoring Defaults</a></li>
-    <li><a href='#vSphere-Step7InstallHQAgentsinVMs'>Step 7 - Install HQ Agents in VMs</a></li>
-    <li><a href='#vSphere-Step8ConfigureAlertDefinitions'>Step 8 - Configure Alert Definitions</a></li>
+    <li><a href='#vSphere-Step1SetupAgentKeystore'>Step 1 - Setup Agent Keystore</a></li>
+    <li><a href='#vSphere-Step2InstallHypericAgent'>Step 2 - Install Hyperic Agent</a></li>
+    <li><a href='#vSphere-Step3ConfigureAgentProperties'>Step 3 - Configure Agent Properties</a></li>
+    <li><a href='#vSphere-Step4TuneAgentandvSpherePluginforLargeVirtualEnvironment%28Optional%29'>Step 4 - Tune Agent and vSphere Plugin for Large Virtual Environment (Optional)</a></li>
+    <li><a href='#vSphere-Step5ConfigurevCenterServerAccessCredentials'>Step 5 - Configure vCenter Server Access Credentials</a></li>
+    <li><a href='#vSphere-Step6SetEventTrackingOptions'>Step 6 - Set Event Tracking Options</a></li>
+    <li><a href='#vSphere-Step7ConfigurevCenterStatisticsLevel'>Step 7 - Configure vCenter Statistics Level</a></li>
+    <li><a href='#vSphere-Step8TailorPluginMonitoringDefaults'>Step 8 - Tailor Plugin Monitoring Defaults</a></li>
+    <li><a href='#vSphere-Step9InstallHypericAgentsinVMs'>Step 9 - Install Hyperic Agents in VMs</a></li>
+    <li><a href='#vSphere-Step10ConfigureAlertDefinitions'>Step 10 - Configure Alert Definitions</a></li>
 </ul>
     <li><a href='#vSphere-MetricDocumentation'>Metric Documentation</a></li>
 <ul>
@@ -72,22 +76,22 @@ div.rbtoc1309373058954 li {margin-left: 0px;padding-left: 0px;}
 
 <h1><a name="vSphere-vSpherePluginOverview"></a>vSphere Plugin Overview </h1>
 
-<p>Hyperic's vSphere plugin manages vSphere Hosts and the VMs that run on them, using built-in java plugin classes, the HQ API, and the vCenter SDK.  </p>
+<p>Hyperic's vSphere plugin manages vSphere Hosts and the VMs that run on them, using built-in java plugin classes, the HQApi, and the vCenter SDK.  </p>
 
 <p>The vSphere plugin replaces the VMware Infrastructure Manager plugin available in previous versions of Hyperic. <b>The VMware Infrastructure Manager plugin was deprecated in Hyperic 4.4.</b> </p>
 
 <h2><a name="vSphere-SupportedVersionsandRequirements"></a>Supported Versions and Requirements </h2>
 
-<p>The vSphere plugin supports vSphere v4.0 and 4.1 and ESX 4.0 and 4.1, and ESXi 4.0 and 4.1. The plugin requires HQ Agent v4.4 or later, and HQ API 3.2 or later. </p>
+<p>The vSphere plugin supports vSphere v4.0 and 4.1 and ESX 4.0 and 4.1, and ESXi 4.0 and 4.1. The plugin requires Hyperic Agent v4.6 or later, and HQApi 5.0.0 or later. </p>
 
-<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Number of Managed VMs</b><br />In this version of the vSphere plugin, the number of VMs an HQ Agent can manage is limited to approximately 1000. Testing indicates that an HQ Agent running on a vCenter host with 2 CPUs will become overloaded when the number of managed VMs reaches 1000.</td></tr></table></div> 
+<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Number of Managed VMs</b><br />Testing of the vSphere plugin indicates the Hyperic Agent can manage 1000 VMs without becoming overloaded.</td></tr></table></div> 
 
-<h2><a name="vSphere-vSphereResourcesandtheHQInventoryModel"></a>vSphere Resources and the HQ Inventory Model </h2>
+<h2><a name="vSphere-vSphereResourcesandtheHypericInventoryModel"></a>vSphere Resources and the Hyperic Inventory Model </h2>
 
-<p>The vSphere plugin defines three new HQ resource types. </p>
+<p>The vSphere plugin defines three new Hyperic resource types. </p>
 
 <ul>
-	<li><b>VMware vCenter</b> &#8212; vCenter is the vSphere management service for administering and managing vSphere Hosts and VMs. The vSphere plugin accesses vCenter functions via the vCenter SDK. You install an HQ Agent on the same system as vCenter to enable management of vSphere Hosts and VMs.</li>
+	<li><b>VMware vCenter</b> &#8212; vCenter is the vSphere management service for administering and managing vSphere Hosts and VMs. The vSphere plugin accesses vCenter functions via the vCenter SDK. You install an Hyperic Agent on the same system as vCenter to enable management of vSphere Hosts and VMs.</li>
 </ul>
 
 
@@ -97,11 +101,11 @@ div.rbtoc1309373058954 li {margin-left: 0px;padding-left: 0px;}
 
 
 <ul>
-	<li><b>VMware vSphere VM</b> &#8212; vSphere VM's run on a vSphere Host. You install an HQ Agent in a vSphere VM to enable management of supported server types (such as Tomcat, JBoss or other supported server types) running in the VM. In HQ Enterprise, if you run an HQ Agent on vCenter and on the VMs that the vCenter instance administers, you can correlate VM and managed server behavior in the HQ Enterprise's <b>HQ vSphere</b> user interface.</li>
+	<li><b>VMware vSphere VM</b> &#8212; vSphere VM's run on a vSphere Host. You install an Hyperic Agent in a vSphere VM to enable management of supported server types (such as Tomcat, JBoss or other supported server types) running in the VM. In vFabric Hyperic, if you run a Hyperic Agent on vCenter and on the VMs that the vCenter instance administers, you can correlate VM and managed server behavior in the vFabric Hyperic's <b>HQ vSphere</b> user interface.</li>
 </ul>
 
 
-<p>The table below shows the vSphere resource type hierarchy; the right column indicates the inventory level for a type in the HQ inventory model. </p>
+<p>The table below shows the vSphere resource type hierarchy; the right column indicates the inventory level for a type in the Hyperic inventory model. </p>
 <div class='table-wrap'>
 <table class='confluenceTable'><tbody>
 <tr>
@@ -121,7 +125,7 @@ div.rbtoc1309373058954 li {margin-left: 0px;padding-left: 0px;}
 <td class='confluenceTd'> platform </td>
 </tr>
 <tr>
-<td class='confluenceTd'> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; HQ Agent-managed resource in VM &nbsp; &nbsp; &nbsp;&nbsp; <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Hyperic Agent-managed resource in VM &nbsp; &nbsp; &nbsp;&nbsp; <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> server </td>
 </tr>
 </tbody></table>
@@ -132,15 +136,17 @@ div.rbtoc1309373058954 li {margin-left: 0px;padding-left: 0px;}
 
 <h2><a name="vSphere-ConfigurationOverview"></a>Configuration Overview </h2>
 
-<p>The vSphere plugin makes use of the vCenter SDK to manage the hosts and VMs under vCenter management. </p>
+<p>The vSphere plugin uses SIGAR to discover the vCenter server, and uses the vCenter SDK to manage the hosts and VMs under vCenter management. </p>
 
-<p>You install an HQ Agent on the platform where the vCenter server runs. The plugin uses SIGAR to discover the vCenter server. </p>
+<p>You install a Hyperic Agent on a platform that can access vCenter Server over the network. To minimize the load on the vCenter platform, do not install the agent on the same platform as vCenter.</p>
+
+<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>SSL Requirements for 4.6 Agents</b><br />In Hyperic 4.6, to communicate with the vCenter server over SSL, you must configure a keystore for the agent and manually import the vCenter SSL certificate into the agent keystore.</td></tr></table></div>
 
 <p>To discover and manage vSphere Hosts and VMs, the plugin must be able to connect to the vCenter SDK port, so after vCenter is discovered, you must enable the plugin to connect to the SDK port by defining the SDK connection settings on the vCenter server's <b>Configuration Properties</b> page. </p>
 
-<p>The plugin tries to connect to the SDK port specified on the vCenter instance's <b>Configuration Properties</b> page. Upon successful connection to vCenter, the HQ Agent reports the vSphere Hosts and VMs under vCenter management to the HQ Server, and starts reporting the availability of the vCenter, the vSphere Hosts it manages, and the VMs in each host. </p>
+<p>The plugin tries to connect to the SDK port specified on the vCenter instance's <b>Configuration Properties</b> page. Upon successful connection to vCenter, the Hyperic Agent reports the vSphere Hosts and VMs under vCenter management to the Hyperic Server, and starts reporting the availability of the vCenter, the vSphere Hosts it manages, and the VMs in each host. </p>
 
-<p>If an HQ Agent is running in a VM, the agent managing the vCenter service will report all currently enabled metrics for the VM, not just availability. </p>
+<p>If a Hyperic Agent is running in a VM, the agent managing the vCenter service will report all currently enabled metrics for the VM, not just availability. </p>
 
 <h2><a name="vSphere-ResourceTypesandManagementFunctions"></a>Resource Types and Management Functions </h2>
 
@@ -165,9 +171,9 @@ div.rbtoc1309373058954 li {margin-left: 0px;padding-left: 0px;}
 <ul>
 	<li><b>Auto-Discover New Hosts</b> &#45; After you configure the the VMware vCenter instance's SDK connection information, the vSphere plugin uses the SDK to obtain the location and other properties for each of the physical ESX hosts under vCenter management. The plugin creates a <em>platform</em> of type "VMware vSphere Host" for each.
 	<ul>
-		<li><ins>vSphere Host Naming</ins> &#45; The name of a vSphere Host in HQ is made up of its name in vCenter, a space, and, enclosed in brackets, its vCenter-assigned UID. For example, the name in HQ for a vSphere Host whose name and UUID in vCenter are "10.16.16.55" and "34313236-3435-5553-4538-30374e39414a", respectively, is:<br/>
+		<li><ins>vSphere Host Naming</ins> &#45; The name of a vSphere Host in Hyperic is made up of its name in vCenter, a space, and, enclosed in brackets, its vCenter-assigned UID. For example, the name in Hyperic for a vSphere Host whose name and UUID in vCenter are "10.16.16.55" and "34313236-3435-5553-4538-30374e39414a", respectively, is:<br/>
 <tt>10.16.16.55 {34313236-3435-5553-4538-30374e39414a</tt>} </li>
-		<li><ins>vSphere Host Properties</ins> &#45; The plugin obtains the properties listed below for each vSphere Host. Click the thumbnail below to see the properties as displayed in the HQ user interface when you browse to a VMware vSphere Host.
+		<li><ins>vSphere Host Properties</ins> &#45; The plugin obtains the properties listed below for each vSphere Host. Click the thumbnail below to see the properties as displayed in the Hyperic user interface when you browse to a VMware vSphere Host.
 		<ul>
 			<li>Description</li>
 			<li>VMware Version</li>
@@ -182,7 +188,7 @@ div.rbtoc1309373058954 li {margin-left: 0px;padding-left: 0px;}
 			<li>vProcessor Sockets</li>
 			<li>Cores per Socket</li>
 			<li>Data Center<br/>
-<span class="image-wrap" style=""><a class="confluence-thumbnail-link 908x247" href='http://support.hyperic.com/download/attachments/77463605/VcenterProperties.png'><img src="attachments/thumbnails/77463605/77660701" style="border: 0px solid black"/></a></span> </li>
+<span class="image-wrap" style=""><img src="attachments/77463605/77660701.png" style="border: 0px solid black"/></span> </li>
 		</ul>
 		</li>
 	</ul>
@@ -191,14 +197,14 @@ div.rbtoc1309373058954 li {margin-left: 0px;padding-left: 0px;}
 
 
 <ul>
-	<li><b>Auto-Discover Changed and Removed Hosts</b> &#8212; During each periodic inventory scan, every 15 minutes by default the HQ Agent detects changes to the vSphere Host administered by the vCenter instance it monitors. The following changes are detected and reflected in HQ inventory:
+	<li><b>Auto-Discover Changed and Removed Hosts</b> &#8212; During each periodic inventory scan, every 15 minutes by default the Hyperic Agent detects changes to the vSphere Host administered by the vCenter instance it monitors. The following changes are detected and reflected in Hyperic inventory:
 	<ul>
 		<li>Changed properties for vSphere Hosts</li>
-		<li>Removed vSphere Hosts &#8212; The plugin detects removal of a host during the inventory scan subsequent to the host's removal from vCenter. As a result, the host and its dependent resources are removed from HQ inventory:
+		<li>Removed vSphere Hosts &#8212; The plugin detects removal of a host during the inventory scan subsequent to the host's removal from vCenter. As a result, the host and its dependent resources are removed from Hyperic inventory:
 		<ul>
-			<li>The vSphere Host resource is removed from HQ inventory.</li>
-			<li>The vSphere VMs that previously ran in on the host are also removed from HQ inventory.</li>
-			<li>The operating system platforms associated with HQ-managed VMs are removed. (An HQ-managed VM is a VM that has or had an HQ Agent running in it.)</li>
+			<li>The vSphere Host resource is removed from Hyperic inventory.</li>
+			<li>The vSphere VMs that previously ran in on the host are also removed from Hyperic inventory.</li>
+			<li>The operating system platforms associated with Hyperic-managed VMs are removed. (A Hyperic-managed VM is a VM that has or had a Hyperic Agent running in it.)</li>
 		</ul>
 		</li>
 	</ul>
@@ -208,7 +214,7 @@ div.rbtoc1309373058954 li {margin-left: 0px;padding-left: 0px;}
 
 
 <ul>
-	<li><b>Metric Collection</b> &#45; The <tt>org.hyperic.hq.plugin.vsphere.VSphereHostCollector</tt> class obtains vCenter Performance Counters for each vSphere host the vCenter Server manages. See <a href="#vSphere-VMwarevSphereHostMetrics">VMware vSphere Host Metrics</a> for a list of supported metrics.</li>
+	<li><b>Metric Collection</b> &#8212; The <tt>org.hyperic.hq.plugin.vsphere.VSphereHostCollector</tt> class obtains vCenter Performance Counters for each vSphere host the vCenter Server manages. See <a href="#vSphere-VMwarevSphereHostMetrics">VMware vSphere Host Metrics</a> for a list of supported metrics.</li>
 </ul>
 
 
@@ -229,9 +235,9 @@ div.rbtoc1309373058954 li {margin-left: 0px;padding-left: 0px;}
 <ul>
 	<li><b>Auto-Discover VMs</b> &#45; The plugin uses the vCenter SDK to discover VMs that the vCenter Server manages, and creates a platform of type "VMware vSphere VM" for each.
 	<ul>
-		<li><ins>vSphere VM Naming</ins> &#45; The name of a vSphere VM in HQ is made up of its name in vCenter, a space, and, enclosed in brackets, its vCenter-assigned UID. For example, the name in HQ for a vSphere VM whose name and UUID in vCenter are "vmc-ssrc-centos5.4" and "564d8a4e-3b34-e2ad-e6b5-5807b890bd39", respectively, is:<br/>
+		<li><ins>vSphere VM Naming</ins> &#45; The name of a vSphere VM in Hyperic is made up of its name in vCenter, a space, and, enclosed in brackets, its vCenter-assigned UID. For example, the name in Hyperic for a vSphere VM whose name and UUID in vCenter are "vmc-ssrc-centos5.4" and "564d8a4e-3b34-e2ad-e6b5-5807b890bd39", respectively, is:<br/>
 <tt>vmc-ssrc-centos5.4 {564d8a4e-3b34-e2ad-e6b5-5807b890bd39</tt>} </li>
-		<li><ins>vSphere VM Properties</ins>&nbsp;The plugin obtains the properties listed below for each VM. Click the thumbnail below to see the properties as displayed in the HQ user interface when you browse to a VMware vSphere VM.
+		<li><ins>vSphere VM Properties</ins>&nbsp;The plugin obtains the properties listed below for each VM. Click the thumbnail below to see the properties as displayed in the Hyperic user interface when you browse to a VMware vSphere VM.
 		<ul>
 			<li>Guest OS</li>
 			<li>VM Version</li>
@@ -244,7 +250,7 @@ div.rbtoc1309373058954 li {margin-left: 0px;padding-left: 0px;}
 			<li>Virtual CPUs</li>
 			<li>Tools Version</li>
 			<li>Config File<br/>
-<span class="image-wrap" style=""><a class="confluence-thumbnail-link 908x247" href='http://support.hyperic.com/download/attachments/77463605/VcenterProperties.png'><img src="attachments/thumbnails/77463605/77660701" style="border: 0px solid black"/></a></span> </li>
+<span class="image-wrap" style=""><img src="attachments/77463605/77660701.png" style="border: 0px solid black"/></span> </li>
 		</ul>
 		</li>
 	</ul>
@@ -253,10 +259,10 @@ div.rbtoc1309373058954 li {margin-left: 0px;padding-left: 0px;}
 
 
 <ul>
-	<li><b>Auto-Discover Changed, Moved, and Removed VMs</b> &#45; - During each periodic inventory scan, every 15 minutes by default, the HQ Agent detects changes to the vSphere VMs administered by the vCenter instance it monitors. The following changes are detected and reflected in HQ inventory:
+	<li><b>Auto-Discover Changed, Moved, and Removed VMs</b> &#45; - During each periodic inventory scan, every 15 minutes by default, the Hyperic Agent detects changes to the vSphere VMs administered by the vCenter instance it monitors. The following changes are detected and reflected in Hyperic inventory:
 	<ul>
 		<li>Changed properties for vSphere VMs.</li>
-		<li>Removed vSphere VMs &#8212; The plugin detects removal of a VM during the inventory scan subsequent to the host's removal from vCenter. The vSphere Host resource is removed from HQ inventory. Operating system platforms associated with HQ-managed VMs are also removed. (An HQ-managed VM is a VM that has or had an HQ Agent running in it.)</li>
+		<li>Removed vSphere VMs &#8212; The plugin detects removal of a VM during the inventory scan subsequent to the host's removal from vCenter. The vSphere Host resource is removed from Hyperic inventory. Operating system platforms associated with Hyperic-managed VMs are also removed. (An Hyperic-managed VM is a VM that has or had a Hyperic Agent running in it.)</li>
 		<li>vMotions - vMotions are detected, and inventory properties updated to reflect the new host without interruption of monitoring.</li>
 	</ul>
 	</li>
@@ -270,7 +276,7 @@ div.rbtoc1309373058954 li {margin-left: 0px;padding-left: 0px;}
 
 <p><a name="vSphere-control"></a> </p>
 <ul>
-	<li><b>Control</b> &#45; The <tt>org.hyperic.hq.plugin.vsphere.VSphereVmControlPlugin</tt> class enables these control actions for VMs with an HQ Agent:
+	<li><b>Control</b> &#45; The <tt>org.hyperic.hq.plugin.vsphere.VSphereVmControlPlugin</tt> class enables these control actions for VMs with an Hyperic Agent:
 	<ul>
 		<li>CreateSnapshot - Saves a snapshot of the current state of the VM so that you can return to the same state repeatedly.</li>
 		<li>RemoveAllSnapshots - Commits all the immediate snapshots before the "You are here" current active state to the base disk and removes all existing snapshots for the VM.</li>
@@ -294,7 +300,7 @@ div.rbtoc1309373058954 li {margin-left: 0px;padding-left: 0px;}
 
 
 <ul>
-	<li><b>Event Tracking</b> &#45; The <tt>org.hyperic.hq.plugin.vsphere.VSphereVmEventPlugin</tt> class obtains events (for VMs that have an HQ Agent) using the vCenter SDK, in accordance with the log tracking options configured for vSphere VMs. If log tracking is enabled, an event will be logged for any control action performed. In addition, vCenter events that meet the log tracking filter criteria will be tracked. (See <a href="Events.html" title="Events">vSphere Events</a> for a list of all vCenter events.) For each event, the following data is logged:
+	<li><b>Event Tracking</b> &#45; The <tt>org.hyperic.hq.plugin.vsphere.VSphereVmEventPlugin</tt> class obtains events (for VMs that have a Hyperic Agent) using the vCenter SDK, in accordance with the log tracking options configured for vSphere VMs. If log tracking is enabled, an event will be logged for any control action performed. In addition, vCenter events that meet the log tracking filter criteria will be tracked. (See <a href="Events.html" title="Events">vSphere Events</a> for a list of all vCenter events.) For each event, the following data is logged:
 	<ul>
 		<li>Log Level</li>
 		<li>Event ID</li>
@@ -318,17 +324,17 @@ div.rbtoc1309373058954 li {margin-left: 0px;padding-left: 0px;}
 <h3><a name="vSphere-ViewaVMwarevCenterInstanceintheResourceHub"></a>View a VMware vCenter Instance in the Resource Hub </h3>
 
 <p>Use <b>Resources &gt; Browse &gt; Servers &gt; Server Type Dropdown &gt; VMware vCenter</b> to navigate to VMware vCenter instance. The <b>Current Health</b> page for the vCenter instance appears. See the thumbnail below for a screenshot. <br/>
-<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1024x761" href='http://support.hyperic.com/download/attachments/77463605/VcenterResourceHub.png'><img src="attachments/thumbnails/77463605/77660681" style="border: 0px solid black"/></a></span> </p>
+<span class="image-wrap" style=""><img src="attachments/77463605/77660681.png" style="border: 0px solid black"/></span> </p>
 
 <h3><a name="vSphere-ViewaVMwarevSphereHostintheResourceHub"></a>View a VMware vSphere Host in the Resource Hub </h3>
 
 <p>Use <b>Resources &gt; Browse &gt; Platforms &gt; Platform Type Dropdown &gt; vSphere Host</b> to navigate to a vSphere Host. The <b>Current Health</b> page for the host. See the thumbnail below for a screenshot. <br/>
-<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1017x816" href='http://support.hyperic.com/download/attachments/77463605/VsphereHostResourceHub.png'><img src="attachments/thumbnails/77463605/77660684" style="border: 0px solid black"/></a></span> </p>
+<span class="image-wrap" style=""><img src="attachments/77463605/77660684.png" style="border: 0px solid black"/></span> </p>
 
 <h3><a name="vSphere-ViewaVMwarevSphereVMintheResourceHub"></a>View a VMware vSphere VM in the Resource Hub </h3>
 
 <p>Use <b>Resources &gt; Browse &gt; Platforms &gt; Platform Type Dropdown &gt; vSphere VM</b> to navigate to a vSphere VM. The <b>Current Health</b> page for the VM. See the thumbnail below for a screenshot. <br/>
-<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1009x833" href='http://support.hyperic.com/download/attachments/77463605/VsphereVmResourceHub.png'><img src="attachments/thumbnails/77463605/77660682" style="border: 0px solid black"/></a></span> </p>
+<span class="image-wrap" style=""><img src="attachments/77463605/77660682.png" style="border: 0px solid black"/></span> </p>
 
 <div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>When you browse platforms on the <b>Resources &gt; Browse</b> page, if the filter is set to "All Platform Types", vSphere VMs will <em>not</em> appear in the list of platforms. You must select "vSphere VM" in the platform types filter to display a list of vSphere VMs in the Resource Hub.</td></tr></table></div> 
 
@@ -340,7 +346,7 @@ div.rbtoc1309373058954 li {margin-left: 0px;padding-left: 0px;}
 
 <p>This section has instructions for enabling the vSphere plugin to manage vSphere Hosts and VMs. </p>
 
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Remove VMware Infrastructure Manager Plugin and Resources</b><br />If you currently have pre-4.4 HQ Agents monitoring vSphere components with the VMware Infrastructure Manager plugin deprecated in Hyperic 4.4, remove the plugin and VI3 resources from inventory. The resource types are: 
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Remove VMware Infrastructure Manager Plugin and Resources</b><br />If you currently have pre-4.4 Hyperic Agents monitoring vSphere components with the VMware Infrastructure Manager plugin deprecated in Hyperic 4.4, remove the plugin and VI3 resources from inventory. The resource types are: 
 <ul>
 	<li>VMware VI3 VM server</li>
 	<li>VMware VI3 Host platform</li>
@@ -350,59 +356,102 @@ div.rbtoc1309373058954 li {margin-left: 0px;padding-left: 0px;}
 </ul>
 </td></tr></table></div> 
 
-<h2><a name="vSphere-Step1InstallHQAgentonvCenterPlatform"></a>Step 1 - Install HQ Agent on vCenter Platform </h2>
+<h2><a name="vSphere-Step1SetupAgentKeystore"></a>Step 1 - Setup Agent Keystore </h2>
 
-<p>Install an HQ Agent on the platform where vCenter Server runs. For instructions, see <a href="Installing an Agent-Only Package.html" title="Installing an Agent-Only Package">Installing an Agent&#45;Only Package</a> </p>
+<p>Create a keystore for the Hyperic Agent on the on the platform where you will install the agent that will monitor vCenter. Import the vCenter server certificate into the truststore.</p>
 
-<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Interactive Agent Configuration is Not Supported</b><br />You must configure the HQ Agent in its properties file. <b>Do not start the HQ Agent until you have configured its startup setting in its</b> <tt><b>agent.properties</b></tt> <b>file, as described in the following section</b>.</td></tr></table></div> 
+<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>SSL Configuration Requirements (Hyperic 4.6 and later</b><br />There are new SSL configuration requirements for secure communication between a Hyperic 4.6 agent and a VMware vCenter server.
 
-<h2><a name="vSphere-Step2ConfigureAgentSetupPropertiesFile"></a>Step 2 - Configure Agent Setup Properties File </h2>
+<p>If the <tt>accept.unverified.certificates</tt> property in <tt>agent.properties</tt> is "false", as it is by default, the VMware vCenter server's unverified SSL certificate must be manually imported to a keystore that the Hyperic 4.6 Agent can access. Otherwise, secure communication between the Hyperic 4.6 Agent and VMware vCenter server will fail.</p>
 
-<p>The vSphere plugin reads the <tt>agent.properties</tt> file for the HQ Agent on the platform where vCenter server is installed to get the connection properties the HQ Agent and HQ Server use to communicate with one another. You must edit the <tt>agent.properties</tt> file to supply the connection property values. </p>
+<p>If the <tt>accept.unverified.certificates</tt> property in <tt>agent.properties</tt> is "true", the vSphere plugin will automatically import the VMware vCenter server's unverified SSL certificate to the keystore accessible to the Hyperic 4.6 agent. This is not recommended because it is less secure and expose the Hyperic Agent to man-in-the-middle attacks.</p></td></tr></table></div>
+<h2><a name="vSphere-Step2InstallHypericAgent"></a>Step 2 - Install Hyperic Agent</h2>
 
-<p>Edit the following lines in <tt>agent.properties</tt> to supply the correct values for your environment, and then restart the HQ Agent. For more information, see about agent startup settings, see <a href="Configure Agent - Server Communication in Properties File.html" title="Configure Agent - Server Communication in Properties File">Configure Agent - Server Communication in Properties File</a>. </p>
+<p>Install a Hyperic Agent on the platform from which you will remotely monitor vCenter Server. For instructions, see <a href="Installing an Agent-Only Package.html" title="Installing an Agent-Only Package">Installing an Agent&#45;Only Package</a>. </p>
+
+<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Interactive Agent Configuration is Not Supported</b><br />You must configure the Hyperic Agent in its properties file. <b>Do not start the Hyperic Agent until you have configured its startup setting in its <tt>agent.properties</tt> file, as described in the following section</b>.</td></tr></table></div> 
+
+<h2><a name="vSphere-Step3ConfigureAgentProperties"></a>Step 3 - Configure Agent Properties </h2>
+
+<p>The vSphere plugin reads the <tt>agent.properties</tt> file for the Hyperic Agent to get the connection properties the Hyperic Agent and Hyperic Server use to communicate with one another. You must edit the <tt>agent.properties</tt> file to supply the connection property values. </p>
+
+<ol>
+	<li>Open <tt>AgentHome/conf/agent.properties</tt> in a text editor.</li>
+	<li>Configure the username and password the agent will use for connecting to the Hyperic Server. Uncomment and set the values of:
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
-		<pre class="theme: Confluence; brush: java; gutter: false">agent.setup.camIP=localhost 
-agent.setup.camPort=7080 
-agent.setup.camSSLPort=7443 
-agent.setup.camSecure=no 
-agent.setup.camLogin=hqadmin 
-agent.setup.camPword=hqadmin 
-agent.setup.agentIP=localhost 
-agent.setup.agentPort=2144 
-agent.setup.unidirectional=no</pre>
+		<pre class="theme: Confluence; brush: java; gutter: false">agent.setup.camLogin= 
+agent.setup.camPword=</pre>
 		</div>
-</div></div> 
-<p>After restart, the HQ Agent should discover the vCenter server and present it in the <b>Auto-Discovery Portlet</b> on the HQ Dashboard. Import the discovered vCenter server to inventory. </p>
+</div></div> </li>
+	<li>Configure the location of the agent keystore (supply the full path) and the keystore password. Uncomment and set the values of:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">agent.keystore.path
+agent.keystore.password</pre>
+		</div>
+</div></div> </li>
+	<li>Configure frequency of default auto-scan. (Optional) Auto-discovery and auto-syncing of vSphere resources occur during the agent default scan (every 15 minutes by default). You can update this time interval by uncommenting and editing this property definition:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false"># autoinventory.defaultScan.interval.millis=900000</pre>
+		</div>
+</div></div> </li>
+	<li>Save and close <tt>agent.properties</tt></li>
+	<li>Start the agent.
+	<ul>
+		<li>After it starts up, the Hyperic Agent should discover the vCenter server and present it in the <b>Auto-Discovery Portlet</b> on the Hyperic Dashboard. Import the discovered vCenter server to inventory.</li>
+	</ul>
+	</li>
+</ol>
 
-<h2><a name="vSphere-Step3ConfigurevCenterServerAccessCredentials"></a>Step 3 - Configure vCenter Server Access Credentials </h2>
+
+
+<h2><a name="vSphere-Step4TuneAgentandvSpherePluginforLargeVirtualEnvironment%28Optional%29"></a>Step 4 - Tune Agent and vSphere Plugin for Large Virtual Environment (Optional)</h2>
+<p><a name="vSphere-largeenvironment"></a><br/>
+Perform the configuration steps in this section if your vCenter instance manages more than 200 VMs. {Proceed to the wrapper configuration step if you have already made the edits to the agent properties file.</p>
+
+<ol>
+	<li>Increase the metric collection queue size and the collector thread pool size by adding these properties to the <tt>agent.properties</tt> file.<br/>
+<tt>scheduleThread.queuesize.vsphere=50000</tt><br/>
+<tt>collector.maxPoolSize=100</tt><br/>
+<tt>collector.corePoolSize=100</tt></li>
+	<li>Increase the batch size for metric batches sent by the agent to the server, by changing the value of the <tt>agent.maxBatchSize</tt> in the <tt>agent.properties</tt> file.<br/>
+<tt>agent.maxBatchSize=1000</tt></li>
+	<li>Save your changes to the <tt>agent.properties</tt> file.</li>
+	<li>Increase the memory available to the agent by adding this property to the Hyperic Agent's <tt>wrapper.conf</tt> file in <tt>AgentHome/conf</tt>:<br/>
+<tt>wrapper.java.additional.3=-Xmx512m</tt></li>
+	<li>Save your changes to the <tt>wrapper.conf</tt> file.</li>
+</ol>
+
+
+<h2><a name="vSphere-Step5ConfigurevCenterServerAccessCredentials"></a>Step 5 - Configure vCenter Server Access Credentials </h2>
 
 <ol>
 	<li>Navigate to the &nbsp;<b>Configuration Properties</b>&nbsp;page for the VMware vCenter instance.<br/>
 <span class="image-wrap" style=""><img src="attachments/77463605/77660690.png" style="border: 0px solid black"/></span> </li>
 	<li>Enter the vCenter SDK URL, supplying an URL with a fully-qualified domain name or an IP address.</li>
 	<li>Enter the username and password for connecting to vCenter.
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Required Privileges</b><br />The vCenter user account that the HQ Agent uses to connect to vCenter must have a vCenter role with the following privileges: 
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Required Privileges</b><br />The vCenter user account that the Hyperic Agent uses to connect to vCenter must have a vCenter role with the following privileges: 
 <ul>
 	<li>Virtual machine &gt; Interaction &gt; <b>Power Off</b>, <b>Power On</b>, <b>Reset</b>, and <b>Suspend</b>.</li>
 	<li>Virtual machine &gt; State &gt; <b>Create Snapshot</b>, <b>Remove Snapshot</b>, <b>Rename Snapshot</b>, and <b>Revert Snapshot</b>.</li>
 </ul>
 </td></tr></table></div> 
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Limit Discovery of ESX Hosts</b><br />If you wish to prevent the HQ Agent from discovering all ESX Hosts managed by the vCenter Server, create a vCenter user with a role that has access to only those ESX Hosts you want to monitor, and configure the vCenter resource in HQ with those credentials.</td></tr></table></div> 
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Limit Discovery of ESX Hosts</b><br />If you wish to prevent the Hyperic Agent from discovering all ESX Hosts managed by the vCenter Server, create a vCenter user with a role that has access to only those ESX Hosts you want to monitor, and configure the vCenter resource in Hyperic with those credentials.</td></tr></table></div> 
 	<ul>
-		<li>vSphere Hosts and VMs are automatically imported into inventory. They do not appear in the <b>Auto-Discovery Portlet</b> on the HQ Dashboard.</li>
+		<li>vSphere Hosts and VMs are automatically imported into inventory. They do not appear in the <b>Auto-Discovery Portlet</b> on the Hyperic Dashboard.</li>
 		<li>Only VMs that are powered on and have a MAC address will be discovered.</li>
 		<li>Soon, metrics should appear on the <b>Monitor</b> tab for a vSphere resource.
 <div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Solving Problems</b><br />If the agent does not start to report metrics for vSphere Hosts and VMs: 
 <ul>
 	<li>Verify that you have correctly specified the vCenter SDK URL, using a fully-qualified domain name or an IP address.
 	<ul>
-		<li>Because HQ can monitor multiple vCenter servers, the vCenter SDK URL for each must be unambiguous; if you use <tt>localhost</tt> when configuring the SDK URLs (rather than an FQDN or IP address), the various vCenter SDK URLs will be non-unique, resulting in erroneous vCenter &gt; Host &gt; VM hierarchies.</li>
+		<li>Because Hyperic can monitor multiple vCenter servers, the vCenter SDK URL for each must be unambiguous; if you use <tt>localhost</tt> when configuring the SDK URLs (rather than an FQDN or IP address), the various vCenter SDK URLs will be non-unique, resulting in erroneous vCenter &gt; Host &gt; VM hierarchies.</li>
 	</ul>
 	</li>
 	<li>Verify that the Username and Password you configured are valid credentials for access the SDK.</li>
-	<li>Verify that the HQ Agent has network connectivity and can reach the API port on the platform where vCenter runs &#8212; check to see if it is blocked by a firewall.</li>
+	<li>Verify that the Hyperic Agent has network connectivity and can reach the API port on the platform where vCenter runs &#8212; check to see if it is blocked by a firewall.</li>
 </ul>
 </td></tr></table></div> </li>
 	</ul>
@@ -410,17 +459,17 @@ agent.setup.unidirectional=no</pre>
 </ol>
 
 
-<h2><a name="vSphere-Step4SetEventTrackingOptions"></a>Step 4 - Set Event Tracking Options </h2>
+<h2><a name="vSphere-Step6SetEventTrackingOptions"></a>Step 6 - Set Event Tracking Options </h2>
 
-<p>You can enable log tracking for vSphere Hosts and VMs. If you do, the agent will log an event for vCenter events that match the criteria you specify. Note that if you enable log tracking for vSphere VMs, HQ will log an event for each control action command performed on the VM from HQ. If log tracking is not enabled for a VM, control actions will not be tracked as events. </p>
+<p>You can enable log tracking for vSphere Hosts and VMs. If you do, the agent will log an event for vCenter events that match the criteria you specify. Note that if you enable log tracking for vSphere VMs, Hyperic will log an event for each control action command performed on the VM from Hyperic. If log tracking is not enabled for a VM, control actions will not be tracked as events. </p>
 
 <p><b>Note:</b> This version of the vSphere plugin returns all events as level INFO. You cannot define filter criteria based on severity level in this version of the vSphere plugin. You can only filter based on message content - you can track events based on whether it matches or does not match a regular repression. See <a href="Events.html" title="Events">vSphere Events</a> for a list of all vCenter events. </p>
 
 <p>To enable log tracking, click the <b>Enable Log Tracking</b> box in the <b>Monitoring</b> section of the <b>Configuration Properties</b> page. </p>
 
-<p>For information about HQ log tracking functionality and configuration options, and how to view log events, see <a href="Set Up Log Tracking for a Resource.html" title="Set Up Log Tracking for a Resource">Set Up Log Tracking for a Resource</a>. </p>
+<p>For information about Hyperic log tracking functionality and configuration options, and how to view log events, see <a href="Set Up Log Tracking for a Resource.html" title="Set Up Log Tracking for a Resource">Set Up Log Tracking for a Resource</a>. </p>
 
-<h2><a name="vSphere-Step5ConfigurevCenterStatisticsLevel"></a>Step 5 - Configure vCenter Statistics Level </h2>
+<h2><a name="vSphere-Step7ConfigurevCenterStatisticsLevel"></a>Step 7 - Configure vCenter Statistics Level </h2>
 
 <p>The metrics the plugin can collect is limited by the the value of vCenter's <b>Statistics Level</b> setting, which by default is level 1. Level 1 provides only basic performance information. To enable additional metrics, you may wish to increase the <b>Statistics Level</b> setting. </p>
 
@@ -428,7 +477,7 @@ agent.setup.unidirectional=no</pre>
 
 <p>For more information, see <a href="http://pubs.vmware.com/vsp40_e/admin/wwhelp/wwhimpl/js/html/wwhelp.htm#href=basic_system_admin.1.1.html%231_8_16_1">Collection Levels</a> in <em>vSphere Basic System Administration</em>.</p></td></tr></table></div> 
 
-<h2><a name="vSphere-Step6TailorPluginMonitoringDefaults"></a>Step 6 - Tailor Plugin Monitoring Defaults </h2>
+<h2><a name="vSphere-Step8TailorPluginMonitoringDefaults"></a>Step 8 - Tailor Plugin Monitoring Defaults </h2>
 
 <p>You can enable and disable metrics, select indicator metrics, and change the collection interval for a resource type on its <b>Monitoring Defaults</b> page. To navigate to a resource type's <b>Monitoring Defaults</b> page: </p>
 
@@ -438,26 +487,26 @@ agent.setup.unidirectional=no</pre>
 	<li>Scroll down to the resource type and click <b>Edit Metric Template</b>.
 	<ul>
 		<li>Click the thumbnails below to view the <b>Monitoring Defaults</b> pages for vSphere Hosts and VMs.<br/>
-<span class="image-wrap" style=""><a class="confluence-thumbnail-link 993x973" href='http://support.hyperic.com/download/attachments/77463605/VsphereHostMonitoringDefaults.png'><img src="attachments/thumbnails/77463605/77660695" style="border: 0px solid black"/></a></span> <br/>
-<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1001x839" href='http://support.hyperic.com/download/attachments/77463605/VsphereVmMonitoringDefaults.png'><img src="attachments/thumbnails/77463605/77660696" style="border: 0px solid black"/></a></span> </li>
+<span class="image-wrap" style=""><img src="attachments/77463605/77660695.png" style="border: 0px solid black"/></span> <br/>
+<span class="image-wrap" style=""><img src="attachments/77463605/77660696.png" style="border: 0px solid black"/></span> </li>
 	</ul>
 	</li>
 </ol>
 
 
-<h2><a name="vSphere-Step7InstallHQAgentsinVMs"></a>Step 7 - Install HQ Agents in VMs </h2>
+<h2><a name="vSphere-Step9InstallHypericAgentsinVMs"></a>Step 9 - Install Hyperic Agents in VMs </h2>
 
-<p>Installing an HQ Agent in each VM enables you to manage HQ-supported server types running in it. &nbsp;In HQ Enterprise, this enables you to correlate the behavior of resources throughout the managed resource hierarchy - from vCenter to managed servers in the VM.&nbsp;&nbsp; </p>
+<p>Installing a Hyperic Agent in each VM enables you to manage Hyperic-supported server types running in it.  In vFabric Hyperic, this enables you to correlate the behavior of resources throughout the managed resource hierarchy &#8212; from vCenter to managed servers in the VM. </p>
 
 <p>For installation instructions, see <a href="Installing an Agent-Only Package.html" title="Installing an Agent-Only Package">Installing an Agent&#45;Only Package</a>. </p>
 
-<p><b>Note:</b> If you run an HQ Agent in a VM, HQ creates an operating system type platform type for it in inventory. For instance, if you run and agent in a VM running Linux, HQ creates a platform of type "Linux" for the system, in addition to the platform of type "vSphere VM" create for the VM itself. </p>
+<p><b>Note:</b> If you run a Hyperic Agent in a VM, Hyperic creates an operating system type platform type for it in inventory. For instance, if you run and agent in a VM running Linux, Hyperic creates a platform of type "Linux" for the system, in addition to the platform of type "vSphere VM" create for the VM itself. </p>
 
-<h2><a name="vSphere-Step8ConfigureAlertDefinitions"></a>Step 8 - Configure Alert Definitions </h2>
+<h2><a name="vSphere-Step10ConfigureAlertDefinitions"></a>Step 10 - Configure Alert Definitions </h2>
 
 <p>Create alert definitions as desired for your managed vSphere components. </p>
 
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>About Alert Processing for vSphere Resources</b><br />If a VM has an agent running in it, If a VM is suspended or powered off, "down" alerts on the "associated platform" (the platform that is represented in HQ when you install an agent on the VM) will not fire.</td></tr></table></div> 
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>About Alert Processing for vSphere Resources</b><br />If a VM has an agent running in it, If a VM is suspended or powered off, "down" alerts on the "associated platform" (the platform that is represented in Hyperic when you install an agent on the VM) will not fire.</td></tr></table></div> 
 
 <h1><a name="vSphere-MetricDocumentation"></a>Metric Documentation </h1>
 
@@ -1119,6 +1168,9 @@ While a VM may&nbsp;have been configured to use 4 GB of RAM, as an example, it m
 </div>
 
 
+
+
+
 				    
                     			    </td>
 		    </tr>
@@ -1128,7 +1180,7 @@ While a VM may&nbsp;have been configured to use 4 GB of RAM, as an example, it m
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jun 29, 2011 14:48</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 27, 2011 14:51</font></td>
 		    </tr>
 	    </table>
     </body>

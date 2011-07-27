@@ -1,7 +1,9 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-    <head>
-        <title>Hyperic 4.6 Documentation : ui-SpringInsight</title>
+ <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
+<p>      
+<p>
+        <title>vFabric Hyperic 4.6 : ui-SpringInsight</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,21 +14,21 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Hyperic 4.6 Documentation : ui-SpringInsight
+                            vFabric Hyperic 4.6 : ui-SpringInsight
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 28, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jul 25, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1309291408955 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1309291408955 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1309291408955 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1311625382035 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1311625382035 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1311625382035 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1309291408955'>
+/*]]>*/</style><div class='rbtoc1311625382035'>
 <ul>
     <li><a href='#ui-SpringInsight-SpringInsightApplications'>Spring Insight Applications</a></li>
     <li><a href='#ui-SpringInsight-UnderstandingApplicationMetrics'>Understanding Application Metrics</a></li>
@@ -40,7 +42,7 @@ div.rbtoc1309291408955 li {margin-left: 0px;padding-left: 0px;}
     <li><a href='#ui-SpringInsight-ContentsoftheSpringInsightApplicationsPage'>Contents of the Spring Insight Applications Page</a></li>
 <ul>
     <li><a href='#ui-SpringInsight-DashboardsTab'>Dashboards Tab</a></li>
-    <li><a href='#ui-SpringInsight-HealthTabforallDashboards'>Health Tab for all Dashboards</a></li>
+    <li><a href='#ui-SpringInsight-HealthTabforallApplications'>Health Tab for all Applications</a></li>
     <li><a href='#ui-SpringInsight-PerformanceTabforaDashboard'>Performance Tab for a Dashboard</a></li>
     <li><a href='#ui-SpringInsight-PerformanceTabforanApplication'>Performance Tab for an Application</a></li>
 </ul>
@@ -119,7 +121,7 @@ div.rbtoc1309291408955 li {margin-left: 0px;padding-left: 0px;}
 
 <h2><a name="ui-SpringInsight-ResponseTimeLevels"></a>Response Time Levels</h2>
 
-<p>The "Invocations" metric tells you what percentage of traces had response times in each of three response time levels:  </p>
+<p>The "Invocations" metric tells you what percentage of traces had response times in each of three response time levels. The response time thresholds for each level are configurable in Spring Insight, and by default are:  </p>
 
 <ul>
 	<li>Satisfied &#8212; Response time 200 ms or less.</li>
@@ -186,7 +188,7 @@ The color of the bar to the left of a Dashboard node indicates the worst Vitals 
 
 
 
-<h2><a name="ui-SpringInsight-HealthTabforallDashboards"></a>Health Tab for all Dashboards</h2>
+<h2><a name="ui-SpringInsight-HealthTabforallApplications"></a>Health Tab for all Applications</h2>
 <div class='table-wrap'>
 <table class='confluenceTable'><tbody>
 <tr>
@@ -200,7 +202,7 @@ After navigating to a dashboard or an application, you can redisplay the <b>Heal
 <ul>
 	<li><b>Applications Health Trend</b> chart &#8212; By default, this chart plots the health of the five applications that currently have the poorest vitals. You can add and remove applications to the chart by checking and unchecking the box next to it. For a definition of the metric, see <a href="#ui-SpringInsight-ApplicationHealth">Application Health</a>.<br class="atl-forced-newline" />
 <br class="atl-forced-newline" /></li>
-	<li>Worst <b>Vitals</b>  &#8212; The <b>Vitals</b> indicator in the "All Applications" bar reflects the worst value reported among all applications reporting to all Dashboards. For a definition of the Vitals metric, see <a href="#ui-SpringInsight-Vitals">Vitals</a>.<br class="atl-forced-newline" />
+	<li>Worst <b>Vitals</b>  &#8212; The <b>Vitals</b> indicator in the "All Applications" bar reflects the worst value reported among all applications reporting to all Dashboards. For a definition of the Vitals metric, see <a href="#ui-SpringInsight-ApplicationVitals">Application Vitals</a>.<br class="atl-forced-newline" />
 <br class="atl-forced-newline" /></li>
 	<li>Application Metrics &#8212; Below the <b>Applications Health Trend</b> chart is a list of all applications under management, ordered by the applications' Vitals metric, starting with the worst. The following data and metrics are displayed for each application: <br class="atl-forced-newline" />
 	<ul>
@@ -237,19 +239,25 @@ After navigating to a dashboard or an application, you can redisplay the <b>Heal
 <ul>
 	<li><b>Applications Health Trend</b> chart &#8212; By default, this chart plots the health of the five applications (reporting to the Dashboard) that currently have the poorest vitals. You can add and remove applications to the chart by checking and unchecking the box next to it. For a definition of the metric, see <a href="#ui-SpringInsight-ApplicationHealth">Application Health</a>.<br class="atl-forced-newline" />
 <br class="atl-forced-newline" /></li>
-	<li>Worst <b>Vitals</b>  &#8212; The <b>Vitals</b> indicator in the "Dashboard" bar reflects the worst value reported among all applications reporting to the currently selected Dashboard. For a definition of the Vitals metric, see <a href="#ui-SpringInsight-Vitals">Vitals</a>.<br class="atl-forced-newline" />
+	<li>Dashboard <b>Vitals</b>  &#8212; The <b>Vitals</b> indicator in the "Dashboard" bar is a composite health indicator that takes into account:
+	<ul>
+		<li>The Vitals for the applications reporting to the currently selected Insight Dashboard.</li>
+		<li>Availability of the managed resources that the Insight Dashboard depends upon: application server (tc Server) and platform.</li>
+		<li>Number of unfixed alerts for the resources that the Insight Dashboard depends upon: application server (tc Server) and platform.<br class="atl-forced-newline" />
 <br class="atl-forced-newline" /></li>
+	</ul>
+	</li>
 	<li>Application Metrics &#8212; Below the <b>Applications Health Trend</b> chart is a list of the applications reporting to the Dashboard. The following metrics are displayed for each application:
 	<ul>
-		<li><b>Vitals</b> &#8212; For a definition, see <a href="#ui-SpringInsight-Vitals">Vitals</a>.</li>
+		<li><b>Vitals</b> &#8212; For a definition, see <a href="#ui-SpringInsight-ApplicationVitals">Application Vitals</a>.</li>
 		<li><b>Alerts</b> &#8212; For a definition, see <a href="#ui-SpringInsight-UnfixedAlertCount">Unfixed Alert Count</a>. <br class="atl-forced-newline" /></li>
 		<li><b>Errors</b> &#8212; For a definition, see <a href="#ui-SpringInsight-ErrorRate">Error Rate</a>. <br class="atl-forced-newline" /></li>
 		<li>Invocations (F/T/S) &#8212; For a definition, see <a href="#ui-SpringInsight-ResponseTimeLevels">Response Time Levels</a>. <br class="atl-forced-newline" /> <br class="atl-forced-newline" /></li>
 	</ul>
 	</li>
-	<li>Application Server Performance ---To view health data for application servers where the applications run, click the control in the <b>Application Server</b>. See <a href="#ui-SpringInsight-ApplicationServerPerformance">Application Server Performance</a>.<br class="atl-forced-newline" />
+	<li>Application Server Performance &#8212; To view health data for the application server that the Insight Dashboard runs on,  click the control in the <b>Application Server</b> bar. See <a href="#ui-SpringInsight-ApplicationServerPerformance">Application Server Performance</a>.<br class="atl-forced-newline" />
 <br class="atl-forced-newline" /></li>
-	<li>Platform Performance &#8212; To view health data for platforms where the applications run, click the control in the <b>Platforms</b> bar.  See <a href="#ui-SpringInsight-PlatformPerformance">Platform Performance</a>.</li>
+	<li>Platform Performance &#8212; To view health data for platform on which the Insight Dashboard runs, click the control in the <b>Platforms</b> bar.  See <a href="#ui-SpringInsight-PlatformPerformance">Platform Performance</a>.</li>
 </ul>
 </td>
 </tr>
@@ -320,7 +328,7 @@ Below the chart, the following information is listed for each platform:<br class
 	<li>Applications
 	<ul>
 		<li>The application name is a link &#8212; if you click it, Insight Operations will open in a new window, and display more detailed resource health and performance metrics for the current display range.</li>
-		<li>The <b>Vitals</b> health bar to the right of the application name indicates the current Vitals for the application. For a definition of the Vitals metric, see <a href="#ui-SpringInsight-Vitals">Vitals</a>.</li>
+		<li>The <b>Vitals</b> health bar to the right of the application name indicates the current Vitals for the application. For a definition of the Vitals metric, see <a href="#ui-SpringInsight-ApplicationVitals">Application Vitals</a>.</li>
 		<li>The <b>Health Trend</b> chart plots the application's "Health" and "Error Rate" metrics for the display range. For a definition of the health metric metric, see <a href="#ui-SpringInsight-ApplicationHealth">Application Health</a>.</li>
 		<li>The <b>Invocations</b> chart plots the distribution of request response times across the three response time levels defined in <a href="#ui-SpringInsight-ResponseTimeLevels">Response Time Levels</a>.</li>
 	</ul>
@@ -392,7 +400,7 @@ Below the chart, the following information is listed for each platform:<br class
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464548/77660834.png">PerfApp.png</a> (image/png)
+                                <a href="attachments/77464548/77955130.png">PerfApp.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
                                 <a href="attachments/77464548/77660835.png">PerfDash.png</a> (image/png)
@@ -413,7 +421,7 @@ Below the chart, the following information is listed for each platform:<br class
                                 <a href="attachments/77464548/77660850.png">SpringInsight.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464548/77660851.png">InsightAppServer.png</a> (image/png)
+                                <a href="attachments/77464548/77955129.png">InsightAppServer.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
                                 <a href="attachments/77464548/77660852.png">SpringInsightOneDash.png</a> (image/png)
@@ -439,6 +447,12 @@ Below the chart, the following information is listed for each platform:<br class
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
                                 <a href="attachments/77464548/77660843.png">healthlamp-unacceptable.png</a> (image/png)
                                 <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/77464548/77660851.png">InsightAppServer.png</a> (image/png)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/77464548/77660834.png">PerfApp.png</a> (image/png)
+                                <br/>
                                                     </div>
 				    
                     			    </td>
@@ -449,7 +463,7 @@ Below the chart, the following information is listed for each platform:<br class
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jun 29, 2011 14:49</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 27, 2011 14:51</font></td>
 		    </tr>
 	    </table>
     </body>

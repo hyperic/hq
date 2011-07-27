@@ -1,7 +1,9 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-    <head>
-        <title>Hyperic 4.6 Documentation : JMX Plugin Tutorial</title>
+ <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
+<p>      
+<p>
+        <title>vFabric Hyperic 4.6 : JMX Plugin Tutorial</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,19 +14,19 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Hyperic 4.6 Documentation : JMX Plugin Tutorial
+                            vFabric Hyperic 4.6 : JMX Plugin Tutorial
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jul 27, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1307466542054 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1307466542054 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1307466542054 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1311779967806 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1311779967806 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1311779967806 li {margin-left: 0px;padding-left: 0px;}
 
-/*]] >*/</style><div class='rbtoc1307466542054'>
+/*]]>*/</style><div class='rbtoc1311779967806'>
 <ul>
     <li><a href='#JMXPluginTutorial-JMXMeasurementPlugin'>JMX Measurement Plugin</a></li>
     <li><a href='#JMXPluginTutorial-DevelopSampleJMXPlugin'>Develop Sample JMX Plugin</a></li>
@@ -248,7 +250,6 @@ A non-numeric value indicates that the attribute is not appropriate for collecti
 </ul>
 
 
-<p>Learn more about <a href="http://support.hyperic.com/display/DOCS46/Monitoring+Overview" title="Monitoring Overview">viewing resources and metrics in HQ</a>.</p>
 
 
 <h2><a name="JMXPluginTutorial-Step6UnderstandandModifyEachPieceoftheSamplePluginXMLDescriptor"></a>Step 6 - Understand and Modify Each Piece of the Sample Plugin XML Descriptor</h2>
@@ -353,7 +354,7 @@ A non-numeric value indicates that the attribute is not appropriate for collecti
 </tr>
 <tr>
 <td class='confluenceTd'> <tt>indicator</tt> </td>
-<td class='confluenceTd'> Whether or not this metric should be treated as an <a href="http://support.hyperic.com/display/DOCS46/Hyperic+Glossary#HypericGlossary-indicatormetric">indicator metric</a> in HQ </td>
+<td class='confluenceTd'> Whether or not this metric should is an indicator metric </td>
 <td class='confluenceTd'> Y </td>
 <td class='confluenceTd'> true, false </td>
 </tr>
@@ -412,13 +413,14 @@ This code uniquely identifies the plugin's domain.</p>
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
 		<pre class="theme: Confluence; brush: xml; gutter: false">&lt;config&gt;
-&lt;option name="jmx.url" description="JMX URL to MBeanServer" default="service:jmx:rmi:///jndi/rmi://localhost:6969/jmxrmi"/&gt;
-&lt;option name="jmx.username" description="JMX username" optional="true" default=""/&gt;
-&lt;option name="jmx.password" description="JMX password" optional="true" default="" type="secret"/&gt;</pre>
+    &lt;option name="jmx.url" description="JMX URL to MBeanServer" default="service:jmx:rmi:///jndi/rmi://localhost:6969/jmxrmi"/&gt;
+    &lt;option name="jmx.username" description="JMX username" optional="true" default=""/&gt;
+    &lt;option name="jmx.password" description="JMX password" optional="true" default="" type="secret"/&gt;
+&lt;config&gt;</pre>
 		</div>
 </div></div>
 <p>All the configuration options specified here are the ones that show up in the server's "<a href="ui-Inventory.Configuration.html" title="ui-Inventory.Configuration">Resource Configuration</a>" screen. The default values for each of these options can be specified here, but users can change the default values on that screen. You can leave most of the default values in this code as-is but should change the default username and password.<br/>
-For a JMX plugin, this list of configuration options suffices, but you can add other options. Learn more about how to <a href="http://support.hyperic.com/display/DOCS46/Plugin+XML+Descriptor#PluginXMLDescriptor-option">write an option</a>. Learn more about <a href="JMX Plugin.html#JMXPlugin-loginconfig">login configuration properties</a> or <a href="JMX Plugin.html#JMXPlugin-config">configuration properties</a> in general.</p>
+For a JMX plugin, this list of configuration options suffices, but you can add other options. For information about defining configuration options, see <a href="option.html" title="option">option</a>.</p>
 
 
 <h3><a name="JMXPluginTutorial-IdentifytheProcessesYouWanttoCollectMetricsFrom"></a>Identify the Processes You Want to Collect Metrics From</h3>
@@ -543,6 +545,7 @@ Any of these methods will set the installpath config variable to be the current 
 This code looks slightly different than the earlier <a href="#JMXPluginTutorial-metrics2">metrics-collection code</a> because there are multiple types of Garbage Collection, each of which collects the same metrics. In cases where there are numerous types, calling out each type and its respective metrics (which are identical to the other types'), is onerous and unnecessary. Using</p>
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre>name=*
+
 </pre>
 </div></div>
 <p>makes sure that every type of GarbageCollector gets measured. The <tt>&lt;plugin type="autoinventory"/&gt;</tt> line tells HQ to resolve the <tt>&#42;</tt>. If you want to collect metrics of another objectName that similarly has multiple types, replace <tt>Java GC</tt> with a meaningful name and <tt>GarbageCollector</tt> with the objectName, and accordingly modify the earlier <a href="#JMXPluginTutorial-metrics">metrics enumeration</a>.
@@ -590,7 +593,7 @@ This code looks slightly different than the earlier <a href="#JMXPluginTutorial-
 		</div>
 </div></div>
 <p>This help text &#8212; which are instructions for exposing MBeans &#8212; should suffice for any plugins gathering JMX metrics. If you are dealing with more than two versions, the <tt>&lt;help name="Java 1.5.x" include="Java"/&gt;</tt> lines can be augmented to include other versions. Additional lines should have the same content but with the server and version replaced with the format: <tt>server version</tt>.<br/>
-If necessary, replace this help with whatever configuration instructions are necessary for getting the plugin running in your environment (prerequisites, etc.). Learn more about using the <a href="http://support.hyperic.com/display/DOCS46/Plugin+XML+Descriptor#PluginXMLDescriptor-helptag">help tag</a>.</p>
+If necessary, replace this help with whatever configuration instructions are necessary for getting the plugin running in your environment (prerequisites, etc.). Learn more about using the <a href="help.html" title="help">help</a> tag.</p>
 
 <h2><a name="JMXPluginTutorial-Step7TestthePlugin."></a>Step 7 - Test the Plugin.</h2>
 
@@ -610,7 +613,7 @@ If necessary, replace this help with whatever configuration instructions are nec
 <p>Your plugin should now kick into action the next time the Agent runs (assuming it's been rebooted since the plugin was added to it), and you should see all the desired metrics in the HQ UI.</p>
 
 
-<div class="scroll-pagebreak"></div>
+<p><font color=""></font></p>
 
 				    
                     			    </td>
@@ -621,7 +624,7 @@ If necessary, replace this help with whatever configuration instructions are nec
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jun 29, 2011 14:49</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 27, 2011 14:51</font></td>
 		    </tr>
 	    </table>
     </body>

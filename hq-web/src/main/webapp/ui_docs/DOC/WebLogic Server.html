@@ -1,7 +1,9 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-    <head>
-        <title>Hyperic 4.6 Documentation : WebLogic Server</title>
+ <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
+<p>      
+<p>
+        <title>vFabric Hyperic 4.6 : WebLogic Server</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,19 +14,19 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Hyperic 4.6 Documentation : WebLogic Server
+                            vFabric Hyperic 4.6 : WebLogic Server
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 29, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jul 27, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1309372734733 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1309372734733 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1309372734733 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1311786241131 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1311786241131 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1311786241131 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1309372734733'>
+/*]]>*/</style><div class='rbtoc1311786241131'>
 <ul>
     <li><a href='#WebLogicServer-Introduction'>Introduction</a></li>
     <li><a href='#WebLogicServer-ConfigurationOverview'>Configuration Overview</a></li>
@@ -101,7 +103,9 @@ div.rbtoc1309372734733 li {margin-left: 0px;padding-left: 0px;}
 
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre> 
+
 HQ_JAVA_HOME=/usr/local/bea/jdk150_04 
+
 </pre>
 </div></div> 
 
@@ -331,16 +335,27 @@ HQ_JAVA_HOME=/usr/local/bea/jdk150_04
 <p>This is an example execution of the WLS plugin's "discover" function, including the results: </p>
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre> 
+
 % java -jar pdk/lib/hq-product.jar \ 
+
 -Dplugins.include=weblogic -Dadmin.username=weblogic -Dadmin.password=weblogic -m discover 
+
 1 servers detected 
 
+
+
 Server: bear Weblogic Admin 9.2 medrec MedRecServer [/usr/local/bea/weblogic92/samples/domains/medrec/servers/MedRecServer] 
+
 AIID...../usr/local/bea/weblogic92/samples/domains/medrec/servers/MedRecServer 
+
 config... 
+
 product..{admin.username=weblogic, server.log_track.files=/usr/local/bea/weblogic92/samples/domains/medrec/servers/MedRecServer/logs/MedRecServer.log, admin.url=t3://bear:7011, domain=medrec, server=MedRecServer, admin.password=weblogic} 
+
 metric...null 
+
 control..{program=/usr/local/bea/weblogic92/samples/domains/medrec/startWebLogic.sh}
+
 </pre>
 </div></div> 
 <p><b>Note:&nbsp;</b> Command usage is documented in <a href="Running and Testing Plugins from Command Line.html" title="Running and Testing Plugins from Command Line">Running and Testing Plugins from Command Line</a>. </p>
@@ -368,29 +383,53 @@ control..{program=/usr/local/bea/weblogic92/samples/domains/medrec/startWebLogic
 <p>In the results below, the value returned for the current working directory (cwd) is "???", indicating that&nbsp; the user running the command lacked permission to obtain that information. </p>
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre> 
+
 % java -jar pdk/lib/sigar.jar pargs State.Name.eq=java,Args.-1.eq=weblogic.Server 
+
 pid=2317 
+
 exe=??? 
+
 cwd=??? 
+
 0=&gt;/usr/local/bea/jrockit90_150_04/bin/java&lt;= 
+
 1=&gt;-jrockit&lt;= 
+
 2=&gt;-Xms256m&lt;= 
+
 3=&gt;-Xmx512m&lt;= 
+
 4=&gt;-Xverify:none&lt;= 
+
 5=&gt;-da&lt;= 
+
 6=&gt;-Dplatform.home=/usr/local/bea/weblogic92&lt;= 
+
 7=&gt;-Dwls.home=/usr/local/bea/weblogic92/server&lt;= 
+
 8=&gt;-Dwli.home=/usr/local/bea/weblogic92/integration&lt;= 
+
 9=&gt;-Dcom.bea.medrec.xml.incoming=incoming&lt;= 
+
 10=&gt;-Dlog4j.configuration=file:/usr/local/bea/weblogic92/samples/domains/medrec/log4jConfig.xml&lt;=
+
 11=&gt;-Dweblogic.management.discover=true&lt;= 
+
 12=&gt;-Dwlw.iterativeDev=&lt;= 
+
 13=&gt;-Dwlw.testConsole=&lt;= 
+
 14=&gt;-Dwlw.logErrorsToConsole=&lt;= 
+
 15=&gt;-Dweblogic.ext.dirs=/usr/local/bea/patch_weblogic920/profiles/default/sysext_manifest_classpath&lt;=
+
 16=&gt;-Dweblogic.Name=MedRecServer&lt;= 
+
 17=&gt;-Djava.security.policy=/usr/local/bea/weblogic92/server/lib/weblogic.policy&lt;= 
+
 18=&gt;weblogic.Server&lt;= 
+
 </pre>
 </div></div> 
 
@@ -399,10 +438,15 @@ cwd=???
 <p>If you run the query as the weblogic user or as root, the Administration Server's current working directory (cwd) is returned: </p>
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre> 
+
 % java -jar pdk/lib/sigar.jar pargs State.Name.eq=java,Args.-1.eq=weblogic.Server 
+
 pid=2317 
+
 exe=/usr/local/bea/jrockit90_150_04/bin/java 
+
 cwd=/usr/local/bea/weblogic92/samples/domains/medrec 
+
 </pre>
 </div></div> 
 
@@ -433,12 +477,19 @@ Install Path: [/usr/local/bea/weblogic92/samples/domains/medrec/servers/MedRecSe
 <br class="atl-forced-newline" /> </p>
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre> 
+
 admin.url [t3://bear:7011] 
+
 admin.username [weblogic] 
+
 admin.password [weblogic] 
+
 server [MedRecServer] 
+
 domain [medrec] 
+
 jvm.runtime [JVMRuntime] (choose JRockit or JVM (Sun)) 
+
 </pre>
 </div></div> 
 <p>7.&nbsp; Click OK. </p>
@@ -464,7 +515,9 @@ jvm.runtime [JVMRuntime] (choose JRockit or JVM (Sun))
 <p>For example, if a Managed Server whose ListenAddress=10.0.0.102 runs on a platform whose FQDN in HQ is&nbsp; appserver2.hyperic.com, the plugin will not find that platform in inventory, and will will fail to add the Managed Server to inventory. In this event, the plugin will log a message like this to the agent.log file in its /log directory: </p>
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre> 
+
 [WeblogicRuntimeDiscoverer] Discovered server (Weblogic 9.2 medrec bear) hosted on another platform (fqdn=10.0.0.102) 
+
 </pre>
 </div></div> 
 
@@ -479,16 +532,27 @@ jvm.runtime [JVMRuntime] (choose JRockit or JVM (Sun))
 <p><b>Note:&nbsp;</b> To run this query in your environment, replace "java" with "<em>HQ_JAVA_HOME"</em>/bin/java", where "_HQ_JAVA_HOME"_is the location of the JRE the agent uses - the same JRE as the Administration Server uses, if you followed the recommendation in <a href="#WebLogicServer-SpecifyAgentJRE">Specify Agent JRE</a>. </p>
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre> 
+
 % java -jar pdk/lib/hq-product.jar weblogic WeblogicConfig /usr/local/bea/weblogic92/samples/domains/medrec/config/config.xml 
+
 /usr/local/bea/weblogic92/samples/domains/medrec/config/config.xml... 
+
 9.2 
+
 medrec 
+
 admin=MedRecServer 
+
 -- listing properties -- 
+
 admin.url=t3://bear:7011 
+
 version=9.2 
+
 domain=medrec 
+
 server=MedRecServer 
+
 </pre>
 </div></div> 
 
@@ -502,7 +566,9 @@ server=MedRecServer
 
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre> 
+
 weblogic.discover.fqdn=same 
+
 </pre>
 </div></div> 
 <ul>
@@ -512,8 +578,11 @@ weblogic.discover.fqdn=same
 
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre> 
+
 weblogic.discover.fqdn.ListenAddress=FQDN.fqdn 
+
 where ListenAddress is the value of that property as defined for the Managed Server in config.xml and FQDN is the 
+
 </pre>
 </div></div> 
 <p>&nbsp;&nbsp;&nbsp; where: </p>
@@ -525,7 +594,9 @@ where ListenAddress is the value of that property as defined for the Managed Ser
 <p>&nbsp;&nbsp;&nbsp; For example: </p>
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre> 
+
 weblogic.discover.fqdn.10.0.0.4=appserver2.hyperic.com 
+
 </pre>
 </div></div> 
 <p>Restart the agent after making changes to agent.properties. </p>
@@ -542,7 +613,7 @@ weblogic.discover.fqdn.10.0.0.4=appserver2.hyperic.com
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jun 29, 2011 14:48</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 27, 2011 14:51</font></td>
 		    </tr>
 	    </table>
     </body>
