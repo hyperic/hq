@@ -220,6 +220,8 @@ public final class HypericRabbitAdmin {
         } catch (PluginException ex) {
             logger.debug("[getVirtualHost] " + ex.getLocalizedMessage(),ex);
             res = get("/api/overview/", RabbitNode.class);
+            res.setName(node);
+            res.setRunning(true);
         }
         return res;
     }
