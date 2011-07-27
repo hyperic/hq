@@ -344,11 +344,6 @@ public class HTTPCollector extends SocketChecker {
 
 			String msg = String.valueOf(statusCode);
 			
-			// ...HEAD requests have no body...
-			if (!isHEAD) {
-				msg += " " + EntityUtils.toString(response.getEntity());
-			}
-
 			Header header = response.getFirstHeader("Server");
 			
 			if (header != null) {
