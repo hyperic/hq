@@ -34,7 +34,7 @@ public class ApacheConf {
     private static final Pattern virtualHostPatter = Pattern.compile("<VirtualHost ([^>]*)>([^<]*)</VirtualHost>");
     private static final Pattern serverNamePatter = Pattern.compile("[^\\S]?ServerName (.*)");
     private static final Pattern serverRootPatter = Pattern.compile("[^\\S]?ServerRoot \"?([^\\s|\"]*)\"?");
-    private static final Pattern includePatter = Pattern.compile("[^\\S]?Include (.*)");
+    private static final Pattern includePatter = Pattern.compile("#?[^\\S]?Include (.*)");
     private static final Pattern ipPattern = Pattern.compile("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
     private static final Log log = LogFactory.getLog(ApacheConf.class);
 
@@ -93,9 +93,15 @@ public class ApacheConf {
     private static File findServerRoot(String config) throws PluginException {
         File sr = null;
         Matcher match = serverRootPatter.matcher(config);
-        if (match.find()) {
+        while (match.find() && sr == null) {
+            log.debug("[findServerRoot] " + match.group());
             sr = new File(match.group(1));
-        } else {
+            if (!(sr.exists() && sr.isDirectory())) {
+                sr = null;
+            }
+        }
+
+        if (sr == null) {
             throw new PluginException("Direcive 'ServerRoot' not found");
         }
 
@@ -116,10 +122,18 @@ public class ApacheConf {
         StringBuffer newConf = new StringBuffer();
 
         while (mach.find()) {
-            log.debug("[replaceIncludes] ->" + mach.group(1));
-            String includeConfig = readFile(new File(serverRoot, mach.group(1)));
-            String replace = replaceIncludes(includeConfig, serverRoot);
-            mach.appendReplacement(newConf, replace);
+            if (!mach.group().startsWith("#")) {
+                File cf = new File(serverRoot, mach.group(1));
+                if (log.isDebugEnabled()) {
+                    log.debug("[replaceIncludes] ->" + mach.group());
+                    log.debug("[replaceIncludes] ->" + cf + " (" + (cf.exists() && cf.isFile()) + ")");
+                }
+                if (cf.exists() && cf.isFile()) {
+                    String includeConfig = readFile(cf);
+                    String replace = replaceIncludes(includeConfig, serverRoot);
+                    mach.appendReplacement(newConf, replace);
+                }
+            }
         }
         mach.appendTail(newConf);
         return newConf.toString();
