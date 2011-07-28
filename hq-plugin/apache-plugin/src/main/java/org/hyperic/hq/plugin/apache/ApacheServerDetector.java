@@ -95,7 +95,7 @@ public class ApacheServerDetector
 
     private static Log log = LogFactory.getLog("ApacheServerDetector");
 
-    private static String defaultConfs[] = {"conf/httpd.con", "conf/httpsd.conf"};
+    private static String defaultConfs[] = {"conf/httpd.conf", "conf/httpsd.conf"};
     
     private Properties props;
     private String defaultIp;
@@ -370,16 +370,24 @@ public class ApacheServerDetector
             }
             metricConfig = getSnmpConfig(snmpConfig);
             productConfig = getProductConfig(metricConfig);
+
             if (binary.conf == null) {
+                String cfgPath = installpath;
+                if (snmpConfigExists) {
+                    cfgPath = snmpConfig.getParentFile().getParent();
+                }
                 for (String conf : defaultConfs) {
-                    File cf = new File(installpath, conf);
+                    File cf = new File(cfgPath, conf);
+                    getLog().debug("[configureServer] cf="+cf+" ("+(cf.exists() && cf.isFile())+")");
                     if (cf.exists() && cf.isFile()) {
                         binary.conf = cf.getAbsolutePath();
                     }
                 }
             }
-            productConfig.setValue("ServerConf", binary.conf);
 
+            if (binary.conf == null) {
+                productConfig.setValue("ServerConf", binary.conf);
+            }
             if (productConfig != null) {
                 addTrackConfig(productConfig);
                 setProductConfig(server, productConfig);
