@@ -18,16 +18,17 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 25, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jul 28, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1311632108207 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1311632108207 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1311632108207 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1311874668778 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1311874668778 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1311874668778 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1311632108207'>
+/*]]>*/</style><div class='rbtoc1311874668778'>
 <ul>
+    <li><a href='#ConfigureAgent-ServerCommunicationInteractively-SSLSetup'>SSL Setup</a></li>
     <li><a href='#ConfigureAgent-ServerCommunicationInteractively-StarttheHypericAgent'>Start the Hyperic Agent</a></li>
     <li><a href='#ConfigureAgent-ServerCommunicationInteractively-ConfigurationPrompts'>Configuration Prompts</a></li>
     <li><a href='#ConfigureAgent-ServerCommunicationInteractively-AboutSSLVerification'>About SSL Verification</a></li>
@@ -35,9 +36,20 @@ div.rbtoc1311632108207 li {margin-left: 0px;padding-left: 0px;}
 
 <p>These are instructions for supplying agent configuration settings interactively the first time you start the agent.</p>
 
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Agent can be configured in agent.properties file</b><br />Instead of configuring agent - server configuration properties interactively, you can specify them in the <tt>agent.properties</tt> file, as described in <a href="Configure Agent - Server Communication in Properties File.html" title="Configure Agent - Server Communication in Properties File">Configure Agent - Server Communication in Properties File</a> &#8212; preferable when you deploy a large number of agents.
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Agent can be configured in agent.properties file</b><br />Instead of configuring agent - server configuration properties interactively, you can specify them in the <tt>agent.properties</tt> file, as described in <a href="Configure Agent - Server Communication in Properties File.html" title="Configure Agent - Server Communication in Properties File">Configure Agent - Server Communication in Properties File</a> &#8212; preferable when you deploy a large number of agents.</td></tr></table></div>
 
-<p><b>Note:</b> You <b>must</b> configure Hyperic Agents that will manage VMware vSphere components in <tt>agent.properties</tt>; do not configure such agents interactively.</p></td></tr></table></div>
+<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Agent features that can <em>only</em> be configured in properties file</b><br /><ul>
+	<li>You <b>must</b> configure Hyperic Agents that will manage VMware vSphere components in <tt>agent.properties</tt>; do not configure such agents interactively. For more information, see <a href="vSphere.html" title="vSphere">vSphere</a>.</li>
+	<li>To configure an agent for a user-managed keystore, you <b>must</b> configure the path and password for the keystore in the agent's <tt>agent.properties</tt> file.</li>
+</ul>
+</td></tr></table></div>
+
+<h1><a name="ConfigureAgent-ServerCommunicationInteractively-SSLSetup"></a>SSL Setup</h1>
+
+<p>If you are going to configure the agent for a user-managed keystore, make sure you have completed the configuration described in <a href="Before You Start.html" title="ssl">SSL Setup</a>.</p>
+
+<p>If you are going to configure the agent for unidirectional communications, </p>
+
 <h1><a name="ConfigureAgent-ServerCommunicationInteractively-StarttheHypericAgent"></a>Start the Hyperic Agent</h1>
 
 <ol>
@@ -85,11 +97,7 @@ hq-agent.bat start</pre>
 	</li>
 	<li>Next you are prompted to identify the server port where the Hyperic server listens for agent communication. Depending on whether you selected SSL in the previous step, one of the following prompts appears:
 	<ul>
-		<li><em>What is the secure HQ server port [default=7443]</em> &#8212; If the Hyperic Server is configured to listen for SSL communications on the default SSL port of 7443, press <b>Return</b>.
-		<ul>
-			<li>#*** &nbsp;</li>
-		</ul>
-		</li>
+		<li><em>What is the secure HQ server port [default=7443]</em> &#8212; If the Hyperic Server is configured to listen for SSL communications on the default SSL port of 7443, press <b>Return</b>.</li>
 		<li><em>What is the HQ server port [default=7080]</em> &#8212; If the Hyperic Server is configured to listen on the default port of 7080, press <b>Return</b>. If there is a firewall blocking traffic from the agent to the server, configure it to forward traffic on TCP port 7080 (or 7443) to the host running the Hyperic Server.</li>
 	</ul>
 	</li>
@@ -133,6 +141,7 @@ Successfully setup agent</pre>
 		</div>
 </div></div>
 <h1><a name="ConfigureAgent-ServerCommunicationInteractively-AboutSSLVerification"></a>About SSL Verification </h1>
+<p><a name="ConfigureAgent-ServerCommunicationInteractively-verification"></a></p>
 
 <p>When the Hyperic 4.6 server and Hyperic 4.6 Agents communicate over SSL, each component validates the other's SSL certificate.</p>
 
@@ -178,7 +187,7 @@ Are you sure you want to continue connecting? [default=no]: yes</pre>
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 27, 2011 14:51</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 28, 2011 14:50</font></td>
 		    </tr>
 	    </table>
     </body>

@@ -18,15 +18,15 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 27, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jul 28, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1311797327864 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1311797327864 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1311797327864 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1311883273445 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1311883273445 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1311883273445 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1311797327864'>
+/*]]>*/</style><div class='rbtoc1311883273445'>
 <ul>
     <li><a href='#HypericSecurityFeaturesandRecommendations-SSLAgenttoServerCommunications'>SSL Agent to Server Communications</a></li>
     <li><a href='#HypericSecurityFeaturesandRecommendations-SSLBetweena4.6Serverand4.6Agents'>SSL Between a 4.6 Server and 4.6 Agents</a></li>
@@ -58,12 +58,12 @@ div.rbtoc1311797327864 li {margin-left: 0px;padding-left: 0px;}
 </ul>
 
 
-<p>If the agent does not trust the Hyperic Server's certificate, it issues a warning (to the command shell or the startup log) that the authenticity of Hyperic Server host cannot be established, and prompts for confirmation that you wish to connect using a self-signed certificate. </p>
+<p>If the agent does not trust the Hyperic Server's certificate, it issues a warning (to the command shell or the startup log) that the authenticity of Hyperic Server host cannot be established, and prompts for confirmation that you wish to connect. </p>
 
 <div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>SSL Certificate Best Practices for New Hyperic Installations</b><br /><ul>
 	<li>Create an SSL keystore on the Hyperic Server host and on each Hyperic Agent.</li>
 	<li>Before starting an agent for the first time, configure the location and password of its keystore in its <tt>agent.properties</tt> file, as described in <a href="Before You Start.html#BeforeYouStart-ssl">SSL Setup</a></li>
-	<li>If you do not configure your own SSL keystores for Hyperic Agents and the Hyperic Server, the components will generate keystores with self-signed certificates. The use of unverifiable certificates is not recommended. If you do use  Hyperic-generated keystores, update the password for each Hyperic-generated keystore; edit <tt><a href="agent.keystore.password.html" title="agent.keystore.password">agent.keystore.password</a></tt> in the <tt>agent.properties</tt> file, and restart the agent.</li>
+	<li>If you do not configure your own SSL keystores for Hyperic Agents and the Hyperic Server, the components will generate keystores with self-signed certificates. Both are named "hq". The use of unverified certificates is not recommended. If you do use Hyperic-generated keystores, update the password for each Hyperic-generated keystore; edit <tt><a href="agent.keystore.password.html" title="agent.keystore.password">agent.keystore.password</a></tt> in the <tt>agent.properties</tt> file, and restart the agent.</li>
 </ul>
 </td></tr></table></div>
 
@@ -83,7 +83,6 @@ div.rbtoc1311797327864 li {margin-left: 0px;padding-left: 0px;}
 
 <ul>
 	<li><a href="vSphere.html" title="vSphere">vSphere</a></li>
-	<li><a href="GemFire.html" title="GemFire">GemFire</a></li>
 	<li><a href="RabbitMQ.html" title="RabbitMQ">RabbitMQ</a></li>
 </ul>
 
@@ -95,7 +94,7 @@ div.rbtoc1311797327864 li {margin-left: 0px;padding-left: 0px;}
 
 <p>You can configure Hyperic such that Hyperic Agents initiate all communications with the Hyperic Server. This feature &#8212; referred to as <em>unidirectional communication</em> is useful if your network topology requires managed platforms to initiate all communication with processes outside a firewall. </p>
 
-<p>You can configure unidirectional communication interactively at first agent startup, or with the <tt>agent.setup.unidirectional</tt> in the agent's <tt>agent.properties</tt> file.</p>
+<p>You can configure unidirectional communication interactively at first agent startup, or with the <tt>agent.setup.unidirectional</tt> in the agent's <tt>agent.properties</tt> file.  See the requirements described at <tt><a href="agent.setup.unidirectional.html" title="agent.setup.unidirectional">agent.setup.unidirectional</a></tt>.</p>
 
 <h1><a name="HypericSecurityFeaturesandRecommendations-ProtectionofSensitiveData"></a>Protection of Sensitive Data</h1>
 
@@ -116,7 +115,7 @@ div.rbtoc1311797327864 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 27, 2011 14:51</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 28, 2011 14:50</font></td>
 		    </tr>
 	    </table>
     </body>

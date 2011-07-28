@@ -272,43 +272,67 @@ div.rbtoc1311357073254 li {margin-left: 0px;padding-left: 0px;}
 
 <p>Enables the unidirectional communications between HQ Agent and HQ Server in vFabric Hyperic. For more information, see <a href="Configure Unidirectional Agent - Server Communication.html" title="Configure Unidirectional Agent - Server Communication">Configure Unidirectional Agent &#45; Server Communication</a>.</p>
 
+<p>Note that a for a unidirectional agent with a user-managed keystore, you must configure the keystore name  in <tt>agent.properties</tt>. See <tt><a href="agent.keystore.alias.html" title="agent.keystore.alias">agent.keystore.alias</a></tt>.</p>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>About unidirectional communication</b><br />If you configure an agent for unidirectional communication, all communication with the server is initiated by the agent. You can configure unidirectional communication at first agent startup, or with the <tt><a href="" title="agent.setup.unidirectional">agent.setup.unidirectional</a></tt> property in <tt>agent.properties</tt>. Related topics: 
+
+<ul>
+	<li><a href="Agent - Server Communication.html" title="Agent - Server Communication">Agent &#45; Server Communication</a></li>
+	<li><a href="Hyperic Security Features and Recommendations.html" title="Hyperic Security Features and Recommendations">Hyperic Security Features and Recommendations</a>.</li>
+</ul>
+</td></tr></table></div> 
+
 <p><b>Default</b> </p>
 
 <p>Commented out, defaults to no.  </p></td></tr></table></div>
 
 <div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>agent.keystore.path</b><br /><b>Description</b> 
 
-<p>This property configures the location of a Hyperic Agent's (version 4.6 or later) SSL keystore. Define the password for the keystore using the <tt><a href="agent.keystore.password.html" title="agent.keystore.password">agent.keystore.password</a></tt> property. </p>
+<p>This property configures the location of a Hyperic Agent's (version 4.6 or later) SSL keystore. Specify the full path to the keystore. Define the password for the keystore using the <tt><a href="agent.keystore.password.html" title="agent.keystore.password">agent.keystore.password</a></tt> property. </p>
 
-<p>These values of <tt><a href="" title="agent.keystore.path">agent.keystore.path</a></tt> and <tt><a href="agent.keystore.password.html" title="agent.keystore.password">agent.keystore.password</a></tt> can only be supplied by defining them in <tt>agent.properties</tt>. </p>
+<p>The values of <tt>agent.keystore.path</tt> and <tt>agent.keystore.password</tt> can only be supplied by defining them in <tt>agent.properties</tt>. </p>
 
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Best Practice for Hyperic Agent Keystore</b><br />Before starting a Hyperic 4.6 Agent for the first time:
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Specifying keystore path on Windows</b><br />On Windows platforms, specify the path to the keystore with Unix-style syntax. To use specify a full Windows path: 
+
 <ul>
-	<li>Create a keystore on its host with an SSL certificate signed by the same CA as the Hyperic Server's SSL certificate.</li>
-	<li>Configure the location and password for the agent keystore using <tt><a href="agent.keystore.password.html" title="agent.keystore.password">agent.keystore.password</a></tt> and <tt><a href="agent.keystore.password.html" title="agent.keystore.password">agent.keystore.password</a></tt>.</li>
+	<li>replace back slashes with forward slashes</li>
+	<li>put a forward slash at the beginning of the path (before the drive letter)</li>
+	<li>if the path contains spaces, put a backslash before each space in the path<br/>
+For example, to specify this Windows path using Unix syntax:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<script type="syntaxhighlighter" class="theme: Confluence; brush: java; gutter: false"><![CDATA[C:\Documents and Settings\Desktop\keystore]]></script>
+</div></div>
+<p>change it to:</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<script type="syntaxhighlighter" class="theme: Confluence; brush: java; gutter: false"><![CDATA[/C:/Documents\ and\ Settings/Desktop/keystore]]></script>
+</div></div></li>
 </ul>
+</td></tr></table></div>
 
-
-<p>For more information see <a href="Hyperic Security Features and Recommendations.html" title="Hyperic Security Features and Recommendations">Hyperic Security Features and Recommendations</a>.</p></td></tr></table></div>
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Best Practices for Hyperic Agent Keystore</b><br />Please see:
+<ul>
+	<li><a href="Hyperic Security Features and Recommendations.html" title="Hyperic Security Features and Recommendations">Hyperic Security Features and Recommendations</a></li>
+	<li><a href="SSL Setup.html" title="SSL Setup">SSL Setup</a></li>
+</ul>
+</td></tr></table></div>
 <p><b>Default</b> <br/>
-none</p></td></tr></table></div>
+<tt>AgentHome/data/keystore</tt></p></td></tr></table></div>
 
 
 <div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>agent.keystore.password</b><br /><b>Description</b> 
 
 <p>This property configures the password for a Hyperic Agent's SSL keystore. Define the location of the keystore using the <tt><a href="agent.keystore.path.html" title="agent.keystore.path">agent.keystore.path</a></tt> property. </p>
 
-<p>These values of <tt><a href="agent.keystore.path.html" title="agent.keystore.path">agent.keystore.path</a></tt> and <tt><a href="" title="agent.keystore.password">agent.keystore.password</a></tt> can only be supplied by defining them in <tt>agent.properties</tt>. </p>
+<p>These values of <tt>agent.keystore.path</tt> and <tt>agent.keystore.password</tt> can only be supplied by defining them in <tt>agent.properties</tt>. </p>
 
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Best Practice for Hyperic Agent Keystore</b><br />Before starting a Hyperic 4.6 Agent for the first time:
+<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Password Requirement for Hyperic Keystores</b><br />The Hyperic Server's keystore password and private key password <b>must</b> be the same &#8212; otherwise, the Hyperic Server's internal Tomcat-based server will be unable to start. For information about why, see <a href="http://tomcat.apache.org/tomcat-6.0-doc/ssl-howto.html">http://tomcat.apache.org/tomcat-6.0-doc/ssl-howto.html</a>. Follow the same convention for a Hyperic Agent keystore &#8212; set the password for the agent keystore be the same as the agent private key,</td></tr></table></div> 
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Best Practices for Hyperic Keystores</b><br />Please see: 
 <ul>
-	<li>Create a keystore on its host with an SSL certificate signed by the same CA as the Hyperic Server's SSL certificate.</li>
-	<li>Configure the location and password for the agent keystore using <tt><a href="" title="agent.keystore.password">agent.keystore.password</a></tt> and <tt><a href="" title="agent.keystore.password">agent.keystore.password</a></tt>.</li>
+	<li><a href="Hyperic Security Features and Recommendations.html" title="Hyperic Security Features and Recommendations">Hyperic Security Features and Recommendations</a></li>
+	<li><a href="SSL Setup.html" title="SSL Setup">SSL Setup</a></li>
 </ul>
-
-
-<p>For more information see <a href="Hyperic Security Features and Recommendations.html" title="Hyperic Security Features and Recommendations">Hyperic Security Features and Recommendations</a>.</p></td></tr></table></div>
-
+</td></tr></table></div> 
 <p><b>Default</b> <br/>
 none</p></td></tr></table></div>
 <p><font color=""></font></p>
@@ -322,7 +346,7 @@ none</p></td></tr></table></div>
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 27, 2011 14:51</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 28, 2011 14:50</font></td>
 		    </tr>
 	    </table>
     </body>
