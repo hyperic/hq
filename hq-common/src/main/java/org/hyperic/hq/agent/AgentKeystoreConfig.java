@@ -37,8 +37,9 @@ import org.hyperic.util.security.KeystoreConfig;
  * This class will get the keystore property in agent's default property file (usually it's agent.properties)
  * and create a keystoreConfig for SSL communication (Should only be used for agent side code).
  */
-public class AgentKeystoreConfig
-    extends KeystoreConfig {
+public class AgentKeystoreConfig extends KeystoreConfig {
+    private static final String DEFAULT_SSL_KEYSTORE_ALIAS = AgentConfig.DEFAULT_SSL_KEYSTORE_ALIAS;
+    private static final String SSL_KEYSTORE_ALIAS = AgentConfig.SSL_KEYSTORE_ALIAS;
     private Log log = LogFactory.getLog(AgentKeystoreConfig.class);
     private boolean acceptUnverifiedCert;
     public AgentKeystoreConfig(){
@@ -47,15 +48,15 @@ public class AgentKeystoreConfig
         try {
             cfg = AgentConfig.newInstance(propFile);
         } catch(IOException exc){
-            log.error("Error: " + exc);
+            log.error("Error: " + exc, exc);
             return ;
         } catch(AgentConfigException exc){
-            log.error("Agent Properties error: " + exc.getMessage());
+            log.error("Agent Properties error: " + exc.getMessage(), exc);
             return ;
         }
         super.setFilePath(cfg.getBootProperties().getProperty(AgentConfig.SSL_KEYSTORE_PATH));
         super.setFilePassword(cfg.getBootProperties().getProperty(AgentConfig.SSL_KEYSTORE_PASSWORD));
-        super.setAlias("hq-agent");
+        super.setAlias(cfg.getBootProperties().getProperty(SSL_KEYSTORE_ALIAS, DEFAULT_SSL_KEYSTORE_ALIAS));
         super.setHqDefault(AgentConfig.PROP_KEYSTORE_PATH[1].equals(getFilePath()));
         String prop = cfg.getBootProperties().getProperty(AgentConfig.SSL_KEYSTORE_ACCEPT_UNVERIFIED_CERT);
         this.acceptUnverifiedCert = Boolean.parseBoolean(prop);
@@ -63,7 +64,7 @@ public class AgentKeystoreConfig
         try {
             address = InetAddress.getLocalHost().getCanonicalHostName();
         } catch (UnknownHostException e) {
-            log.error(e);
+            log.error(e,e);
         }
         super.setKeyCN("Hyperic Agent_"+address);
     }

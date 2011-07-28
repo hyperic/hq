@@ -79,6 +79,8 @@ public class AgentConfig {
     public static final String AGENT_BUNDLE_HOME = "agent.bundle.home";
   
     //Property name for keystore
+    public static final String SSL_KEYSTORE_ALIAS = "agent.keystore.alias";
+    public static final String DEFAULT_SSL_KEYSTORE_ALIAS = "hq";
     public static final String SSL_KEYSTORE_PATH = "agent.keystore.path";
     public static final String SSL_KEYSTORE_PASSWORD = "agent.keystore.password";
     public static final String SSL_KEYSTORE_ACCEPT_UNVERIFIED_CERT = "accept.unverified.certificates";
@@ -174,7 +176,7 @@ public class AgentConfig {
         PROP_PDK_WORK_DIR, 
         PROP_ROLLBACK_AGENT_BUNDLE_UPGRADE
     };
-    
+
     private int        listenPort;          // Port the agent should listen on
     private String     listenIp;            // IP the agent listens on
     private int        proxyPort;           // Proxy server port
