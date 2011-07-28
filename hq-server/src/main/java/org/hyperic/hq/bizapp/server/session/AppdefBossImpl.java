@@ -2244,6 +2244,9 @@ public class AppdefBossImpl implements AppdefBoss {
                 if (r == null || r.isInAsyncDeleteState()) {
                     continue;
                 }
+                if (rName != null && !r.getName().toLowerCase().contains(rName.toLowerCase())) {
+                    continue;
+                }
                 try {
                     if (protoFilterId != null && protoType != null) {
                         final Resource proto = r.getPrototype();
