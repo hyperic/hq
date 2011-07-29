@@ -65,8 +65,8 @@
             <property name="hq.os.name" value="${hq.os.base.name}-${hq.version}.${hq.os.build}" />
             <property name="hq.ee.name" value="${hq.ee.base.name}-${hq.version}.${hq.ee.build}" />
 
-            <property name="hq.os.base.url" value="http://10.0.0.104/raid/release/shipped/hq/stagingRepo/org/hyperic/hq/dist/${hq.os.base.name}/${hq.version}.${hq.build.type}/" />
-            <property name="hq.ee.base.url" value="http://10.0.0.104/raid/release/shipped/hq/stagingRepo/com/hyperic/hq/dist/${hq.ee.base.name}/${hq.version}.${hq.build.type}/" />
+            <property name="hq.os.base.url" value="http://10.0.0.104/raid/release/shipped/hq/stagingRepo/milestone/org/hyperic/hq/dist/hyperic-hq-installer/${hq.version}.${hq.build.type}/" />
+            <property name="hq.ee.base.url" value="http://10.0.0.104/raid/release/shipped/hq/stagingRepo/milestone/com/hyperic/hq/dist/hyperic-hqee-installer/${hq.version}.${hq.build.type}/" />
 
             <property name="hq.os.build.name" value="${hq.os.name}-win32.zip" />
             <property name="hq.ee.build.name" value="${hq.ee.name}-win32.zip" />
