@@ -221,15 +221,24 @@ public class DefaultSSLProviderImpl implements SSLProvider {
                 final boolean debug = log.isDebugEnabled();
                 final StopWatch watch = new StopWatch();
                 try {
+                    for (X509Certificate cert : chain) {
+                        String[] cnValues = AbstractVerifier.getCNs(cert);
+                        String alias;
+                        
+                        if (cnValues != null && cnValues.length > 0) {
+                        	alias = cnValues[0];
+                        } else {
+                        	alias = "UnknownCN";
+                        }
+                        
+                        alias += "-ts=" + System.currentTimeMillis();
+                        
+                        trustStore.setCertificateEntry(alias, cert);
+                    }
                     KEYSTORE_WRITER_LOCK.lockInterruptibly();
                     hasLock = true;
                     keyStoreFileOutputStream = new FileOutputStream(
-                        keystoreConfig.getFilePath());
-                    for (X509Certificate cert : chain) {
-                        String[] cnValues = AbstractVerifier.getCNs(cert);
-                        String alias = cnValues[0] + "-ts=" + System.currentTimeMillis();
-                        trustStore.setCertificateEntry(alias, cert);
-                    }
+                            keystoreConfig.getFilePath());
                     trustStore.store(keyStoreFileOutputStream, keystoreConfig
                         .getFilePassword().toCharArray());
                 } catch (FileNotFoundException e) {
