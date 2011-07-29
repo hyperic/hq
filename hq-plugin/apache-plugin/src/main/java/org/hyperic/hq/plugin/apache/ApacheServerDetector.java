@@ -385,7 +385,7 @@ public class ApacheServerDetector
                 }
             }
 
-            if (binary.conf == null) {
+            if (binary.conf != null) {
                 productConfig.setValue("ServerConf", binary.conf);
             }
             if (productConfig != null) {

@@ -96,6 +96,7 @@
                   failOnMissing="false"/>
     <available property="user-setup-properties.available"
                file="${setup.absolute}"/>
+    <property file="${setup.absolute}" />
     <msgfail unless="user-setup-properties.available">^^^ERROR:\
        The specified Hyperic HQ install configuration file does not exist:
          ${setup.absolute}
@@ -113,6 +114,7 @@
      <delete file="${newSetup}"/>
     <echo>^^^INFO: Loading install configuration...</echo>
     <echo>^^^DEBUG: Loading from ${setup}...</echo>
+    <echo>^^^DEBUG: doing non-interactive, accept= ${accept.eula} ...</echo>
    
     <ant antfile="setup-noninteractive.xml" target="generate-props"/>
     <property file="${newSetup}"/>
@@ -142,17 +144,23 @@ Setup properties will be written to %WRITABLEFILE% instead.
   	<available file="eula.txt" property="eula.present"/>
   </target>
 
-  <target name="show-eula" depends="check-eula" if="eula.present" unless="accept.eula">
-  	<loadfile property="eula.text" srcFile="eula.txt"/>
-	<echo>^^^INFO:
+  <target name="show-eula" depends="check-eula" if="eula.present">
+    <echo>^^^DEBUG: accepted=${accept.eula}...</echo>
+    <antcall target="show-eula-unless-accepted" />
+  </target>
+
+  <target name="show-eula-unless-accepted" unless="accept.eula">
+      <echo>^^^DEBUG: show-eula...</echo>
+        <loadfile property="eula.text" srcFile="eula.txt"/>
+        <echo>^^^INFO:
 __ll__
 ${eula.text}
 __ll__
-	</echo>
+        </echo>
     <input message="Do you accept the terms of the agreement?"
            validargs="y,n"
            addproperty="license.accepted" />
-	<condition property="do.abort">
+        <condition property="do.abort">
       <equals arg1="n" arg2="${license.accepted}"/>
     </condition>
     <fail if="do.abort">The license must be accepted in order to proceed with the installation.</fail>

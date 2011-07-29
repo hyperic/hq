@@ -466,10 +466,10 @@
                                         <File Id="spring_core_3.0.5.release.ja" Name="spring-core-3.0.5.RELEASE.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="xercesimpl.jar" Name="xercesImpl.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="tomcat_juli_6.0.20.jar" Name="tomcat-juli-6.0.20.jar" Vital="no" Compressed="yes" DiskId="1" />
-                                        <File Id="ojdbc14_10.2.0.1.0.jar" Name="ojdbc14-10.2.0.1.0.jar" Vital="no" Compressed="yes" DiskId="1" />
+                                        <File Id="ojdbc5_11.2.0.2.0.jar" Name="ojdbc5-11.2.0.2.0.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="mail_1.4.jar" Name="mail-1.4.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="jms_1.1.jar" Name="jms-1.1.jar" Vital="no" Compressed="yes" DiskId="1" />
-                                        <File Id="wrapper_3.2.3.jar" Name="wrapper-3.2.3.jar" Vital="no" Compressed="yes" DiskId="1" />
+                                        <File Id="wrapper_3.5.6.jar" Name="wrapper-3.5.6.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="spring_jms_3.0.5.release.jar" Name="spring-jms-3.0.5.RELEASE.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="log4j_1.2.14.jar" Name="log4j-1.2.14.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="spring_security_config_3.0.5" Name="spring-security-config-3.0.5.RELEASE.jar" Vital="no" Compressed="yes" DiskId="1" />
