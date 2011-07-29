@@ -417,7 +417,7 @@
                                         <File Id="groovy_all_1.6.7.jar" Name="groovy-all-1.6.7.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="ant.jar" Name="ant.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="getopt_1.0.13.jar" Name="getopt-1.0.13.jar" Vital="no" Compressed="yes" DiskId="1" />
-                                        <File Id="wrapper_3.2.3.jar" Name="wrapper-3.2.3.jar" Vital="no" Compressed="yes" DiskId="1" />
+                                        <File Id="wrapper_3.5.6.jar" Name="wrapper-3.5.6.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="libsigar_ia64_hpux_11.sl" Name="libsigar-ia64-hpux-11.sl" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="xml_apis_1.0.b2.jar" Name="xml-apis-1.0.b2.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="libsigar_sparc_solaris.so" Name="libsigar-sparc-solaris.so" Vital="no" Compressed="yes" DiskId="1" />
