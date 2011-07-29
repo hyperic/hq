@@ -18,18 +18,18 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 28, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jul 29, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1309298287544 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1309298287544 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1309298287544 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1311966445563 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1311966445563 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1311966445563 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1309298287544'>
+/*]]>*/</style><div class='rbtoc1311966445563'>
 <ul>
     <li><a href='#HQApicontrolcommand-Functionality'>Functionality</a></li>
     <li><a href='#HQApicontrolcommand-controlCommandOptions'>control Command Options</a></li>
@@ -40,7 +40,7 @@ div.rbtoc1309298287544 li {margin-left: 0px;padding-left: 0px;}
 </ul>
     <li><a href='#HQApicontrolcommand-controlCommandExamples'>control Command Examples</a></li>
 <ul>
-    <li><a href='#HQApicontrolcommand-controlactions%5CresourceId'>control actions --resourceId</a></li>
+    <li><a href='#HQApicontrolcommand-controlactionsresourceId'>control actions --resourceId</a></li>
     <li><a href='#HQApicontrolcommand-controlhistory%5CresourceId'>control history --resourceId</a></li>
     <li><a href='#HQApicontrolcommand-controlexecute%5Caction%5CresourceId'>control execute --action --resourceId</a></li>
     <li><a href='#HQApicontrolcommand-controlexecuteactionresourceIdoption'>control execute --action --resourceId - option</a></li>
@@ -92,7 +92,7 @@ div.rbtoc1309298287544 li {margin-left: 0px;padding-left: 0px;}
 
 <p>The list of supported control actions is returned in plain text. The resource type and name is included in the output.</p>
 
-<p>For an example, see <a href="#HQApicontrolcommand-controlactionsresourceId">control actions &#45;-resourceId</a>.</p>
+<p>For an example, see <a href="#HQApicontrolcommand-resourceId">control actions &#45;-resourceId</a>.</p>
 
 <h2><a name="HQApicontrolcommand-controlhistory"></a>control history</h2>
 
@@ -129,7 +129,7 @@ div.rbtoc1309298287544 li {margin-left: 0px;padding-left: 0px;}
 </ul>
 
 
-<p>For an example, see <a href="#HQApicontrolcommand-controlhistoryresourceId">control history &#45;-resourceId</a>.</p>
+<p>For an example, see <a href="#HQApicontrolcommand-history">control history --resourceId</a>.</p>
 
 <h2><a name="HQApicontrolcommand-controlexecute"></a>control execute </h2>
 
@@ -174,8 +174,8 @@ where: <br class="atl-forced-newline" />
 
 <p>For examples, see: </p>
 <ul>
-	<li><a href="#HQApicontrolcommand-controlexecuteactionresourceId">control execute &#45;&#45;action &#45;&#45;resourceId</a></li>
-	<li><a href="#HQApicontrolcommand-controlexecuteactionresourceIdoption">control execute &#45;&#45;action &#45;&#45;resourceId &#45;&#45; option</a></li>
+	<li><a href="#HQApicontrolcommand-execute">#control execute --action --resourceId</a></li>
+	<li><a href="#HQApicontrolcommand-option">#control execute --action --resourceId &#8211; option</a></li>
 </ul>
 
 
@@ -186,9 +186,9 @@ where: <br class="atl-forced-newline" />
 <p>The sections below have examples of command-line execution of the <b>control</b> command.</p>
 
 
-<h2><a name="HQApicontrolcommand-controlactions%5CresourceId"></a>control actions &#45;-resourceId</h2>
-
-<p>This command returns a list of the control actions supported by the resource whose internal HQ ID is "10786":</p>
+<h2><a name="HQApicontrolcommand-controlactionsresourceId"></a>control actions --resourceId</h2>
+<p><a name="HQApicontrolcommand-resourceId"></a><br/>
+This command returns a list of the control actions supported by the resource whose internal HQ ID is "10786":</p>
 
 <p><div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
@@ -207,8 +207,8 @@ where: <br class="atl-forced-newline" />
 </div></div>The results include the resource type and FQDN for the resource, "HQ PostgreSQL 8.2" and "Dii-Xrr-MacBook-Pro-15.local", respectively.</p>
 
 <h2><a name="HQApicontrolcommand-controlhistory%5CresourceId"></a>control history &#45;-resourceId</h2>
-
-<p>This command returns a list of the control actions that have been performed on the resource whose internal HQ ID is "10786":</p>
+<p><a name="HQApicontrolcommand-history"></a><br/>
+This command returns a list of the control actions that have been performed on the resource whose internal HQ ID is "10786":</p>
 
 <p><div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
@@ -224,6 +224,7 @@ where: <br class="atl-forced-newline" />
 </div></div>The results include the resource type and FQDN for the resource, "HQ PostgreSQL 8.2" and "Dii-Xrr-MacBook-Pro-15.local", respectively.</p>
 
 <h2><a name="HQApicontrolcommand-controlexecute%5Caction%5CresourceId"></a>control execute &#45;-action &#45;-resourceId</h2>
+<p><a name="HQApicontrolcommand-execute"></a></p>
 
 <p>This command executes the&nbsp;<b>start</b>&nbsp;command on the resource whose internal HQ ID is "10786":</p>
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
@@ -241,8 +242,8 @@ where: <br class="atl-forced-newline" />
 </div></div>
 
 <h2><a name="HQApicontrolcommand-controlexecuteactionresourceIdoption"></a>control execute --action --resourceId &#8211; option </h2>
-
-<p>This command executes the custom control action <b>run</b> on the resource whose internal HQ ID is "10786". <tt>path</tt> and <tt>prefix</tt> are qualifiers. Note that there is a space between the "--" and the name=value pairs that follow. </p>
+<p><a name="HQApicontrolcommand-option"></a><br/>
+This command executes the custom control action <b>run</b> on the resource whose internal HQ ID is "10786". <tt>path</tt> and <tt>prefix</tt> are qualifiers. Note that there is a space between the "--" and the name=value pairs that follow. </p>
 
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
@@ -259,7 +260,7 @@ where: <br class="atl-forced-newline" />
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 28, 2011 14:50</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:44</font></td>
 		    </tr>
 	    </table>
     </body>

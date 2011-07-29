@@ -18,18 +18,18 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 22, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jul 29, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1311357073254 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1311357073254 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1311357073254 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1311965881256 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1311965881256 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1311965881256 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1311357073254'>
+/*]]>*/</style><div class='rbtoc1311965881256'>
 <ul>
     <li><a href='#ConfigureAgent-ServerCommunicationinPropertiesFile-FileBasedConfigurationofAgentServerCommunicationsisEfficient'>File-Based Configuration of Agent-Server Communications is Efficient</a></li>
     <li><a href='#ConfigureAgent-ServerCommunicationinPropertiesFile-Procedure%3AConfigureAgentServerCommunicationProperties'>Procedure: Configure Agent-Server Communication Properties</a></li>
@@ -40,6 +40,7 @@ div.rbtoc1311357073254 li {margin-left: 0px;padding-left: 0px;}
     <li><a href='#ConfigureAgent-ServerCommunicationinPropertiesFile-Step4ConfigureUnidirectionalCommunications%28Optional%29'>Step 4 - Configure Unidirectional Communications (Optional)</a></li>
     <li><a href='#ConfigureAgent-ServerCommunicationinPropertiesFile-Step5ConfigureAgentKeystore%28Optional%29'>Step 5 - Configure Agent Keystore (Optional)</a></li>
     <li><a href='#ConfigureAgent-ServerCommunicationinPropertiesFile-Step6ConfigureAdditionalAgentBehaviors%28Optional%29'>Step 6 - Configure Additional Agent Behaviors (Optional)</a></li>
+    <li><a href='#ConfigureAgent-ServerCommunicationinPropertiesFile-Step7SaveChanges'>Step 7 - Save Changes</a></li>
 </ul>
     <li><a href='#ConfigureAgent-ServerCommunicationinPropertiesFile-CommunicationPropertiesReference'>Communication Properties Reference</a></li>
 </ul></div>
@@ -122,14 +123,9 @@ div.rbtoc1311357073254 li {margin-left: 0px;padding-left: 0px;}
 
 <p>These are the minimum properties required for agent-server communication.</p>
 
-<p>Unless you want to configure other agent behaviors, save your changes and proceed to <a href="#ConfigureAgent-ServerCommunicationinPropertiesFile-CopyToAgent.">Step 6 - Copy <tt>agent.properties</tt> to Agent Installation</a></p>
-
 <h2><a name="ConfigureAgent-ServerCommunicationinPropertiesFile-Step4ConfigureUnidirectionalCommunications%28Optional%29"></a>Step 4 - Configure Unidirectional Communications (Optional)</h2>
 
 <p>By default, agent-server communication is bi-directional. If your policies dictate that all communication between agent and server are agent-initiated, you can uncomment the <tt>agent.setup.unidirectional</tt> property and set it to "yes".</p>
-
-<p>Unless you want to configure other agent behaviors, save your changes and proceed to <a href="#ConfigureAgent-ServerCommunicationinPropertiesFile-CopyToAgent.">Step 6 - Copy <tt>agent.properties</tt> to Agent Installation</a>.</p>
-
 
 <h2><a name="ConfigureAgent-ServerCommunicationinPropertiesFile-Step5ConfigureAgentKeystore%28Optional%29"></a>Step 5 - Configure Agent Keystore (Optional)</h2>
 
@@ -158,6 +154,8 @@ div.rbtoc1311357073254 li {margin-left: 0px;padding-left: 0px;}
 </ul>
 
 
+
+<h2><a name="ConfigureAgent-ServerCommunicationinPropertiesFile-Step7SaveChanges"></a>Step 7 - Save Changes</h2>
 
 <p>After completing your edits, save your changes and start the agent. See <a href="Start, Stop, and Other Agent Operations.html" title="Start, Stop, and Other Agent Operations">Start, Stop, and Other Agent Operations</a>.</p>
 
@@ -274,7 +272,7 @@ div.rbtoc1311357073254 li {margin-left: 0px;padding-left: 0px;}
 
 <p>Note that a for a unidirectional agent with a user-managed keystore, you must configure the keystore name  in <tt>agent.properties</tt>. See <tt><a href="agent.keystore.alias.html" title="agent.keystore.alias">agent.keystore.alias</a></tt>.</p>
 
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>About unidirectional communication</b><br />If you configure an agent for unidirectional communication, all communication with the server is initiated by the agent. You can configure unidirectional communication at first agent startup, or with the <tt><a href="" title="agent.setup.unidirectional">agent.setup.unidirectional</a></tt> property in <tt>agent.properties</tt>. Related topics: 
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>About unidirectional communication</b><br />If you configure an agent for unidirectional communication, all communication with the server is initiated by the agent. You can configure unidirectional communication at first agent startup, or with the <tt>agent.setup.unidirectional</tt> property in <tt>agent.properties</tt>. Related topics: 
 
 <ul>
 	<li><a href="Agent - Server Communication.html" title="Agent - Server Communication">Agent &#45; Server Communication</a></li>
@@ -346,7 +344,7 @@ none</p></td></tr></table></div>
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 28, 2011 14:50</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:43</font></td>
 		    </tr>
 	    </table>
     </body>

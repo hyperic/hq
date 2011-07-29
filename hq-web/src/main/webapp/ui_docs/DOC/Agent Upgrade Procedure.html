@@ -18,29 +18,26 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 25, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jul 29, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1311612460099 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1311612460099 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1311612460099 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1311965610799 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1311965610799 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1311965610799 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1311612460099'>
+/*]]>*/</style><div class='rbtoc1311965610799'>
 <ul>
-    <li><a href='#AgentUpgradeProcedure-AgentUpgradeAlternatives'>Agent Upgrade Alternatives</a></li>
     <li><a href='#AgentUpgradeProcedure-PushAgentBundlefromthevFabricHypericServer'>Push Agent Bundle from the vFabric Hyperic Server</a></li>
     <li><a href='#AgentUpgradeProcedure-UpgradeAgentBundleManually'>Upgrade Agent Bundle Manually</a></li>
     <li><a href='#AgentUpgradeProcedure-CreateaCustomAgentUpgradeBundle'>Create a Custom Agent Upgrade Bundle</a></li>
     <li><a href='#AgentUpgradeProcedure-UpgradeAgentUsingaFullAgentPackage'>Upgrade Agent Using a Full Agent Package</a></li>
 </ul></div>
 
-<h1><a name="AgentUpgradeProcedure-AgentUpgradeAlternatives"></a>Agent Upgrade Alternatives</h1>
-
 <p>To upgrade a Hyperic 4.x Agent to 4.6 you can:</p>
 
 <ul>
-	<li>Install just the 4.6 agent bundle, by pushing it from your upgraded Hyperic 4.6 Server to each agent (in vFabric Hyperic only) as described in <a href="#AgentUpgradeProcedure-PushAgentBundlefromtheHypericServer">Push Agent Bundle from the Hyperic Server</a>, or by manually copying the bundle to each agent as described in <a href="#AgentUpgradeProcedure-UpgradeAgentBundleManually">Upgrade Agent Bundle Manually</a>. If desired, you can first create your own agent bundle, as described in <a href="#AgentUpgradeProcedure-CreateaCustomAgentUpgradeBundle">Create a Custom Agent Upgrade Bundle</a>.</li>
+	<li>Install just the 4.6 agent bundle, by pushing it from your upgraded Hyperic 4.6 Server to each agent (in vFabric Hyperic only) as described in <a href="#AgentUpgradeProcedure-PushAgentBundlefromthevFabricHypericServer">Push Agent Bundle from the vFabric Hyperic Server</a>, or by manually copying the bundle to each agent as described in <a href="#AgentUpgradeProcedure-UpgradeAgentBundleManually">Upgrade Agent Bundle Manually</a>. If desired, you can first create your own agent bundle, as described in <a href="#AgentUpgradeProcedure-CreateaCustomAgentUpgradeBundle">Create a Custom Agent Upgrade Bundle</a>.</li>
 </ul>
 
 
@@ -59,13 +56,12 @@ div.rbtoc1311612460099 li {margin-left: 0px;padding-left: 0px;}
 <p><b>Note:</b> When you update an agent bundle, the agent configuration is preserved &#8212; the <tt>AgentHome/conf/agent.properties</tt> file is not overwritten.</p>
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1311612460173 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1311612460173 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1311612460173 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1311965610870 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1311965610870 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1311965610870 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1311612460173'>
+/*]]>*/</style><div class='rbtoc1311965610870'>
 <ul>
-    <li><a href='#AgentUpgradeProcedure-AgentUpgradeAlternatives'>Agent Upgrade Alternatives</a></li>
     <li><a href='#AgentUpgradeProcedure-PushAgentBundlefromthevFabricHypericServer'>Push Agent Bundle from the vFabric Hyperic Server</a></li>
     <li><a href='#AgentUpgradeProcedure-UpgradeAgentBundleManually'>Upgrade Agent Bundle Manually</a></li>
     <li><a href='#AgentUpgradeProcedure-CreateaCustomAgentUpgradeBundle'>Create a Custom Agent Upgrade Bundle</a></li>
@@ -117,7 +113,7 @@ ROLLBACK_BUNDLE </td>
 </tbody></table>
 </div>
 </li>
-	<li>Restart the agent. For instructions, see <a href="Start, Stop, and Other Agent Operations.html#Start%2CStop%2CandOtherAgentOperations-RestarttheHypericAgent">Restart the Hyperic Agent</a>.</li>
+	<li>Restart the agent. For instructions, see <a href="Start, Stop, and Other Agent Operations.html" title="Start, Stop, and Other Agent Operations">Start, Stop, and Other Agent Operations</a>.</li>
 </ol>
 
 
@@ -214,7 +210,7 @@ gzip ServerHome/hq-engine/hq-server/webapps/ROOT/WEB-INF/hq-agent-bundles/my-bun
 		<pre class="theme: Confluence; brush: java; gutter: false">hq-agent.bat install</pre>
 		</div>
 </div></div></li>
-	<li>Start the agent. For instructions, see <a href="Start, Stop, and Other Agent Operations.html#Start%2CStop%2CandOtherAgentOperations-StarttheHypericAgent">Start the Hyperic Agent</a>.</li>
+	<li>Start the agent. For instructions, see <a href="Start, Stop, and Other Agent Operations.html" title="Start, Stop, and Other Agent Operations">Start, Stop, and Other Agent Operations</a>.</li>
 </ol>
 
 
@@ -234,7 +230,7 @@ gzip ServerHome/hq-engine/hq-server/webapps/ROOT/WEB-INF/hq-agent-bundles/my-bun
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 28, 2011 14:50</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:43</font></td>
 		    </tr>
 	    </table>
     </body>
