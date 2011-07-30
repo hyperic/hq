@@ -369,6 +369,12 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
     }
 
     private String generateSignature(ServerResource server) {
+        boolean disable = "true".equalsIgnoreCase(getManager().getProperty("rabbitmq.disable.runtimeScan"));
+        logger.debug("[generateSignature] rabbitmq.disable.runtimeScan="+disable);
+        if (disable) {
+            return "";
+        }
+
         List<RabbitObject> objs = new ArrayList();
         try {
             HypericRabbitAdmin admin = new HypericRabbitAdmin(server.getProductConfig());
