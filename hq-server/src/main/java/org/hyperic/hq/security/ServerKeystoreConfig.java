@@ -29,7 +29,6 @@ import java.io.File;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.security.KeystoreConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,8 +42,7 @@ public class ServerKeystoreConfig
     private static final Log log = LogFactory.getLog(ServerKeystoreConfig.class);
     
     @Autowired
-    public ServerKeystoreConfig(ConfigBoss configBoss,
-                                @Value("#{securityProperties['server.keystore.path']}") String keystore,
+    public ServerKeystoreConfig(@Value("#{securityProperties['server.keystore.path']}") String keystore,
                                 @Value("#{securityProperties['server.keystore.password']}") String keypass) throws ConfigPropertyException{
         super();
         if(StringUtils.hasText(keystore)){
