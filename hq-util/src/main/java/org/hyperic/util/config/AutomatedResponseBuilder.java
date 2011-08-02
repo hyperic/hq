@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.hyperic.util.PropertyUtil;
+import org.springframework.util.StringUtils;
 
 public class AutomatedResponseBuilder extends InteractiveResponseBuilder {
 
@@ -80,10 +81,19 @@ public class AutomatedResponseBuilder extends InteractiveResponseBuilder {
             String optName = opt.getName();
             try {
                 String prop = props.getProperty(optName);
-                if(prop == null && opt.isOptional()) {
-                    //use the default value if this is an optional field
-                    res.setValue(optName, opt.getDefault());
-                }else {
+                // The logic below works like this...
+                // if prop is null, that means it's not in the setup.properties file, 
+                // so we have to use info from the config option itself...
+                if (prop == null) {
+                	// ...if it's required, use the default value...
+                	// ...or if it's not required but there's a default value, use it...
+                	// ...if it's not required and there's no text value, ignore it...
+                	if (!opt.isOptional() || StringUtils.hasText(opt.getDefault())) {
+                		res.setValue(optName, opt.getDefault());
+                	}
+                } else {
+                // ...this is the ideal path, the properties file and config schema are 
+                // playing nice with each other...
                     res.setValue(optName, prop);
                 }
             } catch(InvalidOptionValueException exc){
