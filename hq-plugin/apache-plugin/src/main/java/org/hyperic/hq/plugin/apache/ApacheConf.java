@@ -5,8 +5,10 @@
 package org.hyperic.hq.plugin.apache;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -31,10 +33,10 @@ import org.hyperic.hq.product.PluginException;
 public class ApacheConf {
 
     private String config;
-    private static final Pattern virtualHostPatter = Pattern.compile("<VirtualHost ([^>]*)>([^<]*)</VirtualHost>");
-    private static final Pattern serverNamePatter = Pattern.compile("[^\\S]?ServerName (.*)");
-    private static final Pattern serverRootPatter = Pattern.compile("[^\\S]?ServerRoot \"?([^\\s|\"]*)\"?");
-    private static final Pattern includePatter = Pattern.compile("#?[^\\S]?Include (.*)");
+    private static final Pattern virtualHostPatter = Pattern.compile("<VirtualHost ([^>]*)>");
+    private static final Pattern serverNamePatter = Pattern.compile("ServerName (.*)");
+    private static final Pattern serverRootPatter = Pattern.compile("ServerRoot \"?([^\\s|\"]*)\"?");
+    private static final Pattern includePatter = Pattern.compile("Include (.*)");
     private static final Pattern ipPattern = Pattern.compile("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
     private static final Log log = LogFactory.getLog(ApacheConf.class);
 
@@ -48,19 +50,29 @@ public class ApacheConf {
         }
     }
 
-    public Map<String,ApacheVHost> getVHosts() throws PluginException, IOException {
-        Map<String,ApacheVHost> vHost = new HashMap<String, ApacheVHost>();
+    public Map<String, ApacheVHost> getVHosts() throws PluginException, IOException {
+        Map<String, ApacheVHost> vHosts = new HashMap<String, ApacheVHost>();
+        int idx = 0;
+        while ((idx = config.indexOf("<VirtualHost", idx)) > 0) {
+            int idxEnd = config.indexOf("</VirtualHost>", idx);
+            vHosts.putAll(parseVirtualHost(config.substring(idx, idxEnd)));
+            idx=idxEnd;
+        }
+        return vHosts;
+    }
 
-        Matcher mach = virtualHostPatter.matcher(config);
-        while (mach.find()) {
+    public static Map<String, ApacheVHost> parseVirtualHost(String vhTag) {
+        Map<String, ApacheVHost> vHost = new HashMap<String, ApacheVHost>();
+        Matcher mach = virtualHostPatter.matcher(vhTag);
+        if (mach.find()) {
             String addrs = mach.group(1);
-            String serverName = getServerName(mach.group(2).trim());
+            String serverName = getServerName(vhTag);
             List<String> addrsList = Arrays.asList(addrs.split(" "));
             for (String listen : addrsList) {
                 ApacheListen l = parseListen(listen);
                 ApacheVHost vh = new ApacheVHost(l.getName(), l.getIp(), l.getPort(), serverName);
                 log.debug("[getVHosts] vHost=" + vh + " (" + l + ")");
-                vHost.put(vh.getServerName(),vh);
+                vHost.put(vh.getServerName(), vh);
             }
         }
         return vHost;
@@ -142,14 +154,14 @@ public class ApacheConf {
     private static String readFile(File file) throws IOException {
         final char[] buffer = new char[0x10000];
         StringBuilder out = new StringBuilder();
-        Reader in = new InputStreamReader(new FileInputStream(file), "UTF-8");
-        int read;
-        do {
-            read = in.read(buffer, 0, buffer.length);
-            if (read > 0) {
-                out.append(buffer, 0, read);
+        BufferedReader in = new BufferedReader(new FileReader(file));
+        String line;
+        while ((line = in.readLine()) != null) {
+            line = line.trim();
+            if (!line.startsWith("#") && line.length() > 0) {
+                out.append(line).append('\n');
             }
-        } while (read >= 0);
+        }
         return out.toString();
     }
 
