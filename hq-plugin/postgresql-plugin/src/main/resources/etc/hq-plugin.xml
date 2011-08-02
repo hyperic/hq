@@ -255,10 +255,10 @@
 
     <plugin type="control"
             class="PostgreSQLControlPlugin"/>
-
-     <!-- plugin type="config_track"
-            class="org.hyperic.hq.product.ConfigFileTrackPlugin"/-->
          
+    <plugin type="config_track"
+            class="org.hyperic.hq.product.FileChangeTrackPlugin"/>
+ 
     <plugin type="config_track"
     		platform="unix"
             class="org.hyperic.hq.product.FileChangeTrackPlugin">

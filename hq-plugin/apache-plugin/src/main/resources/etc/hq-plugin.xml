@@ -802,6 +802,9 @@ ExtendedStatus On
     </service>
     
     <plugin type="config_track"
+    		class="org.hyperic.hq.product.FileChangeTrackPlugin">
+
+    <plugin type="config_track"
     		platform="Unix"
     		class="org.hyperic.hq.product.FileChangeTrackPlugin">
       <monitored>
@@ -932,6 +935,10 @@ ExtendedStatus On
     </service>
 
     <plugin type="config_track"
+    		class="org.hyperic.hq.product.FileChangeTrackPlugin">
+
+    <plugin type="config_track"
+    		platform="Unix"
     		class="org.hyperic.hq.product.FileChangeTrackPlugin">
       <monitored>
         <folder path="httpd/conf" recursive="false" filter=".*.conf"/>

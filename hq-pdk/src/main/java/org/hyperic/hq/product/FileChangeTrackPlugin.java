@@ -29,11 +29,9 @@
 
 package org.hyperic.hq.product;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,7 +39,6 @@ import org.hyperic.cm.filemonitor.IChangeListener;
 import org.hyperic.cm.filemonitor.IFileMonitor;
 import org.hyperic.cm.filemonitor.data.EventActionsEnum;
 import org.hyperic.cm.filemonitor.data.EventMessage;
-import org.hyperic.cm.filemonitor.dto.FolderDto;
 import org.hyperic.hq.product.pluginxml.PluginData;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
@@ -71,14 +68,32 @@ public class FileChangeTrackPlugin extends ConfigFileTrackPlugin{
                 return;
             }
             
+            final String details;
+            switch (eventMsg.getType()) {
+                case CREATE:
+                case DELETE:
+                    if (eventMsg.getDiff() != null && eventMsg.getDiff().length() > 0)
+                        details = eventMsg.getDiff();
+                    else 
+                        details = eventMsg.getFullPath();
+                    break;
+                case RENAME:
+                    details =  eventMsg.getFullPath()+";"+eventMsg.getOldFullPath();
+                    break;
+                case MODIFY:
+                    details = eventMsg.getDiff();
+                    break;
+                default:
+                    details = "";
+                    break;
+            }
+            
             TrackEvent event = 
                 new TrackEvent(getName(),
                                System.currentTimeMillis(),
                                LogTrackPlugin.LOGLEVEL_INFO,
                                eventMsg.getType().protocolValue(),
-                               eventMsg.getFullPath(),
-                               eventMsg.getOldFullPath(), 
-                               eventMsg.getDiff());
+                               details);
                                                   
             getManager().reportEvent(event);    
         }

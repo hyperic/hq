@@ -2050,6 +2050,8 @@
                 class="MySqlServerDetector"/>
         <plugin type="measurement"
                 class="MySqlStatsMeasurementPlugin"/>
+		<plugin type="config_track" class="org.hyperic.hq.product.FileChangeTrackPlugin" />
+
 		<plugin type="config_track" class="org.hyperic.hq.product.FileChangeTrackPlugin"
 			platform="Unix">
 			<monitored>
@@ -2058,7 +2060,7 @@
 				<folder path="" recursive="false" filter="my\.conf"/>
 				<folder path="~/" recursive="false" filter="\.my\.cnf"/>
 				<!-- datadir: for versions before 5.1 -->
-				<!-- note - casees where datadir is not in the default location have not been addressed -->
+				<!-- note - cases where datadir is not in the default location have not been addressed -->
 				<folder path="/usr/local/mysql/data" recursive="false" filter="my\.conf"/>
 				<folder path="/usr/local/var" recursive="false" filter="my\.conf"/>
 			</monitored>

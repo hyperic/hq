@@ -864,6 +864,23 @@
 				<enabled>false</enabled>
 			</snapshots>
 		</repository>
+		<repository>
+			<id>addedforjboss2</id>
+			<name>added for jboss missing jar</name>
+			<url>http://www.mvnsearch.org/maven2</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>addedforjboss1</id>
+			<name>added for jboss missing jar</name>
+			<url>https://maven.atlassian.com/repository/public</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+		
 	</repositories>
 
 	<distributionManagement>

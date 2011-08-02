@@ -30,7 +30,6 @@ import org.hyperic.util.encoding.Base64;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -44,16 +43,13 @@ public class TrackEvent implements java.io.Serializable {
     //maxlen as defined in schema (sql/events/EventLog.hbm.xml)
     //events are also encoded and stored on disk with a max size of 4000
     //see AgentDListProvider.RECSIZE
-    public static final int MESSAGE_MAXLEN = 3500;
+    public static final int MESSAGE_MAXLEN = 900;
     public static final int SOURCE_MAXLEN  = 100;
-    public static final int TYPE_MAXLEN  = 10;
 
     private AppdefEntityID id;  // The appdef id.
     private long time;          // Timestamp of when the event was recorded.
     private int level;          // Log level. (see LogConstants.java)
-    private String type;
     private String source;      // The source (file, class, etc)
-    private String newSource;      // Additional source (file, class, etc) - for cases like rename
     private String message;     // Message to report
 
     public TrackEvent(AppdefEntityID id, long time, int level,
@@ -63,19 +59,6 @@ public class TrackEvent implements java.io.Serializable {
         this.level = level;
         this.source = source;
         this.message = message;
-    }
-    public TrackEvent(AppdefEntityID id, long time, int level, String type,
-                      String source, String newSource, String message) {
-        this(id, time, level, source, message);
-        this.type = type;
-        this.newSource = newSource;
-    }
-    
-    public TrackEvent(String id, long time, int level, String type,
-                      String source, String newSource, String message) {
-        this(id, time, level, source, message);
-        this.type = type;
-        this.newSource = newSource;
     }
 
     public TrackEvent(String id, long time, int level,
@@ -89,14 +72,6 @@ public class TrackEvent implements java.io.Serializable {
     
     public String getSource() {
         return source;
-    }
-
-    public String getNewSource() {
-        return newSource;
-    }
-
-    public String getType() {
-        return type;
     }
 
     public String getMessage() {
@@ -138,8 +113,6 @@ public class TrackEvent implements java.io.Serializable {
         dOs.writeInt(level);
         dOs.writeUTF(truncate(source, SOURCE_MAXLEN));
         dOs.writeUTF(truncate(message, MESSAGE_MAXLEN));
-        dOs.writeUTF(truncate(type, TYPE_MAXLEN));
-        dOs.writeUTF(truncate(newSource, SOURCE_MAXLEN));
 
         return Base64.encode(bOs.toByteArray());
     }
@@ -149,36 +122,27 @@ public class TrackEvent implements java.io.Serializable {
     {
         ByteArrayInputStream bIs;
         DataInputStream dIs;
-        String source, newSource,  message, eventType;
-        int id, entityIdType, level;
+        String source, message;
+        int id, type, level;
         long time;
 
         bIs = new ByteArrayInputStream(Base64.decode(data));
         dIs = new DataInputStream(bIs);
 
         id = dIs.readInt();
-        entityIdType = dIs.readInt();
+        type = dIs.readInt();
         time = dIs.readLong();
         level = dIs.readInt();
         source = dIs.readUTF();
         message = dIs.readUTF();
-        
-        try{
-            eventType = dIs.readUTF();
-            newSource = dIs.readUTF();
-            return new TrackEvent(new AppdefEntityID(entityIdType, id),
-                time, level, eventType, source, newSource, message);
-        } catch (EOFException e){
-            // maintain backwards compatibility
-            return new TrackEvent(new AppdefEntityID(entityIdType, id),
-                time, level, source, message);
-        }
+
+        return new TrackEvent(new AppdefEntityID(type, id),
+                              time, level, source, message);
     }
 
     // XXX: for debuging purposes
     public String toString() {
-        return id  + ": msg=" + message + " type="+ type + " file=" +
-            source + " newFile=" + newSource;
+        return id + ": msg=" + message + " file=" +
+            source;
     }
 }
-
