@@ -132,9 +132,13 @@ public abstract class DefaultServerDetector extends ServerDetector implements Au
                         }
                     }
                 }
-            } catch (Exception ex) {
+            } catch (IOException ex) {
                 if (debug) {
-                    log.debug("[getInstallPaths] error: " + ex.getMessage(), ex);
+                    log.debug("[getInstallPaths] " + ex.getMessage());
+                }
+            } catch (Exception e){
+                if (debug) {
+                    log.debug("[getInstallPaths] error: " + e.getMessage(), e);
                 }
             }
         }
