@@ -497,7 +497,7 @@
                                         <File Id="jsch_0.1.42.jar" Name="jsch-0.1.42.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="velocity_1.6.3.jar" Name="velocity-1.6.3.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="jms_1.1.jar" Name="jms-1.1.jar" Vital="no" Compressed="yes" DiskId="1" />
-                                        <File Id="commons_httpclient_3.1.jar" Name="commons-httpclient-3.1.jar" Vital="no" Compressed="yes" DiskId="1" />
+                                        <File Id="httpclient_4.1.1.jar" Name="httpclient-4.1.1.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="libsigar_amd64_solaris.so" Name="libsigar-amd64-solaris.so" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="libsigar_amd64_freebsd_6.so" Name="libsigar-amd64-freebsd-6.so" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="libsigar_ppc64_aix_5.so" Name="libsigar-ppc64-aix-5.so" Vital="no" Compressed="yes" DiskId="1" />
@@ -522,7 +522,7 @@
                                         <File Id="org.springframework.roo.supp" Name="org.springframework.roo.support-1.0.2.RELEASE.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="libsigar_ppc_linux.so" Name="libsigar-ppc-linux.so" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="freemarker_2.3.4.jar" Name="freemarker-2.3.4.jar" Vital="no" Compressed="yes" DiskId="1" />
-                                        <File Id="tomcat_juli_6.0.20.jar" Name="tomcat-juli-6.0.20.jar" Vital="no" Compressed="yes" DiskId="1" />
+                                        <File Id="juli_6.0.32.jar" Name="juli-6.0.32.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="tomcat_jdbc_1.0.8.5.jar" Name="tomcat-jdbc-1.0.8.5.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="spring_security_core_3.0.5.r" Name="spring-security-core-3.0.5.RELEASE.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="spring_jms_3.0.5.release.jar" Name="spring-jms-3.0.5.RELEASE.jar" Vital="no" Compressed="yes" DiskId="1" />
