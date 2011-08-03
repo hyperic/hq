@@ -72,6 +72,7 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
     // 12 hours
     private static final long REPORT_THRESHOLD = 1000 * 60 * 60 * 12;
     private static final long VIOLATION_THRESHOLD = 1000 * 60 * 60;
+    private static String METRICSNOTCOMINGINDIAGNOSTIC_DISABLE = "MetricsNotComingInDiagnostic.disable";
     private DiagnosticsLogger diagnosticsLogger;
     private AuthzSubjectManager authzSubjectManager;
     private AvailabilityManager availabilityManager;
@@ -79,6 +80,7 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
     private ResourceManager resourceManager;
     private PlatformManager platformManager;
     private MetricDataCache metricDataCache;
+    private Boolean disabled;
 
     @Autowired
     public MetricsNotComingInDiagnostic(DiagnosticsLogger diagnosticsLogger,
@@ -95,6 +97,13 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
         this.resourceManager = resourceManager;
         this.platformManager = platformManager;
         this.metricDataCache = metricDataCache;
+
+        String isDisabled = System.getProperty(METRICSNOTCOMINGINDIAGNOSTIC_DISABLE, "false");
+        if (isDisabled.equals("false")) {
+            setDisabled(false);
+        } else {
+            setDisabled(true);
+        }
     }
 
     @PostConstruct
@@ -122,10 +131,25 @@ public class MetricsNotComingInDiagnostic implements DiagnosticObject {
         this.last = now();
     }
     
+    public Boolean getDisabled() {
+        return this.disabled;
+    }
+    
+    public void setDisabled(Boolean disabled) {
+        log.info("Setting disabled flag to " + disabled.toString());
+        this.disabled = disabled;
+    }
+    
     private String getReport(final boolean isVerbose) {
         if (!HAUtil.isMasterNode()) {
             return "Server must be the primary node in the HA configuration before this report is valid.";
         }
+
+        if (getDisabled()) {
+            return "Report disabled";
+        }
+        
+        // minutes
         if ((now() - last) < REPORT_THRESHOLD) {
             return "MetricsNotComingInDiagnostic is only run every " + REPORT_THRESHOLD / 1000 / 60 / 60 +
                    " hours, next run at " + new Date(last + REPORT_THRESHOLD);
