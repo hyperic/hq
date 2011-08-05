@@ -40,10 +40,10 @@ hyperic.URLS = {}; hyperic.widget = {}; hyperic.utils = {}; hyperic.html = {}; h
 
 hyperic.html = {
     show : function(/*String*/ node){
-        hqDojo.style(node, 'display', '');
+        hqDojo.query("#" + node).style('display', '');
     },
     hide : function(/*String*/ node){
-        hqDojo.style(node, 'display', 'none');
+        hqDojo.query("#" + node).style('display', 'none');
     }
 };
 
