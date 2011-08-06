@@ -13,7 +13,7 @@
 	<version>4.6.0.BUILD-SNAPSHOT</version>
 
 	<properties>
-		<hq.version>4.6.0.BUILD-SNAPSHOT</hq.version>
+		<hq.version>4.6</hq.version>
         <hqapi.version>5.0.0</hqapi.version>
 		<json.version>20080701</json.version>
 		<spring.framework.version>3.0.5.RELEASE</spring.framework.version>
