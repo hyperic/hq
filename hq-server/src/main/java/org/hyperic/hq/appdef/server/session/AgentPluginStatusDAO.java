@@ -25,6 +25,7 @@
  */
 package org.hyperic.hq.appdef.server.session;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -32,9 +33,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+
 import org.hibernate.Hibernate;
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.type.IntegerType;
 import org.hibernate.type.StringType;
@@ -43,6 +48,8 @@ import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.product.server.session.PluginDAO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.orm.hibernate3.HibernateCallback;
+import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -56,6 +63,16 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
         super(AgentPluginStatus.class, factory);
         this.agentDAO = agentDAO;
         this.pluginDAO = pluginDAO;
+    }
+    
+    @PostConstruct
+    public void initCache() {
+        new HibernateTemplate(sessionFactory, true).execute(new HibernateCallback<Object>() {
+            public Object doInHibernate(Session session) throws HibernateException, SQLException {
+                session.createQuery("from AgentPluginStatus").list();
+                return null;
+            }
+        });
     }
     
     public void saveOrUpdate(AgentPluginStatus agentPluginStatus) {
@@ -142,14 +159,16 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
             .append("    from EAM_PLUGIN p ")
             .append("    join EAM_AGENT_PLUGIN_STATUS st on p.md5 = st.md5 ")
             .append("    where st.agent_id = s.agent_id and s.md5 = st.md5 ")
-            .append("    and p.deleted = '0' ")
-            .append(")")
+            .append("    and p.deleted = '0'")
+            .append(") ")
+            .append("OR s.last_sync_status != :syncSuccess")
             .toString();
         final SQLQuery query = getSession().createSQLQuery(sql);
         if (agentId != null) {
             query.setParameter("agentId", agentId);
         }
         return query.addScalar("id", Hibernate.INTEGER)
+                    .setParameter("syncSuccess", AgentPluginStatusEnum.SYNC_SUCCESS.toString())
                     .list();
     }
     
@@ -230,8 +249,11 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
     @SuppressWarnings("unchecked")
     public Collection<AgentPluginStatus> getPluginStatusByFileName(String fileName,
                                                       Collection<AgentPluginStatusEnum> statuses) {
-        final String hql =
-            "from AgentPluginStatus where fileName = :fileName and lastSyncStatus in (:statuses)";
+        final String hql = new StringBuilder(128)
+            .append("from AgentPluginStatus s ")
+            .append("where s.fileName = :fileName and s.lastSyncStatus in (:statuses) ")
+            .append("and exists (select 1 from Platform p where p.agent.id = s.agent.id)")
+            .toString();
         Collection<String> vals = new ArrayList<String>(statuses.size());
         for (final AgentPluginStatusEnum s : statuses) {
             vals.add(s.toString());
@@ -354,12 +376,19 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
         if (pluginFileNames != null && pluginFileNames.isEmpty()) {
             return Collections.emptyMap();
         }
-        String where = "";
+        String and = "";
         if (pluginFileNames != null) {
-            where = "where fileName in (:filenames)";
+            and = "and s.fileName in (:filenames) ";
         }
-        final String hql =
-            "select fileName, count(*) from AgentPluginStatus " + where + " group by fileName";
+        final String hql = new StringBuilder(256)
+            .append("select s.fileName, count(*) from AgentPluginStatus s ")
+            .append("where exists (")
+                .append("select 1 from Agent a ")
+                .append("join a.platforms p ")
+                .append("where a.id = s.agent.id) ")
+            .append(and)
+            .append("group by s.fileName")
+            .toString();
         final Query query = getSession().createQuery(hql);
         if (pluginFileNames != null) {
             query.setParameterList("filenames", pluginFileNames);
@@ -387,6 +416,29 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
           	.append("    where s.fileName = p.path")
           	.append(")")
             .toString();
+        return getSession().createQuery(hql).list();
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<AgentPluginStatus> getPluginStatusByAgent(AgentPluginStatusEnum ... keys) {
+        final List<String> vals = new ArrayList<String>(keys.length);
+        for (AgentPluginStatusEnum key : keys) {
+            vals.add(key.toString());
+        }
+        final String hql = new StringBuilder(128)
+            .append("from AgentPluginStatus s ")
+            .append("where exists (select 1 from Platform p where p.agent.id = s.agent.id) ")
+            .append("and s.lastSyncStatus in (:statuses)")
+            .toString();
+        return getSession()
+            .createQuery(hql)
+            .setParameterList("statuses", vals, new StringType())
+            .list();
+    }
+    
+    @SuppressWarnings("unchecked")
+    public List<Integer> getAllIds() {
+        final String hql = "select id from AgentPluginStatus";
         return getSession().createQuery(hql).list();
     }
 

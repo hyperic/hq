@@ -82,4 +82,8 @@ public class PluginDAO extends HibernateDAO<Plugin> {
         }
         return num.longValue();
     }
+    
+    protected boolean cacheFindAll() {
+        return true;
+    }
 }

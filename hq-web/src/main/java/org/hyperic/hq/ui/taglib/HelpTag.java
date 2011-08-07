@@ -26,17 +26,12 @@
 package org.hyperic.hq.ui.taglib;
 
 import java.io.IOException;
-import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
 
-import org.hyperic.hq.bizapp.shared.ConfigBoss;
-import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ui.Constants;
-import org.hyperic.util.ConfigPropertyException;
 
 /**
  * return the link to the help system.
@@ -44,6 +39,7 @@ import org.hyperic.util.ConfigPropertyException;
 public class HelpTag extends VarSetterBaseTag {
     private static String INTERNAL_HELP_BASE_URL = "/ui_docs/DOC/";
     private boolean context = true;
+	private String key = "";
     
     //----------------------------------------------------public methods
     public boolean isContext() {
@@ -53,57 +49,40 @@ public class HelpTag extends VarSetterBaseTag {
     public void setContext(boolean context) {
         this.context = context;
     }
-
+	
+    public String getKey() {
+        return key;
+    }
+	
+    public void setKey(String key) {
+        this.key = key;
+    }
+	
     public int doStartTag() throws JspException{
         JspWriter output = pageContext.getOut();
+        String helpURL = ((HttpServletRequest) pageContext.getRequest()).getContextPath() + INTERNAL_HELP_BASE_URL;
         
-        // See if help is internal or external
-        boolean external = true;
-     
-        ConfigBoss boss = Bootstrap.getBean(ConfigBoss.class);
-        Properties props;
-        try {
-            props = boss.getConfig();
-        } catch (ConfigPropertyException e) {
-            throw new JspException(e);
-        }
-        String externStr = props.getProperty(HQConstants.ExternalHelp);
-        external = (externStr == null) ||
-                   Boolean.valueOf(externStr).booleanValue();
-
-        String helpURL;
-        if (external) {
-            // Retrieve the context and compose the help URL
-            helpURL = (String) pageContext.getServletContext().getAttribute(
-                Constants.HELP_BASE_URL_KEY);
-        }
-        else {
-            helpURL =
-                ((HttpServletRequest) pageContext.getRequest()).getContextPath()
-                + INTERNAL_HELP_BASE_URL;
-        }
-
         if (context) {
-            String helpContext = (String)
-                pageContext.getRequest().getAttribute(Constants.PAGE_TITLE_KEY);
+            String helpContext = (String) pageContext.getRequest().getAttribute(Constants.PAGE_TITLE_KEY);
             
             if ( helpContext != null)
                 helpURL = helpURL + "ui-" + helpContext; 
         }
-        
-        if (!external) {
-            if (INTERNAL_HELP_BASE_URL.equals(helpURL)) {
+        helpURL+=key;
+		
+        if (INTERNAL_HELP_BASE_URL.equals(helpURL)) {
                 helpURL += "index";
-            }
-            helpURL += ".html";
         }
 
+        helpURL += ".html";
+        
         try{
             output.print( helpURL );
         }
         catch(IOException e){
             throw new JspException(e);        
         }
+        
         return SKIP_BODY;
     }
 }

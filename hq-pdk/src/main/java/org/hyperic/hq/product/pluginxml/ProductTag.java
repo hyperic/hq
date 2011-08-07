@@ -40,7 +40,7 @@ class ProductTag
     static final String ATTR_PACKAGE = "package";
     
     private static final String[] OPTIONAL_ATTRS = {
-        ATTR_CLASS, ATTR_PACKAGE, ATTR_NAME, ATTR_VERSION 
+        ATTR_CLASS, ATTR_PACKAGE, ATTR_NAME
     };
     
     private ProductTag() {}
@@ -89,24 +89,14 @@ class ProductTag
     public void endAttributes() throws XmlAttrException {
         String name = getAttribute(ATTR_NAME);
         String packageName = getAttribute(ATTR_PACKAGE);
-        String version = getAttribute(ATTR_VERSION);
         
         if (name != null) {
             this.data.name = name;
-        }
-        else {
+        } else {
             name = this.data.name;
         }
-        
-        if (version != null) {
-        	this.data.setVersion(version);
-        } else {
-        	version = this.data.getVersion();
-        }
 
-        if ((packageName == null) &&
-            (name != null))
-        {
+        if ((packageName == null) && (name != null)) {
             packageName = DEFAULT_PACKAGE + "." + name;
         }
         

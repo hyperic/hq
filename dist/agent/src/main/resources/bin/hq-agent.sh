@@ -185,8 +185,9 @@ CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/ant-1.7.1.jar"
 CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/commons-logging-1.0.4.jar"
 CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/log4j-1.2.14.jar"
 CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/sigar-${sigar.version}.jar"
-CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/commons-httpclient-3.1.jar"
-CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/commons-codec-1.2.jar"
+CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/httpclient-4.1.1.jar"
+CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/httpcore-4.1.jar"
+CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${PDK_LIB}/spring-core-3.0.5.RELEASE.jar"
 CLIENT_CLASSPATH="${CLIENT_CLASSPATH}:${AGENT_LIB}/hq-lather-${project.version}.jar"
 
 CLIENT_CLASS=org.hyperic.hq.bizapp.agent.client.AgentClient

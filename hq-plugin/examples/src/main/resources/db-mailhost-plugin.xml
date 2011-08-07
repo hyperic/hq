@@ -25,6 +25,7 @@
 
 <!-- Auto-discover services using SQL and collect SMTP metrics -->
 <plugin>
+  <property name="PLUGIN_VERSION" value="@project.version@"/>
   <classpath>
     <!-- for SQLQueryDetector -->
     <include name="pdk/plugins/sqlquery-plugin.jar"/>

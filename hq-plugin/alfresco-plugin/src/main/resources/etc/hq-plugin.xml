@@ -33,7 +33,8 @@
 ]>
 
 
-<plugin package="org.hyperic.hq.plugin.alfresco" version="@project.version@">
+<plugin package="org.hyperic.hq.plugin.alfresco">
+  <property name="PLUGIN_VERSION" value="@project.version@"/>
 
   <classpath>
     <include name="pdk/lib/jdbc/jconn3.jar"/>

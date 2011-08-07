@@ -31,6 +31,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -61,6 +62,7 @@ public class PluginSyncJob implements AgentDataTransferJob {
     private PluginManager pluginManager;
     private boolean restartAgent = true;
     private static final Log log = LogFactory.getLog(PluginSyncJob.class);
+    private AtomicBoolean success = new AtomicBoolean(false);
 
     @Autowired
     public PluginSyncJob(AgentManager agentManager,
@@ -85,18 +87,28 @@ public class PluginSyncJob implements AgentDataTransferJob {
         try {
             final Collection<String> pluginNames = getPluginFileNames(plugins);
             final FileDataResult[] transferResult =
-                agentManager.transferAgentPlugins(overlord, getAgentId(), pluginNames);
+                agentManager.transferAgentPlugins(overlord, agentId, pluginNames);
+            if (Thread.currentThread().isInterrupted()) {
+                return;
+            }
             Map<String, Boolean> removeResult = null;
             if (toRemove != null && !toRemove.isEmpty()) {
-                removeResult = agentManager.agentRemovePlugins(overlord, getAgentId(), toRemove);
+                removeResult = agentManager.agentRemovePlugins(overlord, agentId, toRemove);
+            }
+            if (Thread.currentThread().isInterrupted()) {
+                return;
             }
             logDebugs(transferResult, removeResult);
             restartAgentAndLogErrors(transferResult, removeResult, agentManager);
+            if (Thread.currentThread().isInterrupted()) {
+                return;
+            }
+            success.set(true);
         } catch (Exception e) {
             pluginManager.updateAgentPluginSyncStatusInNewTran(
-                AgentPluginStatusEnum.SYNC_FAILURE, getAgentId(), plugins);
+                AgentPluginStatusEnum.SYNC_FAILURE, agentId, plugins);
             throw new SystemException(
-                "error transferring agent plugins to agentId=" + getAgentId(), e);
+                "error transferring agent plugins to agentId=" + agentId, e);
         }
     }
 
@@ -132,8 +144,8 @@ public class PluginSyncJob implements AgentDataTransferJob {
     }
 
     private void restartAgentAndLogErrors(FileDataResult[] transferResult,
-                                            Map<String, Boolean> removeResult,
-                                            AgentManager agentManager) {
+                                          Map<String, Boolean> removeResult,
+                                          AgentManager agentManager) {
         if (removeResult != null && !removeResult.isEmpty()) {
             for (final Entry<String, Boolean> entry : removeResult.entrySet()) {
                 final String file = entry.getKey();
@@ -187,6 +199,10 @@ public class PluginSyncJob implements AgentDataTransferJob {
 
     public void restartAgent(boolean restartAgent) {
         this.restartAgent = restartAgent;
+    }
+
+    public boolean wasSuccessful() {
+        return success.get();
     }
 
 }

@@ -1,0 +1,56 @@
+ <plugin>
+  <service name="WebApp Cache"
+           server="Sun JVM" version="1.5">
+
+    <property name="OBJECT_NAME"
+              value="Catalina:type=Cache,host=*,path=*"/>
+
+    <property name="AUTOINVENTORY_NAME"
+              value="%platform.name% %path% Tomcat WebApp Cache"/>
+
+    <plugin type="autoinventory"/>
+
+    <plugin type="measurement"
+            class="org.hyperic.hq.product.jmx.MxMeasurementPlugin"/>
+
+    <plugin type="control"
+            class="org.hyperic.hq.product.jmx.MxControlPlugin"/>
+
+    <!-- set* are attribute setters, the rest are MBean operations-->
+    <actions include="setscacheMaxSize,unload,lookup,allocate"/>
+
+    <config>
+      <option name="host"
+              description="Host name"
+              default="localhost"/>
+  
+      <option name="path"
+              description="Path"
+              default="/jsp-examples"/>
+    </config>
+
+    <properties>
+      <property name="cacheMaxSize" description="Maximum Cache Size"/>
+    </properties>
+
+    <filter name="template"
+            value="${OBJECT_NAME}:${alias}"/>
+
+    <metric name="Availability"
+            template="${OBJECT_NAME}:Availability"
+            indicator="true"/>
+
+    <metric name="Access Count"
+            alias="accessCount"
+            collectionType="trendsup"
+            indicator="true"/>
+
+    <metric name="Hit Count"
+            alias="hitsCount"
+            collectionType="trendsup"
+            indicator="true"/>
+
+    <metric name="Size"
+            alias="cacheSize"/>
+  </service>
+</plugin>

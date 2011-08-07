@@ -168,9 +168,19 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                     final Runnable runner = new Runnable() {
                         public void run() {
                             final Integer agentId = am.updateAgentPluginStatus(zevent.getPluginReport());
+                            try {
+                                // since updateAgentPluginStatus may update the agent obj,
+                                // I want to make sure that it is still in cache since it is
+                                // extremely critical for ReportProcessor
+                                am.getAgent(zevent.getPluginReport().getAgentToken());
+                            } catch (AgentNotFoundException e) {
+                                log.debug(e,e);
+                            }
                             // want to check in after transaction is committed
                             if (agentId != null) {
                                 agentPluginSyncRestartThrottle.checkinAfterRestart(agentId);
+                            } else {
+                                log.warn("received a null agentId from token=" + zevent.getPluginReport().getAgentToken());
                             }
                         }
                     };
@@ -197,7 +207,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                 for (final PluginDeployedZevent zevent : events) {
                     final Runnable runner = new Runnable() {
                         public void run() {
-                            am.syncPluginToAgents(zevent.getFileName());
+                            am.syncPluginToAgents(zevent.getFileNames());
                         }
                     };
                     try {
@@ -903,6 +913,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         if (filenames == null || filenames.isEmpty()) {
             return new FileDataResult[0];
         }
+        final boolean debug = log.isDebugEnabled();
         final List<FileDataResult> rtn = new ArrayList<FileDataResult>();
         concurrentStatsCollector.addStat(filenames.size(),
             ConcurrentStatsCollector.AGENT_PLUGIN_TRANSFER);
@@ -912,7 +923,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         Agent agent = agentDao.get(agentId);
         int i=0;
         for (final String filename : filenames) {
-            log.info("Transferring server plugin  " + filename + " to agent " + agent);
+            if (debug) log.debug("Transferring server plugin " + filename + " to agent " + agent);
             File customPlugin = new File(pluginManager.getCustomPluginDir(), filename);
             File src;
             if (!customPlugin.exists()) {
@@ -939,8 +950,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                                    PLUGINS_EXTENSION + AgentUpgradeManager.UPDATED_PLUGIN_EXTENSION);
             // tokenize agent.bundle.home since this can only be resolved at the agent
             files[i][1] = AGENT_BUNDLE_HOME_PROP + "/tmp/" + updatePlugin;
-            log.info("Transferring agent bundle from local repository at " + files[i][0] +
-                     " to agent " + agent + " at " + files[i][1]);
+            if (debug) log.debug("Transferring agent bundle from local repository at " + files[i][0] +
+                                 " to agent " + agent + " at " + files[i][1]);
             modes[i] = FileData.WRITETYPE_CREATEOROVERWRITE;
             i++;
         }
@@ -1013,7 +1024,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         throws PermissionException, AgentNotFoundException, AgentConnectionException,
         AgentRemoteException, FileNotFoundException, IOException, ConfigPropertyException {
 
-        log.info("Upgrading to agent bundle  " + bundleFileName + " on agent " + aid.getID());
+        log.info("Upgrading to agent bundle  " + bundleFileName + " on agent " + aid.toString());
 
         permissionManager.checkCreatePlatformPermission(subject);
 
@@ -1065,7 +1076,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     throws PermissionException, AgentNotFoundException, AgentConnectionException,
            AgentRemoteException, FileNotFoundException, IOException, ConfigPropertyException {
         Agent agent = agentDao.get(agentId);
-        log.info("Restarting agent " + agent);
+        if (log.isDebugEnabled()) log.debug("Restarting agent " + agent);
         permissionManager.checkCreatePlatformPermission(subject);
         AgentCommandsClient client = agentCommandsClientFactory.getClient(agent);
         client.restart();
@@ -1117,12 +1128,11 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     public long pingAgent(AuthzSubject subject, Agent agent) throws PermissionException,
         AgentNotFoundException, AgentConnectionException, AgentRemoteException, IOException,
         ConfigPropertyException {
-        if (log.isDebugEnabled()) log.debug("Pinging agent " + agent.getAddress());
-
         permissionManager.checkCreatePlatformPermission(subject);
-
         AgentCommandsClient client = agentCommandsClientFactory.getClient(agent);
-        return client.ping();
+        long time = client.ping();
+        if (log.isDebugEnabled()) log.debug("Ping agent " + agent.getAddress() + ", time=" + time);
+        return time;
     }
 
     /**
@@ -1239,6 +1249,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     throws AgentConnectionException, AgentRemoteException, PermissionException {
         permissionManager.checkIsSuperUser(subject);
         AgentCommandsClient client = agentCommandsClientFactory.getClient(agent);
+        concurrentStatsCollector.addStat(filenames.size(), ConcurrentStatsCollector.AGENT_PLUGIN_REMOVE);
         return client.agentRemoveFile(filenames);
     }
     
@@ -1310,9 +1321,6 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                 // only set canRestartAgent if plugins from the last run to this run have changed
                 // on the agent side.
                 canRestartAgent = true;
-            } else {
-                if (debug) log.debug("agent=" + agent + " has no updates and plugins haven't " +
-                                     "been modified since the last checkin, ignoring");
             }
             final Map<String, AgentPluginStatus> statusByFileName =
                 agentPluginStatusDAO.getPluginStatusByAgent(agent);
@@ -1329,10 +1337,13 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
             // contained in creates
             processPluginsNotOnAgent(agent, updateMap, creates);
             if (!canRestartAgent && (!updateMap.isEmpty() || !removeMap.isEmpty())) {
-                log.warn("agent=" + agent + " checked in the same plugin report twice in a row " +
-                         " and plugins have not been updated on the server but it's inventory " +
-                         " should be sync'd. updateMap=" + updateMap + ", removeMap=" + removeMap +
-                         ".  All plugins will be sync'd but agent will not be restarted.");
+                log.warn("agent=" + agent + " has checked in the exact same plugin set " +
+                         "twice in a row.  To avoid any potential issues on " +
+                         "the agent which may cause it to continuously restart the Server will sync " +
+                         "up the agent's plugin repository but will not restart it.  Depending on the " +
+                         "state of the agent it may take up to two successful agent restarts in " +
+                         "order for the agent's plugin to be successfully sync'd with the Server." +
+                         "  updateMap=" + updateMap + ", removeMap=" + removeMap);
             }
             agentPluginUpdater.queuePluginTransfer(updateMap, removeMap, canRestartAgent);
         } catch (AgentNotFoundException e) {
@@ -1492,24 +1503,50 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     }
 
     @Transactional(readOnly=true)
-    public void syncPluginToAgentsAfterCommit(String pluginFileName) {
-        ZeventManager.getInstance().enqueueEventAfterCommit(new PluginDeployedZevent(pluginFileName));
+    public void syncPluginToAgentsAfterCommit(Collection<String> pluginFileNames) {
+        if (pluginFileNames.isEmpty()) {
+            return;
+        }
+        ZeventManager.getInstance().enqueueEventAfterCommit(new PluginDeployedZevent(pluginFileNames));
     }
 
-    public void syncPluginToAgents(String filename) {
+    public void syncPluginToAgents(Collection<String> filenames) {
+        if (filenames.isEmpty()) {
+            return;
+        }
+        final Map<Integer, Collection<Plugin>> toSync = new HashMap<Integer, Collection<Plugin>>();
+        for (final String filename : filenames) {
+            final Map<Integer, Collection<Plugin>> tmp = updateStatusAndGetSyncInfo(filename);
+            for (final Entry<Integer, Collection<Plugin>> entry : tmp.entrySet()) {
+                final Integer agentid = entry.getKey();
+                if (agentid == null) {
+                    continue;
+                }
+                Collection<Plugin> plugins = toSync.get(agentid);
+                if (plugins == null) {
+                    plugins = new ArrayList<Plugin>();
+                    toSync.put(agentid, plugins);
+                }
+                plugins.addAll(entry.getValue());
+            }
+        }
+        agentPluginUpdater.queuePluginTransfer(toSync, null, true);
+    }
+
+    private Map<Integer, Collection<Plugin>> updateStatusAndGetSyncInfo(String filename) {
         final Plugin plugin = pluginDAO.getByFilename(filename);
         if (plugin == null) {
-            log.error("attempted to initite plugin transfer of " + filename + " but plugin " +
+            log.error("attempted to initiate plugin transfer of " + filename + " but plugin " +
                       "does not exist in HQ");
-            return;
+            return Collections.emptyMap();
         } else if (plugin.isDisabled()) {
-            log.error("attempted to initite plugin transfer of " + filename + " but plugin " +
+            log.error("attempted to initiate plugin transfer of " + filename + " but plugin " +
                       "is disabled in HQ");
-            return;
+            return Collections.emptyMap();
         } else if (plugin.isDeleted()) {
-            log.error("attempted to initite plugin transfer of " + filename + " but plugin " +
+            log.error("attempted to initiate plugin transfer of " + filename + " but plugin " +
                       "is marked as deleted in HQ");
-            return;
+            return Collections.emptyMap();
         }
         final Collection<Agent> agents = agentPluginStatusDAO.getAutoUpdatingAgents();
         final Map<Agent, AgentPluginStatus> map = agentPluginStatusDAO.getPluginStatusByFileName(filename);
@@ -1526,7 +1563,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                     status = new AgentPluginStatus();
                     status.setAgent(agent);
                     status.setFileName(plugin.getPath());
-                    status.setMD5(plugin.getMD5());
+                    status.setMD5(null);
                     status.setPluginName(plugin.getName());
                     status.setProductName(plugin.getName());
                     status.setLastCheckin(0);
@@ -1539,7 +1576,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                 }
             }
         }
-        agentPluginUpdater.queuePluginTransfer(toSync, null, true);
+        return toSync;
     }
     
     @Transactional(readOnly=true)
@@ -1608,7 +1645,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                     addToRemoveMap(removeMap, agent, s.getFileName());
                     continue;
                 }
-                if (!plugin.getMD5().equals(s.getMD5())) {
+                if (!plugin.getMD5().equals(s.getMD5()) ||
+                        !s.getLastSyncStatus().equals(AgentPluginStatusEnum.SYNC_SUCCESS.toString())) {
                     plugins.add(plugin);
                 }
             }
@@ -1624,8 +1662,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         final Map<Integer, Collection<String>> rtn = new HashMap<Integer, Collection<String>>(size);
         for (final Entry<Agent, Collection<AgentPluginStatus>> entry : removes.entrySet()) {
             final Agent agent = entry.getKey();
-            Collection<AgentPluginStatus> list = entry.getValue();
-            for (AgentPluginStatus s : list) {
+            final Collection<AgentPluginStatus> list = entry.getValue();
+            for (final AgentPluginStatus s : list) {
                 addToRemoveMap(rtn, agent, s.getFileName());
             }
         }
@@ -1663,22 +1701,14 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     // THESE CLASSES ARE USED TO DRIVE THE ZEVENTS FOR THE SERVER -> AGENT PLUGIN SYNC
     // -----------------------------
     private class PluginDeployedZevent extends Zevent {
+        private Collection<String> pluginFileNames;
         @SuppressWarnings("serial")
-        private PluginDeployedZevent(String pluginFileName) {
-            super(new ZeventSourceId() {}, new PluginDeployPayload(pluginFileName));
+        private PluginDeployedZevent(Collection<String> pluginFileNames) {
+            super(new ZeventSourceId() {}, new ZeventPayload() {});
+            this.pluginFileNames = pluginFileNames;
         }
-        private String getFileName() {
-            return ((PluginDeployPayload) getPayload()).getFileName();
-        }
-    }
-
-    private class PluginDeployPayload implements ZeventPayload {
-        private final String pluginFileName;
-        private PluginDeployPayload(String pluginFileName) {
-            this.pluginFileName = pluginFileName;
-        }
-        private String getFileName() {
-            return pluginFileName;
+        private Collection<String> getFileNames() {
+            return pluginFileNames;
         }
     }
 

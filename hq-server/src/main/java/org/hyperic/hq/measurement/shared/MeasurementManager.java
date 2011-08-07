@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.server.session.Server;
@@ -52,6 +53,7 @@ import org.hyperic.hq.measurement.server.session.CollectionSummary;
 import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementEnabler;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 
@@ -404,5 +406,15 @@ public interface MeasurementManager {
     List<Measurement> getMetricsCollecting(ResourceGroup g, Integer templateId);
 
     List<Measurement> getEnabledMeasurements(Integer[] tids, Integer[] aeids);
+
+    Map<Integer, List<Measurement>> getEnabledNonAvailMeasurements(List<Resource> resources);
+
+    /**
+     * This method allows a consumer to grab the associated MeasurementTemplate
+     * from a MeasurementId in a non-transactional context.  The returned MeasurementTemplate is
+     * fully populated.
+     * @return {@link MeasurementTemplate}s
+     */
+    MeasurementTemplate getTemplatesByMeasId(Integer measId);
 
 }

@@ -93,6 +93,10 @@ public class RenditServerImpl implements RenditServer {
         synchronized (cfgLock) {
             plugins.remove(pluginName);
         }
+        UIPlugin plugin = uiPluginManager.findPluginByName(pluginName);
+        if (plugin != null){
+            uiPluginManager.deletePlugin(plugin);
+        }
     }
 
     /**

@@ -30,9 +30,12 @@ import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.agent.client.SecureAgentConnection;
+import org.hyperic.hq.security.ServerKeystoreConfig;
 import org.hyperic.hq.transport.AgentProxyFactory;
 import org.hyperic.util.i18n.MessageBundle;
+import org.hyperic.util.security.KeystoreConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -47,11 +50,20 @@ public class LiveDataCommandsClientFactory {
     private final AgentManager agentManager;
 
     private final AgentProxyFactory agentProxyFactory;
-
+    private KeystoreConfig keystoreConfig;
+    private boolean acceptUnverifiedCertificates;
+    
     @Autowired
-    public LiveDataCommandsClientFactory(AgentManager agentManager, AgentProxyFactory agentProxyFactory) {
+    public LiveDataCommandsClientFactory(AgentManager agentManager, 
+                                         AgentProxyFactory agentProxyFactory,
+                                         ServerKeystoreConfig serverKeystoreConfig,
+                                         @Value("#{securityProperties['accept.unverified.certificates']}")
+                                         boolean acceptUnverifiedCertificates) {
+
         this.agentManager = agentManager;
         this.agentProxyFactory = agentProxyFactory;
+        keystoreConfig = serverKeystoreConfig;
+        this.acceptUnverifiedCertificates = acceptUnverifiedCertificates;
     }
 
     public LiveDataCommandsClient getClient(AppdefEntityID aid) throws AgentNotFoundException {
@@ -72,8 +84,12 @@ public class LiveDataCommandsClientFactory {
         if (agent.isNewTransportAgent()) {
             return new LiveDataCommandsClientImpl(agent, agentProxyFactory);
         } else {
-            return new LegacyLiveDataCommandsClientImpl(new SecureAgentConnection(agent.getAddress(), agent.getPort(),
-                agent.getAuthToken()));
+            SecureAgentConnection conn = new SecureAgentConnection(agent.getAddress(),
+                                                                   agent.getPort(),
+                                                                   agent.getAuthToken(),
+                                                                   keystoreConfig,
+                                                                   acceptUnverifiedCertificates);
+            return new LegacyLiveDataCommandsClientImpl(conn);
         }
     }
 

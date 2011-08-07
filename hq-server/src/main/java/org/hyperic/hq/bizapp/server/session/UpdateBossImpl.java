@@ -36,10 +36,15 @@ import java.util.zip.GZIPOutputStream;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.util.EntityUtils;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServiceManager;
@@ -52,6 +57,10 @@ import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.hqu.server.session.UIPlugin;
 import org.hyperic.hq.hqu.shared.UIPluginManager;
+import org.hyperic.hq.security.ServerKeystoreConfig;
+import org.hyperic.util.http.HQHttpClient;
+import org.hyperic.util.http.HttpConfig;
+import org.hyperic.util.security.KeystoreConfig;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -75,7 +84,8 @@ public class UpdateBossImpl implements UpdateBoss {
     private String updateNotifyUrl;
     private static final int HTTP_TIMEOUT_MILLIS = 30000;
     private DataSource dataSource;
- 
+    private KeystoreConfig keystoreConf;
+    private boolean acceptUnverifiedCertificates;
 
     @Autowired
     public UpdateBossImpl(
@@ -87,7 +97,10 @@ public class UpdateBossImpl implements UpdateBoss {
                           UIPluginManager uiPluginManager,
                           ServerConfigAuditFactory serverConfigAuditFactory,
                           DataSource dataSource,
-                          @Value("#{tweakProperties['hq.updateNotify.url'] }") String updateNotifyUrl) {
+                          @Value("#{tweakProperties['hq.updateNotify.url'] }") String updateNotifyUrl,
+                          ServerKeystoreConfig serverKeystoreConfig,
+                          @Value("#{securityProperties['accept.unverified.certificates']}")
+                          boolean acceptUnverifiedCertificates) {
         this.updateDAO = updateDAO;
         this.serverConfigManager = serverConfigManager;
         this.platformManager = platformManager;
@@ -97,6 +110,8 @@ public class UpdateBossImpl implements UpdateBoss {
         this.serverConfigAuditFactory = serverConfigAuditFactory;
         this.dataSource = dataSource;
         this.updateNotifyUrl = updateNotifyUrl;
+        keystoreConf =  serverKeystoreConfig;
+        this.acceptUnverifiedCertificates = acceptUnverifiedCertificates;
     }
 
     protected Properties getRequestInfo(UpdateStatus status) {
@@ -154,15 +169,16 @@ public class UpdateBossImpl implements UpdateBoss {
      * 
      */
     public void fetchReport() {
-        final boolean debug = log.isDebugEnabled();
+    	final boolean debug = log.isDebugEnabled();
         final StopWatch watch = new StopWatch();
         UpdateStatus status = getOrCreateStatus();
         Properties req;
         byte[] reqBytes;
 
-        if (status.getMode().equals(UpdateStatusMode.NONE))
+        if (status.getMode().equals(UpdateStatusMode.NONE)) {
             return;
-
+        }
+        
         req = getRequestInfo(status);
 
         try {
@@ -182,43 +198,43 @@ public class UpdateBossImpl implements UpdateBoss {
         if(debug){
             log.debug("Generated report.  Size=" + reqBytes.length + " report:\n" + req);
         }
-
-        PostMethod post = new PostMethod(this.updateNotifyUrl);
-        post.addRequestHeader("x-hq-guid", req.getProperty("hq.guid"));
-        HttpClient c = new HttpClient();
-        c.setConnectionTimeout(HTTP_TIMEOUT_MILLIS);
-        c.setTimeout(HTTP_TIMEOUT_MILLIS);
-
-        ByteArrayInputStream bIs = new ByteArrayInputStream(reqBytes);
-
-        post.setRequestBody(bIs);
-
-        String response = null;
-        int statusCode = -1;
+        
         try {
+	        HttpConfig config = new HttpConfig(HTTP_TIMEOUT_MILLIS, HTTP_TIMEOUT_MILLIS, null, -1);
+	        HQHttpClient client = new HQHttpClient(keystoreConf, config, acceptUnverifiedCertificates);
+	        HttpPost post = new HttpPost(updateNotifyUrl);
+	        
+	        post.addHeader("x-hq-guid", req.getProperty("hq.guid"));
+	        
+	        ByteArrayInputStream bIs = new ByteArrayInputStream(reqBytes);
+	        HttpEntity entity = new InputStreamEntity(bIs, reqBytes.length);
+	        
+	        post.setEntity(entity);
+        
             if (debug) watch.markTimeBegin("post");
-            statusCode = c.executeMethod(post);
+
+            HttpResponse response = client.execute(post);
+            
             if (debug) watch.markTimeEnd("post");
 
-            response = post.getResponseBodyAsString();
-        } catch (Exception e) {
-            if(debug) {
-                log.debug("Unable to get updates from " + updateNotifyUrl, e);
+            if (response != null && response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                processReport(response.getStatusLine().getStatusCode(), 
+            			EntityUtils.toString(response.getEntity(), "UTF-8"));
+            } else {
+    	        if (debug) {
+    	        	log.debug("fetchReport: " + watch
+    	                    + ", currentReport {" + status.getReport()
+    	                    + "}, latestReport {url=" + updateNotifyUrl
+    	                    + ", statusCode=" + response.getStatusLine().getStatusCode()
+    	                    + ", response=" + EntityUtils.toString(response.getEntity(), "UTF-8")
+    	                    + "}");
+                }
             }
-            return;
-        } finally {
-            post.releaseConnection();
-            if (debug) {
-                log.debug("fetchReport: " + watch
-                    + ", currentReport {" + status.getReport()
-                    + "}, latestReport {url=" + updateNotifyUrl
-                    + ", statusCode=" + statusCode
-                    + ", response=" + response
-                    + "}");
-            }
-        }
-
-        processReport(statusCode, response);
+        } catch (ClientProtocolException e) {
+			log.error(e);
+		} catch (IOException e) {
+			log.error(e);
+		}
     }
 
     private void processReport(int statusCode, String response) {

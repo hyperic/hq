@@ -40,10 +40,10 @@ hyperic.URLS = {}; hyperic.widget = {}; hyperic.utils = {}; hyperic.html = {}; h
 
 hyperic.html = {
     show : function(/*String*/ node){
-        hqDojo.style(node, 'display', '');
+        hqDojo.query("#" + node).style('display', '');
     },
     hide : function(/*String*/ node){
-        hqDojo.style(node, 'display', 'none');
+        hqDojo.query("#" + node).style('display', 'none');
     }
 };
 
@@ -3554,6 +3554,10 @@ hyperic.alert_center = function(title_name) {
 	    	content: myParam,
 	    	handleAs: 'json',
 	    	load: function(data) {
+				if (data.actionToken) {
+					// use new CSRF token for subsequent POST requests
+					myInput.form.action = data.actionToken;
+				}
 	    		that.startAutoRefresh(that.dialogs.AckAlert.data.subgroup);
 	    	},
 	    	error: function(data){
@@ -3570,6 +3574,10 @@ hyperic.alert_center = function(title_name) {
 	    	content: Form.serialize(myForm,true),
 	    	handleAs: 'json',
 	    	load: function(data){
+				if (data.actionToken) {
+					// use new CSRF token for subsequent POST requests
+					myForm.action = data.actionToken;
+				}
 				that.current.dialog.hide();
 	    		that.startAutoRefresh(that.current.dialog.data.subgroup);
 	    	},
@@ -3620,6 +3628,10 @@ hyperic.alert_center = function(title_name) {
 					
 				// submit next selection
 				if (++alertIndex < ealerts.length) {
+					if (data.actionToken) {
+						// use new CSRF token for subsequent POST requests
+						myForm.action = data.actionToken;
+					}
 					that.xhrBatchSubmit(myDialog, alertIndex);
 				} else {
 					that.current.dialog.hide();
@@ -3806,7 +3818,6 @@ hyperic.maintenance_schedule = function(args) {
     			value: that.selected_from_time,
     			constraints: {
                     datePattern: 'MM/dd/y'},
-    			lang: "en-us",
     			promptMessage: "A valid date in format mm/dd/yyyy is required.",
     			rangeMessage: hyperic.data.maintenance_schedule.error.startDateRange,
     			invalidMessage: hyperic.data.maintenance_schedule.error.datePattern,
@@ -3818,7 +3829,6 @@ hyperic.maintenance_schedule = function(args) {
     			value: that.selected_to_time,
     			constraints: {
                     datePattern: 'MM/dd/y'},
-    			lang: "en-us",
     			promptMessage: "A valid date in format mm/dd/yyyy is required.",
     			rangeMessage: hyperic.data.maintenance_schedule.error.endDateRange,
     			invalidMessage: hyperic.data.maintenance_schedule.error.datePattern,
@@ -3828,7 +3838,6 @@ hyperic.maintenance_schedule = function(args) {
         that.inputs.from_time = new hqDijit.form.TimeTextBox({
     			name: "from_time",
     			value: that.selected_from_time,
-    			lang: "en-us",
                 rangeMessage: hyperic.data.maintenance_schedule.error.startTimeRange,
     			invalidMessage: hyperic.data.maintenance_schedule.error.timePattern,
     			required: true
@@ -3837,7 +3846,6 @@ hyperic.maintenance_schedule = function(args) {
         that.inputs.to_time = new hqDijit.form.TimeTextBox({
     			name: "to_time",
     			value: that.selected_to_time,
-    			lang: "en-us",
                 rangeMessage: hyperic.data.maintenance_schedule.error.endTimeRange,
     			invalidMessage: hyperic.data.maintenance_schedule.error.timePattern,
     			required: true

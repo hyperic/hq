@@ -92,7 +92,7 @@ public interface UIPluginManager {
 	 * 
 	 * @return a collection of {@link AttachType}s
 	 */
-	public Collection<AttachType> findViews(AttachType type);
+	public Collection<View> findViews(AttachType type);
 
 	/**
 	 * Find all attachments for a specific type

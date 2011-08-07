@@ -29,7 +29,6 @@ import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
 import java.io.File;
-import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -39,18 +38,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
-
+import org.easymock.IExpectationSetters;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatus;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatusEnum;
 import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.shared.AgentManager;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.product.shared.PluginManager;
+import org.hyperic.hq.product.shared.PluginTypeEnum;
 import org.hyperic.hq.web.BaseControllerTest;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -59,17 +57,13 @@ import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.hyperic.hq.product.Plugin;
 
-/**
- * @author Annie Chen
- *
- */
 public class PluginManagerControllerTest extends BaseControllerTest {
     private PluginManagerController pluginManagerController;
     private PluginManager mockPluginManager;
     private AgentManager mockAgentManager;
+    private ResourceManager mockResourceManager;
     private AppdefBoss mockAppdefBoss;
     private AuthzBoss mockAuthzBoss;
-    private HttpServletRequest mockHttpServletRequest;
     private static SimpleDateFormat format;
     private static Date date1 = new Date();
     private static Date date2 = new Date();
@@ -90,22 +84,22 @@ public class PluginManagerControllerTest extends BaseControllerTest {
         super.setUp();
         mockPluginManager = createMock(PluginManager.class);
         mockAgentManager = createMock(AgentManager.class);
+        mockResourceManager = createMock(ResourceManager.class);
         mockAppdefBoss = getMockAppdefBoss();
         mockAuthzBoss = getMockAuthzBoss();
-        mockHttpServletRequest = createMock(HttpServletRequest.class);
         pluginManagerController = new PluginManagerController(mockAppdefBoss, mockAuthzBoss, 
-            mockPluginManager, mockAgentManager);
+            mockPluginManager, mockAgentManager,mockResourceManager);
 
     }
     
     @Test
     public void testMechanismOff(){
         Model model =new ExtendedModelMap();
+        expect(mockPluginManager.getStatusesByAgentId(AgentPluginStatusEnum.SYNC_FAILURE)).andStubReturn(getStatusesByAgentId());
         expect(mockPluginManager.getAllPlugins()).andStubReturn(new ArrayList<Plugin>());
         expect(mockPluginManager.getPluginRollupStatus()).andStubReturn(new HashMap<Integer, Map<AgentPluginStatusEnum, Integer>>());
         expect(mockPluginManager.isPluginSyncEnabled()).andStubReturn(false);
         expect(mockPluginManager.getCustomPluginDir()).andStubReturn(new File("/root/hq/test"));
-        expect(mockAgentManager.getAgents()).andStubReturn(getAgents());
         expect(mockAgentManager.getNumAutoUpdatingAgents()).andReturn(Long.parseLong("0"));
 
         replay(mockAgentManager);
@@ -113,11 +107,9 @@ public class PluginManagerControllerTest extends BaseControllerTest {
         
         String toPage = pluginManagerController.index(model);
         Map<String,Object> map = model.asMap();
-        List<Map<String, Object>> summaries = (List<Map<String, Object>>)map.get("pluginSummaries");
         Map<String, Object> info = (Map<String, Object>)map.get("info");
         
         assertEquals("should be direct to admin/managers/plugin page.", "admin/managers/plugin",toPage);
-        assertEquals("pluginSummaries size should be 0",0,summaries.size());
         assertEquals("all agent count should be 0",Long.valueOf(0),info.get("allAgentCount"));
         assertTrue("mechanismOn should be false", !(Boolean)map.get("mechanismOn"));
         assertEquals("instruction should be admin.managers.plugin.mechanism.off",
@@ -128,13 +120,13 @@ public class PluginManagerControllerTest extends BaseControllerTest {
     @Test
     public void testMechanismOn(){
         Model model =new ExtendedModelMap();
-        
+        expect(mockPluginManager.getStatusesByAgentId(AgentPluginStatusEnum.SYNC_FAILURE)).andStubReturn(getStatusesByAgentId());
         expect(mockPluginManager.getAllPlugins()).andStubReturn(getAllPlugins());
         expect(mockPluginManager.getPluginRollupStatus()).andStubReturn(getPluginRollupStatus());
         expect(mockPluginManager.isPluginSyncEnabled()).andStubReturn(true);
         expect(mockPluginManager.getCustomPluginDir()).andStubReturn(new File("/root/hq/test"));
-        expect(mockAgentManager.getAgents()).andStubReturn(getAgents());
         expect(mockAgentManager.getNumAutoUpdatingAgents()).andStubReturn(Long.parseLong("3"));
+        
         replay(mockAgentManager);
         replay(mockPluginManager);
         
@@ -152,8 +144,8 @@ public class PluginManagerControllerTest extends BaseControllerTest {
     
     @Test
     public void testAgentSummary(){
-        expect(mockAgentManager.getAgents()).andReturn(getAgents());
-        replay(mockAgentManager);
+        expect(mockPluginManager.getStatusesByAgentId(AgentPluginStatusEnum.SYNC_FAILURE)).andStubReturn(getStatusesByAgentId());
+        replay(mockPluginManager);
         
         List<String> summaries = pluginManagerController.getAgentStatusSummary();
         
@@ -162,108 +154,11 @@ public class PluginManagerControllerTest extends BaseControllerTest {
         assertEquals("agentZ's name should be 5.5.5.5","5.5.5.5",summaries.get(1));
     }
     
-    private List<Agent> getAgents(){
-        List<Agent> result = new ArrayList<Agent>();
-        
-        Agent agentX = new Agent();
-        Collection<AgentPluginStatus> pluginStatusX = new ArrayList<AgentPluginStatus>();
-        
-        AgentPluginStatus apXA = new AgentPluginStatus();
-        apXA.setLastSyncStatus(AgentPluginStatusEnum.SYNC_FAILURE.toString());
-        apXA.setPluginName("plugin-a");
-        apXA.setLastSyncAttempt(0);
-        pluginStatusX.add(apXA);
-
-        AgentPluginStatus apXB = new AgentPluginStatus();
-        apXB.setLastSyncStatus(AgentPluginStatusEnum.SYNC_FAILURE.toString());
-        apXB.setPluginName("plugin-b");
-        apXB.setLastSyncAttempt(10);
-        pluginStatusX.add(apXB);
-        
-        AgentPluginStatus apXC = new AgentPluginStatus();
-        apXC.setLastSyncStatus(AgentPluginStatusEnum.SYNC_IN_PROGRESS.toString());
-        apXC.setPluginName("plugin-c");
-        apXC.setLastSyncAttempt(100);
-        pluginStatusX.add(apXC);
-        
-        agentX.setPluginStatuses(pluginStatusX);
-        
-        Agent agentY = new Agent();
-        Collection<AgentPluginStatus> pluginStatusY = new ArrayList<AgentPluginStatus>();
-        
-        AgentPluginStatus apYA = new AgentPluginStatus();
-        apYA.setLastSyncStatus(AgentPluginStatusEnum.SYNC_SUCCESS.toString());
-        apYA.setPluginName("plugin-a");
-        apYA.setLastSyncAttempt(0);
-        pluginStatusY.add(apYA);
-
-        AgentPluginStatus apYB = new AgentPluginStatus();
-        apYB.setLastSyncStatus(AgentPluginStatusEnum.SYNC_SUCCESS.toString());
-        apYB.setPluginName("plugin-b");
-        apYB.setLastSyncAttempt(10);
-        pluginStatusY.add(apYB);
-        
-        AgentPluginStatus apYC = new AgentPluginStatus();
-        apYC.setLastSyncStatus(AgentPluginStatusEnum.SYNC_SUCCESS.toString());
-        apYC.setPluginName("plugin-c");
-        apYC.setLastSyncAttempt(100);
-        pluginStatusY.add(apYC);
-        
-        agentY.setPluginStatuses(pluginStatusY);        
-        
-        Agent agentZ = new Agent();
-        Collection<AgentPluginStatus> pluginStatusZ = new ArrayList<AgentPluginStatus>();
-        
-        AgentPluginStatus apZA = new AgentPluginStatus();
-        apZA.setLastSyncStatus(AgentPluginStatusEnum.SYNC_SUCCESS.toString());
-        apZA.setPluginName("plugin-a");
-        apZA.setLastSyncAttempt(0);
-        pluginStatusZ.add(apZA);
-
-        AgentPluginStatus apZB = new AgentPluginStatus();
-        apZB.setLastSyncStatus(AgentPluginStatusEnum.SYNC_IN_PROGRESS.toString());
-        apZB.setPluginName("plugin-b");
-        apZB.setLastSyncAttempt(10);
-        pluginStatusZ.add(apZB);
-        
-        AgentPluginStatus apZC = new AgentPluginStatus();
-        apZC.setLastSyncStatus(AgentPluginStatusEnum.SYNC_FAILURE.toString());
-        apZC.setPluginName("plugin-c");
-        apZC.setLastSyncAttempt(100);
-        pluginStatusZ.add(apZC);
-        
-        agentZ.setPluginStatuses(pluginStatusZ);    
-        
-        Collection <Platform> platformsX = new ArrayList<Platform>();
-        agentX.setPlatforms(platformsX);
-        agentX.setAddress("3.3.3.3");
-        
-        Collection <Platform> platformsY = new ArrayList<Platform>();
-        agentY.setPlatforms(platformsY);
-        agentY.setAddress("4.4.4.4");        
-        
-        Collection <Platform> platformsZ = new ArrayList<Platform>();
-        Platform platformZ1 = new Platform();
-        PlatformType platformType = new PlatformType("platformName-Z","plugin");
-        
-        platformZ1.setPlatformType(platformType);
-        platformZ1.setFqdn("agentZ");
-        platformsZ.add(platformZ1);
-        agentZ.setPlatforms(platformsZ);
-        agentZ.setAddress("5.5.5.5");   
-
-        
-        result.add(agentX);
-        result.add(agentY);
-        result.add(agentZ);
-        return result;
-    }
-
-    
     @Test
     public void testInfoNull(){
-        expect(mockAgentManager.getAgents()).andStubReturn(null);
+        expect(mockPluginManager.getStatusesByAgentId(AgentPluginStatusEnum.SYNC_FAILURE)).andStubReturn(null);
         expect(mockAgentManager.getNumAutoUpdatingAgents()).andReturn(Long.parseLong("0"));
+        replay(mockPluginManager);
         replay(mockAgentManager);
         
         Map<String, Object> result = pluginManagerController.getAgentInfo();
@@ -274,8 +169,9 @@ public class PluginManagerControllerTest extends BaseControllerTest {
     
     @Test
     public void testInfo(){
-        expect(mockAgentManager.getAgents()).andStubReturn(getAgents());
+        expect(mockPluginManager.getStatusesByAgentId(AgentPluginStatusEnum.SYNC_FAILURE)).andStubReturn(getStatusesByAgentId());
         expect(mockAgentManager.getNumAutoUpdatingAgents()).andReturn(Long.parseLong("3"));
+        replay(mockPluginManager);
         replay(mockAgentManager);
 
         Map<String, Object> result = pluginManagerController.getAgentInfo();
@@ -286,8 +182,12 @@ public class PluginManagerControllerTest extends BaseControllerTest {
     
     @Test
     public void testPluginSummaries() throws ParseException{
-        expect(mockPluginManager.getAllPlugins()).andReturn(getAllPlugins());
+        List<Plugin> plugins = getAllPlugins();
+        expect(mockPluginManager.getAllPlugins()).andReturn(plugins);
         expect(mockPluginManager.getPluginRollupStatus()).andReturn(getPluginRollupStatus());
+        expect(mockPluginManager.getPluginType(plugins.get(0))).andReturn(getPluginType(0));
+        expect(mockPluginManager.getPluginType(plugins.get(1))).andReturn(getPluginType(2));//pluginType is set before plugin list sort by status
+        expect(mockPluginManager.getPluginType(plugins.get(2))).andReturn(getPluginType(1));
         replay(mockPluginManager);
  
         List<Map<String, Object>> summaries = pluginManagerController.getPluginSummaries();
@@ -301,6 +201,8 @@ public class PluginManagerControllerTest extends BaseControllerTest {
         assertEquals("plugin-a: initialDeployDate should be ...",format.format(date2),""+summaries.get(0).get("initialDeployDate"));
         assertEquals("plugin-a: id should be 1",1,summaries.get(0).get("id"));
         assertEquals("plugin-a: name should be plugin-a","plugin-a",summaries.get(0).get("name"));
+        assertEquals("plugin-a: is server plugin",true, summaries.get(0).get("isServerPlugin"));
+        assertEquals("plugin-a: is not custom plugin",false, summaries.get(0).get("isCustomPlugin"));
         
         //make sure plugins are sorted by status
         assertEquals("plugin-c: name should be plugin-c","plugin-c",summaries.get(1).get("name"));
@@ -310,7 +212,9 @@ public class PluginManagerControllerTest extends BaseControllerTest {
         assertEquals("plugin-c: errorAgentCount should be 3",3,summaries.get(1).get("errorAgentCount"));
         assertEquals("plugin-c: inProgress should be true",true,(Boolean)summaries.get(1).get("inProgress"));
         assertEquals("plugin-c: id should be 3",3,summaries.get(1).get("id"));        
-
+        assertEquals("plugin-c: is not server plugin",false, summaries.get(1).get("isServerPlugin"));
+        assertEquals("plugin-c: is custom plugin",true, summaries.get(1).get("isCustomPlugin"));
+        
         assertEquals("plugin-b: name should be plugin-b","plugin-b",summaries.get(2).get("name"));
         assertEquals("plugin-b: inProgressAgentCount should be 0",0,summaries.get(2).get("inProgressAgentCount"));
         assertEquals("plugin-b: allAgentCount should be 99",99,summaries.get(2).get("allAgentCount"));
@@ -318,15 +222,35 @@ public class PluginManagerControllerTest extends BaseControllerTest {
         assertEquals("plugin-b: errorAgentCount should be 0",0,summaries.get(2).get("errorAgentCount"));
         assertEquals("plugin-b: inProgress should be false",false,(Boolean)summaries.get(2).get("inProgress"));
         assertEquals("plugin-b: id should be 2",2,summaries.get(2).get("id"));        
+        assertEquals("plugin-b: is not server plugin",false, summaries.get(2).get("isServerPlugin"));
+        assertEquals("plugin-b: is not custom plugin",false, summaries.get(2).get("isCustomPlugin"));
+
+
+    }
+    private Collection<PluginTypeEnum> getPluginType(int index){
+        Collection<PluginTypeEnum> result = new ArrayList<PluginTypeEnum>();
+        switch (index){
+            case 0:
+                result.add(PluginTypeEnum.SERVER_PLUGIN);
+                return result;
+            case 1:
+                result.add(PluginTypeEnum.CUSTOM_PLUGIN);
+                result.add(PluginTypeEnum.DEFAULT_PLUGIN);
+                return result;
+            case 2:
+                return result;
+        }
+        return null;
     }
     
     @Test
     public void testAgentStatus(){
-        
         expect(mockPluginManager.getStatusesByPluginId(3, AgentPluginStatusEnum.SYNC_FAILURE)).andStubReturn(getErrorAgentStatusList());
         expect(mockPluginManager.getStatusesByPluginId(3, AgentPluginStatusEnum.SYNC_IN_PROGRESS)).andStubReturn(getInProgressAgentStatusList());
         replay(mockPluginManager);
-        List<Map<String, Object>> result = pluginManagerController.getAgentStatus(3, "");
+        
+        List<Map<String, Object>> result = pluginManagerController.getAgentStatus(3, "","inprogress");
+        assertEquals("result should be 1",1,result.size());
     }
     
     @Test
@@ -334,18 +258,64 @@ public class PluginManagerControllerTest extends BaseControllerTest {
         expect(mockPluginManager.getStatusesByPluginId(3, AgentPluginStatusEnum.SYNC_FAILURE)).andStubReturn(getErrorAgentStatusList());
         expect(mockPluginManager.getStatusesByPluginId(3, AgentPluginStatusEnum.SYNC_IN_PROGRESS)).andStubReturn(getInProgressAgentStatusList());
         replay(mockPluginManager);
-        List<Map<String, Object>> result =  pluginManagerController.getAgentStatus(3, "xx");
+        List<Map<String, Object>> result =  pluginManagerController.getAgentStatus(3, "xx","inprogress");
         
         assertEquals("result should be empty",0,result.size());
-    }   
+    }
+    @Test
+    public void testDeletePluginResouceCount(){
+        List<Plugin> plugins = getAllPlugins();
+        
+        expect(mockPluginManager.getPluginById(1)).andStubReturn(plugins.get(0));
+        expect(mockPluginManager.getPluginById(2)).andStubReturn(plugins.get(1));
+        expect(mockPluginManager.getPluginById(3)).andStubReturn(plugins.get(2));
+        expect(mockResourceManager.getResourceCountByPlugin(plugins)).andStubReturn(getResourceCounts());
+        replay(mockPluginManager);
+        replay(mockResourceManager);
+        
+        List<Map<String, String>> result = pluginManagerController.getResourceCount("1,2,3");
+        
+        assertEquals("There should be only two entries",2,result.size());
+        assertEquals("The first one should be plugin-a (id=1) ","1",result.get(0).get("pluginId"));
+        assertEquals("plugin-a should have 200 count","200",result.get(0).get("count"));
+        assertEquals("The second one should be plugin-c (id=3) ","3",result.get(1).get("pluginId"));
+        assertEquals("plugin-a should have 1 count","1",result.get(1).get("count"));        
+    }
+    private Map<String, Long> getResourceCounts(){
+        Map<String, Long> result = new HashMap<String,Long>();
+        result.put("plugin-a", (long)200);
+        result.put("plugin-c", (long)1);
+        return result;
+    }
+    
+    private Map<Integer, AgentPluginStatus> getStatusesByAgentId(){
+        Map<Integer, AgentPluginStatus>  result = new HashMap<Integer, AgentPluginStatus>();
+        AgentPluginStatus statusX = new AgentPluginStatus();
+        Agent agentX = new Agent();
+        Collection <Platform> platformsX = new ArrayList<Platform>();
+        agentX.setPlatforms(platformsX);
+        agentX.setAddress("3.3.3.3");
+        statusX.setAgent(agentX);
+        
+        AgentPluginStatus statusZ = new AgentPluginStatus();
+        Agent agentZ = new Agent();
+        Collection <Platform> platformsZ = new ArrayList<Platform>();
+        agentZ.setPlatforms(platformsZ);
+        agentZ.setAddress("5.5.5.5");    
+        statusZ.setAgent(agentZ);
+        
+        result.put(new Integer(0), statusX);
+        result.put(new Integer(2), statusZ);
+        return result;
+    }
     
     private Collection<AgentPluginStatus> getErrorAgentStatusList(){
         Collection<AgentPluginStatus> result = new ArrayList<AgentPluginStatus>();
         
         AgentPluginStatus apCZ = new AgentPluginStatus();
         Agent agentZ = new Agent();
-        Collection <Platform> platformsX = new ArrayList<Platform>();
-        agentZ.setPlatforms(platformsX);
+        Collection <Platform> platformsZ = new ArrayList<Platform>();
+        agentZ.setPlatforms(platformsZ);
         agentZ.setAddress("5.5.5.5");
         apCZ.setAgent(agentZ);
         apCZ.setLastSyncAttempt(date1.getTime());
@@ -391,9 +361,7 @@ public class PluginManagerControllerTest extends BaseControllerTest {
         
         return rollupStatus;
     }
-    private Long getNumAutoUpdatingAgents(){
-        return Long.valueOf(3);
-    }
+
     private List<Plugin> getAllPlugins(){
         List<Plugin> plugins = new ArrayList<Plugin>();
         Plugin pluginA = new Plugin();
@@ -415,5 +383,4 @@ public class PluginManagerControllerTest extends BaseControllerTest {
         
         return plugins;
     }
-    
 }

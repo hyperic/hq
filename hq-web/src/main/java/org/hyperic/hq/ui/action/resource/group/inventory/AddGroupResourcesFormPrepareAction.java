@@ -42,6 +42,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.util.BizappUtils;
@@ -266,7 +267,7 @@ public class AddGroupResourcesFormPrepareAction
      */
     private class PrepareGroupOfGroups
         extends PrepareResourceGroup {
-        PageList availMembers = null;
+        PageList availMembers = new PageList();
 
         protected PageList getAvailResources() {
             return availMembers;
@@ -278,9 +279,16 @@ public class AddGroupResourcesFormPrepareAction
             if (appdefType == -1)
                 appdefType = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_APP;
 
-            availMembers = boss.findCompatInventory(sessionId, AppdefEntityConstants.APPDEF_TYPE_GROUP, appdefType,
+            PageList<AppdefResourceValue> compatGroups = boss.findCompatInventory(sessionId, AppdefEntityConstants.APPDEF_TYPE_GROUP, appdefType,
                 group.getEntityId(), pendingResItems, null, pcAvail);
 
+            for (AppdefResourceValue compatGroup : compatGroups){
+                if (!compatGroup.getName().equals(AuthzConstants.rootResourceGroupName) && !compatGroup.getName().equals(AuthzConstants.groupResourceTypeName)){
+                    availMembers.add(compatGroup);
+                }
+            }
+            
+            
             /**
              * load the group type filters
              */

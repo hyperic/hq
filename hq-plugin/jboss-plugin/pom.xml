@@ -3,12 +3,11 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-
 	<groupId>org.hyperic.hq.plugin</groupId>
 	<artifactId>jboss-plugin</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ Plugin - JBoss Plugin</name>
-	<version>4.6.0.BUILD-SNAPSHOT</version>
+	<version>4.7.0.BUILD-SNAPSHOT</version>
 
 	<dependencies>
 		<dependency>
@@ -158,6 +157,11 @@
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
+		</repository>
+		<repository>
+			<id>jboss-repository</id>
+			<name>JBoss Public Repository</name>
+			<url>http://repository.jboss.org/nexus/content/groups/public-jboss</url>
 		</repository>
 	</repositories>
 

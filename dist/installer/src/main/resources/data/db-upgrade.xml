@@ -11661,6 +11661,40 @@ has already been defined.
                       columnType="VARCHAR2" />
  </schemaSpec>
 
+ <schemaSpec version="3.206">
+    <schema-directSQL>
+        <statement targetDB="mysql" fail="false">
+            alter table EAM_AGENT_PLUGIN_STATUS drop foreign key FK8C8FAC96559691A3
+        </statement>
+        <statement targetDB="mysql" fail="false">
+            alter table EAM_AGENT_PLUGIN_STATUS drop index AGENT_ID
+        </statement>
+        <statement targetDB="mysql" fail="false">
+            alter table EAM_AGENT_PLUGIN_STATUS drop index FK8C8FAC96559691A3
+        </statement>
+        <statement targetDB="mysql">
+            create index AGENT_ID on EAM_AGENT_PLUGIN_STATUS (AGENT_ID)
+        </statement>
+        <statement targetDB="mysql">
+            alter table EAM_AGENT_PLUGIN_STATUS add constraint FK8C8FAC96559691A3 foreign key (AGENT_ID) references EAM_AGENT (ID) on delete cascade
+        </statement>
+    </schema-directSQL>
+ </schemaSpec>
+
+ <schemaSpec version="3.207">
+    <schema-directSQL>
+        <statement targetDB="mysql">
+            alter table EAM_AGENT_PLUGIN_STATUS modify MD5 varchar(100) null
+        </statement>
+        <statement targetDB="postgresql">
+            alter table EAM_AGENT_PLUGIN_STATUS alter column md5 drop not null
+        </statement>
+        <statement targetDB="oracle">
+            alter table EAM_AGENT_PLUGIN_STATUS modify md5 varchar2(100) null
+        </statement>
+    </schema-directSQL>
+ </schemaSpec>
+
 </dbupgrade>
 </target>
 </project>

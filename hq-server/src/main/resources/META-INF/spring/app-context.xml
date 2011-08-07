@@ -87,6 +87,10 @@
 				<prop key="ha.node.ipTTL">64</prop>
                 <prop key="server.pluginsync.enabled">true</prop>
                 <prop key="server.custom.plugin.dir"></prop>
+                <prop key="vfabric.licenseServer.url"></prop>
+				<prop key="server.keystore.path">hyperic.keystore</prop>
+				<prop key="server.keystore.password">hyperic</prop>
+				<prop key="accept.unverified.certificates">false</prop>
 			</props>
 		</property>
 	</bean>
@@ -209,11 +213,21 @@
 
 	<bean class="org.hyperic.hq.appdef.server.session.ResourceTreeGenerator" />
 
-
 	<bean id="tweakProperties"
 		class="org.springframework.beans.factory.config.PropertiesFactoryBean"
 		p:location="classpath:/tweak.properties" />
 
+	<bean id="securityProperties"
+		class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+		<property name="properties">
+			<props>
+				<prop key="server.keystore.path">${server.keystore.path}</prop>
+				<prop key="server.keystore.password">${server.keystore.password}</prop>
+				<prop key="accept.unverified.certificates">${accept.unverified.certificates}</prop>
+			</props>
+		</property>	
+	</bean>
+	
 	<context:mbean-export />
 	<context:mbean-server />
 

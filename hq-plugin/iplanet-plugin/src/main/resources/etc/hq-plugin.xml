@@ -23,7 +23,8 @@
   USA.
  -->
 
-<plugin name="iplanet" version="@project.version@">
+<plugin name="iplanet">
+  <property name="PLUGIN_VERSION" value="@project.version@"/>
 
   <filter name="iplanet.snmp"
           value="iplanet:${snmp.config}"/>

@@ -53,22 +53,24 @@ import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.common.DiagnosticObject;
 import org.hyperic.hq.common.DiagnosticsLogger;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AgentSynchronizer implements DiagnosticObject {
+public class AgentSynchronizer implements DiagnosticObject, ApplicationContextAware {
     
-    private static final int NUM_WORKERS = 4;
+    private final int NUM_WORKERS;
     private static final long WAIT_TIME = 5 * MeasurementConstants.MINUTE;
     private final Log log = LogFactory.getLog(AgentSynchronizer.class.getName());
     private final Set<Integer> activeAgents = Collections.synchronizedSet(new HashSet<Integer>());
-    private final LinkedList<AgentDataTransferJob> agentJobs =
-        new LinkedList<AgentDataTransferJob>();
+    private final LinkedList<StatefulAgentDataTransferJob> agentJobs =
+        new LinkedList<StatefulAgentDataTransferJob>();
     /** used mainly for diagnostics.  map of job description and number of times it has run */
     private final Map<String, Integer> shortDiagInfo = new HashMap<String, Integer>();
     private final Map<String, Integer> fullDiagInfo = new HashMap<String, Integer>();
@@ -77,6 +79,7 @@ public class AgentSynchronizer implements DiagnosticObject {
     private ConcurrentStatsCollector concurrentStatsCollector;
     private AuthzSubject overlord;
     private AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle;
+    private ApplicationContext ctx;
 
     @Autowired
     public AgentSynchronizer(ConcurrentStatsCollector concurrentStatsCollector,
@@ -87,8 +90,20 @@ public class AgentSynchronizer implements DiagnosticObject {
         this.overlord = authzSubjectManager.getOverlordPojo();
         this.agentPluginSyncRestartThrottle = agentPluginSyncRestartThrottle;
         diagnosticsLogger.addDiagnosticObject(this);
+        NUM_WORKERS = getNumWorkers();
     }
     
+    private int getNumWorkers() {
+        int cpus = Runtime.getRuntime().availableProcessors();
+        if (cpus > 4) {
+            return 4;
+        } else if (cpus <= 1) {
+            return 1;
+        } else {
+            return cpus;
+        }
+    }
+
     public Set<Integer> getJobListByDescription(Collection<String> descriptions) {
         List<AgentDataTransferJob> jobs;
         final Set<String> descs = new HashSet<String>(descriptions);
@@ -113,6 +128,7 @@ public class AgentSynchronizer implements DiagnosticObject {
                 return new Thread(r, "AgentSynchronizer" + i.getAndIncrement());
             }
         });
+        log.info("starting AgentSynchronizer with " + NUM_WORKERS + " threads");
         for (int i=0; i<NUM_WORKERS; i++) {
             SchedulerThread worker = new SchedulerThread("AgentSynchronizer" + i, i*1000);
             executor.scheduleWithFixedDelay(worker, i+1, NUM_WORKERS, TimeUnit.SECONDS);
@@ -122,7 +138,7 @@ public class AgentSynchronizer implements DiagnosticObject {
     
     public void addAgentJob(AgentDataTransferJob agentJob) {
         synchronized (agentJobs) {
-            agentJobs.add(agentJob);
+            agentJobs.add(new StatefulAgentDataTransferJob(agentJob));
         }
         concurrentStatsCollector.addStat(1, ConcurrentStatsCollector.AGENT_SYNC_JOB_QUEUE_ADDS);
     }
@@ -158,23 +174,25 @@ public class AgentSynchronizer implements DiagnosticObject {
     }
 
     private boolean syncData() {
-        AgentDataTransferJob j = null;
+        StatefulAgentDataTransferJob job = null;
         synchronized (agentJobs) {
-            j = agentJobs.poll();
+            job = agentJobs.poll();
         }
-        if (j == null) {
+        if (job == null) {
             return false;
         }
-        final AgentDataTransferJob job = j;
         Integer agentId = null;
         try {
             agentId = job.getAgentId();
             final boolean debug = log.isDebugEnabled();
-            boolean added = activeAgents.add(agentId);
+            boolean added;
+            if (!job.canRun()) {
+                added = false;
+            } else {
+                added = activeAgents.add(agentId);
+            }
             if (!added) {
-                synchronized (agentJobs) {
-                    agentJobs.add(job);
-                }
+                reAddJob(job);
                 agentId = null;
                 // return false so that this mechanism doesn't spin out of control
                 // allow the other thread some time to get its job done
@@ -196,71 +214,90 @@ public class AgentSynchronizer implements DiagnosticObject {
         }
     }
 
-    private void executeJob(final AgentDataTransferJob job) throws InterruptedException {
+    private void executeJob(final StatefulAgentDataTransferJob job) throws InterruptedException {
         final String name = Thread.currentThread().getName() + "-" + executorNum.getAndIncrement();
         final Thread thread = new Thread(name) {
             public void run() {
-                if (agentIsAlive(job)) {
+                job.setLastRuntime();
+                if (agentIsPingable(job)) {
                     try {
                         job.execute();
                     } catch (Throwable e) {
-                        job.onFailure();
-                        if (isInRestartState(job.getAgentId())) {
-                            log.warn("received error while trying to communicate with agentId=" +
-                                job.getAgentId() + " while it is restarting.  job=" +
-                                getJobInfo(job) + ": " + e);
+                        if (e instanceof InterruptedException) {
+                            log.warn("jobdesc=" + job.getJobDescription() + " was interrupted: " + e);
                             log.debug(e,e);
                         } else {
                             log.error(e,e);
                         }
                     }
                     return;
-                }
-                AvailabilityManager availabilityManager = Bootstrap.getBean(AvailabilityManager.class);
-                if (availabilityManager.platformIsAvailable(job.getAgentId())) {
-                    // agent is busy but up and running, add job back to the queue
-                    if (log.isDebugEnabled()) {
-                        log.debug("cannot ping agentId=" + job.getAgentId() +
-                                  " but availabilityManager shows that it is available, " +
-                                  "rescheduling job=" + getJobInfo(job));
-                    }
-                    synchronized (agentJobs) {
-                        // if the job queue isn't very full then we don't want to keep spinning
-                        // as a result of re-adding this job.  Instead lets just sleep for a few
-                        // secs and then re-issue the job.
-                        if (agentJobs.size() < NUM_WORKERS) {
-                            try {
-                                agentJobs.wait(5000);
-                            } catch (InterruptedException e) {
-                                log.debug(e,e);
-                            }
-                        }
-                        agentJobs.add(job);
-                    }
                 } else {
                     log.warn("Could not ping agent in order to run job " + getJobInfo(job));
-                    job.onFailure();
                 }
-            }
-            private boolean isInRestartState(int agentId) {
-                return agentPluginSyncRestartThrottle.getAgentIdsInRestartState().containsKey(agentId);
             }
         };
         thread.start();
         thread.join(WAIT_TIME);
         // if the thread is alive just try to interrupt it and keep going
-        if (thread.isAlive()) {
-            log.warn("AgentDataTransferJob=" + getJobInfo(job) +
-                     " has take more than " + WAIT_TIME/1000/60 +
-                     " minutes to run.  Disregarding job threadName={" + thread.getName() + "}");
-            thread.interrupt();
+        final boolean threadIsAlive = thread.isAlive();
+        final boolean jobWasSuccessful = job.wasSuccessful();
+        final AvailabilityManager availabilityManager = ctx.getBean(AvailabilityManager.class);
+        final boolean platformIsAvailable =
+            availabilityManager.platformIsAvailable(job.getAgentId()) || isInRestartState(job.getAgentId());
+        if (jobWasSuccessful) {
+            // do nothing, this is good!
+            return;
+        } else if (platformIsAvailable) {
+            if (threadIsAlive) {
+                thread.interrupt();
+            }
+            job.incrementFailures();
+            if (job.discardJob()) {
+                job.onFailure();
+            } else {
+                reAddJob(job);
+                if (threadIsAlive) {
+                    log.warn("AgentDataTransferJob=" + getJobInfo(job) +
+                             " has take more than " + WAIT_TIME/1000/60 +
+                             " minutes to run.  The agent appears alive so therefore the job was" +
+                             " interrupted and requeued.  Job threadName={" + thread.getName() + "}");
+                } else {
+                    log.warn("AgentDataTransferJob=" + getJobInfo(job) +
+                             " died and was not successful.  The agent appears alive and" +
+                             " therefore the job was requeued. " +
+                             " Job threadName={" + thread.getName() + "}");
+                }
+            }
+        } else {
+            if (threadIsAlive) {
+                thread.interrupt();
+                log.warn("AgentDataTransferJob=" + getJobInfo(job) +
+                         " has take more than " + WAIT_TIME/1000/60 +
+                         " minutes to run.  Discarding job threadName={" + thread.getName() + "}");
+            }
+            // Can't ping agent and platform availability is down, therefore agent must be down
+            job.onFailure();
         }
     }
 
-    private boolean agentIsAlive(AgentDataTransferJob job) {
+    private boolean isInRestartState(int agentId) {
+        return agentPluginSyncRestartThrottle.getAgentIdsInRestartState().containsKey(agentId);
+    }
+
+    private boolean reAddJob(StatefulAgentDataTransferJob job) {
+        if (job.discardJob()) {
+            return false;
+        }
+        synchronized (agentJobs) {
+            agentJobs.add(job);
+        }
+        return true;
+    }
+
+    private boolean agentIsPingable(AgentDataTransferJob job) {
         try {
             // XXX need to set this in the constructor
-            final AgentManager agentManager = Bootstrap.getBean(AgentManager.class);
+            final AgentManager agentManager = ctx.getBean(AgentManager.class);
             agentManager.pingAgent(overlord, job.getAgentId());
         } catch (Exception e) {
             log.debug(e,e);
@@ -340,6 +377,58 @@ public class AgentSynchronizer implements DiagnosticObject {
 
     public String getName() {
         return "Agent Synchronizer";
+    }
+
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.ctx = applicationContext;
+    }
+
+    private class StatefulAgentDataTransferJob implements AgentDataTransferJob {
+        private static final int MAX_FAILURES = 60;
+        private static final long TIME_BTWN_RUNS = MeasurementConstants.MINUTE;
+        private final AgentDataTransferJob job;
+        private int numFailures = 0;
+        private long lastRuntime = Long.MIN_VALUE;
+        private StatefulAgentDataTransferJob(AgentDataTransferJob job) {
+            this.job = job;
+        }
+        public void setLastRuntime() {
+            lastRuntime = now();
+        }
+        public int getAgentId() {
+            return job.getAgentId();
+        }
+        public String getJobDescription() {
+            return job.getJobDescription();
+        }
+        public void execute() {
+            job.execute();
+        }
+        public boolean wasSuccessful() {
+            return job.wasSuccessful();
+        }
+        private void incrementFailures() {
+            numFailures++;
+        }
+        public void onFailure() {
+            job.onFailure();
+        }
+        private boolean discardJob() {
+            return numFailures >= MAX_FAILURES;
+        }
+        private boolean canRun() {
+            if (numFailures >= MAX_FAILURES) {
+                return false;
+            }
+            if (lastRuntime != Long.MIN_VALUE && (lastRuntime+TIME_BTWN_RUNS) > now()) {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    private long now() {
+        return System.currentTimeMillis();
     }
 
 }

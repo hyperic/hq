@@ -31,8 +31,10 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
+import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.regex.Pattern;
+
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
@@ -102,13 +104,15 @@ public class EmbeddedActiveMQServerDetector
                     } else if (app.getName().endsWith(".war")) {
                         try {
                             JarFile war = new JarFile(app);
-                            Enumeration files = war.entries();
+                            Enumeration<JarEntry> files = war.entries();
                             while (files.hasMoreElements()) {
                                 final String fileName = files.nextElement().toString();
                                 if (pattern.matcher(fileName).find()) {
                                     res = new File(app + "!" + fileName);
+                                    break;
                                 }
                             }
+                            war.close();
                         } catch (IOException ex) {
                             log.debug("Error: '" + app + "': " + ex.getMessage(), ex);
                         }

@@ -336,4 +336,6 @@ public interface ResourceGroupManager
      */
     public void updateGroupMembers(List<ResourceCreatedZevent> resourceEvents);
 
+    public void removeGroupsCompatibleWith(String name) throws VetoException;
+
 }

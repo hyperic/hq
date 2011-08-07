@@ -1,7 +1,9 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-    <head>
-        <title>Hyperic 4.5 Documentation : ui-Monitor.CurrentHealth.Metrics</title>
+ <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
+<p>      
+<p>
+        <title>vFabric Hyperic 4.6 : ui-Monitor.CurrentHealth.Metrics</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,258 +14,198 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Hyperic 4.5 Documentation : ui-Monitor.CurrentHealth.Metrics
+                            vFabric Hyperic 4.6 : ui-Monitor.CurrentHealth.Metrics
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on May 20, 2010 by <font color="#0050B2">clee</font>.
+					    This page last changed on Jun 08, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <h1><a name="ui-Monitor.CurrentHealth.Metrics-ViewingaResource%27sMetrics"></a>Viewing a Resource's Metrics</h1>
-
-<p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
-
-
-<p>This screen displays all the metrics, in numeric form, that HQ collects for the resource in the <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-range">metric display range</a>, even those metrics for which no data has been collected. The metrics displayed on the screen vary by <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-resourcetype">resource type</a>; find out which metrics can be collected for this resource in the <a href="http://support.hyperic.com/confluence/display/hypcomm/HyperFORGE" title="HyperFORGE">list of managed products</a>.</p>
-<ul>
-	<li><a href="#ui-Monitor.CurrentHealth.Metrics-Tasks">Tasks</a> available on this screen</li>
-	<li><a href="#ui-Monitor.CurrentHealth.Metrics-Sections">Sections</a> on this screen</li>
-	<li><a href="#ui-Monitor.CurrentHealth.Metrics-Group">Group</a> metrics</li>
-	<li><a href="#ui-Monitor.CurrentHealth.Metrics-Navigating">Navigating</a> via the masthead menu</li>
+				    <ul>
+	<li><a href="#ui-Monitor.CurrentHealth.Metrics-MetricDataMinitab">Metric Data Minitab</a>
+	<ul>
+		<li><a href="#ui-Monitor.CurrentHealth.Metrics-MetricDataMinitabforaSingleResource">Metric Data Minitab for a Single Resource</a></li>
+		<li><a href="#ui-Monitor.CurrentHealth.Metrics-MetricDataMinitabforanAutogrouporCompatibleGroup">Metric Data Minitab for an Autogroup or Compatible Group</a>
+		<ul>
+			<li><a href="#ui-Monitor.CurrentHealth.Metrics-CompareMetricsforResourcesinaCompatibleGroup">Compare Metrics for Resources in a Compatible Group</a></li>
+		</ul>
+		</li>
+		<li><a href="#ui-Monitor.CurrentHealth.Metrics-ViewMetricDetailsandMetadata">View Metric Details and Metadata</a></li>
+	</ul>
+	</li>
+	<li><a href="#ui-Monitor.CurrentHealth.Metrics-SetPageRefreshFrequency">Set Page Refresh Frequency</a></li>
+	<li><a href="#ui-Monitor.CurrentHealth.Metrics-TailorMetricCollectionSettingsfortheResource">Tailor Metric Collection Settings for the Resource</a>
+	<ul>
+		<li><a href="#ui-Monitor.CurrentHealth.Metrics-DisableCollectionofaMetric">Disable Collection of a Metric</a></li>
+		<li><a href="#ui-Monitor.CurrentHealth.Metrics-EnableCollectionofaMetric">Enable Collection of a Metric</a></li>
+		<li><a href="#ui-Monitor.CurrentHealth.Metrics-SetCollectionIntervalforaMetric">Set Collection Interval for a Metric</a></li>
+	</ul>
+	</li>
+	<li><a href="#ui-Monitor.CurrentHealth.Metrics-ConfigureMetricBaselines">Configure Metric Baselines</a></li>
+	<li><a href="#ui-Monitor.CurrentHealth.Metrics-ResourcesMinitab">Resources Minitab</a></li>
 </ul>
 
 
+<h1><a name="ui-Monitor.CurrentHealth.Metrics-MetricDataMinitab"></a>Metric Data Minitab</h1>
 
+<p>The <b>Metric Data</b> minitab, available when an individual resource, or a group of resources of the same type are selected, is a tabular summary of the measurements collected during the currently selected metric display range.</p>
 
-<p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
+<p>By default, the <b>Metric Data</b> minitab displays only metrics for which measurements exist during the metric display range. To list all metrics supported for the resource, click the control next to <b>Show All Metrics</b> at the top of the <b>Metric Data</b> minitab.</p>
 
-<p><a name="ui-Monitor.CurrentHealth.Metrics-Tasks"></a></p>
+<p>When all supported metrics for a resource are listed, a <b>Hide Metrics Without Data</b> control replaces the <b>Show All Metrics</b> control - click the the control next to it to toggle the display.</p>
 
-<h3><a name="ui-Monitor.CurrentHealth.Metrics-TasksAvailableonThisScreen"></a>Tasks Available on This Screen</h3>
+<p>The columns in the <b>Metric Data</b> minitab vary, depending on whether an individual resource or a group of resources is selected, as described in the subsections below.</p>
 
-<p>On this screen, users can do the following:</p>
+<h2><a name="ui-Monitor.CurrentHealth.Metrics-MetricDataMinitabforaSingleResource"></a>Metric Data Minitab for a Single Resource</h2>
 
-<p><b>To change the display of metrics:</b></p>
-<div class='table-wrap'>
-<table class='confluenceTable'><tbody>
-<tr>
-<th class='confluenceTh'> Desired Display </th>
-<th class='confluenceTh'> Instructions </th>
-</tr>
-<tr>
-<td class='confluenceTd'> Only metrics with data </td>
-<td class='confluenceTd'> Click <span class="image-wrap" style=""><img src="attachments/71828496/71926223.png" style="border: 0px solid black"/></span> next to <b>Hide Metrics Without Data</b> at the top of the tab. </td>
-</tr>
-<tr>
-<td class='confluenceTd'> All metrics collected for the resource </td>
-<td class='confluenceTd'> Click <span class="image-wrap" style=""><img src="attachments/71828496/71926223.png" style="border: 0px solid black"/></span> next to <b>Show All Metrics</b> at the top of the tab. </td>
-</tr>
-<tr>
-<td class='confluenceTd'> Specific metric <a href="http://support.hyperic.com/confluence/display/EVO/HQ+Metric+Categories#HQMetricCategories-Categories">categories</a> </td>
-<td class='confluenceTd'> Check or uncheck categories on the left side of the screen and click <span class="image-wrap" style=""><img src="attachments/71828496/71926223.png" style="border: 0px solid black"/></span>. </td>
-</tr>
-<tr>
-<td class='confluenceTd'> Metrics with specific trends </td>
-<td class='confluenceTd'> Check or uncheck the "Trends Up" and "Trends Down" on the left side (under "Value Types") and click <span class="image-wrap" style=""><img src="attachments/71828496/71926223.png" style="border: 0px solid black"/></span>. </td>
-</tr>
-<tr>
-<td class='confluenceTd'> Only <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-dynamicmetric">Dynamic</a> or only <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-staticmetric">Static</a> metrics </td>
-<td class='confluenceTd'> Check or uncheck "Dynamic" and "Static" on the left side (under "Value Types")and click <span class="image-wrap" style=""><img src="attachments/71828496/71926223.png" style="border: 0px solid black"/></span>. </td>
-</tr>
-</tbody></table>
-</div>
+<p>The <b>Metric Data</b> minitab displays the following data for each metric that is enabled for one or more members of a compatible, over the current metric display range:</p>
 
-<p>The display automatically refreshes.</p>
-
-<p><b>To change the frequency with which the screen refreshes:</b></p>
 <ul>
-	<li>In the upper-right corner of the tab, to the right of <ins>Metrics Refresh</ins>, click a refresh value or, to make the display static, click <b>OFF</b>.</li>
+	<li><b>Alerts</b> &#8212; Number of times a collected metric value triggered an alert.</li>
+	<li><b>OOB</b> &#8212; Number of times the metric was out-of-bounds.</li>
+	<li><b>LOW</b> &#8212; Lowest value collected.</li>
+	<li><b>AVG</b> &#8212; Average of values collected.</li>
+	<li><b>PEAK</b> &#8212; Highest value collected.</li>
+	<li><b>LAST</b> &#8212; Last collected value.</li>
+	<li><b>Collection Interval</b> &#8212; Frequency of metric collection. "NONE" indicates that data is not being collected.&nbsp;</li>
 </ul>
 
 
-<p><b>To start collecting data for a metric:</b></p>
+<p><span class="image-wrap" style=""><img src="attachments/77463605/77660405.png" width="800pxpxpxpx" style="border: 0px solid black"/></span></p>
+
+<h2><a name="ui-Monitor.CurrentHealth.Metrics-MetricDataMinitabforanAutogrouporCompatibleGroup"></a>Metric Data Minitab for an Autogroup or Compatible Group</h2>
+
+<p>The <b>Metric Data</b> minitab displays the following data for each metric that is enabled for one or more members of a group of resources of the same type &#8212; an autogroup or a compatible group.</p>
+
+<ul>
+	<li><b>Number Coll</b> &#8212; Number of data points collected across all group members for which the metric is enabled.</li>
+	<li><b>Alerts</b> &#8212; Number of times a collected metric value triggered an alert.</li>
+	<li><b>OOB</b> &#8212; Number of times the metric was out-of-bounds across all group members.</li>
+	<li><b>LOW</b> &#8212; Lowest value collected across all group members.</li>
+	<li><b>AVG</b> &#8212; Average of values collected across all group members.</li>
+	<li><b>PEAK</b> &#8212; Highest value collected across all group members.</li>
+	<li><b>SUM</b> &#8212; Sum of all values collected, not for a metric whose unit is percentage.</li>
+	<li><b>Collection Interval</b> &#8212; Frequency of metric collection.
+	<ul>
+		<li>"NONE" &#8212; indicates that data is not being collected.</li>
+		<li>"VARIES" &#8212; Indicates that the collection interval varies among members of the group.</li>
+	</ul>
+	</li>
+	<li>Member health data &#8212; (For compatible groups only, not autogroups) The lower portion of the Metric Data minitab for a compatible group lists the resources in the group, the current availability of each, and in the rightmost column. an icon that links to the <b>Alerts</b> page for the resource.</li>
+</ul>
+
+
+<p><span class="image-wrap" style=""><img src="attachments/77463605/77660286.png" width="800pxpxpxpx" style="border: 0px solid black"/></span></p>
+
+<h3><a name="ui-Monitor.CurrentHealth.Metrics-CompareMetricsforResourcesinaCompatibleGroup"></a>Compare Metrics for Resources in a Compatible Group</h3>
+
+<p>Check the member resources in "Current Health of group's &lt;group name&gt; resources collecting metrics" and click <b>Compare Metrics of Selected</b> at the bottom of the page.  and proceed to the "<a href="ui-Monitor.Group.Compare.html" title="ui-Monitor.Group.Compare">Compare Metrics</a>" screen.</p>
+
+<h2><a name="ui-Monitor.CurrentHealth.Metrics-ViewMetricDetailsandMetadata"></a>View Metric Details and Metadata</h2>
+
+<p>To display metric data for a single resource in a separate window, click the <span class="image-wrap" style=""><img src="attachments/77463561/77660605.gif" style="border: 0px solid black"/></span> log at the right end of metric data for the resource.</p>
+
+<p><span class="image-wrap" style=""><img src="attachments/77463605/77660235.png" style="border: 0px solid black"/></span></p>
+
+<h1><a name="ui-Monitor.CurrentHealth.Metrics-SetPageRefreshFrequency"></a>Set Page Refresh Frequency</h1>
+
+<p>To change the frequency with which the page refreshes,&nbsp;click a refresh value or&nbsp;<b>OFF</b>, in the <b>Metric Refresh</b> section in the upper right of the minitab.</p>
+
+<h1><a name="ui-Monitor.CurrentHealth.Metrics-TailorMetricCollectionSettingsfortheResource"></a>Tailor Metric Collection Settings for the Resource</h1>
+
+<p>You can tailor the metric collection settings for the resource on the <b>Metric Data</b> minitab.</p>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Resource-Level Metric Collection Settings can Be Overwritten</b><br />The default metric collection settings for a resource are specified on the <b>Administration &gt; Monitoring Defaults</b> page for the associated resource type. You can alter the metric collection interval for a specific resource on its <b>Metric Data</b> minitab &#8212; note however that subsequent updates to the monitoring defaults for the resource type will overwrite any modifications to collection intervals made for a specific resource. For information about setting metric collection options for all resources of the same resource type, see the <a href="Tailor Metric Collection for a Resource Type.html" title="Tailor Metric Collection for a Resource Type">Tailor Metric Collection for a Resource Type</a> page of <em>vFabric Hyperic Administration</em>.</td></tr></table></div>
+
+<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Modifying Metric Collection for a Group</b><br />Changes to make to metric collection settings for a group will apply to all members of that group.</td></tr></table></div>
+
+<h2><a name="ui-Monitor.CurrentHealth.Metrics-DisableCollectionofaMetric"></a>Disable Collection of a Metric</h2>
+
 <ol>
-	<li>In the ""Show All Metrics" view, check the desired metrics (that is, the metrics that HQ is not collecting data for that it <em>should</em> collect data for).</li>
-	<li>At screen bottom, to the right of <b>Collection Interval for Selected</b>, type the frequency (interval) with which HQ should collect this metric's data and click <span class="image-wrap" style=""><img src="attachments/71828496/71926223.png" style="border: 0px solid black"/></span>.<br/>
-HQ will now collect data for this metric at the specified interval.</li>
+	<li>Place a checkmark next to each metric you wish to disable.</li>
+	<li>Click <b>Disable Collection</b>&nbsp;at the bottom of the minitab. &nbsp;</li>
 </ol>
 
 
-<p><b>To stop collecting data for a metric:</b></p>
-<ul>
-	<li>In the ""Show All Metrics" view, check the desired metrics and, at screen bottom, click <span class="image-wrap" style=""><img src="attachments/71828496/71926225.png" style="border: 0px solid black"/></span> .<br/>
-For groups, this stops the collection for all member resources.</li>
-</ul>
+<p><b>Note</b>: If the currently selected resource is a compatible group, collection of the metric is disabled for all resources in the group.</p>
 
+<h2><a name="ui-Monitor.CurrentHealth.Metrics-EnableCollectionofaMetric"></a>Enable Collection of a Metric</h2>
 
-<p><b>To change a metric's collection interval:</b></p>
 <ol>
-	<li>Check the metric.</li>
-	<li>At screen bottom, to the right of <b>Collection Interval for Selected</b>, type the new collection interval for the click <span class="image-wrap" style=""><img src="attachments/71828496/71926223.png" style="border: 0px solid black"/></span>.<br/>
-For grouoss, this changes the collection interval for all member resources.</li>
+	<li>Click the arrow to the right of <b>Show All Metrics</b> at the top of the minitab.
+	<ul>
+		<li>All metrics, including currently disabled metrics, will be listed.</li>
+	</ul>
+	</li>
+	<li>Place a checkmark next to each metric you wish to enable.</li>
+	<li>Click&nbsp;<b>Enable Collection</b>&nbsp;at the bottom of the minitab. &nbsp;</li>
 </ol>
 
 
-<p><b>To change the metric display range:</b></p>
-<ul>
-	<li>Follow the <a href="ui-Monitor.CurrentHealth.html#ui-Monitor.CurrentHealth-display">instructions</a> for doing the same thing on the "Current Health" screen.</li>
-</ul>
+<p>Note: If the currently selected resource is a compatible group, collection of the metric is enabled for all resources in the group.</p>
+
+<h2><a name="ui-Monitor.CurrentHealth.Metrics-SetCollectionIntervalforaMetric"></a>Set Collection Interval for a Metric</h2>
+
+<ol>
+	<li>If the Metric Data minitab currently display all metrics for the resource, including disabled metrics, click <b>Hide Metrics Without Data</b>.&nbsp;</li>
+	<li>Place a checkmark next to the metric whose collection interval you wish to modify. &nbsp;
+	<ul>
+		<li>You can checkmark more than one metric if you want to set the same collection interval for each of them.</li>
+	</ul>
+	</li>
+	<li>To specify the frequency of metric collection:
+	<ol>
+		<li>Enter an integer value in the <b>Collection Interval for Selected</b> field.</li>
+		<li>Select "Minutes" or "Hours" from the pull-down list.</li>
+		<li>Click the arrow to the right of the "Minutes/Hours" pull-down list.</li>
+	</ol>
+	</li>
+</ol>
 
 
-<p><b>To display a secondary window with a single metric's details:</b></p>
-<ul>
-	<li>Click <span class="image-wrap" style=""><img src="attachments/71828496/71926220.gif" style="border: 0px solid black"/></span> in a metric's row.</li>
-</ul>
+<h1><a name="ui-Monitor.CurrentHealth.Metrics-ConfigureMetricBaselines"></a>Configure Metric Baselines</h1>
+
+<p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
 
 
-<h4><a name="ui-Monitor.CurrentHealth.Metrics-ForSingleResources"></a>For Single Resources</h4>
+<p>In vFabric Hyperic, you can use the <b>Set Baselines</b> control at the bottom of the <b>Metric Data</b> minitab to reset the baseline, acceptable high, and acceptable low values for a metric. For more information, <a href="Metrics and Metric Collection.html#MetricsandMetricCollection-baselines">Baselines</a> and <a href="Configure Metric Baselines.html" title="Configure Metric Baselines">Configure Metric Baselines</a>.</p>
 
-<p><b>To set a metric's acceptable low, acceptable high, and</b> <b><a href="http://support.hyperic.com/confluence/display/EVO/Baselines" title="Baselines"><b>baseline</b></a></b> <b>values:</b></p>
-<ul>
-	<li>Check the metrics and click <span class="image-wrap" style=""><img src="attachments/71828496/71926222.png" style="border: 0px solid black"/></span>.<br/>
-This sets those baseline values of the selected metrics to the displayed LOW, PEAK, and AVG values, respectively.</li>
-</ul>
+<h1><a name="ui-Monitor.CurrentHealth.Metrics-ResourcesMinitab"></a>Resources Minitab</h1>
 
-
-<p><b>To chart a metric:</b></p>
-<ul>
-	<li>Check the metrics and click <span class="image-wrap" style=""><img src="attachments/71828496/71926224.gif" style="border: 0px solid black"/></span> and proceed to the "<a href="ui-Monitor.CurrentHealth.Chart.html" title="ui-Monitor.CurrentHealth.Chart">Metric Chart</a>" screen.</li>
-</ul>
-
-
-<h4><a name="ui-Monitor.CurrentHealth.Metrics-ForGroupResources"></a>For Group Resources</h4>
-
-<p><b>To compare metrics among members of the group:</b></p>
-<ul>
-	<li>Check the member resources in "Current Health of group's &lt;group name&gt; resources collecting metrics" and click <span class="image-wrap" style=""><img src="attachments/71828496/71926221.gif" style="border: 0px solid black"/></span> and proceed to the "<a href="ui-Monitor.Group.Compare.html" title="ui-Monitor.Group.Compare">Compare Metrics</a>" screen.</li>
-</ul>
-
-
-<p><b>To chart a metric for 10 members of the group:</b></p>
-<ul>
-	<li>Click the metric name and proceed to the "<a href="ui-Monitor.CurrentHealth.Chart.html" title="ui-Monitor.CurrentHealth.Chart">Metric Chart</a>" screen.<br/>
-Metric data for the top 10 group resources (as listed in "Current Health of group's &lt;group name&gt; resources collecting metrics"), be default, will be displayed in this chart. On the "Metric Chart" screen this set of resources can be changed to include others from the group.</li>
-</ul>
-
-
-<p><b>To view the current health of a member resource:</b></p>
-<ul>
-	<li>Click the resource's name in "Current Health of group's &lt;group name&gt; resources collecting metrics").</li>
-</ul>
-
-
-<p><em><a href="#ui-Monitor.CurrentHealth.Metrics-top"><em>back to top</em></a></em></p>
-
-<p><a name="ui-Monitor.CurrentHealth.Metrics-Sections"></a></p>
-
-<h3><a name="ui-Monitor.CurrentHealth.Metrics-SectionsonThisScreen"></a>Sections on This Screen</h3>
-
-
-<h4><a name="ui-Monitor.CurrentHealth.Metrics-ResourcesTab"></a>Resources Tab</h4>
-
-<p>The <span class="image-wrap" style=""><img src="attachments/71828496/71926226.png" style="border: 0px solid black"/></span> tab primarily allows users to filter the list of metrics displayed at the right. It also displays the same "hosted resources" and "hosting resources" portlets as displayed in the "<a href="ui-Monitor.CurrentHealth.html#ui-Monitor.CurrentHealth-child">Current Health</a>" screen.</p>
-
-<h4><a name="ui-Monitor.CurrentHealth.Metrics-MetricDataTab"></a>Metric Data Tab</h4>
-
-<p>Each metric is displayed with its low, average, peak, and last-recorded values and its collection interval. Also displayed is the number of times a collected metric value triggered an alert ("Alerts") and how many times it was <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-OOB">out-of-bounds</a> ("OOB"). Again, all these values are selected only from the metric display range.</p>
-
-<p>The value of a metric's <ins>Collection Interval</ins> indicates whether or not data is being collected for the metric. A value of "NONE" indicates that data is not being collected. Any other value indicates the frequency with which HQ collects the data.</p>
-
-<p>Metrics can be charted and also their <a href="http://support.hyperic.com/confluence/display/EVO/Baselines" title="Baselines">baseline values</a> can be set.</p>
-
-<p><a name="ui-Monitor.CurrentHealth.Metrics-range"></a></p>
-
-<h4><a name="ui-Monitor.CurrentHealth.Metrics-MetricDisplayRange"></a>Metric Display Range</h4>
-
-<p>This section displays the <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-range">metric display range</a> used in this, and all Monitoring, screens. Users can change the display range.</p>
-
-<p><em><a href="#ui-Monitor.CurrentHealth.Metrics-top"><em>back to top</em></a></em></p>
-
-<p><a name="ui-Monitor.CurrentHealth.Metrics-autogroup"></a></p>
-
-<h3><a name="ui-Monitor.CurrentHealth.Metrics-GroupMetrics"></a>Group Metrics</h3>
-
-<p>This screen displays summary metric data for groups (both user-created <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-compatiblegroup">compatible groups</a> and HQ-created <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-autogroup">autogroups</a>). For compatible groups, HQ displays metric data much like it does for a single resource, but it aggregates metrics at the group level and also displays the <ins>SUM</ins>. The screen indicates the status of metric collection for the group's member resources with data such as <ins>&#35; Collected</ins> (how many member resources have collected data for the listed metric). Users can compare all listed metrics for a selected set of member resources, and they can select a metric to be charted for 10 of the group's members.</p>
-
-<p>In the case of an autogroup, this screen displays all metrics available for collection for the autogroup's <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-resourcetype">resource type</a>. The "Members Collecting" section denotes if any member of the autogroup is collecting that metric: "NO" (none), "YES" (all), or "SOME." If a metric is currently being collected, its <ins>Collection Interval</ins> is also listed: either a specific value if all members that are collecting the metric have the same collection interval, or "DIFFERENT" if the values vary.</p>
-
-<p>Changing values (stopping collection, starting collection, collection interval, etc.) for a metric in a group imposes that one value on all the group's members.</p>
-
-<p><em><a href="#ui-Monitor.CurrentHealth.Metrics-top"><em>back to top</em></a></em></p>
-
-<p><a name="ui-Monitor.CurrentHealth.Metrics-Navigating"></a></p>
-<h3><a name="ui-Monitor.CurrentHealth.Metrics-NavigatingviatheMastheadMenu"></a>Navigating via the Masthead Menu</h3>
-
-<p>Main screens in Hyperic contain a masthead menu. Users can navigate to the following parts of HQ using this menu:</p>
-<div class='table-wrap'>
-<table class='confluenceTable'><tbody>
-<tr>
-<td class='confluenceTd'> <b>Dashboard</b> </td>
-<td class='confluenceTd'> Displays the <a href="ui-Dashboard.html" title="ui-Dashboard">Dashboard</a>, the starting screen in HQ, which displays information about resource health, recent alerts, recently performed auto-discovery scan, and control actions </td>
-</tr>
-<tr>
-<td class='confluenceTd'> <b>Resources</b> </td>
-<td class='confluenceTd'> Click the menu name to access either <b>Browse</b> (takes users to the <a href="ui-Resources.html" title="ui-Resources">Browse Resources</a> screen, where they can locate and navigate through information about all <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-managedresource">managed resources</a>), <b>Currently Down</b> (takes users to the <a href="ui-CurrentlyDown.html" title="ui-CurrentlyDown">Currently Down</a> screen, where they can look at all managed resources that are unavailable), <b>Nagios Availability</b> (available only when Nagios is installed), or <b>Recently Viewed</b> (provides a drop-down list of <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-resource">resources</a> that the user has recently viewed. Selecting one of those resources takes the user to the <a href="ui-Monitor.CurrentHealth.html" title="ui-Monitor.CurrentHealth">Current Health</a> screen for the resource). </td>
-</tr>
-<tr>
-<td class='confluenceTd'> <b>Analyze</b> </td>
-<td class='confluenceTd'> Click the menu name to access <b>Reporting</b> <font color="red">&#42;</font> (presents the <a href="ui-Report.Center.html" title="ui-Report.Center">Reporting</a> screen, from which reports can be generated), <b>Alert Center</b> (presents the <a href="ui-Alert.Center.html" title="ui-Alert.Center">Alert Center</a>, which displays a deployment wide alert summary), or <b>Event Center</b> (presents the <a href="http://support.hyperic.com/confluence/display/DOC/ui-Event.Center" title="ui-Event.Center">Event Center</a>, which displays a deployment-wide event summary). <br class="atl-forced-newline" /> </td>
-</tr>
-<tr>
-<td class='confluenceTd'> <b>Administration</b> </td>
-<td class='confluenceTd'> Takes users (with "Administer Hyperic HQ Server Configuration" permissions) to the <a href="ui-Admin.html" title="ui-Admin">Administration</a> screen, where they can manage the system-wide settings </td>
-</tr>
-<tr>
-<td class='confluenceTd'> <b>Search</b> <br class="atl-forced-newline" /> </td>
-<td class='confluenceTd'> The Search box in the upper right of the Masthead allows you to search for HQ resources of any type and HQ users. <br class="atl-forced-newline" />
-<br class="atl-forced-newline" />
-Search results appear after four characters are entered in the text box. Results will include the first 10 platforms, servers, services, and groups whose name includes the search string. <br class="atl-forced-newline" />  <br class="atl-forced-newline" />
-Double-click a resource in the list to navigate to its Resource page. </td>
-</tr>
-</tbody></table>
-</div>
-
-<p>The masthead also displays the two most recently triggered alerts. Users can click the alert's time to be taken to the <a href="ui-Alert.Detail.html" title="ui-Alert.Detail">alert detail</a>.</p>
-<p><em><a href="#ui-Monitor.CurrentHealth.Metrics-top"><em>back to top</em></a></em></p>
-
-<p><br class="atl-forced-newline" /></p>
-<table class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><tbody><tr>
-<div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>Related Information</b></div><div class="panelContent">
-<p><a href="http://support.hyperic.com/confluence/display/EVO/HQ+Metric+Categories" title="HQ Metric Categories">HQ Metric Categories</a><br/>
-<a href="http://support.hyperic.com/confluence/display/EVO/Monitoring+Overview" title="Monitoring Overview">Monitoring Overview</a></p>
-</div></div></tr></tbody></table>
-
-<h5><a name="ui-Monitor.CurrentHealth.Metrics-ReturntotheUserInterfaceReference."></a>Return to the <a href="User Interface Reference.html" title="User Interface Reference">User Interface Reference</a>.</h5>
+<p>For information about the <b>Resources</b> minitab on the left side of the page, see <a href="Resources Minitab.html" title="Resources Minitab">Resources Minitab</a>.</p>
+<p><font color=""></font></p>
 
 				    					    <br/>
                         <div class="tabletitle">
-                            <a name="attachments">Attachments:</a>
+                            <a name="attachments">
+                                <h2>Attachments:</h2>
+                            </a>
                         </div>
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/71828496/71926227.png">MiniTab_MetricData_on.png</a> (image/png)
+                                <a href="attachments/77464610/77660922.gif">tbb_compareMetricsOfSelected.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/71828496/71926226.png">MiniTab_Resources_on.png</a> (image/png)
+                                <a href="attachments/77464610/77660950.gif">icon_info.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/71828496/71926225.png">tbb_disablecollection.png</a> (image/png)
+                                <a href="attachments/77464610/77660951.gif">tbb_chartselectedmetrics.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/71828496/71926223.png">dash-button_go-arrow.png</a> (image/png)
+                                <a href="attachments/77464610/77660948.png">tbb_setBaselines.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/71828496/71926224.gif">tbb_chartselectedmetrics.gif</a> (image/gif)
+                                <a href="attachments/77464610/77660949.png">MiniTab_MetricData_on.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/71828496/71926222.png">tbb_setBaselines.png</a> (image/png)
+                                <a href="attachments/77464610/77660946.png">MiniTab_Resources_on.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/71828496/71926220.gif">icon_info.gif</a> (image/gif)
+                                <a href="attachments/77464610/77660947.png">tbb_disablecollection.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/71828496/71926221.gif">tbb_compareMetricsOfSelected.gif</a> (image/gif)
+                                <a href="attachments/77464610/77660944.png">dash-button_go-arrow.png</a> (image/png)
                                 <br/>
                                                     </div>
 				    
@@ -272,10 +214,10 @@ Double-click a resource in the list to navigate to its Resource page. </td>
 	    </table>
 	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
 			<tr>
-				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jan 12, 2011 15:43</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:44</font></td>
 		    </tr>
 	    </table>
     </body>

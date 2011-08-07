@@ -51,5 +51,6 @@ public class DetectorConstants {
     public static final String ADDR = "addr";
     public static final String PORT = "port";
     public static final String NO_DURABLE = "nodurable";
-    public static final String AUTO_SYNC = "autosycn";
+    public static final String AUTO_SYNC = "autosync";
+    public static final String HTTPS="https";
 }

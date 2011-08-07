@@ -24,6 +24,7 @@
  -->
 
 <plugin>
+  <property name="PLUGIN_VERSION" value="@project.version@"/>
   <!-- extract from http://www.weathergoose.com/mib-itw.zip -->
   <property name="MIBS"
             value="/usr/local/share/snmp/mibs/itw_mib.mib"/>

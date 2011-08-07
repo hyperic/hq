@@ -190,28 +190,33 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      * 
      */
     @Transactional(readOnly = true)
-    public long getDowntime(Resource resource, long begin, long end) throws MeasurementNotFoundException {
+    public long getDowntime(Resource resource, long rangeBegin, long rangeEnd) throws MeasurementNotFoundException {
         Measurement meas = measurementDAO.findAvailMeasurement(resource);
         if (meas == null) {
             throw new MeasurementNotFoundException("Availability measurement " + "not found for resource " +
                                                    resource.getId());
         }
-        List<AvailabilityDataRLE> availInfo = availabilityDataDAO.getHistoricalAvails(meas, begin, end, false);
+        List<AvailabilityDataRLE> availInfo = availabilityDataDAO.getHistoricalAvails(meas, rangeBegin, rangeEnd, false);
         long rtn = 0l;
         for (AvailabilityDataRLE avail : availInfo) {
             if (avail.getAvailVal() != AVAIL_DOWN) {
                 continue;
             }
-            long endtime = avail.getEndtime();
-            if (endtime == MAX_AVAIL_TIMESTAMP) {
-                endtime = System.currentTimeMillis();
+            long dataDownEndTime = avail.getEndtime();
+            
+            if (dataDownEndTime == MAX_AVAIL_TIMESTAMP) {
+                dataDownEndTime = System.currentTimeMillis();
+            } 
+            if (dataDownEndTime > rangeEnd){
+                // use range end if the data down end time is greater than the end range.
+                dataDownEndTime = rangeEnd;
             }
-            long rangeStartTime = avail.getStartime();
+            long dataDownStartTime = avail.getStartime();
             // Make sure the start of the down time is not earlier then the begin time
-            if (rangeStartTime < begin){
-            	rangeStartTime = begin;
+            if (dataDownStartTime < rangeBegin){
+            	dataDownStartTime = rangeBegin;
             }
-            rtn += (endtime - rangeStartTime);
+            rtn += (dataDownEndTime - dataDownStartTime);
         }
         return rtn;
     }
@@ -248,7 +253,8 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     @Transactional(readOnly = true)
     public Map<Integer, List<Measurement>> getAvailMeasurementChildren(List<Integer> resourceIds,
                                                                        String resourceRelationType) {
-        final List<Object[]> objects = measurementDAO.findRelatedAvailMeasurements(resourceIds, resourceRelationType);
+        final List<Object[]> objects =
+            measurementDAO.findRelatedAvailMeasurements(resourceIds, resourceRelationType);
         return convertAvailMeasurementListToMap(objects);
     }
 

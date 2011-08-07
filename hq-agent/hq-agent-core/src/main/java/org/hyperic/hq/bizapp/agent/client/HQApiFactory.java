@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- *  Copyright (C) [2010], VMware, Inc.
+ *  Copyright (C) [2010-2011], VMware, Inc.
  *  This file is part of Hyperic.
  *
  *  Hyperic is free software; you can redistribute it and/or modify
@@ -31,6 +31,7 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.AgentKeystoreConfig;
 import org.hyperic.hq.agent.server.AgentDaemon;
 import org.hyperic.hq.bizapp.agent.CommandsAPIInfo;
 import org.hyperic.hq.bizapp.agent.ProviderInfo;
@@ -43,17 +44,22 @@ public class HQApiFactory {
 
 	private static final String HQ_USER = "agent.setup.camLogin";
 	private static final String HQ_PASS = "agent.setup.camPword";
+	private static final String JAVA_SSL_KEYSTORE = "javax.net.ssl.keyStore";
+	private static final String JAVA_SSL_KEYSTORE_PASSWORD = "javax.net.ssl.keyStorePassword";
 
 	public static HQApi getHQApi(AgentDaemon agent, Properties bootProps)
 		throws PluginException {
 
 		try {
 			ProviderInfo providerInfo = CommandsAPIInfo.getProvider(agent.getStorageProvider());
-
 			URI uri = new URI(providerInfo.getProviderAddress());
 			String user = bootProps.getProperty(HQ_USER, "hqadmin");
 			String pass = bootProps.getProperty(HQ_PASS, "hqadmin");
 
+			if (uri.getScheme().equalsIgnoreCase("https")) {
+				configureSSLKeystore();
+			}
+			
 			HQApi api = new HQApi(uri, user, pass);
 
 			if (_log.isDebugEnabled()) {
@@ -66,6 +72,29 @@ public class HQApiFactory {
 		} catch (Exception e) {
 			throw new PluginException("Could not get HQApi connection: "
 					+ e.getMessage(), e);
+		}
+	}
+	
+	private static void configureSSLKeystore() {
+		// TODO: Refactor later so that Java system properties do not need to be set.
+		// Ideally, we should be able to pass the DefaultSSLProviderImpl to HQApi.
+
+		AgentKeystoreConfig keystoreConfig = new AgentKeystoreConfig();
+
+		if (!keystoreConfig.isAcceptUnverifiedCert()) {
+	    	String keyStorePath = System.getProperty(JAVA_SSL_KEYSTORE);
+	    	String keyStorePassword = System.getProperty(JAVA_SSL_KEYSTORE_PASSWORD);
+	    	
+	    	if (keyStorePath == null || keyStorePassword == null) {
+	    		String filePath = keystoreConfig.getFilePath();
+	    		System.setProperty(JAVA_SSL_KEYSTORE, filePath);
+	    		System.setProperty(JAVA_SSL_KEYSTORE_PASSWORD, keystoreConfig.getFilePassword()); 
+	    		
+	    		if (_log.isDebugEnabled()) {
+	    			_log.debug("Setting Java system property " + JAVA_SSL_KEYSTORE
+	    							+ " to " + filePath);
+	    		}
+	    	}
 		}
 	}
 

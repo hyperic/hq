@@ -261,6 +261,7 @@ begin
 	    listProperties = ListCreate (STRINGLIST);  
 	    // populate the properties list before writing out to file
 	    ListAddString ( listProperties, "hyperic-hq-agent.installdir=" + sFormattedDir, AFTER );  
+	    ListAddString ( listProperties, "accept.eula=true", AFTER );
 	    // write out properties to file
 		WritePropertiesToFile(listProperties, sWindowsTemp, SETUP_FILE);  
 		ListDestroy ( listProperties );
@@ -270,6 +271,7 @@ begin
 	    listProperties = ListCreate (STRINGLIST);  
 	    // populate the properties list before writing out to file
 	    ListAddString ( listProperties, "shell.installdir=" + sFormattedDir, AFTER );
+	    ListAddString ( listProperties, "accept.eula=true", AFTER );
 	    // write out properties to file
 	    WritePropertiesToFile(listProperties, sWindowsTemp, SETUP_FILE);
 	    ListDestroy(listProperties);    	

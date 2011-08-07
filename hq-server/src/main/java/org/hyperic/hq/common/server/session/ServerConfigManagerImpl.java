@@ -124,11 +124,6 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
             serverConfigAuditFactory.updateBaseURL(subject, newVal, oldVal);
         } else if (key.equals(HQConstants.EmailSender)) {
             serverConfigAuditFactory.updateFromEmail(subject, newVal, oldVal);
-        } else if (key.equals(HQConstants.ExternalHelp)) {
-            boolean oldExternal = oldVal.equals("true");
-            boolean newExternal = newVal.equals("true");
-
-            serverConfigAuditFactory.updateExternalHelp(subject, newExternal, oldExternal);
         } else if (key.equals(HQConstants.DataMaintenance)) {
             int oldHours = (int) (Long.parseLong(oldVal) / 60 / 60 / 1000);
             int newHours = (int) (Long.parseLong(newVal) / 60 / 60 / 1000);

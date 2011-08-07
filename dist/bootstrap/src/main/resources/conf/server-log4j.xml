@@ -102,37 +102,77 @@
 		<level value="OFF" />
 	</logger>
 
-	<!-- Turn off useless error messages, HHQ-3920 -->
-	<logger name="org.hibernate.cache.ReadWriteCache">
-  		<level value="OFF"/>
-	</logger>
+    <!-- Turn off useless error messages, HHQ-3920 -->
+    <logger name="org.hibernate.cache.ReadWriteCache">
+        <level value="OFF"/>
+    </logger>
+
+    <!-- HHQ-4744, turn off hibernate logging of StaleStateException, all errors are logged in HQ -->
+    <logger name="org.hibernate.event.def.AbstractFlushingEventListener">
+        <level value="OFF" />
+    </logger>
+    <logger name="org.hibernate.jdbc.AbstractBatcher">
+        <level value="OFF" />
+    </logger>
+
+    <!-- To debug Plugin Manager related issues change the following from INFO to DEBUG -->
+    <logger name="org.hyperic.hq.appdef.server.session.PluginSyncJob">
+        <level value="INFO" />
+    </logger>
+    <logger name="org.hyperic.hq.appdef.server.session.AgentRemovePluginJob">
+        <level value="INFO" />
+    </logger>
+    <logger name="org.hyperic.hq.appdef.server.session.AgentPluginStatus">
+        <level value="INFO" />
+    </logger>
+    <logger name="org.hyperic.hq.appdef.server.session.AgentPluginStatusEnum">
+        <level value="INFO" />
+    </logger>
+    <logger name="org.hyperic.hq.appdef.server.session.AgentPluginStatusDAO">
+        <level value="INFO" />
+    </logger>
+    <logger name="org.hyperic.hq.appdef.server.session.AgentPluginSyncRestartThrottle">
+        <level value="INFO" />
+    </logger>
+    <logger name="org.hyperic.hq.appdef.server.session.AgentManagerImpl">
+        <level value="INFO" />
+    </logger>
+    <logger name="org.hyperic.hq.appdef.server.session.AgentPluginUpdaterImpl">
+        <level value="INFO" />
+    </logger>
+    <logger name="org.hyperic.hq.product.server.session.PluginManagerImpl">
+        <level value="INFO" />
+    </logger>
 
     <!-- To debug availability issues change the following from INFO to DEBUG -->
+    <logger name="org.hyperic.hq.measurement.server.session.BackfillPointsServiceImpl">
+        <level value="INFO"/>
+    </logger>
     <logger name="org.hyperic.hq.measurement.server.session.AvailabilityCheckServiceImpl">
-  		<level value="INFO"/>
-	</logger>
-	
-	<logger name="org.hyperic.hq.measurement.server.session.ReportProcessorImpl">
-  		<level value="INFO"/>
-	</logger>
+        <level value="INFO"/>
+    </logger>
+    <logger name="org.hyperic.hq.measurement.server.session.ReportProcessorImpl">
+        <level value="INFO"/>
+    </logger>
 
-	<!-- To debug agent scheduling issues change the following from INFO to DEBUG -->
-	<logger name="org.hyperic.hq.measurement.server.session.MeasurementProcessorImpl">
-  		<level value="INFO"/>
-	</logger>
-	
-	<logger name="org.hyperic.hq.measurement.server.session.AgentScheduleSynchronizer">
-  		<level value="INFO"/>
-	</logger>
+    <!-- To debug agent scheduling issues change the following from INFO to DEBUG -->
+    <logger name="org.hyperic.hq.measurement.server.session.MeasurementProcessorImpl">
+        <level value="INFO"/>
+    </logger>
+    <logger name="org.hyperic.hq.agent.server.session.AgentSynchronizer">
+        <level value="INFO"/>
+    </logger>
+    <logger name="org.hyperic.hq.measurement.server.session.AgentScheduleSynchronizer">
+        <level value="INFO"/>
+    </logger>
 
-	<!-- To debug autoinventory issues change the following from INFO to DEBUG -->
-	<logger name="org.hyperic.hq.autoinventory.server.session.AutoinventoryManagerImpl">
-  		<level value="INFO"/>
-	</logger>
-	
-	<logger name="org.hyperic.hq.autoinventory.server.session.ServiceMergerImpl">
-  		<level value="INFO"/>
-	</logger>
+    <!-- To debug autoinventory issues change the following from INFO to DEBUG -->
+    <logger name="org.hyperic.hq.autoinventory.server.session.AutoinventoryManagerImpl">
+        <level value="INFO"/>
+    </logger>
+    <logger name="org.hyperic.hq.autoinventory.server.session.ServiceMergerImpl">
+        <level value="INFO"/>
+    </logger>
 	
 
 	<!--

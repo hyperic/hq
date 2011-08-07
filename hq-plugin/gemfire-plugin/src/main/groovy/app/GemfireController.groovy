@@ -13,17 +13,11 @@ class GemfireController extends BaseController {
         def members = []
         if(!liveData.hasError()){
             def _members = liveData.objectResult
-            _members.each{i ->
-                def name=HtmlUtil.escapeHtml(i[0]);
-                def id=HtmlUtil.escapeHtml(i[1]);
-                members.add([name:name,id:id])
-            }
+            _members.each{i -> members.add(HtmlUtil.escapeHtml(i))}
             log.debug("[tree] members="+members)
         }else{
             log.error(liveData.errorMessage);
         }
-
-        members=members.sort{a, b -> a.name.compareToIgnoreCase b.name};
         render(locals:[members:members])
     }
 

@@ -26,7 +26,8 @@
 
 -->
 
-<plugin version="@project.version@">
+<plugin>
+  <property name="PLUGIN_VERSION" value="@project.version@"/>
 
   <config name="vi">
     <option name="url"

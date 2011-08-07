@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -24,12 +25,14 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.product.shared.PluginDeployException;
 import org.hyperic.hq.product.shared.PluginManager;
+import org.hyperic.hq.product.shared.PluginTypeEnum;
 import org.hyperic.hq.ui.KeyConstants;
 import org.hyperic.hq.web.BaseController;
 import org.springframework.beans.BeansException;
@@ -51,24 +54,25 @@ public class PluginManagerController extends BaseController implements Applicati
     private static final Log log = LogFactory.getLog(PluginManagerController.class);
     
     private static final String HELP_PAGE_MAIN = "Administration.Plugin.Manager";
-    
+
     private PluginManager pluginManager;
     private AgentManager agentManager;
+    private ResourceManager resourceManager;
     private ApplicationContext applicationContext;
     SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy hh:mm aa zzz");
 
     
     @Autowired
     public PluginManagerController(AppdefBoss appdefBoss, AuthzBoss authzBoss, 
-            PluginManager pluginManager, AgentManager agentManager) {
+            PluginManager pluginManager, AgentManager agentManager, ResourceManager resourceManager) {
         super(appdefBoss, authzBoss);
         this.pluginManager = pluginManager;
         this.agentManager = agentManager;
+        this.resourceManager = resourceManager;
     }
     
     @RequestMapping(method = RequestMethod.GET)
     public String index(Model model) {
-        model.addAttribute("pluginSummaries", getPluginSummaries());
         model.addAttribute("info",getAgentInfo());
         model.addAttribute("mechanismOn", pluginManager.isPluginSyncEnabled());
         if (pluginManager.isPluginSyncEnabled()){
@@ -79,6 +83,38 @@ public class PluginManagerController extends BaseController implements Applicati
         model.addAttribute("customDir", pluginManager.getCustomPluginDir().getAbsolutePath());
         model.addAttribute(KeyConstants.PAGE_TITLE_KEY, HELP_PAGE_MAIN);
         return "admin/managers/plugin";
+    }
+    /**
+     * Get the resource count for each plugin. (The count will be shown in delete confirmation dialog.)
+     * @param deleteIds
+     * @return 
+     */
+    @RequestMapping(method = RequestMethod.GET, value="/resource/count", headers="Accept=application/json")
+    public @ResponseBody List<Map<String, String>> getResourceCount(@RequestParam("deleteIds") String deleteIds){
+        
+        Map<String,String> nameIdMapping = new HashMap<String,String>();
+        String[] tempDeleteIds = deleteIds.split(",");
+        List<Plugin> plugins = new ArrayList<Plugin>();
+        
+        for (int i= 0; i<tempDeleteIds.length;i++){
+            Plugin plugin = pluginManager.getPluginById(Integer.parseInt(tempDeleteIds[i]));
+            if(plugin!=null){
+                plugins.add(plugin);
+                nameIdMapping.put(plugin.getName(), String.valueOf(plugin.getId()));
+            }
+        }
+        List<Map<String,String>> result = new ArrayList<Map<String,String>>();
+        Map<String, Long> counts = resourceManager.getResourceCountByPlugin(plugins);
+        Iterator it = counts.entrySet().iterator();
+        while(it.hasNext()){
+            Map.Entry<String, Long> pair = (Map.Entry<String, Long>) it.next();
+            Map<String,String> count = new HashMap<String, String>();
+            count.put("pluginId", nameIdMapping.get(pair.getKey()));
+            count.put("count", String.valueOf(pair.getValue()));
+            result.add(count);
+        }
+        
+        return result;
     }
     
     @RequestMapping(method = RequestMethod.GET, value="/list", headers="Accept=application/json")
@@ -105,6 +141,7 @@ public class PluginManagerController extends BaseController implements Applicati
                 Map<String, Object> pluginSummary = new HashMap<String, Object>();
                 Map<AgentPluginStatusEnum, Integer> pluginStatus = 
                     allPluginStatus.get(pluginId);
+                
                 
                 pluginSummary.put("id", pluginId);
                 pluginSummary.put("name", plugin.getName());
@@ -134,6 +171,27 @@ public class PluginManagerController extends BaseController implements Applicati
                 pluginSummary.put("version", plugin.getVersion());   
                 pluginSummary.put("disabled", plugin.isDisabled());
                 pluginSummary.put("deleted", plugin.isDeleted());
+                
+                boolean isCustom = false;
+                boolean isServer = false;
+                Collection<PluginTypeEnum> pluginType = pluginManager.getPluginType(plugin);
+                if(pluginType!=null){
+                    for(PluginTypeEnum type:pluginType){
+                        switch(type){
+                            case SERVER_PLUGIN:
+                                isServer = true;
+                                break;
+                            case CUSTOM_PLUGIN:
+                                isCustom = true;
+                                break;
+                            default:
+                                break;
+
+                        }
+                    }
+                }
+                pluginSummary.put("isCustomPlugin",isCustom);
+                pluginSummary.put("isServerPlugin", isServer);
                 if(errorAgentCount>0){
                     finalPluginSummaries.add(pluginSummary);
                 }else if(inProgressAgentCount>0){
@@ -153,23 +211,12 @@ public class PluginManagerController extends BaseController implements Applicati
     public @ResponseBody Map<String, Object> getAgentInfo() {
         Map<String, Object> info = new HashMap<String,Object>();
         int agentErrorCount=0;
-        List<Agent> allAgents = agentManager.getAgents();
-        if (allAgents != null){
-            for (Agent agent : allAgents){
-                Collection<AgentPluginStatus> pluginStatus = agent.getPluginStatuses(); 
-                for (AgentPluginStatus status : pluginStatus){
-                    String lastSyncStatus = status.getLastSyncStatus();
-                    if (lastSyncStatus == null) {
-                        continue;
-                    }
-                    AgentPluginStatusEnum e = AgentPluginStatusEnum.valueOf(lastSyncStatus);
-                    if (e == AgentPluginStatusEnum.SYNC_FAILURE){
-                        agentErrorCount++;
-                        break;
-                    }
-                }
-            }
+        Map<Integer, AgentPluginStatus> failureAgents = pluginManager.getStatusesByAgentId(AgentPluginStatusEnum.SYNC_FAILURE);
+        
+        if(failureAgents!=null && failureAgents.size()>0){
+            agentErrorCount = failureAgents.size();
         }
+       
         info.put("agentErrorCount", agentErrorCount);
         info.put("allAgentCount", agentManager.getNumAutoUpdatingAgents());
         return info;
@@ -178,63 +225,48 @@ public class PluginManagerController extends BaseController implements Applicati
     @RequestMapping(method = RequestMethod.GET, value="/agent/summary", headers="Accept=application/json")
     public @ResponseBody List<String> getAgentStatusSummary() {
         List<String> agentNames = new ArrayList<String>();
-        List<Agent> allAgents = agentManager.getAgents();
-        for (Agent agent : allAgents){
-            Collection<AgentPluginStatus> pluginStatus = agent.getPluginStatuses(); 
-            for(AgentPluginStatus status:pluginStatus){
-                String lastSyncStatus = status.getLastSyncStatus();
-                if (lastSyncStatus == null) {
-                    continue;
-                }
-                AgentPluginStatusEnum e =AgentPluginStatusEnum.valueOf(lastSyncStatus);
-                if (e == AgentPluginStatusEnum.SYNC_FAILURE){
-                    agentNames.add(getAgentName(agent));
-                    break;
-                }
-            }
+        
+        Map<Integer, AgentPluginStatus> failureAgents = pluginManager.getStatusesByAgentId(AgentPluginStatusEnum.SYNC_FAILURE);
+        Iterator it = failureAgents.entrySet().iterator();
+        while(it.hasNext()){
+            Map.Entry<Integer, AgentPluginStatus> pairs = (Map.Entry<Integer, AgentPluginStatus>) it.next();
+            AgentPluginStatus status = pairs.getValue();
+            agentNames.add(getAgentName(status.getAgent()));
         }
+       
+        Collections.sort(agentNames);
+        
         return agentNames;
     }    
     
     @RequestMapping(method = RequestMethod.GET, value="/status/{pluginId}", headers="Accept=application/json")
     public @ResponseBody List<Map<String, Object>> getAgentStatus(@PathVariable int pluginId, 
-        @RequestParam("searchWord") String searchWord) {
-        Collection<AgentPluginStatus> errorAgentStatusList = 
-            pluginManager.getStatusesByPluginId(pluginId, AgentPluginStatusEnum.SYNC_FAILURE);
-
+        @RequestParam("searchWord") String searchWord, @RequestParam("status") String status) {
         List<Map<String,Object>> resultAgents = new ArrayList<Map<String,Object>>();
-        for (AgentPluginStatus errorAgentStatus : errorAgentStatusList){
-            String agentName = getAgentName(errorAgentStatus.getAgent());
+        Collection<AgentPluginStatus> agentStatusList ;
+        
+        if("error".equals(status)){
+            agentStatusList = pluginManager.getStatusesByPluginId(pluginId, AgentPluginStatusEnum.SYNC_FAILURE);
+        }else if("inprogress".equals(status)){
+            agentStatusList = pluginManager.getStatusesByPluginId(pluginId, AgentPluginStatusEnum.SYNC_IN_PROGRESS);
+        }else{
+            return resultAgents;
+        }
+        
+        for (AgentPluginStatus agentStatus : agentStatusList){
+            String agentName = getAgentName(agentStatus.getAgent());
             if ("".equals(searchWord) || agentName.contains(searchWord)){
                 Map<String,Object> errorAgent = new HashMap<String,Object>();
                 errorAgent.put("agentName", agentName); 
-                if(errorAgentStatus.getLastSyncAttempt()!=0){
-                    errorAgent.put("syncDate", formatter.format(errorAgentStatus.getLastSyncAttempt())); 
+                if(agentStatus.getLastSyncAttempt()!=0){
+                    errorAgent.put("syncDate", formatter.format(agentStatus.getLastSyncAttempt())); 
                 }else{
                     errorAgent.put("syncDate", "");
                 }
-                
-                errorAgent.put("status", "error");
+                errorAgent.put("status", status);
                 resultAgents.add(errorAgent);
             }
         }
-        
-        Collection<AgentPluginStatus> inProgressAgentStatusList = 
-            pluginManager.getStatusesByPluginId(pluginId, AgentPluginStatusEnum.SYNC_IN_PROGRESS);
-        for(AgentPluginStatus inProgressAgentStatus: inProgressAgentStatusList){
-            String agentName = getAgentName(inProgressAgentStatus.getAgent());
-            if("".equals(searchWord) || agentName.contains(searchWord)){
-                Map<String,Object> inProgressAgent = new HashMap<String,Object>();
-                inProgressAgent.put("agentName", agentName); 
-                if(inProgressAgentStatus.getLastSyncAttempt()!=0){
-                    inProgressAgent.put("syncDate", formatter.format(inProgressAgentStatus.getLastSyncAttempt()));
-                }else{
-                    inProgressAgent.put("syncDate", "");
-                }
-                inProgressAgent.put("status", "inProgress");
-                resultAgents.add(inProgressAgent);
-            }
-        }     
         return resultAgents;
     }
     
@@ -258,7 +290,7 @@ public class PluginManagerController extends BaseController implements Applicati
     
      @RequestMapping(method = RequestMethod.DELETE, value="/delete")
      public @ResponseBody String deletePlugin(@RequestParam(RequestParameterKeys.DELETE_ID) 
-                                              String[] deleteIds, HttpSession session, Model model){
+                                              String[] deleteIds, HttpSession session){
         AuthzSubject subject;
         try {
             subject = getAuthzSubject(session);
@@ -267,7 +299,7 @@ public class PluginManagerController extends BaseController implements Applicati
                 Plugin plugin = pluginManager.getPluginById(Integer.parseInt(deleteIds[i]));
                 pluginFilenames.add(plugin.getPath());
             }
-            pluginManager.removePlugins(subject, pluginFilenames);
+            pluginManager.removePluginsInBackground(subject, pluginFilenames);
          
             return "success";
 

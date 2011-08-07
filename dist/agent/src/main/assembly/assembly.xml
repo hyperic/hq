@@ -158,6 +158,7 @@
 				<!-- Argh - for some reason mvn is still applying filtering to hqapi's transitive deps.  Adding them in explicitly -->
 				<includes>
 					<include>org.hyperic.hq.hqapi:hqapi1</include>
+					<include>org.apache.httpcomponents:*</include>
 					<include>org.jvnet.ws.wadl:*</include>
 					<include>com.sun.localizer:*</include>
 					<include>javax.xml.bind:*</include>

@@ -58,6 +58,7 @@
  -->
 
 <plugin>
+  <property name="PLUGIN_VERSION" value="@project.version@"/>
   <!-- extracted to: pdk/work/scripts/qmail/hq-qmail-qstat -->
   <script name="hq-qmail-qstat">
 #!/bin/sh

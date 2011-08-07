@@ -30,13 +30,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.server.session.AgentDataTransferJob;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentPluginUpdater;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.product.shared.PluginManager;
@@ -52,10 +52,11 @@ public class AgentRemovePluginJob implements AgentDataTransferJob {
     private static final String AGENT_PLUGIN_REMOVE = AgentPluginUpdater.AGENT_PLUGIN_REMOVE;
     private Integer agentId;
     private Collection<String> pluginFileNames;
-    private AuthzSubject overlord;
     private AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle;
     private AgentManager agentManager;
     private PluginManager pluginManager;
+    private AuthzSubjectManager authzSubjectManager;
+    private AtomicBoolean success = new AtomicBoolean(false);
 
     @Autowired
     public AgentRemovePluginJob(AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle,
@@ -63,7 +64,7 @@ public class AgentRemovePluginJob implements AgentDataTransferJob {
                                 PluginManager pluginManager,
                                 AgentManager agentManager) {
         this.agentPluginSyncRestartThrottle = agentPluginSyncRestartThrottle;
-        this.overlord = authzSubjectManager.getOverlordPojo();
+        this.authzSubjectManager = authzSubjectManager;
         this.agentManager = agentManager;
         this.pluginManager = pluginManager;
     }
@@ -79,7 +80,7 @@ public class AgentRemovePluginJob implements AgentDataTransferJob {
     public void execute() {
         try {
             final Map<String, Boolean> result =
-                agentManager.agentRemovePlugins(overlord, agentId, pluginFileNames);
+                agentManager.agentRemovePlugins(authzSubjectManager.getOverlordPojo(), agentId, pluginFileNames);
             for (final Entry<String, Boolean> entry : result.entrySet()) {
                 final String file = entry.getKey();
                 final Boolean res = entry.getValue();
@@ -89,9 +90,13 @@ public class AgentRemovePluginJob implements AgentDataTransferJob {
                     log.error("error removing plugin file=" + file + " from agentId=" + agentId);
                 }
             }
+            if (Thread.currentThread().isInterrupted()) {
+                return;
+            }
             if (!pluginFileNames.isEmpty()) {
                 agentPluginSyncRestartThrottle.restartAgent(agentId);
             }
+            success.set(true);
         } catch (Exception e) {
             throw new SystemException("error removing pluginFiles=" + pluginFileNames +
                                       " from agentId=" + agentId, e);
@@ -113,6 +118,10 @@ public class AgentRemovePluginJob implements AgentDataTransferJob {
     public void onFailure() {
         pluginManager.updateAgentPluginSyncStatus(
             AgentPluginStatusEnum.SYNC_FAILURE, null, Collections.singletonMap(agentId, pluginFileNames));
+    }
+
+    public boolean wasSuccessful() {
+        return success.get();
     }
 
 }

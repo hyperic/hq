@@ -176,15 +176,24 @@
 		color:#777777;
 		font-weight: bold;
 	}
-	.agentStatusSpan,
+	.agentStatusProgressSpan,
+	.agentStatusFailSpan,
 	#agentFailure,
 	.helpLink{
 		color: #0066CC;
 		font-weight: bold;
 		height:9px;
 	}
-	.agentStatusSpan:focus,
-	.agentStatusSpan:hover,
+	.agentStatusProgressSpan,
+	.agentStatusFailSpan,
+	.agentStatusSuccessfulSpan{
+		float:left;height:20px;
+	}
+	
+	.agentStatusProgressSpan:focus,
+	.agentStatusProgressSpan:hover,
+	.agentStatusFailSpan:focus,
+	.agentStatusFailSpan:hover,
 	#agentFailure:focus,
 	#agentFailure:hover,
 	.helpLink:focus,
@@ -273,7 +282,7 @@
 		float:right;
 	}
 	.fileToUploadClose{
-		background: url("/static/images/dash_movecontent_del-on.gif") no-repeat scroll 5px center #FFFFFF
+		background: url("/static/images/dash_movecontent_del-on.gif") no-repeat scroll 5px center #FFFFFF;
 	}
 	#afterSelectFileInstruction{
 		text-align:center;
@@ -281,8 +290,9 @@
 	}
 	.mechanismOffInstruction{
 		background:yellow; 
-	}	
-	#loadingIcon{
+	}
+	#loadingIcon,
+	#summaryLoadingIcon{
 		width:15px;
 	}
 	.infoIcon{
@@ -332,4 +342,11 @@
 	}
 	#deletLoadingIcon{
 	    float:right;
+	}
+	#tableLoadingIcon{
+		width:50px; 
+		height:50px;
+		display:block;
+		margin-left:auto;
+		margin-right:auto;
 	}

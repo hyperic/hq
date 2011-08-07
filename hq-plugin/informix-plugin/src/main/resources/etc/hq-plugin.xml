@@ -25,7 +25,8 @@
   USA.
  -->
 
-<plugin package="org.hyperic.hq.plugin.informix" version="@project.version@">
+<plugin package="org.hyperic.hq.plugin.informix">
+  <property name="PLUGIN_VERSION" value="@project.version@"/>
   <classpath>
     <include name="pdk/lib/jdbc/ifxjdbc.jar"/>
   </classpath>

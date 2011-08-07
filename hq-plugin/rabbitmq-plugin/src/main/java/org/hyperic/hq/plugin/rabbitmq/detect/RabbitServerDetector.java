@@ -168,7 +168,7 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
      * @return
      * @throws PluginException
      */
-    public List<ServiceResource> createRabbitResources(ConfigResponse serviceConfig) {
+    public List<ServiceResource> createRabbitResources(ConfigResponse serviceConfig) throws PluginException {
         List<ServiceResource> rabbitResources = null;
         List<RabbitObject> rabbitObjectss = new ArrayList();
 
@@ -179,22 +179,39 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
         String node = serviceConfig.getValue(DetectorConstants.SERVER_NAME);
         boolean noDurable = serviceConfig.getValue(DetectorConstants.NO_DURABLE, "false").equals("true");
 
+        HypericRabbitAdmin admin = new HypericRabbitAdmin(serviceConfig);
         try {
-            HypericRabbitAdmin admin = new HypericRabbitAdmin(serviceConfig);
             rabbitObjectss.addAll(admin.getConnections());
+        } catch (PluginException ex) {
+            logger.debug("[createRabbitResources] error with Connections: "+ex.getMessage(), ex);
+        }
+
+        try {
             rabbitObjectss.addAll(admin.getChannels());
+        } catch (PluginException ex) {
+            logger.debug("[createRabbitResources] error with Channels: "+ex.getMessage(), ex);
+        }
+
+        try {
             List<RabbitVirtualHost> vhosts = admin.getVirtualHosts();
             for (RabbitVirtualHost vhost : vhosts) {
-                rabbitObjectss.addAll(admin.getQueues(vhost));
-                rabbitObjectss.addAll(admin.getExchanges(vhost));
+                try {
+                    rabbitObjectss.addAll(admin.getQueues(vhost));
+                } catch (PluginException ex) {
+                    logger.debug("[createRabbitResources] error with Queues on "+vhost+": "+ex.getMessage(), ex);
+                }
+                try {
+                    rabbitObjectss.addAll(admin.getExchanges(vhost));
+                } catch (PluginException ex) {
+                    logger.debug("[createRabbitResources] error with Exchanges on "+vhost+": "+ex.getMessage(), ex);
+                }
             }
             rabbitObjectss.addAll(vhosts);
-            rabbitResources = doCreateServiceResources(rabbitObjectss, node, noDurable);
-        } catch (RuntimeException ex) {
-            logger.debug(ex, ex);
         } catch (PluginException ex) {
             logger.debug(ex, ex);
         }
+
+        rabbitResources = doCreateServiceResources(rabbitObjectss, node, noDurable);
         return rabbitResources;
     }
 
@@ -314,13 +331,13 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
             try {
                 InetAddress addr = InetAddress.getLocalHost();
                 String hostname = addr.getHostName();
-                String old_name=name;
-                name+="@"+hostname;
-                name=name.substring(0, name.indexOf("."));
-                logger.debug(DetectorConstants.SNAME+"="+old_name+" -> "+name);
+                String old_name = name;
+                name += "@" + hostname;
+                name = name.substring(0, name.indexOf("."));
+                logger.debug(DetectorConstants.SNAME + "=" + old_name + " -> " + name);
             } catch (UnknownHostException ex) {
-                name=null;
-                logger.debug(ex.getMessage(),ex);
+                name = null;
+                logger.debug(ex.getMessage(), ex);
             }
         }
         return name;
@@ -352,6 +369,12 @@ public class RabbitServerDetector extends ServerDetector implements AutoServerDe
     }
 
     private String generateSignature(ServerResource server) {
+        boolean disable = "true".equalsIgnoreCase(getManager().getProperty("rabbitmq.disable.runtimeScan"));
+        logger.debug("[generateSignature] rabbitmq.disable.runtimeScan="+disable);
+        if (disable) {
+            return "";
+        }
+
         List<RabbitObject> objs = new ArrayList();
         try {
             HypericRabbitAdmin admin = new HypericRabbitAdmin(server.getProductConfig());

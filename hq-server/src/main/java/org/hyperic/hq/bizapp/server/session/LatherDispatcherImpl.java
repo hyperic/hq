@@ -229,9 +229,10 @@ public class LatherDispatcherImpl implements LatherDispatcher {
     }
 
     private String testAgentConn(String agentIP, int agentPort, String authToken,
-                                 boolean isNewTransportAgent, boolean unidirectional) {
-        AgentCommandsClient client = agentCommandsClientFactory.getClient(agentIP, agentPort,
-            authToken, isNewTransportAgent, unidirectional);
+                                 boolean isNewTransportAgent, boolean unidirectional, boolean acceptCertificates) {
+        AgentCommandsClient client = agentCommandsClientFactory.getClient(agentIP, agentPort, authToken, 
+        		isNewTransportAgent, unidirectional, acceptCertificates);
+        
         try {
             client.ping();
         } catch (AgentConnectionException exc) {
@@ -261,8 +262,10 @@ public class LatherDispatcherImpl implements LatherDispatcher {
         String version = args.getVersion();
         boolean isNewTransportAgent = args.isNewTransportAgent();
         boolean unidirectional = args.isUnidirectional();
-        String errRes = testAgentConn(agentIP, port, args.getAuthToken(), isNewTransportAgent,
-            unidirectional);
+        boolean acceptValidation = args.isAcceptCertificates();
+        String errRes = testAgentConn(agentIP, port, args.getAuthToken(), 
+        		isNewTransportAgent, unidirectional, acceptValidation);
+
         if (errRes != null) {
             return new RegisterAgent_result(errRes);
         }
@@ -412,12 +415,13 @@ public class LatherDispatcherImpl implements LatherDispatcher {
         int port = args.getAgentPort();
         boolean isNewTransportAgent = args.isNewTransportAgent();
         boolean unidirectional = args.isUnidirectional();
+        boolean acceptValidation = args.isAcceptCertificates();
 
         try {
             agent = agentManager.getAgent(args.getAgentToken());
 
-            if ((errRes = testAgentConn(agentIP, port, agent.getAuthToken(), isNewTransportAgent,
-                unidirectional)) != null) {
+            if ((errRes = testAgentConn(agentIP, port, agent.getAuthToken(), 
+            		isNewTransportAgent, unidirectional, acceptValidation)) != null) {
                 return new UpdateAgent_result(errRes);
             }
 
@@ -697,10 +701,8 @@ public class LatherDispatcherImpl implements LatherDispatcher {
         AgentConnection conn = null;
         try {
             conn = agentManager.getAgentConnection(method, ctx.getCallerIP(), agentId);
-            LatherValue rtn = runCommand(ctx, method, arg);
-            
             concurrentStatsCollector.addStat(1, LATHER_NUMBER_OF_CONNECTIONS);
-            
+            LatherValue rtn = runCommand(ctx, method, arg);
             return rtn;
         } finally {
             if (conn != null)

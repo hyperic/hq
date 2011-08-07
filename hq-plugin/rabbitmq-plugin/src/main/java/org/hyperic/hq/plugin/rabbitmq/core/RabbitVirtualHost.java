@@ -39,9 +39,13 @@ public class RabbitVirtualHost implements RabbitObject {
     public RabbitVirtualHost() {
     }
 
+    public RabbitVirtualHost(String name) {
+        this.name = name;
+    }
+
     @Override
     public String toString() {
-        return super.toString() + "[name=" + getName() + "]";
+        return "RabbitVirtualHost{name=" + getName() + "}";
     }
 
     /**

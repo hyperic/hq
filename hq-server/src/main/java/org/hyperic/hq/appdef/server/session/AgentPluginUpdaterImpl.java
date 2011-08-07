@@ -29,9 +29,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,6 +42,11 @@ import org.hyperic.hq.agent.server.session.AgentSynchronizer;
 import org.hyperic.hq.appdef.shared.AgentPluginUpdater;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.product.shared.PluginManager;
+import org.hyperic.hq.zevents.Zevent;
+import org.hyperic.hq.zevents.ZeventListener;
+import org.hyperic.hq.zevents.ZeventManager;
+import org.hyperic.hq.zevents.ZeventPayload;
+import org.hyperic.hq.zevents.ZeventSourceId;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -55,32 +63,33 @@ implements AgentPluginUpdater, ApplicationContextAware {
     private AgentSynchronizer agentSynchronizer;
     private PluginManager pluginManager;
     private ApplicationContext ctx;
+    private ZeventManager zeventManager;
     
     @Autowired
     public AgentPluginUpdaterImpl(AgentSynchronizer agentSynchronizer,
-                                  PluginManager pluginManager) {
+                                  PluginManager pluginManager,
+                                  ZeventManager zeventManager) {
         this.agentSynchronizer = agentSynchronizer;
         this.pluginManager = pluginManager;
+        this.zeventManager = zeventManager;
     }
 
-    public void queuePluginTransfer(Map<Integer, Collection<Plugin>> updateMap,
-                                    Map<Integer, Collection<String>> removeMap,
-                                    boolean restartAgents) {
-        if (isDisabled()) {
-            return;
-        }
-        if (updateMap == null) {
-            updateMap = Collections.emptyMap();
-        } if (removeMap == null) {
-            removeMap = Collections.emptyMap();
-        }
-        if (restartAgents) {
-            pluginManager.updateAgentPluginSyncStatus(
-                AgentPluginStatusEnum.SYNC_IN_PROGRESS, updateMap, removeMap);
-        } else {
-            pluginManager.updateAgentPluginSyncStatus(
-                AgentPluginStatusEnum.SYNC_FAILURE, updateMap, removeMap);
-        }
+    @PostConstruct
+    public void postConstruct() {
+        zeventManager.addBufferedListener(PluginStatusUpdatedZevent.class,
+            new ZeventListener<PluginStatusUpdatedZevent>() {
+                public void processEvents(List<PluginStatusUpdatedZevent> events) {
+                    for (final PluginStatusUpdatedZevent event : events) {
+                        queueJobs(event.restartAgents(), event.getUpdateMap(), event.getRemoveMap());
+                    }
+                }
+            }
+        );
+    }
+
+    private void queueJobs(boolean restartAgents,
+                           Map<Integer, Collection<Plugin>> updateMap,
+                           Map<Integer, Collection<String>> removeMap) {
         final Set<Integer> agentIds = new HashSet<Integer>();
         agentIds.addAll(updateMap.keySet());
         agentIds.addAll(removeMap.keySet());
@@ -108,6 +117,35 @@ implements AgentPluginUpdater, ApplicationContextAware {
             job.restartAgent(restartAgents);
             agentSynchronizer.addAgentJob(job);
         }
+    }
+
+    @Transactional(readOnly=false)
+    public void queuePluginTransfer(Map<Integer, Collection<Plugin>> updates,
+                                    Map<Integer, Collection<String>> removes,
+                                    boolean restartAgents) {
+        if (isDisabled()) {
+            return;
+        }
+        @SuppressWarnings("unchecked")
+        final Map<Integer, Collection<Plugin>> updateMap =
+            (updates == null) ? Collections.EMPTY_MAP : updates;
+        @SuppressWarnings("unchecked")
+        final Map<Integer, Collection<String>> removeMap =
+            (removes == null) ? Collections.EMPTY_MAP : removes;
+        if (restartAgents) {
+            pluginManager.updateAgentPluginSyncStatus(
+                AgentPluginStatusEnum.SYNC_IN_PROGRESS, updateMap, removeMap);
+        } else {
+            pluginManager.updateAgentPluginSyncStatus(
+                AgentPluginStatusEnum.SYNC_FAILURE, updateMap, removeMap);
+        }
+        // want jobs to get added to the agentSynchronizer after commit to ensure that we don't
+        // have agents restarting and updating status before the status is updated as a result
+        // of the updateAgentPluginSyncStatus() call. If the queuing was not called this way we
+        // could have agents sitting in the "IN-PROGRESS" state indefinitely because they were
+        // updated out of order
+        zeventManager.enqueueEventAfterCommit(
+            new PluginStatusUpdatedZevent(restartAgents, updateMap, removeMap));
     }
 
     private void removeDuplicates(Collection<Plugin> plugins, Collection<String> toRemove) {
@@ -147,6 +185,30 @@ implements AgentPluginUpdater, ApplicationContextAware {
 
     private boolean isDisabled() {
         return !pluginManager.isPluginSyncEnabled();
+    }
+
+    private class PluginStatusUpdatedZevent extends Zevent {
+        private Map<Integer, Collection<Plugin>> updateMap;
+        private Map<Integer, Collection<String>> removeMap;
+        private boolean restartAgents;
+        @SuppressWarnings("serial")
+        private PluginStatusUpdatedZevent(boolean restartAgents,
+                                          Map<Integer, Collection<Plugin>> updateMap,
+                                          Map<Integer, Collection<String>> removeMap) {
+            super(new ZeventSourceId() {}, new ZeventPayload() {});
+            this.updateMap = updateMap;
+            this.removeMap = removeMap;
+            this.restartAgents = restartAgents;
+        }
+        public boolean restartAgents() {
+            return restartAgents;
+        }
+        private Map<Integer, Collection<Plugin>> getUpdateMap() {
+            return updateMap;
+        }
+        private Map<Integer, Collection<String>> getRemoveMap() {
+            return removeMap;
+        }
     }
 
 }

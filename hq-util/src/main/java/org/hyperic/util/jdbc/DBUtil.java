@@ -72,14 +72,16 @@ public class DBUtil {
     public static final int DATABASE_ORACLE_8 = 3;
     public static final int DATABASE_ORACLE_9 = 4;
     public static final int DATABASE_ORACLE_10 = 8;
-    public static final int DATABASE_ORACLE_11 = 10;
     public static final int DATABASE_MYSQL5 = 9;
+    public static final int DATABASE_ORACLE_11 = 10;
+    public static final int DATABASE_POSTGRESQL_9 = 11;
 
     // Built-in DB constants
     private static String BUILTIN_DB_JDBC_URL = "jdbc:postgresql://127.0.0.1";
     private static String BUILTIN_DB_NAME = "hqdb";
 
     public static final int IN_CHUNK_SIZE = 200;
+
 
     private static Map _dbTypes = new HashMap();
 
@@ -174,6 +176,7 @@ public class DBUtil {
         switch (dbType) {
             case DATABASE_POSTGRESQL_7:
             case DATABASE_POSTGRESQL_8:
+            case DATABASE_POSTGRESQL_9:
                 query = "SELECT nextval('" + table + "_" + key + "_seq'::text)";
                 break;
             case DATABASE_ORACLE_8:
@@ -233,6 +236,8 @@ public class DBUtil {
                     dbType = DATABASE_POSTGRESQL_7;
                 } else if (dbVersion.startsWith("8.")) {
                     dbType = DATABASE_POSTGRESQL_8;
+                } else if (dbVersion.startsWith("9.")) {
+                    dbType = DATABASE_POSTGRESQL_9;
                 }
             } else if (dbName.indexOf("oracle") != -1) {
                 if (dbVersion.startsWith("oracle8")) {
@@ -266,7 +271,9 @@ public class DBUtil {
     }
 
     public static boolean isPostgreSQL(int type) {
-        return (type == DATABASE_POSTGRESQL_7 || type == DATABASE_POSTGRESQL_8);
+        return (type == DATABASE_POSTGRESQL_7 ||
+                type == DATABASE_POSTGRESQL_8 ||
+                type == DATABASE_POSTGRESQL_9);
     }
 
     /**

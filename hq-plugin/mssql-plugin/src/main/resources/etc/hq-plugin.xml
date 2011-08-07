@@ -24,8 +24,9 @@
   USA.
  -->
 
-<plugin name="mssql" version="@project.version@">
-	<script name="MDF_FreeSpacePct2005.sql">
+<plugin name="mssql">
+  <property name="PLUGIN_VERSION" value="@project.version@"/>
+  <script name="MDF_FreeSpacePct2005.sql">
 	<![CDATA[
 set ANSI_NULLS ON 
 set QUOTED_IDENTIFIER ON 
@@ -170,7 +171,7 @@ drop table #tTables
             template="Buffer Manager:Platform=Win32:Page writes/sec"
             category="UTILIZATION"
             group="Reliability"
-            collectionType="dynamic"
+            collectionType="trendsup"
             units="none"/>
         <metric name="Free pages"
             template="${buffer.manager}"

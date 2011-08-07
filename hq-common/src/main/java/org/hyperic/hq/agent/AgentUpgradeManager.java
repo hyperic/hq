@@ -32,21 +32,48 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicReference;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.file.FileUtil;
 import org.tanukisoftware.wrapper.WrapperManager;
 
 public class AgentUpgradeManager {
     
+    private static final Log log = LogFactory.getLog(AgentUpgradeManager.class);
     public static final String UPDATED_PLUGIN_EXTENSION = "-update";
     public static final String REMOVED_PLUGIN_EXTENSION = "-remove";
+    private static AtomicReference<Thread> agentDaemonThread = new AtomicReference<Thread>();;
+    
+    /**
+     * Request a JVM restart if in Java Service Wrapper mode
+     */
+    public static void setAgentDaemonThread(Thread thread) {
+        agentDaemonThread.set(thread);
+    }
     
     /**
      * Request a JVM restart if in Java Service Wrapper mode
      */
     public static void restartJVM() {
         if (WrapperManager.isControlledByNativeWrapper()) {
+            log.info("restart requested");
+            if (agentDaemonThread.get() != null) {
+                try {
+                    if (agentDaemonThread.get().isAlive()) {
+                        agentDaemonThread.get().interrupt();
+                        agentDaemonThread.get().join(30000);
+                    }
+                    if (agentDaemonThread.get().isAlive()) {
+                        log.error("AgentDaemonThread did not die within 30 seconds");
+                        // agentDaemonThread.stop();
+                    }
+                } catch (InterruptedException e) {
+                    log.debug(e,e);
+                }
+            }
             WrapperManager.restartAndReturn();
         }        
     }

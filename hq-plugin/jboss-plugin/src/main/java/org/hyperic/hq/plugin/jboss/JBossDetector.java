@@ -25,14 +25,13 @@
 package org.hyperic.hq.plugin.jboss;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -40,27 +39,24 @@ import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 
 import javax.management.MBeanServerConnection;
-
 import javax.management.ObjectName;
 import javax.naming.Context;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.product.jmx.ServiceTypeFactory;
-
+import org.hyperic.hq.plugin.jboss.jmx.ServerQuery;
+import org.hyperic.hq.plugin.jboss.jmx.ServiceQuery;
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.DaemonDetector;
+import org.hyperic.hq.product.FileServerDetector;
 import org.hyperic.hq.product.GenericPlugin;
 import org.hyperic.hq.product.Log4JLogTrackPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerControlPlugin;
-import org.hyperic.hq.product.FileServerDetector;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.hq.product.ServiceResource;
-import org.hyperic.hq.plugin.jboss.jmx.ServerQuery;
-import org.hyperic.hq.plugin.jboss.jmx.ServiceQuery;
-
+import org.hyperic.hq.product.jmx.ServiceTypeFactory;
 import org.hyperic.util.config.ConfigResponse;
 
 public class JBossDetector
@@ -90,7 +86,7 @@ public class JBossDetector
     //use .sw=java to find both "java" and "javaw"
     private static final String[] PTQL_QUERIES = {
         "State.Name.sw=java,Args.*.eq=" + JBOSS_MAIN,};
-    private static HashMap bindings = new HashMap();
+    private static HashMap<String, String> bindings = new HashMap<String, String>();
     
     
 
@@ -108,7 +104,7 @@ public class JBossDetector
     }
 
     //figure out the install root based on run.jar location in the classpath
-    private static void findServerProcess(List servers, String query) {
+    private static void findServerProcess(List<JBossInstance> servers, String query) {
         bindings.clear();
 
         long[] pids = getPids(query);
@@ -245,7 +241,7 @@ public class JBossDetector
         return configDir.getAbsolutePath();
     }
 
-    private static void findBrandedExe(GenericPlugin plugin, List servers) {
+    private static void findBrandedExe(GenericPlugin plugin, List<JBossInstance> servers) {
         String query =
                 "State.Name.eq=" + plugin.getPluginProperty("brand.exe");
 
@@ -275,7 +271,7 @@ public class JBossDetector
     }
 
     //http://www.multiplan.co.uk/software/javaservice/docs/index.html
-    private static void findServiceExe(GenericPlugin plugin, List servers) {
+    private static void findServiceExe(GenericPlugin plugin, List<JBossInstance> servers) {
         //XXX cant assume name will be 'jboss.exe'
         String query = "State.Name.eq=jboss";
         long[] pids = getPids(query);
@@ -318,8 +314,8 @@ public class JBossDetector
         }
     }
 
-    private static List getServerProcessList(GenericPlugin plugin) {
-        ArrayList servers = new ArrayList();
+    private static List<JBossInstance> getServerProcessList(GenericPlugin plugin) {
+        ArrayList<JBossInstance> servers = new ArrayList<JBossInstance>();
 
         for (int i = 0; i < PTQL_QUERIES.length; i++) {
             findServerProcess(servers, PTQL_QUERIES[i]);
@@ -336,7 +332,7 @@ public class JBossDetector
     }
 
     static String getRunningInstallPath(GenericPlugin plugin) {
-        List servers = getServerProcessList(plugin);
+        List<JBossInstance> servers = getServerProcessList(plugin);
 
         if (servers.isEmpty()) {
             return null;
@@ -360,7 +356,7 @@ public class JBossDetector
 	 	}
 	
 	    try {
-			final Set objectNames = mServer.queryNames(new ObjectName(org.hyperic.hq.product.jmx.MBeanUtil.DYNAMIC_SERVICE_DOMAIN + ":*"), null);
+			final Set<ObjectName> objectNames = mServer.queryNames(new ObjectName(org.hyperic.hq.product.jmx.MBeanUtil.DYNAMIC_SERVICE_DOMAIN + ":*"), null);
 			//TODO have to instantiate here due to classloading issues with MBeanServerConnectionConnection in 1.4 agent.  Can make an instance variable when agent can be 1.5 compliant.
 			ServiceTypeFactory serviceTypeFactory = new ServiceTypeFactory();
 			serviceTypes = serviceTypeFactory.create(getProductPlugin(), (ServerTypeInfo)getTypeInfo(), mServer, objectNames);
@@ -370,59 +366,15 @@ public class JBossDetector
 		return serviceTypes;
 	}
 
-    /**
-     * Look for for the embedded Tomcat server,
-     * if found drop a note of the installpath for
-     * the Tomcat detector to pickup.
-     */
-    private void noteEmbeddedTomcat(String path, String address, String port) {
-        File[] dirs = new File(path, "deploy").listFiles();
-
-        for (int i = 0; i < dirs.length; i++) {
-            File dir = dirs[i];
-            String name = dir.getName();
-
-            if (!dir.isDirectory()) {
-                continue;
-            }
-
-            if (!(name.startsWith(EMBEDDED_TOMCAT) ||
-                    name.startsWith("jboss-web.deployer"))) {
-                continue;
-            }
-
-            Map notes = getManager().getNotes();
-            List tomcats = (List) notes.get(EMBEDDED_TOMCAT);
-
-            if (tomcats == null) {
-                tomcats = new ArrayList();
-                notes.put(EMBEDDED_TOMCAT, tomcats);
-            }
-
-            Map _config = new HashMap();
-            _config.put(JBossProductPlugin.PROP_INSTALLPATH, dir.getPath());
-            if (port != null) {
-                _config.put("port", port);
-            }
-            if (address != null) {
-                _config.put("address", address);
-            }
-            tomcats.add(_config);
-
-            getLog().debug("Found embedded tomcat: " + _config);
-        }
-    }
-
     @Override
-    public List getServerResources(ConfigResponse platformConfig)
+    public List<ServerResource> getServerResources(ConfigResponse platformConfig)
             throws PluginException {
 
-        List servers = new ArrayList();
-        List paths = getServerProcessList(this);
+        List<ServerResource> servers = new ArrayList<ServerResource>();
+        List<JBossInstance> paths = getServerProcessList(this);
 
-        for (int i = 0; i < paths.size(); i++) {
-            JBossInstance inst = (JBossInstance) paths.get(i);
-            List found = getServerList(inst.getConfigPath(), inst.getPid());
+        for (JBossInstance inst : paths) {
+            List<ServerResource> found = getServerList(inst.getConfigPath(), inst.getPid());
             if (found != null) {
                 servers.addAll(found);
             }
@@ -462,13 +414,13 @@ public class JBossDetector
     /**
      * @param installpath Example: /usr/jboss-3.2.3/server/default
      */
-    public List getServerList(String installpath)
+    public List<ServerResource> getServerList(String installpath)
             throws PluginException {
 
         return getServerList(installpath, 0);
     }
 
-    public List getServerList(String installpath, long pid)
+    public List<ServerResource> getServerList(String installpath, long pid)
             throws PluginException {
         File configDir = new File(installpath);
         getLog().debug("[getServerList] configDir='" + configDir + "'");
@@ -586,9 +538,7 @@ public class JBossDetector
         //pickup any jars found relative to this installpath
         adjustClassPath(installpath);
 
-        noteEmbeddedTomcat(installpath, address, cfg.getHttpPort());
-
-        List servers = new ArrayList();
+        List<ServerResource> servers = new ArrayList<ServerResource>();
         //apply externally defined AUTOINVENTORY_NAME, etc.
         if (pid > 0) {
             discoverServerConfig(server, pid);
@@ -599,7 +549,7 @@ public class JBossDetector
     }
 
     @Override
-    public List getServerResources(ConfigResponse platformConfig, String path)
+    public List<ServerResource> getServerResources(ConfigResponse platformConfig, String path)
             throws PluginException {
 
         //strip conf/jboss-service.xml
@@ -607,7 +557,7 @@ public class JBossDetector
     }
 
     @Override
-    protected List discoverServices(ConfigResponse serverConfig)
+    protected List<ServiceResource> discoverServices(ConfigResponse serverConfig)
             throws PluginException {
 
         try {
@@ -617,7 +567,7 @@ public class JBossDetector
         }
     }
 
-    private List discoverJBossServices(ConfigResponse serverConfig)
+    private List<ServiceResource> discoverJBossServices(ConfigResponse serverConfig)
             throws PluginException {
 
         String url = serverConfig.getValue(Context.PROVIDER_URL);
@@ -650,7 +600,7 @@ public class JBossDetector
         List queries = serverQuery.getServiceQueries();
         getLog().debug("discovered " + queries.size() + " services");
 
-        List services = new ArrayList();
+        List<ServiceResource> services = new ArrayList<ServiceResource>();
 
         for (int i = 0; i < queries.size(); i++) {
             ServiceQuery query = (ServiceQuery) queries.get(i);
@@ -706,6 +656,7 @@ public class JBossDetector
             JarFile jarFile = new JarFile(file);
             log.debug("[getVersion] jarFile='" + jarFile.getName() + "'");
             attributes = jarFile.getManifest().getMainAttributes();
+            jarFile.close();
         } catch (IOException e) {
             log.debug(e, e);
             return null;
@@ -737,4 +688,4 @@ public class JBossDetector
 
         return version;
     }
-}
+        }

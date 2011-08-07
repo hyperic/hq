@@ -27,8 +27,11 @@ package org.hyperic.hq.agent.client;
 
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.bizapp.agent.client.SecureAgentConnection;
+import org.hyperic.hq.security.ServerKeystoreConfig;
 import org.hyperic.hq.transport.AgentProxyFactory;
+import org.hyperic.util.security.KeystoreConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -37,12 +40,20 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class AgentCommandsClientFactory {
-
+	
     private final AgentProxyFactory agentProxyFactory;
-
+    private KeystoreConfig keystoreConfig;
+	// TODO Remove this code once we no longer support HQ version less than 4.6
+    //      This is solely to maintain backwards compatibility with older HQ agents
+    //      that don't handle SSL communication correctly
+    private boolean acceptUnverifiedCertificates;
+    
     @Autowired
-    public AgentCommandsClientFactory(AgentProxyFactory agentProxyFactory) {
+    public AgentCommandsClientFactory(AgentProxyFactory agentProxyFactory, ServerKeystoreConfig serverKeystoreConfig, 
+    		@Value("#{securityProperties['accept.unverified.certificates']}")boolean acceptUnverifiedCertificates) {
         this.agentProxyFactory = agentProxyFactory;
+        this.keystoreConfig = serverKeystoreConfig;
+        this.acceptUnverifiedCertificates = acceptUnverifiedCertificates;
     }
 
     public AgentCommandsClient getClient(Agent agent) {
@@ -50,18 +61,17 @@ public class AgentCommandsClientFactory {
             return new AgentCommandsClientImpl(agent, agentProxyFactory);
         } else {
             return new LegacyAgentCommandsClientImpl(new SecureAgentConnection(agent.getAddress(),
-                agent.getPort(), agent.getAuthToken()));
+                agent.getPort(), agent.getAuthToken(),keystoreConfig,acceptUnverifiedCertificates));
+
         }
     }
 
     public AgentCommandsClient getClient(String agentAddress, int agentPort, String authToken,
-                                         boolean isNewTransportAgent, boolean unidirectional) {
+                                         boolean isNewTransportAgent, boolean unidirectional, boolean acceptCertificates) {
         if (isNewTransportAgent) {
             return new AgentCommandsClientImpl(agentProxyFactory, agentAddress, agentPort, unidirectional);
         } else {
-            return new LegacyAgentCommandsClientImpl(new SecureAgentConnection(agentAddress,
-                agentPort, authToken));
+            return new LegacyAgentCommandsClientImpl(new SecureAgentConnection(agentAddress, agentPort, authToken, keystoreConfig, acceptCertificates));
         }
     }
-
 }

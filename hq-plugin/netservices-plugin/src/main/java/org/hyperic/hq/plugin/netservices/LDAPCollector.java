@@ -92,7 +92,7 @@ public class LDAPCollector extends NetServicesCollector {
         // Set the LDAP url
         if (isSSL()) {
             env.put("java.naming.ldap.factory.socket",
-                    "org.hyperic.util.security.UntrustedSSLSocketFactory");
+            		LDAPSSLSocketFactory.class.getName());
             env.put(Context.SECURITY_PROTOCOL, "ssl");
         }
         String providerUrl = "ldap://" + getHostname() + ":" + getPort();

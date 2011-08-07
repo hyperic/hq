@@ -87,13 +87,6 @@
 	    </td>
 	    <td width="30%" class="BlockContent" colspan="2"></td>
   	</tr>
-  	<tr>
-	    <td class="BlockLabel"><fmt:message key="admin.settings.Help"/></td>
-	    <td class="BlockContent" colspan="3">
-		    <html:radio property="externDocs" value="true"/><fmt:message key="admin.settings.Help.External"/>
-		    <html:radio property="externDocs" value="false"/><fmt:message key="admin.settings.Help.Internal"/>
-	    </td>
-  	</tr>
 
 	<!--  DATA MANAGER CONFIG TITLE -->
   	<tr>

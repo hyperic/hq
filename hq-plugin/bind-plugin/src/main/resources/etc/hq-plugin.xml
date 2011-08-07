@@ -25,7 +25,8 @@
   USA.
  -->
 
-<plugin package="org.hyperic.hq.plugin.bind" version="@project.version@">
+<plugin package="org.hyperic.hq.plugin.bind">
+  <property name="PLUGIN_VERSION" value="@project.version@"/>
   <!-- we use a dummy jmx object name -->
   <filter name="domain" value="bind"/>
 

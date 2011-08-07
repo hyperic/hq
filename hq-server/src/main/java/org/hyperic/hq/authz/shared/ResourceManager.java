@@ -43,6 +43,7 @@ import org.hyperic.hq.bizapp.server.session.ResourceCleanupEventListener;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.measurement.server.session.MonitorableType;
+import org.hyperic.hq.product.Plugin;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -340,4 +341,9 @@ public interface ResourceManager {
      * @return {@link Resource} or null if it doesn't exist
      */
     public Resource getResourceById(Integer id);
+
+    /**
+     * @return {@link Map} of {@link String} {@link Plugin}.getName() to a count
+     */
+    public Map<String, Long> getResourceCountByPlugin(Collection<Plugin> plugins);
 }

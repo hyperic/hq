@@ -29,10 +29,12 @@
   <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
 ]>
 
-<plugin package="org.hyperic.hq.plugin.mysql_stats" version="@project.version@">
+<plugin package="org.hyperic.hq.plugin.mysql_stats">
+    <property name="PLUGIN_VERSION" value="@project.version@"/>
     <classpath>
-      <include name="pdk/lib/jdbc/mysql-connector-java*5.1.10-bin.jar"/>
+      <include name="pdk/lib/jdbc/mysql-connector-java*5.1.10.jar"/>
     </classpath>
+    <property name="PLUGIN_VERSION" value="@project.version@"/>
     <property name="template-config"
               value="jdbcUrl=%jdbcUrl%,jdbcUser=%jdbcUser%,jdbcPassword=%jdbcPassword%"/>
     <property name="domain"

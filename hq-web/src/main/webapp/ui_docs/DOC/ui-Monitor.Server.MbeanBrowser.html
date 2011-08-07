@@ -1,7 +1,9 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-    <head>
-        <title>Hyperic 4.5 Documentation : ui-Monitor.Server.MbeanBrowser</title>
+ <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
+<p>      
+<p>
+        <title>vFabric Hyperic 4.6 : ui-Monitor.Server.MbeanBrowser</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,32 +14,28 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Hyperic 4.5 Documentation : ui-Monitor.Server.MbeanBrowser
+                            vFabric Hyperic 4.6 : ui-Monitor.Server.MbeanBrowser
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Sep 21, 2010 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jul 01, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
-<style type='text/css'>/*<![CDATA[*/
-div.rbtoc1285082655448 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1285082655448 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1285082655448 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1285082655448'>
+<p>This page describes the JMX MBean Query page in the VMware vFabric™ Hyperic® user interface.</p>
+
 <ul>
-    <li><a href='#ui-Monitor.Server.MbeanBrowser-UsingJMXMBeanQuery'>Using JMX MBean Query</a></li>
-    <li><a href='#ui-Monitor.Server.MbeanBrowser-EnteringQueryOptions'>Entering Query Options</a></li>
-    <li><a href='#ui-Monitor.Server.MbeanBrowser-EnablingAutomaticRefresh'>Enabling Automatic Refresh</a></li>
-    <li><a href='#ui-Monitor.Server.MbeanBrowser-DefiningSavedMbeanSearches'>Defining Saved Mbean Searches</a></li>
-    <li><a href='#ui-Monitor.Server.MbeanBrowser-SchemaforJMXSearchCriteria'>Schema for JMX Search Criteria</a></li>
-</ul></div>
+	<li><a href="#ui-Monitor.Server.MbeanBrowser-UsingJMXMBeanQuery">Using JMX MBean Query</a></li>
+	<li><a href="#ui-Monitor.Server.MbeanBrowser-EnteringQueryOptions">Entering Query Options</a></li>
+	<li><a href="#ui-Monitor.Server.MbeanBrowser-EnablingAutomaticRefresh">Enabling Automatic Refresh</a></li>
+	<li><a href="#ui-Monitor.Server.MbeanBrowser-DefiningSavedMbeanSearches">Defining Saved Mbean Searches</a></li>
+	<li><a href="#ui-Monitor.Server.MbeanBrowser-SchemaforJMXSearchCriteria">Schema for JMX Search Criteria</a></li>
+</ul>
 
 
-<p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
 
 
 
@@ -52,7 +50,7 @@ div.rbtoc1285082655448 li {margin-left: 0px;padding-left: 0px;}
 
 <p>The JMX MBean Query tool is available on the <b>Views</b> tab when you have a JVM selected in the HQ portal. These instructions assume that your JVM is in HQ inventory. </p>
 
-<p>Note that JVMs are not auto-discovered by HQ. You must add a JVM to HQ inventory and configure for monitoring as described in <a href="http://support.hyperic.com/confluence/display/EVO/Monitor+a+Sun+JVM" title="Monitor a Sun JVM">Monitor a Sun JVM</a>.</p>
+<p>Note that JVMs are not auto-discovered by HQ. You must add a JVM to HQ inventory and configure for monitoring as described in <a href="Sun JVM.html" title="Sun JVM">Sun JVM</a>.</p>
 
 <h1><a name="ui-Monitor.Server.MbeanBrowser-EnteringQueryOptions"></a>Entering Query Options</h1>
 
@@ -77,7 +75,7 @@ div.rbtoc1285082655448 li {margin-left: 0px;padding-left: 0px;}
 
 <p>For MBeans whose object name matches the Object Name Pattern, attributes and operations that match your filter criteria will be listed.&nbsp; For example:</p>
 
-<p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 1303x650" href='http://support.hyperic.com/confluence/download/attachments/71828494/jmx console.gif'><img src="attachments/thumbnails/71828494/71926218" style="border: 0px solid black"/></a></span></p>
+<p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 1303x650" href='http://support.hyperic.com/download/attachments/77464629/jmx console.gif'><img src="attachments/thumbnails/77464629/77660942" style="border: 0px solid black"/></a></span></p>
 
 <h1><a name="ui-Monitor.Server.MbeanBrowser-EnablingAutomaticRefresh"></a>Enabling Automatic Refresh</h1>
 
@@ -124,37 +122,40 @@ div.rbtoc1285082655448 li {margin-left: 0px;padding-left: 0px;}
 <p>For example:</p>
 
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
-<pre class="code-java">
-&lt;?xml version=<span class="code-quote">"1.0"</span> encoding=<span class="code-quote">"UTF-8"</span>?&gt;
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 
 &lt;filters&gt;
 
-  &lt;filter id=<span class="code-quote">"JVM Memory MBean"</span>&gt;
+  &lt;filter id="JVM Memory MBean"&gt;
     &lt;objectName&gt;java.lang:type=Memory&lt;/objectName&gt;
     &lt;attributeRegex&gt;.*Usage&lt;/attributeRegex&gt;
     &lt;operationRegex&gt;.*&lt;/operationRegex&gt;
   &lt;/filter&gt;
 
-  &lt;filter id=<span class="code-quote">"JVM Platform MBeans"</span>&gt;
+  &lt;filter id="JVM Platform MBeans"&gt;
     &lt;objectName&gt;java.lang:*&lt;/objectName&gt;
     &lt;attributeRegex&gt;.*&lt;/attributeRegex&gt;
     &lt;operationRegex&gt;.*&lt;/operationRegex&gt;
   &lt;/filter&gt;
 
-&lt;/filters&gt;
-</pre>
+&lt;/filters&gt;</pre>
+		</div>
 </div></div>
 
+<p><font color=""></font></p>
 
 
 				    					    <br/>
                         <div class="tabletitle">
-                            <a name="attachments">Attachments:</a>
+                            <a name="attachments">
+                                <h2>Attachments:</h2>
+                            </a>
                         </div>
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/71828494/71926218.gif">jmx console.gif</a> (image/gif)
+                                <a href="attachments/77464629/77660942.gif">jmx console.gif</a> (image/gif)
                                 <br/>
                                                     </div>
 				    
@@ -163,10 +164,10 @@ div.rbtoc1285082655448 li {margin-left: 0px;padding-left: 0px;}
 	    </table>
 	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
 			<tr>
-				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jan 12, 2011 15:43</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:44</font></td>
 		    </tr>
 	    </table>
     </body>

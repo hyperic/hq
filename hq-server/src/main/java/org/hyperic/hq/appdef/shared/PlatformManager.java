@@ -401,4 +401,11 @@ public interface PlatformManager {
      */
     public Platform getPlatformByAgentId(Integer agentId);
 
+    /**
+     * @param superUser - must be a super user or else this call will fail
+     * @return {@link Collection} of {@link Platform}s
+     * @throws PermissionException if the authzsubject is not a SuperUser
+     */
+    public Collection<Platform> findAll(AuthzSubject superUser) throws PermissionException;
+
 }

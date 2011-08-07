@@ -33,7 +33,8 @@
 ]>
 
 
-<plugin package="org.hyperic.hq.plugin.coldfusion" version="@project.version@">
+<plugin package="org.hyperic.hq.plugin.coldfusion">
+  <property name="PLUGIN_VERSION" value="@project.version@"/>
 
   <config name="cfconfig">
     <option name="process.query"

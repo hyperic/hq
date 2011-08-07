@@ -93,7 +93,6 @@ public class SenderThread
     private          String                    agentToken;
     private          LinkedList                transitionQueue;
     // This toggle will avoid displaying non-stop messages about server down 
-    private          boolean                   serverError = false;
     private          int                       metricDup = 0;
     private          int                       maxBatchSize = MAX_BATCHSIZE;
     private          Set                       metricDebug;
@@ -472,14 +471,8 @@ public class SenderThread
                 }
             }
             success = true;
-            serverError = false; // it's working fine
         } catch(AgentCallbackClientException exc){
-            if( ! serverError ) {
-                // serverError was false, i.e. it worked before
-                this.log.error("Error sending measurements: " + 
-                               exc.getMessage());
-                serverError = true;
-            }
+            log.error("Error sending measurements: " +  exc.getMessage(), exc);
         } finally {
             if(numDebuggedSent != 0){
                 if(success){

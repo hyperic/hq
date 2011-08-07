@@ -27,9 +27,10 @@
  *  USA.
  -->
 
-<plugin class="org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin" version="@project.version@">
+<plugin class="org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin">
+    <property name="PLUGIN_VERSION" value="@project.version@"/>
 
-    <filter name="server-connection" value="node=%node%,addr=%addr%,port=%port%,username=%username%,password=%password%"/>
+    <filter name="server-connection" value="node=%node%,addr=%addr%,port=%port%,username=%username%,password=%password%,https=%https%"/>
 
     <server name="RabbitMQ" description="RabbitMQ">
 
@@ -43,6 +44,7 @@
 
                         This version of the plugin requires that the RabbitMQ has installaed and runnig the <b>rabbitmq-management</b> plugin.
                         <a href="http://www.rabbitmq.com/management.html" target="_new">See the page on the management plugin</a>
+                        <p>'<a href="http://technet.microsoft.com/en-us/sysinternals/bb896655" target="_new">Handle V3 (sysinternals)</a>' is required by 'rabbitmq-management-agent' plugin on Windows Platforms.</p>
                         <h3>Configuration Requirements</h3>
                         The HQ Agent on the platform where the RabbitMQ server should auto-discover the "RabbitMQ" server instance — assuming
                         at least one RabbitMQ Node is running. — and present it as a new server on the platform in the Auto-Discovery portlet
@@ -52,15 +54,28 @@
                             <li><b>node</b>: RabbitMQ node name (rabbit_X@servername)</li>
                             <li><b>addr</b>: Management HTTP IP/HostName (usualy: localhost)</li>
                             <li><b>port</b>: Management HTTP Listen Port</li>
+                            <li><b>https</b>: Use https/ssl</li>
                             <li><b>username</b>: Administrator User name</li>
                             <li><b>password</b>: Administrator User password</li>
                             <li><b>nodurable</b>: If checked, all nondurable objetcs (Channels, Queue, etc.) will be auto-discovered</li>
-                            <li><b>autosycn</b>: If checked, all unavailable objetcs (Channels, Queue, etc.) will be auto-delete (but not the idle ones, shows as paused)</li>
+                            <li><b>autosync</b>: If checked, all unavailable objetcs (Channels, Queue, etc.) will be auto-delete (but not the idle ones, shows as paused)</li>
                         </ol>
+                        <h3>SSL Configuration Requirements (Hyperic 4.6 and later)</h3>
+                        There are new SSL configuration requirements for secure communication between a Hyperic 4.6 agent and a RabbitMQ-management.
+                        <ul>
+                            <li>If the <b>accept.unverified.certificates</b> property is <b>false</b> (default value) in the <b>agent.properties</b> file, 
+                            the RabbitMQ-management's unverified SSL certificate needs to be manually imported to a keystore that the Hyperic 4.6 agent can access.
+                            Otherwise, secure communication between the Hyperic 4.6 agent and RabbitMQ-management will fail.
+                            </li>
+                            <li>If the <b>accept.unverified.certificates</b> property is <b>true</b> in the <b>agent.properties</b> file, the RabbitMQ plugin will automatically
+                            import the unverified SSL certificate of the RabbitMQ-management to the keystore accessible to the Hyperic 4.6 agent.
+                            <u>This is not recommended</u> because it is less secure and will expose the Hyperic agent to man-in-the-middle attacks.
+                            </li>
+                        </ul> 
                   </p>
                   <p>
                     <h3>Help Docs</h3>
-                    <a href="http://support.hyperic.com/display/EVO/Monitoring+RabbitMQ">Monitoring and Managing RabbitMQ</a>
+                    <a href="http://support.hyperic.com/display/EVO/Monitoring+RabbitMQ" target="_new">Monitoring and Managing RabbitMQ</a>
                   </p>
             ]]>
         </help>
@@ -77,10 +92,11 @@
             <option name="node" description="node"/>
             <option name="addr" description="Http Address" default="localhost"/>
             <option name="port" description="Http Port" default="55672"/>
+            <option name="https" description="Use SSL" default="false" type="boolean"/>
             <option name="username" description="Username" default="guest"/>
-            <option name="password" description="Password" default="guest"/>
+            <option name="password" description="Password" default="guest" type="secret"/>
             <option name="nodurable" description="Discover Nondurable Objects" type="boolean" default="false"/>
-            <option name="autosycn" description="Auto-Delete Unavailable Objects" type="boolean" default="false"/>
+            <option name="autosync" description="Auto-Delete Unavailable Objects" type="boolean" default="false"/>
         </config>
 
         <properties>
@@ -312,7 +328,7 @@
                     collectionType="dynamic"/>
 
             <plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.QueueCollector"/>
-            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+            <plugin type="measurement" class="org.hyperic.hq.plugin.rabbitmq.collect.RabbitServerMeasurement"/>
             <plugin type="autoinventory"/>
             <properties>
                 <property description="Durable" name="durable"/>
@@ -394,7 +410,7 @@
                     collectionType="dynamic"/>
 
             <plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.ChannelCollector"/>
-            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+            <plugin type="measurement" class="org.hyperic.hq.plugin.rabbitmq.collect.RabbitServerMeasurement"/>
             <plugin type="autoinventory"/>
 
             <properties>
@@ -461,7 +477,7 @@
                     collectionType="dynamic"/>
 
             <plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.ConnectionCollector"/>
-            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+            <plugin type="measurement" class="org.hyperic.hq.plugin.rabbitmq.collect.RabbitServerMeasurement"/>
             <plugin type="autoinventory"/>
 
             <properties>
@@ -502,7 +518,7 @@
                     indicator="true"/>
 
             <plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.ExchangeCollector"/>
-            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+            <plugin type="measurement" class="org.hyperic.hq.plugin.rabbitmq.collect.RabbitServerMeasurement"/>
             <plugin type="autoinventory"/>
 
             <properties>
@@ -542,7 +558,7 @@
                     collectionType="dynamic"/>
 
             <plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.VirtualHostCollector"/>
-            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+            <plugin type="measurement" class="org.hyperic.hq.plugin.rabbitmq.collect.RabbitServerMeasurement"/>
             <plugin type="autoinventory"/>
 
             <properties>

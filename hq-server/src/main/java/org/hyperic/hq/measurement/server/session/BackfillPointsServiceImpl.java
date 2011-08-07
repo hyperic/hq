@@ -28,9 +28,13 @@ package org.hyperic.hq.measurement.server.session;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -45,6 +49,7 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.product.MetricValue;
+import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.util.TimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -64,53 +69,114 @@ public class BackfillPointsServiceImpl implements BackfillPointsService {
     private static final double AVAIL_DOWN = MeasurementConstants.AVAIL_DOWN;
     private static final double AVAIL_PAUSED = MeasurementConstants.AVAIL_PAUSED;
     private static final double AVAIL_NULL = MeasurementConstants.AVAIL_NULL;
+    private static final long MINUTE = MeasurementConstants.MINUTE;
+    private static final String AVAIL_BACKFILLER_NUMPLATFORMS =
+        ConcurrentStatsCollector.AVAIL_BACKFILLER_NUMPLATFORMS;
     private final Log log = LogFactory.getLog(BackfillPointsServiceImpl.class);
     private AvailabilityManager availabilityManager;
     private PermissionManager permissionManager;
     private AvailabilityCache availabilityCache;
     private AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle;
     private AgentDAO agentDAO;
+    private ConcurrentStatsCollector concurrentStatsCollector;
 
     @Autowired
     public BackfillPointsServiceImpl(AvailabilityManager availabilityManager,
                                      PermissionManager permissionManager,
                                      AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle,
                                      AgentDAO agentDAO,
-                                     AvailabilityCache availabilityCache) {
+                                     AvailabilityCache availabilityCache,
+                                     ConcurrentStatsCollector concurrentStatsCollector) {
         this.availabilityManager = availabilityManager;
         this.permissionManager = permissionManager;
         this.availabilityCache = availabilityCache;
         this.agentPluginSyncRestartThrottle = agentPluginSyncRestartThrottle;
         this.agentDAO = agentDAO;
+        this.concurrentStatsCollector = concurrentStatsCollector;
+    }
+
+    @PostConstruct
+    public void initStats() {
+        concurrentStatsCollector.register(AVAIL_BACKFILLER_NUMPLATFORMS);
     }
 
     public Map<Integer, DataPoint> getBackfillPoints(long current) {
         Map<Integer, ResourceDataPoint> downPlatforms = getDownPlatforms(current);
         removeRestartingAgents(downPlatforms);
+        if (downPlatforms != null) {
+            concurrentStatsCollector.addStat(downPlatforms.size(), AVAIL_BACKFILLER_NUMPLATFORMS);
+        }
         return getBackfillPts(downPlatforms, current);
     }
 
     private void removeRestartingAgents(Map<Integer, ResourceDataPoint> backfillData) {
-        final Set<Integer> agentIds = agentPluginSyncRestartThrottle.getAgentIdsInRestartState().keySet();
-        final boolean debug = log.isDebugEnabled();
-        for (final Integer agentId : agentIds) {
-            final Agent agent = agentDAO.get(agentId);
-            final Collection<Platform> platforms = agent.getPlatforms();
-            for (final Platform platform : platforms) {
-                if (debug) log.debug("removing platformId=" + platform.getId() +
-                                     " since its agentId=" + agentId + " is in restart state");
-                backfillData.remove(platform.getResource().getId());
+        if (backfillData.isEmpty()) {
+            return;
+        }
+        final long now = now();
+        final Map<Integer, Long> restarting = agentPluginSyncRestartThrottle.getAgentIdsInRestartState();
+        final Set<Integer> processed = new HashSet<Integer>();
+        for (final Entry<Integer, Long> entry : restarting.entrySet()) {
+            final Integer agentId = entry.getKey();
+            final long restartTime = entry.getValue();
+            processed.add(agentId);
+            removeAssociatedPlatforms(agentId, backfillData, restartTime, true);
+            if (backfillData.isEmpty()) {
+                return;
             }
         }
+        // [HHQ-4937] allow agents up to 10 minutes after they checkin to start sending availability
+        // before marking them down
+        final Map<Integer, Long> lastCheckins = agentPluginSyncRestartThrottle.getLastCheckinInfo();
+        for (final Entry<Integer, Long> entry : lastCheckins.entrySet()) {
+            final Integer agentId = entry.getKey();
+            final long lastCheckin = entry.getValue();
+            if ((lastCheckin + (10*MINUTE)) < now || processed.contains(agentId)) {
+                continue;
+            }
+            removeAssociatedPlatforms(agentId, backfillData, lastCheckin, false);
+            if (backfillData.isEmpty()) {
+                return;
+            }
+        }
+    }
+
+    private void removeAssociatedPlatforms(int agentId, Map<Integer, ResourceDataPoint> backfillData,
+                                           long timems, boolean restarting) {
+        final boolean debug = log.isDebugEnabled();
+        final Agent agent = agentDAO.get(agentId);
+        final Collection<Platform> platforms = agent.getPlatforms();
+        for (final Platform platform : platforms) {
+            if (debug) {
+                if (restarting) {
+                    log.debug(new StringBuilder(64)
+                        .append("removing platformId=").append(platform.getId())
+                        .append(" since its agentId=").append(agentId)
+                        .append(" just restarted at ").append(TimeUtil.toString(timems))
+                        .toString());
+                } else {
+                    log.debug(new StringBuilder(64)
+                        .append("removing platformId=").append(platform.getId())
+                        .append(" since its agentId=").append(agentId)
+                        .append(" is in restart state since ").append(TimeUtil.toString(timems))
+                        .toString());
+                }
+            }
+            backfillData.remove(platform.getResource().getId());
+        }
+    }
+
+    private long now() {
+        return System.currentTimeMillis();
     }
 
     private Map<Integer, ResourceDataPoint> getDownPlatforms(long timeInMillis) {
         final boolean debug = log.isDebugEnabled();
         final List<Measurement> platformResources = availabilityManager.getPlatformResources();
-        final long now = TimingVoodoo.roundDownTime(timeInMillis, MeasurementConstants.MINUTE);
+        final long now = TimingVoodoo.roundDownTime(timeInMillis, MINUTE);
         final String nowTimestamp = TimeUtil.toString(now);
-        final Map<Integer, ResourceDataPoint> rtn = new HashMap<Integer, ResourceDataPoint>(
-            platformResources.size());
+        final Map<Integer, ResourceDataPoint> rtn =
+            new HashMap<Integer, ResourceDataPoint>(platformResources.size());
         Resource resource = null;
         synchronized (availabilityCache) {
             for (final Measurement meas : platformResources) {
@@ -167,7 +233,7 @@ public class BackfillPointsServiceImpl implements BackfillPointsService {
 
     private long getBeginWindow(long end, Measurement meas) {
         final long interval = 0;
-        final long wait = 5 * MeasurementConstants.MINUTE;
+        final long wait = 5 * MINUTE;
         long measInterval = meas.getInterval();
 
         // We have to get at least the measurement interval
@@ -188,17 +254,19 @@ public class BackfillPointsServiceImpl implements BackfillPointsService {
         final boolean debug = log.isDebugEnabled();
         final Map<Integer, DataPoint> rtn = new HashMap<Integer, DataPoint>();
         final List<Integer> resourceIds = new ArrayList<Integer>(downPlatforms.keySet());
-        final Map<Integer, List<Measurement>> rHierarchy = availabilityManager
-            .getAvailMeasurementChildren(resourceIds,
-                AuthzConstants.ResourceEdgeContainmentRelation);
+        final Map<Integer, List<Measurement>> rHierarchy =
+            availabilityManager.getAvailMeasurementChildren(
+                resourceIds, AuthzConstants.ResourceEdgeContainmentRelation);
         for (ResourceDataPoint rdp : downPlatforms.values()) {
             final Resource platform = rdp.getResource();
             if (debug) {
-                log.debug(new StringBuilder(256).append("platform name=")
-                    .append(platform.getName()).append(", resourceid=").append(platform.getId())
-                    .append(", measurementid=").append(rdp.getMetricId()).append(
-                        " is being marked ").append(rdp.getValue()).append(" with timestamp = ")
-                    .append(TimeUtil.toString(rdp.getTimestamp())).toString());
+                log.debug(new StringBuilder(256).append("platform name=").append(platform.getName())
+                                                .append(", resourceid=").append(platform.getId())
+                                                .append(", measurementid=").append(rdp.getMetricId())
+                                                .append(" is being marked ").append(rdp.getValue())
+                                                .append(" with timestamp = ")
+                                                .append(TimeUtil.toString(rdp.getTimestamp()))
+                                                .toString());
             }
             rtn.put(platform.getId(), rdp);
             if (rdp.getValue() != AVAIL_DOWN) {

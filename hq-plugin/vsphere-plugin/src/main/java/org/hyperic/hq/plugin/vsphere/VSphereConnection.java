@@ -96,6 +96,22 @@ public class VSphereConnection {
             return rtn;
         }
     }
+    
+    public static void evict(String url) throws PluginException {
+    	synchronized (_conns) {
+    		try {
+	    		List<VSphereConnection> instances = _conns.get(url);
+	    		if (instances != null) {
+	    			for (VSphereConnection v : instances) {
+	    				v.dispose();
+	    			}
+	        		_conns.remove(url);
+	    		}
+    		} catch (Exception e) {
+    			throw new PluginException(e);
+    		}
+    	}
+    }
 
     public void release() {
         synchronized (_conns) {
@@ -106,7 +122,18 @@ public class VSphereConnection {
             }
         }
     }
-
+   
+    public void dispose() {
+    	if (vim != null) {
+	        VSphereUtil.dispose(vim);
+	        if (_log.isDebugEnabled()) {
+	        	_log.debug("Closed previous connection (" +
+	        				address(vim) + ") for: " + url); 
+	        }
+	        vim = null;
+    	}
+    }
+    
     private String getUrl() {
         return url;
     }
@@ -142,20 +169,19 @@ public class VSphereConnection {
             // Else, some previous error must have happened -- expect it to be already logged.
         }
         if (requiresReconnect) {
-            VSphereUtil.dispose(vim);
-            _log.debug("Closed previous connection (" +
-                       address(vim) + ") for: " + url); 
-            vim = null;
+            dispose();
         }
         if (vim == null) {
             try {
-                vim = new VSphereUtil(new URL(url), username, password, true);
+                vim = VSphereUtil.getInstance(props);
             } catch (Exception e) {
                 throw new PluginException(e);
             }
-            _log.debug("Opened new connection (" +
+            if (_log.isDebugEnabled()) {
+            	_log.debug("Opened new connection (" +
                        address(vim) + "/" +
                        address(LOCK) + ") for: " + url);
+            }
             _user = username;
             _pass = password;
         }

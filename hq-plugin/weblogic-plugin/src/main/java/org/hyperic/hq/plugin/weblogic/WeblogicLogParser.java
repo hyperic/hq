@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -38,11 +39,28 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class WeblogicLogParser {
 
-    private Pattern pattern = null;
-    private DateFormat dateFormat =
-        DateFormat.getDateTimeInstance(2, 0, Locale.getDefault());
+   private Pattern pattern = null;
+    private static final Log LOG = LogFactory.getLog(WeblogicLogParser.class.getName());
+    public static final String DATE_TIME_FORMAT_PROPERTY = "weblogic.parser.datetime.format";
+    private static final String DEFAULT_DATE_TIME_FORMAT = "MMMM d, yyyy h:mm:ss a z";
+    private DateFormat dateTimeFormat;
+    
+    public WeblogicLogParser(){
+        this.dateTimeFormat = new SimpleDateFormat(DEFAULT_DATE_TIME_FORMAT,Locale.getDefault());
+    }
+    
+    public DateFormat getDateTimeFormat() {
+        return dateTimeFormat;
+    }
+
+    public void setDateTimeFormat(DateFormat dateTimeFormat) {
+        this.dateTimeFormat = dateTimeFormat;
+    }
 
     class Entry {
         long time;
@@ -87,7 +105,7 @@ public class WeblogicLogParser {
         if (!line.startsWith("####")) {
             return null;
         }
-        line = line.substring(4);
+        line = line.substring(4) + " ";
 
         List list = new ArrayList();
         Matcher matcher = getPattern().matcher(line);
@@ -106,9 +124,12 @@ public class WeblogicLogParser {
         Iterator it = list.iterator();
         String timestamp = nextField(it);
         try {
-            entry.time = this.dateFormat.parse(timestamp).getTime();
+            entry.time = this.dateTimeFormat.parse(timestamp).getTime();
         } catch (ParseException e) {
-            entry.time = 0;
+            LOG.warn("Unable to match log timestamp (" + timestamp +
+                      ") with the current date format. Adjust the formatter property (" + DATE_TIME_FORMAT_PROPERTY +
+                      ") to get accurate timestamp results. Using current time for event until format is fixed.");
+            entry.time = System.currentTimeMillis();
         }
 
         entry.level = nextField(it);
