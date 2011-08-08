@@ -237,8 +237,7 @@ public class DefaultSSLProviderImpl implements SSLProvider {
                     }
                     KEYSTORE_WRITER_LOCK.lockInterruptibly();
                     hasLock = true;
-                    keyStoreFileOutputStream = new FileOutputStream(
-                            keystoreConfig.getFilePath());
+                    keyStoreFileOutputStream = new FileOutputStream(keystoreConfig.getFilePath());
                     trustStore.store(keyStoreFileOutputStream, keystoreConfig
                         .getFilePassword().toCharArray());
                 } catch (FileNotFoundException e) {
