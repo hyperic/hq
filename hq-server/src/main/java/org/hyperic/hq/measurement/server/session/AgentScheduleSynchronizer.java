@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -132,7 +133,7 @@ public class AgentScheduleSynchronizer {
                         if (null == rMan.findResource(aeid)) {
                             Collection<AppdefEntityID> tmp = toUnschedule.get(agentId);
                             if (tmp == null) {
-                                tmp = new ArrayList<AppdefEntityID>();
+                                tmp = new LinkedList<AppdefEntityID>();
                                 toUnschedule.put(agentId, tmp);
                             }
                             if (debug) log.debug("unscheduling non-entity=" + aeid);
