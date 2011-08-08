@@ -331,6 +331,8 @@ public class ReportProcessorImpl implements ReportProcessor {
         if (debug) watch.markTimeEnd("reportAgentSRNs");
         final Set<AppdefEntityID> potentialNonEntitiesToUnschedule = new HashSet<AppdefEntityID>();
         final SRN[] srnList = report.getSRNList();
+        // The listener will determine whether or not these aeid are real or not.  If they are not
+        // real then it will unschedule them.
         for (final SRN srn : srnList) {
             final AppdefEntityID aeid = srn.getEntity();
             potentialNonEntitiesToUnschedule.add(aeid);
@@ -355,8 +357,9 @@ public class ReportProcessorImpl implements ReportProcessor {
             zEventManager.enqueueEventAfterCommit(new AgentScheduleSyncZevent(toReschedule));
         }
         if (!potentialNonEntitiesToUnschedule.isEmpty()) {
-            zEventManager.enqueueEventAfterCommit(
-                new AgentUnscheduleNonEntityZevent(agentToken, potentialNonEntitiesToUnschedule));
+            AgentUnscheduleNonEntityZevent zevent =
+                new AgentUnscheduleNonEntityZevent(agentToken, potentialNonEntitiesToUnschedule);
+            zEventManager.enqueueEventAfterCommit(zevent);
         }
     }
 
