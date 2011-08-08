@@ -106,7 +106,7 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.measurement.server.session.Baseline"
-         maxElementsInMemory="50000"
+         maxElementsInMemory="500000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
