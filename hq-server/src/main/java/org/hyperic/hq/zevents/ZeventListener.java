@@ -34,7 +34,7 @@ import java.util.List;
  * @see ZeventManager#addGlobalListener(ZeventListener)
  * @see ZeventManager#addListener(Class, ZeventListener)
  */
-public interface ZeventListener<T> {
+public interface ZeventListener<T extends Zevent> {
     /**
      * Called by the {@link ZeventManager} to process events coming off the
      * event queue

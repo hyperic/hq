@@ -31,8 +31,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Queue;
 import java.util.Set;
@@ -84,16 +86,19 @@ public class ZeventManager implements ZeventEnqueuer {
     private final Object _listenerLock = new Object();
 
     /* Set of {@link ZeventListener}s listening to events of all types */
-    private final Set _globalListeners = new HashSet();
+    private final Set<TimingListenerWrapper<Zevent>> _globalListeners =
+        new HashSet<TimingListenerWrapper<Zevent>>();
 
     /*
      * Map of {@link Class}es subclassing {@link ZEvent} onto lists of {@link
      * ZeventListener}s
      */
-    private final Map _listeners = new HashMap();
+    private final Map<Class<? extends Zevent>, List<TimingListenerWrapper<Zevent>>> _listeners =
+        new HashMap<Class<? extends Zevent>, List<TimingListenerWrapper<Zevent>>>();
 
     /* Map of {@link Queue} onto the target listeners using them. */
-    private final WeakHashMap _registeredBuffers = new WeakHashMap();
+    private final WeakHashMap<Queue<?>, TimingListenerWrapper<Zevent>> _registeredBuffers =
+        new WeakHashMap<Queue<?>, TimingListenerWrapper<Zevent>>();
 
     // For diagnostics and warnings
     private long _lastWarnTime;
@@ -103,7 +108,7 @@ public class ZeventManager implements ZeventEnqueuer {
     private long _maxTimeInQueue;
     private long _numEvents;
 
-    private BlockingQueue _eventQueue;
+    private BlockingQueue<Zevent> _eventQueue;
     private DiagnosticsLogger diagnosticsLogger;
     private ThreadWatchdog threadWatchdog;
     private long maxQueue;
@@ -131,31 +136,10 @@ public class ZeventManager implements ZeventEnqueuer {
         
     }
 
-    private long getProp(Properties p, String propName, long defaultVal) {
-        String val = p.getProperty(propName, "" + defaultVal);
-        long res;
-
-        if (val == null) {
-            _log.debug("tweak.properties:[" + propName + "] not set.  Using " + defaultVal);
-            res = defaultVal;
-        } else {
-            val = val.trim();
-            try {
-                res = Long.parseLong(val);
-            } catch (NumberFormatException e) {
-                _log.warn("tweak.properties:[" + propName + "] not a number.  " + "( was " + val +
-                          ")  Using " + defaultVal);
-                res = defaultVal;
-            }
-        }
-
-        _log.info("[" + propName + "] = " + res);
-        return res;
-    }
-
     @PostConstruct
+    @SuppressWarnings("unused")
     private void initialize() {
-        _eventQueue = new LinkedBlockingQueue((int) maxQueue);
+        _eventQueue = new LinkedBlockingQueue<Zevent>((int) maxQueue);
 
         QueueProcessor p = new QueueProcessor(this, _eventQueue, (int) batchSize);
 
@@ -232,7 +216,7 @@ public class ZeventManager implements ZeventEnqueuer {
         }
     }
 
-    private void assertClassIsZevent(Class c) {
+    private void assertClassIsZevent(Class<? extends Zevent> c) {
         if (!Zevent.class.isAssignableFrom(c)) {
             throw new IllegalArgumentException("[" + c.getName() + "] does not subclass [" +
                                                Zevent.class.getName() + "]");
@@ -243,9 +227,9 @@ public class ZeventManager implements ZeventEnqueuer {
      * Registers a buffer with the internal list, so data about its contents can
      * be printed by the diagnostic thread.
      */
-    public void registerBuffer(Queue q, ZeventListener e) {
+    public void registerBuffer(Queue<?> q, ZeventListener<? extends Zevent> e) {
         synchronized (_registeredBuffers) {
-            _registeredBuffers.put(q, e);
+            _registeredBuffers.put(q, new TimingListenerWrapper<Zevent>(e));
         }
     }
 
@@ -256,14 +240,14 @@ public class ZeventManager implements ZeventEnqueuer {
      * @param eventClass a subclass of {@link Zevent}
      * @return false if the eventClass was already registered
      */
-    public boolean registerEventClass(Class eventClass) {
+    public boolean registerEventClass(Class<? extends Zevent> eventClass) {
         assertClassIsZevent(eventClass);
 
         synchronized (_listenerLock) {
             if (_listeners.containsKey(eventClass))
                 return false;
 
-            _listeners.put(eventClass, new ArrayList());
+            _listeners.put(eventClass, new LinkedList<TimingListenerWrapper<Zevent>>());
 
             if (_log.isDebugEnabled()) {
                 _log.debug("Register ZEvent " + eventClass);
@@ -289,13 +273,13 @@ public class ZeventManager implements ZeventEnqueuer {
         boolean success = true;
         
     	for (String className : eventClasses) {
-            Class<?> clazz;
+            Class<? extends Zevent> clazz;
             className = className.trim();
             if (className.length() == 0 || className.startsWith("#")) {
                 continue;
             }
             try {
-                clazz = Class.forName(className);
+                clazz = (Class<? extends Zevent>) Class.forName(className);
             } catch (Exception e) {
                 _log.warn("Unable to find Zevent class [" + className + "]", e);
                 continue;
@@ -315,7 +299,7 @@ public class ZeventManager implements ZeventEnqueuer {
      * @param eventClass subclass of {@link Zevent}
      * @return false if the eventClass was not registered
      */
-    public boolean unregisterEventClass(Class eventClass) {
+    public boolean unregisterEventClass(Class<? extends Zevent> eventClass) {
         assertClassIsZevent(eventClass);
 
         synchronized (_listenerLock) {
@@ -329,19 +313,19 @@ public class ZeventManager implements ZeventEnqueuer {
      * 
      * @return false if the listener was already listening
      */
-    public boolean addGlobalListener(ZeventListener listener) {
+    public boolean addGlobalListener(ZeventListener<? extends Zevent> listener) {
         synchronized (_listenerLock) {
-            return _globalListeners.add(new TimingListenerWrapper(listener));
+            return _globalListeners.add(new TimingListenerWrapper<Zevent>(listener));
         }
     }
 
-    public boolean addBufferedGlobalListener(ZeventListener listener) {
+    public boolean addBufferedGlobalListener(ZeventListener<? extends Zevent> listener) {
         ThreadGroupFactory threadFact = new ThreadGroupFactory(_threadGroup, listener.toString());
 
-        listener = new TimingListenerWrapper(listener);
-        BufferedListener bListen = new BufferedListener(listener, threadFact);
+        listener = new TimingListenerWrapper<Zevent>(listener);
+        BufferedListener<Zevent> bListen = new BufferedListener(listener, threadFact);
         synchronized (_listenerLock) {
-            return _globalListeners.add(new TimingListenerWrapper(bListen));
+            return _globalListeners.add(new TimingListenerWrapper<Zevent>(bListen));
         }
     }
 
@@ -350,20 +334,20 @@ public class ZeventManager implements ZeventEnqueuer {
      * 
      * @return false if the listener was not listening
      */
-    public boolean removeGlobalListener(ZeventListener listener) {
+    public boolean removeGlobalListener(ZeventListener<? extends Zevent> listener) {
         synchronized (_listenerLock) {
             return _globalListeners.remove(listener);
         }
     }
 
-    private List getEventTypeListeners(Class eventClass) {
+    private List<TimingListenerWrapper<Zevent>> getEventTypeListeners(Class<? extends Zevent> eventClass) {
         synchronized (_listenerLock) {
-            List res = (List) _listeners.get(eventClass);
+            List<TimingListenerWrapper<Zevent>> res = _listeners.get(eventClass);
 
             if (res == null) {
                 // Register it
                 registerEventClass(eventClass);
-                return (List) _listeners.get(eventClass);
+                return _listeners.get(eventClass);
             }
 
             return res;
@@ -384,20 +368,22 @@ public class ZeventManager implements ZeventEnqueuer {
      * @return the buffered listener. This return value must be used when trying
      *         to remove the listener later on.
      */
-    public ZeventListener addBufferedListener(Set eventClasses, ZeventListener listener) {
+    public BufferedListener<Zevent> addBufferedListener(Set<Class<? extends Zevent>> eventClasses,
+                                                        ZeventListener<? extends Zevent> listener) {
         ThreadGroupFactory threadFact = new ThreadGroupFactory(_threadGroup, listener.toString());
-
-        listener = new TimingListenerWrapper(listener);
-        BufferedListener bListen = new BufferedListener(listener, threadFact);
-
-        for (Iterator i = eventClasses.iterator(); i.hasNext();) {
-            addListener((Class) i.next(), bListen);
+        listener = new TimingListenerWrapper<Zevent>(listener);
+        BufferedListener<Zevent> bListen = new BufferedListener(listener, threadFact);
+        for (Class<? extends Zevent> clazz : eventClasses) {
+            addListener(clazz, bListen);
         }
         return bListen;
     }
 
-    public ZeventListener addBufferedListener(Class eventClass, ZeventListener listener) {
-        return addBufferedListener(Collections.singleton(eventClass), listener);
+    public BufferedListener<Zevent> addBufferedListener(Class<? extends Zevent> eventClass,
+                                                        ZeventListener<? extends Zevent> listener) {
+        Set<Class<? extends Zevent>> s = new HashSet<Class<? extends Zevent>>();
+        s.add(eventClass);
+        return addBufferedListener(s, listener);
     }
 
     /**
@@ -406,15 +392,15 @@ public class ZeventManager implements ZeventEnqueuer {
      * @param eventClass A subclass of {@link Zevent}
      * @return false if the listener was already registered
      */
-    public boolean addListener(Class eventClass, ZeventListener listener) {
+    public boolean addListener(Class<? extends Zevent> eventClass,
+                               ZeventListener<? extends Zevent> listener) {
         assertClassIsZevent(eventClass);
-
         synchronized (_listenerLock) {
-            List listeners = getEventTypeListeners(eventClass);
-
-            if (listeners.contains(listener))
+            List<TimingListenerWrapper<Zevent>> listeners = getEventTypeListeners(eventClass);
+            if (listeners.contains(listener)) {
                 return false;
-            listeners.add(new TimingListenerWrapper(listener));
+            }
+            listeners.add(new TimingListenerWrapper<Zevent>(listener));
             return true;
         }
     }
@@ -423,12 +409,11 @@ public class ZeventManager implements ZeventEnqueuer {
      * Remove a specific event type listener.
      * @see #addListener(Class, ZeventListener)
      */
-    public boolean removeListener(Class eventClass, ZeventListener listener) {
+    public boolean removeListener(Class<? extends Zevent> eventClass,
+                                  ZeventListener<? extends Zevent> listener) {
         assertClassIsZevent(eventClass);
-
         synchronized (_listenerLock) {
-            List listeners = getEventTypeListeners(eventClass);
-
+            List<TimingListenerWrapper<Zevent>> listeners = getEventTypeListeners(eventClass);
             return listeners.remove(listener);
         }
     }
@@ -441,17 +426,14 @@ public class ZeventManager implements ZeventEnqueuer {
      * @throws InterruptedException if the queue was full and the thread was
      *         interrupted
      */
-    public void enqueueEvents(List events) throws InterruptedException {
+    public void enqueueEvents(List<? extends Zevent> events) throws InterruptedException {
         if (_eventQueue.size() > getWarnSize() &&
             (System.currentTimeMillis() - _lastWarnTime) > getWarnInterval()) {
             _lastWarnTime = System.currentTimeMillis();
             _log.warn("Your event queue is having a hard time keeping up.  "
                       + "Get a faster CPU, or reduce the amount of events!");
         }
-
-        for (Iterator i = events.iterator(); i.hasNext();) {
-            Zevent e = (Zevent) i.next();
-
+        for (Zevent e : events) {
             e.enterQueue();
             _eventQueue.offer(e, 1, TimeUnit.SECONDS);
         }
@@ -467,8 +449,8 @@ public class ZeventManager implements ZeventEnqueuer {
      * Enqueue events if the current running transaction successfully commits.
      * @see #enqueueEvents(List)
      */
-    public void enqueueEventsAfterCommit(List inEvents) {
-        final List events = new ArrayList(inEvents);
+    public void enqueueEventsAfterCommit(List<? extends Zevent> inEvents) {
+        final List<Zevent> events = new ArrayList<Zevent>(inEvents);
         TransactionSynchronization txListener = new TransactionSynchronization() {
             public void afterCommit() {
                 try {
@@ -526,9 +508,9 @@ public class ZeventManager implements ZeventEnqueuer {
      * If the event type was never registered, null will be returned, otherwise
      * a list of {@link ZeventListener}s (of potentially size=0)
      */
-    private List getTypeListeners(Zevent z) {
+    private List<TimingListenerWrapper<Zevent>> getTypeListeners(Zevent z) {
         synchronized (_listenerLock) {
-            return (List) _listeners.get(z.getClass());
+            return _listeners.get(z.getClass());
         }
     }
 
@@ -538,11 +520,9 @@ public class ZeventManager implements ZeventEnqueuer {
      * The strategy used in this method creates mini-batches of events to send
      * to each listener. There is no defined order for listener execution.
      */
-    void dispatchEvents(List events) {
+    void dispatchEvents(List<? extends Zevent> events) {
         synchronized (INIT_LOCK) {
-            for (Iterator i = events.iterator(); i.hasNext();) {
-                Zevent z = (Zevent) i.next();
-
+            for (Zevent z : events) {
                 long timeInQueue = z.getQueueExitTime() - z.getQueueEntryTime();
                 if (timeInQueue > _maxTimeInQueue)
                     _maxTimeInQueue = timeInQueue;
@@ -550,13 +530,12 @@ public class ZeventManager implements ZeventEnqueuer {
             }
         }
 
-        List validEvents = new ArrayList(events.size());
-        Map listenerBatches;
+        List<Zevent> validEvents = new ArrayList<Zevent>(events.size());
+        Map<ZeventListener<Zevent>, List<Zevent>> listenerBatches;
         synchronized (_listenerLock) {
-            listenerBatches = new HashMap(_globalListeners.size());
-            for (Iterator i = events.iterator(); i.hasNext();) {
-                Zevent z = (Zevent) i.next();
-                List typeListeners = getTypeListeners(z);
+            listenerBatches = new HashMap<ZeventListener<Zevent>, List<Zevent>>(_globalListeners.size());
+            for (Zevent z : events) {
+                List<TimingListenerWrapper<Zevent>> typeListeners = getTypeListeners(z);
 
                 if (typeListeners == null) {
                     _log.warn("Unable to dispatch event of type [" + z.getClass().getName() +
@@ -565,29 +544,26 @@ public class ZeventManager implements ZeventEnqueuer {
                 }
                 validEvents.add(z);
 
-                for (Iterator j = typeListeners.iterator(); j.hasNext();) {
-                    ZeventListener listener = (ZeventListener) j.next();
-                    List batch = (List) listenerBatches.get(listener);
+                for (ZeventListener<Zevent> listener : typeListeners) {
+                    List<Zevent> batch = listenerBatches.get(listener);
 
                     if (batch == null) {
-                        batch = new ArrayList();
+                        batch = new LinkedList<Zevent>();
                         listenerBatches.put(listener, batch);
                     }
                     batch.add(z);
                 }
             }
 
-            for (Iterator i = _globalListeners.iterator(); i.hasNext();) {
-                ZeventListener listener = (ZeventListener) i.next();
+            for (ZeventListener<Zevent> listener : _globalListeners) {
                 listenerBatches.put(listener, validEvents);
             }
         }
 
         long timeout = getListenerTimeout();
-        for (Iterator i = listenerBatches.entrySet().iterator(); i.hasNext();) {
-            Map.Entry ent = (Map.Entry) i.next();
-            ZeventListener listener = (ZeventListener) ent.getKey();
-            List batch = (List) ent.getValue();
+        for (Entry<ZeventListener<Zevent>, List<Zevent>> ent : listenerBatches.entrySet()) {
+            ZeventListener<Zevent> listener = ent.getKey();
+            List<Zevent> batch = ent.getValue();
 
             synchronized (_listenerLock) {
                 InterruptToken t = null;
@@ -598,8 +574,9 @@ public class ZeventManager implements ZeventEnqueuer {
                 } catch (RuntimeException e) {
                     _log.warn("Exception while invoking listener [" + listener + "]", e);
                 } finally {
-                    if (t != null)
+                    if (t != null) {
                         threadWatchdog.cancelInterrupt(t);
+                    }
                 }
             }
         }
@@ -618,13 +595,10 @@ public class ZeventManager implements ZeventEnqueuer {
                                                       + "num=%-5d\n");
             synchronized (_listenerLock) {
 
-                for (Iterator i = _listeners.entrySet().iterator(); i.hasNext();) {
-                    Map.Entry ent = (Map.Entry) i.next();
-                    Collection listeners = (Collection) ent.getValue();
-
+                for (Entry<Class<? extends Zevent>, List<TimingListenerWrapper<Zevent>>> ent : _listeners.entrySet()) {
+                    List<TimingListenerWrapper<Zevent>> listeners = ent.getValue();
                     res.append("    EventClass: " + ent.getKey() + "\n");
-                    for (Iterator j = listeners.iterator(); j.hasNext();) {
-                        TimingListenerWrapper l = (TimingListenerWrapper) j.next();
+                    for (TimingListenerWrapper<Zevent> l : listeners) {
                         Object[] args = new Object[] { l.toString(),
                                                       new Double(l.getMaxTime()),
                                                       new Double(l.getAverageTime()),
@@ -636,8 +610,7 @@ public class ZeventManager implements ZeventEnqueuer {
                 }
 
                 res.append("    Global Listeners:\n");
-                for (Iterator i = _globalListeners.iterator(); i.hasNext();) {
-                    TimingListenerWrapper l = (TimingListenerWrapper) i.next();
+                for (TimingListenerWrapper<Zevent> l : _globalListeners) {
                     Object[] args = new Object[] { l.toString(),
                                                   new Double(l.getMaxTime()),
                                                   new Double(l.getAverageTime()),
@@ -651,14 +624,10 @@ public class ZeventManager implements ZeventEnqueuer {
                 PrintfFormat fmt = new PrintfFormat("    %-30s size=%d\n");
 
                 res.append("\nZevent Registered Buffers:\n");
-                for (Iterator i = _registeredBuffers.entrySet().iterator(); i.hasNext();) {
-                    Map.Entry ent = (Map.Entry) i.next();
-                    Queue q = (Queue) ent.getKey();
-                    TimingListenerWrapper targ = (TimingListenerWrapper) ent.getValue();
-
-                    res.append(fmt
-                        .sprintf(new Object[] { targ.toString(), new Integer(q.size()), }));
-
+                for (Entry<Queue<?>, TimingListenerWrapper<Zevent>> ent : _registeredBuffers.entrySet()) {
+                    Queue<?> q = ent.getKey();
+                    TimingListenerWrapper<Zevent> targ = ent.getValue();
+                    res.append(fmt.sprintf(new Object[] { targ.toString(), new Integer(q.size()), }));
                     res.append(timingFmt.sprintf(new Object[] { "", // Target
                                                                // already
                                                                // printed

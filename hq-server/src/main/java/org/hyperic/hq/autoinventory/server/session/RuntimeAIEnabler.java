@@ -37,6 +37,7 @@ import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
+import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +60,7 @@ public class RuntimeAIEnabler implements ZeventListener<ResourceZevent> {
     
     @PostConstruct
     public void subscribe() {
-        Set<Class<?>> events = new HashSet<Class<?>>();
+        Set<Class<? extends Zevent>> events = new HashSet<Class<? extends Zevent>>();
         events.add(ResourceCreatedZevent.class);
         events.add(ResourceUpdatedZevent.class);
         events.add(ResourceRefreshZevent.class);

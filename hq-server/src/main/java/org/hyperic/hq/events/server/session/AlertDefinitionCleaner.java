@@ -37,6 +37,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
+import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.util.timer.StopWatch;
@@ -58,7 +59,7 @@ public class AlertDefinitionCleaner implements ZeventListener<ResourceZevent> {
     
     @PostConstruct
     public void registerListener() {
-        HashSet<Class<ResourceDeletedZevent>> events = new HashSet<Class<ResourceDeletedZevent>>();
+        HashSet<Class<? extends Zevent>> events = new HashSet<Class<? extends Zevent>>();
         events.add(ResourceDeletedZevent.class);
         zEventManager.addBufferedListener(events,this);
     }

@@ -39,6 +39,7 @@ import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
+import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +64,7 @@ public class MeasurementEnabler
          * Add measurement enabler listener to enable metrics for newly created
          * resources or to reschedule when resources are updated.
          */
-        Set<Class<?>> listenEvents = new HashSet<Class<?>>();
+        Set<Class<? extends Zevent>> listenEvents = new HashSet<Class<? extends Zevent>>();
         listenEvents.add(ResourceCreatedZevent.class);
         listenEvents.add(ResourceUpdatedZevent.class);
         listenEvents.add(ResourceRefreshZevent.class);
