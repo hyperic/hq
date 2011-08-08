@@ -386,6 +386,8 @@ public class PlatformManagerImpl implements PlatformManager {
             permissionManager.checkRemovePermission(subject, platform.getEntityId());
             // keep the configresponseId so we can remove it later
             ConfigResponseDB config = platform.getConfigResponse();
+            // don't want a proxy obj, since it will never be null
+            config = (config.getId() == null) ? null : configResponseDAO.get(config.getId());
             removeServerReferences(platform);
 
             // this flush ensures that the server's platform_id is set to null
