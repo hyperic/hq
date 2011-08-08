@@ -111,12 +111,6 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
-  <cache name="Measurement.findByResource"
-         maxElementsInMemory="10000"
-         eternal="true"
-         timeToIdleSeconds="0"
-         timeToLiveSeconds="0"
-         memoryStoreEvictionPolicy="LRU"/>
   <cache name="Measurement.findEnabledByResource"
          maxElementsInMemory="10000"
          eternal="true"
