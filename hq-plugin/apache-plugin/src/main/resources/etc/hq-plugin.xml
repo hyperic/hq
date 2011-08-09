@@ -24,6 +24,7 @@
  -->
 
 <plugin name="apache">
+  <property name="PLUGIN_VERSION" value="@project.version@"/>
 
   <!-- ApacheStatusCollector extends HTTPCollector -->
   <classpath>
@@ -40,7 +41,7 @@
   <!-- first part of snmpIndexValue (1.3.6.1.2.1.6.)
        is the tcp protocol id, see ietf-mibs/WWW-MIB.txt -->
   <filter name="vhost.config"
-          value="snmpIndexName=wwwServiceName->wwwServiceProtocol,snmpIndexValue=%server.name%->1.3.6.1.2.1.6.%port%"/>
+          value="snmpIndexName=wwwServiceName->wwwServiceProtocol,snmpIndexValue=%server.name%->1.3.6.1.2.1.6.%server.port%"/>
 
   <!-- we need to lookup the index first, then combine that value
        with the give oid value.  for example:
@@ -746,7 +747,6 @@
 
     <config type="control" platform="Win32">
       <option name="service_name"
-              default="Apache2"
               description="Apache Service Name"/>
     </config>
 
@@ -817,6 +817,8 @@ ExtendedStatus On
     <config include="protocol,url">
       <option name="server.name"
               description="Apache ServerName"/>
+      <option name="server.port"
+              description="Apache ServerPort"/>
     </config>
     <config include="snmp" type="measurement">
       <!-- override default port -->
@@ -865,7 +867,6 @@ ExtendedStatus On
 
     <config type="control" platform="Win32">
       <option name="service_name"
-              default="Apache2"
               description="Apache Service Name"/>
     </config>
 
@@ -886,6 +887,8 @@ ExtendedStatus On
       <config include="protocol,url">
         <option name="server.name"
                 description="Apache ServerName"/>
+      <option name="server.port"
+              description="Apache ServerPort"/>
       </config>
 
       <plugin type="responsetime"
@@ -991,6 +994,20 @@ ExtendedStatus On
 
     <scan>
       <include name="/**/${VERSION_FILE}"/>
+    </scan>
+  </server>
+
+  <server name="Apache-ERS"
+          version="4.x"
+          include="2.4">
+
+    <property name="VERSION_FILE"
+              value="ers-server.pl"/>
+    <scan>
+      <include name="/**/${VERSION_FILE}"/>
+    </scan>
+    <scan registry="SYSTEM\CurrentControlSet\Services\ERS*">
+      <include name="ImagePath"/>
     </scan>
   </server>
 

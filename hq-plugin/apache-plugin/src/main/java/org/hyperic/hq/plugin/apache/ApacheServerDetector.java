@@ -71,6 +71,7 @@ public class ApacheServerDetector
     static final String VHOST_NAME = "VHost";
 
     static final String PROP_SERVER_NAME = "server.name";
+    static final String PROP_SERVER_PORT = "server.port";
 
     static final String[] PTQL_QUERIES = {
         "State.Name.eq=httpd,State.Name.Pne=$1",
@@ -94,6 +95,8 @@ public class ApacheServerDetector
 
     private static Log log = LogFactory.getLog("ApacheServerDetector");
 
+    private static String defaultConfs[] = {"conf/httpd.conf", "conf/httpsd.conf"};
+    
     private Properties props;
     private String defaultIp;
     private PortRange httpRange;
@@ -212,7 +215,15 @@ public class ApacheServerDetector
             if (!conf.exists()) {
                 info.conf = null; //use the defaults
             }
+        }else{
+            for(String conf:defaultConfs){
+                File cf=new File(info.root,conf);
+                if(cf.exists() && cf.isFile()){
+                    info.conf=cf.getAbsolutePath();
+                }
+            }
         }
+        log.debug("[getServerInfo] info.conf=" + info.conf + ", info.root=" + info.root + ", info.name=" + info.name);
     }
 
     //if httpd is started with a relative path, try to find it
@@ -347,6 +358,10 @@ public class ApacheServerDetector
             server.setCustomProperties(cprops);
         }
 
+        getLog().debug("[configureServer] snmpConfigExists=" + snmpConfigExists
+                + " this.discoverModSnmp=" + this.discoverModSnmp
+                + " this.discoverModStatus="+this.discoverModStatus);
+        
         if (snmpConfigExists || this.discoverModSnmp) {
             if (!snmpConfigExists) {
                 log.debug(snmpConfig +
@@ -356,7 +371,24 @@ public class ApacheServerDetector
             metricConfig = getSnmpConfig(snmpConfig);
             productConfig = getProductConfig(metricConfig);
 
+            if (binary.conf == null) {
+                String cfgPath = installpath;
+                if (snmpConfigExists) {
+                    cfgPath = snmpConfig.getParentFile().getParent();
+                }
+                for (String conf : defaultConfs) {
+                    File cf = new File(cfgPath, conf);
+                    getLog().debug("[configureServer] cf="+cf+" ("+(cf.exists() && cf.isFile())+")");
+                    if (cf.exists() && cf.isFile()) {
+                        binary.conf = cf.getAbsolutePath();
+                    }
+                }
+            }
+
             if (productConfig != null) {
+                if (binary.conf != null) {
+                    productConfig.setValue("ServerConf", binary.conf);
+                }
                 addTrackConfig(productConfig);
                 setProductConfig(server, productConfig);
                 setMeasurementConfig(server, metricConfig);
@@ -517,8 +549,8 @@ public class ApacheServerDetector
                            isSSL(server.port));
         config.setProperty(Collector.PROP_HOSTNAME, address);
         config.setProperty(Collector.PROP_PORT, server.port);
-        config.setProperty(PROP_SERVER_NAME,
-                           server.name);
+        config.setProperty(PROP_SERVER_NAME, server.name);
+        config.setProperty(PROP_SERVER_PORT, server.port);
 
         log.debug("Configured server via snmp: " + server);
 
@@ -558,8 +590,9 @@ public class ApacheServerDetector
         Properties props = new Properties();
 
         if (isWin32()) {
-            props.setProperty(Win32ControlPlugin.PROP_SERVICENAME,
-                              getWindowsServiceName());
+            String sname=getWindowsServiceName();
+            if(sname!=null)
+                props.setProperty(Win32ControlPlugin.PROP_SERVICENAME,sname);
             return new ConfigResponse(props);
         }
         else {
@@ -790,10 +823,21 @@ public class ApacheServerDetector
     protected List discoverVHostServices(ConfigResponse serverConfig)
         throws PluginException {
     
+        getLog().debug("[discoverVHostServices] serverConfig="+serverConfig);
         if (serverConfig.getValue(SNMPClient.PROP_IP) == null) {
             return null; //server type "Apache httpd"
         }
-
+        
+        Map<String,ApacheVHost> vHosts;
+        ApacheConf aConf;
+        try {
+            File ServerConf=new File(serverConfig.getValue("ServerConf"));
+            aConf=new ApacheConf(ServerConf);
+            vHosts=aConf.getVHosts();
+        } catch (IOException ex) {
+            throw new PluginException("Error getting VHosts", ex);
+        }
+        
         ApacheSNMP snmp = new ApacheSNMP();
 
         List servers;
@@ -843,11 +887,19 @@ public class ApacheServerDetector
 
             ConfigResponse config = new ConfigResponse();
 
-            config.setValue(Collector.PROP_PORT, server.port);
-
-            config.setValue(Collector.PROP_HOSTNAME,
-                            getListenAddress(server.port, hostname));
+            String exceptedServerName = server.name + ":" + server.port;
+            ApacheVHost vhost=vHosts.get(exceptedServerName);
+            if (vhost!=null) {
+                config.setValue(Collector.PROP_HOSTNAME, vhost.getIp());
+                config.setValue(Collector.PROP_PORT, vhost.getPort());
+            }else if (config.getValue(Collector.PROP_HOSTNAME) == null) {
+                ApacheListen parseListen = ApacheConf.parseListen(exceptedServerName);
+                config.setValue(Collector.PROP_HOSTNAME, parseListen.getIp());
+                config.setValue(Collector.PROP_PORT, parseListen.getPort());
+            }
+            
             config.setValue(PROP_SERVER_NAME, server.name);
+            config.setValue(PROP_SERVER_PORT, server.port);
 
             //XXX snmp does not tell us the protocol
             String proto = protocol == null ?
