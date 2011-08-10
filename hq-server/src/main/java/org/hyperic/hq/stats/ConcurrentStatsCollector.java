@@ -241,7 +241,7 @@ public final class ConcurrentStatsCollector {
 
             public long getVal() throws StatUnreachableException {
                 try {
-                    return (long) sigar.getProcCpu(getProcPid()).getPercent();
+                    return (long) (sigar.getProcCpu(getProcPid()).getPercent() * 100);
                 } catch (SigarException e) {
                     throw new StatUnreachableException(e.getMessage(), e);
                 }

@@ -35,15 +35,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.util.thread.ThreadGroupFactory;
 
-class BufferedListener
+class BufferedListener<T extends Zevent>
     extends ThreadPoolExecutor
-    implements ZeventListener
+    implements ZeventListener<T>
 {
     private static Log _log = LogFactory.getLog(BufferedListener.class);
 
-    private final ZeventListener _target;
+    private final ZeventListener<T> _target;
     
-    BufferedListener(ZeventListener target, ThreadGroupFactory fact) {
+    BufferedListener(ZeventListener<T> target, ThreadGroupFactory fact) {
         super(1, 1, 0, TimeUnit.SECONDS, new LinkedBlockingQueue(), fact);
         ZeventManager.getInstance().registerBuffer(getQueue(), target);
         _target = target;

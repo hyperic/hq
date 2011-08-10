@@ -35,6 +35,7 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
+import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +61,7 @@ public class MergePlatformAndServersEventListener implements ZeventListener<Merg
     @PostConstruct
     public void subscribeForEvents() {
     	concurrentStatsCollector.register(ConcurrentStatsCollector.RUNTIME_PLATFORM_AND_SERVER_MERGER);
-        Set<Class<?>>events = new HashSet<Class<?>>();
+        Set<Class<? extends Zevent>>events = new HashSet<Class<? extends Zevent>>();
         events.add(MergePlatformAndServersZevent.class);
         zeventManager.addBufferedListener(events, this);
     }

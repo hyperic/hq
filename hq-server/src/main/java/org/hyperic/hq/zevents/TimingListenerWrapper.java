@@ -26,9 +26,7 @@ package org.hyperic.hq.zevents;
 
 import java.util.List;
 
-public class TimingListenerWrapper 
-    implements ZeventListener
-{
+public class TimingListenerWrapper<T extends Zevent>  implements ZeventListener<T> {
     private ZeventListener _target;
     private long           _maxTime   = 0;
     private long           _totTime   = 0;

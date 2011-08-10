@@ -33,6 +33,7 @@ import javax.annotation.PostConstruct;
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.ui.shared.DashboardManager;
+import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +54,7 @@ public class ResourceDeleteWatcher implements ZeventListener<ResourceDeletedZeve
 
     @PostConstruct
     public void subscribe() {
-        HashSet<Class<ResourceDeletedZevent>> events = new HashSet<Class<ResourceDeletedZevent>>();
+        HashSet<Class<? extends Zevent>> events = new HashSet<Class<? extends Zevent>>();
         events.add(ResourceDeletedZevent.class);
         zEventManager.addBufferedListener(events, this);
     }

@@ -33,6 +33,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.CallbackException;
 import org.hibernate.EmptyInterceptor;
 import org.hibernate.EntityMode;
+import org.hibernate.ObjectNotFoundException;
 import org.hibernate.Transaction;
 import org.hibernate.type.Type;
 
@@ -42,9 +43,8 @@ import org.hibernate.type.Type;
  * One use case is to set creation and modified time on
  * on save, merge or collection cascades
  */
-public class HypericInterceptorTarget
-    extends EmptyInterceptor
-{
+@SuppressWarnings("serial")
+public class HypericInterceptorTarget extends EmptyInterceptor {
     private final Log _log = LogFactory.getLog(HypericInterceptor.class);
         
     public String onPrepareStatement(String sql) {
@@ -57,20 +57,30 @@ public class HypericInterceptorTarget
     
     public boolean onFlushDirty(Object entity, Serializable id, 
                                 Object[] currentState, Object[] previousState, 
-                                String[] propertyNames, Type[] types)
-    {
-        if (entHasContainerManagedTimestamp(entity))
-            return updateTimestamp((ContainerManagedTimestampTrackable)entity, 
-                                   currentState, previousState, propertyNames);
+                                String[] propertyNames, Type[] types) {
+        try {
+            if (entHasContainerManagedTimestamp(entity)) {
+                return updateTimestamp((ContainerManagedTimestampTrackable)entity, 
+                                       currentState, previousState, propertyNames);
+            }
+        } catch (ObjectNotFoundException e) {
+            _log.warn("entity not found: " + e);
+            _log.debug(e,e);
+        }
         return false;
     }
 
     public boolean onSave(Object entity, Serializable id, Object[] state, 
-                          String[] propertyNames, Type[] types)
-    {
-        if (entHasContainerManagedTimestamp(entity))
-            return updateTimestamp((ContainerManagedTimestampTrackable)entity, 
-                                   state, null, propertyNames);
+                          String[] propertyNames, Type[] types) {
+        try {
+            if (entHasContainerManagedTimestamp(entity)) {
+                return updateTimestamp((ContainerManagedTimestampTrackable)entity, 
+                                       state, null, propertyNames);
+            }
+        } catch (ObjectNotFoundException e) {
+            _log.warn("entity not found: " + e);
+            _log.debug(e,e);
+        }
         return false;
     }
 
