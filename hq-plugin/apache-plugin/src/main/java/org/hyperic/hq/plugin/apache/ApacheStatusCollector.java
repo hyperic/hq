@@ -34,9 +34,9 @@ import java.net.HttpURLConnection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpResponse;
 import org.hyperic.hq.plugin.netservices.HTTPCollector;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
@@ -119,45 +119,41 @@ public class ApacheStatusCollector extends HTTPCollector {
         }
     }
 
-    private void parse(HttpResponse response) throws IOException {
-        InputStream is = response.getEntity().getContent();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+    private void parse(HttpMethod method) throws IOException {
+        InputStream is =
+            method.getResponseBodyAsStream();
+        BufferedReader reader =
+            new BufferedReader(new InputStreamReader(is));
         String line;
 
         while ((line = reader.readLine()) != null) {
             int ix = line.indexOf(": ");
-            
             if (ix == -1) {
                 continue;
             }
-            
             String key = line.substring(0, ix).trim();
             String val = line.substring(ix+2).trim();
-            
             if (key.equals("Scoreboard")) {
                 parseScoreboard(val);
-            } else {
+            }
+            else {
                 key = StringUtil.replace(key, " ", "");
-              
                 if ((ix = val.indexOf("e-")) != -1) {
                     val = val.substring(0, ix);
                 }
-                
                 setValue(key, val);
                 /* {Busy,Idle}Servers in 1.3, {Busy,Idle}Workers in 2.0 */
-                
                 if (key.endsWith("Workers")) {
                     key = StringUtil.replace(key, "Workers", "Servers");
                 }
-                
                 setValue(key, val);
             }
         }        
     }
 
-    protected void parseResults(HttpResponse response) {
+    protected void parseResults(HttpMethod method) {
         try {
-            parse(response);
+            parse(method);
         } catch (IOException e) {
             log.error("Exception parsing: " + getURL(), e);
         }
