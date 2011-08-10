@@ -701,7 +701,7 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
         var dataRange = '1w';
 
         var providerTabs = {};
-        hyperic.widget.tempNode = dojo.byId('z');
+        hyperic.widget.tempNode = hqDojo.byId('z');
 
         // var cprop = {expires:1}; //cookies should expire after 1d
         function changeCloudRange(evt)
@@ -710,7 +710,7 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
             loadData();
         }
 
-        dojo11.addOnLoad(
+        hqDojo.ready(
             function() {
                 document.status = hyperic.widget.StatusElement('ct', 'nt', 'status', 'update', refInt);
                 loadData();
@@ -726,7 +726,7 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
         function loadData() {
             //Show the status update message
             document.status.startUpdate();
-            dojo11.xhrGet( {
+            hqDojo.xhrGet( {
                 // url : '/cloud1.js?' + new Date().getTime(), //prevent caching
                 url : '/hqu/saasCenter/Saascenter/summaryData.hqu?time=' + t + '&range=' + dataRange + '?' + t,
                 handleAs : 'json',
@@ -828,7 +828,7 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
             }
             hyperic.widget.tooltip.cleanup();
 
-            dojo.byId('overallSummary').innerHTML = '';
+            hqDojo.byId('overallSummary').innerHTML = '';
 
             // create the cloudstatus overview widgets
             var f = document.createElement("div");
@@ -859,7 +859,7 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
                     tmp_id = 'overall_' + tabid + '_summary';
 
                     f.innerHTML = '<div id="' + tmp_id + '"><h1 class="title" onclick="changeTabs(\\\''+ tabid +'\\\')">' + providers[j].longName + '</h1></div>';
-                    dojo.byId('overallSummary').appendChild(f.firstChild);
+                    hqDojo.byId('overallSummary').appendChild(f.firstChild);
                     for (var i in providers[j].strips) {
                         if(typeof(providers[j].strips[i]) !== 'function')
                         {
@@ -871,7 +871,7 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
                             {
                                 charts_container_id = (++id1) + '_charts';
                                 f.innerHTML = '<div id="' + charts_container_id + '"></div>';
-                                dojo.byId(tmp_id).appendChild(f.firstChild);
+                                hqDojo.byId(tmp_id).appendChild(f.firstChild);
                                 for(chart in providers[j].strips[i].charts) {
                                     if(typeof(providers[j].strips[i].charts[chart]) !== 'function')
                                     {
@@ -879,7 +879,7 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
                                     }
                                 }
                                 f.innerHTML = '<div style="clear: both;"></div>';
-                                dojo.byId(charts_container_id).appendChild(f.firstChild);
+                                hqDojo.byId(charts_container_id).appendChild(f.firstChild);
                                 delete charts_container_id;
                             }
                         }
@@ -924,11 +924,11 @@ this.runtimeStyle.backgroundImage = "none")),this.pngSet=true)
             // if(activeTab.id == 'cso'){
             //     return;
             // }
-            // dojo.byId('cso').className = 'tab';
-            // dojo.byId('cso_tab').style.display = 'none';
-            // dojo.byId(activeTab.id).className = 'activeTab';
-            // dojo.byId(activeTab.id+'_tab').style.display = '';
-            // dojo.publish('tabchange', [activeTab.id]);
+            // hqDojo.byId('cso').className = 'tab';
+            // hqDojo.byId('cso_tab').style.display = 'none';
+            // hqDojo.byId(activeTab.id).className = 'activeTab';
+            // hqDojo.byId(activeTab.id+'_tab').style.display = '';
+            // hqDojo.publish('tabchange', [activeTab.id]);
         }
         </script>
 <!-- end hqu plugin -->

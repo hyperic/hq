@@ -51,7 +51,6 @@ import org.springframework.stereotype.Service;
 public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
     private final Log log = LogFactory.getLog(AvailabilityCheckServiceImpl.class);
     private static final String AVAIL_BACKFILLER_TIME = ConcurrentStatsCollector.AVAIL_BACKFILLER_TIME;
-    private static final String AVAIL_BACKFILLER_NUMPLATFORMS = ConcurrentStatsCollector.AVAIL_BACKFILLER_NUMPLATFORMS;
 
     private long startTime = 0;
     private long wait = 5 * MeasurementConstants.MINUTE;
@@ -77,7 +76,6 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
     @PostConstruct
     public void initStats() {
         concurrentStatsCollector.register(AVAIL_BACKFILLER_TIME);
-        concurrentStatsCollector.register(AVAIL_BACKFILLER_NUMPLATFORMS);
     }
 
     public void backfill() {
@@ -92,7 +90,7 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
 
     private void backfill(long current, boolean forceStart) {
         long start = now();
-        long backfilledPts = -1;
+        Map<Integer, DataPoint> backfillPoints = null;
         try {
             final boolean debug = log.isDebugEnabled();
             if (debug) {
@@ -104,7 +102,6 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
                 log.info("not starting availability check");
                 return;
             }
-
             synchronized (IS_RUNNING_LOCK) {
                 if (isRunning) {
                     log.warn("Availability Check Service is already running, bailing out");
@@ -121,11 +118,9 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
                 // associated AVAIL_UP value from the agent.
                 // The code must be extremely efficient or else it will have
                 // a big impact on the performance of availability insertion.
-                Map<Integer, DataPoint> backfillPoints = null;
                 synchronized (availabilityCache) {
                     backfillPoints = backfillPointsService.getBackfillPoints(current);
-                    backfilledPts = backfillPoints.keySet().size();
-                    backfillAvails(new ArrayList<DataPoint>(backfillPoints.values()));
+                    backfillAvails(backfillPoints);
                 }
                 // send data to event handlers outside of synchronized block
                 availabilityManager.sendDataToEventHandlers(backfillPoints);
@@ -138,9 +133,6 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
             throw new SystemException(e);
         } finally {
             concurrentStatsCollector.addStat(now() - start, AVAIL_BACKFILLER_TIME);
-            if (backfilledPts != -1) {
-                concurrentStatsCollector.addStat(backfilledPts, AVAIL_BACKFILLER_NUMPLATFORMS);
-            }
         }
     }
 
@@ -148,20 +140,22 @@ public class AvailabilityCheckServiceImpl implements AvailabilityCheckService {
      * Since this method is called from the synchronized block in backfill()
      * please see the associated NOTE.
      */
-    private void backfillAvails(List<DataPoint> backfillList) {
+    private void backfillAvails(Map<Integer, DataPoint> backfillData) {
+        if (backfillData.isEmpty()) {
+            return;
+        }
+        final List<DataPoint> backfillPoints = new ArrayList<DataPoint>(backfillData.values());
         final boolean debug = log.isDebugEnabled();
         final int batchSize = 500;
-        for (int i = 0; i < backfillList.size(); i += batchSize) {
+        for (int i=0; i < backfillPoints.size(); i+=batchSize) {
             if (debug) {
-                log.debug("backfilling " + batchSize + " datapoints, " + (backfillList.size() - i) +
+                log.debug("backfilling " + batchSize + " datapoints, " + (backfillPoints.size() - i) +
                           " remaining");
             }
-            int end = Math.min(i + batchSize, backfillList.size());
-            // use this method signature to not send data to event handlers from
-            // here.
-            // send it outside the synchronized cache block from the calling
-            // method
-            availabilityManager.addData(backfillList.subList(i, end), false);
+            int end = Math.min(i + batchSize, backfillPoints.size());
+            // use this method signature to not send data to event handlers from here.
+            // send it outside the synchronized cache block from the calling method
+            availabilityManager.addData(backfillPoints.subList(i, end), false);
         }
     }
 

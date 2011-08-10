@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2010], VMware, Inc.
+ * Copyright (C) [2004-2011], VMware, Inc.
  * This file is part of Hyperic.
  *
  * Hyperic is free software; you can redistribute it and/or modify
@@ -46,14 +46,19 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
+import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.appdef.server.session.AgentDAO;
+import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
@@ -72,6 +77,7 @@ import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.product.AvailabilityMetricValue;
 import org.hyperic.hq.product.MetricValue;
+import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.pager.PageControl;
@@ -79,7 +85,6 @@ import org.hyperic.util.pager.PageList;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -111,6 +116,8 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
 
     private static final long MAX_DATA_BACKLOG_TIME = 7 * MeasurementConstants.DAY;
 
+    private AuthzSubjectManager authzSubjectManager;
+
     private MeasurementManager measurementManager;
 
     private ResourceGroupManager groupManager;
@@ -126,13 +133,17 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     private RegisteredTriggers registeredTriggers;
     private AvailabilityCache availabilityCache;
     private ConcurrentStatsCollector concurrentStatsCollector;
+    private AgentDAO agentDAO;
     
     @Autowired
-    public AvailabilityManagerImpl(ResourceManager resourceManager, ResourceGroupManager groupManager, MessagePublisher messenger,
+    public AvailabilityManagerImpl(AuthzSubjectManager authzSubjectManager, ResourceManager resourceManager, 
+    							   ResourceGroupManager groupManager, MessagePublisher messenger,
                                    AvailabilityDataDAO availabilityDataDAO, MeasurementDAO measurementDAO,
-                                   MessagePublisher messagePublisher, RegisteredTriggers registeredTriggers, AvailabilityCache availabilityCache,
+                                   MessagePublisher messagePublisher, RegisteredTriggers registeredTriggers,
+                                   AvailabilityCache availabilityCache, AgentDAO agentDAO,
                                    ConcurrentStatsCollector concurrentStatsCollector) {
-        this.resourceManager = resourceManager;
+    	this.authzSubjectManager = authzSubjectManager;
+    	this.resourceManager = resourceManager;
         this.groupManager = groupManager;
         this.messenger = messenger;
         this.availabilityDataDAO = availabilityDataDAO;
@@ -141,6 +152,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         this.registeredTriggers = registeredTriggers;
         this.availabilityCache = availabilityCache;
         this.concurrentStatsCollector = concurrentStatsCollector;
+        this.agentDAO = agentDAO;
     }
 
     @PostConstruct
@@ -178,28 +190,33 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
      * 
      */
     @Transactional(readOnly = true)
-    public long getDowntime(Resource resource, long begin, long end) throws MeasurementNotFoundException {
+    public long getDowntime(Resource resource, long rangeBegin, long rangeEnd) throws MeasurementNotFoundException {
         Measurement meas = measurementDAO.findAvailMeasurement(resource);
         if (meas == null) {
             throw new MeasurementNotFoundException("Availability measurement " + "not found for resource " +
                                                    resource.getId());
         }
-        List<AvailabilityDataRLE> availInfo = availabilityDataDAO.getHistoricalAvails(meas, begin, end, false);
+        List<AvailabilityDataRLE> availInfo = availabilityDataDAO.getHistoricalAvails(meas, rangeBegin, rangeEnd, false);
         long rtn = 0l;
         for (AvailabilityDataRLE avail : availInfo) {
             if (avail.getAvailVal() != AVAIL_DOWN) {
                 continue;
             }
-            long endtime = avail.getEndtime();
-            if (endtime == MAX_AVAIL_TIMESTAMP) {
-                endtime = System.currentTimeMillis();
+            long dataDownEndTime = avail.getEndtime();
+            
+            if (dataDownEndTime == MAX_AVAIL_TIMESTAMP) {
+                dataDownEndTime = System.currentTimeMillis();
+            } 
+            if (dataDownEndTime > rangeEnd){
+                // use range end if the data down end time is greater than the end range.
+                dataDownEndTime = rangeEnd;
             }
-            long rangeStartTime = avail.getStartime();
+            long dataDownStartTime = avail.getStartime();
             // Make sure the start of the down time is not earlier then the begin time
-            if (rangeStartTime < begin){
-            	rangeStartTime = begin;
+            if (dataDownStartTime < rangeBegin){
+            	dataDownStartTime = rangeBegin;
             }
-            rtn += (endtime - rangeStartTime);
+            rtn += (dataDownEndTime - dataDownStartTime);
         }
         return rtn;
     }
@@ -236,7 +253,8 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     @Transactional(readOnly = true)
     public Map<Integer, List<Measurement>> getAvailMeasurementChildren(List<Integer> resourceIds,
                                                                        String resourceRelationType) {
-        final List<Object[]> objects = measurementDAO.findRelatedAvailMeasurements(resourceIds, resourceRelationType);
+        final List<Object[]> objects =
+            measurementDAO.findRelatedAvailMeasurements(resourceIds, resourceRelationType);
         return convertAvailMeasurementListToMap(objects);
     }
 
@@ -286,13 +304,24 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         Map<Integer, Measurement> measMap = new HashMap<Integer, Measurement>();
         
         try {
+    		AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
+
             // TODO: Resolve circular dependency and autowire MaintenanceEventManager
             List<MaintenanceEvent> events = PermissionManagerFactory.getInstance()
-                .getMaintenanceEventManager().getRunningMaintenanceEvents();
+                .getMaintenanceEventManager().getMaintenanceEvents(overlord, 
+                		MaintenanceEvent.STATE_RUNNING);
 
             for (MaintenanceEvent event : events) {
-                ResourceGroup group = groupManager.findResourceGroupById(event.getGroupId());
-                Collection<Resource> resources = groupManager.getMembers(group);
+            	AppdefEntityID entityId = event.getAppdefEntityID();
+            	Collection<Resource> resources = null;
+            	
+            	if (entityId.isGroup()) {
+            		ResourceGroup group = groupManager.findResourceGroupById(entityId.getId());
+            		resources = groupManager.getMembers(group);
+            	} else {
+            		Resource resource = resourceManager.findResource(entityId);
+            		resources = Collections.singletonList(resource);
+            	}
 
                 for (Resource resource : resources) {
                     List<Measurement> measurements = getAvailMeasurementChildren(
@@ -1537,4 +1566,36 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         }
         return true;
     }
+    
+    @Transactional(readOnly=true)
+    public boolean platformIsAvailable(int agentId) {
+        final Agent agent = agentDAO.get(agentId);
+        if (agent == null) {
+            return false;
+        }
+        Resource resource = null;
+        Collection<Platform> platforms = agent.getPlatforms();
+        for (final Platform p : platforms) {
+            if (PlatformDetector.isSupportedPlatform(p.getResource().getPrototype().getName())) {
+                resource = p.getResource();
+                if (resource == null || resource.isInAsyncDeleteState()) {
+                    return false;
+                }
+                break;
+            }
+        }
+        final Measurement m = measurementManager.getAvailabilityMeasurement(resource);
+        if (m == null) {
+            return false;
+        }
+        final MetricValue last = getLastAvail(m);
+        if (last == null) {
+            return false;
+        }
+        if (last.getValue() == MeasurementConstants.AVAIL_UP) {
+            return true;
+        }
+        return false;
+    }
+
 }

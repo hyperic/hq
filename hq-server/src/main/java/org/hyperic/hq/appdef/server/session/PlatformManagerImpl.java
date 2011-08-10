@@ -86,7 +86,6 @@ import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
-import org.hyperic.hq.common.ProductProperties;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.Audit;
@@ -96,6 +95,7 @@ import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.server.session.AgentScheduleSyncZevent;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.PlatformTypeInfo;
+import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.sigar.NetFlags;
 import org.hyperic.util.pager.PageControl;
@@ -192,17 +192,6 @@ public class PlatformManagerImpl implements PlatformManager {
     // TODO resolve circular dependency
     private AIQueueManager getAIQueueManager() {
         return Bootstrap.getBean(AIQueueManager.class);
-    }
-
-    // TODO remove after HE-54 allows injection
-    private PlatformCounter getCounter() {
-        PlatformCounter counter = (PlatformCounter) ProductProperties
-            .getPropertyInstance("hyperic.hq.platform.counter");
-
-        if (counter == null) {
-            counter = new DefaultPlatformCounter();
-        }
-        return counter;
     }
 
     /**
@@ -392,7 +381,7 @@ public class PlatformManagerImpl implements PlatformManager {
             .findResourceById(AuthzConstants.authzHQSystem), subject, 0, 0);
         boolean pushed = false;
         try {
-            auditManager.pushContainer(audit);
+        	auditManager.pushContainer(audit);
             pushed = true;
             permissionManager.checkRemovePermission(subject, platform.getEntityId());
             // keep the configresponseId so we can remove it later
@@ -511,7 +500,6 @@ public class PlatformManagerImpl implements PlatformManager {
             }
 
             trimStrings(pValue);
-            getCounter().addCPUs(pValue.getCpuCount().intValue());
             validateNewPlatform(pValue);
             PlatformType pType = findPlatformType(platformTypeId);
 
@@ -536,9 +524,8 @@ public class PlatformManagerImpl implements PlatformManager {
             platformDAO.getSession().flush();
 
             // Send resource create event
-            ResourceCreatedZevent zevent = new ResourceCreatedZevent(subject, platform
-                .getEntityId());
-            zeventManager.enqueueEventAfterCommit(zevent);
+            // Send resource create & increment platform count events
+            zeventManager.enqueueEventAfterCommit(new ResourceCreatedZevent(subject, platform.getEntityId()));
 
             return platform;
         } catch (NotFoundException e) {
@@ -560,8 +547,6 @@ public class PlatformManagerImpl implements PlatformManager {
      */
     public Platform createPlatform(AuthzSubject subject, AIPlatformValue aipValue)
         throws ApplicationException {
-        getCounter().addCPUs(aipValue.getCpuCount().intValue());
-
         PlatformType platType = platformTypeDAO.findByName(aipValue.getPlatformTypeName());
 
         if (platType == null) {
@@ -582,6 +567,7 @@ public class PlatformManagerImpl implements PlatformManager {
         ConfigResponseDB config = configResponseDAO.createPlatform();
 
         Platform platform = platType.create(aipValue, subject.getName(), config, agent);
+        agent.getPlatforms().add(platform);
         platformDAO.save(platform);
 
         // AUTHZ CHECK
@@ -591,10 +577,9 @@ public class PlatformManagerImpl implements PlatformManager {
             throw new SystemException(e);
         }
 
-        // Send resource create event
-        ResourceCreatedZevent zevent = new ResourceCreatedZevent(subject, platform.getEntityId());
-        zeventManager.enqueueEventAfterCommit(zevent);
-
+        // Send resource create & increment platform count events
+        zeventManager.enqueueEventAfterCommit(new ResourceCreatedZevent(subject, platform.getEntityId()));
+        
         return platform;
     }
 
@@ -802,20 +787,15 @@ public class PlatformManagerImpl implements PlatformManager {
                     for (Platform plat : platforms) {
 
                         // Make sure the types match
-                        if (!plat.getPlatformType().getName().equals(
-                            aiPlatform.getPlatformTypeName())) {
+                        if (!plat.getPlatformType().getName().equals(aiPlatform.getPlatformTypeName())) {
                             continue;
                         }
 
-                        // If we got any platforms that match this IP address,
-                        // then
-                        // we just take it and see if we can match up more
-                        // criteria.
-                        // We can assume that is a candidate for the platform we
-                        // are
+                        // If we got any platforms that match this IP address, then
+                        // we just take it and see if we can match up more criteria.
+                        // We can assume that is a candidate for the platform we are
                         // looking for. This should only fall apart if we have
-                        // multiple platforms defined for the same IP address,
-                        // which
+                        // multiple platforms defined for the same IP address, which
                         // should be a rarity.
 
                         if (plat.getFqdn().equals(fqdn)) { // Perfect
@@ -1372,6 +1352,12 @@ public class PlatformManagerImpl implements PlatformManager {
             return new PageList<Platform>();
         }
     }
+    
+    @Transactional(readOnly=true)
+    public Collection<Platform> findAll(AuthzSubject superUser) throws PermissionException {
+        permissionManager.checkIsSuperUser(superUser);
+        return platformDAO.findAll();
+    }
 
     /**
      * Get the scope of viewable platforms for a given user
@@ -1574,12 +1560,6 @@ public class PlatformManagerImpl implements PlatformManager {
             log.debug("No changes found between value object and entity");
             return plat;
         } else {
-            int newCount = existing.getCpuCount().intValue();
-            int prevCpuCount = plat.getCpuCount().intValue();
-            if (newCount > prevCpuCount) {
-                getCounter().addCPUs(newCount - prevCpuCount);
-            }
-
             if (!(existing.getName().equals(plat.getName()))) {
                 if (platformDAO.findByName(existing.getName()) != null)
                     // duplicate found, throw a duplicate object exception
@@ -1618,19 +1598,7 @@ public class PlatformManagerImpl implements PlatformManager {
                 } else if (!plat.getAgent().equals(existing.getAgent())) {
                     // Need to enqueue the ResourceUpdatedZevent if the
                     // agent changed to get the metrics scheduled
-                    List<ResourceUpdatedZevent> events = new ArrayList<ResourceUpdatedZevent>();
-                    events.add(new ResourceUpdatedZevent(subject, plat.getEntityId()));
-                    for (Server svr : plat.getServers()) {
-
-                        events.add(new ResourceUpdatedZevent(subject, svr.getEntityId()));
-
-                        for (Service svc : svr.getServices()) {
-
-                            events.add(new ResourceUpdatedZevent(subject, svc.getEntityId()));
-                        }
-                    }
-
-                    zeventManager.enqueueEventsAfterCommit(events);
+                    resourceManager.resourceHierarchyUpdated(subject, Collections.singletonList(plat.getResource()));
                 }
             }
             platformDAO.updatePlatform(plat, existing);
@@ -1806,11 +1774,6 @@ public class PlatformManagerImpl implements PlatformManager {
         if (platform == null) {
             throw new PlatformNotFoundException("Platform not found with either FQDN: " + fqdn +
                                                 " nor CertDN: " + certdn);
-        }
-        int prevCpuCount = platform.getCpuCount().intValue();
-        Integer count = aiplatform.getCpuCount();
-        if ((count != null) && (count.intValue() > prevCpuCount)) {
-            getCounter().addCPUs(aiplatform.getCpuCount().intValue() - prevCpuCount);
         }
 
         // Get the FQDN before we update
@@ -2018,6 +1981,22 @@ public class PlatformManagerImpl implements PlatformManager {
     @Transactional(readOnly = true)
     public Number getPlatformCount() {
         return platformDAO.getPlatformCount();
+    }
+
+    @Transactional(readOnly = true)
+    public Platform getPlatformByAgentId(Integer agentId) {
+        final Agent agent = agentDAO.get(agentId);
+        if (agent == null) {
+            return null;
+        }
+        final Collection<Platform> platforms = agent.getPlatforms();
+        for (final Platform platform : platforms) {
+            final Resource resource = platform.getResource();
+            if (PlatformDetector.isSupportedPlatform(resource.getPrototype().getName())) {
+                return platform;
+            }
+        }
+        return null;
     }
 
     /**

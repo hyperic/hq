@@ -30,51 +30,56 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.InetAddress;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.agent.AgentConnectionException;
+import org.hyperic.hq.agent.AgentKeystoreConfig;
 import org.hyperic.hq.agent.server.AgentConnectionListener;
 import org.hyperic.hq.agent.server.AgentServerConnection;
 import org.hyperic.hq.agent.server.AgentStartException;
-import org.hyperic.hq.bizapp.agent.CommonSSL;
 import org.hyperic.hq.bizapp.agent.TokenData;
 import org.hyperic.hq.bizapp.agent.TokenManager;
 import org.hyperic.hq.bizapp.agent.TokenNotFoundException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.hyperic.util.security.DefaultSSLProviderImpl;
+import org.hyperic.util.security.SSLProvider;
 
 class SSLConnectionListener
     extends AgentConnectionListener
 {
+    
+    private static final String PROP_READ_TIMEOUT = "agent.readTimeOut";
+    private static int READ_TIMEOUT = 120000;
+    static {
+        try {
+            READ_TIMEOUT = Integer.parseInt(System.getProperty(PROP_READ_TIMEOUT));
+        } catch (NumberFormatException e) {
+        }
+    }
     private SSLServerSocket listenSock;
     private Log             log;
-    private KeyManager[]    kManagers;
     private TokenManager    tokenManager;
 
-    public SSLConnectionListener(AgentConfig cfg, 
-                                 KeyManager[] kManagers,
-                                 TokenManager tokenManager)
+    public SSLConnectionListener(AgentConfig cfg, TokenManager tokenManager)
     {
         super(cfg);
         this.listenSock   = null;
         this.log          = LogFactory.getLog(SSLConnectionListener.class);
-        this.kManagers    = kManagers;
         this.tokenManager = tokenManager;
     }
 
     private SSLServerConnection handleNewConn(SSLSocket sock)
-        throws AgentConnectionException
-    {
+    throws AgentConnectionException, SocketTimeoutException {
         SSLServerConnection res;
         InetAddress remoteAddr;
         TokenData token;
@@ -91,9 +96,11 @@ class SSLConnectionListener
 
             dIs = new DataInputStream(sock.getInputStream());
             authToken = dIs.readUTF();
+        } catch(SocketTimeoutException exc) {
+            throw exc;
         } catch(IOException exc){
             throw new AgentConnectionException("Error negotiating auth: " +
-                                               exc.getMessage());
+                                               exc.getMessage(), exc);
         }
 
         // Set the token from pending to locked, if need be
@@ -152,75 +159,91 @@ class SSLConnectionListener
     }
 
     public AgentServerConnection getNewConnection()
-        throws AgentConnectionException, InterruptedIOException
-    {
+    throws AgentConnectionException, InterruptedIOException {
         AgentServerConnection res;
         SSLSocket inConn = null;
         boolean success = false;
-
         try {
             inConn  = (SSLSocket)this.listenSock.accept();
-            res     = this.handleNewConn(inConn);
-            success = true;
+            inConn.setSoTimeout(READ_TIMEOUT);
         } catch(InterruptedIOException exc){
             throw exc;
         } catch(IOException exc){
             throw new AgentConnectionException(exc.getMessage(), exc);
+        }
+        try {
+            res     = handleNewConn(inConn);
+            success = true;
+        } catch (SocketTimeoutException e) {
+            InterruptedIOException toThrow = new InterruptedIOException();
+            toThrow.initCause(e);
+            log.warn("socket timed out while handling a command from the server: " + e);
+            log.debug(e,e);
+            throw toThrow;
         } finally {
-            if(success == false && inConn != null){
-                try {
-                    inConn.close();
-                } catch(IOException exc){
-                    log.debug(exc,exc);
-                }
+            if(!success) {
+                close(inConn);
             }
         }
-
         return res;
     }
 
-    public void setup(int timeout)
-        throws AgentStartException
-    {
-        SSLServerSocketFactory sFactory;
-        AgentConfig cfg;
-        SSLContext context;
-        InetAddress addr;
-        int port;
-            
-        try {
-            context = CommonSSL.getSSLContext();
-            context.init(this.kManagers, null, null);
-        } catch(Exception exc){
-            throw new AgentStartException("Unable to setup SSL context: " + 
-                                          exc.getMessage());
+    private void close(SSLSocket socket) {
+        if (socket != null){
+            try {
+                socket.close();
+            } catch(IOException exc){
+                log.debug(exc,exc);
+            }
         }
+    }
 
-        sFactory = context.getServerSocketFactory();
+    public void setup(int timeout) throws AgentStartException {
+        AgentConfig cfg = this.getConfig();
+        AgentKeystoreConfig keystoreConfig = new AgentKeystoreConfig();
+    	SSLProvider provider = new DefaultSSLProviderImpl(keystoreConfig,keystoreConfig.isAcceptUnverifiedCert());
+        SSLContext context = provider.getSSLContext();
+    	SSLServerSocketFactory sFactory = context.getServerSocketFactory();
         
-        cfg = this.getConfig();
+        InetAddress addr;
+        
         try {
             addr = cfg.getListenIpAsAddr();
         } catch(UnknownHostException exc){
-            throw new AgentStartException("Failed to setup listen socket " +
-                                          " on '" + cfg.getListenIp() + "': "+
-                                          "unknown host");
+            throw new AgentStartException("Failed to setup listen socket on '" + cfg.getListenIp() + "': unknown host");
         }
 
-        port = cfg.getListenPort();
-        try {
-            this.listenSock = 
-                (SSLServerSocket)sFactory.createServerSocket(port, 50, addr);
-            this.listenSock.setSoTimeout(timeout);
-        } catch(IOException exc){
-            throw new AgentStartException("Failed to listen at " +
-                                          cfg.getListenIp() + ":" + port +
-                                          ": " + exc.getMessage());
+        int port = cfg.getListenPort();
+        // Better to retry until this succeeds rather than give up and not allowing
+        // the agent to start
+        while (true) {
+            try {
+                listenSock = (SSLServerSocket)sFactory.createServerSocket(port, 50, addr);
+                listenSock.setSoTimeout(timeout);
+                break;
+            } catch(IOException exc){
+                if (listenSock != null) {
+                    try {
+                        listenSock.close();
+                    } catch (IOException e1) {
+                        log.debug(e1,e1);
+                    }
+                }
+                log.warn("Failed to listen at " + cfg.getListenIp() +
+                         ":" + port + ": " + exc.getMessage() + ".  Will retry until up.");
+                log.debug(exc,exc);
+                try {
+                    Thread.sleep(30000);
+                } catch (InterruptedException e) {
+                    log.debug(e,e);
+                }
+            }
         }
     }
 
     public void cleanup(){
         if(this.listenSock != null){
+            log.info("closing listener socket " + listenSock.getInetAddress() + ":" + listenSock.getLocalPort());
             try {this.listenSock.close();} catch(IOException exc){}
             this.listenSock = null;
         }

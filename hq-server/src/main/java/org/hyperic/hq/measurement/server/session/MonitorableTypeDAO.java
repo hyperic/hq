@@ -35,8 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class MonitorableTypeDAO
-    extends HibernateDAO<MonitorableType> {
+public class MonitorableTypeDAO extends HibernateDAO<MonitorableType> {
 
     @Autowired
     public MonitorableTypeDAO(SessionFactory f) {
@@ -50,13 +49,13 @@ public class MonitorableTypeDAO
         return mt;
     }
 
-    MonitorableType findByName(String name) {
+    public MonitorableType findByName(String name) {
         String sql = "from MonitorableType where name=?";
         return (MonitorableType) getSession().createQuery(sql).setString(0, name).uniqueResult();
     }
 
     @SuppressWarnings("unchecked")
-    Map<String, MonitorableType> findByPluginName(String pluginName) {
+    public Map<String, MonitorableType> findByPluginName(String pluginName) {
         String sql = "from MonitorableType where plugin=?";
         List<MonitorableType> list = getSession().createQuery(sql).setString(0, pluginName).list();
         Map<String, MonitorableType> rtn = new HashMap<String, MonitorableType>(list.size());

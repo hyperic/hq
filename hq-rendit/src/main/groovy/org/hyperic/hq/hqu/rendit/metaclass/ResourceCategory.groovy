@@ -1,15 +1,15 @@
 /**
- * NOTE: This copyright does *not* cover user programs that use HQ
+ * NOTE: This copyright does *not* cover user programs that use Hyperic
  * program services by normal system calls through the application
  * program interfaces provided as part of the Hyperic Plug-in Development
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  *  "derived work".
  *
- *  Copyright (C) [2009-2010], VMware, Inc.
- *  This file is part of HQ.
+ *  Copyright (C) [2009-2011], VMware, Inc.
+ *  This file is part of Hyperic.
  *
- *  HQ is free software; you can redistribute it and/or modify
+ *  Hyperic is free software; you can redistribute it and/or modify
  *  it under the terms version 2 of the GNU General Public License as
  *  published by the Free Software Foundation. This program is distributed
  *  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
@@ -40,23 +40,26 @@ import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.server.session.ResourceGroup
 import org.hyperic.hq.authz.server.session.ResourceGroupSortField;
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo
+import org.hyperic.hq.authz.shared.PermissionManagerFactory
 import org.hyperic.hq.appdef.Agent
 import org.hyperic.hq.appdef.shared.AppdefEntityID
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue
 import org.hyperic.hq.appdef.shared.AppdefUtil;
-import org.hyperic.hq.appdef.server.session.Platform
+import org.hyperic.hq.appdef.shared.IpValue
 import org.hyperic.hq.appdef.shared.PlatformValue
+import org.hyperic.hq.appdef.server.session.Platform
 import org.hyperic.hq.appdef.server.session.Server
 import org.hyperic.hq.appdef.server.session.Service
 import org.hyperic.hq.appdef.shared.ServerValue
 import org.hyperic.hq.common.VetoException
+import org.hyperic.hq.events.MaintenanceEvent
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertManager;
 import org.hyperic.hq.events.shared.EventLogManager;
+import org.hyperic.hq.events.shared.MaintenanceEventManager
 import org.hyperic.hq.product.PluginNotFoundException
-
 
 import org.hyperic.hq.livedata.shared.LiveDataCommand
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -97,7 +100,11 @@ class ResourceCategory {
 	private static eventMan = Bootstrap.getBean(EventLogManager.class)
 	private static cMan     = Bootstrap.getBean(ControlManager.class)
 	private static csMan	= Bootstrap.getBean(ControlScheduleManager.class);
-	
+	private static resMan   = Bootstrap.getBean(ResourceManager.class)
+
+    private static MaintenanceEventManager maintMan =
+        PermissionManagerFactory.getInstance().getMaintenanceEventManager();
+
 	/**
 	 * Creates a URL for the resource.  This should typically only be called
 	 * via HtmlUtil.linkTo (or from a controller).  
@@ -327,17 +334,17 @@ class ResourceCategory {
 	static boolean isService(Resource r) {
 		r.resourceType.id == AuthzConstants.authzService
 	}
-	
+
 	static Platform toPlatform(Resource r) {
 		assert isPlatform(r)
 		platMan.findPlatformById(r.instanceId)
 	}
-	
+
 	static Server toServer(Resource r) {
 		assert isServer(r)
 		svrMan.findServerById(r.instanceId)
 	}
-	
+
 	static Service toService(Resource r) {
 		assert isService(r)
 		svcMan.findServiceById(r.instanceId)
@@ -370,7 +377,7 @@ class ResourceCategory {
 		}
 		return description == null ? "" : description
 	}
-	
+
 	/**
 	 * @see documentation for ResourceConfig.  We don't return it directly
 	 * here, as we'd like to abstract the thing doing the persisting
@@ -401,29 +408,7 @@ class ResourceCategory {
 	 * @return a list of {@link Resource}s
 	 */
 	static Collection getViewableChildren(Resource r, AuthzSubject user) {
-		def res = []
-		if (isPlatform(r)) {
-			def plat    = toPlatform(r)
-			plat.servers.each {
-				try {
-					def resource = it.checkPerms(operation: 'view', user:user)
-					res.add(resource)
-				} catch (PermissionException e) {
-					// Ignore
-				}
-			}
-		} else if (isServer(r)) {
-			def svr = toServer(r)
-			svr.services.each {
-				try {
-					def resource = it.checkPerms(operation: 'view', user:user)
-					res.add(resource)
-				} catch (PermissionException e) {
-					// Ignore
-				}
-			}
-		}
-		res
+		resMan.findChildren(user, r)
 	}
 	
 	/**
@@ -470,7 +455,7 @@ class ResourceCategory {
 		def aeval = new AppdefEntityValue(aeid, authzMan.overlordPojo)
 		def plats = aeval.getAssociatedPlatforms(PageControl.PAGE_ALL);
 		def plat = plats[0]
-		return Bootstrap.getBean(ResourceManager.class).findResource(plat.entityId)
+		return resMan.findResource(plat.entityId)
 	}
 	
 	/**
@@ -552,12 +537,23 @@ class ResourceCategory {
 		platVal.fqdn     = cfg.fqdn
 		platVal.cpuCount = 1  // XXX:  How can we better gauge?
 		platVal.location = cfg.location
+
+		for (ip in ips) {
+			def ipVal = new IpValue()
+			ipVal.setAddress(ip.address)
+			ipVal.setNetmask(ip.netmask)
+			ipVal.setMACAddress(ip.mac)
+			platVal.addIpValue(ipVal)
+		}
 		
+		if (platVal.getIpValues().length == 0 && cfg.ip != null) {
+			def ipVal = new IpValue()
+			ipVal.setAddress(cfg.ip)			
+			platVal.addIpValue(ipVal)
+		}
+				
 		def plat  = platMan.createPlatform(subject, proto.instanceId,
 				platVal, agent.id)
-		for (ip in ips) {
-			platMan.addIp(plat, ip.address, ip.netmask, ip.mac)
-		}
 		
 		def res = plat.resource
 		setConfig(res, cfg, subject)
@@ -732,7 +728,25 @@ class ResourceCategory {
 			" dest=" + destination.getResourceType().getName())
 		}
 	}
-	
+
+    static MaintenanceEvent scheduleMaintenance(Resource r, AuthzSubject subject,
+                                                long start, long end) {
+        MaintenanceEvent e = new MaintenanceEvent(r.entityId);
+        e.setStartTime(start)
+        e.setEndTime(end)
+        maintMan.schedule(subject, e)
+    }
+
+    static void unscheduleMaintenance(Resource r, AuthzSubject subject) {
+        MaintenanceEvent e = new MaintenanceEvent(r.entityId);
+        maintMan.unschedule(subject, e)
+    }
+
+    static MaintenanceEvent getMaintenanceEvent(Resource r,
+                                                AuthzSubject subject) {
+        maintMan.getMaintenanceEvent(subject, r.entityId)
+    }
+    	
 	private static getOverlord() {
 		return authzMan.overlordPojo
 	}

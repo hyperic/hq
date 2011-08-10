@@ -4,6 +4,7 @@
   <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
 ]>
 <plugin>
+    <property name="PLUGIN_VERSION" value="@project.version@"/>
     <classpath>
         <include name="pdk/lib/mx4j" />
     </classpath>
@@ -83,14 +84,15 @@
                 <metric name="Uptime" alias="uptime" indicator="true" collectionType="static" units="sec"/>
                 <metric name="Number of Clients" alias="nclients"/>
                 <metric name="Gets" alias="stat.gets" collectionType="trendsup"/>
-                <metric name="GetTime" alias="stat.gettime" units="sec"/>
+                <metric name="GetTime" alias="stat.gettime" units="ns"/>
                 <metric name="Puts" alias="stat.puts" collectionType="trendsup"/>
-                <metric name="PutTime" alias="stat.puttime" units="sec"/>
+                <metric name="PutTime" alias="stat.puttime" units="ns"/>
             </metrics>
             <service name="Region">
                 <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
                 <plugin type="collector" class="com.vmware.springsource.hyperic.plugin.gemfire.collectors.RegionCollector" />
                 <config type="measurement">
+                    <option name="memberID" description="Cache Server Id"/>
                     <option name="regionID" description="Region Name"/>
                 </config>
                 <properties>
@@ -118,6 +120,7 @@
                 <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin" />
                 <plugin type="collector" class="com.vmware.springsource.hyperic.plugin.gemfire.collectors.GatewayCollector" />
                 <config type="measurement">
+                    <option name="memberID" description="Cache Server Id"/>
                     <option name="gatewayID" description="Gateway Id"/>
                 </config>
                 <filter name="template" value="GemFire:${JXMCFG},member.name=%member.name%,gatewayID=%gatewayID%:${alias}"/>

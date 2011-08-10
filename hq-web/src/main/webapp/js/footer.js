@@ -24,22 +24,26 @@
 var conH;
 var winH;
 var footerH = 28;
-var browserH = 88;
+var browserH = 28;
 
 function setFoot() {
-  var WindowSize = {
-    width: window.innerWidth || (window.document.documentElement.clientWidth || window.document.body.clientWidth),
-    height: window.innerHeight || (window.document.documentElement.clientHeight || window.document.body.clientHeight)
-  };
-  
-  winH = WindowSize.height;
-  conH = dojo11.coords("header", false).h + dojo11.coords("migContainer", false).h;
-  
-  var myHeight = winH - conH - footerH + browserH;
-  
-  if (myHeight > 60) {
-  	var footerContent = dojo11.byId("footerContent");
-  	
-  	footerContent.style.marginTop = myHeight + "px";
-  }
+	var footerContent = hqDojo.byId("footerContent");
+
+	if (footerContent) {
+		footerContent.style.marginTop = "0px";
+
+		var WindowSize = {
+			width: window.innerWidth || (window.document.documentElement.clientWidth || window.document.body.clientWidth),
+			height: window.innerHeight || (window.document.documentElement.clientHeight || window.document.body.clientHeight)
+		};
+	
+		winH = WindowSize.height;
+		conH = hqDojo.position("header").h + hqDojo.position("migContainer").h;
+	
+		var myHeight = winH - conH - footerH + browserH;
+	
+		if (myHeight > 0) {
+			footerContent.style.marginTop = myHeight + "px";
+		}
+	}
 }

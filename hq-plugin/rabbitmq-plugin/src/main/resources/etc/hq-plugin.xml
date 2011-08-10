@@ -28,8 +28,9 @@
  -->
 
 <plugin class="org.hyperic.hq.plugin.rabbitmq.product.RabbitProductPlugin">
+    <property name="PLUGIN_VERSION" value="@project.version@"/>
 
-    <filter name="server-connection" value="node=%node%,authentication=%authentication%"/>
+    <filter name="server-connection" value="node=%node%,addr=%addr%,port=%port%,username=%username%,password=%password%,https=%https%"/>
 
     <server name="RabbitMQ" description="RabbitMQ">
 
@@ -39,10 +40,11 @@
                     <h2>Configure RabbitMQ for Monitoring</h2>
 
                       <h3>Prerequisites and Support</h3>
-                        The RabbitMQ plugin runs under HQ 4.5 and later and supports RabbitMQ versions 1.8.1 and higher.
+                        The RabbitMQ plugin runs under HQ 4.6 and later and supports RabbitMQ versions 2.x and higher.
 
-                        This version of the plugin requires that the HQ Agent that manages RabbitMQ has permission to read the Erlang cookie.
-
+                        This version of the plugin requires that the RabbitMQ has installaed and runnig the <b>rabbitmq-management</b> plugin.
+                        <a href="http://www.rabbitmq.com/management.html" target="_new">See the page on the management plugin</a>
+                        <p>'<a href="http://technet.microsoft.com/en-us/sysinternals/bb896655" target="_new">Handle V3 (sysinternals)</a>' is required by 'rabbitmq-management-agent' plugin on Windows Platforms.</p>
                         <h3>Configuration Requirements</h3>
                         The HQ Agent on the platform where the RabbitMQ server should auto-discover the "RabbitMQ" server instance — assuming
                         at least one RabbitMQ Node is running. — and present it as a new server on the platform in the Auto-Discovery portlet
@@ -50,20 +52,37 @@
                         <h3>Config properties</h3>
                         <ol>
                             <li><b>node</b>: RabbitMQ node name (rabbit_X@servername)</li>
-                            <li><b>authentication</b>: Content of .erlang.cookie file</li>
-                            <li><b>process.query</b>: Sigar PTQL Query for RaabitMQ process (default='State.Name.re=[beam|erl],Args.*.eq=-sname,Args.*.eq=%node%')</li>
+                            <li><b>addr</b>: Management HTTP IP/HostName (usualy: localhost)</li>
+                            <li><b>port</b>: Management HTTP Listen Port</li>
+                            <li><b>https</b>: Use https/ssl</li>
+                            <li><b>username</b>: Administrator User name</li>
+                            <li><b>password</b>: Administrator User password</li>
+                            <li><b>nodurable</b>: If checked, all nondurable objetcs (Channels, Queue, etc.) will be auto-discovered</li>
+                            <li><b>autosync</b>: If checked, all unavailable objetcs (Channels, Queue, etc.) will be auto-delete (but not the idle ones, shows as paused)</li>
                         </ol>
+                        <h3>SSL Configuration Requirements (Hyperic 4.6 and later)</h3>
+                        There are new SSL configuration requirements for secure communication between a Hyperic 4.6 agent and a RabbitMQ-management.
+                        <ul>
+                            <li>If the <b>accept.unverified.certificates</b> property is <b>false</b> (default value) in the <b>agent.properties</b> file, 
+                            the RabbitMQ-management's unverified SSL certificate needs to be manually imported to a keystore that the Hyperic 4.6 agent can access.
+                            Otherwise, secure communication between the Hyperic 4.6 agent and RabbitMQ-management will fail.
+                            </li>
+                            <li>If the <b>accept.unverified.certificates</b> property is <b>true</b> in the <b>agent.properties</b> file, the RabbitMQ plugin will automatically
+                            import the unverified SSL certificate of the RabbitMQ-management to the keystore accessible to the Hyperic 4.6 agent.
+                            <u>This is not recommended</u> because it is less secure and will expose the Hyperic agent to man-in-the-middle attacks.
+                            </li>
+                        </ul> 
                   </p>
                   <p>
                     <h3>Help Docs</h3>
-                    <a href="http://support.hyperic.com/display/EVO/Monitoring+RabbitMQ">Monitoring and Managing RabbitMQ</a>
+                    <a href="http://support.hyperic.com/display/EVO/Monitoring+RabbitMQ" target="_new">Monitoring and Managing RabbitMQ</a>
                   </p>
             ]]>
         </help>
 
         <plugin type="autoinventory" class="org.hyperic.hq.plugin.rabbitmq.detect.RabbitServerDetector"/>
 
-        <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+        <plugin type="measurement" class="org.hyperic.hq.plugin.rabbitmq.collect.RabbitServerMeasurement"/>
 
         <plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.RabbitServerCollector"/>
 
@@ -71,24 +90,132 @@
 
         <config>
             <option name="node" description="node"/>
-            <option name="authentication" description=".erlang.cookie value"/>
-            <option name="process.query" default="State.Name.re=[beam|erl],Args.*.eq=-sname,Args.*.eq=%node%"
-                    description="PTQL Query"/>
+            <option name="addr" description="Http Address" default="localhost"/>
+            <option name="port" description="Http Port" default="55672"/>
+            <option name="https" description="Use SSL" default="false" type="boolean"/>
+            <option name="username" description="Username" default="guest"/>
+            <option name="password" description="Password" default="guest" type="secret"/>
+            <option name="nodurable" description="Discover Nondurable Objects" type="boolean" default="false"/>
+            <option name="autosync" description="Auto-Delete Unavailable Objects" type="boolean" default="false"/>
         </config>
 
         <properties>
-            <property description="Node Name" name="node.name"/>
-            <property description="Node Path" name="node.path"/>
-            <property description="Node PID" name="node.pid"/>
-            <property description="Erlang Process" name="erlang.process"/>
-            <property description="Rabbit -boot" name="rabbit.boot"/>
         </properties>
 
         <metric name="Availability"
                 template="rabbitmq:${server-connection}:Availability"
                 indicator="true"/>
 
-        &process-metrics;
+        <metric name="Messages"
+                template="rabbitmq:${server-connection}:messages"
+                indicator="true"/>
+
+        <metric name="Messages Ready"
+                template="rabbitmq:${server-connection}:messages_ready"
+                indicator="true"/>
+
+        <metric name="Messages Unacknowledged"
+                template="rabbitmq:${server-connection}:messages_unacknowledged"
+                indicator="true"/>
+
+        <metric name="Messages Publish /s"
+                template="rabbitmq:${server-connection}:publishDetails"
+                indicator="true"/>
+        <metric name="Messages Confirm /s"
+                template="rabbitmq:${server-connection}:confirmDetails"
+                indicator="true"/>
+        <metric name="Messages Deliver /s"
+                template="rabbitmq:${server-connection}:deliverDetails"
+                indicator="true"/>
+        <metric name="Messages Acknowledge /s"
+                template="rabbitmq:${server-connection}:ackDetails"
+                indicator="true"/>
+        <metric name="Messages Get /s"
+                template="rabbitmq:${server-connection}:getDetails"
+                indicator="true"/>
+        <metric name="Messages Get (noack) /s"
+                template="rabbitmq:${server-connection}:getNoAckDetails"
+                indicator="true"/>
+        <metric name="Messages Deliver (noack) /s"
+                template="rabbitmq:${server-connection}:deliverNoAckDetails"
+                indicator="true"/>
+        <metric name="Messages Deliver+Get /s"
+                template="rabbitmq:${server-connection}:deliverGetDetails"
+                indicator="true"/>
+
+        <metric name="Memory watermark"
+                template="rabbitmq:${server-connection}:mem_ets"
+                indicator="true"/>
+
+        <metric name="Erlang Processes used"
+                template="rabbitmq:${server-connection}:proc_used"/>
+
+        <metric name="Erlang Processes % used"
+                template="rabbitmq:${server-connection}:proc_used_percentage"
+                indicator="true" units="percentage"/>
+
+        <metric name="Process Open File Descriptors %"
+                template="rabbitmq:${server-connection}:fd_percentage"
+                indicator="true" units="percentage"/>
+
+        <metric name="Process Virtual Memory Size"
+                template="rabbitmq-sigar:Type=ProcMem,${server-connection}:Size"
+                units="B"/>
+
+        <metric name="Process Resident Memory Size"
+                template="rabbitmq-sigar:Type=ProcMem,${server-connection}:Resident"
+                indicator="true"
+                units="B"/>
+
+        <metric name="Process Page Faults"
+                template="rabbitmq-sigar:Type=ProcMem,${server-connection}:PageFaults"
+                collectionType="trendsup"/>
+
+        <metric name="Process Cpu System Time"
+                template="rabbitmq-sigar:Type=ProcCpu,${server-connection}:Sys"
+                units="ms"
+                collectionType="trendsup"/>
+
+        <metric name="Process Cpu User Time"
+                template="rabbitmq-sigar:Type=ProcCpu,${server-connection}:User"
+                units="ms"
+                collectionType="trendsup"/>
+
+        <metric name="Process Cpu Total Time"
+                template="rabbitmq-sigar:Type=ProcCpu,${server-connection}:Total"
+                units="ms"
+                collectionType="trendsup"/>
+
+        <metric name="Process Cpu Usage"
+                template="rabbitmq-sigar:Type=ProcCpu,${server-connection}:Percent"
+                indicator="true"
+                units="percentage"/>
+
+        <metric name="Process Start Time"
+                template="rabbitmq-sigar:Type=ProcTime,${server-connection}:StartTime"
+                category="AVAILABILITY"
+                units="epoch-millis"
+                collectionType="static"/>
+
+        <metric name="Process Open File Descriptors"
+                template="rabbitmq-sigar:Type=ProcFd,${server-connection}:Total"/>
+
+        <metric name="Process Threads"
+                template="rabbitmq-sigar:Type=ProcState,${server-connection}:Threads"/>
+
+        <metric name="Channels"
+                    template="rabbitmq:${server-connection}:channelCount"
+                    category="UTILIZATION"
+                    units="none"
+                    indicator="true"
+                    collectionType="dynamic"/>
+        <metric name="Connections"
+                    template="rabbitmq:${server-connection}:connectionCount"
+                    category="UTILIZATION"
+                    units="none"
+                    indicator="true"
+                    collectionType="dynamic"/>
+
 
         <!-- Next release:
        <plugin type="control" class="org.hyperic.hq.plugin.rabbitmq.manage.RabbitBrokerManagerPlugin"/>
@@ -98,13 +225,51 @@
 
         <service name="Queue">
             <property name="template"
-                      value="rabbitmq:vhost=%vhost%,${server-connection}:%queue%.${alias}"/>
+                      value="rabbitmq:queue=%queue%,vhost=%vhost%,${server-connection}:${alias}"/>
 
             <config>
                 <option name="vhost" description="rabbit node-vhost name"/>
                 <option name="queue" description="queue name"/>
             </config>
 
+
+            <metric name="Availability"
+                    category="AVAILABILITY"
+                    units="percentage"
+                    indicator="true"
+                    defaultOn="true"
+                    collectionType="dynamic"/>
+            <metric name="idle Time"
+                    alias="idleTime"
+                    category="UTILIZATION"
+                    units="ms"
+                    indicator="true"
+                    defaultOn="true"
+                    collectionType="static"/>
+            <metric name="Messages Publish /s"
+                alias="publishDetails"
+                indicator="true"/>
+            <metric name="Messages Confirm /s"
+                alias="confirmDetails"
+                indicator="true"/>
+            <metric name="Messages Deliver /s"
+                alias="deliverDetails"
+                indicator="true"/>
+            <metric name="Messages Acknowledge /s"
+                alias="ackDetails"
+                indicator="true"/>
+            <metric name="Messages Get /s"
+                alias="getDetails"
+                indicator="true"/>
+            <metric name="Messages Get (noack) /s"
+                alias="getNoAckDetails"
+                indicator="true"/>
+            <metric name="Messages Deliver (noack) /s"
+                alias="deliverNoAckDetails"
+                indicator="true"/>
+            <metric name="Messages Deliver+Get /s"
+                alias="deliverGetDetails"
+                indicator="true"/>
             <metric name="Messages"
                     alias="messages"
                     category="THROUGHPUT"
@@ -154,12 +319,6 @@
                     indicator="true"
                     defaultOn="true"
                     collectionType="dynamic"/>
-            <metric name="Availability"
-                    category="AVAILABILITY"
-                    units="percentage"
-                    indicator="true"
-                    defaultOn="true"
-                    collectionType="dynamic"/>
             <metric name="Memory"
                     alias="memory"
                     category="UTILIZATION"
@@ -169,23 +328,58 @@
                     collectionType="dynamic"/>
 
             <plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.QueueCollector"/>
-            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+            <plugin type="measurement" class="org.hyperic.hq.plugin.rabbitmq.collect.RabbitServerMeasurement"/>
             <plugin type="autoinventory"/>
             <properties>
-                <property description="Name" name="name"/>
-                <property description="Process ID" name="pid"/>
                 <property description="Durable" name="durable"/>
             </properties>
         </service>
 
         <service name="Channel">
-            <property name="template" value="rabbitmq:vhost=%vhost%,${server-connection}:%channel%.${alias}"/>
+            <property name="template" value="rabbitmq:channel=%channel%,${server-connection}:${alias}"/>
 
             <config>
                 <option name="vhost" description="rabbit node-vhost name"/>
                 <option name="channel" description="channel name"/>
             </config>
 
+            <metric name="Availability"
+                    category="AVAILABILITY"
+                    interval="300000"
+                    units="percentage"
+                    indicator="true"
+                    collectionType="dynamic"/>
+            <metric name="Messages Publish /s"
+                alias="publishDetails"
+                indicator="true"/>
+            <metric name="Messages Confirm /s"
+                alias="confirmDetails"
+                indicator="true"/>
+            <metric name="Messages Deliver /s"
+                alias="deliverDetails"
+                indicator="true"/>
+            <metric name="Messages Acknowledge /s"
+                alias="ackDetails"
+                indicator="true"/>
+            <metric name="Messages Get /s"
+                alias="getDetails"
+                indicator="true"/>
+            <metric name="Messages Get (noack) /s"
+                alias="getNoAckDetails"
+                indicator="true"/>
+            <metric name="Messages Deliver (noack) /s"
+                alias="deliverNoAckDetails"
+                indicator="true"/>
+            <metric name="Messages Deliver+Get /s"
+                alias="deliverGetDetails"
+                indicator="true"/>
+            <metric name="idle Time"
+                    alias="idleTime"
+                    category="UTILIZATION"
+                    units="ms"
+                    indicator="true"
+                    defaultOn="true"
+                    collectionType="static"/>
             <metric name="Consumers"
                     alias="consumerCount"
                     category="UTILIZATION"
@@ -214,29 +408,21 @@
                     indicator="true"
                     defaultOn="true"
                     collectionType="dynamic"/>
-            <metric name="Availability"
-                    category="AVAILABILITY"
-                    interval="300000"
-                    units="percentage"
-                    indicator="true"
-                    collectionType="dynamic"/>
 
             <plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.ChannelCollector"/>
-            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+            <plugin type="measurement" class="org.hyperic.hq.plugin.rabbitmq.collect.RabbitServerMeasurement"/>
             <plugin type="autoinventory"/>
 
             <properties>
-                <property description="Process ID" name="pid"/>
-                <property description="Connection" name="connection"/>
-                <property description="Number" name="number"/>
                 <property description="User" name="user"/>
+                <property description="Confirm" name="confirm"/>
                 <property description="Transactional" name="transactional"/>
             </properties>
         </service>
 
         <service name="Connection">
             <property name="template"
-                      value="rabbitmq:${server-connection}:%connection%.${alias}"/>
+                      value="rabbitmq:connection=%connection%,${server-connection}:${alias}"/>
 
             <config>
                 <option name="connection" description="connection name"/>
@@ -291,23 +477,21 @@
                     collectionType="dynamic"/>
 
             <plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.ConnectionCollector"/>
-            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+            <plugin type="measurement" class="org.hyperic.hq.plugin.rabbitmq.collect.RabbitServerMeasurement"/>
             <plugin type="autoinventory"/>
 
             <properties>
-                <property description="PID" name="pid"/>
-                <property description="Self Node" name="selfNode"/>
-                <property description="Peer Node" name="peerNode"/>
-                <property description="Frame Max" name="frameMax"/>
-                <property description="State" name="state"/>
-                <property description="VHost" name="vHost"/>
-                <property description="Username" name="username"/>
+                <property description="Authentication" name="authMechanism"/>
+                <property description="Protocol" name="protocol"/>
+                <property description="User" name="user"/>
+                <property description="Timeout" name="timeout"/>
+                <property description="SSL" name="ssl"/>
             </properties>
         </service>
 
         <service name="Exchange">
             <property name="template"
-                      value="rabbitmq:vhost=%vhost%,${server-connection}:%exchange%.${alias}"/>
+                      value="rabbitmq:exchange=%exchange%,vhost=%vhost%,${server-connection}:${alias}"/>
 
             <config>
                 <option name="vhost" description="rabbit node-vhost name"/>
@@ -320,14 +504,26 @@
                     units="percentage"
                     indicator="true"
                     collectionType="dynamic"/>
+            <metric name="IN Messages Publish /s"
+                    alias="in_publish_details"
+                    category="THROUGHPUT"
+                    units="none"
+                    defaultOn="true"
+                    indicator="true"/>
+            <metric name="OUT Messages Publish /s"
+                    alias="out_publish_details"
+                    category="THROUGHPUT"
+                    units="none"
+                    defaultOn="true"
+                    indicator="true"/>
 
             <plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.ExchangeCollector"/>
-            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+            <plugin type="measurement" class="org.hyperic.hq.plugin.rabbitmq.collect.RabbitServerMeasurement"/>
             <plugin type="autoinventory"/>
 
             <properties>
                 <property description="Durable" name="durable"/>
-                <property description="Exchange Type" name="exchangeType"/>
+                <property description="Exchange Type" name="type"/>
                 <property description="Auto-delete" name="autoDelete"/>
             </properties>
         </service>
@@ -360,28 +556,9 @@
                     units="none"
                     indicator="true"
                     collectionType="dynamic"/>
-            <metric name="Consumers"
-                    alias="consumerCount"
-                    category="UTILIZATION"
-                    units="none"
-                    indicator="true"
-                    collectionType="dynamic"/>
-            <metric name="Channels"
-                    alias="channelCount"
-                    category="UTILIZATION"
-                    units="none"
-                    indicator="true"
-                    collectionType="dynamic"/>
-            <metric name="Connections"
-                    alias="connectionCount"
-                    category="UTILIZATION"
-                    units="none"
-                    indicator="true"
-                    collectionType="dynamic"/>
-
 
             <plugin type="collector" class="org.hyperic.hq.plugin.rabbitmq.collect.VirtualHostCollector"/>
-            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+            <plugin type="measurement" class="org.hyperic.hq.plugin.rabbitmq.collect.RabbitServerMeasurement"/>
             <plugin type="autoinventory"/>
 
             <properties>

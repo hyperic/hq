@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.PostConstruct;
 
@@ -44,6 +45,7 @@ import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.shared.TransactionRetry;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.hibernate.SessionManager;
 import org.hyperic.hq.hibernate.SessionManager.SessionRunner;
@@ -78,17 +80,20 @@ public class AgentScheduleSynchronizer {
     private ConcurrentStatsCollector concurrentStatsCollector;
     private MeasurementProcessor measurementProcessor;
     private AgentSynchronizer agentSynchronizer;
+    private TransactionRetry transactionRetry;
     
     @Autowired
     public AgentScheduleSynchronizer(ZeventEnqueuer zEventManager, AgentManager agentManager,
                                      MeasurementProcessor measurementProcessor,
                                      AgentSynchronizer agentSynchronizer,
-                                     ConcurrentStatsCollector concurrentStatsCollector) {
+                                     ConcurrentStatsCollector concurrentStatsCollector,
+                                     TransactionRetry transactionRetry) {
         this.zEventManager = zEventManager;
         this.agentManager = agentManager;
         this.measurementProcessor = measurementProcessor;
         this.concurrentStatsCollector = concurrentStatsCollector;
         this.agentSynchronizer = agentSynchronizer;
+        this.transactionRetry = transactionRetry;
     }
 
     @PostConstruct
@@ -220,6 +225,8 @@ public class AgentScheduleSynchronizer {
             return;
         }
         final AgentDataTransferJob job = new AgentDataTransferJob() {
+            private Collection<AppdefEntityID> aeids;
+            private AtomicBoolean success = new AtomicBoolean(false);
             public String getJobDescription() {
                 if (schedule) {
                     return "Agent Schedule Job";
@@ -231,7 +238,6 @@ public class AgentScheduleSynchronizer {
                 return agentId;
             }
             public void execute() {
-                Collection<AppdefEntityID> aeids = null;
                 final Map<Integer, Collection<AppdefEntityID>> aeidMap =
                     (schedule) ? scheduleAeids : unscheduleAeids;
                 synchronized (aeidMap) {
@@ -240,6 +246,16 @@ public class AgentScheduleSynchronizer {
                 if (aeids != null && !aeids.isEmpty()) {
                     runSchedule(schedule, agentId, aeids);
                 }
+                if (Thread.currentThread().isInterrupted()) {
+                    return;
+                }
+                success.set(true);
+            }
+            public void onFailure() {
+                log.warn("could not schedule aeids=" + aeids + " to agentId=" + agentId);
+            }
+            public boolean wasSuccessful() {
+                return success.get();
             }
         };
         if (schedule) {
@@ -251,9 +267,19 @@ public class AgentScheduleSynchronizer {
         }
         agentSynchronizer.addAgentJob(job);
     }
-
+    
     private void runSchedule(final boolean schedule, final Integer agentId,
                              final Collection<AppdefEntityID> aeids) {
+        final Runnable runner = new Runnable() {
+            public void run() {
+                _runSchedule(schedule, agentId, aeids);
+            }
+        };
+        transactionRetry.runTransaction(runner, 3, 1000);
+    }
+
+    private void _runSchedule(final boolean schedule, final Integer agentId,
+                              final Collection<AppdefEntityID> aeids) {
         try {
             SessionManager.runInSession(new SessionRunner() {
                 public void run() throws Exception {

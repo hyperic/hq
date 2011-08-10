@@ -118,8 +118,9 @@ public class PluginUpdater {
 	}
 
 	/**
-	 * Updates the specified {@link ProductPlugin} with the new or changed service types.  Will completely wipe out old data related to existing
-	 * ServiceTypes in order to apply possible updates.
+	 * Updates the specified {@link ProductPlugin} with the new or changed service types.
+	 * Will completely wipe out old data related to existing ServiceTypes in order to apply possible
+	 * updates.
 	 * 
 	 * @param productPlugin
 	 *            The {@link ProductPlugin} to update

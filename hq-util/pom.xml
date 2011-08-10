@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.hyperic.hq</groupId>
 		<artifactId>hq-parent</artifactId>
-		<version>4.6.0.BUILD-SNAPSHOT</version>
+		<version>4.7.0.BUILD-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>hq-util</artifactId>
@@ -23,8 +23,8 @@
 			<artifactId>commons-logging</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>commons-httpclient</groupId>
-			<artifactId>commons-httpclient</artifactId>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>commons-validator</groupId>

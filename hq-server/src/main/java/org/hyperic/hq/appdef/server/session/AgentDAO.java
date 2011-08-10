@@ -30,6 +30,8 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -45,8 +47,8 @@ import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class AgentDAO
-    extends HibernateDAO<Agent> {
+public class AgentDAO extends HibernateDAO<Agent> {
+    private static final Log log = LogFactory.getLog(AgentDAO.class);
     @Autowired
     public AgentDAO(SessionFactory f) {
         super(Agent.class, f);
@@ -58,13 +60,20 @@ public class AgentDAO
         new HibernateTemplate(sessionFactory, true).execute(new HibernateCallback() {
             public Object doInHibernate(Session session) throws HibernateException, SQLException {
                 List<String> tokens = session.createQuery("select agentToken from Agent").list();
-                final String sql = "from Agent where agentToken=?";
+                String hql = "from Agent where agentToken=?";
+                log.info("preloading Agent.findByAgentToken cache");
                 for(String token : tokens) {
                     //HQ-2575 Preload findByAgentToken query cache to minimize DB connections when multiple agents
                     //send measurement reports to a restarted server 
-                    session.createQuery(sql).setString(0,token).setCacheRegion(
-                        "Agent.findByAgentToken").setCacheable(true).uniqueResult();
+                    session.createQuery(hql).setString(0,token)
+                           .setCacheRegion("Agent.findByAgentToken")
+                           .setCacheable(true)
+                           .uniqueResult();
                 }
+                // pre-fetch platforms bag to optimize ReportProcessor.handleMeasurementData
+                log.info("preloading Agent.platforms bag");
+                hql = "from Agent a left outer join fetch a.platforms";
+                session.createQuery(hql).list();
                 return null;
             }
         });
@@ -86,7 +95,11 @@ public class AgentDAO
     @SuppressWarnings("unchecked")
     public List<Agent> findByIP(String ip) {
         String hql = "from Agent where address=:address";
-        return (List<Agent>) getSession().createQuery(hql).setString("address", ip).list();
+        return (List<Agent>) getSession().createQuery(hql)
+                                         .setString("address", ip)
+                                         .setCacheable(true)
+                                         .setCacheRegion("Agent.findByIP")
+                                         .list();
     }
     
     public int countUsed() {

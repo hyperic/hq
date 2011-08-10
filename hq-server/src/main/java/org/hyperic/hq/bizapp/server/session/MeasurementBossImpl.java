@@ -2934,66 +2934,83 @@ public class MeasurementBossImpl implements MeasurementBoss {
             log.debug("END setResourceTypeDisplaySummary -- " + watch.getElapsed() + " msec");
     }
 
-    private double getCalculatedGroupAvailability(double[] data) {
-    	 boolean hasDownValues = false;
-         boolean hasUpValues = false;
-         boolean hasUnknownValues = false;
-         double result = MeasurementConstants.AVAIL_UNKNOWN;
-         
-         if (data.length > 0) {
+    protected double getCalculatedGroupAvailability(double[] data) {
+        boolean hasDownValues = false;
+        boolean hasUpValues = false;
+        boolean hasUnknownValues = false;
+        boolean hasWarnValues = false;
+        boolean hasPausedValues = false;
+        boolean hasOffValues = false;
+        double result = MeasurementConstants.AVAIL_UNKNOWN;
+
+        if (data.length > 0) {
             double sum = 0;
-            
+
             for (int ii = 0; ii < data.length; ii++) {
                 double val = data[ii];
-            
+
                 if (val == MeasurementConstants.AVAIL_DOWN) {
                     hasDownValues = true;
                 } else if (val == MeasurementConstants.AVAIL_UP) {
                     hasUpValues = true;
                 } else if (val == MeasurementConstants.AVAIL_UNKNOWN) {
                     hasUnknownValues = true;
+                } else if (val == MeasurementConstants.AVAIL_WARN) {
+                    hasWarnValues = true;
+                } else if (val == MeasurementConstants.AVAIL_PAUSED) {
+                    hasPausedValues = true;
+                } else if (val == MeasurementConstants.AVAIL_POWERED_OFF) {
+                    hasOffValues = true;
                 }
-                
+
                 sum += val;
             }
-            
-            result = getSummaryValue(hasDownValues, hasUpValues, hasUnknownValues);
-         }
-         
-         return result;
+
+            result = getSummaryValue(hasDownValues, hasUpValues, hasUnknownValues, hasWarnValues,
+                hasPausedValues, hasOffValues);
+        }
+
+        return result;
     }
-    
+
     /**
-     * Red only (regardless of any Gray) = Red 
-     * Red + Green (regardless of any Gray) = Yellow 
-     * Gray only (regardless of any Green) = Gray 
-     * Green only = Green
+     * Here is the table for these states evaluated in this order: All Red = Red,
+     * All Green = Green, All Yellow = Yellow, All Grey = Grey, All Orange = Orange,
+     * All Black = Black, Yellow + Anything else = Yellow, Red + Green = Yellow,
+     * Red + Anything else = Red, Green + Grey + Anything else = Grey, Green +
+     * Anything else = Green
      * 
-     * Other states are out of play when dealing with groups, so we don't consider them here.
-     * For example, if 2 resources out of a group of 10 are paused/powered off,
-     * the availability of the group is really based on the state of the 8 resources
-     * that are monitorable.  This technically should apply to resources that are 
-     * misconfigured/unknown, but we lack another way of signaling this to the user
-     * so for now the above rules still apply.
+     * Color mapping: Red = Down, Green = Up, Yellow = Warn, Grey = Unknown, Orange
+     * = Paused (VM)/Maintenance, Black = Powered Off (VM)/Suspended
      */
     private Double getSummaryValue(boolean hasDownValues, boolean hasUpValues,
-                                   boolean hasUnknownValues) {
-    	Double result = new Double(AVAIL_UNKNOWN);
-    	
-        if (hasUpValues && !(hasDownValues || hasUnknownValues)) { 
-        	// Everything is up, no downs, no unknowns == GREEN
-        	result = new Double(AVAIL_UP);
-        } else if (hasDownValues && hasUpValues) { 
-        	// There are ups and downs, doesn't matter about unknowns == YELLOW
-        	result = new Double(AVAIL_WARN);
-        } else if (hasDownValues) { 
-        	// There's a down, at this point nothing else matters == RED
-        	result = new Double(AVAIL_DOWN);
-        } else if (hasUnknownValues) { 
-        	// If we've gotten this far and it's an unknown == GRAY
-        	result = new Double(AVAIL_UNKNOWN);
-        } 
-        
+                                   boolean hasUnknownValues, boolean hasWarnValues,
+                                   boolean hasPausedValues, boolean hasOffValues) {
+        Double result = new Double(AVAIL_UNKNOWN);
+        if (hasOffValues &&
+            !(hasDownValues || hasUnknownValues || hasWarnValues || hasPausedValues || hasUpValues)) {
+            // only has off values
+            result = new Double(AVAIL_POWERED_OFF);
+        } else if (hasPausedValues &&
+                   !(hasDownValues || hasUnknownValues || hasWarnValues || hasOffValues || hasUpValues)) {
+            // only has paused values
+            result = new Double(AVAIL_PAUSED);
+        } else if (hasUpValues && !(hasDownValues || hasUnknownValues || hasWarnValues)) {
+            // Everything is up, no downs, no unknowns, no warns, we ignore the
+            // paused and off == GREEN
+            result = new Double(AVAIL_UP);
+        } else if (hasWarnValues || (hasDownValues && hasUpValues)) {
+            // There are all warns, or there are ups and downs, doesn't matter
+            // about unknowns, paused, and off == YELLOW
+            result = new Double(AVAIL_WARN);
+        } else if (hasDownValues) {
+            // There's a down, at this point nothing else matters == RED
+            result = new Double(AVAIL_DOWN);
+        } else if (hasUnknownValues) {
+            // If we've gotten this far and it's an unknown == GREY
+            result = new Double(AVAIL_UNKNOWN);
+        }
+
         return result;
     }
 

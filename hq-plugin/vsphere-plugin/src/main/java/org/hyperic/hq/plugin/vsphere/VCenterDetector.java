@@ -41,6 +41,7 @@ import org.hyperic.hq.agent.server.ConfigStorage;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.bizapp.agent.CommandsAPIInfo;
 import org.hyperic.hq.bizapp.agent.ProviderInfo;
+import org.hyperic.hq.bizapp.agent.client.HQApiFactory;
 import org.hyperic.hq.hqapi1.HQApi;
 import org.hyperic.hq.product.DaemonDetector;
 import org.hyperic.hq.product.PluginException;
@@ -58,34 +59,6 @@ public class VCenterDetector extends DaemonDetector {
     private static final String STORAGE_KEYLIST = "runtimeAD-keylist";
     
     private static final String AGENT_TOKEN = CommandsAPIInfo.PROP_AGENT_TOKEN;
-    private static final String PROVIDER_URL = CommandsAPIInfo.PROP_PROVIDER_URL;
-    
-    static final String HQ_USER = "agent.setup.camLogin";
-    static final String HQ_PASS = "agent.setup.camPword";
-   
-
-    //XXX future HQ/pdk should provide this.
-    private HQApi getApi(Properties props) throws PluginException {
-        
-        try {
-        	String providerURL = props.getProperty(PROVIDER_URL);
-        	URI uri = new URI(providerURL);
-            String user = props.getProperty(HQ_USER, "hqadmin");
-            String pass = props.getProperty(HQ_PASS, "hqadmin");
-
-            HQApi api = new HQApi(uri, user, pass);
-            
-            if (_log.isDebugEnabled()) {
-                _log.debug("Using HQApi at " + uri.getScheme() + "://" 
-                			+ uri.getHost() + ":" + uri.getPort());
-            }
-            
-            return api;
-
-        } catch (Exception e) {
-            throw new PluginException("Could not get HQApi connection: " + e.getMessage(), e);        	
-        }
-    }
     
     protected VCenterPlatformDetector getPlatformDetector() {
         return new VMAndHostVCenterPlatformDetector();
@@ -105,9 +78,7 @@ public class VCenterDetector extends DaemonDetector {
         
         try {
             ProviderInfo providerInfo = CommandsAPIInfo.getProvider(agent.getStorageProvider());
-        
             props.put(AGENT_TOKEN, providerInfo.getAgentToken());
-            props.put(PROVIDER_URL, providerInfo.getProviderAddress());
         } catch (Exception e) {
             throw new PluginException(e.getMessage(), e);
         }
@@ -116,7 +87,8 @@ public class VCenterDetector extends DaemonDetector {
 		
         try {
             vim = VSphereUtil.getInstance(props);
-            getPlatformDetector().discoverPlatforms(props,getApi(props), vim);
+            HQApi api = HQApiFactory.getHQApi(agent, props);
+            getPlatformDetector().discoverPlatforms(props, api, vim);
         } catch (IOException e) {
             throw new PluginException(e.getMessage(), e);
         } finally {

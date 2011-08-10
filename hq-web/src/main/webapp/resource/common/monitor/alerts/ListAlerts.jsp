@@ -289,13 +289,13 @@
 	<tiles:insert definition=".portlet.error"/>
 
 	<script type="text/javascript">
-		dojo11.require("dijit.dijit");
-		dojo11.require("dijit.Dialog");
-  		dojo11.require("dijit.ProgressBar");
+		hqDojo.require("dijit.dijit");	
+		hqDojo.require("dijit.Dialog");
+  		hqDojo.require("dijit.ProgressBar");
           	
 		var MyAlertCenter = null;
 
-		dojo11.addOnLoad(function(){
+		hqDojo.ready(function(){
 			MyAlertCenter = new hyperic.alert_center("Alerts");          		
 		});
 	</script>
@@ -309,7 +309,7 @@
 			<td><a href="javascript:nextDay()"><html:img page="/images/schedule_right.gif" border="0"/></a></td>
 			<td><html:link href="javascript:popupCal()"><html:img page="/images/schedule_iconCal.gif" width="19" height="17" alt="" border="0"/></html:link></td>
 			<td class="ButtonCaptionText" width="100%" style="text-align: right; font-style: italic;">
-    			<c:url var="path" value="/"/>
+    			<c:url var="path" value="/images/icon_ack.gif"/>
     			<fmt:message key="dash.settings.criticalAlerts.ack.instruction">
       				<fmt:param value="${path}"/>
     			</fmt:message>

@@ -28,6 +28,7 @@ package org.hyperic.hq.appdef.shared;
 
 public final class AppdefEntityConstants {
 
+    public static final int APPDEF_TYPE_PRIVATEGROUP = 0;
     public static final int APPDEF_TYPE_PLATFORM    = 1;
     public static final int APPDEF_TYPE_SERVER      = 2;
     public static final int APPDEF_TYPE_SERVICE     = 3;
@@ -38,6 +39,7 @@ public final class AppdefEntityConstants {
     public static final int APPDEF_TYPE_AIIP        = 8;
     public static final int APPDEF_TYPE_AUTOGROUP   = 9;
 
+    private static final String APPDEF_NAME_PRIVATEGROUP = "privateGroup";
     private static final String APPDEF_NAME_PLATFORM    = "platform";
     private static final String APPDEF_NAME_SERVER      = "server";
     private static final String APPDEF_NAME_SERVICE     = "service";
@@ -186,6 +188,8 @@ public final class AppdefEntityConstants {
             return APPDEF_TYPE_GROUP_COMPAT_PS_LABEL;
         case APPDEF_TYPE_GROUP_COMPAT_SVC:
             return APPDEF_TYPE_GROUP_COMPAT_SVC_LABEL;
+        case AppdefEntityConstants.APPDEF_TYPE_PRIVATEGROUP:
+            return AppdefEntityConstants.APPDEF_NAME_PRIVATEGROUP;
         }
         throw new IllegalArgumentException("Unknown appdef group type: " +
                                            grpType);

@@ -465,11 +465,11 @@
                                         <File Id="snmp4j_1.11.jar" Name="snmp4j-1.11.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="spring_core_3.0.5.release.ja" Name="spring-core-3.0.5.RELEASE.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="xercesimpl.jar" Name="xercesImpl.jar" Vital="no" Compressed="yes" DiskId="1" />
-                                        <File Id="tomcat_juli_6.0.20.jar" Name="tomcat-juli-6.0.20.jar" Vital="no" Compressed="yes" DiskId="1" />
-                                        <File Id="ojdbc14_10.2.0.1.0.jar" Name="ojdbc14-10.2.0.1.0.jar" Vital="no" Compressed="yes" DiskId="1" />
+                                        <File Id="juli_6.0.32.jar" Name="juli-6.0.32.jar" Vital="no" Compressed="yes" DiskId="1" />
+                                        <File Id="ojdbc5_11.2.0.2.0.jar" Name="ojdbc5-11.2.0.2.0.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="mail_1.4.jar" Name="mail-1.4.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="jms_1.1.jar" Name="jms-1.1.jar" Vital="no" Compressed="yes" DiskId="1" />
-                                        <File Id="wrapper_3.2.3.jar" Name="wrapper-3.2.3.jar" Vital="no" Compressed="yes" DiskId="1" />
+                                        <File Id="wrapper_3.5.6.jar" Name="wrapper-3.5.6.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="spring_jms_3.0.5.release.jar" Name="spring-jms-3.0.5.RELEASE.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="log4j_1.2.14.jar" Name="log4j-1.2.14.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="spring_security_config_3.0.5" Name="spring-security-config-3.0.5.RELEASE.jar" Vital="no" Compressed="yes" DiskId="1" />
@@ -511,7 +511,7 @@
                                         <File Id="activemq_protobuf_1.0.jar" Name="activemq-protobuf-1.0.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="ant_starteam.jar" Name="ant-starteam.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="commons_lang_2.1.jar" Name="commons-lang-2.1.jar" Vital="no" Compressed="yes" DiskId="1" />
-                                        <File Id="commons_httpclient_3.1.jar" Name="commons-httpclient-3.1.jar" Vital="no" Compressed="yes" DiskId="1" />
+                                        <File Id="httpclient_4.1.1.jar" Name="httpclient-4.1.1.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="commons_digester_1.6.jar" Name="commons-digester-1.6.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="activation_1.1.jar" Name="activation-1.1.jar" Vital="no" Compressed="yes" DiskId="1" />
                                         <File Id="commons_collections_3.2.1.ja" Name="commons-collections-3.2.1.jar" Vital="no" Compressed="yes" DiskId="1" />

@@ -76,9 +76,9 @@ public class AgentMonitor
      * @return true if the agent is up, false otherwise
      */
     public boolean ping(Agent agent) {
+        AgentCommandsClient client = agentCommandsClientFactory.getClient(agent);
+
         try {
-            AgentCommandsClient client = 
-                agentCommandsClientFactory.getClient(agent);
             client.ping(); 
         } catch (AgentRemoteException e) {
             log.error("Agent exception: " + e.getMessage());

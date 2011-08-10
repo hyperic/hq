@@ -30,23 +30,21 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Set;
+import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.regex.Pattern;
+
 import javax.management.MBeanServerConnection;
-import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import org.apache.commons.logging.Log;
-import org.hyperic.hq.product.Metric;
 
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginManager;
 import org.hyperic.hq.product.ServerResource;
-import org.hyperic.hq.product.ServiceResource;
 import org.hyperic.hq.product.jmx.MxQuery;
 import org.hyperic.hq.product.jmx.MxServerDetector;
-import org.hyperic.hq.product.jmx.MxServerQuery;
-import org.hyperic.hq.product.jmx.MxServiceQuery;
 import org.hyperic.hq.product.jmx.MxUtil;
 import org.hyperic.util.config.ConfigResponse;
 
@@ -106,13 +104,15 @@ public class EmbeddedActiveMQServerDetector
                     } else if (app.getName().endsWith(".war")) {
                         try {
                             JarFile war = new JarFile(app);
-                            Enumeration files = war.entries();
+                            Enumeration<JarEntry> files = war.entries();
                             while (files.hasMoreElements()) {
                                 final String fileName = files.nextElement().toString();
                                 if (pattern.matcher(fileName).find()) {
                                     res = new File(app + "!" + fileName);
+                                    break;
                                 }
                             }
+                            war.close();
                         } catch (IOException ex) {
                             log.debug("Error: '" + app + "': " + ex.getMessage(), ex);
                         }
@@ -127,6 +127,39 @@ public class EmbeddedActiveMQServerDetector
 
         log.debug("[findVersionFile] res=" + res);
         return res;
+    }
+
+    @Override
+    public List getServerResources(ConfigResponse platformConfig) throws PluginException {
+        log.debug("[getServerResources] platformConfig="+platformConfig);
+        List<ServerResource> servers = super.getServerResources(platformConfig);
+        List<ServerResource> serversOK = new ArrayList();
+
+        for (ServerResource server : servers) {
+            JMXConnector connector = null;
+            MBeanServerConnection mServer;
+            try {
+                connector = MxUtil.getMBeanConnector(server.getProductConfig().toProperties());
+                mServer = connector.getMBeanServerConnection();
+                Set<ObjectName> objs=mServer.queryNames(new ObjectName("org.apache.activemq:*"), null);
+                log.debug("[getServerResources] objs.size="+objs.size());
+                if(objs.size()>0){ // Only discover servers with jmx obects on activeMQ domain.
+                    serversOK.add(server);
+                }
+            } catch (Exception e) {
+                log.debug(e.getMessage(), e);
+            } finally {
+                try {
+                    if (connector != null) {
+                        connector.close();
+                    }
+                } catch (IOException e) {
+                    throw new PluginException(e.getMessage(), e);
+                }
+            }
+
+        }
+        return serversOK;
     }
 
     @Override

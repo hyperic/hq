@@ -52,7 +52,10 @@ import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServerDAO;
 import org.hyperic.hq.appdef.server.session.ServerType;
+import org.hyperic.hq.appdef.server.session.ServerTypeDAO;
 import org.hyperic.hq.appdef.server.session.ServiceDAO;
+import org.hyperic.hq.appdef.server.session.ServiceType;
+import org.hyperic.hq.appdef.server.session.ServiceTypeDAO;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
@@ -60,6 +63,7 @@ import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
+import org.hyperic.hq.appdef.shared.ResourceTypeCleanupZevent;
 import org.hyperic.hq.appdef.shared.ResourcesCleanupZevent;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
@@ -70,21 +74,26 @@ import org.hyperic.hq.authz.shared.ResourceEdgeCreateException;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.server.session.AppdefBossImpl;
 import org.hyperic.hq.common.NotFoundException;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.ResourceAuditFactory;
 import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplateDAO;
+import org.hyperic.hq.measurement.server.session.MonitorableType;
+import org.hyperic.hq.measurement.server.session.MonitorableTypeDAO;
 import org.hyperic.hq.product.PlatformDetector;
+import org.hyperic.hq.product.Plugin;
+import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.util.timer.StopWatch;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -98,7 +107,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional
 @Service
-public class ResourceManagerImpl implements ResourceManager, ApplicationContextAware {
+public class ResourceManagerImpl implements ResourceManager {
 
     private final Log log = LogFactory.getLog(ResourceManagerImpl.class);
     private Pager resourceTypePager = null;
@@ -116,7 +125,11 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     private ApplicationDAO applicationDAO;
     private PermissionManager permissionManager;
     private ResourceAuditFactory resourceAuditFactory;
-    private ApplicationContext applicationContext;
+    private MonitorableTypeDAO monitorableTypeDAO;
+    private ServerTypeDAO serverTypeDAO;
+    private ServiceTypeDAO serviceTypeDAO;
+    private MeasurementTemplateDAO measurementTemplateDAO;
+    private ResourceRemover resourceRemover;
 
     @Autowired
     public ResourceManagerImpl(ResourceEdgeDAO resourceEdgeDAO, PlatformDAO platformDAO,
@@ -126,8 +139,11 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
                                ResourceTypeDAO resourceTypeDAO,
                                ResourceRelationDAO resourceRelationDAO,
                                ZeventEnqueuer zeventManager, PlatformTypeDAO platformTypeDAO,
+                               ServerTypeDAO serverTypeDAO, ServiceTypeDAO serviceTypeDAO,
+                               MeasurementTemplateDAO measurementTemplateDAO,
                                ApplicationDAO applicationDAO, PermissionManager permissionManager,
-                               ResourceAuditFactory resourceAuditFactory) {
+                               ResourceAuditFactory resourceAuditFactory, ResourceRemover resourceRemover,
+                               MonitorableTypeDAO monitorableTypeDAO) {
         this.resourceEdgeDAO = resourceEdgeDAO;
         this.platformDAO = platformDAO;
         this.serverDAO = serverDAO;
@@ -143,6 +159,11 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         this.permissionManager = permissionManager;
         resourceTypePager = Pager.getDefaultPager();
         this.resourceAuditFactory = resourceAuditFactory;
+        this.monitorableTypeDAO = monitorableTypeDAO;
+        this.serverTypeDAO = serverTypeDAO;
+        this.serviceTypeDAO = serviceTypeDAO;
+        this.measurementTemplateDAO = measurementTemplateDAO;
+        this.resourceRemover = resourceRemover;
     }
 
     /**
@@ -171,11 +192,12 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         if (log.isDebugEnabled())
             log.debug("Removing authz resource: " + aeid);
 
+        Zevent zevent = new ResourceDeletedZevent(subject, aeid);
         AuthzSubject s = authzSubjectManager.findSubjectById(subject.getId());
+        
         removeResource(s, r);
 
         // Send resource delete event
-        ResourceDeletedZevent zevent = new ResourceDeletedZevent(subject, aeid);
         zeventManager.enqueueEventAfterCommit(zevent);
     }
 
@@ -318,9 +340,11 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         return resourceDAO.findRootResource();
     }
 
-    /**
-     * 
-     */
+    @Transactional(readOnly = true)
+    public Resource getResourceById(Integer id) {
+        return resourceDAO.get(id);
+    }
+
     @Transactional(readOnly = true)
     public Resource findResourceById(Integer id) {
         return resourceDAO.findById(id);
@@ -442,9 +466,12 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
      *        associated platforms, under the virtual resource hierarchy
      * @return AppdefEntityID[] - an array of the resources (including children)
      *         deleted
-     * 
+     * TODO suspending transaction was a performance enhancement from previous releases (i.e. 4.3)
+     * It makes integration testing difficult, but we need to live w/it for now  until we can
+     * re-visit the whole asynch deletion concept.  Makes a HUGE difference in performance.
      */
-    public AppdefEntityID[] removeResourcePerms(AuthzSubject subj, Resource r,
+    @Transactional(propagation=Propagation.NOT_SUPPORTED)
+    public AppdefEntityID[] removeResourceAndRelatedResources(AuthzSubject subj, Resource r,
                                                 boolean nullResourceType,
                                                 boolean removeAllVirtual) throws VetoException,
         PermissionException {
@@ -474,25 +501,25 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         final boolean debug = log.isDebugEnabled();
         final StopWatch watch = new StopWatch();
         if (debug)
-            watch.markTimeBegin("removeResourcePerms.pmCheck");
+            watch.markTimeBegin("removeResourceAndRelatedResources.pmCheck");
         pm.check(subj.getId(), resourceType, r.getInstanceId(), opName);
         if (debug) {
-            watch.markTimeEnd("removeResourcePerms.pmCheck");
+            watch.markTimeEnd("removeResourceAndRelatedResources.pmCheck");
         }
 
         ResourceEdgeDAO edgeDao = resourceEdgeDAO;
         if (debug) {
-            watch.markTimeBegin("removeResourcePerms.findEdges");
+            watch.markTimeBegin("removeResourceAndRelatedResources.findEdges");
         }
         Collection<ResourceEdge> edges = edgeDao.findDescendantEdges(r, getContainmentRelation());
         Collection<ResourceEdge> virtEdges = edgeDao.findDescendantEdges(r, getVirtualRelation());
         if (debug) {
-            watch.markTimeEnd("removeResourcePerms.findEdges");
+            watch.markTimeEnd("removeResourceAndRelatedResources.findEdges");
         }
         Set<AppdefEntityID> removed = new HashSet<AppdefEntityID>();
         for (ResourceEdge edge : edges) {
             // Remove descendants' permissions
-            removed.addAll(Arrays.asList(removeResourcePerms(subj, edge.getTo(), true, removeAllVirtual)));
+            removed.addAll(Arrays.asList(removeResourceAndRelatedResources(subj, edge.getTo(), true, removeAllVirtual)));
         }
 		
 		for (ResourceEdge edge : virtEdges) {
@@ -503,9 +530,9 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
 							.contains(prototype.getName()))) {
 				// do not remove the associated resources,
 				// but remove the virtual resource edges
-				edgeDao.deleteEdges(edge.getTo(), getVirtualRelation());
+			    resourceRemover.removeEdges(edge.getTo(), getVirtualRelation());
 			} else {
-				_removeResource(subj, edge.getTo(), true);
+				resourceRemover.removeResource(subj, edge.getTo(), true);
 			}
 		}
 		
@@ -513,61 +540,21 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         if (debug) {
             watch.markTimeBegin("removeResource");
         }
-        _removeResource(subj, r, nullResourceType);
+        resourceRemover.removeResource(subj, r, nullResourceType);
         if (debug) {
-            watch.markTimeBegin("removeResource");
+            watch.markTimeEnd("removeResource");
             log.debug(watch);
         }
         return removed.toArray(new AppdefEntityID[0]);
     }
 
-    /**
-     * 
-     */
-    public void _removeResource(AuthzSubject subj, Resource r, boolean nullResourceType) {
-        final boolean debug = log.isDebugEnabled();
-        final ResourceEdgeDAO edgeDao = resourceEdgeDAO;
-        final StopWatch watch = new StopWatch();
-        if (debug) {
-            watch.markTimeBegin("removeResourcePerms.removeEdges");
-        }
-        // Delete the edges and resource groups
-        edgeDao.deleteEdges(r);
-        if (debug) {
-            watch.markTimeEnd("removeResourcePerms.removeEdges");
-        }
-        if (nullResourceType) {
-            r.setResourceType(null);
-        }
-        final long now = System.currentTimeMillis();
-        if (debug) {
-            watch.markTimeBegin("removeResourcePerms.audit");
-        }
-        resourceAuditFactory.deleteResource(findResourceById(AuthzConstants.authzHQSystem), subj,
-            now, now);
-        if (debug) {
-            watch.markTimeEnd("removeResourcePerms.audit");
-            log.debug(watch);
-        }
-    }
+  
 
     /**
      * 
      */
     public void removeResource(AuthzSubject subject, Resource r) throws VetoException {
-        if (r == null) {
-            return;
-        }
-        applicationContext.publishEvent(new ResourceDeleteRequestedEvent(r));
-
-        final long now = System.currentTimeMillis();
-        resourceAuditFactory.deleteResource(findResourceById(AuthzConstants.authzHQSystem),
-            subject, now, now);
-        Collection groupBag = r.getGroupBag();
-        if (groupBag != null) {
-            groupBag.clear();
-        }
-        resourceDAO.remove(r);
+        resourceRemover.removeResource(subject, r);
     }
 
     /**
@@ -646,12 +633,12 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
      */
     @Transactional(readOnly = true)
     public Map<String, Collection<Integer>> findAllViewableInstances(AuthzSubject subject,
-                                                                     ResourceType resourceType) {
+                                                                     Collection<ResourceType> types) {
         final Map<String, Collection<Integer>> rtn = new HashMap<String, Collection<Integer>>();
         final PermissionManager pm = PermissionManagerFactory.getInstance();
-        final Set<Integer> resources = (resourceType == null) ?
+        final Set<Integer> resources = (types == null) ?
             pm.findViewableResources(subject, resourceTypeDAO.findAll()) :
-            pm.findViewableResources(subject, Collections.singletonList(resourceType));
+            pm.findViewableResources(subject, types);
         for (final Integer resId : resources) {
             final Resource res = findResourceById(resId);
             if (res == null || res.isInAsyncDeleteState() || res.isSystem()) {
@@ -675,6 +662,15 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
     @Transactional(readOnly = true)
     public List<Resource> findResourcesByParent(AuthzSubject subject, Resource res) {
         return resourceDAO.findByResource(subject, res);
+    }
+
+    /**
+     * Find all the resources which are direct descendants of the given resource.
+     * In resource edge terminology, distance = 1.
+     */
+    @Transactional(readOnly = true)
+    public List<Resource> findChildren(AuthzSubject subject, Resource res) {
+        return resourceDAO.findChildren(subject, res);
     }
 
     /**
@@ -925,18 +921,6 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         }
 
         return config;
-    }
-
-    private Collection<PlatformType> findSupportedPlatformTypes() {
-        Collection<PlatformType> platformTypes = platformTypeDAO.findAll();
-
-        for (Iterator<PlatformType> it = platformTypes.iterator(); it.hasNext();) {
-            PlatformType pType = it.next();
-            if (!PlatformDetector.isSupportedPlatform(pType.getName())) {
-                it.remove();
-            }
-        }
-        return platformTypes;
     }
 
     /**
@@ -1372,12 +1356,93 @@ public class ResourceManagerImpl implements ResourceManager, ApplicationContextA
         return resourceDAO.getPlatformCountMinusVsphereVmPlatforms();
     }
 
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
-    }
-
     public ResourceType findResourceTypeById(Integer id) {
         return resourceTypeDAO.findById(id);
+    }
+    
+    public Map<String, Long> getResourceCountByPlugin(Collection<Plugin> plugins) {
+        final Collection<MonitorableType> types = new ArrayList<MonitorableType>();
+        for (final Plugin plugin : plugins) {
+            types.addAll(monitorableTypeDAO.findByPluginName(plugin.getName()).values());
+        }
+        return resourceDAO.getResourceCountByProtoTypeName(types);
+    }
+
+    public void removeResourcesAndTypes(AuthzSubject subj, Collection<MonitorableType> types) {
+        final boolean debug = log.isDebugEnabled();
+        final StopWatch watch = new StopWatch();
+        if (debug) log.debug("Removing Resources By Types " + types);
+        final Collection<String> typeNames = new ArrayList<String>(types.size());
+        for (final MonitorableType type : types) {
+            typeNames.add(type.getName());
+        }
+        if (debug) watch.markTimeBegin("getResourcesByProtoTypeName");
+        final Collection<Resource> resources = resourceDAO.getResourcesByProtoTypeName(typeNames);
+        if (debug) watch.markTimeEnd("getResourcesByProtoTypeName");
+        for (final Resource r : resources) {
+            try {
+                if (debug) watch.markTimeBegin("removeResourcePerms");
+                final AppdefEntityID[] aeids = removeResourceAndRelatedResources(subj, r, true, false);
+                if (debug) watch.markTimeEnd("removeResourcePerms");
+                if (debug) log.debug("removed aeids=[" + aeids + "]");
+            } catch (PermissionException e) {
+                log.error(e,e);
+            } catch (VetoException e) {
+                log.error(e,e);
+            }
+        }
+        if (debug) log.debug("Done Removing Resources By Types " + watch);
+        zeventManager.enqueueEventAfterCommit(new ResourceTypeCleanupZevent(typeNames));
+    }
+
+    public void removeResourceTypes(Collection<String> typeNames) {
+        for (final String typeName : typeNames) {
+            removeMeasurementTempls(typeName);
+            final MonitorableType mt = monitorableTypeDAO.findByName(typeName);
+            // mt should not be null at this point, but you never know
+            if (mt != null) {
+                monitorableTypeDAO.remove(mt);
+            }
+            final Resource proto = resourceDAO.findResourcePrototypeByName(typeName);
+            // proto = null here means that no resources are configured with that particular type
+            if (proto != null) {
+                removeAppdefType(proto);
+                AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
+                try {
+                    removeResource(overlord, proto);
+                } catch (VetoException e) {
+                    throw new SystemException(e);
+                }
+            }
+        }
+    }
+
+    private void removeMeasurementTempls(String typeName) {
+        final List<MeasurementTemplate> templs =
+            measurementTemplateDAO.findDerivedByMonitorableType(typeName);
+        for (final MeasurementTemplate t : templs) {
+            measurementTemplateDAO.remove(t);
+        }
+    }
+
+    private void removeAppdefType(Resource proto) {
+        final Integer typeId = proto.getResourceType().getId();
+        if (typeId.equals(AuthzConstants.authzPlatformProto)) {
+            final PlatformType platformType = platformTypeDAO.get(proto.getInstanceId());
+            if (platformType != null) {
+                platformTypeDAO.remove(platformType);
+            }
+        } else if (typeId.equals(AuthzConstants.authzServerProto)) {
+            final ServerType serverType = serverTypeDAO.get(proto.getInstanceId());
+            if (serverType != null) {
+                serverTypeDAO.remove(serverType);
+            }
+        } else if (typeId.equals(AuthzConstants.authzServiceProto)) {
+            final ServiceType serviceType = serviceTypeDAO.get(proto.getInstanceId());
+            if (serviceType != null) {
+                serviceTypeDAO.remove(serviceType);
+            }
+        }
     }
 
 }

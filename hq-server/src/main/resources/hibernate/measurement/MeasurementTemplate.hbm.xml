@@ -96,6 +96,12 @@
       <column name="CATEGORY_ID" not-null="true" index="TEMPL_CATEGORY_IDX"/>
     </many-to-one>
 
+    <bag inverse="true" cascade="delete" name="measurementBag" table="EAM_MEASUREMENT">
+      <cache usage="read-write"/>
+      <key column="TEMPLATE_ID"/>
+      <one-to-many class="Measurement"/>
+    </bag>
+
   </class>
 
 </hibernate-mapping>

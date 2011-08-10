@@ -26,6 +26,7 @@
  -->
 
 <plugin name="websphere" class="WebsphereProductPlugin">
+    <property name="PLUGIN_VERSION" value="@project.version@"/>
     <filter name="domain"
           value="%server.node%/%server.name%"/>
     <filter name="auth"
@@ -718,6 +719,19 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
                   description="Maximum Size"/>
             </properties>
         </service>
+		
+		<filter name="conf" value=".*\.xml|.*\.cfg|.*\.properties|.*\.ini|.*\.conf|.*\.config"/>
+    	<filter name="code" value=".*\.jar|.*\.dll|.*\.class|.*\.jsp|.*\.php|.*\.pl|.*\.vb|.*\.vbs|.*\.js|.*\.py|.*\.pyc|.*\.cgi"/>
+		
+		<plugin type="config_track" class="org.hyperic.hq.product.FileChangeTrackPlugin">
+			<monitored>
+				<folder path="installedApps" recursive="true" filter="${code}"/>
+				<folder path="config" recursive="true" filter="${conf}"/>
+				<folder path="properties" recursive="true" filter="${conf}|.*\.policy|.*\.props|.*\.key"/>
+			</monitored>
+		</plugin>
+		<property name="DEFAULT_CONFIG_TRACK_ENABLE" value="true" />
+		
     </server>
 
     <server name="WebSphere"

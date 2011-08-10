@@ -32,20 +32,48 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicReference;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.file.FileUtil;
 import org.tanukisoftware.wrapper.WrapperManager;
 
 public class AgentUpgradeManager {
     
+    private static final Log log = LogFactory.getLog(AgentUpgradeManager.class);
     public static final String UPDATED_PLUGIN_EXTENSION = "-update";
+    public static final String REMOVED_PLUGIN_EXTENSION = "-remove";
+    private static AtomicReference<Thread> agentDaemonThread = new AtomicReference<Thread>();;
+    
+    /**
+     * Request a JVM restart if in Java Service Wrapper mode
+     */
+    public static void setAgentDaemonThread(Thread thread) {
+        agentDaemonThread.set(thread);
+    }
     
     /**
      * Request a JVM restart if in Java Service Wrapper mode
      */
     public static void restartJVM() {
         if (WrapperManager.isControlledByNativeWrapper()) {
+            log.info("restart requested");
+            if (agentDaemonThread.get() != null) {
+                try {
+                    if (agentDaemonThread.get().isAlive()) {
+                        agentDaemonThread.get().interrupt();
+                        agentDaemonThread.get().join(30000);
+                    }
+                    if (agentDaemonThread.get().isAlive()) {
+                        log.error("AgentDaemonThread did not die within 30 seconds");
+                        // agentDaemonThread.stop();
+                    }
+                } catch (InterruptedException e) {
+                    log.debug(e,e);
+                }
+            }
             WrapperManager.restartAndReturn();
         }        
     }
@@ -159,29 +187,50 @@ public class AgentUpgradeManager {
      * @return a List of updated plugins or an empty list if no plugins were updated
      * @throws IOException if failed to update a plugin
      */
-    public static List updatePlugins(Properties bootProps) throws IOException {
-        List updatedPlugins = new ArrayList();
+    public static List<String> updatePlugins(Properties bootProps) throws IOException {
+        List<String> updatedPlugins = new ArrayList<String>();
         String tmpDir = bootProps.getProperty(AgentConfig.PROP_TMPDIR[0]);
         String pluginsDir = bootProps.getProperty(AgentConfig.PROP_PDK_PLUGIN_DIR[0]);
         String[] children = new File(tmpDir).list();
         if (children != null) {
+            // we want to remove all plugins, then update
+            // this is just in case there are duplicates
             for (int i=0; i<children.length; i++) {
-                // only update plugins marked for update
+                if (children[i].indexOf(REMOVED_PLUGIN_EXTENSION) > 0) {
+                    removePlugin(children[i], tmpDir, pluginsDir, updatedPlugins);
+                }
+            }
+            for (int i=0; i<children.length; i++) {
                 if (children[i].indexOf(UPDATED_PLUGIN_EXTENSION) > 0) {
-                    String fileName = StringUtil.remove(children[i], UPDATED_PLUGIN_EXTENSION);
-                    File tmpJar = new File(tmpDir + "/" + children[i]);
-                    File targetJar = new File(pluginsDir + "/" + fileName);
-                    boolean rslt = FileUtil.safeFileMove(tmpJar, targetJar);
-                    if (!rslt) {
-                        throw new IOException("Failed to update plugin: " + fileName);
-                    } 
-                    else {
-                        updatedPlugins.add(fileName);
-                    }
+                    movePlugin(children[i], tmpDir, pluginsDir, updatedPlugins);
                 }
             }
         }
         return updatedPlugins;
+    }
+
+    private static void removePlugin(String child, String tmpDir, String pluginsDir,
+                                     List<String> updatedPlugins) {
+        String fileName = StringUtil.remove(child, REMOVED_PLUGIN_EXTENSION);
+        File tmpJar = new File(tmpDir + "/" + child);
+        File targetJar = new File(pluginsDir + "/" + fileName);
+        targetJar.delete();
+        tmpJar.delete();
+    }
+
+    private static void movePlugin(String child, String tmpDir, String pluginsDir,
+                                   List<String> updatedPlugins)
+    throws IOException {
+        String fileName = StringUtil.remove(child, UPDATED_PLUGIN_EXTENSION);
+        File tmpJar = new File(tmpDir + "/" + child);
+        File targetJar = new File(pluginsDir + "/" + fileName);
+        boolean rslt = FileUtil.safeFileMove(tmpJar, targetJar);
+        if (!rslt) {
+            throw new IOException("Failed to update plugin: " + fileName);
+        } 
+        else {
+            updatedPlugins.add(fileName);
+        }
     }
     
 }

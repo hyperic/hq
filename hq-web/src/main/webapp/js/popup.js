@@ -54,13 +54,13 @@ var overlay = {
     },
 
     moveOverlay: function (anchor) {
-        var ovl = $('overlay');
+        var ovl = hqDojo.byId('overlay');
         var anchorY = this.findPosY(anchor);
         var left = this.findPosX(anchor);
 
-        var top = this.findPosY($('charttop')) - 4;
+        var top = this.findPosY(hqDojo.byId('charttop')) - 4;
 
-        var bottom = this.findPosY($('timetop')) + 4;
+        var bottom = this.findPosY(hqDojo.byId('timetop')) + 4;
 
         ovl.style.visibility='visible';
         ovl.style.left = left + 'px';
@@ -70,10 +70,10 @@ var overlay = {
 
     showTimePopup: function (index, e) {
         this.hideTimePopup();
-        var anchor = $('timePopup_' + index);
+        var anchor = hqDojo.byId('timePopup_' + index);
         var left = this.findPosX(anchor) - 35;
         var top = this.findPosY(anchor) + 10;
-        this.curPopup = $('timePopup');
+        this.curPopup = hqDojo.byId('timePopup');
         this.curPopup.innerHTML = this.times[index];
         this.curPopup.style.left = left + 'px';
 
@@ -91,10 +91,10 @@ var overlay = {
 
     showTimePopupTopMetricChart: function (index, e) {
         this.hideTimePopup();
-        var anchor = $('timePopup_' + index);
+        var anchor = hqDojo.byId('timePopup_' + index);
         var left = this.findPosX(anchor) - 35;
         var top = this.findPosY(anchor) + 10;
-        this.curPopup = $('timePopup');
+        this.curPopup = hqDojo.byId('timePopup');
         this.curPopup.innerHTML = this.times[index];
         this.curPopup.style.left = left + 'px';
 
@@ -113,12 +113,14 @@ var overlay = {
     fadeInTimePopup: function (top) {
         if (top != null)
             this.curPopup.style.top = top + 'px';
-        new Effect.Appear(this.curPopup);
+        
+        hqDojo.fadeIn({ node: this.curPopup }).play();
     },
 
     moveTimePopup: function (top) {
         if (this.curPopup.style.top != (top + 'px')) {
-            new Effect.Fade(this.curPopup);
+            hqDojo.fadeOut({ node: this.curPopup }).play();
+
             setTimeout("overlay.fadeInTimePopup(" + top + ")", 1000);
         }
     },
@@ -204,7 +206,7 @@ var menuLayers = {
   offY: 5,   // vertical offset 
 
   show: function(id, e) {
-    var mnu = $? $(id): null;
+    var mnu = hqDojo.byId(id);
     if (!mnu) return;
     this.activeMenuID = id;
     if ( mnu.onmouseout == null ) mnu.onmouseout = this.mouseoutCheck;
@@ -217,7 +219,9 @@ var menuLayers = {
     this.clearTimer();
     if (this.activeMenuID && $) 
     {
-      this.timer = setTimeout("$('"+menuLayers.activeMenuID+"').style.visibility = 'hidden';if(dojo11.isIE == 6){dojo11.query('select').forEach(function(sel) { sel.style.display = '';});}", 200);
+      this.timer = setTimeout(function() {
+    	  hqDojo.style(menuLayers.activeMenuID, "visibility", "hidden");
+      }, 200);
     }
   },
   
@@ -236,14 +240,17 @@ var menuLayers = {
           viewport.height + viewport.scrollY - mnu.offsetHeight;
     else y = y + this.offY;
 
-    this.timer = setTimeout("$('" + menuLayers.activeMenuID + "').style.visibility = 'visible';if(dojo11.isIE == 6){dojo11.query('select').forEach(function(sel) { sel.style.display = 'none';});}", 200);
+    this.timer = setTimeout(function() {
+    	hqDojo.style(menuLayers.activeMenuID, "visibility", "visible");
+    }, 200);
+    
     mnu.style.left = x + "px"; mnu.style.top = y + "px";
   },
   
   mouseoutCheck: function(e) {
     e = e? e: window.event;
     // is element moused into contained by menu? or is it menu (ul or li or a to menu div)?
-    var mnu = $(menuLayers.activeMenuID);
+    var mnu = hqDojo.byId(menuLayers.activeMenuID);
     var toEl = e.relatedTarget? e.relatedTarget: e.toElement;
     if ( mnu != toEl && !menuLayers.contained(toEl, mnu) ) menuLayers.hide();
   },

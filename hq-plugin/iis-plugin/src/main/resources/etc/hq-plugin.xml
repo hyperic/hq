@@ -26,6 +26,7 @@
  -->
 
 <plugin name="iis">
+  <property name="PLUGIN_VERSION" value="@project.version@"/>
   <!-- Properties used for looking up metrics through the PDH -->
   <filter name="domain"
           value="\Web Service(${iishost})\" />
@@ -749,6 +750,16 @@
                    description="Document Root"/>
       </properties>
     </service>
+    
+    <plugin type="config_track"
+    		class="org.hyperic.hq.product.FileChangeTrackPlugin">
+      <monitored>
+        <folder path="C:\Windows\system32\inetsrv" recursive="false" filter="metabase.xml"/>
+        <folder path="wwwroot" recursive="true" filter=".*.xml|.*.jar|.*.dll|.*.aspx|.*.asp|.*.js|.*.vbs|.*.ini|.*.conf|.*.properties"/>
+      </monitored>
+    </plugin>
+    <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="true" />
+    
   </server>
 
   <server name="IIS"

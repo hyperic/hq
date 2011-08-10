@@ -107,12 +107,18 @@
     <c:if test="${showUpAndDown}">
       <td class="BlockTitle">
         <c:if test="${empty portletName && not isFirstPortlet}">
-        <html:link page="/dashboard/MovePortletUp.do?portletName=${portletName}"><html:img page="/images/dash_icon_up.gif" border="0" width="17" height="16"/></html:link>
+	        <html:link action="/dashboard/MovePortletUp">
+	        	<html:param name="portletName" value="${portletName}"/>
+	        	<html:img page="/images/dash_icon_up.gif" border="0" width="17" height="16"/>
+	        </html:link>
         </c:if>
       </td>
       <td class="BlockTitle">
         <c:if test="${empty portletName && not isLastPortlet}">
-        <html:link page="/dashboard/MovePortletDown.do?portletName=${portletName}"><html:img page="/images/dash_icon_down.gif" border="0" width="17" height="16"/></html:link>
+        	<html:link action="/dashboard/MovePortletDown">
+        		<html:param name="portletName" value="${portletName}"/>
+        		<html:img page="/images/dash_icon_down.gif" border="0" width="17" height="16"/>
+        	</html:link>
         </c:if>
       </td>
     </c:if>
@@ -121,10 +127,10 @@
     <td class="BlockTitle" align="right">
       <c:choose>
         <c:when test="${not empty adminToken}">
-          <html:link page="${adminUrl}" paramId="token" paramName="adminToken"><html:img page="/images/4.0/icons/properties.gif" width="16" height="16" border="0"/></html:link></t
+          <html:link page="${adminUrl}" paramId="token" paramName="adminToken"><img src="<html:rewrite page="/images/4.0/icons/properties.gif" />" width="16" height="16" border="0"/></html:link>
         </c:when>
         <c:otherwise>
-          <html:link page="${adminUrl}"><html:img page="/images/4.0/icons/properties.gif" width="16" height="16" border="0"/></html:link>
+          <html:link page="${adminUrl}"><img src="<html:rewrite page="/images/4.0/icons/properties.gif" />" width="16" height="16" border="0"/></html:link>
         </c:otherwise>
       </c:choose>
     </td>

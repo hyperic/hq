@@ -59,8 +59,8 @@
   </c:otherwise>
 </c:choose>
 
-<script src="<html:rewrite page="/js/"/>schedule.js" type="text/javascript"></script>
-<script src="<html:rewrite page="/js/"/>monitorSchedule.js" type="text/javascript"></script>
+<script src="<html:rewrite page="/js/schedule.js"/>" type="text/javascript"></script>
+<script src="<html:rewrite page="/js/monitorSchedule.js"/>" type="text/javascript"></script>
 <script  type="text/javascript">
  var jsPath = "<html:rewrite page="/js/"/>";
  var cssPath = "<html:rewrite page="/css/"/>";

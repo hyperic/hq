@@ -43,10 +43,12 @@ import org.hyperic.hq.agent.commands.AgentDie_result;
 import org.hyperic.hq.agent.commands.AgentPing_args;
 import org.hyperic.hq.agent.commands.AgentPing_result;
 import org.hyperic.hq.agent.commands.AgentReceiveFileData_args;
+import org.hyperic.hq.agent.commands.AgentRemoveFileData_args;
 import org.hyperic.hq.agent.commands.AgentRestart_args;
 import org.hyperic.hq.agent.commands.AgentRestart_result;
 import org.hyperic.hq.agent.commands.AgentUpgrade_args;
 import org.hyperic.hq.agent.commands.AgentUpgrade_result;
+import org.hyperic.hq.agent.commands.FileRemoval_result;
 
 /**
  * The server-side of the commands the Agent supports.  This object 
@@ -84,6 +86,7 @@ public class AgentCommandsServer
                                             OutputStream outStream)
         throws AgentRemoteException 
     {
+        if (log.isDebugEnabled()) log.debug("dispatching cmd=" + cmd);
         if(cmd.equals(AgentCommandsAPI.command_ping)){
             new AgentPing_args(args);  // Just parse the args
 
@@ -118,6 +121,10 @@ public class AgentCommandsServer
             String currentAgentBundle = 
                 agentCommandsService.getCurrentAgentBundle();
             return new AgentBundle_result(currentAgentBundle);
+        } else if (cmd.equals(AgentCommandsAPI.command_remove_file)) {
+            AgentRemoveFileData_args a = new AgentRemoveFileData_args(args);
+            Map<String, Boolean> fileRemovalMap = agentCommandsService.agentRemoveFile(a.getFiles());
+            return new FileRemoval_result(fileRemovalMap);
         } else {
             throw new AgentAssertionException("Unknown command '" + cmd + "'");
         }

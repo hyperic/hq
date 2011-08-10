@@ -47,16 +47,24 @@
 </tiles:insert>
 
 <script type="text/javascript">
-	var baseUrl = "<html:rewrite page="/resource/common/monitor/visibility/IndicatorCharts.do"/>";
-		baseUrl += "?eid=<c:out value="${eid}"/>";
-
+	<c:url var="baseUrl" value="/resource/common/monitor/visibility/IndicatorCharts.do">
+		<c:param name="eid" value="${eid}"/>
+	</c:url>
 	<c:if test="${not empty ctype}">
-		baseUrl += "&ctype=<c:out value="${ctype}"/>";
+		<c:url var="baseUrl" value="${baseUrl}">
+			<c:param name="ctype" value="${ctype}"/>
+		</c:url>
 	</c:if>
-  
+
+	var baseUrl = '${baseUrl}';
+	
 	function addMetric(metric) {
-	    var frameUrl = baseUrl + "&view=<c:out value="${view}"/>";
-	    	frameUrl += "&action=add&addMetric=" + metric;
+		<c:url var="baseUrl" value="${baseUrl}">
+			<c:param name="view" value="${view}"/>
+			<c:param name="action" value="add"/>
+			<c:param name="addMetric" value="{addMetric}"/>
+		</c:url>
+	    var frameUrl = unescape('${baseUrl}').replace("{addMetric}", metric);
 	
 	    window.parent.frames[0].location = frameUrl;
 	}
@@ -65,24 +73,24 @@
 	    var form = document.IndicatorViewsForm;
 
 	    if (option.value == 'go') {
-	        dojo.byId('viewname').style.display = "";
+	        hqDojo.byId('viewname').style.display = "";
 	        form.view.value = option.text;
 	        form.submit();
 	    } else if (option.value == 'delete') {
 	        form.view.value = "";
 	        form.submit();
 	    } else if (option.value == 'create') {
-	        dojo.byId('viewname').style.display = "";
+	        hqDojo.byId('viewname').style.display = "";
 	        return;
 	    } else if (option.value == 'update') {
 	        form.view.value = "<c:out value="${view}"/>";
 	    }
 	    
-	    dojo.byId('viewname').style.display = "none";
+	    hqDojo.byId('viewname').style.display = "none";
 	}
 </script>
 
-<html:form action="/resource/common/monitor/visibility/IndicatorCharts.do"
+<html:form action="/resource/common/monitor/visibility/IndicatorCharts"
 	       method="GET" onsubmit="this.view.disabled=false">
 	<input type="hidden" name="eid" value="<c:out value="${eid}"/>">
 	
@@ -95,7 +103,12 @@
 			<td class="ListHeaderInactive" nowrap="true">
 				<fmt:message key="resource.common.monitor.visibility.IndicatorCharts" />&nbsp;
 				<fmt:message key="common.label.Pipe" />&nbsp;
-				<a href='<html:rewrite page="/ResourceCurrentHealth.do"/>?eid=<c:out value="${eid}"/>&view=<c:out value="${view}"/>&alertDefaults=true'>
+				<c:url var="resourceCurrentHealthUrl" value="/ResourceCurrentHealth.do">
+					<c:param name="eid" value="${eid}"/>
+					<c:param name="view" value="${view}"/>
+					<c:param name="alertDefaults" value="true"/>
+				</c:url>
+				<a href="${resourceCurrentHealthUrl}">
 					<fmt:message key="resource.common.monitor.visibility.now" />
 				</a>
 			</td>
@@ -173,8 +186,8 @@
 												<c:set var="timelineIndicatorColor" value="timelineUnknown" />
 											</c:otherwise>
 										</c:choose>
-									<div class="<c:out value="${timelineIndicatorColor}" />"
-									     onmousedown="overlay.moveOverlay(this);overlay.showTimePopupTopMetricChart(<c:out value="${status.count - 1}"/>, event)" />
+									<div class="${timelineIndicatorColor}"
+									     onmousedown="overlay.moveOverlay(this);overlay.showTimePopupTopMetricChart(<c:out value="${status.count - 1}"/>, event)"></div>
 								</td>
 							</c:forEach>
 							<td width="10" align="left">

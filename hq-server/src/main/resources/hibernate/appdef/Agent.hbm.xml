@@ -75,14 +75,29 @@
       <column name="UNIDIRECTIONAL" not-null="true"/>
     </property>
 
+    <property name="pluginInventoryChecksum" type="string">
+      <column name="PLUGIN_INVENTORY_CHECKSUM" length="128"/>
+    </property>
+
+    <property name="lastPluginInventoryCheckin" type="long">
+      <column name="LAST_PLUGIN_INVENTORY_CHECKIN" not-null="true" default="0"/>
+    </property>
+
     <many-to-one name="agentType">
       <column name="AGENT_TYPE_ID" not-null="false" index="AGENT_TYPE_ID_IDX"/>
     </many-to-one>
 
+    <bag inverse="true" cascade="all" name="pluginStatuses" table="EAM_AGENT_PLUGIN_STATUS" lazy="true">
+      <key on-delete="cascade" column="AGENT_ID"/>
+      <one-to-many class="org.hyperic.hq.appdef.server.session.AgentPluginStatus"/>
+    </bag>
+
     <bag inverse="true" cascade="save-update" name="platforms" table="EAM_PLATFORM">
+      <cache usage="read-write"/>
       <key column="AGENT_ID"/>
       <one-to-many class="org.hyperic.hq.appdef.server.session.Platform"/>
     </bag>
+
   </class>
 
 </hibernate-mapping>

@@ -30,12 +30,15 @@ import java.util.Properties;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portal;
 import org.hyperic.hq.ui.action.resource.common.monitor.config.ResourceConfigPortalAction;
+import org.hyperic.hq.ui.util.BizappUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.apache.struts.action.ActionForm;
@@ -72,8 +75,13 @@ public class ConfigPortalAction
     /** mode=configure || mode=view */
     public ActionForward configMetrics(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                        HttpServletResponse response) throws Exception {
+    	Integer sessionId = RequestUtils.getSessionId(request);
+    	
+        if (!BizappUtils.canAdminHQ(sessionId, authzBoss)) {
+            throw new PermissionException("User not authorized to configure " + "server settings");
+        }
 
-        setResource(request);
+        setResource(request, response);
 
         super.configMetrics(mapping, form, request, response);
 

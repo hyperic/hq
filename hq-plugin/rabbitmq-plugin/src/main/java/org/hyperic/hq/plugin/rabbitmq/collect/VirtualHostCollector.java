@@ -25,10 +25,13 @@
  */
 package org.hyperic.hq.plugin.rabbitmq.collect;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
 import org.hyperic.hq.plugin.rabbitmq.core.RabbitVirtualHost;
+import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 
 import java.util.Properties;
@@ -37,6 +40,7 @@ import java.util.Properties;
  * VirtualHostCollector
  * @author Helena Edelson
  */
+// XXX cambiar a Measurement plugin 
 public class VirtualHostCollector extends RabbitMQDefaultCollector {
 
     private static final Log logger = LogFactory.getLog(VirtualHostCollector.class);
@@ -49,30 +53,24 @@ public class VirtualHostCollector extends RabbitMQDefaultCollector {
             logger.debug("[collect] vhost=" + vhost + " node=" + node);
         }
 
-        RabbitVirtualHost virtualHost = new RabbitVirtualHost(vhost, rabbitAdmin);
-
-        if (virtualHost != null) {
-            setAvailability(virtualHost.isAvailable());
-            setValue("queueCount", virtualHost.getQueueCount());
-            setValue("exchangeCount", virtualHost.getExchangeCount());
-            setValue("connectionCount", virtualHost.getConnectionCount());
-            setValue("channelCount", virtualHost.getChannelCount());
-            setValue("consumerCount", virtualHost.getConsumerCount());
+        try {
+            HypericRabbitAdmin admin = new HypericRabbitAdmin(props);
+            admin.getVirtualHost(vhost);
+            setAvailability(true);
+        } catch (PluginException ex) {
+            setAvailability(false);
+            logger.debug(ex.getMessage(), ex);
         }
-    }
 
-    /**
-     * Assemble custom key/value data for each object to set
-     * as custom properties in the ServiceResource to display
-     * in the UI.
-     * @param vh
-     * @return
-     */
-    public static ConfigResponse getAttributes(RabbitVirtualHost vh) {
-        ConfigResponse res = new ConfigResponse();
-        res.setValue("name", vh.getName());
-        res.setValue("node", vh.getNode());
-        return res;
+        try {
+            RabbitVirtualHost virtualHost = rabbitAdmin.getVirtualHost(vhost);
+            setAvailability(true);
+            setValue("queueCount", rabbitAdmin.getQueues(virtualHost).size());
+            setValue("exchangeCount", rabbitAdmin.getQueues(virtualHost).size());
+        } catch (Exception ex) {
+            setAvailability(false);
+            logger.debug(ex.getMessage(), ex);
+        }
     }
 
     @Override

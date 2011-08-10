@@ -33,4 +33,13 @@ public interface AgentDataTransferJob {
     
     public void execute();
 
+    /**
+     * @return denotes success and used in case the job hangs.  If the job hangs and the agent is
+     *         available this method will tell the {@link AgentSynchronizer} mechanism to retry
+     *         the job after the Thread's interrupt status has been set.
+     */
+    public boolean wasSuccessful();
+
+    public void onFailure();
+
 }

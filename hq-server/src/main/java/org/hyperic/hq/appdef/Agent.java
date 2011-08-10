@@ -28,8 +28,7 @@ package org.hyperic.hq.appdef;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.server.session.AgentPluginStatus;
 import org.hyperic.hq.appdef.server.session.Platform;
 
 public class Agent extends AppdefBean {
@@ -41,6 +40,9 @@ public class Agent extends AppdefBean {
     private boolean _unidirectional;
     private AgentType _agentType;
     private Collection _platforms;
+    private Collection _pluginStatuses;
+    private long lastPluginInventoryCheckin;
+    private String pluginInventoryChecksum;
 
     public Agent() {
     }
@@ -128,6 +130,14 @@ public class Agent extends AppdefBean {
     public void setAgentType(AgentType agentType) {
         _agentType = agentType;
     }
+    
+    public void setPluginStatuses(Collection<AgentPluginStatus> pluginStatuses) {
+        _pluginStatuses = pluginStatuses;
+    }
+    
+    public Collection<AgentPluginStatus> getPluginStatuses() {
+        return _pluginStatuses;
+    }
 
     public Collection<Platform> getPlatforms() {
         return _platforms;
@@ -166,16 +176,32 @@ public class Agent extends AppdefBean {
     }
 
     public String toString() {
-        StringBuffer str = new StringBuffer("{");
+        StringBuffer str = new StringBuffer(64);
 
-        str.append("address=").append(getAddress()).append(" ")
-           .append("port=").append(getPort()).append(" ")
-           .append("authToken=").append(getAuthToken()).append(" ");
+        str.append("{id=").append(getId()).append(" ")
+           .append("address=").append(getAddress()).append(" ")
+           .append("port=").append(getPort()).append("}");
         return(str.toString());
     }
     
     public boolean allowContainerManagedLastModifiedTime() {
         return false;
+    }
+
+    public long getLastPluginInventoryCheckin() {
+        return lastPluginInventoryCheckin;
+    }
+
+    public void setLastPluginInventoryCheckin(long lastPluginInventoryCheckin) {
+        this.lastPluginInventoryCheckin = lastPluginInventoryCheckin;
+    }
+
+    public String getPluginInventoryChecksum() {
+        return pluginInventoryChecksum;
+    }
+
+    public void setPluginInventoryChecksum(String pluginInventoryChecksum) {
+        this.pluginInventoryChecksum = pluginInventoryChecksum;
     }
 
 }

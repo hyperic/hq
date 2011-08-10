@@ -25,6 +25,107 @@
  -->
 
 <plugin name="mssql">
+  <property name="PLUGIN_VERSION" value="@project.version@"/>
+  <script name="MDF_FreeSpacePct2005.sql">
+	<![CDATA[
+set ANSI_NULLS ON 
+set QUOTED_IDENTIFIER ON 
+IF OBJECT_ID('tempdb..#tTables') IS NOT NULL DROP TABLE #tTables 
+create table #tTables 
+( 
+numID INTEGER IDENTITY(1,1), 
+strTableName sysname, 
+db_sizes bigint, 
+unalloc_sizes bigint 
+) 
+
+EXEC sp_MSforeachdb 
+'USE [?] 
+declare @dbname sysname 
+declare @bytesperpage dec(15,0) 
+declare @pagesperMB dec(15,0) 
+declare @dbmaxsize dec(15,0)
+declare @reservedpages  bigint
+
+SET @dbname = db_name() 
+
+select @bytesperpage = low from master.dbo.spt_values where number = 1 
+and type = ''E'' 
+
+select @pagesperMB = 1048576 / @bytesperpage 
+
+select @dbmaxsize = min(maxsize) from dbo.sysfiles where (status & 64 = 0)
+
+if @dbmaxsize <> -1
+begin 
+	select @dbmaxsize = sum(convert(dec(15),maxsize)) from dbo.sysfiles 
+	where (status & 64 = 0)
+end
+
+select	@reservedpages = sum(total_pages) from sys.allocation_units
+
+insert into #tTables( strTableName, db_sizes, unalloc_sizes) 
+select 
+db_name(), 
+database_size =  (case @dbmaxsize 
+                              when -1 then -1 
+                              else  
+                              cast( ((@dbmaxsize / @pagesperMB)*1024) as bigint ) 
+                              end), 
+unallocated_space = (case when @dbmaxsize >= @reservedpages then
+						cast(((convert (dec (15,2),@dbmaxsize) - convert (dec (15,2),@reservedpages)) / @pagesperMB*1024) as bigint )
+					else 0 
+					end)'
+
+select strTableName "DBName", 
+(case db_sizes when -1 then 100 else cast(round(100.00*unalloc_sizes/db_sizes, 2) as decimal(5,2)) end) "DatabaseFreePct" from #tTables 
+              
+drop table #tTables 
+	]]>
+	</script>
+	
+	<!-- Script for version 2000 -->
+	<script name="MDF_FreeSpacePct2000.sql">
+	<![CDATA[
+set ANSI_NULLS ON 
+set QUOTED_IDENTIFIER ON 
+IF OBJECT_ID('tempdb..#tTables') IS NOT NULL DROP TABLE #tTables 
+create table #tTables 
+( 
+numID INTEGER IDENTITY(1,1), 
+strTableName sysname, 
+db_sizes bigint, 
+unalloc_sizes bigint 
+) 
+EXEC sp_MSforeachdb 
+'USE [?] 
+declare @dbname sysname 
+declare @bytesperpage dec(15,0) 
+declare @pagesperMB dec(15,0) 
+declare @dbmaxsize dec(15,0)
+SET @dbname = db_name() 
+select @bytesperpage = low from master.dbo.spt_values where number = 1 and type = ''E'' 
+select @pagesperMB = 1048576 / @bytesperpage 
+select @dbmaxsize = min(maxsize) from dbo.sysfiles where (status & 64 = 0)
+if @dbmaxsize <> -1
+begin 
+select @dbmaxsize = sum(convert(dec(15),maxsize)) from dbo.sysfiles where (status & 64 = 0)
+end
+
+insert into #tTables( strTableName, db_sizes, unalloc_sizes) 
+select 
+db_name(), 
+database_size =  (case @dbmaxsize when -1 then -1 else	cast( ((@dbmaxsize / @pagesperMB)*1024) as bigint ) end), 
+unallocated_space =  cast((((@dbmaxsize - (select sum(convert(dec(15),reserved) )	
+from sysindexes where indid in (0, 1, 255))) / @pagesperMB )*1024) as bigint )'	
+
+select strTableName "DBName", 
+(case db_sizes when -1 then 100 else CAST(ROUND(100.0*unalloc_sizes/db_sizes, 0) AS INT) end) "DatabaseFreePct" from #tTables 			
+
+drop table #tTables
+	]]>
+	</script>
+	
   <!-- appended to each template by the hq-plugin.xml parser -->
     <property name="template-config"
             value="service_name=%service_name%"/>
@@ -70,7 +171,7 @@
             template="Buffer Manager:Platform=Win32:Page writes/sec"
             category="UTILIZATION"
             group="Reliability"
-            collectionType="dynamic"
+            collectionType="trendsup"
             units="none"/>
         <metric name="Free pages"
             template="${buffer.manager}"
@@ -180,16 +281,6 @@
             collectionType="dynamic"
             units="none"/>
 
-    <!--
-    <metric name="Log Cache Reads/Sec"
-            alias="LogCacheReadsSec"
-            template="${db.domain}:Platform=Win32:Log Cache Reads/sec"
-            category="UTILIZATION"
-            group="Log"
-            collectionType="dynamic"
-            units="none"/>
-            -->
-
         <metric name="Log Cache Hit Ratio"
             alias="LogCacheHitRatio"
             template="${db.domain}:Type=Formatted:Log Cache Hit Ratio"
@@ -197,72 +288,6 @@
             group="Log"
             collectionType="dynamic"
             units="none"/>
-
-    <!--
-    <metric name="Bulk Copy Rows/Sec"
-            alias="BulkCopyRowsSec"
-            template="${db.domain}:Platform=Win32:Bulk Copy Rows/sec"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="dynamic"
-            units="none"/>
-
-    <metric name="Bulk Copy Throughput/Sec"
-            alias="BulkCopyThroughputSec"
-            template="${db.domain}:Platform=Win32:Bulk Copy Throughput/sec"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="dynamic"
-            units="none"/>
-
-    <metric name="Backup/Restore Throughput/Sec"
-            alias="BackupRestoreThrSec"
-            template="${db.domain}:Platform=Win32:Backup/Restore Throughput/sec"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="dynamic"
-            units="none"/>
-
-    <metric name="DBCC Logical Scan Bytes/Sec"
-            alias="DBCCLogicalScanBytesSec"
-            template="${db.domain}:Platform=Win32:DBCC Logical Scan Bytes/sec"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="dynamic"
-            units="B"/>
-
-    <metric name="Shrink Data Movement Bytes/Sec"
-            alias="ShrinkDataMvBytesSec"
-            template="${db.domain}:Platform=Win32:Shrink Data Movement Bytes/sec"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="dynamic"
-            units="B"/>
-
-    <metric name="Log Flushes/Sec"
-            alias="LogFlushesSec"
-            template="${db.domain}:Platform=Win32:Log Flushes/sec"
-            category="UTILIZATION"
-            group="Log"
-            collectionType="dynamic"
-            units="none"/>
-
-    <metric name="Log Bytes Flushed/Sec"
-            alias="LogBytesFlushedSec"
-            template="${db.domain}:Platform=Win32:Log Bytes Flushed/sec"
-            category="UTILIZATION"
-            group="Log"
-            collectionType="dynamic"
-            units="B"/>
-
-    <metric name="Log Flush Waits/Sec"
-            alias="LogFlushWaitsSec"
-            template="${db.domain}:Platform=Win32:Log Flush Waits/sec"
-            category="UTILIZATION"
-            group="Log"
-            collectionType="dynamic"
-            units="none"/>
-    -->
 
         <metric name="Log Flush Wait Time"
             alias="LogFlushWaitTime"
@@ -295,6 +320,7 @@
             group="Log"
             collectionType="dynamic"
             units="none"/>
+
     </metrics>
 
     <metrics name="mssql-access">
@@ -311,33 +337,7 @@
             group="Resource Utilization"
             collectionType="trendsup"
             units="none"/>
-    <!--
 
-    <metric name="Range Scans/Sec"
-            alias="RangeScansSec"
-            template="Access Methods:Platform=Win32:Range Scans/Sec"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="dynamic"
-            units="none"/>
-
-    <metric name="Probe Scans/Sec"
-            alias="ProbeScansSec"
-            template="Access Methods:Platform=Win32:Probe Scans/Sec"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="dynamic"
-            units="none"/>
-
-    <metric name="Scan Point Revalidations/Sec"
-            alias="ScanPointRevalidationsSec"
-            template="Access Methods:Platform=Win32:Scan Point Revalidations/Sec"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="dynamic"
-            units="none"/>
-
--->
     <metric name="Workfiles Created"
             alias="WorkfilesCreatedSec"
             template="Access Methods:Platform=Win32:Workfiles Created/Sec"
@@ -355,87 +355,6 @@
             collectionType="dynamic"
             units="none"/>
 
-    <!--
-    <metric name="Forwarded Records/Sec"
-            alias="ForwardedRecordsSec"
-            template="Access Methods:Platform=Win32:Forwarded Records/Sec"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="dynamic"
-            units="none"/>
-
-    <metric name="Skipped Ghosted Records/Sec"
-            alias="SkippedGhostedRecordsSec"
-            template="Access Methods:Platform=Win32:Skipped Ghosted Records/Sec"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="dynamic"
-            units="none"/>
-
-    <metric name="Index Searches/Sec"
-            alias="IndexSearchesSec"
-            template="Access Methods:Platform=Win32:Index Searches/Sec"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="dynamic"
-            units="none"/>
-
-    <metric name="FreeSpace Scans/Sec"
-            alias="FreeSpaceScansSec"
-            template="Access Methods:Platform=Win32:FreeSpace Scans/Sec"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="dynamic"
-            units="none"/>
-
-    <metric name="FreeSpace Page Fetches/Sec"
-            alias="FreeSpacePageFetchesSec"
-            template="Access Methods:Platform=Win32:FreeSpace Page Fetches/Sec"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="dynamic"
-            units="none"/>
-
-    <metric name="Pages Allocated/Sec"
-            alias="PagesAllocatedSec"
-            template="Access Methods:Platform=Win32:Pages Allocated/Sec"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="dynamic"
-            units="none"/>
-
-    <metric name="Extents Allocated/Sec"
-            alias="ExtentsAllocatedSec"
-            template="Access Methods:Platform=Win32:Extents Allocated/Sec"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="dynamic"
-            units="none"/>
-
-    <metric name="Mixed page allocations/Sec"
-            alias="MixedpageallocationsSec"
-            template="Access Methods:Platform=Win32:Mixed page allocations/Sec"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="dynamic"
-            units="none"/>
-
-    <metric name="Extent Deallocations/Sec"
-            alias="ExtentDeallocationsSec"
-            template="Access Methods:Platform=Win32:Extent Deallocations/Sec"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="dynamic"
-            units="none"/>
-
-    <metric name="Page Deallocations/Sec"
-            alias="PageDeallocationsSec"
-            template="Access Methods:Platform=Win32:Page Deallocations/Sec"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="dynamic"
-            units="none"/>
--->
     <metric name="Page Splits"
             alias="PageSplitsSec"
             template="Access Methods:Platform=Win32:Page Splits/Sec"
@@ -443,15 +362,7 @@
             group="Resource Utilization"
             collectionType="trendsup"
             units="none"/>
-<!--
-    <metric name="Table Lock Escalations/Sec"
-            alias="TableLockEscalationsSec"
-            template="Access Methods:Platform=Win32:Table Lock Escalations/Sec"
-            category="UTILIZATION"
-            group="Lock"
-            collectionType="dynamic"
-            units="none"/>
-  -->
+
     </metrics>
 
     <metrics name="mssql-general">
@@ -577,14 +488,6 @@
             collectionType="dynamic"
             units="KB"/>
 
-    <!--metric name="Target Server Memory"
-            alias="TargetServerMemory"
-            template="Memory Manager:Platform=Win32:Target Server Memory(KB)"
-            category="UTILIZATION"
-            group="Memory"
-            collectionType="dynamic"
-            units="KB"/-->
-
         <metric name="Total Server Memory"
             alias="TotalServerMemory"
             template="Memory Manager:Platform=Win32:Total Server Memory (KB)"
@@ -595,6 +498,7 @@
     </metrics>
 
     <metrics name="mssql-stats">
+    
     <metric name="Batch Requests"
             alias="BatchRequests"
             template="SQL Statistics:Platform=Win32:Batch Requests/Sec"
@@ -602,40 +506,7 @@
             group="Resource Utilization"
             collectionType="trendsup"
             units="none"/>
-    <!--
-
-    <metric name="Auto-Param Attempts/Sec"
-            alias="AutoParamAttemptsSec"
-            template="SQL Statistics:Platform=Win32:Auto-Param Attempts/Sec"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="dynamic"
-            units="none"/>
-
-    <metric name="Failed Auto-Params/Sec"
-            alias="FailedAutoParamsSec"
-            template="SQL Statistics:Platform=Win32:Failed Auto-Params/Sec"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="dynamic"
-            units="none"/>
-
-    <metric name="Safe Auto-Params/Sec"
-            alias="SafeAutoParamsSec"
-            template="SQL Statistics:Platform=Win32:Safe Auto-Params/Sec"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="dynamic"
-            units="none"/>
-
-    <metric name="Unsafe Auto-Params/Sec"
-            alias="UnsafeAutoParamsSec"
-            template="SQL Statistics:Platform=Win32:Unsafe Auto-Params/Sec"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="dynamic"
-            units="none"/>
--->
+   
     <metric name="SQL Compilations"
             alias="SQLCompilations"
             template="SQL Statistics:Platform=Win32:SQL Compilations/Sec"
@@ -708,15 +579,6 @@
     </metrics>
 
     <metrics name="mssql-latches">
-    <!--
-    <metric name="Latch Waits/Sec"
-            alias="LatchWaitsSec"
-            template="Latches:Platform=Win32:Latch Waits/Sec"
-            category="UTILIZATION"
-            group="Resource Utilization"
-            collectionType="dynamic"
-            units="none"/>
--->
 
         <metric name="Average Latch Wait Time"
             alias="AverageLatchWaitTime"
@@ -742,42 +604,8 @@
        Trigger Plans.
   -->
 
-    <metrics name="mssql-cache">
-    <!--
-    <metric name="Cache Hit Ratio"
-            alias="CacheHitRatio"
-            template="${cache.domain}:Type=Formatted:Cache Hit Ratio"
-            category="UTILIZATION"
-            group="Cache"
-            collectionType="dynamic"
-            units="none"/>
-
-    <metric name="Cache Pages"
-            alias="CachePages"
-            template="${cache.domain}:Platform=Win32:Cache Pages"
-            category="UTILIZATION"
-            group="Cache"
-            collectionType="dynamic"
-            units="none"/>
-
-    <metric name="Cache Object Counts"
-            alias="CacheObjectCounts"
-            template="${cache.domain}:Platform=Win32:Cache Object Counts"
-            category="UTILIZATION"
-            group="Cache"
-            collectionType="dynamic"
-            units="none"/>
-
-    <metric name="Cache Use Counts/Sec"
-            alias="CacheUseCountsSec"
-            template="${cache.domain}:Platform=Win32:Cache Use Counts/Sec"
-            category="UTILIZATION"
-            group="Cache"
-            collectionType="dynamic"
-            units="none"/>
-  -->
-    </metrics>
-
+    <metrics name="mssql-cache"/>
+    
     <server name="MsSQL"
           version="2000"
           platforms="Win32">
@@ -817,6 +645,18 @@
             <option name="service_name"
               description="Service Name"
               default="MSSQLSERVER"/>
+            <option name="sqlserver_name"
+              description="Server Name"
+              default="localhost"/>
+          <option name="user"
+              description="Username"
+              optional="true"
+              default="%user%"/>
+            <option name="password"
+              description="Password"
+              optional="true"
+              type="secret"
+              default="%password%"/> 
         </config>
 
         <properties>
@@ -828,6 +668,11 @@
             <metrics>
                 <include name="mssql-avail"/>
                 <include name="mssql-database"/>
+                <!-- Metric for 2000 only -->
+                <metric name="Database Free Percent" category="UTILIZATION"
+             		units="percent"
+             		template="${db.name}:ServerName=%sqlserver_name%,User=%user%,Password=%password%:Database Free Percent 2000"
+             		collectionType="dynamic" />
             </metrics>
 
             <config>
@@ -844,6 +689,24 @@
 
         <property name="mssql.version" value="9"/>
         <property name="mssql.version.file" value="sqlsvc90.dll"/>
+        
+        <service name="Database">
+            <metrics>
+                <include name="mssql-avail"/>
+                <include name="mssql-database"/>
+                <!-- Metric for 2005 and 2008 only -->
+                <metric name="Database Free Percent" category="UTILIZATION"
+             		units="percent"
+             		template="${db.name}:ServerName=%sqlserver_name%,User=%user%,Password=%password%:Database Free Percent"
+             		collectionType="dynamic" />
+            </metrics>
+
+            <config>
+                <option name="db.name"
+                description="Database name"
+                default="Northwind"/>
+            </config>
+        </service>
 
     </server>
     <server name="MsSQL"

@@ -32,13 +32,14 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.ui.servlet.RenditServlet;
 
 public class RenditFilter extends BaseFilter {
-    private static final Log _log = LogFactory.getLog(RenditFilter.class);
+    private static final Log log = LogFactory.getLog(RenditFilter.class);
     
 	public void doFilter(ServletRequest request, ServletResponse response,
 	                     FilterChain chain) 
@@ -46,12 +47,18 @@ public class RenditFilter extends BaseFilter {
     {
         if (request instanceof HttpServletRequest) {
             HttpServletRequest hreq = (HttpServletRequest)request;
-            if (_log.isDebugEnabled()) {
-                _log.debug("Filtering request: " + hreq.getRequestURI() + 
+            if (log.isDebugEnabled()) {
+                log.debug("Filtering request: " + hreq.getRequestURI() + 
                            " valid=" + RenditServlet.requestIsValid(hreq));
             }
             if (!RenditServlet.requestIsValid(hreq)) { 
-                throw new ServletException("Invalid request");
+                if(response instanceof HttpServletResponse){
+                    HttpServletResponse res = (HttpServletResponse) response;
+                    res.sendError(HttpServletResponse.SC_BAD_REQUEST,"Invalid request");
+                }
+                if (log.isDebugEnabled()) {
+                    log.debug("Invalid request:"+hreq.getPathInfo());
+                }
             }
         }
         chain.doFilter(request, response);

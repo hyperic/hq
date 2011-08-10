@@ -25,6 +25,7 @@
  -->
 
 <plugin>
+  <property name="PLUGIN_VERSION" value="@project.version@"/>
   <service name="HQ Inventory">
 
     <!-- config defined by the sqlquery-plugin -->

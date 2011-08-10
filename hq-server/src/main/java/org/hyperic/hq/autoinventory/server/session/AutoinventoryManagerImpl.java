@@ -806,11 +806,10 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
     public void createDependentManagers() {
         // Get reference to the AI plugin manager
         try {
-            aiPluginManager = (AutoinventoryPluginManager) productManager
-                .getPluginManager(ProductPlugin.TYPE_AUTOINVENTORY);
-
-        } catch (Exception e) {
-            log.error("Unable to initialize session beans.", e);
+            aiPluginManager = (AutoinventoryPluginManager) productManager.getPluginManager(
+                ProductPlugin.TYPE_AUTOINVENTORY);
+        } catch (Throwable e) {
+            log.error("Unable to initialize AI Product Manager.", e);
         }
     }
 

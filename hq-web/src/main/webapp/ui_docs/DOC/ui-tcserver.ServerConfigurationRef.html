@@ -1,7 +1,9 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-    <head>
-        <title>Hyperic 4.5 Documentation : ui-tcserver.ServerConfigurationRef</title>
+ <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
+<p>      
+<p>
+        <title>vFabric Hyperic 4.6 : ui-tcserver.ServerConfigurationRef</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,49 +14,45 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Hyperic 4.5 Documentation : ui-tcserver.ServerConfigurationRef
+                            vFabric Hyperic 4.6 : ui-tcserver.ServerConfigurationRef
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 18, 2010 by <font color="#0050B2">jshackell</font>.
+					    This page last changed on Jul 29, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <p>The features described on this page are available in tc Server and tc Server Standard Edition.</p>
-<style type='text/css'>/*<![CDATA[*/
-div.rbtoc1281566736044 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1281566736044 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1281566736044 li {margin-left: 0px;padding-left: 0px;}
-
-/*]]>*/</style><div class='rbtoc1281566736044'>
-<ul>
-    <li><a href='#ui-tcserver.ServerConfigurationRef-tcRuntimeConfigurationReference'>tc Runtime Configuration Reference</a></li>
-<ul>
-    <li><a href='#ui-tcserver.ServerConfigurationRef-GeneralConfiguration'>General Configuration</a></li>
-<ul>
-    <li><a href='#ui-tcserver.ServerConfigurationRef-ServerProperties'>Server Properties</a></li>
-    <li><a href='#ui-tcserver.ServerConfigurationRef-JMXListener'>JMX Listener</a></li>
+				    <ul>
+	<li><a href="#ui-tcserver.ServerConfigurationRef-tcRuntimeConfigurationReference">tc Runtime Configuration Reference</a>
+	<ul>
+		<li><a href="#ui-tcserver.ServerConfigurationRef-GeneralConfiguration">General Configuration</a>
+		<ul>
+			<li><a href="#ui-tcserver.ServerConfigurationRef-ServerProperties">Server Properties</a></li>
+			<li><a href="#ui-tcserver.ServerConfigurationRef-JMXListener">JMX Listener</a></li>
+		</ul>
+		</li>
+		<li><a href="#ui-tcserver.ServerConfigurationRef-ServerStartConfiguration">Server Start Configuration</a>
+		<ul>
+			<li><a href="#ui-tcserver.ServerConfigurationRef-General">General</a></li>
+			<li><a href="#ui-tcserver.ServerConfigurationRef-SunSpecificJVMOptions">Sun Specific JVM Options</a></li>
+			<li><a href="#ui-tcserver.ServerConfigurationRef-Advanced">Advanced</a></li>
+		</ul>
+		</li>
+		<li><a href="#ui-tcserver.ServerConfigurationRef-ContextContainer">Context Container</a>
+		<ul>
+			<li><a href="#ui-tcserver.ServerConfigurationRef-StaticResourceCache">Static Resource Cache</a></li>
+			<li><a href="#ui-tcserver.ServerConfigurationRef-WebApplicationLogger">Web Application Logger</a></li>
+		</ul>
+		</li>
+		<li><a href="#ui-tcserver.ServerConfigurationRef-ServerDefaultsJSP">Server Defaults &#45; JSP</a></li>
+		<li><a href="#ui-tcserver.ServerConfigurationRef-ServerDefaultsStaticContent">Server Defaults &#45; Static Content</a></li>
+	</ul>
+	</li>
 </ul>
-    <li><a href='#ui-tcserver.ServerConfigurationRef-ServerStartConfiguration'>Server Start Configuration</a></li>
-<ul>
-    <li><a href='#ui-tcserver.ServerConfigurationRef-General'>General</a></li>
-    <li><a href='#ui-tcserver.ServerConfigurationRef-SunSpecificJVMOptions'>Sun Specific JVM Options</a></li>
-    <li><a href='#ui-tcserver.ServerConfigurationRef-Advanced'>Advanced</a></li>
-</ul>
-    <li><a href='#ui-tcserver.ServerConfigurationRef-ContextContainer'>Context Container</a></li>
-<ul>
-    <li><a href='#ui-tcserver.ServerConfigurationRef-StaticResourceCache'>Static Resource Cache</a></li>
-    <li><a href='#ui-tcserver.ServerConfigurationRef-WebApplicationLogger'>Web Application Logger</a></li>
-</ul>
-    <li><a href='#ui-tcserver.ServerConfigurationRef-ServerDefaults%3AJSP'>Server Defaults: JSP</a></li>
-    <li><a href='#ui-tcserver.ServerConfigurationRef-ServerDefaults%3AStaticContent'>Server Defaults: Static Content</a></li>
-</ul>
-</ul></div>
 
 
-<p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
 
 
-<h1><a name="ui-tcserver.ServerConfigurationRef-tcRuntimeConfigurationReference"></a>tc Runtime Configuration Reference</h1>
+<h2><a name="ui-tcserver.ServerConfigurationRef-tcRuntimeConfigurationReference"></a>tc Runtime Configuration Reference</h2>
 
 <p>This page defines the fields on the <b>Views &gt; Server Configuration &gt; Configuration</b> tab - the page where an authorized user can configure a tc Runtime instance.</p>
 
@@ -326,13 +324,13 @@ Note that this may cause the VM to reduce overall throughput, and in some cases 
 <tr>
 <td class='confluenceTd'> Command Line Arguments <a name="ui-tcserver.ServerConfigurationRef-configurationstartupcliArgs"></a></td>
 <td class='confluenceTd'> Enter additional options to the CATALINA_OPTS environment variables if they are not available as text fields on this&nbsp; configuration page. Use one of these forms: <br class="atl-forced-newline" />
-<br class="atl-forced-newline" />  <tt>&#45;X:<em>OptionValue</em></tt><br class="atl-forced-newline" />  <br class="atl-forced-newline" />
+<br class="atl-forced-newline" />  -XOptionValue<br class="atl-forced-newline" />  <br class="atl-forced-newline" />
 or <br class="atl-forced-newline" />
-<br class="atl-forced-newline" />  <tt>&#45;XX:<em>Option=Value</em></tt><br class="atl-forced-newline" />  <br class="atl-forced-newline" />
+<br class="atl-forced-newline" />  -XX:Option=Value <br class="atl-forced-newline" />  <br class="atl-forced-newline" />
 with a space between options. <br class="atl-forced-newline" />
 <br class="atl-forced-newline" />
 For example: <br class="atl-forced-newline" />
-<br class="atl-forced-newline" />  <tt>&#45;Xms512M &#45;Xmx512M &#45;XX:NewSize=128M</tt> </td>
+<br class="atl-forced-newline" />  -Xms512M -Xmx512M -XX:NewSize=128M </td>
 </tr>
 </tbody></table>
 </div>
@@ -383,7 +381,7 @@ The fields described in the following table configure the context for <em>every<
 </div>
 
 
-<h2><a name="ui-tcserver.ServerConfigurationRef-ServerDefaults%3AJSP"></a>Server Defaults: JSP</h2>
+<h2><a name="ui-tcserver.ServerConfigurationRef-ServerDefaultsJSP"></a>Server Defaults - JSP</h2>
 
 <p><a name="ui-tcserver.ServerConfigurationRef-configurationdefaultsJsp"></a><br/>
 The fields described in the following table configure JSP-related init params for <em>every</em> Web application deployed to this tc Runtime instance. HQ loads and updates the values from the <tt>CATALINA_BASE/conf/web.xml</tt> file for this tc Runtime instance.</p>
@@ -486,7 +484,7 @@ Default value is clsid:8AD9C840-044E-11D1-B3E9-00805F499D93. <br class="atl-forc
 </div>
 
 
-<h2><a name="ui-tcserver.ServerConfigurationRef-ServerDefaults%3AStaticContent"></a>Server Defaults: Static Content</h2>
+<h2><a name="ui-tcserver.ServerConfigurationRef-ServerDefaultsStaticContent"></a>Server Defaults - Static Content</h2>
 
 <p><a name="ui-tcserver.ServerConfigurationRef-configurationdefaultsStatic"></a><br/>
 The fields described in the following table configure static content-related init params for <em>every</em> Web application deployed to this tc Runtime instance. HQ loads and updates the values from the <tt>CATALINA_BASE/conf/web.xml</tt> file for this tc Runtime instance.</p>
@@ -538,10 +536,10 @@ The fields described in the following table configure static content-related ini
 	    </table>
 	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
 			<tr>
-				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jan 12, 2011 15:43</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:44</font></td>
 		    </tr>
 	    </table>
     </body>

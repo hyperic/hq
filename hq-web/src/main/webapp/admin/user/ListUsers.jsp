@@ -109,8 +109,12 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
     <display:column width="20%" property="department" title="admin.user.list.Department" />
   </display:table>
 
+	<c:url var="newAction" value="/admin/user/UserAdmin.do">
+		<c:param name="mode" value="new" />
+	</c:url>
+
   <tiles:insert definition=".toolbar.list">
-    <tiles:put name="listNewUrl" value="/admin/user/UserAdmin.do?mode=new"/>  
+    <tiles:put name="listNewUrl" beanName="newAction"/>  
     <tiles:put name="deleteOnly"><c:out value="${!useroperations['createSubject']}"/></tiles:put>
     <tiles:put name="newOnly"><c:out value="${!useroperations['removeSubject']}"/></tiles:put>
     <tiles:put name="listItems" beanName="AllUsers"/>

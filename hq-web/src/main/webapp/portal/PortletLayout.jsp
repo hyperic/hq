@@ -36,24 +36,13 @@
 <link rel="stylesheet" href="<html:rewrite page="/css/HQ_40.css"/>" type="text/css"/>
 
 <script type="text/javascript">
-djConfig = { isDebug: false, locale: 'en-us' }
-</script>
-<script type="text/javascript" src="<html:rewrite page='/js/dojo/0.4.4/dojo.js'/>"></script> 
-<script type="text/javascript">
 djConfig.parseOnLoad = true;
 djConfig.baseUrl = '/static/js/dojo/1.5/dojo/';
-djConfig.scopeMap = [
-        ["dojo", "dojo11"],
-        ["dijit", "dijit11"],
-        ["dojox", "dojox11"]
-    ];
 </script>
 <script src="<html:rewrite page='/static/js/dojo/1.5/dojo/dojo.js'/>" type="text/javascript"></script>
 <script type="text/javascript">
-    var imagePath = "<html:rewrite page="/images/"/>";
-    dojo11.require('dojo.date');
-    dojo.require('dojo.event.*');
-	dojo.require('dojo.widget.*');
+    var imagePath = "/images/";
+    hqDojo.require('dojo.date');
 </script>
 <script src="<html:rewrite page='/js/prototype.js'/>" type="text/javascript"></script>
 <script src="<html:rewrite page='/js/popup.js'/>" type="text/javascript"></script>
@@ -77,8 +66,8 @@ var onloads = [];
 
 	function refreshPortlets() {
 	
-	    var problemPortlet = dojo.byId('problemResourcesTable');
-	    var favoritePortlet = dojo.byId('favoriteTable');
+	    var problemPortlet = hqDojo.byId('problemResourcesTable');
+	    var favoritePortlet = hqDojo.byId('favoriteTable');
 	
 	    var nodes = document.getElementsByTagName('table');
 	    var getRecentForm = document.getElementsByTagName('form')
@@ -127,13 +116,13 @@ var onloads = [];
 	    }
 	}
 	
-	onloads.push(refreshPortlets);
-
-	dojo11.addOnLoad(function() {
-		initOnloads();
+	hqDojo.ready(function() {
+		refreshPortlets();
 	});
 </script>
-<html:link page="/Resource.do?eid=" linkName="viewResUrl" styleId="viewResUrl" style="display:none;"></html:link>
+<html:link action="/Resource" linkName="viewResUrl" styleId="viewResUrl" style="display:none;">
+	<html:param name="eid" value=""/>
+</html:link>
 
 <tiles:insert beanProperty="url" beanName="portlet" flush="true">
 	<tiles:put name="portlet" beanName="portlet" />

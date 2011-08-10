@@ -30,6 +30,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.GregorianCalendar;
 
+import javax.print.attribute.standard.DateTimeAtCompleted;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -64,11 +65,11 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.beans.AlertBean;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.util.NumberUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.units.FormatSpecifics;
 import org.hyperic.util.units.FormattedNumber;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -133,8 +134,9 @@ public class ListAlertAction
         PageList<Alert> alerts;
 
         try {
-            long begin = cal.getTimeInMillis();
-            alerts = eventsBoss.findAlerts(sessionId, appEntId, begin, begin + Constants.DAYS, pc);
+            final DateTime begin = new DateTime(cal);
+            final DateTime end = addAlmostOneDay(begin);
+            alerts = eventsBoss.findAlerts(sessionId, appEntId, begin.getMillis(), end.getMillis(), pc);
         } catch (PermissionException e) {
             // user is not allowed to see/manage alerts.
             // return empty list for now
@@ -214,6 +216,15 @@ public class ListAlertAction
         return null;
     }
 
+    /**
+     * Take the existing DateTime and add 23:59:59.
+     * @param begin
+     * @return
+     */
+	public DateTime addAlmostOneDay(final DateTime begin) {
+		return begin.plusDays(1).minusSeconds(1);
+	}
+
     private void setupCondition(AlertBean bean, AlertConditionValue cond, String value, HttpServletRequest request,
                                 int sessionId) throws SessionTimeoutException, SessionNotFoundException,
         MeasurementNotFoundException, RemoteException {
@@ -251,28 +262,8 @@ public class ListAlertAction
                 if (value == null || value.length() == 0) {
                     bean.setValue(Constants.UNKNOWN);
                 } else {
-                    String last = value.substring(value.length() - 1);
-                    try {
-                        // This is legacy code, used to format a comma delimited
-                        // number in the logs. However, we should be storing
-                        // fully formatted values into logs now. Remove post 4.1
-                        Integer.parseInt(last);
-
-                        // format threshold and value
-                        if (m == null) {
-                            m = measurementBoss.getMeasurement(sessionId, new Integer(cond.getMeasurementId()));
-
-                        }
-                        double dval = NumberUtil.stringAsNumber(value).doubleValue();
-
-                        FormattedNumber val = UnitsConvert.convert(dval, m.getTemplate().getUnits());
-
-                        bean.setValue(val.toString());
-                    } catch (NumberFormatException e) {
-                        bean.setValue(value);
-                    }
+                    bean.setValue(value);
                 }
-
                 break;
 
             case EventConstants.TYPE_CUST_PROP:

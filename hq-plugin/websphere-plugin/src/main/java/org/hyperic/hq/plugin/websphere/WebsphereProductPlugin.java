@@ -33,7 +33,6 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -142,17 +141,17 @@ public class WebsphereProductPlugin extends ProductPlugin {
      * returns most recent version found.
      */
     public static File getRegistryInstallPath() {
-        List dirs = getRegistryInstallPaths();
+        List<File> dirs = getRegistryInstallPaths();
 
         if (dirs.size() == 0) {
             return null;
         }
 
-        return (File)dirs.get(0);
+        return dirs.get(0);
     }
 
-    public static List getRegistryInstallPaths() {
-        List dirs = new ArrayList();
+    public static List<File> getRegistryInstallPaths() {
+        List<File> dirs = new ArrayList<File>();
 
         try {
             RegistryKey key =
@@ -241,7 +240,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
         return isOSGi;
     }
 
-    private void addClassPath(List path,
+    private void addClassPath(List<String> path,
                               String dir,
                               String[] jars) {
 
@@ -254,18 +253,18 @@ public class WebsphereProductPlugin extends ProductPlugin {
                 continue;
                 }
 
-                log.debug("Classpath += " + dir + jars[j]);
+                log.debug("- Classpath += " + dir + jars[j]);
                 path.add(dir + jars[j]);
             }
         }
 
     //jar names minus version "_6.1.0.jar"
-    private void addClassPathOSGi(List path,
+    private void addClassPathOSGi(List<String> path,
                                   String dir,
                                   String[] jars)
     {
         log.debug("Adding OSGi packages from " + dir);
-        final HashMap wantedJars = new HashMap();
+        final HashMap<String, Boolean> wantedJars = new HashMap<String, Boolean>();
         for (int i=0; i<jars.length; i++) {
             wantedJars.put(jars[i], Boolean.TRUE);
         }
@@ -299,9 +298,9 @@ public class WebsphereProductPlugin extends ProductPlugin {
         JarOutputStream os = new JarOutputStream(new FileOutputStream(newJar));
         byte[] buffer = new byte[1024];
         try {
-            for (Enumeration e = jar.entries(); e.hasMoreElements();) {
+            for (Enumeration<JarEntry> e = jar.entries(); e.hasMoreElements();) {
                 int n;
-                JarEntry entry = (JarEntry)e.nextElement();
+                JarEntry entry = e.nextElement();
 
                 if (entry.getName().startsWith("org/apache/commons/logging/")) {
                     continue;
@@ -351,35 +350,37 @@ public class WebsphereProductPlugin extends ProductPlugin {
             "runtimes"
         };
 
-        for (int i=0; i<dirs.length; i++) {
+        for (int i = 0; i < dirs.length; i++) {
             File dir = new File(installDir, dirs[i]);
             String[] jars = dir.list();
-            if (jars == null) {
-                continue;
-            }
-            for (int j=0; j<jars.length; j++) {
-                File jar = new File(dir, jars[j]);
-                if (jar.isDirectory() || !jars[j].endsWith(".jar")) {
-                    continue;
+            if (jars != null) {
+                for (int j = 0; j < jars.length; j++) {
+                    File jar = new File(dir, jars[j]);
+                    if (isValidJar(jar)) {
+                        log.debug("classpath += " + jar);
+                        if (jar.getName().startsWith("com.ibm.ws.runtime_")) {
+                            jar = runtimeJarHack(jar);
+                        }
+                        URL url = sun.net.www.ParseUtil.fileToEncodedURL(jar);
+                        addURL.invoke(loader, new Object[]{url});
+                    } else {
+                        log.debug("jar '" + jars[j] + "' skipped");
+                        continue;
+                    }
                 }
-
-                if (jars[j].startsWith("com.ibm.ws.webservices.thinclient")) {
-                    // skip
-                    continue;
-                }
-
-                log.debug("classpath += " + jar);
-                if (jars[j].startsWith("com.ibm.ws.runtime_")) {
-                    jar = runtimeJarHack(jar);
-                }
-                URL url = sun.net.www.ParseUtil.fileToEncodedURL(jar);
-                addURL.invoke(loader, new Object[] { url });
             }
         }
     }
 
+    private boolean isValidJar(File jar) {
+        return  jar.getName().startsWith("com.ibm")
+                && jar.getName().endsWith(".jar")
+                && !jar.getName().contains("thinclient")
+                && jar.isFile();
+    }
+
     private String[] getClassPathOSGi(String installDir) {
-        ArrayList path = new ArrayList();
+        ArrayList<String> path = new ArrayList<String>();
 
         String v = WebsphereDetector.getComponentVersion(new File(installDir, "properties/version/WAS.product"));
         if (v.startsWith("6")) {
@@ -440,7 +441,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
         OperatingSystem os = OperatingSystem.getInstance();
         boolean testIBMJDK = (os.getName().equals(OperatingSystem.NAME_LINUX)
                 || os.getName().equals(OperatingSystem.NAME_WIN32));
-        assert testIBMJDK : os.getName();
+        //assert testIBMJDK : os.getName();
         if (testIBMJDK) {
             VALID_JVM = System.getProperty("java.vm.vendor").toUpperCase().indexOf("IBM") != -1;
             if (!VALID_JVM) {

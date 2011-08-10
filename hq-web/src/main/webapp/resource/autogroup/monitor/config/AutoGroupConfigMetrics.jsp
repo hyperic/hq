@@ -118,7 +118,10 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 <tiles:insert definition=".resource.common.monitor.config.editConfigMetricsVisibility"/>
 
 <c:set var="tmpMetrics" value="${requestScope.availabilityMetrics}"/>
-<c:set var="tmpAddToListUrl" value="/resource/${section}/monitor/Config.do?mode=addMetrics&eid=${Resource.entityId.appdefKey}"/>
+<c:url var="tmpAddToListUrl" value="/resource/${section}/monitor/Config.do">
+	<c:param name="mode" value="addMetrics"/>
+	<c:param name="eid" value="${Resource.entityId.appdefKey}"/>
+</c:url>
 <tiles:insert definition=".resource.common.monitor.config.toolbar.addToList">
   <tiles:put name="showAddToListBtn" value="false"/>
   <tiles:put name="addToListUrl" beanName="tmpAddToListUrl"/>

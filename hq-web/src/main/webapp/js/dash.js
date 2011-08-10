@@ -1,12 +1,12 @@
 // NOTE: requires prototype.js
 
 function changeDashboard(formId){
-    $(formId).submit();
+	hqDojo.byId(formId).submit();
 }
 
 function selectDefaultDashboard(url){
-    var selectDashboardEl = $('dashSelect');
-    var defaultDashboardEl = $('defaultDashboard');
+    var selectDashboardEl = hqDojo.byId('dashSelect');
+    var defaultDashboardEl = hqDojo.byId('defaultDashboard');
     
     if (defaultDashboardEl == null || selectDashboardEl == null) return;  // elements don't exist by ids given
 	
@@ -15,7 +15,7 @@ function selectDefaultDashboard(url){
 	var currDefault = defaultDashboardEl;
 	
 	if (index < 0) {
-		$("dashboardSelectionErrorPanel").setStyle({ display:"block" });
+		hqDojo.style("dashboardSelectionErrorPanel", "display", "block");
 		return;
 	}
 	
@@ -24,26 +24,36 @@ function selectDefaultDashboard(url){
 	if (newDefault != currDefault) {
 		defaultDashboardEl.value = newDefault;
 		
-		$('makeDefaultBtn').hide();
+		hqDojo.style('makeDefaultBtn', "display", "none");
 		
 	    if (url != null && url != 'undefined') {
-	    	new Ajax.Request(url, {
-				method: 'post',
-				parameters: { 'defaultDashboard' : newDefault },
-				onSuccess: function(transport) {
-					$('makeDefaultUpdatingIcon').hide();
-					$('makeDefaultUserMessage').show();
-					setTimeout("$('makeDefaultUserMessage').fade();", 3000);
-				},
-				onFailure: function(transport) {
-					$('makeDefaultUpdatingIcon').hide();
-					$('makeDefaultUserError').show();
-					setTimeout("$('makeDefaultUserError').fade();", 3000);
-				}
-			});
+	    	hqDojo.xhrPost({
+	    		url: url,
+	    		content: {
+	    			'defaultDashboard' : newDefault
+	    		},
+	    		load: function(response, args) {
+	    			hqDojo.style('makeDefaultUpdatingIcon', "display", "none");
+					hqDojo.style('makeDefaultUserMessage', "display", "");
+					setTimeout(function() {
+						hqDojo.fadeOut({
+							node: 'makeDefaultUserMessage'
+						}).play();
+					}, 3000);
+	    		},
+	    		error: function(response, args) {
+	    			hqDojo.style('makeDefaultUpdatingIcon', "display", "none");
+					hqDojo.style('makeDefaultUserError', "display", "");
+					setTimeout(function() {
+						hqDojo.fadeOut({
+							node: 'makeDefaultUserError'
+						}).play();
+					}, 3000);
+	    		}
+	    	});
 	    } else {
 	    	// Old way of doing it, popup dialog is using this
-	    	$('DashboardForm').submit();
+	    	hqDojo.byId('DashboardForm').submit();
 	    }
 	}
 }

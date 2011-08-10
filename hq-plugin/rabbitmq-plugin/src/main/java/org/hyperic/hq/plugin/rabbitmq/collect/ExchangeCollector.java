@@ -28,56 +28,53 @@ package org.hyperic.hq.plugin.rabbitmq.collect;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.rabbitmq.core.HypericRabbitAdmin;
-import org.hyperic.util.config.ConfigResponse;
-import org.springframework.amqp.core.Exchange;
 
-import java.util.List;
 import java.util.Properties;
-import org.hyperic.hq.product.Metric;
+import org.hyperic.hq.plugin.rabbitmq.core.RabbitExchange;
 
 /**
  * ExchangeCollector
  * @author Helena Edelson
  */
-public class ExchangeCollector extends RabbitMQListCollector {
+public class ExchangeCollector extends RabbitMQDefaultCollector {
 
     private static final Log logger = LogFactory.getLog(ExchangeCollector.class);
 
     public void collect(HypericRabbitAdmin rabbitAdmin) {
         Properties props = getProperties();
         String vhost = (String) props.get(MetricConstants.VHOST);
+        String exch = (String) props.get(MetricConstants.EXCHANGE);
+        if (exch == null) {
+            exch = "";
+        }
         if (logger.isDebugEnabled()) {
             String node = (String) props.get(MetricConstants.NODE);
-            logger.debug("[collect] vhost=" + vhost + " node=" + node);
+            logger.debug("[collect] exch='" + exch + "' vhost='" + vhost + "' node='" + node + "'");
         }
 
-        List<Exchange> exchanges = rabbitAdmin.getExchanges(vhost);
-        if (exchanges != null) {
-            for (Exchange e : exchanges) {
-                logger.debug("[collect] Exchange="+e.getName());
-                setValue(e.getName() + "." + Metric.ATTR_AVAIL, Metric.AVAIL_UP);
+        try {
+            RabbitExchange e = rabbitAdmin.getExchange(vhost, exch);
+            setAvailability(true);
+            if (e.getMessageStatsIn() != null) {
+                setValue("in_publish_details", e.getMessageStatsIn().getPublishDetails().get("rate"));
+            } else {
+                setValue("in_publish_details", 0);
             }
-        }
-    }
+            if (e.getMessageStatsOut() != null) {
+                setValue("out_publish_details", e.getMessageStatsOut().getPublishDetails().get("rate"));
+            } else {
+                setValue("out_publish_details", 0);
+            }
 
-    /**
-     * Assemble custom key/value data for each object to set
-     * as custom properties in the ServiceResource to display
-     * in the UI.
-     * @param e
-     * @return
-     */
-    public static ConfigResponse getAttributes(Exchange e) {
-        String durable = e.isDurable() ? "durable" : "not durable";
-        ConfigResponse res = new ConfigResponse();
-        res.setValue("durable", durable);
-        res.setValue("exchangeType", e.getType());
-        res.setValue("autoDelete", e.isAutoDelete());
-        return res;
+        } catch (Exception ex) {
+            setAvailability(false);
+            logger.debug(ex.getMessage(), ex);
+        }
     }
 
     @Override
     public Log getLog() {
         return logger;
+
     }
 }

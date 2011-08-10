@@ -28,6 +28,7 @@
 
 
 <plugin>
+    <property name="PLUGIN_VERSION" value="@project.version@"/>
     <classpath>
         <include name="pdk/plugins/netdevice-plugin.jar"/>
     </classpath>

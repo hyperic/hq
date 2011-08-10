@@ -34,12 +34,21 @@
 <tiles:importAttribute name="portlet"/>
 
 <script type="text/javascript">
-function requestMetricsResponse<c:out value="${portlet.token}"/>() {
-    var dummyStr = '&hq=' + new Date().getTime();
-    var metricsUrl = "<html:rewrite page="/dashboard/ViewMetricViewer.do?token=${portlet.token}"/>" + dummyStr;
-	new Ajax.Request(metricsUrl, {method: 'get', onSuccess:showMetricsResponse});
-}
-onloads.push(requestMetricsResponse<c:out value="${portlet.token}"/>);
+	function requestMetricsResponse${portlet.token}() {
+	    hqDojo.xhrGet({
+			url: "<html:rewrite action="/dashboard/ViewMetricViewer" />",
+			content: {
+				token: "${portlet.token}",
+				hq: (new Date()).getTime()
+			},
+			handleAs: "json",
+			load: showMetricsResponse
+		});			
+	}
+	
+	hqDojo.ready(function() {
+		requestMetricsResponse${portlet.token}();
+	});
 </script>
 
 <div class="effectsPortlet">
@@ -70,7 +79,7 @@ onloads.push(requestMetricsResponse<c:out value="${portlet.token}"/>);
       <tbody>
     <tr class="ListRow">
             <td class="ListCell">
-                <c:url var="path" value="/"/>
+                <c:url var="path" value="/images/4.0/icons/properties.gif"/>
                 <fmt:message key="dash.home.add.resources.to.display">
                   <fmt:param value="${path}"/>
                 </fmt:message>

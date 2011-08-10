@@ -120,7 +120,9 @@ public class ServerConfig
     public static final String Q_ADMIN_USER = "What should the username be for the initial admin user?";
     public static final String Q_ADMIN_PASSWORD = "What should the password be for the initial admin user?";
     public static final String Q_ADMIN_EMAIL = "What should the email address be for the initial admin user?";
-
+    public static final String Q_USE_CUSTOM_KEYSTORE = "Would you like to use your own java keystore?";
+    public static final String Q_SERVER_KEYSTORE_PATH = "What is the file path to your java keystore?";
+    public static final String Q_SERVER_KEYSTORE_PASSWORD = "What is the password to your java keystore?";
     private static final String SERVER_DATABASE_UPGRADE_CHOICE = "server.database.upgrade.choice";
 
     // convenience constants
@@ -139,6 +141,13 @@ public class ServerConfig
         ConfigSchema schema = super.getUpgradeSchema(previous, iterationCount);
         if (schema == null)
             schema = new ConfigSchema();
+
+        // TODO Remove this code once we no longer support HQ version less than 4.6
+        //      This is solely to maintain backwards compatibility with older HQ agents
+        //      that don't handle SSL communication correctly.
+        //      For the upgrade case, we want to automatically import unverified certificates
+        schema.addOption(new HiddenConfigOption("accept.unverified.certificates", Boolean.TRUE.toString()));
+
         switch (iterationCount) {
             case 0:
                 schema.addOption(new HiddenConfigOption("server.overwrite", YesNoConfigOption.NO));
@@ -172,6 +181,12 @@ public class ServerConfig
 
         // Do we have an builtin-postgresql packaged with us?
         boolean haveBuiltinDB = getReleaseHasBuiltinDB();
+
+        // TODO Remove this code once we no longer support HQ version less than 4.6
+        //      This is solely to maintain backwards compatibility with older HQ agents
+        //      that don't handle SSL communication correctly
+        //      For the new install case, we do not want to automatically import unverified certificates
+        schema.addOption(new HiddenConfigOption("accept.unverified.certificates", Boolean.FALSE.toString()));
 
         switch (iterationCount) {
             case 0:
@@ -223,9 +238,31 @@ public class ServerConfig
                         Q_PORT_WEBAPP_SECURE, new Integer(7443)));
 
                 }
+                
+                if (installMode.isQuick()) {
+                	schema.addOption(new HiddenConfigOption("server.use.custom.keystore", YesNoConfigOption.NO));
+                } else {
+                	schema.addOption(new YesNoConfigOption("server.use.custom.keystore", Q_USE_CUSTOM_KEYSTORE, YesNoConfigOption.NO));
+                }
+
+            	
+                break;
+            case 4:
+            	String useCustomKeystore = previous.getValue("server.use.custom.keystore");
+
+                	schema.addOption(new StringConfigOption("server.keystore.path", Q_SERVER_KEYSTORE_PATH, ""));
+            	if (YesNoConfigOption.YES.equals(useCustomKeystore)) {   //yes implies it's not a quick install (default is no)
+                	schema.addOption(new StringConfigOption("server.keystore.password", Q_SERVER_KEYSTORE_PASSWORD, ""));                	
+            	} else {
+            		// TODO not sure if there's a cleaner way to do this.  The problem is we technically don't know the real install path bc 
+            		// the archive hasn't been unzipped at this point.  So we use a token and replace it later in the ant script with the real path
+            		schema.addOption(new HiddenConfigOption("server.keystore.path", "../../conf/hyperic.keystore"));
+                	schema.addOption(new HiddenConfigOption("server.keystore.password", "hyperic"));
+            	}
+
                 break;
 
-            case 4:
+            case 5:
                 portChoice = previous.getValue("server.webapp.port");
                 fqdn = computeFQDN();
                 domain = computeDomain(fqdn);
@@ -249,16 +286,13 @@ public class ServerConfig
                     schema.addOption(new StringConfigOption("server.mail.host", Q_MAIL_HOST, fqdn));
                 }
 
-                if (installMode.isQuick()) {
-                    schema.addOption(new HiddenConfigOption("server.mail.sender", "hqadmin@" +
-                                                                                  domain));
-                } else {
-                    schema.addOption(new StringConfigOption("server.mail.sender", Q_MAIL_FROM,
-                        "hqadmin@" + domain));
-                }
+                // We always ask for username and password now per HQ-3627, 
+                // so probably shouldn't auto enter the email value
+                schema.addOption(new StringConfigOption("server.mail.sender", Q_MAIL_FROM, "hqadmin@" + domain));
+
                 break;
 
-            case 5:
+            case 6:
                 if (installMode.isOracle()) {
                     schema.addOption(new HiddenConfigOption("server.database.choice", DBC_ORA10));
                 } else if (installMode.isPostgres()) {
@@ -291,7 +325,7 @@ public class ServerConfig
                 }
                 break;
 
-            case 6:
+            case 7:
                 // determine server.database from server.database.choice...
                 dbChoiceStr = previous.getValue("server.database.choice");
                 if (dbChoiceStr.equals(DBC_ORA10))
@@ -384,28 +418,24 @@ public class ServerConfig
                 senderChoice = previous.getValue("server.mail.sender");
                 // dont ask about admin username if this is an HA node
                 // this should have already been set up
-                if (installMode.isQuick()) {
-                    schema.addOption(new HiddenConfigOption("server.admin.username", "hqadmin"));
-                    schema.addOption(new HiddenConfigOption("server.admin.password", "hqadmin"));
-                    schema.addOption(new HiddenConfigOption("server.admin.email", senderChoice));
-                } else {
-                    usernameOption = new AdminUsernameConfigOption("server.admin.username",
-                        Q_ADMIN_USER, "hqadmin");
-                    schema.addOption(usernameOption);
+                // We always ask for username and password now per HQ-3627
+                usernameOption = new AdminUsernameConfigOption("server.admin.username", Q_ADMIN_USER, "hqadmin");
+                    
+                schema.addOption(usernameOption);
 
-                    passwordOption = new StringConfigOption("server.admin.password",
-                        Q_ADMIN_PASSWORD, null);
-                    passwordOption.setSecret(true);
-                    passwordOption.setMinLength(6);
-                    passwordOption.setMaxLength(40);
-                    schema.addOption(passwordOption);
-
-                    schema.addOption(new StringConfigOption("server.admin.email", Q_ADMIN_EMAIL,
-                        senderChoice));
-                }
+                passwordOption = new StringConfigOption("server.admin.password", Q_ADMIN_PASSWORD, null);
+                    
+                passwordOption.setSecret(true);
+                passwordOption.setMinLength(6);
+                passwordOption.setMaxLength(40);
+                schema.addOption(passwordOption);
+                
+                // probably shouldn't auto enter the email value, since we're asking for username...
+                schema.addOption(new StringConfigOption("server.admin.email", Q_ADMIN_EMAIL, senderChoice));
+                
                 break;
 
-            case 7:
+            case 8:
                 // Get encryption key
                 String encryptionKey = previous.getValue("server.encryption-key");
 
@@ -421,7 +451,7 @@ public class ServerConfig
                 schema.addOption(encryptedPwOption);
                 break;
 
-            case 8:
+            case 9:
                 // For servers using the builtinDB we have only gotten the port
                 // at
                 // this point. Now we setup the url based on the port selection
@@ -433,7 +463,7 @@ public class ServerConfig
                 }
                 break;
 
-            case 9:
+            case 10:
                 // Now that they have made their jdbc selections, do a sanity
                 // check:
                 // If we are in "quick" mode and the database already exists,
@@ -457,7 +487,7 @@ public class ServerConfig
                 }
                 break;
 
-            case 10:
+            case 11:
                 String dbUpgradeChoice = previous.getValue(SERVER_DATABASE_UPGRADE_CHOICE);
                 if (dbUpgradeChoice.equals(DB_CHOICE_OVERWRITE)) {
                     schema.addOption(new HiddenConfigOption("server.database.create",
@@ -470,7 +500,7 @@ public class ServerConfig
                                                  + "Exiting installer.");
                 }
                 break;            
-            case 11:
+            case 12:
                 if(isEEInstall) {
                     schema.addOption(new HiddenConfigOption("accept.eula",YesNoConfigOption.NO));
                 }

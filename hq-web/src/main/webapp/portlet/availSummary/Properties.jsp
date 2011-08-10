@@ -35,10 +35,11 @@
 
 <hq:pageSize var="pageSize"/>
 <c:set var="widgetInstanceName" value="resources"/>
-<c:url var="selfAction" value="/dashboard/Admin.do?mode=availSummary">
- <c:if test="${not empty param.token}">
- 	<c:param name="token" value="${param.token}"/>
- </c:if>
+<c:url var="selfAction" value="/dashboard/Admin.do">
+	<c:param name="mode" value="availSummary" />
+ 	<c:if test="${not empty param.token}">
+ 		<c:param name="token" value="${param.token}"/>
+ 	</c:if>
 </c:url>
 <script  src="<html:rewrite page="/js/listWidget.js"/>" type="text/javascript"></script>
 <script type="text/javascript">
@@ -48,7 +49,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 var help = '<hq:help/>';
 
 /***********************************************/
-/* Disable "Enter" key in Form script- By Nurul Fadilah(nurul@REMOVETHISvolmedia.com)
+/* Disable "Enter" key in Form script- By Nurul Fadilah
 /* This notice must stay intact for use
 /* Visit http://www.dynamicdrive.com/ for full source code
 /***********************************************/

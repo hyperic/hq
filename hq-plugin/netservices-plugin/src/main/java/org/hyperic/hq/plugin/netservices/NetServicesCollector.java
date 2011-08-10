@@ -28,23 +28,22 @@ package org.hyperic.hq.plugin.netservices;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Properties;
 
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
-import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.hyperic.hq.agent.AgentKeystoreConfig;
 import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.sigar.NetConnection;
 import org.hyperic.sigar.NetStat;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
-import org.hyperic.util.security.BogusTrustManager;
+import org.hyperic.util.security.DefaultSSLProviderImpl;
+import org.hyperic.util.security.SSLProvider;
 
 public abstract class NetServicesCollector extends Collector {
 
@@ -54,7 +53,7 @@ public abstract class NetServicesCollector extends Collector {
     private int defaultPort, defaultSSLPort;
     private boolean isSSL, enableNetstat;
     private String sslProtcol;
-
+    private AgentKeystoreConfig keystoreConfig;
     private String user, pass;
 
     private boolean hasCredentials;
@@ -75,7 +74,7 @@ public abstract class NetServicesCollector extends Collector {
         if (!this.enableNetstat) {
             return;
         }
-
+        
         InetSocketAddress saddr = getSocketAddress();
         byte[] address = saddr.getAddress().getAddress();
         int port = saddr.getPort();
@@ -103,7 +102,10 @@ public abstract class NetServicesCollector extends Collector {
 
     protected void init() throws PluginException {
         Properties props = getProperties();
+        
+        this.keystoreConfig = new AgentKeystoreConfig();
         this.enableNetstat = getPlugin().isNetStatEnabled();
+        
         if (this.enableNetstat) {
             if (sigar == null) {
                 sigar = new Sigar();
@@ -238,83 +240,22 @@ public abstract class NetServicesCollector extends Collector {
     public String getHostAddress() {
         return getSocketAddress().getAddress().getHostAddress();
     }
-
-    protected Socket createSSLSocket()
-        throws IOException {
-
-        SSLContext context;
-        String proto = getSSLProtocol();
-
-        try {
-            context = SSLContext.getInstance(proto);
-        } catch(NoSuchAlgorithmException e) {
-            throw new IOException("Unable to get SSL context (" +
-                                  proto + "): " +
-                                  e.getMessage());
-        }
-
-        try {
-            X509TrustManager[] managers =
-                new X509TrustManager[] { new BogusTrustManager() };
-
-            context.init(null, managers, null);
-        } catch(KeyManagementException e) {
-            throw new IOException("Unable to initialize trust manager: " +
-                                   e.getMessage());
-        }
-
-        return context.getSocketFactory().createSocket();
-    }
-
-    protected void connect(Socket socket)
-        throws IOException {
-
-        InetSocketAddress saddr = getSocketAddress();
-        try {
-            socket.connect(saddr, getTimeoutMillis());
-            socket.setSoTimeout(getTimeoutMillis());
-            setMessage("OK");
-        } catch (IOException e) {
-            setMessage("connect " + saddr, e);
-            throw e;
-        }        
+    
+    public SocketWrapper getSocketWrapper() throws IOException {
+    	return getSocketWrapper(false);
     }
     
-    public Socket getSocket()
-        throws IOException {
-        
-        Socket socket;
-        boolean isSSL = isSSL();
-        
-        if (isSSL) {
-            try {
-                socket = createSSLSocket();
-            } catch (IOException e) {
-                setMessage("Failed to create SSL socket", e);
-                throw e;
-            }
-        }
-        else {
-            socket = new Socket();
-        }
+    public SocketWrapper getSocketWrapper(boolean acceptUnverifiedCertificatesOverride) throws IOException {
+    	// Somtimes we may want to override what's set in the keystore config...mostly for init purposes...
+    	boolean accept = acceptUnverifiedCertificatesOverride ? true : keystoreConfig.isAcceptUnverifiedCert();
+    	SSLProvider sslProvider = new DefaultSSLProviderImpl(keystoreConfig, accept);
+        SSLSocketFactory factory = sslProvider.getSSLSocketFactory();
+        Socket socket = factory.createSocket();
 
-        connect(socket);
+        socket.connect(getSocketAddress(), getTimeoutMillis());
+        socket.setSoTimeout(getTimeoutMillis());
+        ((SSLSocket) socket).startHandshake();       
 
-        if (isSSL) {
-            try {
-                ((SSLSocket)socket).startHandshake();
-            } catch (IOException e) {
-                setMessage("SSL start handshake failed", e);
-                throw e;
-            }
-        }
-
-        return socket;
-    }
-    
-    public SocketWrapper getSocketWrapper()
-        throws IOException {
-
-        return new SocketWrapper(getSocket());
+        return new SocketWrapper(socket);
     }
 }

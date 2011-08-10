@@ -96,6 +96,7 @@
                   failOnMissing="false"/>
     <available property="user-setup-properties.available"
                file="${setup.absolute}"/>
+    <property file="${setup.absolute}" />
     <msgfail unless="user-setup-properties.available">^^^ERROR:\
        The specified Hyperic HQ install configuration file does not exist:
          ${setup.absolute}
@@ -113,6 +114,7 @@
      <delete file="${newSetup}"/>
     <echo>^^^INFO: Loading install configuration...</echo>
     <echo>^^^DEBUG: Loading from ${setup}...</echo>
+    <echo>^^^DEBUG: doing non-interactive, accept= ${accept.eula} ...</echo>
    
     <ant antfile="setup-noninteractive.xml" target="generate-props"/>
     <property file="${newSetup}"/>
@@ -142,17 +144,23 @@ Setup properties will be written to %WRITABLEFILE% instead.
   	<available file="eula.txt" property="eula.present"/>
   </target>
 
-  <target name="show-eula" depends="check-eula" if="eula.present" unless="accept.eula">
-  	<loadfile property="eula.text" srcFile="eula.txt"/>
-	<echo>^^^INFO:
+  <target name="show-eula" depends="check-eula" if="eula.present">
+    <echo>^^^DEBUG: accepted=${accept.eula}...</echo>
+    <antcall target="show-eula-unless-accepted" />
+  </target>
+
+  <target name="show-eula-unless-accepted" unless="accept.eula">
+      <echo>^^^DEBUG: show-eula...</echo>
+        <loadfile property="eula.text" srcFile="eula.txt"/>
+        <echo>^^^INFO:
 __ll__
 ${eula.text}
 __ll__
-	</echo>
-    <input message="Do accept the terms of the agreement?"
+        </echo>
+    <input message="Do you accept the terms of the agreement?"
            validargs="y,n"
            addproperty="license.accepted" />
-	<condition property="do.abort">
+        <condition property="do.abort">
       <equals arg1="n" arg2="${license.accepted}"/>
     </condition>
     <fail if="do.abort">The license must be accepted in order to proceed with the installation.</fail>
@@ -283,8 +291,17 @@ __ll__
 		  </antcall>
 	</target>
 	
-  <target name="post-agent-unpack">
-	   <echo>^^^INFO: Setting permissions on agent binaries...</echo>
+	<target name="post-agent-unpack">
+		<echo>^^^INFO: Setting permissions on ${agent-dir}...</echo>
+	  	<chmod perm="go-rwx" type="both">
+	  		<fileset dir="${agent-dir}">
+	  			<include name="**/bin" />
+	  			<include name="**/conf" />
+	  			<include name="**/log" />
+	  			<include name="**/wrapper" />
+	  		</fileset>
+	  	</chmod>
+	  	<echo>^^^INFO: Setting permissions on agent binaries...</echo>
 		<antcall target="chmod-exec">
 			<param name="chmod.dir" value="${agent-dir}"/>
 		</antcall>
@@ -293,7 +310,7 @@ __ll__
   		<antcall target="fix-text-files">
 			<param name="crlf.dir" value="${agent-dir}"/>
 	    </antcall>
-  </target>
+  	</target>
 
   <target name="agent"
           depends="agent.valid-props,setup-agent-init"
@@ -522,12 +539,19 @@ ${errMsg}
     <!-- Copy the existing config -->
     <serverConfigUpgrade existing="${server.upgradedir}/conf/hq-server.conf" 
     	new="${server.product.dir}/conf/hq-server.conf" upgradeDir="${server.upgradedir}"/>
-  	
+  		
     <!-- Copy the existing license file, if there is one -->
+  	<!-- Disable copying of license.xml file for 4.6 upgrade bc it's now different, post 4.6 upgrades should
+  	     copying the serial file, if one exists...
     <echo>^^^INFO: Copying existing license file</echo>
     <copy file="${server.upgradedir}/conf/license.xml"
           todir="${server.product.dir}/conf"
           failonerror="false"/>
+  	-->
+  	
+  	<echo>^^^INFO: Copying keystore</echo>
+  	<available file="${server.upgradedir}/conf/hyperic.keystore" property="keystore.exists"/>
+  	<antcall target="copy-keystore-upgrade" />
   	
   	<!-- Copy log4j.xml from evolution or later -->
     <copy file="${server.upgradedir}/conf/log4j.xml"
@@ -598,6 +622,7 @@ ${errMsg}
   <target name="generate-hq-server-conf" unless="setup.upgrade">
     <substProps src="${install.dir}/data/hq-server.conf"
                 dest="${conf-dir}/hq-server.conf"/>
+  	<replace file="${conf-dir}/hq-server.conf" token="@SERVER_CONF@" value="${conf-dir}" />
   </target>
 	
 	<target name="unpack-server">
@@ -623,8 +648,8 @@ ${errMsg}
     <echo>^^^INFO: Creating server configuration files...</echo>
     <property name="conf-dir" value="${server.product.dir}/conf"/>
     <antcall target="copy-license"/>
+	<antcall target="copy-keystore" />
     <antcall target="generate-hq-server-conf"/>
-
     <property name="tomcat.home"
               value="${server.product.dir}/hq-engine"/>
    
@@ -687,7 +712,51 @@ ${errMsg}
     </antcall>
 
     <!-- Mark executables as executable -->
-    <echo>^^^INFO: Setting permissions on server binaries...</echo>
+	<echo>^^^INFO: Setting permissions on ${server.product.dir}...</echo>
+
+    <!-- Must break things up into chunks to avoid overly-long argument lists.  The webapps, in the hq-server
+         hierarchy, are the directories with the most files, so narrow down to them -->
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}">
+            <exclude name="hq-engine/**" />
+        	<exclude name="jre/**" />
+        	<exclude name="hqdb/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine">
+            <exclude name="hq-server/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server">
+            <exclude name="webapps/**" />
+        	<exclude name="work/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps">
+            <exclude name="ROOT/**" />
+        </fileset>
+    </chmod>    
+
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps">
+            <include name="ROOT" /> 
+        </fileset>
+    </chmod>    
+
+    <!-- Don't traverse recursively into the ROOT webapp, it's enough to restrict permissions on the top-level directories -->
+    <chmod perm="go-rwx" type="both">
+        <fileset dir="${server.product.dir}/hq-engine/hq-server/webapps/ROOT">
+            <include name="*" />
+        </fileset>
+    </chmod>
+
+	<echo>^^^INFO: Setting permissions on server binaries...</echo>
     <antcall target="chmod-exec">
       <param name="chmod.dir" value="${server.product.dir}"/>
     </antcall>
@@ -701,11 +770,45 @@ ${errMsg}
     <antcall target="debug-setup"/>
   </target>
 
-  <target name="copy-license" unless="setup.upgrade">
-    <copy file="${install.dir}/data/license.xml" todir="${conf-dir}"
-          failonerror="false"/>
-  </target>
+	  <target name="copy-license" unless="setup.upgrade">
+	    <copy file="${install.dir}/data/license.xml" todir="${conf-dir}"
+	          failonerror="false"/>
+	  </target>
 
+	  <target name="copy-keystore" unless="setup.upgrade">
+	    <copy file="${install.dir}/data/hyperic.keystore" 
+	    	tofile="${server.product.dir}/conf/hyperic.keystore"
+	          failonerror="false"/>
+	  	<copy file="${install.dir}/data/hyperic.keystore" 
+	  		tofile="${server.product.dir}/conf/hyperic.keystore.backup.DO.NOT.DELETE"
+	  	              failonerror="false"/>
+	  	<delete file="${install.dir}/data/hyperic.keystore" />
+	  </target>
+
+	  <target name="copy-keystore-upgrade">
+	    <antcall target="copy-generated-keystore" />
+	  	<antcall target="copy-existing-keystore" />
+	  </target>
+	
+	  <target name="copy-generated-keystore" unless="keystore.exists">
+	  	<copy file="${install.dir}/data/hyperic.keystore" 
+	  		tofile="${server.product.dir}/conf/hyperic.keystore"
+	  		failonerror="false"/>
+        <copy file="${install.dir}/data/hyperic.keystore" 
+            tofile="${server.product.dir}/conf/hyperic.keystore.backup.DO.NOT.DELETE"
+                      failonerror="false"/>
+	  	<delete file="${install.dir}/data/hyperic.keystore" />
+	  </target>
+	
+	  <target name="copy-existing-keystore" if="keystore.exists">
+        <copy file="${server.upgradedir}/conf/hyperic.keystore"
+                    tofile="${server.product.dir}/conf/hyperic.keystore"
+                    failonerror="false"/>
+	    <copy file="${server.upgradedir}/conf/hyperic.keystore.backup.DO.NOT.DELETE"
+                    tofile="${server.product.dir}/conf/hyperic.keystore.backup.DO.NOT.DELETE"
+                    failonerror="false"/>
+	  </target>
+	
   <!-- If server.overwrite is not set or is false, check for an
        existing HQ server installation -->
   <target name="fail-if--server.alreadyInstalled"
@@ -737,7 +840,7 @@ ${errMsg}
   </target>
 
   <target name="chmod-exec">
-    <chmod perm="a+rx">
+    <chmod perm="750">
       <fileset dir="${chmod.dir}">
         <include name="**/bin/*"/>
         <include name="**/sbin/*"/>

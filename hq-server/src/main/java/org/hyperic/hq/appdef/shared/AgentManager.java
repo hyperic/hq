@@ -34,17 +34,15 @@ import java.util.Map;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
+import org.hyperic.hq.agent.FileDataResult;
 import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
-import org.hyperic.hq.appdef.server.session.AgentPluginStatus;
-import org.hyperic.hq.appdef.server.session.AgentPluginStatusEnum;
-import org.hyperic.hq.appdef.server.session.AgentSortField;
 import org.hyperic.hq.appdef.server.session.AgentConnections.AgentConnection;
+import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
+import org.hyperic.hq.appdef.server.session.AgentSortField;
 import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.lather.PluginReport_args;
-import org.hyperic.hq.product.Plugin;
 import org.hyperic.util.ConfigPropertyException;
 
 /**
@@ -325,6 +323,7 @@ public interface AgentManager {
      * @param subject The subject issuing the request.
      * @param aid The agent id.
      * @param plugin The plugin name.
+     * @return {@link FileDataResult} if sizes are 0 then file was not transferred
      * @throws PermissionException if the subject does not have proper
      *         permissions to issue an agent plugin transfer.
      * @throws FileNotFoundException if the plugin is not found on the HQ
@@ -337,9 +336,9 @@ public interface AgentManager {
      * @throws AgentNotFoundException if no agent exists with the given agent
      *         id.
      */
-    public void transferAgentPlugin(AuthzSubject subject, AppdefEntityID aid, String plugin)
+    public FileDataResult transferAgentPlugin(AuthzSubject subject, AppdefEntityID aid, String plugin)
         throws PermissionException, AgentConnectionException, AgentNotFoundException, AgentRemoteException,
-        FileNotFoundException, IOException, ConfigPropertyException;
+               FileNotFoundException, IOException, ConfigPropertyException;
 
     /**
      * Transfer an agent plugin residing on the HQ server to an agent. The
@@ -417,6 +416,14 @@ public interface AgentManager {
 
     /**
      * Pings the specified agent.
+     * @see AgentManagerImpl#pingAgent(AuthzSubject, Agent)
+     */
+    public long pingAgent(AuthzSubject overlord, Integer agentId)
+    throws AgentNotFoundException, PermissionException, AgentConnectionException, IOException,
+           ConfigPropertyException, AgentRemoteException;
+
+    /**
+     * Pings the specified agent.
      * @param subject The subject issuing the request.
      * @param aid The agent id.
      * @return the time it took (in milliseconds) for the round-trip time of the
@@ -438,31 +445,65 @@ public interface AgentManager {
     public long pingAgent(AuthzSubject subject, Agent agent) throws PermissionException, AgentNotFoundException,
         AgentConnectionException, AgentRemoteException, IOException, ConfigPropertyException;
 
-// XXX javadoc!
-    public void updateAgentPluginStatus(PluginReport_args arg);
+    /**
+     * updates the AgentPluginStatus objs which are delivered from the agent upon startup.
+     * calls to this will trigger an agent sync on three different scenarios
+     * 1) plugins not on the reporting agent will be pushed
+     * 2) plugins on the agent where their md5 checksums differ will be pushed
+     * 3) plugins on the agent but not on the server, or in a deleted state, will be removed
+     * @return agentId associated with arg if the agent is to be restarted or null if none exists
+     * or it is determined if the agent will not be restarted
+     */
+    public Integer updateAgentPluginStatus(PluginReport_args arg);
 
-// XXX javadoc!
+    /**
+     * queues the {@link PluginReport_args} obj into a background queue.  Eventually calls
+     * updateAgentPluginStatus(PluginReport_args)
+     * @see AgentManager#updateAgentPluginStatus(PluginReport_args)
+     */
     public void updateAgentPluginStatusInBackground(PluginReport_args arg);
 
-// XXX javadoc!
-    public void transferAgentPlugins(AuthzSubject subj, Integer agentId, Collection<String> jarNames)
+    /**
+     * @return {@link FileDataResult}[] if sizes are 0 length then file was not transferred
+     */
+    public FileDataResult[] transferAgentPlugins(AuthzSubject subj, Integer agentId, Collection<String> jarNames)
     throws PermissionException, AgentConnectionException, AgentNotFoundException,
            AgentRemoteException, FileNotFoundException, IOException, ConfigPropertyException;
     
-// XXX javadoc!
+    /**
+     * Removes plugin jars from the plugin directory on the remote Agent.
+     * @return {@link Map} of {@link String} = pluginJarName to
+     * {@link Boolean} = file delete was successful or failed.
+     * XXX may want to change Boolean so that it is a status string "SUCCESS" or an error message
+     */
+    public Map<String, Boolean> agentRemovePlugins(AuthzSubject subject, Integer agentId,
+                                                   Collection<String> pluginJarNames)
+    throws AgentConnectionException, AgentRemoteException, PermissionException;
+
+    /**
+     * will sync all agent with the appropriate plugins.
+     * There are three checks per agent:
+     * 1) plugins not on an agent will be pushed
+     * 2) plugins on the agent where their md5 checksums differ will be pushed
+     * 3) plugins on the agent but not on the server, or in a deleted state, will be removed
+     */
+    public void syncAllAgentPlugins();
+
+    /**
+     * syncs the specified pluginFileNames to all Auto Updating Agents
+     */
+    public void syncPluginToAgents(Collection<String> pluginNames);
+
+    /**
+     * syncs the specified pluginFileNames to all Auto Updating Agents after commit
+     * @see AgentManager#syncPluginToAgents(Collection)
+     * @see AgentManager#getNumAutoUpdatingAgents()
+     */
+    public void syncPluginToAgentsAfterCommit(Collection<String> pluginFileNames);
+
+    /**
+     * @return long representing the unique agent_ids in the EAM_AGENT_PLUGIN_STATUS table
+     */
     public long getNumAutoUpdatingAgents();
-    
-// XXX javadoc!
-    public List<Plugin> getAllPlugins();
-
-// XXX javadoc!
-    public Map<Plugin, Collection<AgentPluginStatus>> getOutOfSyncAgentsByPlugin();
-
-// XXX javadoc!
-    public Collection<String> getOutOfSyncPluginNamesByAgentId(Integer agentId);
-
-// XXX javadoc!
-    public void updateAgentPluginSyncStatusInNewTran(AgentPluginStatusEnum s, Integer agentId,
-                                                     Collection<Plugin> plugins);
 
 }

@@ -26,6 +26,7 @@
 
 package org.hyperic.hq.ui.security;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -45,9 +46,11 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Operation;
+import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.RoleManager;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.common.ApplicationException;
@@ -57,6 +60,7 @@ import org.hyperic.hq.ui.WebUser;
 import org.hyperic.util.config.ConfigResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.session.SessionAuthenticationException;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.stereotype.Component;
@@ -69,17 +73,19 @@ public class BaseSessionInitializationStrategy implements SessionAuthenticationS
     private AuthzBoss authzBoss;
     private AuthBoss authBoss;
 	private UserAuditFactory userAuditFactory;
+	private RoleManager roleManager;
     
     @Autowired
     public BaseSessionInitializationStrategy(AuthBoss authBoss, AuthzBoss authzBoss,
     		                                 AuthzSubjectManager authzSubjectManager,
     		                                 UserAuditFactory userAuditFactory,
-    		                                 SessionManager sessionManager) {
+    		                                 SessionManager sessionManager, RoleManager roleManager) {
     	this.authBoss = authBoss;
     	this.authzBoss = authzBoss;
     	this.authzSubjectManager = authzSubjectManager;
     	this.sessionManager = sessionManager;    	
     	this.userAuditFactory = userAuditFactory;
+    	this.roleManager = roleManager;
     }
     
     public void onAuthentication(Authentication authentication, HttpServletRequest request,
@@ -107,6 +113,21 @@ public class BaseSessionInitializationStrategy implements SessionAuthenticationS
                     subj = authzSubjectManager.createSubject(
                         overlord, username, true, HQConstants.ApplicationName, "", "", "", "",
                         "", "", false);
+                    //every user has ROLE_HQ_USER.  If other roles assigned, automatically assign them to new user
+                    if(authentication.getAuthorities().size() > 1) {
+                        Collection<Role> roles = roleManager.getAllRoles();
+                        for(GrantedAuthority authority: authentication.getAuthorities()) {
+                            if(authority.getAuthority().equals("ROLE_HQ_USER")) {
+                                continue;
+                            }
+                            for(Role role: roles) {
+                                if(("ROLE_" + role.getName()).equalsIgnoreCase(authority.getAuthority())) {
+                                    roleManager.addSubjects(authzSubjectManager.getOverlordPojo(), role.getId(), 
+                                        new Integer[] {subj.getId()});
+                                }
+                            }
+                        }
+                    }
                 } catch (ApplicationException e) {
                     throw new SessionAuthenticationException(
                         "Unable to add user to authorization system");

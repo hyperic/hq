@@ -30,7 +30,11 @@ import org.apache.commons.lang.StringEscapeUtils
 
 class HtmlUtil {
     static String hquStylesheets() {
-        '<link rel="stylesheet" href="/hqu/public/hqu.css" type="text/css">'
+		"""
+		<link rel="stylesheet" href="/static/js/dojo/1.5/dojox/grid/resources/Grid.css">                 
+		<link rel="stylesheet" href="/static/js/dojo/1.5/dojox/grid/resources/tundraGrid.css">                 
+		<link rel="stylesheet" href="/hqu/public/hqu.css">
+		"""
     }
     
     static String escapeHtml(o) {
@@ -63,17 +67,17 @@ class HtmlUtil {
         def qparams = [:]
                        
         if (opts.absolute) {
-            res = "${opts.absolute}/"
+            res = "${opts.absolute}"
         }
         opts.remove('absolute')
         
         if (opts.asset) {
-            res += "public/${opts['asset']}"
+            res += "/public/${opts['asset']}"
             opts.remove('asset')
         }
         
         if (opts['action']) {
-        	res += opts['action'] + '.hqu'
+        	res += '/' + opts['action'] + '.hqu'
         	opts.remove('action')
         }
         
@@ -101,7 +105,9 @@ class HtmlUtil {
         for (o in qparams) {
             if (!addedParam)
                 res += '?'
-            res += "${o.key}=${escapeHtml(o.value)}&"
+			else
+				res += '&'
+            res += "${o.key}=${escapeHtml(o.value)}"
             addedParam = true
         }
         res
@@ -177,11 +183,10 @@ class HtmlUtil {
         res << """
             <script type="text/javascript">
               function ${funcid}() {
-                  dojo.io.bind({
+                  hqDojo.xhrPost({
                       url: '${useUrlFor(p)}',
-                      method: "post",
-                      mimetype: "text/json-comment-filtered",
-                      load: function(type, data, evt) {
+                      handleAs: "json-comment-filtered",
+                      load: function(response, args) {
                           ${afterAction};
                       }
                    });

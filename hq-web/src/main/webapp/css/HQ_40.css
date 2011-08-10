@@ -1394,6 +1394,14 @@ select {
 	cursor: pointer;
 }
 
+.widget .enable_alert_btn {
+	cursor: pointer;
+}
+
+.widget .disable_alert_btn {
+	cursor: pointer;
+}
+
 .widget .last_updated {
 	position: absolute;
 	right: 10px;
@@ -2570,4 +2578,20 @@ span.returnToLink {
 
 #advancedContainer input[type=text] {
     width:auto;
+}
+
+.dijitArrowButtonInner {
+	border: 0 !important;
+}
+
+.maintenanceLink a {
+	color:#0066CC;
+	font-weight:normal;
+	text-decoration:underline;
+}
+
+.maintenanceLink a:hover {
+	color:#0099FF;
+	font-weight:normal;
+	text-decoration:underline;
 }

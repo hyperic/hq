@@ -70,7 +70,9 @@
     }
   }
 
-  onloads.push( checkAllBoxes );
+  	hqDojo.ready(function() {
+  		checkAllBoxes();
+  	});
 </c:if>
 </script>
 
@@ -105,8 +107,10 @@
           			</li>
           			<hr/>
           			<li>
-            			<html:link page="/resource/${summary.resourceEntityTypeName}/monitor/Visibility.do?mode=${mode}&type=${summary.resourceTypeId}" paramId="rid" paramName="summary" paramProperty="resourceId">
-              				<fmt:message key="resource.common.monitor.visibility.GoToResource"/>
+            			<html:link action="/resource/${summary.resourceEntityTypeName}/monitor/Visibility" paramId="rid" paramName="summary" paramProperty="resourceId">
+            				<html:param name="mode" value="${mode}"/>
+            				<html:param name="type" value="${summary.resourceTypeId}"/>
+            				<fmt:message key="resource.common.monitor.visibility.GoToResource"/>
             			</html:link>
           			</li>
         		</ul>
@@ -135,7 +139,11 @@
       						<td class="ListCellCheckbox"><html:multibox property="eids" value="${summary.entityId}" styleClass="${listMembersName}" onchange="ToggleGroup(this, widgetProperties)"/></td>
       					</c:if>
       					<td class="ListCell" style="padding-top:10px;">
-        					<html:link page="/resource/${summary.resourceEntityTypeName}/monitor/Visibility.do?mode=${mode}&eid=${summary.resourceTypeId}:${summary.resourceId}"><c:out value="${summary.resourceName}"/></html:link>
+        					<html:link action="/resource/${summary.resourceEntityTypeName}/monitor/Visibility">
+        						<html:param name="mode" value="${mode}"/>
+        						<html:param name="eid" value="${summary.resourceTypeId}:${summary.resourceId}"/>
+        						${summary.resourceName}
+        					</html:link>
       					</td>
       					<td class="ListCellCheckbox">
     						<tiles:insert page="/resource/common/monitor/visibility/AvailIcon.jsp">

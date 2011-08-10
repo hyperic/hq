@@ -35,13 +35,41 @@
 ]>
 
 
-<plugin package="org.hyperic.hq.plugin.tomcat" name="tomcat">
-  <classpath>
+<plugin package="org.hyperic.hq.plugin.tomcat" class="TomcatProductPlugin" name="tomcat">
+    <property name="PLUGIN_VERSION" value="@project.version@"/>
+    <classpath>
     <include name="pdk/lib/mx4j"/>
     <!-- relative to auto-discovered installpath (see PROC_HOME_PROPERTY) -->
     <include name="server/lib/commons-modeler-*.jar"/>
-  </classpath>
-  
+    <!-- JBoss Web classpath -->
+        <include name="client/jnp-client.jar"/>
+        <include name="client/jboss-common-client.jar"/>
+        <include name="client/jboss-jsr77-client.jar"/>
+        <include name="client/jbossall-client.jar"/>
+        <include name="client/log4j.jar"/>
+        <include name="client/jmx-rmi-connector-client.jar"/>
+        <include name="lib/jboss-system.jar"/>
+        <include name="lib/jboss-jmx.jar"/>
+        <include name="lib/jboss-management.jar"/>
+        <include name="lib/dom4j.jar"/>
+    <!-- used underneath javax.management.Query.match() -->
+        <include name="lib/gnu-regexp.jar"/>
+    <!-- required for MainDeployer.listDeployed() -->
+        <include name="lib/endorsed/xercesImpl.jar"/>
+        <include name="lib/endorsed/xml-apis.jar"/>
+
+        <include name="server/default/lib/jboss-management.jar"/>
+        <include name="server/all/lib/jboss-management.jar"/>
+    <!-- for jndi authentication -->
+        <include name="server/default/lib/jbosssx.jar"/>
+        <include name="server/all/lib/jbosssx.jar"/>
+
+    <!-- relative to $installpath incase
+         server/{default,all} do not exist -->
+        <include name="lib/jboss-management.jar"/>
+        <include name="lib/jbosssx.jar"/>
+    </classpath>
+
 
   <filter name="template"
           value="${OBJECT_NAME}:${alias}"/>
@@ -97,7 +125,7 @@
             alias="ProcessCpuTime"
             indicator="true"
             template="${OBJECT_NAME}:${alias}"
-            units="ms"
+            units="ns"
             collectionType="trendsup"/>
     <metric name="Open File Descriptor Count"
             alias="OpenFileDescriptorCount"
@@ -165,9 +193,8 @@
 
     <metrics include="Heap Metrics"/>
 
-    <!-- remove -DISABLED to enable server discovery for 5.5 -->
     <property name="PROC_HOME_PROPERTY"
-              value="catalina.base-DISABLED"/>
+              value="catalina.base"/>
 
     <property name="PROC_QUERY"
               value="State.Name.re=java|jsvc,State.Name.Pne=jsvc,Args.*.sw=-Dcatalina.base="/>
@@ -180,6 +207,17 @@
 
     <plugin type="log_track"
             class="org.hyperic.hq.product.Log4JLogTrackPlugin"/>
+
+    <plugin type="config_track"
+            class="org.hyperic.hq.product.FileChangeTrackPlugin">
+            <monitored>
+            	<folder path="conf" recursive="true" filter=".*.properties|.*.xml|.*.policy"/>
+            	<folder path="bin" recursive="false" filter=".*.bat|.*.xml|.*.sh"/>
+            	<folder path="lib" recursive="false" filter=".*.jar"/>
+            	<folder path="webapps" recursive="true" filter=".*.properties|.*.xml|.*\.jar|.*\.dll|.*\.class|.*\.jsp|.*\.php|.*\.pl|.*\.js|.*\.py|.*\.pyc|.*\.cgi"/>
+            </monitored>
+    </plugin>
+     <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="true" />
 
     <property name="DEFAULT_PROGRAM"
               value="bin/catalina.sh"/>
@@ -549,7 +587,38 @@
               value="catalina.base"/>
     <plugin type="autoinventory"
             class="org.hyperic.hq.plugin.tomcat.TomcatServerDetector"/>
+
+
      &internal-services;
+     &hibernate-services;
+ 
+    
+  </server>
+
+  <server name="JBoss Web" version="2.0" include="Apache Tomcat 6.0">
+    <property name="JBOSS_VERSION" value="4"/>
+    <property name="VERSION_FILE" value="deploy/jboss-web.deployer/jbossweb.jar"/>
+    <property name="PROC_QUERY" value="State.Name.re=java|jsvc,State.Name.Pne=jsvc,Args.*.eq=org.jboss.Main"/>
+    <plugin type="autoinventory" class="org.hyperic.hq.plugin.tomcat.JBossWebServerDetector"/>
+    <plugin type="measurement" class="org.hyperic.hq.plugin.tomcat.JBossWeb2XMeasurementPlugin"/>
+     &hibernate-services;
+  </server>
+
+  <server name="JBoss Web" version="2.1" include="Apache Tomcat 6.0">
+    <property name="JBOSS_VERSION" value="5"/>
+    <property name="VERSION_FILE" value="deploy/jbossweb.sar/jbossweb.jar"/>
+    <property name="PROC_QUERY" value="State.Name.re=java|jsvc,State.Name.Pne=jsvc,Args.*.eq=org.jboss.Main"/>
+    <plugin type="autoinventory" class="org.hyperic.hq.plugin.tomcat.JBossWebServerDetector"/>
+    <plugin type="measurement" class="org.hyperic.hq.plugin.tomcat.JBossWeb2XMeasurementPlugin"/>
+     &hibernate-services;
+  </server>
+
+  <server name="JBoss Web" version="3.0" include="Apache Tomcat 6.0">
+    <property name="JBOSS_VERSION" value="6"/>
+    <property name="VERSION_FILE" value="deploy/jbossweb.sar/jbossweb.jar"/>
+    <property name="PROC_QUERY" value="State.Name.re=java|jsvc,State.Name.Pne=jsvc,Args.*.eq=org.jboss.Main"/>
+    <plugin type="autoinventory" class="org.hyperic.hq.plugin.tomcat.JBossWebServerDetector"/>
+    <plugin type="measurement" class="org.hyperic.hq.plugin.tomcat.JBossWebMeasurementPlugin"/>
      &hibernate-services;
   </server>
 

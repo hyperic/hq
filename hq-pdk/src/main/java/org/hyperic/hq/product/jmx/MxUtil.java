@@ -328,6 +328,9 @@ public class MxUtil {
             throw attributeNotFound(objectName,
                                     metric.getAttributeName(), e);
         } catch (InstanceNotFoundException e) {
+            if (metric.isAvail()) {
+                return new Double(Metric.AVAIL_DOWN);
+            }
             throw objectNotFound(objectName, e);
         } catch (UndeclaredThrowableException e) {
             Throwable cause1 = e.getCause();
@@ -350,6 +353,8 @@ public class MxUtil {
                 while (cause != null) {
                     if (cause instanceof AttributeNotFoundException) {
                         return new Double(Metric.AVAIL_UP);
+                    }else if (cause instanceof InstanceNotFoundException) {
+                        return new Double(Metric.AVAIL_DOWN);
                     }
                     cause = cause.getCause();
                 }

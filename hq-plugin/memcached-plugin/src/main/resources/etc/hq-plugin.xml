@@ -24,6 +24,7 @@
  -->
 
 <plugin name="memcached">
+  <property name="PLUGIN_VERSION" value="@project.version@"/>
 
   <!-- extends NetServicesCollector -->
   <classpath>

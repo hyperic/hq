@@ -84,10 +84,6 @@ public class ServerConfigAuditFactory {
         return createAudit(user, "auditMsg.serverConfig.announce", newVal.getValue(), old.getValue());
     }
 
-    public ServerConfigAudit updateExternalHelp(AuthzSubject user, boolean newVal, boolean old) {
-        return createAudit(user, "auditMsg.serverConfig.help", newVal + "", old + "");
-    }
-
     public ServerConfigAudit updateDBMaint(AuthzSubject user, int newVal, int old) {
         return createAudit(user, "auditMsg.serverConfig.dbMaint", newVal + "", old + "");
     }

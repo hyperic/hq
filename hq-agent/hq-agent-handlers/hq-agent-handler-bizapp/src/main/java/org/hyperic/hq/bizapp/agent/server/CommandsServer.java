@@ -25,8 +25,7 @@
 
 package org.hyperic.hq.bizapp.agent.server;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -36,8 +35,6 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.util.Properties;
 
 import javax.net.ssl.KeyManager;
@@ -48,12 +45,12 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentAPIInfo;
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.agent.AgentConfigException;
+import org.hyperic.hq.agent.AgentKeystoreConfig;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentRemoteValue;
 import org.hyperic.hq.agent.AgentStartupCallback;
 import org.hyperic.hq.agent.server.AgentDaemon;
 import org.hyperic.hq.agent.server.AgentNotificationHandler;
-import org.hyperic.hq.agent.server.AgentRunningException;
 import org.hyperic.hq.agent.server.AgentServerHandler;
 import org.hyperic.hq.agent.server.AgentStartException;
 import org.hyperic.hq.agent.server.AgentStorageException;
@@ -69,17 +66,13 @@ import org.hyperic.hq.bizapp.agent.commands.GetServer_args;
 import org.hyperic.hq.bizapp.agent.commands.GetServer_result;
 import org.hyperic.hq.bizapp.agent.commands.SetServer_args;
 import org.hyperic.hq.bizapp.agent.commands.SetServer_result;
-import org.hyperic.util.exec.Execute;
-import org.hyperic.util.exec.ExecuteWatchdog;
-import org.hyperic.util.exec.PumpStreamHandler;
+import org.hyperic.util.security.KeystoreConfig;
+import org.hyperic.util.security.KeystoreManager;
 import org.hyperic.util.security.SecurityUtil;
 
 public class CommandsServer 
     implements AgentServerHandler, TokenStorer, AgentNotificationHandler
 {
-    private static final String KEYSTORE_PW = "storePW";
-    private static final String KEYSTORE_FILE = "data/agent.keystore";
-
     private static final long   TOKEN_TIMEOUT = 20 * 1000;   // 20 seconds
 
     private CommandsAPIInfo      verAPI;
@@ -89,7 +82,6 @@ public class CommandsServer
     private AgentDaemon          agent;
     private Socket               startupSock;
     private String               tokenFile;
-    private String               keystoreFile;
     private String               keyAlg;
     private AgentStartupCallback agentStartupCallback;
 
@@ -100,7 +92,6 @@ public class CommandsServer
         this.storage      = null;
         this.agent        = null;
         this.startupSock  = null;
-        this.keystoreFile = null;
         this.keyAlg       = null;
         this.agentStartupCallback = null;
     }
@@ -216,124 +207,8 @@ public class CommandsServer
                                           "for " + KEYSTORE_TYPE);
         }
     }
-
-    private String genAgentName(){
-        return "AGENT-" + SecurityUtil.generateRandomToken();
-    }
-
-    private void keyStoreLoadStream(KeyStore keystore, InputStream loadData)
-        throws AgentStartException
-    {
-        try {
-            keystore.load(loadData, KEYSTORE_PW.toCharArray());
-        } catch(IOException exc){
-            throw new AgentStartException("Unable to create new keystore: " +
-                                          exc.getMessage());
-        } catch(NoSuchAlgorithmException exc){
-            throw new AgentStartException("Unable to find algorithm to " +
-                                          "create keystore: " + 
-                                          exc.getMessage());
-        } catch(CertificateException exc){
-            throw new AgentStartException("Unable to load certificate from " +
-                                          "keystore: " + exc.getMessage());
-        }
-    }
-
-    private String getDname() {
-        return
-        "CN=" + genAgentName() +
-        ", " +
-        "OU=" + "HQ" +
-        ", " +
-        "O="  + "hyperic.net" +
-        ", " +
-        "C=US";
-    }
-
-    private void createKeyStore()
-        throws AgentStartException
-    {
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-
-        String errmsg =
-            "Failed to generate " + this.keystoreFile + ": ";
-
-        String javaHome = System.getProperty("java.home");
-        String keytool =
-            javaHome + File.separator + "bin" + File.separator + "keytool";
-        
-        String[] args = {
-            keytool,
-            "-genkey",
-            "-dname",     getDname(),
-            "-alias",     "HQ",
-            "-keystore",  this.keystoreFile,
-            "-storepass", KEYSTORE_PW,
-            "-keypass",   KEYSTORE_PW,
-            "-keyalg",    this.keyAlg
-        };
-
-        int timeout = 5 * 60 * 1000; //5min
-        ExecuteWatchdog wdog = new ExecuteWatchdog(timeout);
-        Execute exec =
-            new Execute(new PumpStreamHandler(output), wdog);
-        exec.setCommandline(args);
-
-        log.debug("Generating keystore: " +
-                  exec.getCommandLineString());
-
-        int rc;
-        try {
-            rc = exec.execute();
-        } catch (Exception e) {
-            rc = -1;
-            log.error(e);
-        }
-        
-        if (rc != 0) {
-            String msg = output.toString().trim();
-            if (msg.length() == 0) {
-                msg = "timeout after " + timeout + "ms";
-            }
-            throw new AgentStartException(errmsg + "[" +
-                                          exec.getCommandLineString() + "] " +
-                                          msg);
-        }
-    }
-
-    private KeyStore loadKeyStore()
-        throws AgentStartException
-    {
-        KeyStore keyStore;
-        FileInputStream is = null;
-
-        File ks = new File(this.keystoreFile);
-
-        if (!ks.exists()) {
-            createKeyStore();
-            this.log.warn("Agent certificate not found --" +
-                          " generating a new one");
-        }
-        
-        try {
-            keyStore = getKeyStoreInstance();
-            is = new FileInputStream(this.keystoreFile);
-            keyStoreLoadStream(keyStore, is);
-        } catch (Exception e) {
-            String msg =
-                "Loading keystore file " + this.keystoreFile +
-                ": " + e.getMessage();
-            throw new AgentStartException(msg, e);
-        } finally {
-            if (is != null) {
-                try { is.close(); } catch (IOException e) {}
-            }
-        }
-
-        return keyStore;
-    }
-
-    private KeyManager[] getKeyManagers(KeyStore useStore)
+    
+    private KeyManager[] getKeyManagers(KeyStore useStore,String filePass)
         throws AgentStartException
     {
         KeyManagerFactory res;
@@ -342,12 +217,11 @@ public class CommandsServer
         alg = KeyManagerFactory.getDefaultAlgorithm();
         try {
             res = KeyManagerFactory.getInstance(alg);
-            res.init(useStore, KEYSTORE_PW.toCharArray());
+            res.init(useStore, filePass.toCharArray());
         } catch(Exception exc){
             throw new AgentStartException("Unable to get default key " +
                                           "manager: " + exc.getMessage());
         }
-
         return res.getKeyManagers();
     }
 
@@ -416,8 +290,8 @@ public class CommandsServer
             agent.registerNotifyHandler(this, AgentDaemon.NOTIFY_AGENT_FAILED_START);
         }
         catch (AgentConfigException e) {
-            this.log.warn("Failure to find startup " +
-                            "reporting port in sys properties");
+            log.warn("Failure to find startup reporting port in sys properties: " + e);
+            log.debug(e,e);
         }
         catch (IOException e) {
             throw new AgentStartException("Wrapped Exception", e);
@@ -437,18 +311,17 @@ public class CommandsServer
             this.setupTokenManager(cfg);
             bootConfig   = cfg.getBootProperties();
             this.storage = agent.getStorageProvider();
-            this.keystoreFile =
-                bootConfig.getProperty(AgentConfig.PROP_KEYSTORE[0]);
             this.keyAlg =
                 bootConfig.getProperty("agent.keyalg", "RSA");
-            keystore     = this.loadKeyStore();
-            keyManagers  = this.getKeyManagers(keystore);
-            listener     = new SSLConnectionListener(cfg, keyManagers,
-                                                     this.tokenManager);
+            
+            KeystoreConfig  keystoreConfig = new AgentKeystoreConfig();
+            keystore     = KeystoreManager.getKeystoreManager().getKeyStore(keystoreConfig );
+            keyManagers  = this.getKeyManagers(keystore,keystoreConfig.getFilePassword());
+            listener     = new SSLConnectionListener(cfg, this.tokenManager);
             agent.setConnectionListener(listener);
-        } catch(AgentRunningException exc){
-            throw new AgentStartException("Unable to initialize SSL: " +
-                                          exc.getMessage());
+        } catch(Exception exc){
+            //This catch is intended to catch AgentRunningException, KeyStoreException, IOException
+            throw new AgentStartException("Unable to initialize SSL: " + exc.getMessage(), exc);
         }
         this.log.info("Commands Server started up");
     }

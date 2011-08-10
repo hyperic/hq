@@ -58,6 +58,7 @@
  -->
 
 <plugin name="jboss" class="JBossProductPlugin">
+    <property name="PLUGIN_VERSION" value="@project.version@"/>
 
     <classpath>
         <include name="client/jnp-client.jar"/>
@@ -891,6 +892,23 @@
 
             <actions include="stop,start,restart,flush"/>
         </service>
+        
+	<filter name="conf" value=".*\.xml|.*\.cfg|.*\.properties|.*\.ini|.*\.conf|.*\.config"/>
+    <filter name="code" value=".*\.jar|.*\.dll|.*\.class|.*\.jsp|.*\.asp|.*\.aspx|.*\.php|.*\.pl|.*\.vb|.*\.vbs|.*\.js|.*\.py|.*\.pyc|.*\.cgi"/>    
+    <plugin type="config_track"
+    		class="org.hyperic.hq.product.FileChangeTrackPlugin">
+      <monitored>
+        <folder path="server/all/conf" recursive="true" filter="${conf}"/>
+        <folder path="server/default/conf" recursive="true" filter="${conf}"/>
+        <folder path="server/default/deploy" recursive="true" filter="${code}|${conf}"/>
+        <folder path="server/minimal/conf" recursive="true" filter="${conf}"/>
+        <folder path="server/standard/conf" recursive="true" filter="${conf}"/>
+        <folder path="server/web/conf" recursive="true" filter="${conf}"/>
+        <folder path="" recursive="false" filter="jar-versions.xml"/>
+      </monitored>
+    </plugin>
+    <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="true" />
+        
     </server>
 
     <server name="JBoss"
@@ -1566,7 +1584,7 @@
             <plugin type="control"
               class="JBossStateServiceControlPlugin"/>
 
-            <actions include="stop,start,removeAllMessages"/>
+            <actions include="stop,start"/>
 
             <metric name="Availability"
             template="${OBJECT_NAME}:${alias}"
@@ -1654,6 +1672,10 @@
             <metric name="Durable Message Count" alias="DurableMessageCount" category="THROUGHPUT" indicator="true"/>
             <metric name="NonDurableMessageCount" alias="NonDurableMessageCount" category="THROUGHPUT"/>
         </service>
-
+       <service name="WebApp" internal="true">
+            <property name="CONTROL_OBJECT_NAME"
+                value="jboss.web:j2eeType=WebModule,name=//localhost%path%,J2EEApplication=none,J2EEServer=none"/>
+            <plugin type="control" class="JBoss6StateServiceControlPlugin"/>
+        </service>
     </server>
 </plugin>

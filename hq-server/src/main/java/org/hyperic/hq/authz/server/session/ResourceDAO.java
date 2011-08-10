@@ -28,8 +28,10 @@ package org.hyperic.hq.authz.server.session;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeSet;
 
 import net.sf.ehcache.Cache;
@@ -43,8 +45,6 @@ import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.server.session.Server;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -52,6 +52,7 @@ import org.hyperic.hq.authz.shared.EdgePermCheck;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.measurement.server.session.MonitorableType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -200,6 +201,18 @@ public class ResourceDAO
         Query q = createQuery(hql);
         return wherePermCheck.addQueryParameters(q, subject, r, 0, Arrays.asList(VIEW_APPDEFS))
             .list();
+    }
+
+    public List<Resource> findChildren(AuthzSubject subject, Resource r) {
+        final String[] VIEW_APPDEFS = new String[] { AuthzConstants.platformOpViewPlatform,
+                                                    AuthzConstants.serverOpViewServer,
+                                                    AuthzConstants.serviceOpViewService, };
+
+        EdgePermCheck wherePermCheck = permissionManager.makePermCheckHql("rez", false);
+        String hql = "select rez from Resource rez " + wherePermCheck;
+
+        Query q = createQuery(hql);
+        return wherePermCheck.addQueryParameters(q, subject, r, 1, Arrays.asList(VIEW_APPDEFS)).list();
     }
 
     @SuppressWarnings("unchecked")
@@ -428,6 +441,49 @@ public class ResourceDAO
             }
         }
         return rtn;
+    }
+    
+    @SuppressWarnings("unchecked")
+    Map<String, Long> getResourceCountByProtoTypeName(Collection<MonitorableType> types) {
+        if (types == null || types.isEmpty()) {;
+            return Collections.emptyMap();
+        }
+        final Map<String, String> map = new HashMap<String, String>();
+        for (final MonitorableType mt : types) {
+            map.put(mt.getName(), mt.getPlugin());
+        }
+        final String hql = new StringBuilder()
+            .append("select count(*), prototype.name from Resource ")
+            .append("where prototype.name in (:typeNames) group by prototype.name")
+            .toString();
+        final Collection<Object[]> list = getSession().createQuery(hql)
+                           .setParameterList("typeNames", map.keySet())
+                           .list();
+        final Map<String, Long> rtn = new HashMap<String, Long>();
+        for (final Object[] objs : list) {
+            final String pluginName = map.get(objs[1]);
+            if (pluginName == null) {
+                continue;
+            }
+            Long count = rtn.get(pluginName);
+            if (count == null) {
+                rtn.put(pluginName, ((Number) objs[0]).longValue());
+            } else {
+                rtn.put(pluginName, count + ((Number) objs[0]).longValue());
+            }
+        }
+        return rtn;
+    }
+    
+    @SuppressWarnings("unchecked")
+    Collection<Resource> getResourcesByProtoTypeName(Collection<String> typeNames) {
+        if (typeNames == null || typeNames.isEmpty()) {
+            return Collections.emptyList();
+        }
+        final String hql = "from Resource where prototype.name in (:typeNames)";
+        return getSession().createQuery(hql)
+                           .setParameterList("typeNames", typeNames)
+                           .list();
     }
 
 }

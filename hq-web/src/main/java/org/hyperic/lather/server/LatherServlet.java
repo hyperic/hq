@@ -31,6 +31,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -65,9 +66,11 @@ import org.hyperic.util.encoding.Base64;
  * XXX -- We could do more with caching the method/object which we are
  *        invoking, but right now, it seems to be quite fast.
  */
+@SuppressWarnings("serial")
 public class LatherServlet 
     extends HttpServlet
 {
+    private static final AtomicLong ids = new AtomicLong();
     private static final String PROP_PREFIX =
         "org.hyperic.lather.";
   
@@ -201,7 +204,7 @@ public class LatherServlet
         String[] method, args, argsClass;
         LatherContext ctx;
         byte[] decodedArgs;
-        Class valClass;
+        Class<?> valClass;
 
         ctx = new LatherContext();
         ctx.setCallerIP(req.getRemoteAddr());
@@ -267,6 +270,7 @@ public class LatherServlet
                           LatherXCoder xcoder, LatherContext ctx, String method, LatherValue arg, 
                            Log log, LatherDispatcher latherDispatcher)
         {
+            super(method + "-" + ids.getAndIncrement());
             this.resp    = resp;
            
             this.xcoder  = xcoder;
@@ -287,17 +291,15 @@ public class LatherServlet
                                                          
                 issueSuccessResponse(this.resp, this.xcoder, res);
             }  catch(IllegalArgumentException exc){
-                this.log.error("IllegalArgumentException when invoking LatherDispatcher." , exc);
+                log.error("IllegalArgumentException when invoking LatherDispatcher from Ip=" + ctx.getCallerIP() +
+                          ", method=" + method, exc);
                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             } catch(RuntimeException exc){
-                this.log.error("RuntimeException when invoking LatherDispatcher." , exc);
+                log.error("RuntimeException when invoking LatherDispatcher from Ip=" + ctx.getCallerIP() +
+                          ", method=" + method, exc);
                 issueErrorResponse(resp, exc.toString());
             } catch(LatherRemoteException exc){
-                
-                
-                
-                    issueErrorResponse(resp, exc.toString());
-               
+                issueErrorResponse(resp, exc.toString());
             }
         }
 

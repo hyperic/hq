@@ -28,7 +28,6 @@ package org.hyperic.hq.product;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
-import java.util.List;
 
 import org.hyperic.util.security.MD5;
 
@@ -43,26 +42,27 @@ public class PluginInfo implements java.io.Serializable {
     public String jar;
     public String md5;
     public String name;
+    public String version;
     public String product;
     public int deploymentOrder = 0;
     public transient ClassLoader resourceLoader = null;
 
-    private static final byte[] PLATFORMS;
-
-    static {
-        String platforms = "";
-        for (int i=0; i<PlatformDetector.PLATFORM_NAMES.length; i++) {
-            platforms += PlatformDetector.PLATFORM_NAMES[i];
-        }
-        PLATFORMS = platforms.getBytes();
-    }
-
     //for use by MeasurementPluginManager (proxies)
-    PluginInfo(String name) {
+    PluginInfo(String name, String version) {
         this.name = name;
+        this.version = version;
         this.product = name;
         this.jar  = "";
         this.md5  = "";
+    }
+
+    /** Used for plugins that are excluded on the agent */
+    PluginInfo(File file, String version) {
+        this.name = file.getName().replace("-plugin", "").replace(".xml", "").replace(".jar", "");
+        this.version = version;
+        this.product = name;
+        this.jar  = file.getName();
+        this.md5 = MD5.getMD5Checksum(file);
     }
     
     public PluginInfo(ProductPlugin plugin, String jar) {
@@ -70,6 +70,7 @@ public class PluginInfo implements java.io.Serializable {
             File jarFile = new File(jar);
             this.deploymentOrder = plugin.getDeploymentOrder();
             this.name  = plugin.getName();
+            this.version = plugin.getPluginVersion();
             this.product = plugin.getName();
             this.md5   = getMD5(plugin, jar);
             this.jar   = jarFile.getName();
@@ -81,6 +82,7 @@ public class PluginInfo implements java.io.Serializable {
     public PluginInfo(String name, PluginInfo info) {
         this.product = info.name;
         this.name  = name;
+        this.version = info.version;
         this.md5   = info.md5;
         this.jar   = info.jar;
         this.mtime = info.mtime;
@@ -88,31 +90,23 @@ public class PluginInfo implements java.io.Serializable {
         this.deploymentOrder = info.deploymentOrder;
     }
 
-    private String getMD5(ProductPlugin plugin, String jar)
-        throws IOException {
+    private String getMD5(ProductPlugin plugin, String jar) throws IOException {
+        return MD5.getMD5Checksum(new File(jar));
+    }
 
-        MD5 md5;
+    public int hashCode() {
+        return 17 + (7*md5.hashCode() + 7*jar.hashCode());
+    }
 
-        if (jar.endsWith(".jar")) {
-            md5 = MD5.getJarDigest(jar);
-            //if PlatformBasics.PLATFORM_NAMES changes
-            //we want the plugins to re-deploy
-            md5.getMessageDigest().update(PLATFORMS);
+    public boolean equals(Object rhs) {
+        if (this == rhs) {
+            return true;
         }
-        else {
-            md5 = new MD5();
-            md5.add(new File(jar));
+        if (rhs instanceof PluginInfo) {
+            final PluginInfo info = (PluginInfo) rhs;
+            return md5.equals(info.md5) && jar.equals(info.jar);
         }
-
-        //add any external entities to the MD5 such that
-        //changes to externals causes this plugin to redeploy
-        List includes = plugin.data.getIncludes();
-        for (int i=0; i<includes.size(); i++) {
-            File file = new File((String)includes.get(i));
-            md5.add(file);
-        }
-
-        return md5.getDigestString();
+        return false;
     }
 
     //true if plugins are from the same jar

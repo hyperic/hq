@@ -38,7 +38,5 @@
 	<fmt:message key="delete.resource" />
 </c:set>
 		
-<html:link page="javascript:hyperic.utils.deleteResource('${resource.entityId.type}:${resource.id}', '${userMsg}');">
-	<c:out value="${deleteMessage}"/>
-</html:link>
+<a href="javascript:hyperic.utils.deleteResource('${resource.entityId.type}:${resource.id}', '${userMsg}');">${deleteMessage}</a>
 <html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/>

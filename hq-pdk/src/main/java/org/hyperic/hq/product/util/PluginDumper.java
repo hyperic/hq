@@ -514,16 +514,10 @@ public class PluginDumper {
     private void loadPlugins() {
 
         int nplugins =
-            ppm.registerPlugins(this.config.pluginDir).size();
+            ppm.registerPlugins(this.config.pluginDir, null).size();
 
         String dir = this.config.props.getProperty("plugin.dir");
-        if (dir == null) {
-            nplugins += ppm.registerCustomPlugins(".").size();
-        }
-        else {
-            //override ../hq-plugins useful for dev
-            nplugins += ppm.registerPlugins(dir).size();
-        }
+        nplugins += ppm.registerPlugins(dir, null).size();
         
         if (nplugins == 0) {
             System.out.println("no plugins loaded from directory: " +

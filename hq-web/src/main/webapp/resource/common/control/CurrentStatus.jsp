@@ -85,13 +85,17 @@
     hyperic.updateControlStatus = function (){
       setTimeout( "hyperic.updateControlStatus()", 5000 );
 
-      updateUrl = '<html:rewrite page="/resource/common/control/UpdateStatus.do"/>?eid=<c:out value="${Resource.entityId}"/>';
+      <c:url var="updateUrl" value="/resource/common/control/UpdateStatus.do">
+      	<c:param name="eid" value="${Resource.entityId}"/>
+      </c:url>
       <c:if test="${section eq 'group'}">
-        updateUrl += '&bid=<c:out value="${requestScope.bid}"/>';
+      	<c:url var="updateUrl" value="${updateUrl}">
+    		<c:param name="bid" value="${requestScope.bid}"/>
+    	</c:url>
       </c:if>
 
-      dojo11.xhrGet( {
-          url: updateUrl,
+      hqDojo.xhrGet( {
+          url: '${updateUrl}',
           handleAs: 'json',
           load: function(status){
             console.log(status);
@@ -102,11 +106,11 @@
               window.location.reload()
             }
             else {
-              dojo11.byId('ctrlAction').innerHTML = status.ctrlAction;
-              dojo11.byId('ctrlDesc').innerHTML = status.ctrlDesc;
-              dojo11.byId('ctrlStart').innerHTML = new Date(status.ctrlStart).formatDate("MM/dd/yyyy hh:mm:ss t");
-              dojo11.byId('ctrlSched').innerHTML = new Date(status.ctrlSched).formatDate("MM/dd/yyyy hh:mm:ss t");
-              dojo11.byId('ctrlDuration').innerHTML = Math.round(status.ctrlDuration/10)/100 + 's';
+              hqDojo.byId('ctrlAction').innerHTML = status.ctrlAction;
+              hqDojo.byId('ctrlDesc').innerHTML = status.ctrlDesc;
+              hqDojo.byId('ctrlStart').innerHTML = new Date(status.ctrlStart).formatDate("MM/dd/yyyy hh:mm:ss t");
+              hqDojo.byId('ctrlSched').innerHTML = new Date(status.ctrlSched).formatDate("MM/dd/yyyy hh:mm:ss t");
+              hqDojo.byId('ctrlDuration').innerHTML = Math.round(status.ctrlDuration/10)/100 + 's';
             }
           },
           error: function(data){
@@ -117,7 +121,7 @@
       });
     };
 
-    dojo11.addOnLoad( function() {
+    hqDojo.ready( function() {
         hyperic.updateControlStatus();
     });
   -->

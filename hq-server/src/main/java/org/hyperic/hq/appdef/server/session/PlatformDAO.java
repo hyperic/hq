@@ -326,8 +326,12 @@ public class PlatformDAO
     @SuppressWarnings("unchecked")
     public Collection<Platform> findByAgent(Agent agt) {
         String sql = "from Platform where agent.id=?";
-        return (Collection<Platform>) getSession().createQuery(sql).setInteger(0,
-            agt.getId().intValue()).list();
+        return (Collection<Platform>) getSession()
+            .createQuery(sql)
+            .setCacheable(true)
+            .setCacheRegion("Platform.findByAgent")
+            .setInteger(0, agt.getId()
+            .intValue()).list();
     }
 
     @SuppressWarnings("unchecked")

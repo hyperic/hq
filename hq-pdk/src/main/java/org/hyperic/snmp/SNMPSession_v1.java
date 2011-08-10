@@ -84,7 +84,7 @@ class SNMPSession_v1 implements SNMPSession {
         this.version = SnmpConstants.version1;
     }
 
-    protected void initSession(String address, String port, String transport) throws SNMPException {
+    protected void initSession(String address, String port, String transport, String retries, String timeout) throws SNMPException {
         if (address == null) {
             address = SNMPClient.DEFAULT_IP;
         }
@@ -97,8 +97,8 @@ class SNMPSession_v1 implements SNMPSession {
 
         this.target.setAddress(this.address);
         this.target.setVersion(this.version);
-        this.target.setRetries(1);
-        this.target.setTimeout(1500);
+        this.target.setRetries(Integer.parseInt(retries));
+        this.target.setTimeout(Integer.parseInt(timeout));
 
         try {
             this.session = getSessionInstance();
@@ -107,7 +107,7 @@ class SNMPSession_v1 implements SNMPSession {
         }
     }
 
-    void init(String address, String port, String community, String transport) throws SNMPException {
+    void init(String address, String port, String community, String transport, String retries, String timeout) throws SNMPException {
         CommunityTarget target = new CommunityTarget();
 
         if (community == null) {
@@ -118,7 +118,7 @@ class SNMPSession_v1 implements SNMPSession {
 
         this.target = target;
 
-        initSession(address, port, transport);
+        initSession(address, port, transport, retries, timeout);
     }
 
     protected static OID getOID(String name) throws MIBLookupException {

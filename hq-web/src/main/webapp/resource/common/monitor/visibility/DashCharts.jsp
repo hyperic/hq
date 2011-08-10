@@ -39,7 +39,29 @@
 <META Http-Equiv="Expires" Content="0">
 
 <link rel=stylesheet href="<html:rewrite page="/css/win.css"/>" type="text/css">
-
+<script type="text/javascript">
+	var djConfig = {};
+	djConfig.parseOnLoad = true;
+	djConfig.baseUrl = '/static/js/dojo/1.5/dojo/';
+	djConfig.scopeMap = [ [ "dojo", "hqDojo" ], [ "dijit", "hqDijit" ], [ "dojox", "hqDojox" ] ];
+</script>
+<!--[if IE]>
+<script type="text/javascript">
+	// since dojo has trouble when it comes to using relative urls + ssl, we
+	// use this workaorund to provide absolute urls.
+	function qualifyURL(url) {
+		var a = document.createElement('img');
+	    a.src = url;
+	    return a.src;
+	}
+			
+	djConfig.modulePaths = {
+	    "dojo": qualifyURL("/static/js/dojo/1.5/dojo"),
+	    "dijit":  qualifyURL("/static/js/dojo/1.5/dijit"),
+	    "dojox":  qualifyURL("/static/js/dojo/1.5/dojox")
+  	};
+</script>
+<![endif]-->
 <script src="<html:rewrite page='/static/js/dojo/1.5/dojo/dojo.js'/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/functions.js"/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/prototype.js"/>" type="text/javascript"></script>
@@ -89,7 +111,7 @@ var indicatorCharts = new Array();
 <div id="slowScreenSplash" align="center" class="wait" style="top:20%;left:22%;">
 <c:choose>
 <c:when test="${not empty chartDataKeys}">
-  <fmt:message key="resource.common.monitor.visibility.request.wait"/><img src="/images/4.0/icons/ajax-loader.gif" alt="">
+  <fmt:message key="resource.common.monitor.visibility.request.wait"/><img src="<html:rewrite page="/images/4.0/icons/ajax-loader.gif" />" alt="">
 </c:when>
 <c:otherwise>
   <!-- Some weird tag bug that forces me to use the single tag syntax, rather than open/close -->
@@ -113,7 +135,7 @@ var indicatorCharts = new Array();
 		  "name" : "MyIndicatorChartsManager",
 		  "view" : "<c:out value="${IndicatorViewsForm.view}"/>",
 		  "eid" : "<c:out value="${eid}"/>",
-		  "baseUrl" : "<html:rewrite page="/resource/common/monitor/visibility/IndicatorCharts.do"/>",
+		  "baseUrl" : "/resource/common/monitor/visibility/IndicatorCharts.do",
 		  "displaySize" : <c:out value="${IndicatorViewsForm.displaySize}"/>
   };
 

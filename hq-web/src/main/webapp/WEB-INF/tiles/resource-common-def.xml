@@ -84,7 +84,11 @@
   <definition name=".resource.common.quickDelete"
               path="/resource/common/QuickDelete.jsp"/>
 
-  <!-- quick "delete resource" from tools menu -->
+  <!-- quick "add to group" from tools menu -->
+  <definition name=".resource.common.scheduleDowntime"
+              path="/resource/common/ScheduleDowntime.jsp"/>
+
+  <!-- quick "add to group" from tools menu -->
   <definition name=".resource.common.addToGroup"
               path="/resource/common/AddToGroup.jsp"/>
 

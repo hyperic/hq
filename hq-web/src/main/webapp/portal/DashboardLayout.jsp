@@ -46,8 +46,10 @@
 	autoLogout = false;
 	
 	function removePortlet(name, label) {
-	    dojo11.xhrPost({
-	        url: '/app/dashboard/<c:out value="${selectedDashboardId}" />/portlets/' + name,
+		var portletUrl = "<html:rewrite page="/app/dashboard/${selectedDashboardId}/portlets/{portletName}"/>";
+		
+	    hqDojo.xhrPost({
+	        url: unescape(portletUrl).replace("{portletName}", name),
 	        content: {
 				_method: "DELETE"
 	        },
@@ -56,7 +58,7 @@
 	}
 	  
 	function postRemovet(name, label){
-	    new Effect.BlindUp(dojo.byId(name));
+	    new Effect.BlindUp(hqDojo.byId(name));
 	    var wide = isWide(name);
 	    if (!wide && !isNarrow(name)) {
 	        return;
@@ -80,14 +82,13 @@
 	        portletOptions[portletOptions.length] = new Option(label, name);
 	
 	        // Make sure div is visible
-	        dojo.byId('addContentsPortlet' + wide).style.visibility='visible';
+	        hqDojo.byId('addContentsPortlet' + wide).style.visibility='visible';
 	    }
 	}
 	
 	function refreshPortlets() {
-	
-	    var problemPortlet = dojo.byId('problemResourcesTable');
-	    var favoritePortlet = dojo.byId('favoriteTable');
+	    var problemPortlet = hqDojo.byId('problemResourcesTable');
+	    var favoritePortlet = hqDojo.byId('favoriteTable');
 	
 	    var nodes = document.getElementsByTagName('table');
 	    var getRecentForm = document.getElementsByTagName('form')
@@ -136,9 +137,13 @@
 	    }
 	}
 	
-	onloads.push(refreshPortlets);
+	hqDojo.ready(function() {
+		refreshPortlets();
+	});
 </script>
-<html:link page="/Resource.do?eid=" linkName="viewResUrl" styleId="viewResUrl" style="display:none;"></html:link>
+<html:link action="/Resource" linkName="viewResUrl" styleId="viewResUrl" style="display:none;">
+	<html:param name="eid" value="{eid}"/>
+</html:link>
 
 <%
   String divStart;
@@ -179,7 +184,7 @@
 			<td colspan="100%" style="padding-left:16px; padding-right:15px;">
 				<c:choose>
 					<c:when test="${DashboardForm.dashboardSelectable}">
-						<html:form method="post" action="/SetDashboard.do" styleId="DashboardForm">
+						<html:form method="post" action="/SetDashboard" styleId="DashboardForm">
 							<div class="dashboard">
 								<div style="display: table-cell; vertical-align: middle; float:left;">
 									<span style="font-weight: bold; margin-right: 4px;">
@@ -287,7 +292,6 @@
 						        // This should be rewritten using dojo 1.1 dnd.move package
 						        // http://docs.google.com/View?docid=d764479_11fcs7s397
 						        // writing a new Sortable version using dojo 1.1 which will hopefully play better with IE
-						        // Anton Stroganov <anton@hyperic.com>
 						        // -----------
 					            Sortable.create("<c:out value="narrowList_${narrow}"/>", {
 						            dropOnEmpty: true,
@@ -295,8 +299,9 @@
 			               			containment: ["<c:out value="narrowList_${narrow}"/>"],
 			               			handle: 'widgetHandle',
 			               			onUpdate: function() {
-			                    		dojo11.xhrPost({
-			                        		url: "<html:rewrite page="/dashboard/ReorderPortlets.do"/>?"+Sortable.serialize('<c:out value="narrowList_${narrow}"/>'),
+			                    		hqDojo.xhrPost({
+			                        		url: "<html:rewrite action="/dashboard/ReorderPortlets"/>",
+			                        		postData: Sortable.serialize('<c:out value="narrowList_${narrow}"/>'),
 			                        		load: function(){ }
 			                    		});
 			                    	},

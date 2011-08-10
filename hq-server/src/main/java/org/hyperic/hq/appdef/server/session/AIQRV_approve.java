@@ -76,7 +76,8 @@ public class AIQRV_approve implements AIQResourceVisitor {
     
     @Autowired
     public AIQRV_approve(PlatformManager platformManager, ConfigManager configMgr,
-                         CPropManager cpropMgr, ServerManager serverManager, ResourceManager resourceManager) {
+                         CPropManager cpropMgr, ServerManager serverManager,
+                         ResourceManager resourceManager) {
         this.platformManager = platformManager;
         this.configMgr = configMgr;
         this.cpropMgr = cpropMgr;
@@ -301,9 +302,8 @@ public class AIQRV_approve implements AIQResourceVisitor {
         try {
             Server server = getExistingServer(subject, platform, aiserver);
             if (server == null) {
-                // XXX scottmf probably should not blow up here
-                // better to change status to added from changed??
-                throw new AIQApprovalException("Server id " + aiserver.getId() + " not found");
+                // just ignore this and move on.
+                return;
             }
             ServerValue serverValue = server.getServerValue();
             AIServerValue aiserverValue = aiserver.getAIServerValue();
@@ -373,6 +373,10 @@ public class AIQRV_approve implements AIQResourceVisitor {
             log.info("Created server (" + serverValue.getId() + "): " + serverValue);
         } catch (PermissionException e) {
             throw e;
+        } catch (NotFoundException e) {
+            // just ignore and keep moving, this could happen if a plugin was removed from HQ
+            log.warn(e);
+            log.debug(e,e);
         } catch (Exception e) {
             throw new SystemException("Error creating platform from " + "AI data: " +
                                       e.getMessage(), e);

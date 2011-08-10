@@ -39,7 +39,11 @@ var pageData = new Array();
 </script>
 
 <c:set var="entityId" value="${Resource.entityId}"/>
-<c:url var="selfAction" value="/resource/service/Inventory.do?mode=view&rid=${Resource.id}&type=${entityId.type}"/>
+<c:url var="selfAction" value="/resource/service/Inventory.do">
+	<c:param name="mode" value="view"/>
+	<c:param name="rid" value="${Resource.id}"/>
+	<c:param name="type" value="${entityId.type}"/>
+</c:url>
 <tiles:insert definition=".page.title.resource.service.full">
     <tiles:put name="resource" beanName="Resource"/>
     <tiles:put name="resourceOwner" beanName="ResourceOwner"/>

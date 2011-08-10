@@ -28,7 +28,7 @@ var diagramDiv;
 var toolsShown = false;
 
 function toggleDiagram(eId) {
-  var thisDiv = $(eId);
+  var thisDiv = hqDojo.byId(eId);
   
   if ( diagShown ) {
     hideDiagram(thisDiv);
@@ -68,7 +68,7 @@ function hide(menu) {
 }
 
 function toggleMenu(menuId) {
-  var menu = $(menuId);
+  var menu = hqDojo.byId(menuId);
   if ( menu.shown ) {
     hide(menu);
   }
@@ -101,15 +101,19 @@ function bodyClicked(e) {
     hideDiagram('diagramDiv');
   }
 
-  if ( $('toolMenu') && $('toolMenu').shown && (!target.id || (target.id != 'toolMenuSpan' && target.id != 'toolMenuArrow')) ) {
-    hide($('toolMenu'));
+  var toolMenu = hqDojo.byId("toolMenu");
+  
+  if ( toolMenu && toolMenu.shown && (!target.id || (target.id != 'toolMenuSpan' && target.id != 'toolMenuArrow')) ) {
+    hide(toolMenu);
   }
 
-  if ( (!target.id || target.id != 'recentImg') && $('recent') && $('recent').shown ) {
-    hide($('recent'));
+  var recent = hqDojo.byId("recent");
+  
+  if ( (!target.id || target.id != 'recentImg') && recent && recent.shown ) {
+    hide(recent);
   }
 }
-dojo.event.connect(dojo.body(), "onclick", window, bodyClicked);
-//document.body.onclick = bodyClicked;
+
+hqDojo.connect(hqDojo.body(), "onclick", window, bodyClicked);
 
 /*-- END diagram.js --*/

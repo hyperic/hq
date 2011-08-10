@@ -26,6 +26,7 @@
  -->
 
 <plugin package="org.hyperic.hq.plugin.postgresql">
+  <property name="PLUGIN_VERSION" value="@project.version@"/>
   <classpath>
     <include name="pdk/lib/jdbc/postgresql-7.4.3.jar"/>
   </classpath>
@@ -255,6 +256,29 @@
 
     <plugin type="control"
             class="PostgreSQLControlPlugin"/>
+         
+    <plugin type="config_track"
+            class="org.hyperic.hq.product.FileChangeTrackPlugin"/>
+ 
+    <plugin type="config_track"
+    		platform="unix"
+            class="org.hyperic.hq.product.FileChangeTrackPlugin">
+            <monitored>
+            	<folder path="data" recursive="false" filter=".*\.conf"/>
+            	<!-- system variable PGDATA -->
+            	<folder path="*PGDATA*" recursive="false" filter=".*\.conf"/>
+            </monitored>
+    </plugin>
+
+    <plugin type="config_track"
+    		platform="win32"
+            class="org.hyperic.hq.product.FileChangeTrackPlugin">
+            <monitored>
+            	<folder path="data" recursive="false" filter=".*\.conf"/>
+            </monitored>
+    </plugin>
+     <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="true" />
+
 
     <actions include="Analyze,ResetStatistics,Vacuum,VacuumAnalyze"/>
 
@@ -285,6 +309,10 @@
       <option name="jdbcPassword" type="secret"
               optional="true"
               description="JDBC Password"/>
+      <option name="indexes.enable"
+              description="Auto Discover Indexes"
+              type="boolean"
+              default="false"/>
     </config>
 
     <service name="Table">
@@ -336,9 +364,14 @@
           version="8.3"
           include="8.2"/>
 
-  <!-- Define 8.3 server type -->
+  <!-- Define 8.4 server type -->
+  <server name="PostgreSQL"
+          version="8.4"
+          include="8.3"/>
+
+  <!-- Define 9.0 server type -->
   <server name="PostgreSQL"
           version="9.0"
-          include="8.3"/>
+          include="8.4"/>
 
 </plugin>

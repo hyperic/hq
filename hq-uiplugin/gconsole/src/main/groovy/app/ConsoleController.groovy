@@ -80,7 +80,7 @@ class ConsoleController extends BaseController {
         def tmplCode = ""
         
         if (templates.contains(template)) {
-            new File(templateDir, "${template}.groovy").withReader { r ->
+            new File(templateDir, "${template}.groovy").withReader("UTF-8") { r ->
 				tmplCode = r.text
             }
         }
@@ -90,14 +90,20 @@ class ConsoleController extends BaseController {
     
     def execute(params) {            
         log.info "Params is ${params}"
-        executeCode(params.getOne('code'))
+        def data = executeCode(params.getOne('code'))
+        
+        // generate a new CSRF token for subsequent requests if needed
+        def opts = [action:"execute", encodeUrl:true]
+        data["actionToken"] = urlFor(opts)
+        
+        return data
     }
     
     private Map executeCode(code) {
         log.info "Requested to execute code\n${code}\n"
 		File tmp = File.createTempFile('gcon', null)
         log.info "Writing tmp file: ${tmp.absolutePath}"
-		tmp.withWriter { writer -> 
+		tmp.withWriter("UTF-8") { writer -> 
 			writer.write(code)
 		}
 		

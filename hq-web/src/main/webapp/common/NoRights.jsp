@@ -70,14 +70,14 @@
         <p>
         <fmt:message key="securityAlert.CannotBeDisplayed"/> 
         <fmt:message key="securityAlert.PleaseContact"/> 
-        <!--html:link href="mailto:CAMAdmin@petstore.com"!--><fmt:message key="securityAlert.CAMAdminstrator"/><!--/html:link-->
+        <fmt:message key="securityAlert.CAMAdminstrator"/>
         <fmt:message key="securityAlert.toAdd"/>
         </p>
         
         <p>
         <fmt:message key="securityAlert.ReturnTo"/>
         <html:link href="javascript:history.back(1)"><fmt:message key="securityAlert.previousPage"/></html:link>
-        <html:link page="/ResourceHub.do"><fmt:message key="error.Error.ResourceHubLink"/></html:link>
+        <html:link action="/ResourceHub"><fmt:message key="error.Error.ResourceHubLink"/></html:link>
         </p>
       </td>
     </tr>

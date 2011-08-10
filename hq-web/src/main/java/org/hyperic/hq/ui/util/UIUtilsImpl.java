@@ -34,6 +34,7 @@ import java.util.List;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
@@ -106,4 +107,13 @@ public class UIUtilsImpl implements UIUtils {
         return new ArrayList();
     }
 
+    public boolean isResourceAlertable(AppdefResourceValue rv) {
+    	switch (rv.getEntityId().getType()) {
+        case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+        case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+            return true;
+        default:
+            return false;
+    }    }
 }

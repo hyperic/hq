@@ -26,6 +26,7 @@
  -->
 
 <plugin name="resin">
+  <property name="PLUGIN_VERSION" value="@project.version@"/>
     <classpath>
         <include name="pdk/lib/mx4j"/>
     </classpath>

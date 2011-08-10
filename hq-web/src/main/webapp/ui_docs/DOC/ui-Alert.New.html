@@ -1,7 +1,9 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-    <head>
-        <title>Hyperic 4.5 Documentation : ui-Alert.New</title>
+ <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
+<p>      
+<p>
+        <title>vFabric Hyperic 4.6 : ui-Alert.New</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,23 +14,22 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Hyperic 4.5 Documentation : ui-Alert.New
+                            vFabric Hyperic 4.6 : ui-Alert.New
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 14, 2009 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jun 21, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
-<p>The <b>New Alert Definition</b> page allows you to define the properties and condition set for an alert definition. After you define the alert properties and condition set, and save your changes, you can define actions for HQ to perform when an alert is fired.</p>
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1281566110510 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1281566110510 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1281566110510 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1308685861701 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1308685861701 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1308685861701 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1281566110510'>
+/*]]>*/</style><div class='rbtoc1308685861701'>
 <ul>
     <li><a href='#ui-Alert.New-NavigatetotheNewAlertDefinitionPage'>Navigate to the New Alert Definition Page</a></li>
     <li><a href='#ui-Alert.New-DefineAlertProperties'>Define Alert Properties</a></li>
@@ -37,7 +38,13 @@ div.rbtoc1281566110510 li {margin-left: 0px;padding-left: 0px;}
     <li><a href='#ui-Alert.New-DefineAlertActions'>Define Alert Actions</a></li>
 </ul></div>
 
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Learn About Alerting</b><br />For information about Hyperic alerting functionality, see <a href="Alerts and Alert Definitions.html" title="Alerts and Alert Definitions">Alerts and Alert Definitions</a>.</td></tr></table></div>
+
+<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Creating a Resource Type Alert Definition in vFabric Hyperic?</b><br />See <a href="Define an Alert for a Resource Type.html" title="Define an Alert for a Resource Type">Define an Alert for a Resource Type</a>.</td></tr></table></div>
+
 <h2><a name="ui-Alert.New-NavigatetotheNewAlertDefinitionPage"></a>Navigate to the New Alert Definition Page</h2>
+
+<p>The <b>New Alert Definition</b> page allows you to define the properties and condition set for an alert definition. After you define the alert properties and condition set, and save your changes, you can define actions for HQ to perform when an alert is fired.</p>
 
 <p>To access the <b>New Alert Definition</b> page,</p>
 <ol>
@@ -73,6 +80,7 @@ div.rbtoc1281566110510 li {margin-left: 0px;padding-left: 0px;}
 <h2><a name="ui-Alert.New-DefineAlertConditionSet"></a>Define Alert Condition Set</h2>
 
 <p>The options for defining alert conditions and firing rules vary by the type of resource to which the alert applies, and your version of HQ.</p>
+
 <h3><a name="ui-Alert.New-ConditionSet"></a>Condition Set</h3>
 
 <p>An alert condition specifies a resource metric value or event that will initiate the alert firing process.</p>
@@ -87,7 +95,7 @@ div.rbtoc1281566110510 li {margin-left: 0px;padding-left: 0px;}
 		<li>Define the rule for evaluating the metric value.&nbsp; You can:
 		<ul>
 			<li><ins>Compare metric value to an absolute value</ins>. Select an operator: <b>&gt;(greater than)</b>, <b>&lt;(less than)</b>, <b>=(equal to)</b>, or <b>&#33;= (not equal to)</b>, and enter a metric value. If the metric value is a percentage, specify it as a float value. For example, enter <tt>.99</tt> for <tt>99%</tt>, <tt>1.0</tt> for 100%. Use a period (.) as a decimal separator, rather than a comma (,).</li>
-			<li><ins>Compare metric value to its minimum, baseline, or maximum value</ins> <font color="red">&#42;</font>, in HQ Enterprise only. Select an operator: <b>&gt;(greater than)</b>, <b>&lt;(less than)</b>, <b>=(equal to)</b>, or <b>&#33;= (not equal to)</b>, and choose "Min Value", "Baseline Value" or "Max Value". Baselining must be enabled. For more information, see <a href="http://support.hyperic.com/confluence/display/DOC/Baselines" title="Baselines">Baselines</a>.</li>
+			<li><ins>Compare metric value to its minimum, baseline, or maximum value</ins> <font color="red">&#42;</font>, in HQ Enterprise only. Select an operator: <b>&gt;(greater than)</b>, <b>&lt;(less than)</b>, <b>=(equal to)</b>, or <b>&#33;= (not equal to)</b>, and choose "Min Value", "Baseline Value" or "Max Value". Baselining must be enabled. For more information, see <a href="Metrics and Metric Collection.html#MetricsandMetricCollection-baselines">Baselines</a>.</li>
 			<li><ins>Fire upon change in metric value</ins>.&nbsp; Click <b>value changes</b>.</li>
 		</ul>
 		</li>
@@ -110,24 +118,29 @@ div.rbtoc1281566110510 li {margin-left: 0px;padding-left: 0px;}
 
 
 <ul>
-	<li><b>Events/Log Level Condition</b> &#45; To define a condition that is triggered by a log event, select a message severity level ("error", "warn", "info", "debug", "all") and optionally a match string. The condition is satisfied each time a message of the selected severity that contains the match string (if one was specified) is written to a log file that HQ is tracking. Log tracking must be enabled for the resource. To determine the log files that HQ monitors for the resource, see the <b>Configuration Properties</b> section of the resource's <b>Inventory</b> tab. The log files that HQ monitors for a resource are defined using the <b>server.log_track.files</b> property. For configuration instructions, see&nbsp; see <a href="http://support.hyperic.com/confluence/display/DOC/Log+Tracking" title="Log Tracking">Log Tracking</a>.</li>
+	<li><b>Events/Log Level Condition</b> &#45; To define a condition that is triggered by a log event, select a message severity level ("error", "warn", "info", "debug", "all") and optionally a match string. The condition is satisfied each time a message of the selected severity that contains the match string (if one was specified) is written to a log file that HQ is tracking. Log tracking must be enabled for the resource. To determine the log files that HQ monitors for the resource, see the <b>Configuration Properties</b> section of the resource's <b>Inventory</b> tab. The log files that HQ monitors for a resource are defined using the <b>server.log_track.files</b> property. For configuration instructions, see&nbsp; see <a href="Set Up Log Tracking for a Resource.html" title="Set Up Log Tracking for a Resource">Set Up Log Tracking for a Resource</a>.</li>
 </ul>
 
 
 <ul>
-	<li><b>Config Changed... Condition</b> &#45; This type of condition is triggered by a change to a configuration file that HQ is configured to monitor for the resource. To limit the condition to a single file, enter its filename in the "match filename" field.&nbsp; If you don't specify a filename, a change to any file monitored will trigger the alert.&nbsp; To determine the log files that HQ monitors for the resource, see the <b>Configuration Properties</b> section of the resource's <b>Inventory</b> tab. The files that HQ monitors for a resource are defined using the <b>server.config_track.files</b> property. The maximum length for filename entered is&nbsp; 25 characters.&nbsp; For configuration instructions, see <a href="http://support.hyperic.com/confluence/display/DOC/Configuration+Tracking" title="Configuration Tracking">Configuration Tracking</a>.</li>
+	<li><b>Config Changed... Condition</b> &#45; This type of condition is triggered by a change to a configuration file that HQ is configured to monitor for the resource. To limit the condition to a single file, enter its filename in the "match filename" field.&nbsp; If you don't specify a filename, a change to any file monitored will trigger the alert.&nbsp; To determine the log files that HQ monitors for the resource, see the <b>Configuration Properties</b> section of the resource's <b>Inventory</b> tab. The files that HQ monitors for a resource are defined using the <b>server.config_track.files</b> property. The maximum length for filename entered is&nbsp; 25 characters.&nbsp; For configuration instructions, see <a href="Set Up Configuration Tracking for a Resource.html" title="Set Up Configuration Tracking for a Resource">Set Up Configuration Tracking for a Resource</a>.</li>
 </ul>
 
 
-<h3><a name="ui-Alert.New-DefineAdditionalConditions"></a>Define Additional Conditions<font color="red">&#42;</font></h3>
+<h3><a name="ui-Alert.New-DefineAdditionalConditions"></a>Define Additional Conditions</h3>
+<p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+
 
 <p>In HQ Enterprise, you can define up to three conditions for an alert. To add another condition, click <b>Add Another Condition</b> and specify whether both the new condition and the preceding one must be satisfied for the alert to be triggered ("AND") or only one must be satisfied ("OR").</p>
 
-<h3><a name="ui-Alert.New-DefineRecoveryAlertBehavior"></a>Define Recovery Alert Behavior<font color="red">&#42;</font></h3>
+<h3><a name="ui-Alert.New-DefineRecoveryAlertBehavior"></a>Define Recovery Alert Behavior</h3>
+<p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+
+
 
 <p>To designate the alert you're defining as a recovery alert, select the primary alert definition from the pulldown.</p>
 
-<p>A recovery alert condition should detect when the condition that fired the primary alert is no longer true. When a recovery alert fires, it marks the primary alert "Fixed", and the primary alert definition is re-enabled. The primary alert definition should be configured to <b>Generate one alert and then disable alert definition until fixed,</b> as described below. For more information, see <a href="http://support.hyperic.com/confluence/display/DOC/Recovery+Alerts" title="Recovery Alerts">Recovery Alerts</a>.</p>
+<p>A recovery alert condition should detect when the condition that fired the primary alert is no longer true. When a recovery alert fires, it marks the primary alert "Fixed", and the primary alert definition is re-enabled. The primary alert definition should be configured to <b>Generate one alert and then disable alert definition until fixed,</b> as described below. For more information, see <a href="Define a Recovery Alert for a Resource Alert.html" title="Define a Recovery Alert for a Resource Alert">Define a Recovery Alert for a Resource Alert</a>.</p>
 
 <h3><a name="ui-Alert.New-EnableActions"></a>Enable Actions</h3>
 <p><a name="ui-Alert.New-EnableActions"></a></p>
@@ -153,7 +166,7 @@ div.rbtoc1281566110510 li {margin-left: 0px;padding-left: 0px;}
 
 <p>This option eliminates redundant firing for the same problem. If you do not choose this option, the alert will fire repeatedly as long as the triggering condition is still true.&nbsp;&nbsp;</p>
 
-<p>In HQ Enterprise this configuration option &#45;&nbsp; used in conjunction with recovery alerts &#45;&nbsp; automates the process of disabling and re-enabling an alert definition.&nbsp; Result:&nbsp; (1) no redundant alerts for the same problem, and (2) you don't have manually "fix" an alert triggered by a transient problem.&nbsp; For more information, see <a href="http://support.hyperic.com/confluence/display/DOC/Recovery+Alerts" title="Recovery Alerts">Recovery Alerts</a>.</p>
+<p>In HQ Enterprise this configuration option &#45;&nbsp; used in conjunction with recovery alerts &#45;&nbsp; automates the process of disabling and re-enabling an alert definition.&nbsp; Result:&nbsp; (1) no redundant alerts for the same problem, and (2) you don't have manually "fix" an alert triggered by a transient problem.</p>
 
 <h4><a name="ui-Alert.New-DisregardControlActionsforRelatedAlerts."></a>Disregard Control Actions for Related Alerts.</h4>
 <p><a name="ui-Alert.New-DisregardControlActions"></a></p>
@@ -178,18 +191,17 @@ div.rbtoc1281566110510 li {margin-left: 0px;padding-left: 0px;}
 <p>You can use the tabs at the bottom of the <b>Alert Definition</b> page to set up one or more actions to be performed when the alert fires. See the "Create or Edit Alert Actions" section on the associated <a href="ui-Alert.Edit.html#ui-Alert.Edit-CreateorEditAlertActions">help page</a> for instructions.</p>
 
 <p>Note: Defining actions for an alert definition is optional.</p>
-<div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>Related Information</b></div><div class="panelContent">
-<p><a href="http://support.hyperic.com/confluence/display/EVO/Key+Facts+about+HQ+Alerting" title="Key Facts about HQ Alerting">Key Facts about HQ Alerting</a></p>
-</div></div>
 
 				    					    <br/>
                         <div class="tabletitle">
-                            <a name="attachments">Attachments:</a>
+                            <a name="attachments">
+                                <h2>Attachments:</h2>
+                            </a>
                         </div>
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/71828489/71926189.gif">fb_ok.gif</a> (image/gif)
+                                <a href="attachments/77464607/77660892.gif">fb_ok.gif</a> (image/gif)
                                 <br/>
                                                     </div>
 				    
@@ -198,10 +210,10 @@ div.rbtoc1281566110510 li {margin-left: 0px;padding-left: 0px;}
 	    </table>
 	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
 			<tr>
-				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jan 12, 2011 15:43</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:44</font></td>
 		    </tr>
 	    </table>
     </body>

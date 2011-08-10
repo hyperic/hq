@@ -35,11 +35,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
+import org.hyperic.hq.agent.AgentKeystoreConfig;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.security.DefaultSSLProviderImpl;
+import org.hyperic.util.security.SSLProvider;
 import org.hyperic.util.timer.StopWatch;
 
 import com.vmware.vim25.HostHardwareSummary;
@@ -78,21 +84,31 @@ public class VSphereUtil extends ServiceInstance {
         _url = url.toString();
     }
 
+    private static void configureSSLKeystore() {
+        AgentKeystoreConfig keystoreConfig = new AgentKeystoreConfig();
+		SSLProvider sslProvider = new DefaultSSLProviderImpl(keystoreConfig, keystoreConfig.isAcceptUnverifiedCert());
+		SSLContext sslContext = sslProvider.getSSLContext();
+	    HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
+		HttpsURLConnection.setDefaultHostnameVerifier(new AllowAllHostnameVerifier());
+    }
+    
     static VSphereUtil getInstance(Properties props)
         throws PluginException {
 
         String url = getURL(props);
         if (url == null) {
-            throw new PluginException(VSphereCollector.PROP_URL +
-                                      " not configured");
+            throw new PluginException(PROP_URL + " not configured");
         }
 
-        String username = props.getProperty(VSphereCollector.PROP_USERNAME);
-        String password = props.getProperty(VSphereCollector.PROP_PASSWORD); 
+        String username = props.getProperty(PROP_USERNAME);
+        String password = props.getProperty(PROP_PASSWORD);
 
         try {
-            return new VSphereUtil(new URL(url), username, password, true);
+        	configureSSLKeystore();
+            return new VSphereUtil(new URL(url), username, password, false);
         } catch (Exception e) {
+        	VSphereConnection.evict(url);
+        	
             throw new PluginException("ServiceInstance(" + url + ", " +
                                       username + "): " + e, e);
         }
@@ -108,18 +124,24 @@ public class VSphereUtil extends ServiceInstance {
     public boolean isSessionValid() {
         try {
             //make sure session is still valid. XXX better way?
-            Calendar clock = getServerClock();
+            Calendar clock = currentTime();
             if (clock == null) {
-                _log.debug(_url + " session invalid, clock=NULL");
+            	if (_log.isDebugEnabled()) {
+            		_log.debug(_url + " session invalid, clock=NULL");
+            	}
                 return false;
             }
             else {
-                _log.debug(_url + " session valid, clock=" +
-                           new Date(clock.getTimeInMillis()));
+            	if (_log.isDebugEnabled()) {
+            		_log.debug(_url + " session valid, clock=" +
+            					new Date(clock.getTimeInMillis()));
+            	}
                 return true;
             }
         } catch (Exception e) {
-            _log.debug(_url + " session invalid, clock=" + e, e);
+        	if (_log.isDebugEnabled()) {
+        		_log.debug(_url + " session invalid: " + e.getMessage(), e);
+        	}
             return false;
         }
     }

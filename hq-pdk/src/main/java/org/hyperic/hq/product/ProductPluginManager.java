@@ -30,7 +30,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -47,7 +46,6 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConfig;
-import org.hyperic.hq.common.LicenseManager;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.product.pluginxml.PluginData;
 import org.hyperic.sigar.OperatingSystem;
@@ -55,8 +53,6 @@ import org.hyperic.util.PluginLoader;
 import org.hyperic.util.PluginLoaderException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.security.MD5;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * This class is a manager for ProductPlugin implementations and is also a
@@ -408,7 +404,7 @@ public class ProductPluginManager
             if (!dir.exists()) {
                 continue;
             }
-            registerPlugins(dir.getPath());
+            registerPlugins(dir.getPath(), null);
         }
     }
 
@@ -421,12 +417,7 @@ public class ProductPluginManager
             }
             File[] pluginFiles = listPlugins(dir);
             for (final File file : pluginFiles) {
-                try {
-// XXX need to update this to the plugin name
-                    rtn.put(file.toString(), MD5.getDigestString(file));
-                } catch (IOException e) {
-                    log.debug(e,e);
-                }
+                rtn.put(file.toString(), MD5.getMD5Checksum(file));
             }
         }
         return rtn;
@@ -666,16 +657,26 @@ public class ProductPluginManager
                 return false;
             }
         }
+        if (isExcluded(name)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean isExcluded(String name) {
+        if (name.endsWith("-plugin.jar") || name.endsWith("-plugin.xml")) {
+            name = name.substring(0, name.length() - 11);
+        }
         if (this.excludePlugins != null) {
             if (this.excludePlugins.get(name) != null) {
                 if (DEBUG_LIFECYCLE) {
                     log.debug("Skipping " + name + " (in plugins.exclude)");
                 }
-                return false;
+                return true;
             }
         }
-
-        return true;
+        return false;
     }
 
     /**
@@ -710,22 +711,6 @@ public class ProductPluginManager
         }
     }
 
-    public Collection<PluginInfo> registerCustomPlugins(String startDir) {
-        // check startDir and higher for hq-plugins
-        File dir = new File(startDir).getAbsoluteFile();
-        
-        while (dir != null) {
-            File customPluginDir = new File(dir, "hq-plugins");
-            
-            if (customPluginDir.exists()) {
-                return registerPlugins(customPluginDir.toString());
-            }
-            
-            dir = dir.getParentFile();
-        }
-        return Collections.emptyList();
-    }
-
     private File[] listPlugins(File dir) {
         File[] plugins = dir.listFiles();
         return plugins;
@@ -746,49 +731,72 @@ public class ProductPluginManager
             return msg;
         }
     }
-
-    public Collection<PluginInfo> registerPlugins(String path) {
-
-        Collection<PluginInfo> rtn = new ArrayList<PluginInfo>();
-        List<String> dirs = StringUtil.explode(path, File.pathSeparator);
-
-        for (int i = 0; i < dirs.size(); i++) {
-            File dir = new File(dirs.get(i));
-            if (!dir.exists()) {
-                log.debug("register plugins: " + dir + " does not exist");
+    
+    public Collection<PluginInfo> getAllPluginInfoDirectFromFileSystem(String path) {
+        final Collection<PluginInfo> rtn = new ArrayList<PluginInfo>();
+        final List<String> dirs = StringUtil.explode(path, File.pathSeparator);
+        for (final String d : dirs) {
+            final File dir = new File(d);
+            if (!dir.exists() || !dir.isDirectory()) {
                 continue;
             }
-            if (!dir.isDirectory()) {
-                log.debug("register plugins: " + dir + " not a directory");
-                continue;
-            }
-
-            File[] plugins = listPlugins(dir);
-            for (int j = 0; j < plugins.length; j++) {
-                String name = plugins[j].getName();
-                
-                if (!isLoadablePluginName(name)) {
-                    continue;
-                }
-                
-                log.info("Loading plugin: " + name);
-                
-                try {
-                    PluginInfo info = null;
-                    if ((info = registerPluginJar(plugins[j].getAbsolutePath())) != null) {
-                    	rtn.add(info);
-                    }
-                } catch (UnsupportedClassVersionError e) {
-                    log.info("Cannot load " + name + ": " + unsupportedClassVersionMessage(e.getMessage()));
-                } catch (PluginExistsException e) {
-                    log.debug("Plugin " + name + " already exists.");
-                } catch (PluginException e) {
-                	// ...we're unable to register this particular plugin, log it and press on...
-                	log.error("A problem occured while registering plugin [" + name + "]", e);
+            File[] plugins = dir.listFiles();
+            for (File plugin : plugins) {
+                String name = plugin.getName();
+                if (name.endsWith("-plugin.jar") || name.endsWith("-plugin.xml")) {
+                    rtn.add(new PluginInfo(plugin, "NONE"));
                 }
             }
         }
+        return rtn;
+    }
 
+    public Collection<PluginInfo> registerPlugins(String path, Collection<PluginInfo> excludes) {
+        Collection<PluginInfo> rtn = new ArrayList<PluginInfo>();
+        List<String> dirs = StringUtil.explode(path, File.pathSeparator);
+        for (int i = 0; i < dirs.size(); i++) {
+            File dir = new File(dirs.get(i));
+            if (!dir.exists()) {
+                log.warn("register plugins: " + dir + " does not exist");
+                continue;
+            }
+            if (!dir.isDirectory()) {
+                log.warn("register plugins: " + dir + " not a directory");
+                continue;
+            }
+            File[] plugins = listPlugins(dir);
+            Collection<PluginInfo> pluginInfo = register(Arrays.asList(plugins), excludes);
+            rtn.addAll(pluginInfo);
+        }
+        return rtn;
+    }
+
+    private Collection<PluginInfo> register(Collection<File> plugins, Collection<PluginInfo> excludes) {
+        Collection<PluginInfo> rtn = new ArrayList<PluginInfo>();
+        for (File plugin : plugins) {
+            String name = plugin.getName();
+            if (!isLoadablePluginName(name)) {
+                if (isExcluded(name) && excludes != null && plugin.exists() && !plugin.isDirectory()) {
+                    PluginInfo info = new PluginInfo(plugin, "EXCLUDED");
+                    excludes.add(info);
+                }
+                continue;
+            }
+            log.info("Loading plugin: " + name + " (" + plugin.getParent() + ")");
+            try {
+                PluginInfo info = null;
+                if ((info = registerPluginJar(plugin.getAbsolutePath())) != null) {
+                	rtn.add(info);
+                }
+            } catch (UnsupportedClassVersionError e) {
+                log.info("Cannot load " + name + ": " + unsupportedClassVersionMessage(e.getMessage()));
+            } catch (PluginExistsException e) {
+                log.debug("Plugin " + name + " already exists.");
+            } catch (PluginException e) {
+            	// ...we're unable to register this particular plugin, log it and press on...
+            	log.error("A problem occured while registering plugin [" + name + "]", e);
+            }
+        }
         return rtn;
     }
 
@@ -923,30 +931,16 @@ public class ProductPluginManager
                     throw new PluginException("Malformed name for: " + jarName);
                 }
             }
-
-            // Check with LicenseManager
-            try {
-                Class<?> c = Class.forName("com.hyperic.hq.license.LicenseManager");
-                Method getInstance = c.getMethod("instance", null);
-                LicenseManager mgr = (LicenseManager) getInstance.invoke(null, null);
-                if (!mgr.isPluginEnabled(pluginName)) {
-                    if (DEBUG_LIFECYCLE) {
-                        log.debug("Skipping " + pluginName + " (in license.exclude)");
-                    }
-                    return null;
-                }
-
-            } catch (Exception e) {
-                // Don't validate against LicenseManager then
-            }
-
             if (data.getName() == null) {
                 data.setName(pluginName);
             }
             if (plugin.getName() == null) {
                 plugin.setName(pluginName);
             }
-
+            if (plugin.getPluginVersion() == null) {
+            	plugin.setPluginVersion(data.getVersion());
+            }
+            
             if (this.client && (implName != null)) {
                 // already added the classpath, but the impl may override/adjust
                 String[] pluginClasspath = plugin.getClassPath(this);
@@ -964,14 +958,7 @@ public class ProductPluginManager
 
             setPluginInfo(pluginName, info);
 
-            // Skip duplicate plugins
-            try {
-                registerPlugin(plugin, null);
-            } catch (PluginExistsException e) {
-                log.error("Unable to deploy plugin '" + jarName + "'", e);
-                throw e;
-            }
-
+            registerPlugin(plugin, null);
             TypeInfo[] types = plugin.getTypes();
 
             if (types == null) {

@@ -42,6 +42,8 @@ import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.bizapp.server.session.ResourceCleanupEventListener;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.measurement.server.session.MonitorableType;
+import org.hyperic.hq.product.Plugin;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -119,6 +121,13 @@ public interface ResourceManager {
      */
     public Resource findRootResource();
 
+    /**
+     * When using this method make sure that you know the Resource exists or else it will throw
+     * a {@link ObjectNotFoundException} when calling resource.getSomeProperty()
+     * If you are unsure, then use getResourceById()
+     * @return {@link Resource} proxy
+     * @see #getResourceById(Integer)
+     */
     public Resource findResourceById(Integer id);
 
     /**
@@ -148,12 +157,10 @@ public interface ResourceManager {
      * @return AppdefEntityID[] - an array of the resources (including children)
      *         deleted
      */
-    public AppdefEntityID[] removeResourcePerms(AuthzSubject subj, Resource r,
+    public AppdefEntityID[] removeResourceAndRelatedResources(AuthzSubject subj, Resource r,
                                                 boolean nullResourceType,
                                                 boolean removeAllVirtual) throws VetoException,
         PermissionException;
-
-    public void _removeResource(AuthzSubject subj, Resource r, boolean nullResourceType);
 
     public void removeResource(AuthzSubject subject, Resource r) throws VetoException;
 
@@ -181,12 +188,18 @@ public interface ResourceManager {
      * @return Map of resource values
      */
     public Map<String, Collection<Integer>> findAllViewableInstances(AuthzSubject subject,
-                                                                     ResourceType resourceType);
+                                                                     Collection<ResourceType> types);
 
     /**
      * Find all the resources which are descendents of the given resource
      */
     public List<Resource> findResourcesByParent(AuthzSubject subject, Resource res);
+
+    /**
+     * Find all the resources which are direct descendants of the given resource.
+     * In resource edge terminology, distance = 1.
+     */
+    public List<Resource> findChildren(AuthzSubject subject, Resource res);
 
     /**
      * Find all the resources of an authz resource type
@@ -309,4 +322,28 @@ public interface ResourceManager {
                                                    Collection<ResourceType> resourceTypes);
 
     ResourceType getResourceTypeById(Integer resourceTypeId);
+
+    /**
+     * Fetches all types defined by values and deletes the associated {@link Resource}s and
+     * types via the asynchronous delete mechanism
+     * @param subj {@link AuthzSubject}
+     * @param values {@link Collection} of {@link MonitorableType}s
+     */
+    public void removeResourcesAndTypes(AuthzSubject subj, Collection<MonitorableType> values);
+
+    /**
+     * Deletes the ResourceTypes where the type names are defined by typeNames
+     * @param typeNames
+     */
+    public void removeResourceTypes(Collection<String> typeNames);
+
+    /**
+     * @return {@link Resource} or null if it doesn't exist
+     */
+    public Resource getResourceById(Integer id);
+
+    /**
+     * @return {@link Map} of {@link String} {@link Plugin}.getName() to a count
+     */
+    public Map<String, Long> getResourceCountByPlugin(Collection<Plugin> plugins);
 }

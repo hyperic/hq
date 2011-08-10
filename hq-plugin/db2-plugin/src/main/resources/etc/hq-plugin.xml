@@ -24,6 +24,7 @@
  -->
 
 <plugin name="db2" class="DB2ProductPlugin">
+  <property name="PLUGIN_VERSION" value="@project.version@"/>
   <!-- appended to each template by MeasurementInfoXML -->
   <property name="template-config" 
             value="nodename=%nodename%,user=%user%,password=%password%"/>

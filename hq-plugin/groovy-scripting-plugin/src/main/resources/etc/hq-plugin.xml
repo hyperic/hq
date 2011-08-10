@@ -25,6 +25,7 @@
  -->
 
 <plugin class="org.hyperic.hq.plugin.groovy.GroovyLanguagePlugin">
+  <property name="PLUGIN_VERSION" value="@project.version@"/>
 
   <classpath>
     <include name="pdk/plugins/scripting/groovy-all-*.jar"/>

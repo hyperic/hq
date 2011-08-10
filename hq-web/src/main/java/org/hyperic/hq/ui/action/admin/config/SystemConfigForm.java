@@ -52,7 +52,6 @@ public class SystemConfigForm
     private boolean reindex = false;
     private int updateMode = 0;
     private String elPurgeVal = "0";
-    private boolean externDocs = true;
     private boolean _alertsAllowed = true;
     private boolean _alertNotificationsAllowed = true;
 
@@ -66,7 +65,6 @@ public class SystemConfigForm
         buf.append(" helpPassword=").append(helpPassword);
         buf.append(" deleteUnits=").append(deleteUnits);
         buf.append(" updateMode=").append(updateMode);
-        buf.append(" externDocs=").append(externDocs);
         buf.append(" alertsAllowed=").append(_alertsAllowed);
         buf.append(" alertNotificationsAllowed=").append(_alertNotificationsAllowed);
 
@@ -122,11 +120,6 @@ public class SystemConfigForm
         String elPurgeValStr = prop.getProperty(HQConstants.EventLogPurge);
         Long elPurgeLong = new Long(elPurgeValStr);
         elPurgeVal = calcTimeUnit(elPurgeLong.longValue());
-
-        String externDocsStr = prop.getProperty(HQConstants.ExternalHelp);
-        if (externDocsStr != null) {
-            externDocs = Boolean.valueOf(externDocsStr).booleanValue();
-        }
 
         String alertsAllowedStr = prop.getProperty(HQConstants.AlertsEnabled, "true");
         _alertsAllowed = Boolean.valueOf(alertsAllowedStr).booleanValue();
@@ -201,7 +194,6 @@ public class SystemConfigForm
         long elPurgeLong = convertToMillisecond(Long.parseLong(elPurgeVal), Constants.DAYS_LABEL);
 
         prop.setProperty(HQConstants.EventLogPurge, String.valueOf(elPurgeLong));
-        prop.setProperty(HQConstants.ExternalHelp, String.valueOf(externDocs));
 
         prop.setProperty(HQConstants.AlertsEnabled, String.valueOf(_alertsAllowed));
         prop.setProperty(HQConstants.AlertNotificationsEnabled, String.valueOf(_alertNotificationsAllowed));
@@ -319,14 +311,6 @@ public class SystemConfigForm
 
     public void setUpdateMode(int updateMode) {
         this.updateMode = updateMode;
-    }
-
-    public boolean isExternDocs() {
-        return externDocs;
-    }
-
-    public void setExternDocs(boolean externDocs) {
-        this.externDocs = externDocs;
     }
 
     public boolean isAlertsAllowed() {

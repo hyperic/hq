@@ -1,0 +1,8 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
+<?xml version="1.0"?>
+
+<plugin package="${package}" name="${pluginName}">
+
+</plugin>

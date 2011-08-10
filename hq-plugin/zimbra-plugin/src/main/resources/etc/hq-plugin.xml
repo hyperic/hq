@@ -34,9 +34,9 @@
  ]>
 
 <plugin package="org.hyperic.hq.plugin.zimbra">
-    
-    <server name="Zimbra"
-     version="4.5.x">
+  <property name="PLUGIN_VERSION" value="@project.version@"/>
+
+  <server name="Zimbra" version="4.5.x">
         
         <plugin type="autoinventory"
          class="ZimbraServerDetector"/>

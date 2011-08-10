@@ -149,4 +149,12 @@ public interface AvailabilityManager {
      */
     public void sendDataToEventHandlers(Map<Integer, DataPoint> data);
 
+    /**
+     * @return true if the OS platform associated with the agentId is available.  Since multiple
+     * platforms may be associated with an agent, {@link PlatformDetector}.isSupportedPlatform() is
+     * used to determine which association to check availability against.
+     * @see PlatformDetector#isSupportedPlatform()
+     */
+    public boolean platformIsAvailable(int agentId);
+
 }

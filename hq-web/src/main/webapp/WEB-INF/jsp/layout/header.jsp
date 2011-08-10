@@ -3,14 +3,15 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 
 <div id="headerLogo">
-	<a href="<html:rewrite action="/Dashboard" />">
+	<a href="<spring:url value="/Dashboard.do" />">
 		<img alt="<fmt:message key="header.Dashboard" />" src="<spring:url value="/static/images/hqlogo.jpg"/>" border="0" />
 	</a>
 </div>
 <div id="headerLinks">
-	<sec:authorize access="hasRole('ROLE_USER')">
+	<sec:authorize access="hasRole('ROLE_HQ_USER')">
  		<c:if test="${not empty HQUpdateReport}">
  	 		<div id="update" class="dialog" style="display: none;">
  	 			<c:out value="${HQUpdateReport}" escapeXml="false"/>
@@ -27,10 +28,10 @@
 		</c:if>	
 	</sec:authorize>
 	<ul>
-		<sec:authorize access="hasRole('ROLE_USER')">
+		<sec:authorize access="hasRole('ROLE_HQ_USER')">
 			<li>
 				<span><fmt:message key="header.Welcome"/></span>
-				<a href="<html:rewrite action="/admin/user/UserAdmin" />?mode=view&u=${sessionScope.webUser.id}">
+				<a href="<spring:url value="/admin/user/UserAdmin.do?mode=view&u=${sessionScope.webUser.id}"/>">
 	            	${sessionScope.webUser.firstName}
 				</a>
 			</li>
@@ -46,13 +47,13 @@
 			</a>
 		</li>
 		<li>
-			<a id="helpLink" href="http://support.hyperic.com/confluence/display/DOC/" target="_blank" title="<fmt:message key="header.Help" />">
+			<a id="helpLink" href="<hq:help/>" target="_blank" title="<fmt:message key="header.Help" />">
 				<fmt:message key="header.Help" />
 			</a>
 		</li>
 	</ul>
 </div>
-<sec:authorize access="hasRole('ROLE_USER')">
+<sec:authorize access="hasRole('ROLE_HQ_USER')">
 	<div id="loading" class="ajaxLoading" style="">
        	<img src="<spring:url value="/static/images/ajax-loader.gif" />" border="0" width="16" height="16" />
     </div>
@@ -63,23 +64,23 @@
     <div id="headerTabs">
 		<ul>
 			<li id="dashboardTab" class="tab">
-				<a href="<html:rewrite action="/Dashboard" />">
+				<a href="<spring:url value="/Dashboard.do" />">
 					<fmt:message key="header.dashboard"/>
 				</a>
 			</li>
 	        <li id="resourceTab" class="tab">
-	        	<a href="<html:rewrite action="/ResourceHub" />">
+	        	<a href="<spring:url value="/ResourceHub.do" />">
 	        		<fmt:message key="header.resources"/>
 	        	</a>
 	           	<ul class="root">
 	               	<li>
-	               		<a href="<html:rewrite action="/ResourceHub" />">
+	               		<a href="<spring:url value="/ResourceHub.do" />">
 	               			<fmt:message key="header.Browse"/>
 	               		</a>
 	               	</li>
 	                <c:forEach var="attachment" items="${mastheadResourceAttachments}">
 					<li>
- 						<a href="<html:rewrite page="/mastheadAttach.do?typeId=${attachment.attachment.id}"/>">${attachment.HTML}</a>
+ 						<a href="<spring:url value="/mastheadAttach.do?typeId=${attachment.attachment.id}"/>">${attachment.HTML}</a>
  					</li>
 					</c:forEach>
 	               	<li class="subMenu">
@@ -89,7 +90,7 @@
   								<c:when test="${not empty resources}">
   									<c:forEach var="resource" items="${resources}">
     									<li>
-    										<a href="<html:rewrite page="/Resource.do?eid=${resource.key}"/>">${resource.value.name}</a>
+    										<a href="<spring:url value="/Resource.do?eid=${resource.key}"/>">${resource.value.name}</a>
     									</li>
   									</c:forEach>
   								</c:when>
@@ -104,15 +105,20 @@
 	        <li id="analyzeTab" class="tab">
 				<a><fmt:message key="header.analyze"/></a>
 				<ul class="root">
+					<c:if test="${not empty eeItems}">
+						<c:forEach var="eeItem" items="${eeItems}">
+						     <li><a href="<spring:url value="${eeItem.pagePath}"/>"><fmt:message key="${eeItem.messageKey}"/></a></li>
+						</c:forEach>
+					</c:if>
 					<c:forEach var="attachment" items="${mastheadTrackerAttachments}">
 					<li>
- 						<a href="<html:rewrite page="/mastheadAttach.do?typeId=${attachment.attachment.id}"/>">${attachment.HTML}</a>
+ 						<a href="<spring:url value="/mastheadAttach.do?typeId=${attachment.attachment.id}"/>">${attachment.HTML}</a>
  					</li>
 					</c:forEach>
 				</ul>
 	        </li>
 		    <li id="adminTab" class="tab">
-		    	<a href="<html:rewrite action="/Admin" />">
+		    	<a href="<spring:url value="/Admin.do" />">
 		    		<fmt:message key="header.admin"/>
 		    	</a>
 		   	</li>
@@ -139,40 +145,41 @@
     </div>
     <script src="<spring:url value="/js/lib/lib.js" />" type="text/javascript"></script>
     <script>
-    	dojo.require("dijit.Dialog");
+	    hqDojo.require("dijit.dijit");
+    	hqDojo.require("dijit.Dialog");
    	 	
-    	var resourceURL = '<html:rewrite action="/Resource" />';
-		var userURL = '<html:rewrite action="/admin/user/UserAdmin" />';
-    	var searchWidget = new hyperic.widget.search(dojo, { search: '<spring:url value="/app/search" />' }, 3, { keyCode: 83, ctrl: true });
+    	var resourceURL = '<spring:url value="/Resource.do" />';
+		var userURL = '<spring:url value="/admin/user/UserAdmin.do" />';
+    	var searchWidget = new hyperic.widget.search(hqDojo, { search: '<spring:url value="/app/search" />' }, 3, { keyCode: 83, ctrl: true });
     	var refreshCount = 0;
     	var refreshAlerts = function() {
-      		dojo.xhrGet({
-	    	  	url: "<html:rewrite page="/common/RecentAlerts.jsp"/>",
+      		hqDojo.xhrGet({
+	    	  	url: "<spring:url value="/common/RecentAlerts.jsp"/>",
 	    	  	load: function(response, args) {
-	    	        dojo.style("headerAlerts", {
+	    	        hqDojo.style("headerAlerts", {
 	    	        	"display": "",
 	    	        	"top": 0,
 	    	        	"left": "310px",
 	    	        	"paddingLeft": "72px"
 	    	        });
-	    	        dojo.byId("recentAlerts").innerHTML = response;
+	    	        hqDojo.byId("recentAlerts").innerHTML = response;
 	    	  	} 
 	      	});
 	    };
    	 	
-	    dojo.ready(function() { 
+	    hqDojo.ready(function() { 
 	    	refreshAlerts();
-        	activateHeaderTab(dojo);
+        	activateHeaderTab(hqDojo);
         	searchWidget.create();
         
-        	dojo.subscribe("refreshAlerts", function(data) {
+        	hqDojo.subscribe("refreshAlerts", function(data) {
         		refreshCount++;
         		refreshAlerts();
         	});
         	
         	setInterval(function() {
         		if (refreshCount < 30 || window.autoLogout === undefined) {
-    	            dojo.publish("refreshAlerts");
+    	            hqDojo.publish("refreshAlerts");
     	        } else {
     	        	top.location.href = "<spring:url value="/j_spring_security_logout" />";
     	        }
@@ -181,51 +188,51 @@
         	}, 60*1000);
         	
         	//Connect the events for the box, cancel and search buttons
-        	dojo.connect(searchWidget.searchBox, "onkeypress", searchWidget, "search");
+        	hqDojo.connect(searchWidget.searchBox, "onkeypress", searchWidget, "search");
         	
         	// What should the hot-keys do?
-        	dojo.subscribe('enter', searchWidget, "search");
+        	hqDojo.subscribe('enter', searchWidget, "search");
         	
         	// Render Search Tooltip
-        	dojo.byId('headerSearch').title = "<fmt:message key="header.searchTip.mac" />";
+        	hqDojo.byId('headerSearch').title = "<fmt:message key="header.searchTip.mac" />";
         	
-        	dojo.query(".tab", dojo.byId("headerTabs")).onmouseenter(function(e) {
-        		dojo.addClass(e.currentTarget, "hover");
+        	hqDojo.query(".tab", hqDojo.byId("headerTabs")).onmouseenter(function(e) {
+        		hqDojo.addClass(e.currentTarget, "hover");
         	}).onmouseleave(function(e) {
-        		dojo.removeClass(e.currentTarget, "hover");
+        		hqDojo.removeClass(e.currentTarget, "hover");
         	});
-        	dojo.query(".subMenu", dojo.byId("headerTabs")).onmouseenter(function(e) {
-        		dojo.addClass(e.currentTarget, "hover");
+        	hqDojo.query(".subMenu", hqDojo.byId("headerTabs")).onmouseenter(function(e) {
+        		hqDojo.addClass(e.currentTarget, "hover");
         	}).onmouseleave(function(e) {
-        		dojo.removeClass(e.currentTarget, "hover");
+        		hqDojo.removeClass(e.currentTarget, "hover");
         	});
-    		if (dojo.byId("updateLink")) {
-    			new dijit.Dialog({
+    		if (hqDojo.byId("updateLink")) {
+    			new hqDijit.Dialog({
         	 	 		id: 'update_popup',
         	 			refocus: true,
         	 			autofocus: false,
         	 			opacity: 0,
         	 			title: "<fmt:message key="header.dialog.title.update" />"
         			}, 
-        			dojo.byId('update')
+        			hqDojo.byId('update')
         		);
         	 	
-    			dojo.connect(dojo.byId("updateAcknowledgementButton"), "onclick", function(e) {
+    			hqDojo.connect(hqDojo.byId("updateAcknowledgementButton"), "onclick", function(e) {
         			if (this.value == "<fmt:message key="header.Acknowledge"/>") {
-            	        dojo.xhrPost({
-                	 	 	url: "<html:rewrite action="/Dashboard" />",
+            	        hqDojo.xhrPost({
+                	 	 	url: "<spring:url value="/Dashboard.do" />",
                  		 	content: { 
                  		 		update: true 
                  		 	},
                  	 		load: function(data) {
-                 	 			dojo.style("updateLink", "display", "none");
-                 	 			dijit.byId("update_popup").hide();
+                 	 			hqDojo.style("updateLink", "display", "none");
+                 	 			hqDijit.byId("update_popup").hide();
                 			}
                			});
                 	}
         		});
-        		dojo.connect(dojo.byId("updateLink"), "onclick", function(e) {
-        			 dijit.byId("update_popup").show();
+        		hqDojo.connect(hqDojo.byId("updateLink"), "onclick", function(e) {
+        			 hqDijit.byId("update_popup").show();
         		});
     		}
     	});

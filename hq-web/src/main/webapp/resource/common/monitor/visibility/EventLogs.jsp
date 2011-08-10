@@ -11,7 +11,7 @@
 <c:if test="${eventsExist}">
 <tr>
   <td>
-<script src="<html:rewrite page="/js"/>/timeline/api-2.0/timeline-api.js" type="text/javascript"></script>
+<script src="<html:rewrite page="/js/timeline/api-2.0/timeline-api.js"/>" type="text/javascript"></script>
 
 <script src="<html:rewrite page="/js/effects.js"/>" type="text/javascript"></script>
 
@@ -63,7 +63,9 @@ function timeLineOnLoad() {
   setTimeout("fillEventLogs()", 5000);
  }
 
-  onloads.push( timeLineOnLoad );
+	hqDojo.ready(function() {
+		timeLineOnLoad();
+	});
 
   function fillEventLogs() {
   <c:forEach var="timeTick" items="${timeIntervals}" varStatus="status">

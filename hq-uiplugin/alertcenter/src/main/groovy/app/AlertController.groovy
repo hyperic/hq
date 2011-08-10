@@ -83,7 +83,7 @@ class AlertController
         defaultSortOrder: 0,  // descending
         styleClass: {it.fixed ? null : "alertHighlight"},
         columns: [
-            [field:AlertSortField.ACTION_TYPE, width:'3%',
+            [field:AlertSortField.ACTION_TYPE, width:'20px',
              label:{
 				 def canTakeAction
 				
@@ -101,7 +101,7 @@ class AlertController
              	 def id = "Alerts|" + it.alertDefinition.appdefEntityId.appdefKey + "|" + it.id + "|" + pause
 				 def member = (it.ackable ? "ackableAlert" : "fixableAlert")
              	 def box = ((it.fixed || !canTakeAction) ? "" : "<input type='checkbox' name='ealerts' id='" + id + "' class='" + member + "' value='-559038737:" + it.id +"' onclick='MyAlertCenter.toggleAlertButtons(this)' />")}],
-            [field:AlertSortField.DATE, width:'8%',
+            [field:AlertSortField.DATE, width:'100px',
              label:{df.format(it.timestamp)}],
             [field:AlertSortField.DEFINITION, width:'15%',
              label:{linkTo(it.alertDefinition.name, [resource:it]) }],
@@ -111,9 +111,9 @@ class AlertController
             [field:AlertSortField.PLATFORM, width:'28%',
              label:{linkTo(it.alertDefinition.resource.platform.name,
                            [resource:it.alertDefinition.resource.platform])}],
-            [field:AlertSortField.FIXED, width:'5%',
+            [field:AlertSortField.FIXED, width:'40px',
              label:{YesOrNo.valueFor(it.fixed).value.capitalize()}],
-            [field:AlertSortField.ACKED_BY, width:'7%',
+            [field:AlertSortField.ACKED_BY, width:'75px',
              label:{
 				 def canTakeAction
 				
@@ -132,7 +132,7 @@ class AlertController
                  def by = it.acknowledgedBy
                  by == null ? ((it.ackable && canTakeAction) ? "<a href='javascript:MyAlertCenter.acknowledgeAlert(\"" + id + "\")'><img src='/images/icon_ack.gif'></a>" : "") : by.fullName
             }],
-            [field:AlertSortField.SEVERITY, width:'6%',
+            [field:AlertSortField.SEVERITY, width:'70px',
              label:{
                 def s = it.alertDefinition.severity
                 def imgUrl = urlFor(asset:'images') + 
@@ -159,7 +159,7 @@ class AlertController
         defaultSortOrder: 0,  // descending
         styleClass: {it.fixed ? null : "alertHighlight"},
         columns: [
-            [field:GalertLogSortField.ACTION_TYPE, width:'3%',
+            [field:GalertLogSortField.ACTION_TYPE, width:'20px',
              label:{
 				 def canTakeAction
 				
@@ -177,16 +177,16 @@ class AlertController
              	 def id = "GroupAlerts|" + it.alertDef.appdefID.appdefKey + "|" + it.id + "|" + pause
              	 def member = (it.acknowledgeable ? "ackableAlert" : "fixableAlert")
              	 def box = ((it.fixed || !canTakeAction) ? "" : "<input type='checkbox' name='ealerts' id='" + id + "' class='" + member + "' value='195934910:" + it.id +"' onclick='MyAlertCenter.toggleAlertButtons(this)' />")}],
-            [field:GalertLogSortField.DATE, width:'14%',
+            [field:GalertLogSortField.DATE, width:'100px',
              label:{df.format(it.timestamp)}],
             [field:GalertLogSortField.DEFINITION, width:'25%',
              label:{linkTo(it.alertDef.name, [resource:it]) }],
             [field:GalertLogSortField.GROUP, width:'35%',
              label:{linkTo(it.alertDef.group.name,
                     [resource:it.alertDef.group])}],
-            [field:GalertLogSortField.FIXED, width:'5%',
+            [field:GalertLogSortField.FIXED, width:'40px',
              label:{YesOrNo.valueFor(it.fixed).value.capitalize()}],
-            [field:GalertLogSortField.ACKED_BY, width:'10%',
+            [field:GalertLogSortField.ACKED_BY, width:'75px',
              label:{
 				 def canTakeAction
 				
@@ -204,7 +204,7 @@ class AlertController
              	 def id = "GroupAlerts|" + it.alertDef.appdefID.appdefKey + "|" + it.id + "|" + pause
                  def by = it.acknowledgedBy
                  by == null ? ((it.acknowledgeable && canTakeAction) ? "<a href='javascript:MyAlertCenter.acknowledgeAlert(\"" + id + "\")'><img src='/images/icon_ack.gif'></a>" : "") : by.fullName }],
-            [field:GalertLogSortField.SEVERITY, width:'8%',
+            [field:GalertLogSortField.SEVERITY, width:'70px',
              label:{
                  def s = it.alertDef.severity
                  def imgUrl = urlFor(asset:'images') + 
@@ -228,11 +228,11 @@ class AlertController
         columns: [
             [field:AlertDefSortField.NAME, width:'13%',
              label:{linkTo(it.name, [resource:it]) }],
-            [field:AlertDefSortField.CTIME, width:'13%',
+            [field:AlertDefSortField.CTIME, width:'100px',
              label:{df.format(it.ctime)}],
-            [field:AlertDefSortField.MTIME, width:'13%',
+            [field:AlertDefSortField.MTIME, width:'100px',
              label:{df.format(it.mtime)}],
-            [field:AlertDefSortField.ACTIVE, width:'5%',
+            [field:AlertDefSortField.ACTIVE, width:'40px',
              label:{
              	def markUp = "<span style='whitespace:nowrap:'>"
              	 
@@ -246,7 +246,7 @@ class AlertController
              	
              	return markUp + "</span>"
 			}],
-            [field:AlertDefSortField.LAST_FIRED, width:'13%',
+            [field:AlertDefSortField.LAST_FIRED, width:'100px',
              label:{
                 if (it.lastFired)
                     return linkTo(df.format(it.lastFired),
@@ -264,7 +264,7 @@ class AlertController
                 else
                     return linkTo(it.escalation.name, [resource:it.escalation])
             }],
-            [field:AlertDefSortField.PRIORITY, width:'8%',
+            [field:AlertDefSortField.PRIORITY, width:'70px',
              label:{getSeverityImg(it.severity)}],
         ]
     ]
@@ -279,11 +279,11 @@ class AlertController
         columns: [
             [field:AlertDefSortField.NAME, width:'20%',
              label:{linkTo(it.name, [resource:it]) }],
-            [field:AlertDefSortField.CTIME, width:'13%',
+            [field:AlertDefSortField.CTIME, width:'100px',
              label:{df.format(it.ctime)}], 
-            [field:AlertDefSortField.MTIME, width:'13%',
+            [field:AlertDefSortField.MTIME, width:'100px',
              label:{df.format(it.mtime)}], 
-            [field:AlertDefSortField.ACTIVE, width:'7%',
+            [field:AlertDefSortField.ACTIVE, width:'40px',
              label:{
             	def markUp = "<span style='whitespace:nowrap:'>"
                 	 
@@ -301,7 +301,7 @@ class AlertController
                  else
                      return linkTo(it.escalation.name, [resource:it.escalation])
              }],
-            [field:AlertDefSortField.PRIORITY, width:'10%',
+            [field:AlertDefSortField.PRIORITY, width:'70px',
              label:{getSeverityImg(it.severity)}], 
         ]
     ]
@@ -317,13 +317,13 @@ class AlertController
         columns: [
             [field:GalertDefSortField.NAME, width:'17%',
              label:{linkTo(it.name, [resource:it]) }],
-            [field:GalertDefSortField.CTIME, width:'13%',
+            [field:GalertDefSortField.CTIME, width:'100px',
              label:{df.format(it.ctime)}],
-            [field:GalertDefSortField.MTIME, width:'13%',
+            [field:GalertDefSortField.MTIME, width:'100px',
              label:{df.format(it.mtime)}],
-            [field:GalertDefSortField.ACTIVE, width:'7%',
+            [field:GalertDefSortField.ACTIVE, width:'40px',
              label:{YesOrNo.valueFor(it.enabled).value.capitalize()}],
-            [field:GalertDefSortField.LAST_FIRED, width:'13%',
+            [field:GalertDefSortField.LAST_FIRED, width:'100px',
              label:{
                  if (it.lastFired)
                      return linkTo(df.format(it.lastFired),
@@ -335,7 +335,7 @@ class AlertController
              label:{linkTo(it.group.name, [resource:it.group])}],
             [field:GalertDefSortField.ESCALATION, width:'14%',
              label:{linkTo(it.escalation.name, [resource:it.escalation])}],
-            [field:GalertDefSortField.SEVERITY, width:'7%',
+            [field:GalertDefSortField.SEVERITY, width:'70px',
              label:{getSeverityImg(it.severity)}], 
         ]
     ]
@@ -359,15 +359,16 @@ class AlertController
     }
 
     private getGroups() {
-        def res = [[code:0, value:localeBundle.AllGroups]]
-        resourceHelper.findViewableGroups().each { group ->
+        def res = [
+            [code:0, value:localeBundle.AllGroups]
+        ]
+        def groups = resourceHelper.findViewableGroups().sort { p1, p2 -> p1.name.compareToIgnoreCase(p2.name) }.each { group ->
             res << [code: group.id, value: group.name]
         }
         res
     }
 
     def AlertController() {
-        setTemplate('standard')
     }
     
     def index(params) {

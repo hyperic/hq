@@ -26,6 +26,7 @@
  -->
 
 <plugin package="org.hyperic.hq.plugin.ntp">
+  <property name="PLUGIN_VERSION" value="@project.version@"/>
 
   <filter name="template" value="ntpd:ntpdc=%ntpdc%,timeout=%timeout%:${alias}"/>
 

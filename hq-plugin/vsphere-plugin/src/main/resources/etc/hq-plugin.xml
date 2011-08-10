@@ -24,6 +24,7 @@
   USA.
  -->
 <plugin name="vsphere" class="VSphereProductPlugin">
+  <property name="PLUGIN_VERSION" value="@project.version@"/>
   <config name="sdk">
     <option name="url"
             description="vCenter sdk url"
@@ -442,5 +443,54 @@
     <metric name="Connection Validation Time"
             units="ms"
             indicator="true"/>
+            
+    <help>
+        <![CDATA[
+              <p>
+                <h2>Configure VMware vCenter for Monitoring</h2>
+
+                  <h3>Prerequisites and Support</h3>
+                    The vSphere plugin runs under Hyperic 4.5.1 and later and supports vSphere versions 4.0 and 4.1.
+
+                  <h3>SSL Configuration Requirements (Hyperic 4.6 and later)</h3>
+                    There are new SSL configuration requirements for secure communication between a Hyperic 4.6 agent
+                    and a VMware vCenter server.
+                    
+                    <ul>
+                    	<li>If the <b>accept.unverified.certificates</b> property is <b>false</b> (default value) in the <b>agent.properties</b> file, 
+                    		the VMware vCenter server's unverified SSL certificate needs to be manually imported to a keystore that the Hyperic 4.6 agent can access.
+                    		Otherwise, secure communication between the Hyperic 4.6 agent and VMware vCenter server will fail.
+                    	</li>
+                    	<li>If the <b>accept.unverified.certificates</b> property is <b>true</b> in the <b>agent.properties</b> file, the vSphere plugin will automatically
+                    		import the unverified SSL certificate of the VMware vCenter server to the keystore accessible to the Hyperic 4.6 agent.
+                    		<u>This is not recommended</u> because it is less secure and will expose the Hyperic agent to man-in-the-middle attacks.
+                    	</li>
+                    </ul>
+                    
+                  <h3>Auto-Discovery and Auto-Syncing Configuration Requirements (Hyperic 4.5.1 and later)</h3>
+                    The vSphere plugin uses HQApi to do advanced auto-discovery and auto-syncing of vSphere resources.
+                    This requires connection properties between the Hyperic agent and server to be supplied in the <b>agent.properties</b> file.
+                    
+                    <ol>
+                    	<li>Edit the following lines in the <b>agent.properties</b> file to supply the correct values for your environment.
+                    		<ul>
+                    			<li><b>agent.setup.camLogin</b>=yourHypericUser</li>
+                    			<li><b>agent.setup.camPword</b>=yourHypericPassword</li>
+                    		</ul>
+                    	</li>
+                    </ol>
+                    
+                    Auto-discovery and auto-syncing of vSphere resources occur during the agent default scan (every 15 minutes by default).
+                    
+                    <ol>
+                    	<li>You can update this time interval by uncommenting and updating the following line in the <b>agent.properties</b> file:
+                    		<ul>
+                    			<li><b>autoinventory.defaultScan.interval.millis</b>=900000</li>
+                    		</ul>
+                    	</li>
+                    </ol>
+              </p>
+        ]]>
+    </help>
   </server>
 </plugin>

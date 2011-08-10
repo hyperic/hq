@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.security.KeyStoreException;
 import java.util.Iterator;
 import java.util.Properties;
 
@@ -49,6 +50,9 @@ import org.hyperic.util.config.AutomatedResponseBuilder;
 import org.hyperic.util.config.InteractiveResponseBuilder;
 import org.hyperic.util.config.InteractiveResponseBuilder_IOHandler;
 import org.hyperic.util.config.SkipConfigException;
+import org.hyperic.util.config.YesNoConfigOption;
+import org.hyperic.util.security.KeystoreConfig;
+import org.hyperic.util.security.KeystoreManager;
 
 public class ConfigSchemaTask 
     extends Task
@@ -174,7 +178,22 @@ public class ConfigSchemaTask
                 throw new BuildException(e);
             }
         }
-
+        
+        // ...generate or load our internal keystore...
+        // ...store in data dir temporarily and copy it to correct location in ant script...
+    	String path = itsFile.getParent(); 
+    	String filePath = path + "/hyperic.keystore";
+    	String filePassword = "hyperic";
+    	KeystoreConfig config = new KeystoreConfig("hq", filePath, filePassword, true);
+    	
+    	try {
+			KeystoreManager.getKeystoreManager().getKeyStore(config);
+		} catch (KeyStoreException e) {
+			throw new BuildException(e);
+		} catch (IOException e) {
+			throw new BuildException(e);
+		}
+        
         if (itsReplaceInstallDir) {
             String newInstallDir
                 = mergedResponse.getValue(itsSchemaProvider.getBaseName() 
@@ -182,7 +201,7 @@ public class ConfigSchemaTask
             itsProject.setProperty(itsInstallDirPropName, 
                                    newInstallDir);
         }
-
+        
         // Generate summary text
         String completionText
             = itsSchemaProvider.getCompletionText(mergedResponse);

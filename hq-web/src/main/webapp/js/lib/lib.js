@@ -40,10 +40,10 @@ hyperic.URLS = {}; hyperic.widget = {}; hyperic.utils = {}; hyperic.html = {}; h
 
 hyperic.html = {
     show : function(/*String*/ node){
-        dojo.html.setStyle(node, 'display', '');
+        hqDojo.query("#" + node).style('display', '');
     },
     hide : function(/*String*/ node){
-        dojo.html.setStyle(node, 'display', 'none');
+        hqDojo.query("#" + node).style('display', 'none');
     }
 };
 
@@ -73,7 +73,7 @@ hyperic.form = {
      * @param inputNodeName the String ID of the hidden input field
     */
     mockLinkSubmit : function(inputName, inputValue, inputNodeName){
-        var hiddenInputObj = dojo.byId(inputNodeName);
+        var hiddenInputObj = hqDojo.byId(inputNodeName);
         hiddenInputObj.name=inputName;
         hiddenInputObj.value=inputValue;
         
@@ -88,7 +88,7 @@ hyperic.form = {
         }
     },
     createEscalationPauseOptions : function(selectAttributes, maxPauseTime) {
-		var myPauseSelect = dojo11.clone(hyperic.data.escalation.pauseSelect);
+		var myPauseSelect = hqDojo.clone(hyperic.data.escalation.pauseSelect);
 
 		if (selectAttributes.id != null) {
 			myPauseSelect.id = selectAttributes.id;
@@ -135,18 +135,12 @@ hyperic.utils.key = {
             evt.stopPropagation();            
         }
         if(evt.keyCode == 13) {
-            dojo.event.topic.publish('enter', [evt]);
+            hqDojo.publish('enter', [evt]);
         }
     },
     registerListener : function(/*DOMNode*/node, /*fp*/handler){
         if(handler && node) {
-            dojo.event.connect(node, 'onkeyup', handler);
-            /*
-            if(dojo.isIE) {
-                node.attachEvent("keyup", handler);
-            } else {
-                node.addEventListener("keyup", handler, false);
-            }*/
+            hqDojo.connect(node, 'onkeyup', handler);
         }
     }
 };
@@ -290,16 +284,19 @@ hyperic.widget.search = function(dojo, /*Object*/ urls, /*number*/ minStrLenth, 
         var string = e.target.value;
         if(this.searchBox.value.length >= this.minStrLen){
             this.searchStarted();
-            dojo.xhrGet({
-                url: this.searchURL+'?q='+string, 
+            hqDojo.xhrGet({
+                url: this.searchURL,
+                content: {
+                	q: string
+                },
                 handleAs: "json",
                 headers: { 
                 	"Content-Type": "application/json" 
                 },
                 timeout: 5000, 
                 load: function(response, args) {
-                	var resURL = resourceURL + "?eid=";
-    	            var usrURL = userURL + "?mode=view&u=";
+                	var resURL = resourceURL + ((resourceURL.indexOf("?") == -1) ? "?" : "&") + "eid=";
+    	            var usrURL = userURL + ((userURL.indexOf("?") == -1) ? "?" : "&") + "mode=view&u=";
     	            var template = "<li class='type'><a href='link' title='fullname'>text<\/a><\/li>";
     	            var count = 0;
     	            var res = "";
@@ -325,8 +322,8 @@ hyperic.widget.search = function(dojo, /*Object*/ urls, /*number*/ minStrLenth, 
     	                count++;
     	            }
     	            
-    	            dojo.byId("resourceResults").innerHTML = res;
-    	            dojo.byId("resourceResultsCount").innerHTML = count;
+    	            hqDojo.byId("resourceResults").innerHTML = res;
+    	            hqDojo.byId("resourceResultsCount").innerHTML = count;
 
     	            count = 0;
     	            res = "";
@@ -343,10 +340,10 @@ hyperic.widget.search = function(dojo, /*Object*/ urls, /*number*/ minStrLenth, 
     	                count++;
     	            }
     	             
-    	            dojo.byId("usersResults").innerHTML = res;
-    	            dojo.byId("usersResultsCount").innerHTML = count;
-    	            dojo.style("headerSearchResults", "display", "");
-    	            dojo.removeClass("searchBox", "searchActive");
+    	            hqDojo.byId("usersResults").innerHTML = res;
+    	            hqDojo.byId("usersResultsCount").innerHTML = count;
+    	            hqDojo.style("headerSearchResults", "display", "");
+    	            hqDojo.removeClass("searchBox", "searchActive");
                 },
                 error: this.error
             });
@@ -362,18 +359,18 @@ hyperic.widget.search = function(dojo, /*Object*/ urls, /*number*/ minStrLenth, 
         this.searchEnded();
     };
     this.searchStarted = function(){
-    	dojo.addClass("searchBox", "searchActive");
+    	hqDojo.addClass("searchBox", "searchActive");
     };
     this.searchEnded = function(){
-    	dojo.removeClass("searchBox", "searchActive");
+    	hqDojo.removeClass("searchBox", "searchActive");
     };
 
     return this;
 };
 
 function loadSearchData(response, evt) {
-	var resURL = resourceURL+"?eid=";
-    var usrURL = userURL +"?mode=view&u=";
+	var resURL = resourceURL + ((resourceURL.indexOf("?") == -1) ? "?" : "&") + "eid=";
+    var usrURL = userURL + ((userURL.indexOf("?") == -1) ? "?" : "&") + "mode=view&u=";
     var template = "<li class='type'><a href='link' title='fullname'>text<\/a><\/li>";
     var count = 0;
     var res = "";
@@ -399,8 +396,8 @@ function loadSearchData(response, evt) {
         count++;
     }
     
-    dojo.byId("resourceResults").innerHTML = res;
-    dojo.byId("resourceResultsCount").innerHTML = count;
+    hqDojo.byId("resourceResults").innerHTML = res;
+    hqDojo.byId("resourceResultsCount").innerHTML = count;
 
     count = 0;
     res = "";
@@ -417,10 +414,10 @@ function loadSearchData(response, evt) {
         count++;
     }
      
-    dojo.byId("usersResults").innerHTML = res;
-    dojo.byId("usersResultsCount").innerHTML = count;
-    dojo.byId('headerSearchResults').style.display = '';
-    dojo.byId('searchBox').className = "";
+    hqDojo.byId("usersResults").innerHTML = res;
+    hqDojo.byId("usersResultsCount").innerHTML = count;
+    hqDojo.byId('headerSearchResults').style.display = '';
+    hqDojo.byId('searchBox').className = "";
 }
 
 /**
@@ -483,15 +480,15 @@ hyperic.widget.Menu = function(kwArgs) {
         if(kwArgs.menuNode) {
             this.node = kwArgs.menuNode;
             this.node.style.display='none';
-            dojo11.connect(this.node, 'onmouseenter', that, 'onHover');
-            dojo11.connect(this.node, 'onmouseleave', that, 'onUnHover');
+            hqDojo.connect(this.node, 'onmouseenter', that, 'onHover');
+            hqDojo.connect(this.node, 'onmouseleave', that, 'onUnHover');
         }
         if(kwArgs.toggleNode) {
             if(kwArgs.subMenu){
                 this._isSubMenu = true;
-                dojo11.connect(kwArgs.toggleNode, 'onmouseover', that, 'onclick');
+                hqDojo.connect(kwArgs.toggleNode, 'onmouseover', that, 'onclick');
             }else{
-                dojo11.connect(kwArgs.toggleNode, 'onclick', that, 'onclick');
+                hqDojo.connect(kwArgs.toggleNode, 'onclick', that, 'onclick');
             }
         }
         
@@ -505,15 +502,8 @@ hyperic.widget.Menu = function(kwArgs) {
 /* OLD REPORTING */
 
 function init_reporting(){
-    dojo.require("dojo.widget.DropdownDatePicker"); 
-    dojo.require("dojo.widget.HtmlWidget");
-    dojo.require("dojo.widget.ValidationTextbox");
-    dojo.require("dojo.io");
-    dojo.require("dojo.json");
-    dojo.require("dojo.event");
-    
-    dojo.event.connect(window, "onload", function(){
-        var reportList = dojo.byId("reports");
+    hqDojo.ready(function(){
+        var reportList = hqDojo.byId("reports");
         if(reportList){
             reportList.selectedIndex = 0;
             selectedChanged(reportList);
@@ -524,28 +514,13 @@ function init_reporting(){
 hyperic.hq = {};
 hyperic.hq.reporting = {};
 hyperic.hq.dom = {};
-
-hyperic.hq.dom.datePickerProps = {
-    displayWeeks : "6",
-    inputWidth : "15em",
-    formatLength : "full",
-    templateString : '<div class="fieldRow" dojoAttachPoint="fieldRowContainerNode">\n\t<label for="${this.widgetId}">\n\t\t<span class="fieldLabel ${this.fieldRequiredClass}"><img src="/images/icon_required.gif" height="9" width="9" border="0"><span dojoAttachPoint="fieldLabel">${this.label}</span></span>\n\t</label>\n\t\t<div class="fieldValue" dojoAttachPoint="fieldWrapper">\n\t\t<span style=\"white-space:nowrap\"><input type=\"hidden\" name=\"\" value=\"\" dojoAttachPoint=\"valueNode\" /><input name=\"\" type=\"text\" value=\"\" style=\"vertical-align:middle;\" dojoAttachPoint=\"inputNode\" dojoAttachEvent=\"onclick:onIconClick\" readonly=\"readonly\" autocomplete=\"off\" /> <img src=\"${this.iconURL}\" alt=\"${this.iconAlt}\" dojoAttachEvent=\"onclick:onIconClick\" dojoAttachPoint=\"buttonNode\" style=\"vertical-align:middle; cursor:pointer; cursor:hand\" /></span>\n<div dojoattachpoint="validationMessage" class="errorMsg"></div></div>\n</div>',
-    value : new Date(),
-    StartDate : new Date(1-1-2000)
-};
     
 hyperic.hq.dom.validationTextboxProps = {
     id : "ValidationWidget1",
-    type : 'text',
     required : true,
-    missingClass : "",
     size : 23,
     maxlength : 60,
-    missingMessage : "",
-    requiredMessage : "this value is required",
-    listenOnKeyPress : false,
-    templateString : '<div class="fieldRow" dojoAttachPoint="fieldRowContainerNode">\n\t<label for="${this.widgetId}">\n\t\t<span class="fieldLabel ${this.fieldRequiredClass}"><img src="/images/icon_required.gif" height="9" width="9" border="0"><span dojoAttachPoint="fieldLabel">${this.label}</span></span>\n\t</label>\n\t\t<div class="fieldValue" dojoAttachPoint="fieldWrapper">\n\t\t<span style="float:${this.htmlfloat};">\n\t\t<input dojoAttachPoint="textbox" type="${this.type}" dojoAttachEvent="onblur;onfocus;onkeyup" id="${this.widgetId}" name="${this.name}" size="${this.size}" maxlength="${this.maxlength}" class="${this.className}" style="">\n\t\t\t<div dojoAttachPoint="invalidSpan" class="${this.invalidClass}">&nbsp;-&nbsp;${this.messages.invalidMessage}</div>\n\t\t<div dojoAttachPoint="missingSpan" class="${this.missingClass}">&nbsp;-&nbsp;${this.messages.missingMessage}</div>\n\t\t<div dojoAttachPoint="rangeSpan" class="${this.rangeClass}">&nbsp;-&nbsp;${this.messages.rangeMessage}</div>\n\t\t</span>\n</div>\n</div>',
-    templateCssString : ".dojoValidateEmpty{}\n.dojoValidateValid{}\n.dojoValidateInvalid{}\n.dojoValidateRange{}\n"
+    templateString : '<div class="fieldRow" dojoAttachPoint="fieldRowContainerNode">\n\t<label for="${this.widgetId}">\n\t\t<span class="fieldLabel ${this.fieldRequiredClass}"><img src="/images/icon_required.gif" height="9" width="9" border="0"><span dojoAttachPoint="fieldLabel">${this.label}</span></span>\n\t</label>\n\t\t<div class="fieldValue" dojoAttachPoint="fieldWrapper">\n\t\t<span style="float:${this.htmlfloat};">\n\t\t<input dojoAttachPoint="textbox" type="${this.type}" dojoAttachEvent="onblur;onfocus;onkeyup" id="${this.widgetId}" name="${this.name}" size="${this.size}" maxlength="${this.maxlength}" class="${this.className}" style="">\n\t\t\t<div dojoAttachPoint="invalidSpan" class="${this.invalidClass}">&nbsp;-&nbsp;${this.messages.invalidMessage}</div>\n\t\t<div dojoAttachPoint="missingSpan" class="${this.missingClass}">&nbsp;-&nbsp;${this.messages.missingMessage}</div>\n\t\t<div dojoAttachPoint="rangeSpan" class="${this.rangeClass}">&nbsp;-&nbsp;${this.messages.rangeMessage}</div>\n\t\t</span>\n</div>\n</div>'
 };
 
 hyperic.hq.dom.selectboxProps = {
@@ -558,62 +533,129 @@ hyperic.hq.dom.selectboxProps = {
    maxListLength : 10
 };
 
+hqDojo.require("dijit.dijit");
+hqDojo.require("dijit.form.DateTextBox");
 hyperic.hq.dom.createDatePicker = function(datePickerName){
-    hyperic.hq.dom.datePickerProps.label = datePickerName;
-    hyperic.hq.dom.datePickerProps.name = datePickerName;
-    hyperic.hq.dom.id = datePickerName;
-    var parentNode =  document.createElement('div');
-    parentNode.id = dojo.dom.getUniqueId();
-    dojo.byId("reportOptions").appendChild(parentNode); 
-    var calendarWidget = dojo.widget.createWidget("dropdowndatepicker", hyperic.hq.dom.datePickerProps, parentNode);
-    calendarWidget.inputNode.id = calendarWidget.widgetId;
-    hyperic.hq.reporting.manager.currentReportOptions.push(calendarWidget);
+	var section = hqDojo.create("div", {
+			"style": "padding: 5px;"
+	}, "reportOptions");
+	
+	var label = hqDojo.create("label", {
+		"for": datePickerName,
+		"class": "fieldLabel required"	
+	}, section);
+	
+	var img = hqDojo.create("img", {
+		"src": "/images/icon_required.gif",
+		"height": 9,
+		"width": 9,
+		"border": 0
+	}, label);
+	
+	var span = hqDojo.create("span", {}, label);
+	
+	span.innerHTML = datePickerName;
+
+	var div = hqDojo.create("div", {}, section);
+	var datePicker = new hqDijit.form.DateTextBox({
+		"name": datePickerName,
+		"value": new Date()
+	}, div);
+	
+    hyperic.hq.reporting.manager.currentReportOptions.push(datePicker);
 };
 
+hqDojo.require("dijit.form.ValidationTextBox");
 hyperic.hq.dom.createTextBox = function(textboxName){
-    hyperic.hq.dom.validationTextboxProps.label = textboxName;
-    hyperic.hq.dom.validationTextboxProps.name = textboxName;
-    var parentNode =  document.createElement('div');
-    parentNode.id = dojo.dom.getUniqueId();
-    dojo.byId("reportOptions").appendChild(parentNode); 
-    var validationWidget = dojo.widget.createWidget("ValidationTextbox", hyperic.hq.dom.validationTextboxProps, parentNode);
-    hyperic.hq.reporting.manager.currentReportOptions.push(validationWidget);
-    return validationWidget;
+	var section = hqDojo.create("div", {
+		"style": "padding: 5px;"
+	}, "reportOptions");
+
+	var label = hqDojo.create("label", {
+		"for": textboxName,
+		"class": "fieldLabel required"	
+	}, section);
+	
+	var img = hqDojo.create("img", {
+		"src": "/images/icon_required.gif",
+		"height": 9,
+		"width": 9,
+		"border": 0
+	}, label);
+	
+	var span = hqDojo.create("span", {}, label);
+
+	span.innerHTML = textboxName;
+	
+	var div = hqDojo.create("div", {}, section);
+	var textbox = new hqDijit.form.ValidationTextBox({
+		"name": textboxName,
+		"required": true,
+	    "size": 23,
+	    "maxlength": 60
+	}, div);
+	
+	hyperic.hq.reporting.manager.currentReportOptions.push(textbox);
+    
+	return textbox;
 };
 
+hqDojo.require("dijit.form.FilteringSelect");
+hqDojo.require("dojo.data.ItemFileReadStore");
 hyperic.hq.dom.createSelectBox = function(selectboxName, optionsArray){
-    this.option = function(name, value){
-        return "<option value='" + value + '">' + name + "</option>";
-    };
-    var select = document.createElement('select');
-    select.id = "temp";
-    var option = document.createElement('option'); 
-    option.value = "-1";
-    option.innerHTML = "All Resources";
-    select.appendChild(option);
-    for(var i =0; i < optionsArray.length; i++){
-        option = document.createElement('option');
-        option.value = optionsArray[i].id;
-        option.innerHTML = optionsArray[i].name;
-        select.appendChild(option);
-    }
-    dojo.byId("reportOptions").appendChild(select);
-    hyperic.hq.dom.selectboxProps.label = selectboxName;
-    var selectWidget = dojo.widget.createWidget("ComboBox", hyperic.hq.dom.selectboxProps, select);
-    selectWidget.textInputNode.id = selectWidget.widgetId;
-    selectWidget.dataProvider.searchLimit = optionsArray.length + 1;
-    selectWidget.domNode = selectWidget.textInputNode;
-    hyperic.hq.reporting.manager.currentReportOptions.push(selectWidget);
+	var section = hqDojo.create("div", {
+		"style": "padding: 5px;"
+	}, "reportOptions");
+
+	var label = hqDojo.create("label", {
+		"for": selectboxName,
+		"class": "fieldLabel required"	
+	}, section);
+	
+	var img = hqDojo.create("img", {
+		"src": "/images/icon_required.gif",
+		"height": 9,
+		"width": 9,
+		"border": 0
+	}, label);
+	
+	var span = hqDojo.create("span", {}, label);
+
+	span.innerHTML = selectboxName;
+
+	optionsArray.unshift({
+		id: "-1", 
+		name: "All Resources"
+	});
+	
+	var dataStore = new hqDojo.data.ItemFileReadStore({
+		data: {
+			identifier: "id",
+			label: "name",
+			items: optionsArray
+		}
+	});
+	
+	var div = hqDojo.create("div", {}, section);
+	
+	var comboBox = new hqDijit.form.FilteringSelect({
+		"name": selectboxName,
+		"store": dataStore,
+		"value": -1,
+        "searchAttr": "name"
+    }, div);
+	
+	hyperic.hq.reporting.manager.currentReportOptions.push(comboBox);
 };
 
 hyperic.hq.reporting.manager = { 
     currentReportOptions : [], 
-    preSubmit : function(){
+    preSubmit : function() {
         var submit = this.validateReportOptions();
         if(submit){
             this.serializeReportOptions();
-            //dojo.byId("ReportingForm").submit();
-            var mp = dojo.byId("messagePanel");
+            //hqDojo.byId("ReportingForm").submit();
+            var mp = hqDojo.byId("messagePanel");
             if(mp){
                 mp.style.display="none";
             }
@@ -623,73 +665,46 @@ hyperic.hq.reporting.manager = {
         }
     },
     serializeReportOptions : function(){
-        var obj = "{";
-        for(var i = 0; i < this.currentReportOptions.length; i++){
-            if(this.currentReportOptions[i].getDate){
-                obj += '"' + this.currentReportOptions[i].name + '":"' +  this.currentReportOptions[i].getDate().getTime() +'",'; 
-            }else if(this.currentReportOptions[i].getState){
-                var value = this.currentReportOptions[i].comboBoxSelectionValue.value;
-                if(dojo.render.html.ie){
-                    obj += '"' + this.currentReportOptions[i].label + '":"' + value +'",';
-                }else{
-                    obj += '"' + this.currentReportOptions[i].label + '":"' + value +'",';
-                }
-            }else if(this.currentReportOptions[i].textbox){
-                obj += '"' + this.currentReportOptions[i].name + '":"' +  this.currentReportOptions[i].getValue() +'",';
-            }
+        var obj = [];
+        var temp = "";
+        
+        for(var i = 0; i < this.currentReportOptions.length; i++) {
+        	temp += '"' + this.currentReportOptions[i].name + '":"';
+        	
+        	if (this.currentReportOptions[i].getValue().getTime) {
+	        	temp += this.currentReportOptions[i].getValue().getTime();
+	        } else {
+	        	temp += this.currentReportOptions[i].getValue();
+	        }
+	        
+	        temp += '"';
+	        
+            obj.push(temp);
+            
+            temp = "";
         }
-        obj += "}";
-        dojo.byId("jsonData").value = obj;
+        
+        hqDojo.byId("jsonData").value = "{" + obj.join(",") + "}";
     },
     validateReportOptions : function(){
         var submit = true;
         var dates ={};
-        for(var i =0; i < this.currentReportOptions.length; i++){
-            if(this.currentReportOptions[i].getDate){
-                if(this.currentReportOptions[i].label == "Start Date" ||
-                    this.currentReportOptions[i].label == "StartDate"){ 
-                    dates.StartDate = this.currentReportOptions[i].getDate();
-                    dates.StartDateNode = this.currentReportOptions[i];
-                }else{
-                    dates.EndDate = this.currentReportOptions[i].getDate();
-                    dates.EndDateNode = this.currentReportOptions[i];
-                }
-                if(this.currentReportOptions[i].inputNode.value === ''){
-                    this.currentReportOptions[i].fieldWrapper.className += ' error';
-                    this.currentReportOptions[i].validationMessage.innerHTML = "&nbsp;-&nbsp;this field is required ";
-                    submit = false && submit;
-                }else{
-                    this.currentReportOptions[i].fieldWrapper.className = 'fieldValue';
-                    this.currentReportOptions[i].validationMessage.innerHTML = "";
-                    submit = true && submit;                        
-                }
-            }else if(this.currentReportOptions[i].getState){
-                if(this.currentReportOptions[i].getValue() === '' && !this.currentReportOptions[i]._isValidOption()){
-                    this.currentReportOptions[i].fieldWrapper.className += ' error';
-                    this.currentReportOptions[i].validationMessage.innerHTML = "&nbsp;-&nbsp;this field is required ";
-                    submit = false && submit;  
-                }else{
-                    this.currentReportOptions[i].fieldWrapper.className = 'fieldValue';
-                    this.currentReportOptions[i].validationMessage.innerHTML = "";
-                    submit = true && submit;
-                }
-            }else if(this.currentReportOptions[i].getValue && !this.currentReportOptions[i].getState){
-                if(this.currentReportOptions[i].textbox.value === ''){
-                    this.currentReportOptions[i].fieldWrapper.className += ' error';
-                    this.currentReportOptions[i].validationMessage.innerHTML = "&nbsp;-&nbsp;this field is required ";
-                    submit = false && submit;                       
-                }else{
-                    this.currentReportOptions[i].fieldWrapper.className = 'fieldValue';
-                    this.currentReportOptions[i].validationMessage.innerHTML = "";
-                    submit = true && submit;                        
-                }
-            }
+        
+        for (var i =0; i < this.currentReportOptions.length; i++) {
+            if (this.currentReportOptions[i].getValue === '') {
+            	submit = false && submit;
+            	break;
+            } else if (this.currentReportOptions[i].name == "StartDate") { 
+                dates.StartDate = this.currentReportOptions[i].getValue();
+                dates.StartDateNode = this.currentReportOptions[i];
+            } else if (this.currentReportOptions[i].name == "EndDate") {
+                dates.EndDate = this.currentReportOptions[i].getValue();
+                dates.EndDateNode = this.currentReportOptions[i];
+            } 
         }
         if(dates.EndDate && dates.StartDate){
             if(dates.StartDate > dates.EndDate){
-                    dates.EndDateNode.fieldWrapper.className += ' error';
-                    dates.EndDateNode.validationMessage.innerHTML = '&nbsp;-&nbsp;The "End" date must be earlier than the "Start" date.';
-                    submit = false && submit;
+                submit = false && submit;
             }
         }
         return submit;
@@ -697,7 +712,7 @@ hyperic.hq.reporting.manager = {
 };
 
 function resetReportOptions(){
-    dojo.byId("reportOptions").innerHTML = "";
+    hqDojo.empty("reportOptions");
     hyperic.hq.reporting.manager.currentReportOptions = [];
     //TODO iterate through and call destroy
 }
@@ -708,44 +723,42 @@ function selectedChanged(selectNode){
     //inner html the response after checking the validity
     var selected;
     var textNode;
-    var textTargetNode = dojo.byId("reportDetails");
+    var textTargetNode = hqDojo.byId("reportDetails");
     if(selectNode){
         selected = selectNode.options[selectNode.selectedIndex];
-        textNode = dojo.byId(selected.value);
+        textNode = hqDojo.byId(selected.value);
         textTargetNode.innerHTML = textNode.innerHTML;
     }
     getReportOptions(selected.value);
 }
 
 function getReportOptions(reportName){
-    var URL = "/reporting/ReportCenter.do?reportName=" + reportName;
-    var request = new dojo.io.Request(URL, "text/plain", "XMLHTTPTransport");
-    request.load = function(type, data, evt){
-        if(data){ createInputFieldsFromJSON(data); } 
-    };
-    request.error = function(type, error){};
-    dojo.io.bind(request);
+	hqDojo.xhrGet({
+		url: "/reporting/ReportCenter.do?reportName=" + reportName,
+		handleAs: "json",
+		load: function(response, args) {
+	        if(response) createInputFieldsFromJSON(response); 
+	    } 
+	});
 }
 
-function createInputFieldsFromJSON(jsonArray){
+function createInputFieldsFromJSON(descriptor){
     resetReportOptions();
-    var descriptor = dojo.json.evalJson(jsonArray);
-    //for(var key in descriptor){
-    var i = 0;
-    while(i < descriptor.length){
-        // var type = descriptor[key].type;
+    
+    for (var i = 0; i < descriptor.length; i++) {
         var type = descriptor[i].descriptor.type;
-        if(type !== undefined){
+        
+        if (type !== undefined) {
             var o = descriptor[i].descriptor;
-            if(type.indexOf("String") != -1){
+        
+            if (type.indexOf("String") != -1) {
                 hyperic.hq.dom.createTextBox(o.name);
-            }else if(type.indexOf("Date") != -1){
+            } else if (type.indexOf("Date") != -1) {
                 hyperic.hq.dom.createDatePicker(o.name);
-            }else if(type.indexOf("Group") != -1){
+            } else if (type.indexOf("Group") != -1) {
                 hyperic.hq.dom.createSelectBox(o.name, o.options);
             }
         } 
-        i++; 
     }
 }
 
@@ -812,7 +825,7 @@ hyperic.widget.Chart = function(node, kwArgs) {
         					+ '</h3><div id="widget_chart"></div><div class="xlegend"></div></div>';
         
         that.template = template;
-        that.node = dojo11.byId(node);
+        that.node = hqDojo.byId(node);
         that.name = kwArgs.name;
         that.node.innerHTML = template;
         that.data = kwArgs.data;
@@ -847,12 +860,12 @@ hyperic.widget.Chart = function(node, kwArgs) {
                         fillColor     : "#00B93A" //#E6FCCA
                         }
                     )];
-                    that.chart = Timeplot.create(dojo11.byId("widget_chart"), pi);
+                    that.chart = Timeplot.create(hqDojo.byId("widget_chart"), pi);
                     // that.chart.loadText(that.url, ",", that.dataSource);
                     that.chart.loadJSON(that.data, that.dataSource);                }
                 else
                 {
-                    node_el = dojo11.byId(node);
+                    node_el = hqDojo.byId(node);
                     var message = SimileAjax.Graphics.createMessageBubble(node_el.ownerDocument);
                     message.containerDiv.className = "timeline-message-container";
                     node_el.appendChild(message.containerDiv);
@@ -877,7 +890,7 @@ hyperic.widget.Chart = function(node, kwArgs) {
                         fillColor     : "#00B93A" //#E6FCCA
                         }
                     )];
-                    that.chart = Timeplot.create(dojo11.byId("widget_chart"), pi);
+                    that.chart = Timeplot.create(hqDojo.byId("widget_chart"), pi);
                     that.chart.loadJSON({"2008-08-04T01:08:51-0700":[0],"2008-08-04T01:09:51-0700":[0],"2008-08-04T01:10:51-0700":[0],"2008-08-04T01:11:51-0700":[0],"2008-08-04T01:12:51-0700":[0]}, that.dataSource);
                 }
                 
@@ -888,18 +901,14 @@ hyperic.widget.Chart = function(node, kwArgs) {
     };
 
     this.cleanup = function(){
-        // dojo11.unsubscribe(that.subscriptions[0]);
-        
         // destroy all children of the chart container
         while(that.node.lastChild) {
           that.node.removeChild(that.node.lastChild);
         }
-        // that.node.parentNode.removeChild(that.node);
+    
         that.node = null;
-        };
-    //init
+    };
     that.isShowing = false;
-    // this.create(node, kwArgs, tabid, chartPos);
     this.create(node, kwArgs);
     this.showChart();
 };
@@ -933,7 +942,7 @@ hyperic.dashboard.widget = {
         {
             e.stopPropagation();
             e.preventDefault();
-            dojo11.stopEvent(e);
+            hqDojo.stopEvent(e);
 
             this['click_' + action](e);
         }
@@ -996,26 +1005,25 @@ hyperic.dashboard.widget = {
     swapSheets: function(to,onEnd) {
         var fromSheet = this.sheets[this.currentSheet];
         var toSheet = this.sheets[to];
-        var c = dojo11.fx.chain([
-            dojo11.fadeOut({
+        var c = hqDojo.fx.chain([
+            hqDojo.fadeOut({
                 node : fromSheet, 
                 onEnd: function() { 
-                        dojo11.style(fromSheet,'display','none');
-                        dojo11.style(toSheet,'display','block'); 
-                    } 
-                }
-            ),
-            dojo11.fadeIn({
+                	hqDojo.style(fromSheet, 'display', 'none');
+                    hqDojo.style(toSheet, 'display', 'block'); 
+                } 
+            }),
+            hqDojo.fadeIn({
                 node : toSheet
-                }
-            )
-            ]);
+            })
+        ]);
 
-        if(onEnd)
-        {
-            dojo11.connect(c,'onEnd',onEnd);
+        if(onEnd) {
+            hqDojo.connect(c,'onEnd',onEnd);
         }
+        
         c.play();
+        
         this.previousSheet = this.currentSheet;
         this.currentSheet = to;
     }
@@ -1102,7 +1110,7 @@ function addOptionToSelect(select,option)
  * @param {Text} search text
  */
 function searchSelectBox(node,text) {
-    dojo11.forEach(
+    hqDojo.forEach(
         node.options,
         function(opt)
         {
@@ -1314,24 +1322,24 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
     that.queryParams = { get: "dashboard.html?action=listReports" };
 
     // the dom containers
-    that.container.loading = dojo11.query('.loading',node)[0];
-    that.container.progress = dojo11.query('.progress',node)[0];
-    that.container.error_loading = dojo11.query('.notfound',node)[0];
-    that.container.content = dojo11.query('.contents',node)[0];
+    that.container.loading = hqDojo.query('.loading',node)[0];
+    that.container.progress = hqDojo.query('.progress',node)[0];
+    that.container.error_loading = hqDojo.query('.notfound',node)[0];
+    that.container.content = hqDojo.query('.contents',node)[0];
 
     // the buttons and form elements
-    that.remove_btn = dojo11.query('.remove_btn',node)[0];
-    that.refresh_btn = dojo11.query('.refresh_btn',node)[0];
-    that.select_btn = dojo11.query('.reportSelect',node)[0];
+    that.remove_btn = hqDojo.query('.remove_btn',node)[0];
+    that.refresh_btn = hqDojo.query('.refresh_btn',node)[0];
+    that.select_btn = hqDojo.query('.reportSelect',node)[0];
 
     // the report stuff
-    that.report_img = dojo11.query('.reportImage',node)[0];
-    that.report_legend = dojo11.query('.reportLegend',node)[0];
-    that.showLeg_btn = dojo11.query('.showlegend_btn',node)[0];
-    that.hideLeg_btn = dojo11.query('.hidelegend_btn',node)[0];
-    that.legend = dojo11.query('.legend',node)[0];
-    that.report_title = dojo11.query('.reportTitle',node)[0];
-    that.arcLink = dojo11.query('.arcLink',node)[0];
+    that.report_img = hqDojo.query('.reportImage',node)[0];
+    that.report_legend = hqDojo.query('.reportLegend',node)[0];
+    that.showLeg_btn = hqDojo.query('.showlegend_btn',node)[0];
+    that.hideLeg_btn = hqDojo.query('.hidelegend_btn',node)[0];
+    that.legend = hqDojo.query('.legend',node)[0];
+    that.report_title = hqDojo.query('.reportTitle',node)[0];
+    that.arcLink = hqDojo.query('.arcLink',node)[0];
 
     that.isLegendShowing = false;
     that.legendDia = '';
@@ -1374,8 +1382,8 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
 
             // Dim the underlay less
             var underlayId = that.legendDiv + '_underlay'
-            dojo11.byId(underlayId).style.background = '#707070';
-            dojo11.byId(underlayId).style.opacity = '0.1';
+            hqDojo.byId(underlayId).style.background = '#707070';
+            hqDojo.byId(underlayId).style.opacity = '0.1';
         }
     };
     /**
@@ -1491,12 +1499,12 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
             that.arcLink.href = that.url;
             that.init_connection(that.url+that.queryParams.get);
             console.log("connecting the buttons");
-            dojo11.connect(that.refresh_btn,'onclick',that.click_refresh_btn);
-            dojo11.connect(that.select_btn,'onchange',that.select_change);
-            dojo11.connect(that.showLeg_btn,'onclick',that.toggleLegend);
-            dojo11.connect(that.hideLeg_btn,'onclick',that.toggleLegend);
+            hqDojo.connect(that.refresh_btn,'onclick',that.click_refresh_btn);
+            hqDojo.connect(that.select_btn,'onchange',that.select_change);
+            hqDojo.connect(that.showLeg_btn,'onclick',that.toggleLegend);
+            hqDojo.connect(that.hideLeg_btn,'onclick',that.toggleLegend);
             var pane = that.legend;
-			that.legendDia = new dijit11.Dialog({
+			that.legendDia = new hqDijit.Dialog({
 				id: that.legendDiv,
 				refocus: true,
 				autofocus: false,
@@ -1505,7 +1513,7 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
 			},pane);
         }
 
-        dojo11.connect(that.remove_btn,'onclick',that.click_remove_btn);
+        hqDojo.connect(that.remove_btn,'onclick',that.click_remove_btn);
     };
 
     /**
@@ -1516,7 +1524,7 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
         var now = new Date();
         uri = uri + '&' + now.getTime();
         console.info(uri);
-        dojo11.io.script.get({
+        hqDojo.io.script.get({
             handleAs : "html",
             url : uri,
             checkString : "document.arcReportList",
@@ -1532,7 +1540,7 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
     this.getImageURL = function (uri, checkString) {
         console.info(uri);
         document.arcImageData = null;
-        dojo11.io.script.get({
+        hqDojo.io.script.get({
             handleAs : "html",
             url : uri,
             checkString : "document.arcImageData",
@@ -1586,25 +1594,27 @@ hyperic.dashboard.arcWidget.prototype = hyperic.dashboard.widget;
  */
 hyperic.dashboard.chartWidget = function(args) {
     var that = this;
-    var node = dojo11.byId(args.tabName);
+    var node = hqDojo.byId(args.tabName);
     var portletName = args.portletName;
     var portletLabel = args.title;
     var baseUrl = args.url;
-
+    var chartUrl = args.chartUrl;
+    var ctypeChartUrl = args.ctypeChartUrl;
+    
     that.sheets = {};
-    that.sheets.loading = dojo11.query('.loading',node)[0];
-    that.sheets.error_loading = dojo11.query('.error_loading',node)[0];
-    that.sheets.instructions = dojo11.query('.instructions',node)[0];
-    that.sheets.config = dojo11.query('.config',node)[0];
-    that.sheets.content = dojo11.query('.content',node)[0];
+    that.sheets.loading = hqDojo.query('.loading',node)[0];
+    that.sheets.error_loading = hqDojo.query('.error_loading',node)[0];
+    that.sheets.instructions = hqDojo.query('.instructions',node)[0];
+    that.sheets.config = hqDojo.query('.config',node)[0];
+    that.sheets.content = hqDojo.query('.content',node)[0];
     that.currentSheet = 'loading';
 
-    that.last_updated_div = dojo11.query('.last_updated',node)[0];
+    that.last_updated_div = hqDojo.query('.last_updated',node)[0];
 
-    that.chartsearch = dojo11.byId('chartsearch');
-    that.chartselect = new hyperic.selectBox(dojo11.byId('chartselect'));
+    that.chartsearch = hqDojo.byId('chartsearch');
+    that.chartselect = new hyperic.selectBox(hqDojo.byId('chartselect'));
     
-    that.play_btn = dojo11.query('.pause_btn',node)[0];
+    that.play_btn = hqDojo.query('.pause_btn',node)[0];
     
     that.chart = null;
     that.charts = [];
@@ -1632,9 +1642,9 @@ hyperic.dashboard.chartWidget = function(args) {
         that.pauseCharts();
         hyperic.dashboard.widget.click_config_btn.apply(this,[e]);
         
-        var input_rotation = dojo11.byId('chart_rotation');
-        var input_interval = dojo11.byId('chart_interval');
-        var input_range = dojo11.byId('chart_range');
+        var input_rotation = hqDojo.byId('chart_rotation');
+        var input_interval = hqDojo.byId('chart_interval');
+        var input_range = hqDojo.byId('chart_range');
         if(that.config.rotation == 'true')
         {
             input_rotation.checked = true;
@@ -1672,7 +1682,7 @@ hyperic.dashboard.chartWidget = function(args) {
     this.click_save_btn = function(e)
     {
         // if the time range has changed, reset the chart data and chart refresh cycle
-        if(that.config.range && that.config.range != dojo11.byId('chart_range').value)
+        if(that.config.range && that.config.range != hqDojo.byId('chart_range').value)
         {
             for(var i = 0; i < that.charts.length; i++)
             {
@@ -1685,11 +1695,11 @@ hyperic.dashboard.chartWidget = function(args) {
             }
         }
 
-        that.config.interval = parseInt(dojo11.byId('chart_interval').value,10);
-        that.config.range = dojo11.byId('chart_range').value;
-        that.config.rotation = dojo11.byId('chart_rotation').checked ? 'true' : 'false';
+        that.config.interval = parseInt(hqDojo.byId('chart_interval').value,10);
+        that.config.range = hqDojo.byId('chart_range').value;
+        that.config.rotation = hqDojo.byId('chart_rotation').checked ? 'true' : 'false';
 
-        dojo11.xhrPost({
+        hqDojo.xhrPost({
             url: baseUrl,
             content: { 
         		"tr" : that.config.range, 
@@ -1821,8 +1831,9 @@ hyperic.dashboard.chartWidget = function(args) {
         var chartId = that.currentChartId;
         var chartIndex = that.chartselect.select.selectedIndex;
         if(confirm('Remove ' + that.charts[chartId].name + ' from saved charts?')) {
-            dojo11.xhrPost( {
-                url: baseUrl + "/chart/" + that.charts[chartId].rid + "/" + that.charts[chartId].mtid + "/",
+        	var urlToUse = chartUrl.replace("{rid}", that.charts[chartId].rid).replace("{mtid}", that.charts[chartId].mtid);
+            hqDojo.xhrPost( {
+                url: urlToUse,
                 content: {
             		"_method" : "DELETE" // need to work around issue using PUT directly
             	},
@@ -2077,7 +2088,7 @@ hyperic.dashboard.chartWidget = function(args) {
             that.fetchChartsCycleId = null;
             that.swapSheets('loading');
         }
-        dojo11.xhrGet( {
+        hqDojo.xhrGet( {
             url: baseUrl,
             handleAs: 'json',
             headers: { "Content-Type": "application/json"},
@@ -2139,20 +2150,20 @@ hyperic.dashboard.chartWidget = function(args) {
     that.fetchChartData = function(chart)
     {
     	if (that._fetchingChart) {
-    		return new dojo.Deferred();
+    		return new hqDojo.Deferred();
     	}
     	
     	that._fetchingChart = true;
     	
-    	var chartUrl = baseUrl + "/chart/" + that.charts[chart].rid + "/" + that.charts[chart].mtid + "/";
+    	var urlToUse = unescape(chartUrl).replace("{rid}", that.charts[chart].rid).replace("{mtid}", that.charts[chart].mtid);
     	var ctype = that.charts[chart].ctype;
     	
     	if (ctype != null) {
-    		chartUrl += ctype + "/";
+    		urlToUse = unescape(ctypeChartUrl).replace("{rid}", that.charts[chart].rid).replace("{mtid}", that.charts[chart].mtid).replace("{ctype}", ctype);
     	}
     
-    	return dojo11.xhrGet( {
-            url: chartUrl,
+    	return hqDojo.xhrGet( {
+            url: urlToUse,
             handleAs: 'json',
             headers: { "Content-Type": "application/json"},
             preventCache: true,
@@ -2230,7 +2241,7 @@ hyperic.dashboard.chartWidget = function(args) {
     {
         if(that.currentSheet == 'content')
         {
-            dojo11.query('#chart_container',that.sheets.content)[0].style.width = that.sheets.content.offsetWidth - 150;
+            hqDojo.query('#chart_container',that.sheets.content)[0].style.width = that.sheets.content.offsetWidth - 150;
         }
     };
 
@@ -2238,21 +2249,21 @@ hyperic.dashboard.chartWidget = function(args) {
     {
         // connect the onclick event of the whole widget to the clickHandler
         // function of this object, inherited from hyperic.dashboard.widget.
-        dojo11.connect(node,'onclick',dojo11.hitch(that,'clickHandler'));
+        hqDojo.connect(node,'onclick',hqDojo.hitch(that,'clickHandler'));
 
         // set up the event handlers for the live search box
-        dojo11.connect(that.chartsearch,'onfocus', that.emptySearch);
-        dojo11.connect(that.chartsearch,'onblur', that.resetSearch);
-        dojo11.connect(that.chartsearch,'onkeyup',that.search);
+        hqDojo.connect(that.chartsearch,'onfocus', that.emptySearch);
+        hqDojo.connect(that.chartsearch,'onblur', that.resetSearch);
+        hqDojo.connect(that.chartsearch,'onkeyup',that.search);
 
         // set up the event handler for the select box
-        dojo11.connect(that.chartselect.select,'onclick',that.select);
+        hqDojo.connect(that.chartselect.select,'onclick',that.select);
 
         // set up the event handler for the remove button
-        dojo11.connect(dojo11.byId('chart_remove_btn'),'onclick',that.click_chart_remove_btn);
+        hqDojo.connect(hqDojo.byId('chart_remove_btn'),'onclick',that.click_chart_remove_btn);
 
         // handle resizing of the window
-        dojo11.connect(window,'onresize',dojo11.hitch(that, that.chartResize));
+        hqDojo.connect(window,'onresize',hqDojo.hitch(that, that.chartResize));
 
         that.fetchAndPlayCharts();
 
@@ -2275,7 +2286,7 @@ hyperic.dashboard.chartWidget.prototype = hyperic.dashboard.widget;
  */
 hyperic.dashboard.summaryWidget = function(args) {
     var that = this;
-    var node = dojo11.byId(args.tabName);
+    var node = hqDojo.byId(args.tabName);
     var portletName = args.portletName;
     var portletLabel = args.title;
     var baseUrl = args.url;
@@ -2283,30 +2294,30 @@ hyperic.dashboard.summaryWidget = function(args) {
 	that.cycleId = null;
 
     that.sheets = {};
-    that.sheets.loading = dojo11.query('.loading',node)[0];
-    that.sheets.error_loading = dojo11.query('.error_loading',node)[0];
-    that.sheets.instructions = dojo11.query('.instructions',node)[0];
-    that.sheets.config = dojo11.query('.config',node)[0];
-    that.sheets.content = dojo11.query('.content',node)[0];
+    that.sheets.loading = hqDojo.query('.loading',node)[0];
+    that.sheets.error_loading = hqDojo.query('.error_loading',node)[0];
+    that.sheets.instructions = hqDojo.query('.instructions',node)[0];
+    that.sheets.config = hqDojo.query('.config',node)[0];
+    that.sheets.content = hqDojo.query('.content',node)[0];
     that.currentSheet = 'loading';
 
     that.last_updated = new Date();
-    that.last_updated_div = dojo11.query('.last_updated',node)[0];
+    that.last_updated_div = hqDojo.query('.last_updated',node)[0];
 
     that.alert_groups = {"data": {}, "count": 0};
     that.selected_alert_groups = [];
     that.alert_group_status = {};
 
-    that.available_alert_groups = new hyperic.selectBox(dojo11.byId('available_alert_groups'));
-    that.enabled_alert_groups = new hyperic.selectBox(dojo11.byId('enabled_alert_groups'));
-    that.groupsearch = dojo11.byId('groupsearch');
+    that.available_alert_groups = new hyperic.selectBox(hqDojo.byId('available_alert_groups'));
+    that.enabled_alert_groups = new hyperic.selectBox(hqDojo.byId('enabled_alert_groups'));
+    that.groupsearch = hqDojo.byId('groupsearch');
 
-	that.enable_alert_btn = dojo11.query('.enable_alert_btn',that.sheets.config)[0];
-	that.disable_alert_btn = dojo11.query('.disable_alert_btn',that.sheets.config)[0];
+	that.enable_alert_btn = hqDojo.query('.enable_alert_btn',that.sheets.config)[0];
+	that.disable_alert_btn = hqDojo.query('.disable_alert_btn',that.sheets.config)[0];
 
     that.tables = {
-        lcol: dojo11.query('.lcol table tbody',node)[0],
-        rcol: dojo11.query('.rcol table tbody',node)[0]
+        lcol: hqDojo.query('.lcol table tbody',node)[0],
+        rcol: hqDojo.query('.rcol table tbody',node)[0]
     };
 
     that.config = {
@@ -2500,7 +2511,7 @@ hyperic.dashboard.summaryWidget = function(args) {
     {
         that.selected_alert_groups = that.enabled_alert_groups.getAllValues();
 
-        dojo11.xhrPost( {
+        hqDojo.xhrPost( {
             url: baseUrl,
             content: {
         		"rid" : that.selected_alert_groups,
@@ -2648,7 +2659,7 @@ hyperic.dashboard.summaryWidget = function(args) {
      */
     that.fetchAlertGroupStatus = function()
     {
-        return dojo11.xhrGet( {
+        return hqDojo.xhrGet( {
             url: baseUrl,
             handleAs: 'json',
             headers: { "Content-Type": "application/json"},
@@ -2723,12 +2734,12 @@ hyperic.dashboard.summaryWidget = function(args) {
     {
         // connect the onclick event of the whole widget to the clickHandler
         // function of this object, inherited from hyperic.dashboard.widget.
-        dojo11.connect(node,'onclick',dojo11.hitch(that,'clickHandler'));
+        hqDojo.connect(node,'onclick',hqDojo.hitch(that,'clickHandler'));
 
         // set up the event handlers for the live search box
-        dojo11.connect(that.groupsearch,'onfocus', that.emptySearch);
-        dojo11.connect(that.groupsearch,'onblur', that.resetSearch);
-        dojo11.connect(that.groupsearch,'onkeyup',that.search);
+        hqDojo.connect(that.groupsearch,'onfocus', that.emptySearch);
+        hqDojo.connect(that.groupsearch,'onblur', that.resetSearch);
+        hqDojo.connect(that.groupsearch,'onkeyup',that.search);
         
         // preload 'disabled' view buttons
         var disabled_select = new Image();
@@ -2750,7 +2761,6 @@ hyperic.dashboard.summaryWidget.prototype = hyperic.dashboard.widget;
 
 hyperic.group_manager = function(args) {
 	var that = this;
-	var baseUrl = args.url;
 	
 	that.dialogs = {};
 	that.message_area = {};
@@ -2758,17 +2768,17 @@ hyperic.group_manager = function(args) {
 	
 	that.init = function() {		
 		if(!that.dialogs.AddToExistingGroup){
-	    	var pane = dojo11.byId("add_to_existing_group_dialog");
-			that.dialogs.AddToExistingGroup = new dijit11.Dialog({
+	    	var pane = hqDojo.byId("add_to_existing_group_dialog");
+			that.dialogs.AddToExistingGroup = new hqDijit.Dialog({
 				id: "Add_to_Existing_Group_Dialog",
 				refocus: true,
 				autofocus: false,
 				title: "Group Manager"
 				}, pane);
 			
-			that.message_area.AddToExistingGroup = dojo11.byId("AddToExistingGroupStatus");
-			that.button_area.AddToExistingGroup = dojo11.byId("AddToExistingGroupButton");
-			that.button_area.AddToNewGroup = dojo11.byId("AddToNewGroupButton");
+			that.message_area.AddToExistingGroup = hqDojo.byId("AddToExistingGroupStatus");
+			that.button_area.AddToExistingGroup = hqDojo.byId("AddToExistingGroupButton");
+			that.button_area.AddToNewGroup = hqDojo.byId("AddToNewGroupButton");
 			
 			that.dialogs.AddToExistingGroup.toggleAll = function(checkAllBox) {
 				var checkedState = checkAllBox.checked;
@@ -2793,7 +2803,7 @@ hyperic.group_manager = function(args) {
 
 			that.dialogs.AddToExistingGroup.toggleButtons = function(myCheckBox) {
 				var myList = myCheckBox.form;
-				var checkAllBox = dojo11.byId("AddToExistingGroup_CheckAllBox");
+				var checkAllBox = hqDojo.byId("AddToExistingGroup_CheckAllBox");
 
 				if (myCheckBox.id != checkAllBox.id) {
 					checkAllBox.checked = false;
@@ -2855,8 +2865,6 @@ hyperic.group_manager = function(args) {
 		var entityType = eidArray[0].split(":")[0];
 		var myForm = document.AddToExistingGroupForm;
 		
-		myForm.action = "/resource/hub/RemoveResource.do";
-		myForm.method = "POST";
 		myForm.removeChild(myForm.eid);
 				
 		var a = new Array(eidArray.length+2);
@@ -2928,12 +2936,12 @@ hyperic.group_manager = function(args) {
 		that.button_area.AddToNewGroup.className = "CompactButton";
 		that.button_area.AddToNewGroup.disabled = false;
 		
-		var tbody = dojo11.byId("AddToExistingGroupTableBody");
+		var tbody = hqDojo.byId("AddToExistingGroupTableBody");
         for (var i = tbody.childNodes.length-1; i >= 0; i--) {
             tbody.removeChild(tbody.childNodes[i]);
         }
         
-		dojo11.byId("AddToExistingGroupTableFooter").style.display = "";
+		hqDojo.byId("AddToExistingGroupTableFooter").style.display = "";
 		that.dialogs.AddToExistingGroup.show();
 		that.getGroupsNotContaining(eidArray);	
 	}
@@ -2946,8 +2954,8 @@ hyperic.group_manager = function(args) {
 		that.displayConfirmation(that.message_area.AddToExistingGroup,
 								'Please wait. Processing your request...');
 
-		dojo11.xhrPost( {
-            url: baseUrl + "association",
+		hqDojo.xhrPost( {
+            url: args.postUrl,
             content: {
 				eid: formArray.eid.split(","),
 				groupId: formArray.group.toString().split(",")
@@ -2972,8 +2980,8 @@ hyperic.group_manager = function(args) {
 	}
 	
 	that.getGroupsNotContaining = function(eids) {    
-		dojo11.xhrPost( {
-            url: baseUrl + "associations",
+		hqDojo.xhrPost( {
+            url: args.associationsUrl,
             content: {
 				eid: eids,
 				"_method": "PUT"
@@ -2981,8 +2989,8 @@ hyperic.group_manager = function(args) {
 			handleAs: 'json',
             preventCache: true,
             load: function(data) {            	
-            	var tbody = dojo11.byId("AddToExistingGroupTableBody");
-            	var tfoot = dojo11.byId("AddToExistingGroupTableFooter");
+            	var tbody = hqDojo.byId("AddToExistingGroupTableBody");
+            	var tfoot = hqDojo.byId("AddToExistingGroupTableFooter");
 
             	tfoot.style.display = "none";
             	            	
@@ -3091,7 +3099,7 @@ hyperic.indicator_charts_manager = function(props, charts) {
 	}
 	
 	that.drawChart = function(chartArgs) {
-		var rootObj = $("root");
+		var rootObj = hqDojo.byId("root");
 		var liNode = document.createElement("li");
 		liNode.id = chartArgs.metricId;
 
@@ -3173,7 +3181,7 @@ hyperic.indicator_charts_manager = function(props, charts) {
 		if (displaySize > 0) { 
 			url += '&displaySize=' + (displaySize+1);
 
-		    dojo.xhrGet({
+		    hqDojo.xhrGet({
 		        url: url,
 		        handleAs: "json",
 		        preventCache: true,
@@ -3187,7 +3195,7 @@ hyperic.indicator_charts_manager = function(props, charts) {
 		        }
 		      });	    	
 		} else {
-			dojo.byId("slowScreenSplash").style.display = "none";
+			hqDojo.byId("slowScreenSplash").style.display = "none";
 			that.chartsEndTime = new Date();
 			that.logLoadTime();
 		}
@@ -3203,7 +3211,7 @@ hyperic.indicator_charts_manager = function(props, charts) {
 			url += '&ctype=' + that.ctype;
 		}
     	
-        dojo.xhrGet({
+        hqDojo.xhrGet({
             url: url,
             handleAs: "text",
             preventCache: true,
@@ -3216,7 +3224,7 @@ hyperic.indicator_charts_manager = function(props, charts) {
             error: function(data){
               console.debug("could not remove metric:");
               console.debug(data);
-              new Effect.Pulsate($(metric));
+              new Effect.Pulsate(metric);
             }
           });
 	}
@@ -3231,7 +3239,7 @@ hyperic.indicator_charts_manager = function(props, charts) {
 			url += '&ctype=' + that.ctype;
 		}
     	
-        dojo.xhrGet({
+        hqDojo.xhrGet({
             url: url,
             handleAs: "text",
             preventCache: true,
@@ -3239,14 +3247,14 @@ hyperic.indicator_charts_manager = function(props, charts) {
             load: function(data, ioArgs) {
               console.log(data);
               console.log('moved metric up');
-              var root = dojo.byId('root');
-              var elem = $(metric);
+              var root = hqDojo.byId('root');
+              var elem = hqDojo.byId(metric);
               moveElementUp(elem, root);
             },
             error: function(data){
               console.debug("could not move metric up:");
               console.debug(data);
-              new Effect.Pulsate($(metric));
+              new Effect.Pulsate(metric);
             }
           });
 	}
@@ -3261,7 +3269,7 @@ hyperic.indicator_charts_manager = function(props, charts) {
 			url += '&ctype=' + that.ctype;
 		}
     	
-        dojo.xhrGet({
+        hqDojo.xhrGet({
             url: url,
             handleAs: "text",
             preventCache: true,
@@ -3269,14 +3277,14 @@ hyperic.indicator_charts_manager = function(props, charts) {
             load: function(data, ioArgs) {
               console.log(data);
               console.log('moved metric down');
-              var root = dojo.byId('root');
-              var elem = $(metric);
+              var root = hqDojo.byId('root');
+              var elem = hqDojo.byId(metric);
               moveElementDown(elem, root);
             },
             error: function(data){
               console.debug("could not move metric down:");
               console.debug(data);
-              new Effect.Pulsate($(metric));
+              new Effect.Pulsate(metric);
             }
           });
 	}
@@ -3290,7 +3298,7 @@ hyperic.alert_center = function(title_name) {
 	that.dialogs = {};
 	
 	that.initDialog = function() {
-    	var alertCenterDiv = dojo11.byId("HQAlertCenterDialog");
+    	var alertCenterDiv = hqDojo.byId("HQAlertCenterDialog");
 
     	if (!that.dialogs.AckAlert) {
 	    	var ackDiv = document.createElement("div");
@@ -3324,7 +3332,7 @@ hyperic.alert_center = function(title_name) {
       	    	'</div>';
 	    	alertCenterDiv.appendChild(ackDiv);
 	    	
-	    	that.dialogs.AckAlert = new dijit11.Dialog({
+	    	that.dialogs.AckAlert = new hqDijit.Dialog({
 				id: "Alert_Center_Ack_Alert_Dialog",
 				refocus: true,
 				autofocus: false,
@@ -3335,19 +3343,19 @@ hyperic.alert_center = function(title_name) {
 		    	form: null,
 		    	subgroup: null,
 	    		button_area: {
-	    			active: dojo11.byId("AlertCenterAckButtonActive"),
-	    			inactive: dojo11.byId("AlertCenterAckButtonInActive")
+	    			active: hqDojo.byId("AlertCenterAckButtonActive"),
+	    			inactive: hqDojo.byId("AlertCenterAckButtonInActive")
 	    		},
 	    		message_area: {
-	    			request_status: dojo11.byId("AlertCenterAckStatus")
+	    			request_status: hqDojo.byId("AlertCenterAckStatus")
 	    		},
-		    	note: dojo11.byId("AckNoteTextArea"),
-		    	pause: dojo11.byId("AlertCenterPauseCheckbox"),
-		    	pauseTime: dojo11.byId("AlertCenterPauseSelect")
+		    	note: hqDojo.byId("AckNoteTextArea"),
+		    	pause: hqDojo.byId("AlertCenterPauseCheckbox"),
+		    	pauseTime: hqDojo.byId("AlertCenterPauseSelect")
 		    }
 	    	
 	    	// restart auto refresh after dialog closes
-	    	dojo11.connect(that.dialogs.AckAlert, "hide", this, "delayAutoRefresh");
+	    	hqDojo.connect(that.dialogs.AckAlert, "hide", this, "delayAutoRefresh");
     	}
 	    
 		if (!that.dialogs.FixAlert) {
@@ -3385,7 +3393,7 @@ hyperic.alert_center = function(title_name) {
       	    	'</div>';
 			alertCenterDiv.appendChild(fixedDiv);
 	    	
-	    	that.dialogs.FixAlert = new dijit11.Dialog({
+	    	that.dialogs.FixAlert = new hqDijit.Dialog({
 				id: "Alert_Center_Fix_Alert_Dialog",
 				refocus: true,
 				autofocus: false,
@@ -3396,22 +3404,22 @@ hyperic.alert_center = function(title_name) {
 	    		form: null,
 	    		subgroup: null,
 	    		button_area: {
-	    			active: dojo11.byId("AlertCenterFixedButtonActive"),
-	    			inactive: dojo11.byId("AlertCenterFixedButtonInActive")
+	    			active: hqDojo.byId("AlertCenterFixedButtonActive"),
+	    			inactive: hqDojo.byId("AlertCenterFixedButtonInActive")
 	    		},
 	    		message_area: {
-	    			request_status: dojo11.byId("AlertCenterFixedStatus"),
-	    			progress_status: dojo11.byId("AlertCenterProgressStatus")
+	    			request_status: hqDojo.byId("AlertCenterFixedStatus"),
+	    			progress_status: hqDojo.byId("AlertCenterProgressStatus")
 	    		},
-	    		note: dojo11.byId("FixedNoteTextArea"),
-	    		fixAll: dojo11.byId("FixAllCheckbox")
+	    		note: hqDojo.byId("FixedNoteTextArea"),
+	    		fixAll: hqDojo.byId("FixAllCheckbox")
 	    	}
 	    	
 	    	// restart auto refresh after dialog closes
-	    	dojo11.connect(that.dialogs.FixAlert, "hide", this, "delayAutoRefresh");
+	    	hqDojo.connect(that.dialogs.FixAlert, "hide", this, "delayAutoRefresh");
 	    	
 	    	// create progress bar				
-			that.dialogs.FixAlert.data.progressBar = new dijit11.ProgressBar({}, dojo11.byId("AlertCenterProgressBar"));
+			that.dialogs.FixAlert.data.progressBar = new hqDijit.ProgressBar({}, hqDojo.byId("AlertCenterProgressBar"));
 		}
 	}
 
@@ -3505,10 +3513,10 @@ hyperic.alert_center = function(title_name) {
 			myDialog.data.fixAll.checked = false;
 		}
 		if (myDialog.data.pause != null) {
-			var escalationSpan = dojo11.byId("AlertCenterEscalationOption");		
+			var escalationSpan = hqDojo.byId("AlertCenterEscalationOption");		
 			myDialog.data.pause.checked = true;
 			myDialog.data.pause.onclick = function() { 
-				dojo11.byId("AlertCenterPauseSelect").disabled = !this.checked; 
+				hqDojo.byId("AlertCenterPauseSelect").disabled = !this.checked; 
 			};
 
 			if (myDialog.data.pauseTime.options.length == 0) {
@@ -3534,18 +3542,22 @@ hyperic.alert_center = function(title_name) {
 	}
 
 	that.acknowledgeAlert = function(inputId) {		
-		var myInput = dojo11.byId(inputId);
+		var myInput = hqDojo.byId(inputId);
 		var myParam = {buttonAction: "ACKNOWLEDGE", output: "json"}
 		
 		myParam[myInput.name] = myInput.value;
 		that.initData(that.dialogs.AckAlert, myInput.form);
 		that.stopAutoRefresh();
 
-		dojo11.xhrPost( {
+		hqDojo.xhrPost( {
 	    	url: myInput.form.action,
 	    	content: myParam,
 	    	handleAs: 'json',
 	    	load: function(data) {
+				if (data.actionToken) {
+					// use new CSRF token for subsequent POST requests
+					myInput.form.action = data.actionToken;
+				}
 	    		that.startAutoRefresh(that.dialogs.AckAlert.data.subgroup);
 	    	},
 	    	error: function(data){
@@ -3557,11 +3569,15 @@ hyperic.alert_center = function(title_name) {
 	}
 	
 	that.xhrSubmit = function(myForm) {				
-		dojo11.xhrPost( {
+		hqDojo.xhrPost( {
 	    	url: myForm.action,
 	    	content: Form.serialize(myForm,true),
 	    	handleAs: 'json',
 	    	load: function(data){
+				if (data.actionToken) {
+					// use new CSRF token for subsequent POST requests
+					myForm.action = data.actionToken;
+				}
 				that.current.dialog.hide();
 	    		that.startAutoRefresh(that.current.dialog.data.subgroup);
 	    	},
@@ -3601,7 +3617,7 @@ hyperic.alert_center = function(title_name) {
 		// submit each selection separately			
 		batchFormObj["ealerts"] = ealerts[alertIndex];
 			
-		dojo11.xhrPost( {
+		hqDojo.xhrPost( {
 			url: myForm.action,
 			content: batchFormObj,
 			sync: false,
@@ -3612,6 +3628,10 @@ hyperic.alert_center = function(title_name) {
 					
 				// submit next selection
 				if (++alertIndex < ealerts.length) {
+					if (data.actionToken) {
+						// use new CSRF token for subsequent POST requests
+						myForm.action = data.actionToken;
+					}
 					that.xhrBatchSubmit(myDialog, alertIndex);
 				} else {
 					that.current.dialog.hide();
@@ -3628,7 +3648,7 @@ hyperic.alert_center = function(title_name) {
 
 	that.resetAlertTable = function(myForm) {
 		var subgroup = myForm.id.substring(0, myForm.id.indexOf("_FixForm"));
-		var checkAllBox = dojo11.byId(subgroup + "_CheckAllBox");
+		var checkAllBox = hqDojo.byId(subgroup + "_CheckAllBox");
 		checkAllBox.checked = false;
 		that.toggleAll(checkAllBox, false);
 		myForm.fixedNote.value = "";
@@ -3665,9 +3685,9 @@ hyperic.alert_center = function(title_name) {
 		}
 		var myList = myCheckBox.form;
 		var subgroup = myList.id.substring(0, myList.id.indexOf("_FixForm"));
-		var checkAllBox = dojo11.byId(subgroup + "_CheckAllBox");
-		var fixedButton = dojo11.byId(subgroup + "_FixButton");
-		var ackButton = dojo11.byId(subgroup + "_AckButton");
+		var checkAllBox = hqDojo.byId(subgroup + "_CheckAllBox");
+		var fixedButton = hqDojo.byId(subgroup + "_FixButton");
+		var ackButton = hqDojo.byId(subgroup + "_AckButton");
 
 		// delay refresh for X milliseconds if checkbox is clicked
 		if (doDelay) {
@@ -3757,14 +3777,15 @@ hyperic.alert_center = function(title_name) {
 	that.initDialog();
 }
 
-hyperic.maintenance_schedule = function(args, title_name, group_id, group_name) {
+hyperic.maintenance_schedule = function(args) {
     var that = this;
     var baseUrl = args.url;
     
     that.existing_schedule = {};
-    that.group_id = args.resourceId;
-    that.group_name = unescape(args.resourceName);
-    that.title_name = args.title + " - " + that.group_name;
+    that.appdefentity_id = args.appdefentityId;
+    that.entity_id = that.appdefentity_id.split(":")[1];
+    that.resource_name = unescape(args.resourceName);
+    that.title_name = args.title + " - " + that.resource_name;
     that.dialog = null;
 	that.buttons = {};
 	that.inputs = {};
@@ -3773,8 +3794,8 @@ hyperic.maintenance_schedule = function(args, title_name, group_id, group_name) 
     that.server_time = new Date(); // default
         
     that.message_area = {
-    	request_status : dojo11.byId('maintenance_status_' + that.group_id),
-    	schedule_status : dojo11.byId('existing_downtime_' + that.group_id)
+    	request_status : hqDojo.byId('maintenance_status_' + that.entity_id),
+    	schedule_status : hqDojo.byId('existing_downtime_' + that.entity_id)
     };
 
     that.init = function() {
@@ -3782,83 +3803,73 @@ hyperic.maintenance_schedule = function(args, title_name, group_id, group_name) 
 			if(that.title_name.length > 42) {
 				that.title_name = that.title_name.substring(0,42) + "...";
 			}
-	    	var pane = dojo11.byId('maintenance' + that.group_id);
+	    	var pane = hqDojo.byId('maintenance' + that.entity_id);
 			pane.style.width = "450px";
-			that.dialog = new dijit11.Dialog({
-				id: "maintenance_schedule_dialog_" + that.group_id,
+			that.dialog = new hqDijit.Dialog({
+				id: "maintenance_schedule_dialog_" + that.entity_id,
 				refocus: true,
 				autofocus: false,
 				title: that.title_name
 			},pane);
 		}
         
-        that.inputs.from_date = new dijit11.form.DateTextBox({
+        that.inputs.from_date = new hqDijit.form.DateTextBox({
     			name: "from_date",
     			value: that.selected_from_time,
     			constraints: {
                     datePattern: 'MM/dd/y'},
-    			lang: "en-us",
     			promptMessage: "A valid date in format mm/dd/yyyy is required.",
     			rangeMessage: hyperic.data.maintenance_schedule.error.startDateRange,
     			invalidMessage: hyperic.data.maintenance_schedule.error.datePattern,
     			required: true
     		}, "from_date");
 
-        that.inputs.to_date = new dijit11.form.DateTextBox({
+        that.inputs.to_date = new hqDijit.form.DateTextBox({
     			name: "to_date",
     			value: that.selected_to_time,
     			constraints: {
                     datePattern: 'MM/dd/y'},
-    			lang: "en-us",
     			promptMessage: "A valid date in format mm/dd/yyyy is required.",
     			rangeMessage: hyperic.data.maintenance_schedule.error.endDateRange,
     			invalidMessage: hyperic.data.maintenance_schedule.error.datePattern,
     			required: true
     		}, "to_date");
 
-        that.inputs.from_time = new dijit11.form.TimeTextBox({
+        that.inputs.from_time = new hqDijit.form.TimeTextBox({
     			name: "from_time",
     			value: that.selected_from_time,
-    			lang: "en-us",
                 rangeMessage: hyperic.data.maintenance_schedule.error.startTimeRange,
     			invalidMessage: hyperic.data.maintenance_schedule.error.timePattern,
     			required: true
     		}, "from_time");
 
-        that.inputs.to_time = new dijit11.form.TimeTextBox({
+        that.inputs.to_time = new hqDijit.form.TimeTextBox({
     			name: "to_time",
     			value: that.selected_to_time,
-    			lang: "en-us",
                 rangeMessage: hyperic.data.maintenance_schedule.error.endTimeRange,
     			invalidMessage: hyperic.data.maintenance_schedule.error.timePattern,
     			required: true
     		}, "to_time");
 
-		that.buttons.schedule_btn = new dijit11.form.Button({
+		that.buttons.schedule_btn = new hqDijit.form.Button({
 			label: hyperic.data.maintenance_schedule.label.schedule,
 			name: "schedule_btn",
 			id: "schedule_btn",
 			type: 'button'
 		}, "schedule_btn");
-
-        dojo11.connect(that.buttons.schedule_btn, 'onClick', that.schedule_action);
-
-		that.buttons.cancel_btn = new dijit11.form.Button({
-			label: hyperic.data.maintenance_schedule.label.cancel,
-			name: "cancel_btn",
-			id: "cancel_btn",
-			type: 'cancel'
-		}, "cancel_btn");
-		dojo11.connect(that.buttons.cancel_btn, 'onClick', that.dialog.onCancel);
-
-		that.buttons.clear_schedule_btn = new dijit11.form.Button({
+        hqDojo.connect(that.buttons.schedule_btn, 'onClick', that.schedule_action);
+        
+		that.buttons.clear_schedule_btn = new hqDijit.form.Button({
 			label: hyperic.data.maintenance_schedule.label.clear,
 			name: "clear_schedule_btn",
 			id: "clear_schedule_btn",
 			type: 'button'
 		}, "clear_schedule_btn");
-        dojo11.connect(that.buttons.clear_schedule_btn, 'onClick', that.clear_schedule_action);
-
+        hqDojo.connect(that.buttons.clear_schedule_btn, 'onClick', that.clear_schedule_action);
+        
+		hqDojo.byId("maintenance_cancel_link_" + that.entity_id).onclick = function(e) {
+			hqDijit.byId("maintenance_schedule_dialog_" + that.entity_id).onCancel();
+		};
     };
 
     that.schedule_action = function() {
@@ -3867,13 +3878,11 @@ hyperic.maintenance_schedule = function(args, title_name, group_id, group_name) 
     	// validate with updated constraints
     	if(that.dialog.validate())
         {
-            var args = that.dialog.getValues();
-
     	    // create unix epoch datetime in GMT timezone
-            from_datetime = (args.from_date.getTime() + args.from_time.getTime() - args.from_time.getTimezoneOffset() * 60000);
-            to_datetime = (args.to_date.getTime() + args.to_time.getTime() - args.to_time.getTimezoneOffset() * 60000);
+            var from_datetime = (that.inputs.from_date.getValue().getTime() + that.inputs.from_time.getValue().getTime() - that.inputs.from_time.getValue().getTimezoneOffset() * 60000);
+            var to_datetime = (that.inputs.to_date.getValue().getTime() + that.inputs.to_time.getValue().getTime() - that.inputs.to_time.getValue().getTimezoneOffset() * 60000);
 
-            return dojo11.xhrPost( {
+            return hqDojo.xhrPost( {
                 url: baseUrl + "/schedule",
                 content: {
             		startTime: from_datetime, 
@@ -3904,7 +3913,7 @@ hyperic.maintenance_schedule = function(args, title_name, group_id, group_name) 
                 },
                 error: function(data){
                 	that.displayError(hyperic.data.maintenance_schedule.error.serverError);
-                	console.info("An error occurred setting maintenance schedule for group " + that.group_id, data);
+                	console.info("An error occurred setting maintenance schedule for resource " + that.appdefentity_id, data);
                 },
                 timeout: 5000
             });
@@ -3912,8 +3921,8 @@ hyperic.maintenance_schedule = function(args, title_name, group_id, group_name) 
     };
     
     that.clear_schedule_action = function() {
-        return dojo11.xhrPost( {
-            url: baseUrl + "/schedule/" + that.group_id,
+        return hqDojo.xhrPost( {
+            url: baseUrl + "/schedule/" + that.appdefentity_id,
             content: {
         		"_method" : "DELETE" // need to work around issue using PUT directly
         	},
@@ -3934,15 +3943,15 @@ hyperic.maintenance_schedule = function(args, title_name, group_id, group_name) 
             },
             error: function(data){
             	that.displayError(hyperic.data.maintenance_schedule.error.serverError);
-            	console.info("An error occurred clearing maintenance schedule for group " + that.group_id, data);
+            	console.info("An error occurred clearing maintenance schedule for resource " + that.appdefentity_id, data);
             },
             timeout: 5000
         });
     };
     
     that.getSchedule = function() {
-        return dojo11.xhrGet( {
-            url: baseUrl + "/schedule/" + that.group_id,
+        return hqDojo.xhrGet( {
+            url: baseUrl + "/schedule/" + that.appdefentity_id,
             headers: { "Content-Type": "application/json"},
             handleAs: 'json',
             preventCache: true,
@@ -3984,7 +3993,7 @@ hyperic.maintenance_schedule = function(args, title_name, group_id, group_name) 
                 that.resetSchedule();
             	that.redraw(true, "&nbsp;");
             	that.displayError(hyperic.data.maintenance_schedule.error.serverError);
-            	console.info("An error occurred fetching maintenance schedule for group " + that.group_id, data);
+            	console.info("An error occurred fetching maintenance schedule for resource " + that.appdefentity_id, data);
             },
             timeout: 5000
         });
@@ -4089,7 +4098,7 @@ hyperic.maintenance_schedule = function(args, title_name, group_id, group_name) 
 		
         // temporary hack because dojo displays the full timezone name
         // (pacific daylight time) in windows firefox
-		var timezoneName = dojo11.date.getTimezoneName(new Date());
+		var timezoneName = hqDojo.date.getTimezoneName(new Date());
         var tzSplit = timezoneName.split(" ");        
         if (tzSplit.length > 1) {            
             // Take the first letter of each word in the split             
@@ -4100,8 +4109,8 @@ hyperic.maintenance_schedule = function(args, title_name, group_id, group_name) 
             }
             timezoneName = timezoneName.toUpperCase();
         }       
-		dojo11.byId('maintenance_from_time_timezone').innerHTML = hyperic.data.maintenance_schedule.label.time + '&nbsp;(' + timezoneName + '):&nbsp;';
-		dojo11.byId('maintenance_to_time_timezone').innerHTML = hyperic.data.maintenance_schedule.label.time + '&nbsp;(' + timezoneName + '):&nbsp;';
+		hqDojo.byId('maintenance_from_time_timezone').innerHTML = hyperic.data.maintenance_schedule.label.time + '&nbsp;(' + timezoneName + '):&nbsp;';
+		hqDojo.byId('maintenance_to_time_timezone').innerHTML = hyperic.data.maintenance_schedule.label.time + '&nbsp;(' + timezoneName + '):&nbsp;';
 		
         if(that.existing_schedule.from_time)
         {
@@ -4153,7 +4162,7 @@ hyperic.maintenance_schedule = function(args, title_name, group_id, group_name) 
         }
         else
         {
-        	setTimeout('maintenance_' + that.group_id + '.dialog.hide()', 2000);
+        	setTimeout('maintenance_' + that.entity_id + '.dialog.hide()', 2000);
         }
     };
     
@@ -4174,21 +4183,21 @@ hyperic.clone_resource_dialog = function(args) {
 	that.buttons = {};
 	that.platform_id = args.platformId || null;
     that.sheets = {};
-    that.sheets.clone_instructions = dojo11.byId('clone_instructions');
-    that.sheets.clone_queue_status = dojo11.byId('clone_queue_status');
-    that.sheets.clone_error_status = dojo11.byId('clone_error_status');
+    that.sheets.clone_instructions = hqDojo.byId('clone_instructions');
+    that.sheets.clone_queue_status = hqDojo.byId('clone_queue_status');
+    that.sheets.clone_error_status = hqDojo.byId('clone_error_status');
     that.currentSheet = 'clone_instructions';
 
-    that.available_clone_targets = new hyperic.selectBox(dojo11.byId('available_clone_targets'));
-    that.selected_clone_targets = new hyperic.selectBox(dojo11.byId('selected_clone_targets'));
+    that.available_clone_targets = new hyperic.selectBox(hqDojo.byId('available_clone_targets'));
+    that.selected_clone_targets = new hyperic.selectBox(hqDojo.byId('selected_clone_targets'));
     
-    that.searchbox = dojo11.byId('cln_search');
+    that.searchbox = hqDojo.byId('cln_search');
     
     that.init = function() {
 	    if(!that.dialog){
-			var pane = dojo11.byId('clone_resource_dialog');
+			var pane = hqDojo.byId('clone_resource_dialog');
 			pane.style.width = "450px";
-			that.dialog = new dijit11.Dialog({
+			that.dialog = new hqDijit.Dialog({
 				id: "clone_resource_dialog",
 				refocus: true,
 				autofocus: false,
@@ -4196,26 +4205,26 @@ hyperic.clone_resource_dialog = function(args) {
 			},pane);
 		}
 
-		that.buttons.create_btn = new dijit11.form.Button({
+		that.buttons.create_btn = new hqDijit.form.Button({
 			label: "Queue for Cloning",
 			name: "clone_btn",
 			id: "clone_btn",
 			type: 'submit'
 		}, "clone_btn");
-        dojo11.connect(that.buttons.create_btn, 'onClick', that.clone_action);
+        hqDojo.connect(that.buttons.create_btn, 'onClick', that.clone_action);
 
-		that.buttons.cancel_btn = new dijit11.form.Button({
+		that.buttons.cancel_btn = new hqDijit.form.Button({
 			label: "Cancel",
 			name: "create_cancel_btn",
 			id: "create_cancel_btn",
 			type: 'cancel'
 		}, "clone_cancel_btn");
-		dojo11.connect(that.buttons.cancel_btn, 'onClick', that.cancel_action);
+		hqDojo.connect(that.buttons.cancel_btn, 'onClick', that.cancel_action);
 
-        that.buttons.add_clone_btn = dojo11.byId('add_clone_btn');
-        that.buttons.remove_clone_btn = dojo11.byId('remove_clone_btn');
+        that.buttons.add_clone_btn = hqDojo.byId('add_clone_btn');
+        that.buttons.remove_clone_btn = hqDojo.byId('remove_clone_btn');
 
-		dojo11.connect(
+		hqDojo.connect(
 		    that.buttons.add_clone_btn, 
 		    'onclick', 
 		    function(e) { 
@@ -4234,8 +4243,8 @@ hyperic.clone_resource_dialog = function(args) {
         		}
 		    }
 		);
-		dojo11.connect(
-		    dojo11.byId('remove_clone_btn'), 
+		hqDojo.connect(
+		    hqDojo.byId('remove_clone_btn'), 
 		    'onclick', 
 		    function(e) { 
 		        that.available_clone_targets.steal(that.selected_clone_targets);
@@ -4255,16 +4264,16 @@ hyperic.clone_resource_dialog = function(args) {
 		);
 
         // search box connections
-        dojo11.connect(that.searchbox,'onfocus', function(e) {if(e.target.value == '[ Resources ]') { e.target.value = ''; }});
-        dojo11.connect(that.searchbox,'onblur', function(e) {if(e.target.value == '') { e.target.value = '[ Resources ]'; }});
-        dojo11.connect(that.searchbox,'onkeyup',function(e) { that.available_clone_targets.search(e.target.value);});
-        dojo11.connect(that.searchbox,'onkeyup',function(e) { that.selected_clone_targets.search(e.target.value);});
+        hqDojo.connect(that.searchbox,'onfocus', function(e) {if(e.target.value == '[ Resources ]') { e.target.value = ''; }});
+        hqDojo.connect(that.searchbox,'onblur', function(e) {if(e.target.value == '') { e.target.value = '[ Resources ]'; }});
+        hqDojo.connect(that.searchbox,'onkeyup',function(e) { that.available_clone_targets.search(e.target.value);});
+        hqDojo.connect(that.searchbox,'onkeyup',function(e) { that.selected_clone_targets.search(e.target.value);});
 
 		that.fetchData();
     };
 
     that.fetchData = function() {
-        dojo11.xhrGet( {
+        hqDojo.xhrGet( {
             url: baseUrl + "/targets",
             preventCache: true,
             headers: { "Content-Type": "application/json"},
@@ -4329,7 +4338,7 @@ hyperic.clone_resource_dialog = function(args) {
         }
         if(clone_target_ids.length > 0)
         {
-        	dojo11.xhrPost( {
+        	hqDojo.xhrPost( {
                 url: baseUrl,
                 content: {
         			ctid: clone_target_ids
@@ -4378,7 +4387,7 @@ function listItemClicked(node){
 
 document.onResize = function(e){
     var newSize = document.body.offsetWidth - 35 - 270 +'px';
-    var node = dojo.byId("rightPanel");
+    var node = hqDojo.byId("rightPanel");
     node.style.width = newSize;
 
 };
@@ -4448,7 +4457,7 @@ Date.prototype.formatDate = function(format)
 
     format = format.replace("B",months[date.getMonth()]);
 
-    format = format.replace("z",dojo11.date.getTimezoneName(date));
+    format = format.replace("z",hqDojo.date.getTimezoneName(date));
 
     var hours = date.getHours();       
     if (format.indexOf("t") > -1)
@@ -4559,7 +4568,7 @@ hyperic.MetricsUpdater = function(eid,ctype,messages) {
             {
                 url += '&ctype=' + that.ctype;
             }
-            dojo11.xhrGet( {
+            hqDojo.xhrGet( {
                 url: url,
                 handleAs: "json",
                 timeout: 5000,
@@ -4570,8 +4579,8 @@ hyperic.MetricsUpdater = function(eid,ctype,messages) {
                         that.setValues(data.objects[i]);
                     }
                     // Update the time
-                    if (dojo.byId('UpdatedTime') !== null) {
-                        dojo.byId('UpdatedTime').innerHTML = messages.LastUpdated + now.toLocaleString();
+                    if (hqDojo.byId('UpdatedTime') !== null) {
+                        hqDojo.byId('UpdatedTime').innerHTML = messages.LastUpdated + now.toLocaleString();
                     }
                 },
                 error: function(data){
@@ -4590,7 +4599,7 @@ hyperic.MetricsUpdater = function(eid,ctype,messages) {
 
     that.substitute = function( attribute, metricValues) {
         var metric = metricValues.mid;
-        var lastSpan = dojo11.byId(attribute + metric);
+        var lastSpan = hqDojo.byId(attribute + metric);
         if (lastSpan !== null) {
             var html;
             if (attribute == "avail") {
@@ -4635,11 +4644,11 @@ hyperic.MetricsUpdater = function(eid,ctype,messages) {
                 {
                     if(i == refresh)
                     {
-                        dojo.byId('refresh' + i).innerHTML = that.refreshRates[i];
+                        hqDojo.byId('refresh' + i).innerHTML = that.refreshRates[i];
                     }
                     else
                     {
-                        dojo.byId('refresh' + i).innerHTML = '<a href="javascript:" onclick="metricsUpdater.setRefresh('+ i +');">' + that.refreshRates[i] + '</a>';
+                        hqDojo.byId('refresh' + i).innerHTML = '<a href="javascript:" onclick="metricsUpdater.setRefresh('+ i +');">' + that.refreshRates[i] + '</a>';
                     }
                 }
             }
@@ -4760,16 +4769,16 @@ hyperic.widget.Health = function(parentNodeId, kwArgs, isDetail) {
     that.create = function() {
         var f = hyperic.widget.tempNode;
         f.innerHTML = that.template;
-        that.appendNode = dojo.byId(parentNodeId);
-        that.titleNode = dojo.byId(that.id + '_roll_title');
-        that.legendNode = dojo.byId(that.id + '_legend');
-        that.node = dojo.byId(that.id + '_health');
-        that.moreNode = dojo.byId(that.id + '_more');
-        dojo.byId(that.id + '_data').innerHTML = that.createHealthData(that.data);
-        dojo.byId(that.id + '_status').innerHTML = that.createStatus(that.statusMsg);
-        that.connects[0] = dojo11.connect(that.node, 'onmouseenter', that, 'onMouseOver');
-        that.connects[1] = dojo11.connect(that.node, 'onmouseleave', that, 'onMouseOut');
-        dojo.byId(parentNodeId).appendChild(f.firstChild);
+        that.appendNode = hqDojo.byId(parentNodeId);
+        that.titleNode = hqDojo.byId(that.id + '_roll_title');
+        that.legendNode = hqDojo.byId(that.id + '_legend');
+        that.node = hqDojo.byId(that.id + '_health');
+        that.moreNode = hqDojo.byId(that.id + '_more');
+        hqDojo.byId(that.id + '_data').innerHTML = that.createHealthData(that.data);
+        hqDojo.byId(that.id + '_status').innerHTML = that.createStatus(that.statusMsg);
+        that.connects[0] = hqDojo.connect(that.node, 'onmouseenter', that, 'onMouseOver');
+        that.connects[1] = hqDojo.connect(that.node, 'onmouseleave', that, 'onMouseOut');
+        hqDojo.byId(parentNodeId).appendChild(f.firstChild);
         };
     that.createStatus = function(data) {
         var ihtml = '';
@@ -4814,18 +4823,10 @@ hyperic.widget.Health = function(parentNodeId, kwArgs, isDetail) {
         return ihtml;
         };
     that.onMouseOver = function() {
-        //Append the class rle-over to rle-box for ie 6 since it can't do div:hover
-        if (dojo.isIE === 6) {
-        	that.node.className += ' rle-over';
-        }
         //that.legendNode.innerHTML = that.legend;
         if(that.isDetail){ that.moreNode.style.display = 'block'; }
         };
     that.onMouseOut = function() {
-        //reset the hover effect
-        if (dojo.isIE === 6) {
-        	that.node.className = 'rle-box';
-        }
         //that.legendNode.innerHTML = "&nbsp;";
         if(that.isDetail){ that.moreNode.style.display = 'none'; }
         };
@@ -4837,8 +4838,8 @@ hyperic.widget.Health = function(parentNodeId, kwArgs, isDetail) {
         that.moreNode = null;
         that.appendNode = null;
         //disconnect all aggregated events
-        dojo11.disconnect(that.connects[0]);
-        dojo11.disconnect(that.connects[1]);
+        hqDojo.disconnect(that.connects[0]);
+        hqDojo.disconnect(that.connects[1]);
         };
     //init
     this.create();
@@ -4855,7 +4856,7 @@ hyperic.widget.Table = function(node, kwArgs) {
     var t2 = '</tr></thead><tbody>';
     var t3 = '</tbody></table><div>';
     this.create = function(node, kwArgs) {
-        this.node = dojo.byId(node);
+        this.node = hqDojo.byId(node);
         var t = t1 + this.createHeader(kwArgs.header) + t2 + this.createBody(kwArgs.data) + t3;
         var f = hyperic.widget.tempNode;
         f.innerHTML = t;
@@ -4904,8 +4905,6 @@ hyperic.widget.tooltip = {
     connections : [],
     conIdx : -1,
     init : function(kwArgs) {
-        if(dojo.isIE == 6)
-            return;
         if(kwArgs.tipElements)
             this.tipElements = kwArgs.tipElements;
         if ( !document.getElementById ||
@@ -4914,12 +4913,12 @@ hyperic.widget.tooltip = {
             return;
         }
         var i,j;
-        if(!dojo.byId('toolTip')){
+        if(!hqDojo.byId('toolTip')){
             this.tip = document.createElement('div');
             this.tip.id = 'toolTip';
             document.getElementsByTagName('body')[0].appendChild(this.tip);
         }else{
-            this.tip = dojo.byId('toolTip');
+            this.tip = hqDojo.byId('toolTip');
         }
         this.tip.style.top = '0';
         this.tip.style.display = 'none';
@@ -4929,13 +4928,13 @@ hyperic.widget.tooltip = {
             if(kwArgs.document){
                 current = document.getElementsByTagName(this.tipElements[i]);
             }else{
-                current = dojo.byId(kwArgs.baseNodeId).getElementsByTagName(this.tipElements[i]);
+                current = hqDojo.byId(kwArgs.baseNodeId).getElementsByTagName(this.tipElements[i]);
             }   
             var curLen = current.length;
             for ( j=0; j<curLen; j++ ) {
                 if(current[j].getAttribute('title')){
-                    this.connections[++this.conIdx] = dojo11.connect(current[j], 'mouseover', hyperic.widget.tooltip, "tipOver");
-                    this.connections[++this.conIdx] = dojo11.connect(current[j], 'mouseout', hyperic.widget.tooltip, "tipOut");
+                    this.connections[++this.conIdx] = hqDojo.connect(current[j], 'mouseover', hyperic.widget.tooltip, "tipOver");
+                    this.connections[++this.conIdx] = hqDojo.connect(current[j], 'mouseout', hyperic.widget.tooltip, "tipOut");
                     current[j].setAttribute('tip',current[j].getAttribute('title'));
                     current[j].removeAttribute('title');
                 }
@@ -5018,7 +5017,7 @@ hyperic.widget.tooltip = {
     },
     cleanup: function() {
         for(var i = 0; i < this.connections.length; i++) {
-            dojo11.disconnect(this.connections[i]);
+            hqDojo.disconnect(this.connections[i]);
         }
         this.conIdx = -1;
     }
@@ -5051,11 +5050,11 @@ hyperic.widget.CloudChart = function(node, kwArgs, tabid, chartPos, chartType) {
         that.template = template;
         that.tabid = tabid;
         that.node = node;
-        var f = dojo.byId('z');
+        var f = hqDojo.byId('z');
         that.chartName = kwArgs.chartName;
         //console.log("created chart: "+kwArgs.chartName);
         f.innerHTML = template;
-        dojo.byId(node).appendChild(f.firstChild);
+        hqDojo.byId(node).appendChild(f.firstChild);
         that.url = kwArgs.url;
         that.data = kwArgs.data;
         that.chartPos = chartPos;
@@ -5112,7 +5111,7 @@ hyperic.widget.CloudChart = function(node, kwArgs, tabid, chartPos, chartType) {
             chartOptions.showValues = false;
         }
 
-        that.chart = Timeplot.create(dojo11.byId(that.tabid + "_chart" + that.chartPos), [Timeplot.createPlotInfo( chartOptions )]);
+        that.chart = Timeplot.create(hqDojo.byId(that.tabid + "_chart" + that.chartPos), [Timeplot.createPlotInfo( chartOptions )]);
 
         if(count > 1)
         {
@@ -5124,7 +5123,7 @@ hyperic.widget.CloudChart = function(node, kwArgs, tabid, chartPos, chartType) {
             if(chartType != 'dashboard')
             {
                 // display 'no data' message
-                containerNode = dojo11.byId(that.containerId);
+                containerNode = hqDojo.byId(that.containerId);
                 var message = SimileAjax.Graphics.createMessageBubble(containerNode.ownerDocument);
                 message.containerDiv.className = "timeline-message-container";
                 containerNode.appendChild(message.containerDiv);
@@ -5143,12 +5142,12 @@ hyperic.widget.CloudChart = function(node, kwArgs, tabid, chartPos, chartType) {
     this.cleanup = function(){
         cloudTabs.unsubscribe('activeTabChange', that.onTabChange);
 
-        n = dojo11.byId(that.containerId);
+        n = hqDojo.byId(that.containerId);
         // destroy all children of the chart container
         while(n.lastChild) {
           n.removeChild(n.lastChild);
         }
-        dojo11.byId(that.node).removeChild(n);
+        hqDojo.byId(that.node).removeChild(n);
 
         that.node = null;
     };
@@ -5172,10 +5171,10 @@ hyperic.widget.CloudChart = function(node, kwArgs, tabid, chartPos, chartType) {
  */
 hyperic.widget.StatusElement = function(ct, nt, status, update, interval) {
     var that = this;
-    that.ctNode = dojo.byId(ct);
-    that.ntNode = dojo.byId(nt);
-    that.sNode = dojo.byId(status);
-    that.uNode = dojo.byId(update);
+    that.ctNode = hqDojo.byId(ct);
+    that.ntNode = hqDojo.byId(nt);
+    that.sNode = hqDojo.byId(status);
+    that.uNode = hqDojo.byId(update);
     that.interval = null;
     that.time = interval;
     that.refInterval = interval;

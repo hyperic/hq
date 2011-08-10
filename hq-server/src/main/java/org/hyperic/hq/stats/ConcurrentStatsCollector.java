@@ -28,11 +28,7 @@ package org.hyperic.hq.stats;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -55,6 +51,8 @@ import org.hyperic.util.stats.StatCollector;
 import org.hyperic.util.stats.StatUnreachableException;
 import org.hyperic.util.stats.StatsObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -68,6 +66,7 @@ public final class ConcurrentStatsCollector {
     private final Sigar sigar = new Sigar();
     private final AtomicBoolean hasStarted = new AtomicBoolean(false);
     private Long pid;
+    private TaskScheduler taskScheduler;
 
     public static final int WRITE_PERIOD = ConcurrentStatsWriter.WRITE_PERIOD;
     public static final String JVM_TOTAL_MEMORY = "JVM_TOTAL_MEMORY", 
@@ -105,15 +104,18 @@ public final class ConcurrentStatsCollector {
     						   JDBC_HQ_DS_IN_USE = "JDBC_HQ_DS_IN_USE",
                                AVAIL_BACKFILLER_TIME = "AVAIL_BACKFILLER_TIME",
                                AGENT_PLUGIN_TRANSFER = "AGENT_PLUGIN_TRANSFER",
+                               AGENT_PLUGIN_REMOVE = "AGENT_PLUGIN_REMOVE",
                                AGENT_SYNC_JOB_QUEUE_ADDS = "AGENT_SYNC_JOB_QUEUE_ADDS",
-                               AVAIL_BACKFILLER_NUMPLATFORMS = "AVAIL_BACKFILLER_NUMPLATFORMS";
+                               AVAIL_BACKFILLER_NUMPLATFORMS = "AVAIL_BACKFILLER_NUMPLATFORMS",
+                               AGENT_PLUGIN_SYNC_PENDING_RESTARTS = "AGENT_PLUGIN_SYNC_PENDING_RESTARTS",
+                               AGENT_PLUGIN_SYNC_RESTARTS = "AGENT_PLUGIN_SYNC_RESTARTS";
 
 
 
     @Autowired
-    public ConcurrentStatsCollector(MBeanServer mBeanServer) {
+    public ConcurrentStatsCollector(MBeanServer mBeanServer,@Value("#{concurrentStatsScheduler}")TaskScheduler taskScheduler) {
     	this.mBeanServer = mBeanServer;
-    	
+    	this.taskScheduler = taskScheduler;
         registerInternalStats();
     }
 
@@ -397,23 +399,6 @@ public final class ConcurrentStatsCollector {
     public StatsObject pollQueue() {
     	return queue.poll();
     }
-    
-    private final ScheduledThreadPoolExecutor samplerExecutor =
-        new ScheduledThreadPoolExecutor(8, new ThreadFactory() {
-            private final String namePrefix = "hqstats-sampler-";
-            private final AtomicInteger threadNumber = new AtomicInteger(0);
-         
-            public Thread newThread(Runnable r) {
-                Thread t = new Thread(r, namePrefix + threadNumber.getAndIncrement());
-                if (t.isDaemon()) {
-                    t.setDaemon(false);
-                }
-                if (t.getPriority() != Thread.NORM_PRIORITY) {
-                    t.setPriority(Thread.NORM_PRIORITY);
-                }
-                return t;
-            }
-        });
 
     private class StatSampler implements StatCollector {
         private final StatCollector stat;
@@ -446,7 +431,7 @@ public final class ConcurrentStatsCollector {
                     }
                 }
             };
-            samplerExecutor.scheduleAtFixedRate(runnable, 0, 1, TimeUnit.SECONDS);
+            taskScheduler.scheduleAtFixedRate(runnable, 1000);
         }
         
         public String getId() {
@@ -519,10 +504,14 @@ public final class ConcurrentStatsCollector {
                 try {
                     if (_isComposite) {
                         long val = getComposite(_names[i]);
-                        return (_isTrend) ? (_last = val - _last) : val;
+                        long rtn = (_isTrend) ? (val - _last) : val;
+                        _last = val;
+                        return rtn;
                     } else {
                         long val = getValue(_names[i]);
-                        return (_isTrend) ? (_last = val - _last) : val;
+                        long rtn = (_isTrend) ? (val - _last) : val;
+                        _last = val;
+                        return rtn;
                     }
                 } catch (Exception e) {
                     exception = e;

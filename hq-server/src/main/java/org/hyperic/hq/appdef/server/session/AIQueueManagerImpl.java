@@ -353,22 +353,16 @@ public class AIQueueManagerImpl implements AIQueueManager {
     }
 
     /**
-     * Get an AIServerValue by Id.
+     * Get an AIServer by Id.
      * 
      * 
      * 
-     * @return The AIServerValue with the given id, or null if that server id
+     * @return The AIServer with the given id, or null if that server id
      *         does not exist in the queue.
      */
     @Transactional(readOnly = true)
-    public AIServerValue findAIServerById(AuthzSubject subject, int serverID) {
-        AIServer aiserver = aIServerDAO.get(new Integer(serverID));
-
-        if (aiserver == null) {
-            return null;
-        }
-
-        return aiserver.getAIServerValue();
+    public AIServer findAIServerById(AuthzSubject subject, int serverID) {
+        return aIServerDAO.get(new Integer(serverID));
     }
 
     /**
@@ -377,6 +371,12 @@ public class AIQueueManagerImpl implements AIQueueManager {
     public void removeAssociatedAIPlatform(Platform platform) throws VetoException {
         AIPlatform aiPlat = getAIPlatformByPlatform(platform);
         if (aiPlat == null) {
+            return;
+        }
+        try {
+            aiPlat.getAgentToken();
+        } catch (ObjectNotFoundException e) {
+            log.debug(e,e);
             return;
         }
         aiPlatformDAO.remove(aiPlat);
@@ -680,7 +680,12 @@ public class AIQueueManagerImpl implements AIQueueManager {
     @Transactional(readOnly = true)
     public AIPlatformValue getAIPlatformByPlatformID(AuthzSubject subject, Integer platformID) {
         AIPlatform aip = getAIPlatformByPlatformID(platformID);
-        return (aip == null) ? null : aip.getAIPlatformValue();
+        try {
+            return (aip == null) ? null : aip.getAIPlatformValue();
+        } catch (ObjectNotFoundException e) {
+            log.debug(e,e);
+            return null;
+        }
     }
 
     private AIPlatform getAIPlatformByPlatformID(Integer platformID) {

@@ -6,17 +6,17 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <%--
-  NOTE: This copyright does *not* cover user programs that use HQ
+  NOTE: This copyright does *not* cover user programs that use Hyperic
   program services by normal system calls through the application
   program interfaces provided as part of the Hyperic Plug-in Development
   Kit or the Hyperic Client Development Kit - this is merely considered
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
-  This file is part of HQ.
+  Copyright (C) [2004-2011], VMware, Inc.
+  This file is part of Hyperic.
   
-  HQ is free software; you can redistribute it and/or modify
+  Hyperic is free software; you can redistribute it and/or modify
   it under the terms version 2 of the GNU General Public License as
   published by the Free Software Foundation. This program is distributed
   in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
@@ -48,21 +48,35 @@
 </script>
 
 <script>
-	dojo11.addOnLoad(function() {
+	hqDojo.ready(function() {
 		<c:if test="${empty cancelOnly}">
-			dojo11.connect(dojo11.byId("okButton"), "onclick", function() {
-				hyperic.form.mockLinkSubmit("ok.x", "1", "formButtonHiddenSubmitArea");
-			});
+			// it is possible for this template to be used multiple times
+			// on the same page, so query for all possible occurrences of the id
+			// (although all ids on a page should really be unique to be XHTML-compliant).
 			
-			<c:if test="${empty noReset}">
-				dojo11.connect(dojo11.byId("resetButton"), "onclick", function() {
-					hyperic.form.mockLinkSubmit("reset.x", "1", "formButtonHiddenSubmitArea");
-				});
-			</c:if>
+			hqDojo.query(".button42").forEach(function(e){				
+				if (e.id == 'okButton' && e.onclick == null) {
+					e.onclick = function() {
+						hyperic.form.mockLinkSubmit("ok.x", "1", "formButtonHiddenSubmitArea");
+					};
+				}
+
+				<c:if test="${empty noReset}">
+					if (e.id == 'resetButton' && e.onclick == null) {
+						e.onclick = function() {
+							hyperic.form.mockLinkSubmit("reset.x", "1", "formButtonHiddenSubmitArea");							
+						};
+					}
+				</c:if>
+			});
 		</c:if>
 		<c:if test="${empty noCancel}">
-			dojo11.connect(dojo11.byId("cancelButton"), "onclick", function() {
-				hyperic.form.mockLinkSubmit("cancel.x", "1", "formButtonHiddenSubmitArea");
+			hqDojo.query(".button42").forEach(function(e){
+				if (e.id == 'cancelButton' && e.onclick == null) {
+					e.onclick = function() {
+						hyperic.form.mockLinkSubmit("cancel.x", "1", "formButtonHiddenSubmitArea");
+					};
+				}
 			});
 		</c:if>
 	});

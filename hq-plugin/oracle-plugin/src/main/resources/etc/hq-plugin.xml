@@ -35,6 +35,7 @@
 
 
 <plugin package="org.hyperic.hq.plugin.oracle">
+  <property name="PLUGIN_VERSION" value="@project.version@"/>
 
   <!-- extracted to: pdk/work/scripts/oracle/hq-tns-ping -->
   <script name="hq-tns-ping">
@@ -82,7 +83,7 @@ fi
   </script>
 
   <classpath>
-    <include name="pdk/lib/jdbc/ojdbc14.jar"/>
+    <include name="pdk/lib/jdbc/ojdbc5.jar"/>
   </classpath>
 
   <!-- we use a dummy jmx object name -->
@@ -483,6 +484,25 @@ fi
        <property name="version"
                  description="Oracle Version"/>
     </properties>
+
+   <plugin type="config_track" platform="unix"
+            class="org.hyperic.hq.product.FileChangeTrackPlugin">
+            <monitored>
+            	<folder path="dbs" recursive="false" filter=".*\.ora"/>
+            	<folder path="network/admin" recursive="false" filter=".*\.ora"/>
+            	<folder path="etc" recursive="false" filter="oratab"/>
+            </monitored>
+    </plugin>
+
+   <plugin type="config_track" platform="win32"
+            class="org.hyperic.hq.product.FileChangeTrackPlugin">
+            <monitored>
+            	<folder path="database" recursive="false" filter=".*\.ora"/>
+            	<folder path="network/admin" recursive="false" filter=".*\.ora"/>
+            </monitored>
+    </plugin>
+    <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="true" />
+    
 
     <service name="User Instance">
       <plugin type="measurement"

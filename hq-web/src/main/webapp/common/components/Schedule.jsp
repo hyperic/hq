@@ -37,11 +37,11 @@
 <c:if test="${empty TheControlForm}">
  <c:set var="TheControlForm" value="${requestScope[\"org.apache.struts.taglib.html.BEAN\"]}"/>
 </c:if>
-<script src="<html:rewrite page="/js/"/>schedule.js" type="text/javascript"></script>
+<script src="<html:rewrite page="/js/schedule.js"/>" type="text/javascript"></script>
 <script  type="text/javascript">
- var imagePath = "<html:rewrite page="/images/"/>";
- var jsPath = "<html:rewrite page="/js/"/>";
- var cssPath = "<html:rewrite page="/css/"/>";
+ var imagePath = "/images/";
+ var jsPath = "/js/";
+ var cssPath = "/css/";
  
  var isMonitorSchedule = false;
 </script>

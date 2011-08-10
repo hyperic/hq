@@ -58,6 +58,9 @@ public abstract class BaseTag
     static final String ATTR_VALUE       = "value";
     static final String ATTR_PLATFORM    = "platform";
     static final String ATTR_CLASS       = "class";
+    static final String ATTR_RECURSIVE   = "recursive";
+    static final String ATTR_PATH        = "path";
+    static final String ATTR_FILTER      = "filter";
 
     static final String TYPE_GLOBAL      = "global";
 

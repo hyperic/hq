@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2010], VMware, Inc.
+ * Copyright (C) [2004-2011], VMware, Inc.
  * This file is part of Hyperic.
  *
  * Hyperic is free software; you can redistribute it and/or modify
@@ -28,6 +28,7 @@ package org.hyperic.hq.events.server.session;
 import java.util.Collections;
 import java.util.List;
 
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.events.MaintenanceEvent;
@@ -45,9 +46,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class MaintenanceEventManagerImpl implements MaintenanceEventManager {
     /**
+     * @deprecated Get maintenance event by AppdefEntityID instead
+     * 
      * Get the maintenance event for the group
-     * 
-     * 
      */
     public MaintenanceEvent getMaintenanceEvent(AuthzSubject subject, Integer groupId)
         throws PermissionException, SchedulerException {
@@ -55,9 +56,17 @@ public class MaintenanceEventManagerImpl implements MaintenanceEventManager {
     }
 
     /**
-     * Get currently running maintenance events
+     * Get the maintenance event for the resource
      */
-    public List<MaintenanceEvent> getRunningMaintenanceEvents()
+    public MaintenanceEvent getMaintenanceEvent(AuthzSubject subject, AppdefEntityID adeId)
+        throws PermissionException, SchedulerException {
+        return null;
+    }
+
+    /**
+     * Get current maintenance events
+     */
+    public List<MaintenanceEvent> getMaintenanceEvents(AuthzSubject subject, String state)
         throws SchedulerException {
         return Collections.EMPTY_LIST;
     }

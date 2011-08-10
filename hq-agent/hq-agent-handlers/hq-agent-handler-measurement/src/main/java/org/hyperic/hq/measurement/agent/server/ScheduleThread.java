@@ -39,6 +39,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -101,7 +102,7 @@ public class ScheduleThread
     // AppdefID -> Schedule
     private final Map<String,ResourceSchedule> schedules = new HashMap<String,ResourceSchedule>();
     // Should I shut down?
-    private volatile boolean shouldDie = false;
+    private AtomicBoolean shouldDie = new AtomicBoolean(false);
     // Interrupt object
     private final Object interrupter = new Object();
     // Hash of DSNs to their errors
@@ -130,8 +131,7 @@ public class ScheduleThread
     private long statMaxFetchTime = Long.MIN_VALUE;
     private long statMinFetchTime = Long.MAX_VALUE;
 
-    ScheduleThread(Sender sender, MeasurementValueGetter manager,
-                   Properties config)
+    ScheduleThread(Sender sender, MeasurementValueGetter manager, Properties config)
         throws AgentStartException
     {
         agentConfig = config;
@@ -275,7 +275,7 @@ public class ScheduleThread
      * Shut down the schedule thread.
      */
     void die(){
-        shouldDie = true;
+        shouldDie.set(true);
         for (String s : executors.keySet()) {
             ThreadPoolExecutor executor = executors.get(s);
             List<Runnable> queuedMetrics = executor.shutdownNow();
@@ -572,8 +572,8 @@ public class ScheduleThread
                     rs.retry.add(meas);
                     return;
                 }
-                sender.processData(meas.getDsnID(), data,
-                                    meas.getDerivedID());
+
+                sender.processData(meas.getDsnID(), data, meas.getDerivedID());
                 synchronized (statsLock) {
                     statNumMetricsFetched++;
                 }
@@ -615,7 +615,7 @@ public class ScheduleThread
 
     private void collect(ResourceSchedule rs, List items)
     {
-        for (int i=0; i<items.size() && (!shouldDie); i++) {
+        for (int i=0; i<items.size() && (!shouldDie.get()); i++) {
             ScheduledMeasurement meas =
                 (ScheduledMeasurement)items.get(i);
             ParsedTemplate tmpl = toParsedTemplate(meas);
@@ -690,6 +690,7 @@ public class ScheduleThread
         }
 
         List items;
+
         try {
             items = schedule.consumeNextItems();
             timeOfNext = schedule.getTimeOfNext();
@@ -699,7 +700,7 @@ public class ScheduleThread
         collect(rs, items);
         return timeOfNext;
     }
-
+    
     private long collect() {
         long timeOfNext = 0;
         
@@ -715,7 +716,7 @@ public class ScheduleThread
 
         if (schedules != null) {
             for (Iterator<ResourceSchedule> it = schedules.values().iterator();
-            it.hasNext() && (!shouldDie);) {
+            it.hasNext() && (!shouldDie.get());) {
 
                 ResourceSchedule rs = it.next();
                 try {
@@ -740,7 +741,7 @@ public class ScheduleThread
      */
     public void run(){
         boolean isDebug = log.isDebugEnabled();
-        while (!shouldDie) {
+        while (!shouldDie.get()) {
             long timeOfNext = collect();
             long now = System.currentTimeMillis();
             if (timeOfNext > now) {

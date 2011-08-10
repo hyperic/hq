@@ -89,17 +89,14 @@ class ProductTag
     public void endAttributes() throws XmlAttrException {
         String name = getAttribute(ATTR_NAME);
         String packageName = getAttribute(ATTR_PACKAGE);
-
+        
         if (name != null) {
             this.data.name = name;
-        }
-        else {
+        } else {
             name = this.data.name;
         }
 
-        if ((packageName == null) &&
-            (name != null))
-        {
+        if ((packageName == null) && (name != null)) {
             packageName = DEFAULT_PACKAGE + "." + name;
         }
         

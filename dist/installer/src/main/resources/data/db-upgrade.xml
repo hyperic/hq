@@ -11477,7 +11477,7 @@ has already been defined.
  <schemaSpec version="3.197">
  	<removeOldHQServers upgradeDir="${server.upgradedir}"/>
  </schemaSpec>
-	
+
  <schemaSpec version="3.198">
  	<schema-directSQL>
 		<statement desc="Drop unused eam_ai_agent_report table">
@@ -11503,6 +11503,198 @@ has already been defined.
     <schema-alterColumn table="EAM_AGENT" column="version"
 	       	            precision="50" columnType="VARCHAR2" /> 	
  </schemaSpec>
+
+ <schemaSpec version="3.200.1">
+	<schema-alterColumn table="EAM_ALERT_CONDITION" column="OPTION_STATUS"
+		                precision="150" columnType="VARCHAR2" />
+ </schemaSpec>
+
+ <schemaSpec version="3.200.2">
+     <schema-directSQL>
+       <statement fail="false" targetDB="oracle">
+         drop index MEAS_ENABLED_IDX
+       </statement>
+       <statement fail="false" targetDB="postgresql">
+         drop index MEAS_ENABLED_IDX
+       </statement>
+       <statement fail="false" targetDB="mysql">
+         drop index MEAS_ENABLED_IDX on EAM_MEASUREMENT
+       </statement>
+     </schema-directSQL>
+ </schemaSpec>
+	
+ <schemaSpec version="3.201">
+    <schema-addColumn table="EAM_PLUGIN" column="version"
+	       	            precision="100" columnType="VARCHAR2" />
+ </schemaSpec>
+
+ <schemaSpec version="3.202">
+    <schema-directSQL>
+        <statement targetDB="oracle">
+            create table EAM_AGENT_PLUGIN_STATUS (
+                ID number(10,0) not null,
+                VERSION_COL number(19,0) default 0 not null,
+                AGENT_ID number(10,0) not null,
+                FILE_NAME varchar2(128 char) not null,
+                PRODUCT_NAME varchar2(128 char) not null,
+                PLUGIN_NAME varchar2(200 char) not null,
+                MD5 varchar2(100 char) not null,
+                LAST_CHECKIN number(19,0) not null,
+                LAST_SYNC_STATUS varchar2(64 char),
+                LAST_SYNC_ATTEMPT number(19,0),
+                primary key (ID)
+            )
+        </statement>
+        <statement targetDB="oracle">
+            create index AGENT_ID on EAM_AGENT_PLUGIN_STATUS (AGENT_ID)
+        </statement>
+        <statement targetDB="oracle">
+            create sequence EAM_AGENT_PLUGIN_STATUS_ID_SEQ start with 10001 increment by 1  cache 100 
+        </statement>
+        <statement targetDB="postgresql">
+            create table EAM_AGENT_PLUGIN_STATUS (
+                ID int4 not null,
+                VERSION_COL int8 default 0 not null,
+                AGENT_ID int4 not null,
+                FILE_NAME varchar(128) not null, 
+                PRODUCT_NAME varchar(128) not null, 
+                PLUGIN_NAME varchar(200) not null, 
+                MD5 varchar(100) not null, 
+                LAST_CHECKIN int8 not null,
+                LAST_SYNC_STATUS varchar(64),
+                LAST_SYNC_ATTEMPT int8,
+                primary key (ID)
+            )
+        </statement>
+        <statement targetDB="postgresql">
+            create index AGENT_ID on EAM_AGENT_PLUGIN_STATUS (AGENT_ID)
+        </statement>
+        <statement targetDB="postgresql">
+            create sequence EAM_AGENT_PLUGIN_STATUS_ID_SEQ start 10001 increment 1
+        </statement>
+        <statement targetDB="mysql">
+            create table EAM_AGENT_PLUGIN_STATUS (
+                ID int(11) not null,
+                AGENT_ID int(11) not null,
+                MD5 varchar(100) not null,
+                VERSION_COL bigint(20) not null default 0,
+                PLUGIN_NAME varchar(200) not null,
+                PRODUCT_NAME varchar(128) not null,
+                FILE_NAME varchar(128) not null,
+                LAST_CHECKIN bigint(20) not null,
+                LAST_SYNC_ATTEMPT bigint(20) null,
+                LAST_SYNC_STATUS varchar(64) null,
+                primary key (ID)
+            )
+        </statement>
+        <statement>
+            alter table EAM_AGENT_PLUGIN_STATUS add constraint FK8C8FAC96559691A3 foreign key (agent_id) references EAM_AGENT(ID) ON DELETE CASCADE
+        </statement>
+        <statement>
+            create index APS_MD5_IDX on EAM_AGENT_PLUGIN_STATUS(MD5)
+        </statement>
+        <statement>
+            create index APS_FILE_NAME_IDX on EAM_AGENT_PLUGIN_STATUS(FILE_NAME)
+        </statement>
+        <statement>
+            create index APS_PLUGIN_NAME_IDX on EAM_AGENT_PLUGIN_STATUS(PLUGIN_NAME)
+        </statement>
+        <statement targetDB="oracle">
+            alter table EAM_PLUGIN add DISABLED number(1) default 0 not null
+        </statement>
+        <statement targetDB="postgresql">
+            alter table EAM_PLUGIN add DISABLED boolean not null default false
+        </statement>
+        <statement targetDB="mysql">
+            alter table EAM_PLUGIN add DISABLED bit not null default 0
+        </statement>
+        <statement targetDB="oracle">
+            alter table EAM_PLUGIN add MTIME number(19,0) default 0 not null
+        </statement>
+        <statement targetDB="postgresql">
+            alter table EAM_PLUGIN add MTIME int8 not null default 0
+        </statement>
+        <statement targetDB="mysql">
+            alter table EAM_PLUGIN add MTIME bigint(20) not null default 0
+        </statement>
+        <statement>
+            update EAM_PLUGIN set MTIME = CTIME
+        </statement>
+    </schema-directSQL>
+ </schemaSpec>
+
+	
+ <schemaSpec version="3.203">
+    <schema-insert table="EAM_CONFIG_PROPS"
+                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES ('67', 'LDAP_GROUP_SEARCH_BASE', '', '', %%FALSE%%)"/>
+    <schema-insert table="EAM_CONFIG_PROPS"
+                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES ('68', 'LDAP_GROUP_SEARCH_FILTER', '', '(member={0})', %%FALSE%%)"/>
+    <schema-insert table="EAM_CONFIG_PROPS"
+                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES ('69', 'LDAP_GROUP_SEARCH_ROLE_ATTRIBUTE', '', 'cn', %%FALSE%%)"/>
+    <schema-insert table="EAM_CONFIG_PROPS"
+                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES ('70', 'LDAP_GROUP_SEARCH_SUBTREE', '', 'false', %%FALSE%%)"/>
+ </schemaSpec>
+
+ <schemaSpec version="3.204">
+    <schema-directSQL>
+        <statement targetDB="oracle">
+            alter table EAM_PLUGIN add DELETED number(1) default 0 not null
+        </statement>
+        <statement targetDB="postgresql">
+            alter table EAM_PLUGIN add DELETED boolean not null default false
+        </statement>
+        <statement targetDB="mysql">
+            alter table EAM_PLUGIN add DELETED bit not null default 0
+        </statement>
+    </schema-directSQL>
+ </schemaSpec>
+
+ <schemaSpec version="3.205">
+    <schema-addColumn table="EAM_AGENT"
+                      column="LAST_PLUGIN_INVENTORY_CHECKIN"
+                      nullable="NOT NULL"
+                      default="0"
+                      columnType="LONG" />
+    <schema-addColumn table="EAM_AGENT"
+                      column="PLUGIN_INVENTORY_CHECKSUM"
+                      precision="128"
+                      columnType="VARCHAR2" />
+ </schemaSpec>
+
+ <schemaSpec version="3.206">
+    <schema-directSQL>
+        <statement targetDB="mysql" fail="false">
+            alter table EAM_AGENT_PLUGIN_STATUS drop foreign key FK8C8FAC96559691A3
+        </statement>
+        <statement targetDB="mysql" fail="false">
+            alter table EAM_AGENT_PLUGIN_STATUS drop index AGENT_ID
+        </statement>
+        <statement targetDB="mysql" fail="false">
+            alter table EAM_AGENT_PLUGIN_STATUS drop index FK8C8FAC96559691A3
+        </statement>
+        <statement targetDB="mysql">
+            create index AGENT_ID on EAM_AGENT_PLUGIN_STATUS (AGENT_ID)
+        </statement>
+        <statement targetDB="mysql">
+            alter table EAM_AGENT_PLUGIN_STATUS add constraint FK8C8FAC96559691A3 foreign key (AGENT_ID) references EAM_AGENT (ID) on delete cascade
+        </statement>
+    </schema-directSQL>
+ </schemaSpec>
+
+ <schemaSpec version="3.207">
+    <schema-directSQL>
+        <statement targetDB="mysql">
+            alter table EAM_AGENT_PLUGIN_STATUS modify MD5 varchar(100) null
+        </statement>
+        <statement targetDB="postgresql">
+            alter table EAM_AGENT_PLUGIN_STATUS alter column md5 drop not null
+        </statement>
+        <statement targetDB="oracle">
+            alter table EAM_AGENT_PLUGIN_STATUS modify md5 varchar2(100) null
+        </statement>
+    </schema-directSQL>
+ </schemaSpec>
+
 </dbupgrade>
 </target>
 </project>

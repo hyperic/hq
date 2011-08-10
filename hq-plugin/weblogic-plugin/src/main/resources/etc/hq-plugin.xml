@@ -26,6 +26,7 @@
  -->
 
 <plugin name="weblogic" class="WeblogicProductPlugin">
+  <property name="PLUGIN_VERSION" value="@project.version@"/>
 
   <classpath>
     <!-- look for service pack jar as weblogic does in their scripts. -->
@@ -1179,6 +1180,16 @@
               class="WeblogicEJBControl"/>
     </service>
 
+	<filter name="conf" value=".*\.xml|.*\.cfg|.*\.properties|.*\.ini|.*\.conf|.*\.config|.*\.ldift|.*\.sql|.*\.ddl|.*\.sh"/>
+    <filter name="code" value=".*\.jar|.*\.dll|.*\.class|.*\.jsp|.*\.php|.*\.pl|.*\.js|.*\.py|.*\.pyc|.*\.cgi|.*\.so"/>
+    <plugin type="config_track"
+    		class="org.hyperic.hq.product.FileChangeTrackPlugin">
+      <monitored>
+        <folder path="" recursive="true" filter="${code}${conf}"/>
+      </monitored>
+    </plugin>
+    <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="true" />
+
   </server>
 
   <server name="Weblogic Admin"
@@ -1201,6 +1212,16 @@
     <plugin type="control"
             platform="Win32"
             class="WeblogicControlWin32Plugin"/>
+            
+   	<filter name="conf" value=".*\.xml|.*\.cfg|.*\.properties|.*\.ini|.*\.conf|.*\.config|.*\.lok|.*\.ldift"/>
+    <filter name="code" value=".*\.jar|.*\.dll|.*\.class|.*\.jsp|.*\.php|.*\.pl|.*\.js|.*\.py|.*\.pyc|.*\.cgi|.*\.so|.*\.sql|.*\.sh"/>
+    <plugin type="config_track"
+    		class="org.hyperic.hq.product.FileChangeTrackPlugin">
+      <monitored>
+        <folder path="" recursive="true" filter="${code}${conf}"/>
+      </monitored>
+    </plugin>
+   
 
   </server>
 

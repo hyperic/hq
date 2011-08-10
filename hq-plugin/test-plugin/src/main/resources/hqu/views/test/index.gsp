@@ -1,39 +1,39 @@
 <script type="text/javascript">
 document.navTabCat = "Admin";
 function sendCode() {
-  dojo.byId('timeStatus').innerHTML = '... executing';
-   dojo.io.bind({
-    url: '<%= urlFor(action:"execute") %>',
-    method: "post",
-    mimetype: "text/json-comment-filtered",
-    content: {
-        code:   dojo.byId("code").value,
-        debug:  dojo.byId("hiberDebug").checked
-    },
-    load: function(type, data, evt) {
-      dojo.byId('result').innerHTML = data.result;
-      dojo.byId('hiberStats').innerHTML = data.hiberStats;
-      dojo.byId('timeStatus').innerHTML = data.timeStatus;
-    },
-    error: function(type, data, evt) {
-      alert('error! ' + data);
-    }
-  });
+  	hqDojo.byId('timeStatus').innerHTML = '... executing';
+   	hqDojo.xhrPost({
+    	url: '<%= urlFor(action:"execute", encodeUrl:true) %>',
+    	handleAs: "json-comment-filtered",
+    	content: {
+        	code:   hqDojo.byId("code").value,
+ 	       debug:  hqDojo.byId("hiberDebug").checked
+    	},
+    	load: function(response, args) {
+     		hqDojo.byId('result').innerHTML = response.result;
+		    hqDojo.byId('hiberStats').innerHTML = response.hiberStats;
+      		hqDojo.byId('timeStatus').innerHTML = response.timeStatus;
+    	},
+    	error: function(response, args) {
+      		alert('error! ' + response);
+    	}
+  	});
 }
 
 function chooseTemplate(t) {
-  dojo.io.bind({
-    url: '<%= urlFor(action:"getTemplate") %>',
-    method: "get",
-    mimetype: "text/json-comment-filtered",
-    content: {template: t},
-    load: function(type, data, evt) {
-      dojo.byId('code').value = data.result;
-    },
-    error: function(type, data, evt) {
-      alert('error! ' + data);
-    }
-  });
+  	hqDojo.xhrGet({
+    	url: '<%= urlFor(action:"getTemplate") %>',
+	    handleAs: "json-comment-filtered",
+    	content: {
+        	template: t
+        },
+    	load: function(response, args) {
+      		hqDojo.byId('code').value = response.result;
+    	},
+    	error: function(response, args) {
+      		alert('error! ' + response);
+    	}
+  	});
 }
 
 </script>

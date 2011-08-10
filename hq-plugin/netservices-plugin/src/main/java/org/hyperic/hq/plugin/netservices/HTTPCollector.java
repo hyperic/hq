@@ -27,371 +27,380 @@ package org.hyperic.hq.plugin.netservices;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.auth.AuthScope;
-import org.apache.commons.httpclient.auth.BasicScheme;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.methods.HeadMethod;
-import org.apache.commons.httpclient.params.HttpClientParams;
-import org.apache.commons.httpclient.params.HttpMethodParams;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.ParseException;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.auth.params.AuthPNames;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpHead;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.params.ClientPNames;
+import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.CoreProtocolPNames;
+import org.apache.http.params.HttpParams;
+import org.apache.http.util.EntityUtils;
+import org.hyperic.hq.agent.AgentKeystoreConfig;
 import org.hyperic.hq.common.shared.ProductProperties;
+import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.PluginException;
-import org.hyperic.util.security.UntrustedSSLProtocolSocketFactory;
+import org.hyperic.util.http.HQHttpClient;
+import org.hyperic.util.http.HttpConfig;
+import org.springframework.util.StringUtils;
 
 public class HTTPCollector extends SocketChecker {
+	private boolean isPingCompat;
+	private String url;
+	private String method;
+	private String hosthdr;
+	private String useragent;
+	private Pattern pattern;
+	private List<String> matches = new ArrayList<String>();
+	private String proxyHost = null;
+	private int proxyPort = 8080;
+	private Log log;
 
-    private boolean isPingCompat;
-    private String url;
-    private String method;
-    private String hosthdr;
-    private String useragent;
-    private Pattern pattern;
-    private ArrayList matches = new ArrayList();
-    private String proxyHost = null;
-    private int proxyPort = 8080;
+	protected void init() throws PluginException {
+		super.init();
+		log = LogFactory.getLog(HTTPCollector.class);
+		Properties props = getProperties();
 
-    protected void init() throws PluginException {
-        super.init();
-        Properties props = getProperties();
+		boolean isSSL = isSSL();
 
-        boolean isSSL = isSSL();
+		String protocol = props.getProperty(PROP_PROTOCOL,
+				isSSL ? PROTOCOL_HTTPS : PROTOCOL_HTTP);
 
-        String protocol =
-            props.getProperty(PROP_PROTOCOL,
-                              isSSL ? PROTOCOL_HTTPS : PROTOCOL_HTTP);
+		// back compat w/ old url.availability templates
+		this.isPingCompat = protocol.equals("ping");
 
-        //back compat w/ old url.availability templates
-        this.isPingCompat =
-            protocol.equals("ping");
+		if (this.isPingCompat) {
+			return;
+		}
 
-        if (this.isPingCompat) {
-            return;
+		this.method = props.getProperty(PROP_METHOD, METHOD_HEAD);
+		this.hosthdr = props.getProperty("hostheader");
+		
+		try {
+			URL url = new URL(protocol, getHostname(), getPort(), getPath());
+		
+			this.url = url.toString();
+		} catch (MalformedURLException e) {
+			throw new PluginException(e);
+		}
+
+		this.useragent = getPlugin().getManagerProperty("http.useragent");
+
+		if (this.useragent == null || this.useragent.trim().length() == 0) {
+			this.useragent = "Hyperic-HQ-Agent/" + ProductProperties.getVersion();
+		}
+
+		// for log_track
+		setSource(this.url);
+
+		// to allow self-signed server certs
+		if (isSSL) {
+			// Try to get grab and accept the certificate
+			try {
+				getSocketWrapper(true);
+			} catch (IOException e) {
+				log.warn(e);
+				// ...log it but probably going to be a problem later...
+			}
+		}
+
+		String pattern = props.getProperty("pattern");
+		
+		if (pattern != null) {
+			this.pattern = Pattern.compile(pattern);
+			this.method = METHOD_GET;
+		}
+
+		String proxy = props.getProperty("proxy");
+
+		if (proxy != null) {
+			setSource(getSource() + " [via " + proxy + "]");
+			
+			int ix = proxy.indexOf(':');
+			
+			if (ix != -1) {
+				this.proxyPort = Integer.parseInt(proxy.substring(ix + 1));
+				proxy = proxy.substring(0, ix);
+			}
+			
+			this.proxyHost = proxy;
+		}
+
+        collect();
+        if (getLogLevel() == LogTrackPlugin.LOGLEVEL_ERROR) {
+            throw new PluginException(getMessage());
         }
+	}
 
-        this.method =
-            props.getProperty(PROP_METHOD, METHOD_HEAD);
+	protected String getURL() {
+		return this.url;
+	}
 
-        this.hosthdr =
-            props.getProperty("hostheader");
+	protected void setURL(String url) {
+		this.url = url;
+	}
 
-        this.url = 
-            protocol + "://" + getHostname() + ":" + getPort() + getPath();
+	protected String getMethod() {
+		return this.method;
+	}
 
-        this.useragent = getPlugin().getManagerProperty("http.useragent");
-        
-        if (this.useragent == null || this.useragent.trim().length() == 0) {
-            this.useragent = "Hyperic-HQ-Agent/" + ProductProperties.getVersion();
-        }
-        
-        //for log_track
-        setSource(this.url);
+	protected void setMethod(String method) {
+		this.method = method;
+	}
 
-        //to allow self-signed server certs
-        if (isSSL) {
-            UntrustedSSLProtocolSocketFactory.register();
-        }
+	private double getAvail(int code) {
+		// There are too many options to list everything that is
+		// successful. So, instead we are going to call out the
+		// things that should be considered failure, everything else
+		// is OK.
+		switch (code) {
+		case HttpURLConnection.HTTP_BAD_REQUEST:
+		case HttpURLConnection.HTTP_FORBIDDEN:
+		case HttpURLConnection.HTTP_NOT_FOUND:
+		case HttpURLConnection.HTTP_BAD_METHOD:
+		case HttpURLConnection.HTTP_CLIENT_TIMEOUT:
+		case HttpURLConnection.HTTP_CONFLICT:
+		case HttpURLConnection.HTTP_PRECON_FAILED:
+		case HttpURLConnection.HTTP_ENTITY_TOO_LARGE:
+		case HttpURLConnection.HTTP_REQ_TOO_LONG:
+		case HttpURLConnection.HTTP_INTERNAL_ERROR:
+		case HttpURLConnection.HTTP_NOT_IMPLEMENTED:
+		case HttpURLConnection.HTTP_UNAVAILABLE:
+		case HttpURLConnection.HTTP_VERSION:
+		case HttpURLConnection.HTTP_BAD_GATEWAY:
+		case HttpURLConnection.HTTP_GATEWAY_TIMEOUT:
+			return Metric.AVAIL_DOWN;
+		default:
+		}
 
-        String pattern = props.getProperty("pattern");
-        if (pattern != null) {
-            this.pattern = Pattern.compile(pattern);
-            this.method = METHOD_GET;
-        }
+		if (hasCredentials()) {
+			if (code == HttpURLConnection.HTTP_UNAUTHORIZED) {
+				return Metric.AVAIL_DOWN;
+			}
+		}
 
-        String proxy = props.getProperty("proxy");
+		return Metric.AVAIL_UP;
+	}
 
-        if (proxy != null) {
-            setSource(getSource() + " [via " + proxy + "]");
-            int ix = proxy.indexOf(':');
-            if (ix != -1) {
-                this.proxyPort =
-                    Integer.parseInt(proxy.substring(ix+1));
-                proxy = proxy.substring(0, ix);
-            }
-            this.proxyHost = proxy;
-        }
-    }
+	// allow response to have metrics, must be:
+	// Content-Type: text/plain
+	// Content-Length: <= 8192   DRC: Why the limitation?
+	// XXX flag to always disable and/or change these checks
+	protected void parseResults(HttpResponse response) {
+		Header length = response.getFirstHeader("Content-Length");
+		Header type = response.getFirstHeader("Content-Type");
 
-    protected String getURL() {
-        return this.url;
-    }
+		if (type == null || !type.getValue().equals("text/plain")) {
+			return;
+		}
 
-    protected void setURL(String url) {
-        this.url = url;
-    }
+		if (length != null) {
+			try {
+				if (Integer.parseInt(length.getValue()) > 8192) {
+					return;
+				}
+			} catch (NumberFormatException e) {
+				return;
+			}
+		}
 
-    protected String getMethod() {
-        return this.method;
-    }
+		try {
+			parseResults(EntityUtils.toString(response.getEntity(), "UTF-8"));
+		} catch (ParseException e) {
+			setErrorMessage("Exception parsing response: " + e.getMessage(), e);
+		} catch (IOException e) {
+			setErrorMessage("Exception reading response stream: " + e.getMessage(), e);
+		}
+	}
 
-    protected void setMethod(String method) {
-        this.method = method;
-    }
+	private boolean matchResponse(HttpResponse response) {
+		String body;
+		
+		try {
+			body = EntityUtils.toString(response.getEntity(), "UTF-8");
+		} catch (ParseException e) {
+			setErrorMessage("Exception parsing response: " + e.getMessage(), e);
+			
+			return false;
+		} catch (IOException e) {
+			setErrorMessage("Exception reading response stream: " + e.getMessage(), e);
+			
+			return false;
+		}
 
-    private double getAvail(int code)  {
-        // There are too many options to list everything that is
-        // successful.  So, instead we are going to call out the
-        // things that should be considered failure, everything else
-        // is OK.
-        switch (code) {
-          case HttpURLConnection.HTTP_BAD_REQUEST:
-          case HttpURLConnection.HTTP_FORBIDDEN:
-          case HttpURLConnection.HTTP_NOT_FOUND:
-          case HttpURLConnection.HTTP_BAD_METHOD:
-          case HttpURLConnection.HTTP_CLIENT_TIMEOUT:
-          case HttpURLConnection.HTTP_CONFLICT:
-          case HttpURLConnection.HTTP_PRECON_FAILED:
-          case HttpURLConnection.HTTP_ENTITY_TOO_LARGE:
-          case HttpURLConnection.HTTP_REQ_TOO_LONG:
-          case HttpURLConnection.HTTP_INTERNAL_ERROR:
-          case HttpURLConnection.HTTP_NOT_IMPLEMENTED:
-          case HttpURLConnection.HTTP_UNAVAILABLE:
-          case HttpURLConnection.HTTP_VERSION:
-          case HttpURLConnection.HTTP_BAD_GATEWAY:
-          case HttpURLConnection.HTTP_GATEWAY_TIMEOUT:
-            return Metric.AVAIL_DOWN;
-          default:
-        }
+		if (body == null) {
+			body = "";
+		}
 
-        if (hasCredentials()) {
-            if (code == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                return Metric.AVAIL_DOWN;
-            }
-        }
+		try {
+			Matcher matcher = this.pattern.matcher(body);
+			boolean matches = false;
 
-        return Metric.AVAIL_UP;
-    }
+			while (matcher.find()) {
+				matches = true;
+				
+				int count = matcher.groupCount();
+				// skip group(0):
+				// "Group zero denotes the entire pattern by convention"
+				for (int i = 1; i <= count; i++) {
+					this.matches.add(matcher.group(i));
+				}
+			}
+			
+			if (matches) {
+				return true;
+			}
+			
+			setWarningMessage("Response (length=" + body.length() + ") does not match " + this.pattern);
+		} catch (Exception e) {
+			setErrorMessage("Exception matching response: " + e.getMessage(), e);
+		}
+		return false;
+	}
 
-    //allow response to have metrics, must be:
-    //Content-Type: text/plain
-    //Content-Length: <= 8192
-    //XXX flag to always disable and/or change these checks
-    protected void parseResults(HttpMethod method) {
-        Header length =
-            method.getResponseHeader("Content-Length");
-        Header type =
-            method.getResponseHeader("Content-Type");
+	public void collect() {
+		if (this.isPingCompat) {
+			// back compat w/ old url.availability templates
+			super.collect();
+			
+			return;
+		}
 
-        if (type == null) {
-            return;
-        }
+		this.matches.clear();
+		
+		boolean isHEAD = getMethod().equals(METHOD_HEAD);
+		HttpConfig config = new HttpConfig(getTimeoutMillis(), getTimeoutMillis(), proxyHost, proxyPort);
 
-        if (!type.getValue().equals("text/plain")) {
-            return;
-        }
+		AgentKeystoreConfig keystoreConfig = new AgentKeystoreConfig();
+        log.debug("isAcceptUnverifiedCert:"+keystoreConfig.isAcceptUnverifiedCert());
 
-        if (length == null) {
-            //return; //XXX ?
-        }
-        else {
-            try {
-                if (Integer.parseInt(length.getValue()) > 8192) {
-                    return;
-                }
-            } catch (NumberFormatException e) {
-                return;
-            }
-        }
+		HttpClient client = new HQHttpClient (keystoreConfig, config, keystoreConfig.isAcceptUnverifiedCert());
+		HttpParams params = client.getParams();
+		
+		params.setParameter(CoreProtocolPNames.USER_AGENT, this.useragent);
+		
+		if (this.hosthdr != null) {
+			params.setParameter(ClientPNames.VIRTUAL_HOST, this.hosthdr);
+		}
 
-        try {
-            String body = method.getResponseBodyAsString();
-            parseResults(body);
-        } catch (Exception e) { 
-            //throws IOException in commons-httpclient/3.0, nada in 2.0
-            setErrorMessage("Exception parsing response: " +
-                            e.getMessage());
-        }
-    }
+		HttpRequestBase method = (isHEAD) ? new HttpHead(getURL()) : new HttpGet(getURL());
 
-    private boolean matchResponse(HttpMethod method) {
-        String body;
-        try {
-            body = method.getResponseBodyAsString();
-        } catch (Exception e) {
-            setErrorMessage("Exception getting response body: " +
-                            e.getMessage());
-            return false;
-        }
+		method.getParams().setParameter(ClientPNames.HANDLE_REDIRECTS, isFollow());
 
-        if (body == null) {
-            body = "";
-        }
-        try {
-            Matcher matcher = this.pattern.matcher(body);
-            boolean matches = false;
+		if (hasCredentials()) {
+			UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(getUsername(), getPassword());
+			String realm = getProperties().getProperty("realm", "");
 
-            while (matcher.find()) {
-                matches = true;
-                int count = matcher.groupCount();
-                //skip group(0):
-                //"Group zero denotes the entire pattern by convention"
-                for (int i=1; i<=count; i++) {
-                    this.matches.add(matcher.group(i));
-                }
-            }
-            if (matches) {
-                return true;
-            }
-            setWarningMessage("Response (length=" + body.length() +
-                              ") does not match " + this.pattern);
-        } catch (Exception e) {
-            setErrorMessage("Exception matching response: " +
-                            e.getMessage(), e);
-        }
-        return false;
-    }
+			if (realm.length() == 0) {
+				// send header w/o challenge
+				boolean isProxied = (StringUtils.hasText(proxyHost) && proxyPort != -1);
+				Header authenticationHeader = BasicScheme.authenticate(credentials, "UTF-8", isProxied);
 
-    public void collect() {
-        if (this.isPingCompat) {
-            //back compat w/ old url.availability templates
-            super.collect();
-            return;
-        }
+				method.addHeader(authenticationHeader);
+			} else {
+				String authenticationHost = (this.hosthdr == null) ? getHostname() : this.hosthdr;
+				AuthScope authScope = new AuthScope(authenticationHost, -1, realm);
+				
+				((DefaultHttpClient) client).getCredentialsProvider().setCredentials(authScope, credentials);
 
-        this.matches.clear();
-        HttpMethod method;
-        boolean isHEAD =
-            getMethod().equals(METHOD_HEAD);
-        HttpClient client = new HttpClient();
-        HttpClientParams params = new HttpClientParams();
-        params.setParameter(HttpMethodParams.USER_AGENT, this.useragent);
-        if (this.hosthdr != null) {
-            params.setVirtualHost(this.hosthdr);
-        }
-        client.setParams(params);
-        client.setConnectionTimeout(getTimeoutMillis());
-        client.setTimeout(getTimeoutMillis());
+				method.getParams().setParameter(ClientPNames.HANDLE_AUTHENTICATION, true);
+			}
+		}
 
-        if (this.proxyHost != null) {
-            client.getHostConfiguration().setProxy(this.proxyHost,
-                                                   this.proxyPort);
-        }
+		double avail;
+		
+		try {
+			startTime();
+			
+			HttpResponse response = client.execute(method);
+			
+			endTime();
 
-        if (isHEAD) {
-            HeadMethod head = new HeadMethod(getURL());
-            head.setBodyCheckTimeout(-1);
-            method = head;
-        }
-        else {
-            GetMethod get = new GetMethod(getURL());
-            method = get;
-        }        
+			int statusCode = response.getStatusLine().getStatusCode();
+			
+			setResponseCode(statusCode);
 
-        method.setFollowRedirects(isFollow());
+			avail = getAvail(statusCode);
 
-        if (hasCredentials()) {
-            UsernamePasswordCredentials credentials =
-                new UsernamePasswordCredentials(getUsername(),
-                                                getPassword());
-            String realm = getProperties().getProperty("realm", "");
+			String msg = String.valueOf(statusCode);
+			
+			Header header = response.getFirstHeader("Server");
+			
+			if (header != null) {
+				msg += " (" + header.getValue() + ")";
+			}
 
-            if (realm.length() == 0) {
-                //send header w/o challenge
-                String auth =
-                    BasicScheme.authenticate(credentials,
-                                             method.getParams().getCredentialCharset());
+			long lastModified = 0;
+			
+			header = response.getFirstHeader("Last-Modified");
 
-                method.addRequestHeader(new Header("Authorization", auth));
-            }
-            else {
-                String authHost = (this.hosthdr == null) ? getHostname() : this.hosthdr;
-                AuthScope authScope = new AuthScope(authHost, -1, realm);
-                client.getState().setCredentials(authScope, credentials);
-                
-                method.setDoAuthentication(true);
-            }
-        }
+			if (header != null) {
+				try {
+					DateFormat format = new SimpleDateFormat();
+					
+					// TODO lock down the expected format (wasn't specified in orig code...
+					lastModified = format.parse(header.getValue()).getTime();
+				} catch (Exception e) {
+					// TODO probably should do something a bit more useful here...
+				}
+			} else if (statusCode == 200) {
+				lastModified = System.currentTimeMillis();
+			}
 
-        double avail;
-        int rc;
-        
-        try {
-            startTime();
-            rc = client.executeMethod(method);
-            endTime();
+			if (lastModified != 0) {
+				setValue("LastModified", lastModified);
+			}
 
-            setResponseCode(rc);
+			if (!isHEAD && (avail == Metric.AVAIL_UP)) {
+				if (this.pattern != null) {
+					if (!matchResponse(response)) {
+						avail = Metric.AVAIL_WARN;
+					} else if (matches.size() != 0) {
+						msg += " match results=" + this.matches;
+					}
+				} else {
+					parseResults(response);
+				}
+			}
 
-            avail = getAvail(rc);
+			if (avail == Metric.AVAIL_UP) {
+				if (this.matches.size() != 0) {
+					setInfoMessage(msg);
+				} else {
+					setDebugMessage(msg);
+				}
+			} else if (avail == Metric.AVAIL_WARN) {
+				setWarningMessage(msg);
+			} else {
+				setErrorMessage(msg);
+			}
+		} catch (IOException e) {
+			avail = Metric.AVAIL_DOWN;
+			setErrorMessage(e.toString());
+		}
 
-            String msg =
-                method.getStatusCode() +
-                " " +
-                method.getStatusText();
+		setAvailability(avail);
 
-            Header header =
-                method.getResponseHeader("Server");
-            if (header != null) {
-                msg += " (" + header.getValue() + ")";
-            }
-
-            long lastModified = 0;
-            header =
-                method.getResponseHeader("Last-Modified");
-
-            if (header != null) {
-                try {
-                    lastModified =
-                        Date.parse(header.getValue());
-                } catch (Exception e) {
-                    
-                }
-            }
-            else if (rc == 200) {
-                lastModified = System.currentTimeMillis();
-            }
-
-            if (lastModified != 0) {
-                setValue("LastModified", lastModified);
-            }
-
-            if (!isHEAD && (avail == Metric.AVAIL_UP)) {
-                if (this.pattern != null) {
-                    if (!matchResponse(method)) {
-                        avail = Metric.AVAIL_WARN;
-                    }
-                    else if (matches.size() != 0) {
-                        msg += " match results=" + this.matches;
-                    }
-                }
-                else {
-                    parseResults(method);
-                }
-            }
-
-            if (avail == Metric.AVAIL_UP) {
-                if (this.matches.size() != 0) {
-                    setInfoMessage(msg);
-                }
-                else {
-                    setDebugMessage(msg);
-                }
-            }
-            else if (avail == Metric.AVAIL_WARN) {
-                setWarningMessage(msg);
-            }
-            else {
-                setErrorMessage(msg);
-            }
-        } catch (IOException e) {
-            avail = Metric.AVAIL_DOWN;
-            setErrorMessage(e.toString());
-        } finally {
-            method.releaseConnection();
-        }
-
-        setAvailability(avail);
-        
-        netstat();
-    }
+		netstat();
+	}
 }

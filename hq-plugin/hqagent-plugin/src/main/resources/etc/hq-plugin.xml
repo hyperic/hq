@@ -26,7 +26,8 @@
  -->
 
 <plugin class="org.hyperic.hq.plugin.hqagent.AgentProductPlugin">
-  <metrics name="HQ Agent">
+    <property name="PLUGIN_VERSION" value="@project.version@"/>
+    <metrics name="HQ Agent">
     <metric name="Availability"
             alias="Availability"
             template="camAgent:availability"

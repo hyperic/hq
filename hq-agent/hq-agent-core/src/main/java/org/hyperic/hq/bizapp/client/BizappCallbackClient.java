@@ -56,16 +56,19 @@ public class BizappCallbackClient
                                String.valueOf(config.getProxyPort()));
         }
         
+        String keyStorePropName = AgentConfig.PROP_KEYSTORE_PATH[0];
+        
+        System.setProperty(keyStorePropName, config.getBootProperties().getProperty(keyStorePropName));       
     }
 
-    public void bizappPing()
+    public void bizappPing(final boolean acceptUnverifiedCertificates)
         throws AgentCallbackClientException
     {
         ProviderInfo provider;
 
         provider = this.getProvider();
         this.invokeLatherCall(provider, CommandInfo.CMD_PING, 
-                              NullLatherValue.INSTANCE);
+                              NullLatherValue.INSTANCE, acceptUnverifiedCertificates);
     }
 
     public boolean userIsValid(String user, String pword)
@@ -96,6 +99,7 @@ public class BizappCallbackClient
      * @param cpuCount The host platform cpu count.
      * @param isNewTransportAgent <code>true</code> if the agent is using the new transport layer.
      * @param unidirectional <code>true</code> if the agent is unidirectional.
+     * @param acceptCertificates <code>true</code> if the server should accept agent SSL certificates
      * @return The result containing the new agent token.
      */
     public RegisterAgentResult registerAgent(String oldAgentToken, 
@@ -105,7 +109,8 @@ public class BizappCallbackClient
                                              String version,
                                              int cpuCount, 
                                              boolean isNewTransportAgent, 
-                                             boolean unidirectional)
+                                             boolean unidirectional,
+                                             boolean acceptCertificates)
         throws AgentCallbackClientException
     {
         RegisterAgent_result res;
@@ -127,11 +132,12 @@ public class BizappCallbackClient
         args.setAgentPort(agentPort);
         args.setVersion(version);
         args.setCpuCount(cpuCount);
+        args.setAcceptCertificates(acceptCertificates);
         
         if (isNewTransportAgent) {
             args.setNewTransportAgent(unidirectional);            
         }
-
+        
         res = (RegisterAgent_result)this.invokeLatherCall(provider,
                                                 CommandInfo.CMD_REGISTER_AGENT,
                                                 args);
@@ -141,7 +147,8 @@ public class BizappCallbackClient
     public String updateAgent(String agentToken, String user, String pword,
                               String agentIp, int agentPort, 
                               boolean isNewTransportAgent, 
-                              boolean unidirectional)
+                              boolean unidirectional,
+                              boolean acceptCertificates)
         throws AgentCallbackClientException
     {
         UpdateAgent_result res;
@@ -156,11 +163,12 @@ public class BizappCallbackClient
         args.setAgentIP(agentIp);
         args.setAgentPort(agentPort);
         args.setAgentToken(agentToken);
+        args.setAcceptCertificates(acceptCertificates);
         
         if (isNewTransportAgent) {
             args.setNewTransportAgent(unidirectional);
         }
-
+        
         res = (UpdateAgent_result)this.invokeLatherCall(provider,
                                                 CommandInfo.CMD_UPDATE_AGENT,
                                                 args);

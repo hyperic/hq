@@ -26,27 +26,25 @@
 package org.hyperic.hq.product.pluginxml;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.FileInputStream;
 import java.io.PrintStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.xml.sax.EntityResolver;
-import org.xml.sax.InputSource;
-
+import org.hyperic.hq.product.IMonitorConfig;
+import org.hyperic.hq.product.MonitoredFolderConfig;
 import org.hyperic.hq.product.MeasurementInfo;
 import org.hyperic.hq.product.PlatformTypeInfo;
 import org.hyperic.hq.product.PluginException;
@@ -60,6 +58,8 @@ import org.hyperic.util.ArrayUtil;
 import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EnumerationConfigOption;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
 
 
 
@@ -70,6 +70,7 @@ public class PluginData {
     public static final String PLUGINS_PREFIX = "pdk/plugins/";
     private static final Log log = LogFactory.getLog("PluginData");
     private static final TypeInfo[] NO_TYPES = new TypeInfo[0];
+    private static final String PLUGIN_VERSION_PROP = "PLUGIN_VERSION";
     private static HashMap cache = new HashMap();
 
     Map scratch;
@@ -80,6 +81,7 @@ public class PluginData {
     private Map pluginImpls = new HashMap();
 
     String name = null;
+    String version = null;
     String file = null;
     ClassLoader loader;
     Map fileScanIncludes = new HashMap();
@@ -96,6 +98,7 @@ public class PluginData {
     private static Map serviceExtensions = null;
     private static Map serviceInventoryPlugins = new HashMap();
     List includes = new ArrayList();
+    private List<IMonitorConfig> monitoredConfigs = new LinkedList<IMonitorConfig>();
 
     public String getName() {
         return this.name;
@@ -105,7 +108,15 @@ public class PluginData {
         this.name = name;
     }
 
-    public String getPluginName() {
+    public String getVersion() {
+		return version;
+	}
+
+	public void setVersion(String version) {
+		this.version = version;
+	}
+
+	public String getPluginName() {
         if (this.name != null) {
             return this.name;
         }
@@ -661,7 +672,11 @@ public class PluginData {
     }
     
     public void setProperty(String key, String value) {
-        this.properties.setProperty(key, value);
+        if (key.equals(PLUGIN_VERSION_PROP) && value != null) {
+            setVersion(value);
+        } else {
+            this.properties.setProperty(key, value);
+        }
     }
 
     /**
@@ -713,6 +728,18 @@ public class PluginData {
             }
         }
         globalProperties.putAll(props);
+    }
+
+    public List<IMonitorConfig> getMonitoredConfigs() {
+        return monitoredConfigs;
+    }
+
+    public void setMonitoredConfigs(List<IMonitorConfig> monitoredConfigs) {
+        this.monitoredConfigs = monitoredConfigs;
+    }
+
+    public void addMonitoredConfig(IMonitorConfig monitoredConfig) {
+        this.monitoredConfigs.add(monitoredConfig);
     }
 
     //cleanup resources no longer needed after the plugin

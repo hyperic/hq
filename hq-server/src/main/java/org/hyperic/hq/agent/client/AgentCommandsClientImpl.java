@@ -28,6 +28,8 @@ package org.hyperic.hq.agent.client;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -271,6 +273,25 @@ public class AgentCommandsClientImpl
         if (_agentRegistrationClient) {
             throw new AgentConnectionException("Only client ping is allowed");
         }        
-    }  
+    }
+
+    public Map<String, Boolean> agentRemoveFile(Collection<String> files)
+    throws AgentRemoteException, AgentConnectionException {
+        AgentCommandsClient proxy = null;
+        try {
+            proxy = (AgentCommandsClient)getAsynchronousProxy(AgentCommandsClient.class, false);
+            Map<String, Boolean> rtn = proxy.agentRemoveFile(files);
+            if (rtn == null) {
+                _log.error("error removing files from agent=" + getAgent() + " files=" + files);
+                rtn = new HashMap<String, Boolean>(files.size());
+                for (String file : files) {
+                    rtn.put(file, false);
+                }
+            }
+            return rtn;
+        } finally {
+            safeDestroyService(proxy);
+        }
+    }
 
 }

@@ -25,6 +25,7 @@
  -->
 
 <plugin name="exchange">
+  <property name="PLUGIN_VERSION" value="@project.version@"/>
 
   <filter name="store" value="win32:Object=MSExchangeIS"/>
   <filter name="mta" value="win32:Object=MSExchangeMTA"/>

@@ -18,8 +18,15 @@
 		<name>help</name>
 		<tag-class>org.hyperic.hq.ui.taglib.HelpTag</tag-class>
 		<body-content>empty</body-content>
+		<!-- When context is true, which is default, key will append to the context to be the key to the help doc.
+		     When context is false, key will be the key to the help doc-->
 		<attribute>
 			<name>context</name>
+			<required>false</required>
+			<rtexprvalue>false</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>key</name>
 			<required>false</required>
 			<rtexprvalue>false</rtexprvalue>
 		</attribute>
