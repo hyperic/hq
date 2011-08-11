@@ -84,7 +84,7 @@
         </c:choose>
         <c:param name="eid" value="${resourceType}:${resourceId}"/>
       </c:url>
-      <td class="TabCell" style="cursor:pointer;"><html:link href="${tabLink}"><html:img page="/images/tab_${tab.value}_off.gif" onmouseover="imageSwap (this, imagePath +  'tab_${tab.value}', '_over')" onmouseout="imageSwap (this, imagePath +  'tab_${tab.value}', '_off')"alt="" border="0"/></html:link></td>
+      <td class="TabCell" style="cursor:pointer;"><html:link href="${tabLink}"><html:img page="/images/tab_${tab.value}_off.gif" onmouseover="imageSwap (this, imagePath +  'tab_${tab.value}', '_over')" onmouseout="imageSwap (this, imagePath +  'tab_${tab.value}', '_off')" alt="" border="0"/></html:link></td>
      </c:otherwise>
     </c:choose>
   </c:forEach>
