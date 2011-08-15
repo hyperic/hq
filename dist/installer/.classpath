@@ -78,7 +78,6 @@
 	<classpathentry kind="var" path="M2_REPO/org/springframework/security/spring-security-web/3.0.5.RELEASE/spring-security-web-3.0.5.RELEASE.jar" sourcepath="M2_REPO/org/springframework/security/spring-security-web/3.0.5.RELEASE/spring-security-web-3.0.5.RELEASE-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/spring-tx/3.0.5.RELEASE/spring-tx-3.0.5.RELEASE.jar" sourcepath="M2_REPO/org/springframework/spring-tx/3.0.5.RELEASE/spring-tx-3.0.5.RELEASE-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/springframework/spring-web/3.0.5.RELEASE/spring-web-3.0.5.RELEASE.jar" sourcepath="M2_REPO/org/springframework/spring-web/3.0.5.RELEASE/spring-web-3.0.5.RELEASE-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/apache/tomcat-jdbc/1.0.8.5/tomcat-jdbc-1.0.8.5.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/apache/tomcat-juli/6.0.20/tomcat-juli-6.0.20.jar"/>
 	<classpathentry kind="var" path="M2_REPO/org/apache/velocity/velocity/1.6.3/velocity-1.6.3.jar" sourcepath="M2_REPO/org/apache/velocity/velocity/1.6.3/velocity-1.6.3-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/tanukisoft/wrapper/3.2.3/wrapper-3.2.3.jar"/>
