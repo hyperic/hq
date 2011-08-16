@@ -107,7 +107,6 @@ import org.hyperic.hq.measurement.shared.ResourceLogEvent;
 import org.hyperic.hq.product.ConfigTrackPlugin;
 import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.PluginInfo;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.TrackEvent;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
@@ -181,6 +180,19 @@ public class LatherDispatcherImpl implements LatherDispatcher {
     @PostConstruct
     public void initStatsCollector() {
     	concurrentStatsCollector.register(LATHER_NUMBER_OF_CONNECTIONS);
+        concurrentStatsCollector.register(ConcurrentStatsCollector.CMD_PING);
+        concurrentStatsCollector.register(ConcurrentStatsCollector.CMD_USERISVALID);
+        concurrentStatsCollector.register(ConcurrentStatsCollector.CMD_MEASUREMENT_SEND_REPORT);
+        concurrentStatsCollector.register(ConcurrentStatsCollector.CMD_MEASUREMENT_GET_CONFIGS);
+        concurrentStatsCollector.register(ConcurrentStatsCollector.CMD_REGISTER_AGENT);
+        concurrentStatsCollector.register(ConcurrentStatsCollector.CMD_UPDATE_AGENT);
+        concurrentStatsCollector.register(ConcurrentStatsCollector.CMD_AI_SEND_REPORT);
+        concurrentStatsCollector.register(ConcurrentStatsCollector.CMD_AI_SEND_RUNTIME_REPORT);
+        concurrentStatsCollector.register(ConcurrentStatsCollector.CMD_TRACK_SEND_LOG);
+        concurrentStatsCollector.register(ConcurrentStatsCollector.CMD_TRACK_SEND_CONFIG_CHANGE);
+        concurrentStatsCollector.register(ConcurrentStatsCollector.CMD_CONTROL_GET_PLUGIN_CONFIG);
+        concurrentStatsCollector.register(ConcurrentStatsCollector.CMD_CONTROL_SEND_COMMAND_RESULT);
+        concurrentStatsCollector.register(ConcurrentStatsCollector.CMD_PLUGIN_SEND_REPORT);
     }
 
     private void sendTopicMessage(String msgTopic, Serializable data) throws LatherRemoteException {
@@ -536,10 +548,10 @@ public class LatherDispatcherImpl implements LatherDispatcher {
             addMeasurementConfig(ents, pNode.getPlatform());
 
             try {
-                AppdefEntityValue aeval = new AppdefEntityValue(pNode.getPlatform().getEntityId(),
-                    overlord);
-                List<AppdefResourceValue> services = aeval
-                    .getAssociatedServices(PageControl.PAGE_ALL);
+                AppdefEntityValue aeval =
+                    new AppdefEntityValue(pNode.getPlatform().getEntityId(), overlord);
+                List<AppdefResourceValue> services =
+                    aeval.getAssociatedServices(PageControl.PAGE_ALL);
                 for (int i = 0; i < services.size(); i++) {
                     ServiceValue val = (ServiceValue) services.get(i);
 
@@ -713,30 +725,43 @@ public class LatherDispatcherImpl implements LatherDispatcher {
     private LatherValue runCommand(LatherContext ctx, String method, LatherValue arg)
         throws LatherRemoteException {
         if (method.equals(CommandInfo.CMD_PING)) {
+            concurrentStatsCollector.addStat(1, ConcurrentStatsCollector.CMD_PING);
             return cmdPing(arg);
         } else if (method.equals(CommandInfo.CMD_USERISVALID)) {
+            concurrentStatsCollector.addStat(1, ConcurrentStatsCollector.CMD_USERISVALID);
             return cmdUserIsValid(ctx, (UserIsValid_args) arg);
         } else if (method.equals(CommandInfo.CMD_MEASUREMENT_SEND_REPORT)) {
+            concurrentStatsCollector.addStat(1, ConcurrentStatsCollector.CMD_MEASUREMENT_SEND_REPORT);
             return cmdMeasurementSendReport((MeasurementSendReport_args) arg);
         } else if (method.equals(CommandInfo.CMD_MEASUREMENT_GET_CONFIGS)) {
+            concurrentStatsCollector.addStat(1, ConcurrentStatsCollector.CMD_MEASUREMENT_GET_CONFIGS);
             return cmdMeasurementGetConfigs((MeasurementGetConfigs_args) arg);
         } else if (method.equals(CommandInfo.CMD_REGISTER_AGENT)) {
+            concurrentStatsCollector.addStat(1, ConcurrentStatsCollector.CMD_REGISTER_AGENT);
             return cmdRegisterAgent(ctx, (RegisterAgent_args) arg);
         } else if (method.equals(CommandInfo.CMD_UPDATE_AGENT)) {
+            concurrentStatsCollector.addStat(1, ConcurrentStatsCollector.CMD_UPDATE_AGENT);
             return cmdUpdateAgent(ctx, (UpdateAgent_args) arg);
         } else if (method.equals(CommandInfo.CMD_AI_SEND_REPORT)) {
+            concurrentStatsCollector.addStat(1, ConcurrentStatsCollector.CMD_AI_SEND_REPORT);
             return cmdAiSendReport((AiSendReport_args) arg);
         } else if (method.equals(CommandInfo.CMD_AI_SEND_RUNTIME_REPORT)) {
+            concurrentStatsCollector.addStat(1, ConcurrentStatsCollector.CMD_AI_SEND_RUNTIME_REPORT);
             return cmdAiSendRuntimeReport((AiSendRuntimeReport_args) arg);
         } else if (method.equals(CommandInfo.CMD_TRACK_SEND_LOG)) {
+            concurrentStatsCollector.addStat(1, ConcurrentStatsCollector.CMD_TRACK_SEND_LOG);
             return cmdTrackLogMessage((TrackSend_args) arg);
         } else if (method.equals(CommandInfo.CMD_TRACK_SEND_CONFIG_CHANGE)) {
+            concurrentStatsCollector.addStat(1, ConcurrentStatsCollector.CMD_TRACK_SEND_CONFIG_CHANGE);
             return cmdTrackConfigChange((TrackSend_args) arg);
         } else if (method.equals(CommandInfo.CMD_CONTROL_GET_PLUGIN_CONFIG)) {
+            concurrentStatsCollector.addStat(1, ConcurrentStatsCollector.CMD_CONTROL_GET_PLUGIN_CONFIG);
             return cmdControlGetPluginConfig((ControlGetPluginConfig_args) arg);
         } else if (method.equals(CommandInfo.CMD_CONTROL_SEND_COMMAND_RESULT)) {
+            concurrentStatsCollector.addStat(1, ConcurrentStatsCollector.CMD_CONTROL_SEND_COMMAND_RESULT);
             return cmdControlSendCommandResult((ControlSendCommandResult_args) arg);
         } else if (method.equals(CommandInfo.CMD_PLUGIN_SEND_REPORT)) {
+            concurrentStatsCollector.addStat(1, ConcurrentStatsCollector.CMD_PLUGIN_SEND_REPORT);
             return cmdAgentPluginReport((PluginReport_args) arg);
         } else {
             log.warn(ctx.getCallerIP() + " attempted to invoke '" + method +

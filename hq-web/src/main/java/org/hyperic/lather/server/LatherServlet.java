@@ -30,8 +30,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -62,90 +67,72 @@ import org.hyperic.util.encoding.Base64;
  * argsClass = the class which the 'args' is encoded for
  *
  * The response is an encoded LatherValue object.
- *
- * XXX -- We could do more with caching the method/object which we are
- *        invoking, but right now, it seems to be quite fast.
  */
 @SuppressWarnings("serial")
-public class LatherServlet 
-    extends HttpServlet
-{
+public class LatherServlet extends HttpServlet {
     private static final AtomicLong ids = new AtomicLong();
-    private static final String PROP_PREFIX =
-        "org.hyperic.lather.";
-  
-    private static final String PROP_MAXCONNS =
-        PROP_PREFIX + "maxConns";
-    private static final String PROP_EXECTIMEOUT =
-        PROP_PREFIX + "execTimeout";
-    private static final String PROP_CONNID =
-        PROP_PREFIX + "connID";
+    private static final String PROP_PREFIX = ConnManager.PROP_PREFIX;
+    private static final String PROP_MAXCONNS = ConnManager.PROP_MAXCONNS;
+    private static final String PROP_EXECTIMEOUT = PROP_PREFIX + "execTimeout";
+    private static final String PROP_CONNID = PROP_PREFIX + "connID";
 
-    private final Log log = 
-        LogFactory.getLog(LatherServlet.class.getName());
+    private final Log log = LogFactory.getLog(LatherServlet.class);
    
     private Random       rand;
-    private ConnManager  connMgr;
     private int          execTimeout;
+    private static final AtomicReference<ConnManager> connManager = new AtomicReference<ConnManager>();
 
-    private String getReqCfg(ServletConfig cfg, String prop)
-        throws ServletException
-    {
+    private String getReqCfg(ServletConfig cfg, String prop) throws ServletException {
         String res;
-
-        if((res = cfg.getInitParameter(prop)) == null)
+        if ((res = cfg.getInitParameter(prop)) == null) {
             throw new ServletException("init-param '" + prop + "' not set");
+        }
         return res;
     }
 
-    public void init(ServletConfig cfg)
-        throws ServletException
-    {
-        String sMaxConns, sExecTimeout;
-        int maxConns = Integer.MAX_VALUE;
-
-        super.init(cfg); // Call super to ensure the servlet config is saved.
-        this.rand           = new Random();
-
-        if((sMaxConns = this.getReqCfg(cfg, PROP_MAXCONNS)) != null){
-            try {
-                maxConns = Integer.parseInt(sMaxConns);
-            } catch(NumberFormatException exc){
-                throw new ServletException("init-param '" + PROP_MAXCONNS + 
-                                           "' does not have a value which is "+
-                                           "an integer (" + sMaxConns + ")");
-            }
+    public void init(ServletConfig cfg) throws ServletException {
+        // Call super per the javadoc
+        super.init(cfg);
+        rand = new Random();
+        if (connManager.get() == null) {
+            connManager.compareAndSet(null, getConnManager(cfg));
         }
-
-        if((sExecTimeout = this.getReqCfg(cfg, PROP_EXECTIMEOUT)) != null){
-            try {
-                this.execTimeout = Integer.parseInt(sExecTimeout);
-            } catch(NumberFormatException exc){
-                throw new ServletException("init-param '" + PROP_EXECTIMEOUT +
-                                           "' does not have a value which is "+
-                                           "an integer (" + sExecTimeout +")");
-            }
-        }
-
-        this.connMgr = ConnManager.getInstance(maxConns);
+        execTimeout = Integer.parseInt(getReqCfg(cfg, PROP_EXECTIMEOUT));
     }
 
-   
+    private ConnManager getConnManager(ServletConfig cfg) throws ServletException {
+        @SuppressWarnings("unchecked")
+        final Enumeration<String> paramNames = cfg.getInitParameterNames();
+        final Map<String, Semaphore> maxConnMap = new HashMap<String, Semaphore>();
+        while (paramNames.hasMoreElements()) {
+            final String name = paramNames.nextElement();
+            if (!name.startsWith(PROP_PREFIX) || name.contains(PROP_EXECTIMEOUT)) {
+                continue;
+            }
+            final String param = cfg.getInitParameter(name);
+            try {
+                final int value = Integer.parseInt(param);
+                maxConnMap.put(name.replace(PROP_PREFIX, ""), new Semaphore(value));
+            } catch (NumberFormatException e) {
+                log.error("could not initialize max conn setting for " + name + " value=" + param);
+            }
+        }
+        if (!maxConnMap.containsKey(PROP_MAXCONNS)) {
+            throw new ServletException("init-params do not contain key=" + PROP_MAXCONNS + ")");
+        }
+        return new ConnManager(maxConnMap);
+    }
 
-    private static void issueErrorResponse(HttpServletResponse resp,
-                                    String errMsg)
-        throws IOException
-    {
+    private static void issueErrorResponse(HttpServletResponse resp, String errMsg)
+    throws IOException {
         resp.setContentType("text/raw");
         resp.setIntHeader(LatherHTTPClient.HDR_ERROR, 1);
         resp.getOutputStream().print(errMsg);
     }
 
-    private static void issueSuccessResponse(HttpServletResponse resp,
-                                             LatherXCoder xCoder, 
+    private static void issueSuccessResponse(HttpServletResponse resp, LatherXCoder xCoder, 
                                              LatherValue res)
-        throws IOException
-    {
+    throws IOException {
         ByteArrayOutputStream bOs;
         DataOutputStream dOs;
         byte[] rawData;
@@ -161,42 +148,44 @@ public class LatherServlet
         resp.getOutputStream().print(Base64.encode(rawData));
     }
 
-    protected void service(HttpServletRequest req,
-                           HttpServletResponse resp)
-        throws ServletException, IOException
-    {
+    protected void service(HttpServletRequest req, HttpServletResponse resp)
+    throws ServletException, IOException {
+        final boolean debug = log.isDebugEnabled();
         boolean gotConn = false;
         int connRnd;
-
         connRnd = this.rand.nextInt();
+        String method = req.getParameter("method");
         try {
-            gotConn = this.connMgr.getConn();
-            if(gotConn == false){
-                this.log.debug("Denying request from " + req.getRemoteAddr() +
-                               " numConns=" + this.connMgr.getNumConns());
-                resp.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+            gotConn = connManager.get().grabConn(method);
+            if (!gotConn) {
+                final String msg = new StringBuilder(128)
+                    .append("Denied request from ").append(req.getRemoteAddr())
+                    .append(" availablePermits=").append(connManager.get().getAvailablePermits(method))
+                    .append(", method=").append(method)
+                    .toString();
+                if (debug) log.debug(msg);
+                resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, msg);
                 return;
             }
-            
             req.setAttribute(PROP_CONNID, new Integer(connRnd));
-            this.log.debug("Accepting request from " + req.getRemoteAddr() +
-                           " numConns=" + this.connMgr.getNumConns() +
-                           " conID=" + connRnd);
+            if (debug) {
+                log.debug("Accepting request from " + req.getRemoteAddr() +
+                          " availablePermits=" + connManager.get().getAvailablePermits(method) +
+                          " conID=" + connRnd);
+            }
             super.service(req, resp);
         } finally {
-            if(gotConn){
-                this.connMgr.releaseConn();
-                this.log.debug("Releasing request from " + 
-                               req.getRemoteAddr() +
-                               " numConns=" + this.connMgr.getNumConns() +
-                               " connID=" + connRnd);
+            if (gotConn) {
+                connManager.get().releaseConn(method);
+                if (debug) log.debug("Releasing request from " +  req.getRemoteAddr() +
+                                     " availablePermits=" + connManager.get().getAvailablePermits(method) +
+                                     " connID=" + connRnd);
             }
         }
     }
 
     public void doPost(HttpServletRequest req, HttpServletResponse resp)
-        throws ServletException, IOException
-    {
+    throws ServletException, IOException {
         ByteArrayInputStream bIs;
         DataInputStream dIs;
         LatherXCoder xCoder;
@@ -216,26 +205,28 @@ public class LatherServlet
         args = req.getParameterValues("args");
         argsClass = req.getParameterValues("argsClass");
 
-        if(method == null || args == null || argsClass == null ||
-           method.length != 1 || args.length != 1 || argsClass.length != 1)
-        {
-            this.log.error("Invalid Lather request made from " +
-                           req.getRemoteAddr());
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        if (method == null || args == null || argsClass == null ||
+            method.length != 1 || args.length != 1 || argsClass.length != 1) {
+            String msg = "Invalid Lather request made from " + req.getRemoteAddr();
+            log.error(msg);
+            resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, msg);
             return;
         }
 
-        this.log.debug("Invoking method '" + method[0] + "' for connID=" + 
-                       req.getAttribute(PROP_CONNID));
+        if (log.isDebugEnabled()) {
+            log.debug("Invoking method '" + method[0] +
+                      "' for connID=" +  req.getAttribute(PROP_CONNID));
+        }
 
         try {
             valClass = Class.forName(argsClass[0], true, 
                                      xCoder.getClass().getClassLoader());
         } catch(ClassNotFoundException exc){
-            this.log.error("Lather request from " + req.getRemoteAddr() + 
-                           " required an argument object of class '" + 
-                           argsClass[0] + "' which could not be found");
-            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            String msg = "Lather request from " + req.getRemoteAddr() + 
+                         " required an argument object of class '" +  argsClass[0] +
+                         "' which could not be found";
+            log.error(msg);
+            resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, msg);
             return;
         }
 
@@ -291,9 +282,10 @@ public class LatherServlet
                                                          
                 issueSuccessResponse(this.resp, this.xcoder, res);
             }  catch(IllegalArgumentException exc){
-                log.error("IllegalArgumentException when invoking LatherDispatcher from Ip=" + ctx.getCallerIP() +
-                          ", method=" + method, exc);
-                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                String msg = "IllegalArgumentException when invoking LatherDispatcher from Ip=" +
+                    ctx.getCallerIP() + ", method=" + method;
+                log.error(msg, exc);
+                resp.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, msg);
             } catch(RuntimeException exc){
                 log.error("RuntimeException when invoking LatherDispatcher from Ip=" + ctx.getCallerIP() +
                           ", method=" + method, exc);

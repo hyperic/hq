@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2009], Hyperic, Inc.
+ * Copyright (C) [2004-2011], VMWare, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -45,6 +45,7 @@ import net.sf.ehcache.CacheManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.bizapp.shared.lather.CommandInfo;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
 import org.hyperic.util.stats.StatCollector;
@@ -108,8 +109,20 @@ public final class ConcurrentStatsCollector {
                                AGENT_SYNC_JOB_QUEUE_ADDS = "AGENT_SYNC_JOB_QUEUE_ADDS",
                                AVAIL_BACKFILLER_NUMPLATFORMS = "AVAIL_BACKFILLER_NUMPLATFORMS",
                                AGENT_PLUGIN_SYNC_PENDING_RESTARTS = "AGENT_PLUGIN_SYNC_PENDING_RESTARTS",
+                               CMD_PING = "LATHER_" + CommandInfo.CMD_PING.toUpperCase(),
+                               CMD_MEASUREMENT_SEND_REPORT = "LATHER_" + CommandInfo.CMD_MEASUREMENT_SEND_REPORT.toUpperCase(),
+                               CMD_MEASUREMENT_GET_CONFIGS = "LATHER_" + CommandInfo.CMD_MEASUREMENT_GET_CONFIGS.toUpperCase(),
+                               CMD_REGISTER_AGENT = "LATHER_" + CommandInfo.CMD_REGISTER_AGENT.toUpperCase(),
+                               CMD_UPDATE_AGENT = "LATHER_" + CommandInfo.CMD_UPDATE_AGENT.toUpperCase(),
+                               CMD_AI_SEND_REPORT = "LATHER_" + CommandInfo.CMD_AI_SEND_REPORT.toUpperCase(),
+                               CMD_AI_SEND_RUNTIME_REPORT = "LATHER_" + CommandInfo.CMD_AI_SEND_RUNTIME_REPORT.toUpperCase(),
+                               CMD_TRACK_SEND_LOG = "LATHER_" + CommandInfo.CMD_TRACK_SEND_LOG.toUpperCase(),
+                               CMD_TRACK_SEND_CONFIG_CHANGE = "LATHER_" + CommandInfo.CMD_TRACK_SEND_CONFIG_CHANGE.toUpperCase(),
+                               CMD_CONTROL_GET_PLUGIN_CONFIG = "LATHER_" + CommandInfo.CMD_CONTROL_GET_PLUGIN_CONFIG.toUpperCase(),
+                               CMD_CONTROL_SEND_COMMAND_RESULT = "LATHER_" + CommandInfo.CMD_CONTROL_SEND_COMMAND_RESULT.toUpperCase(),
+                               CMD_PLUGIN_SEND_REPORT = "LATHER_" + CommandInfo.CMD_PLUGIN_SEND_REPORT.toUpperCase(),
+                               CMD_USERISVALID = "LATHER_" + CommandInfo.CMD_USERISVALID.toUpperCase(),
                                AGENT_PLUGIN_SYNC_RESTARTS = "AGENT_PLUGIN_SYNC_RESTARTS";
-
 
 
     @Autowired

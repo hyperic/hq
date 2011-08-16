@@ -424,6 +424,18 @@
         <servlet-name>lather</servlet-name>
         <servlet-class>org.hyperic.lather.server.LatherServlet</servlet-class>
         <init-param>
+            <param-name>org.hyperic.lather.measurementGetConfigs</param-name>
+            <param-value>50</param-value>
+        </init-param>
+        <init-param>
+            <param-name>org.hyperic.lather.aiSendRuntimeReport</param-name>
+            <param-value>50</param-value>
+        </init-param>
+        <init-param>
+            <param-name>org.hyperic.lather.aiSendReport</param-name>
+            <param-value>50</param-value>
+        </init-param>
+        <init-param>
             <param-name>org.hyperic.lather.maxConns</param-name>
             <param-value>3000</param-value>
         </init-param>

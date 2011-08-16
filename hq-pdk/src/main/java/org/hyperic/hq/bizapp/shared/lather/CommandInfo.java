@@ -28,25 +28,17 @@ package org.hyperic.hq.bizapp.shared.lather;
 public class CommandInfo {
     public static final String CMD_PING                    = "ping";
     public static final String CMD_USERISVALID             = "userIsValid";
-    public static final String CMD_MEASUREMENT_GET_SERVER_TIME =
-        "measurementGetServerTime";
-    public static final String CMD_MEASUREMENT_GET_CONFIGS =
-        "measurementGetConfigs";
-    public static final String CMD_MEASUREMENT_SEND_REPORT = 
-        "measurementSendReport";
+    public static final String CMD_MEASUREMENT_GET_SERVER_TIME = "measurementGetServerTime";
+    public static final String CMD_MEASUREMENT_GET_CONFIGS = "measurementGetConfigs";
+    public static final String CMD_MEASUREMENT_SEND_REPORT =  "measurementSendReport";
     public static final String CMD_REGISTER_AGENT          = "registerAgent";
     public static final String CMD_UPDATE_AGENT            = "updateAgent";
-    public static final String CMD_AI_SEND_REPORT =
-        "aiSendReport";
-    public static final String CMD_AI_SEND_RUNTIME_REPORT =
-        "aiSendRuntimeReport";
+    public static final String CMD_AI_SEND_REPORT          = "aiSendReport";
+    public static final String CMD_AI_SEND_RUNTIME_REPORT  = "aiSendRuntimeReport";
     public static final String CMD_TRACK_SEND_LOG          = "trackSendLog";
-    public static final String CMD_TRACK_SEND_CONFIG_CHANGE =
-        "trackSendConfigChange";
-    public static final String CMD_CONTROL_GET_PLUGIN_CONFIG =
-        "controlGetPluginConfig";
-    public static final String CMD_CONTROL_SEND_COMMAND_RESULT =
-        "controlSendCommandResult";
+    public static final String CMD_TRACK_SEND_CONFIG_CHANGE = "trackSendConfigChange";
+    public static final String CMD_CONTROL_GET_PLUGIN_CONFIG = "controlGetPluginConfig";
+    public static final String CMD_CONTROL_SEND_COMMAND_RESULT = "controlSendCommandResult";
     public static final String CMD_PLUGIN_SEND_REPORT = "pluginSendReport";
 
     public static final String[] SECURE_COMMANDS = {
