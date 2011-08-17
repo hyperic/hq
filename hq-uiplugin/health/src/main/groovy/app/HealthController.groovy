@@ -48,6 +48,10 @@ import org.hyperic.util.jdbc.DBUtil
 import org.hyperic.hibernate.PageInfo
 import org.hyperic.hq.measurement.shared.MeasurementManager
 
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.CacheManager
+import net.sf.ehcache.config.CacheConfiguration
+
 import java.text.DateFormat;
 import java.sql.Types
 import javax.naming.InitialContext
@@ -63,11 +67,12 @@ class HealthController
         new PrintfFormat("%-25s %-15s %-5s %-9s %-17s %-13s %-16s %-10s %s")
     private cpropMan = Bootstrap.getBean(CPropManager.class)
 	private measurementMan = Bootstrap.getBean(MeasurementManager.class)
+    private def totalCacheInBytes = 0
 
     HealthController() {
         onlyAllowSuperUsers()
         setJSONMethods(['getSystemStats', 'getDiag', 'cacheData', 
-                        'agentData', 'runQuery', 'executeQuery'])
+                        'agentData', 'runQuery', 'executeQuery', 'totalCacheSizeInBytes'])
     }
 
     boolean logRequests() {
@@ -81,7 +86,7 @@ class HealthController
             },
             defaultSort: AgentSortField.CTIME,
             defaultSortOrder: 1,
-            rowId: {it.id},
+            rowId: {it.agent.id},
             columns: [
                 [field: [getValue: {localeBundle.fqdn},
                  description:'fqdn', sortable:false], 
@@ -204,6 +209,8 @@ class HealthController
         def sizeCol   = new CacheColumn('size',   'Size',   true)
         def hitsCol   = new CacheColumn('hits',   'Hits',   true)
         def missCol   = new CacheColumn('misses', 'Misses', true)
+        def limitCol  = new CacheColumn('limit', 'Limit', true)
+        def memUsgCol = new CacheColumn('memoryUsage', 'Memory Usage', true)
         
         def globalId = 0
         [
@@ -216,7 +223,7 @@ class HealthController
             styleClass: {(it.misses <= it.size) ? null : "red"},
             columns: [
                 [field:  regionCol,
-                 width:  '50%',
+                 width:  '40%',
                  label:  {it.region}],
                 [field:  sizeCol,
                  width:  '10%',
@@ -227,12 +234,18 @@ class HealthController
                 [field:  missCol,
                  width:  '10%',
                  label:  {"${it.misses}"}],
+                [field:  limitCol,
+                 width:  '10%',
+                 label:  {"${it.limit}"}],
+                [field:  memUsgCol,
+                 width:  '10%',
+                 label:  {"${it.memoryUsage}"}],
             ],
         ]
     }
     
     private getCacheData(pageInfo) {
-        def res = Bootstrap.getBean(ProductBoss.class).cacheHealths
+        def res = getCacheHealths()
         
         def d = pageInfo.sort.description
         res = res.sort {a, b ->
@@ -247,6 +260,37 @@ class HealthController
         if (endIdx >= res.size)
             endIdx = -1
         return res[startIdx..endIdx]
+    }
+    
+    private  getCacheHealths() {
+        def manager = CacheManager.getInstance()
+        def caches = manager.getCacheNames()
+        List<Map<String,Object>> healths = new ArrayList<Map<String,Object>>(caches.size());
+        for (Cache cacheName : caches ) {
+            def cache = manager.getCache(cacheName)
+            def memoryUsage = cache.calculateInMemorySize()
+            totalCacheInBytes += memoryUsage
+            CacheConfiguration config = cache.getCacheConfiguration()
+            def limit = config.getMaxElementsInMemory()
+            Map<String,Object> health = new HashMap<String,Object>();
+            health.put("region", cache.getName());
+            health.put("limit", limit)
+            health.put("memoryUsage", formatBytes(memoryUsage))
+            health.put("size", new Integer(cache.getSize()));
+            health.put("hits", new Integer(cache.getHitCount()));
+            health.put("misses", new Integer(cache.getMissCountNotFound()));
+            healths.add(health);
+        }
+        // Adding a row for the total memory
+        Map<String,Object> health = new HashMap<String,Object>()
+        health.put("region", "*Total Memory Usage*");
+        health.put("size", 0);
+        health.put("hits", 0);
+        health.put("misses", 0);
+        health.put("limit", 0);
+        health.put("memoryUsage", formatBytes(totalCacheInBytes))
+        healths.add(health)
+        return healths;
     }
 
     private getDiagnostics() {
@@ -305,6 +349,10 @@ class HealthController
     
     def cacheData(params) {
         DojoUtil.processTableRequest(cacheSchema, params)
+    }
+    
+    def totalCacheSizeInBytes(params) {
+        DojoUtil.processTableRequest(totalCacheInBytes, params)
     }
 
     private formatBytes(b) {
@@ -410,6 +458,7 @@ class HealthController
             fqdn:             s.getFQDN(),
             guid:             Bootstrap.getBean(ServerConfigManager.class).getGUID(),
             dbVersion:        runQueryAsText('version'),
+            dbCharacterSet:   runQueryAsText('dbCharacterSet'),
             reportTime:       dateFormat.format(System.currentTimeMillis()),
             userName:         user.fullName,
             numPlatforms:     resourceHelper.find(count:'platforms'),
@@ -440,7 +489,9 @@ class HealthController
             agentFmt:         agentFmt,
             AgentSortField:   AgentSortField,
             licenseInfo:      [:],
-        ] + getSystemStats([:])
+            cacheHealths:     getCacheHealths(),
+			dbQueries:        runAllOrphanQueries(),
+        ] + getSystemStats([:]) 
         
         if (HQUtil.isEnterpriseEdition()) {
             locals.licenseInfo = Bootstrap.getBean(com.hyperic.hq.license.LicenseManager.class).licenseInfo
@@ -519,6 +570,22 @@ class HealthController
                     "(SELECT 1 FROM EAM_ALERT WHERE ALERT_ID = EAM_ALERT.ID)) OR " +
                     "(ALERT_TYPE = 195934910 AND NOT EXISTS " +
                     "(SELECT 1 FROM EAM_GALERT_LOGS WHERE ALERT_ID = EAM_GALERT_LOGS.ID))"],
+          orphanedServers: [
+              name: localeBundle['queryOrphanedServers'],
+              query: "SELECT COUNT(*) FROM EAM_RESOURCE WHERE RESOURCE_TYPE_ID = 303 " +
+                     "AND INSTANCE_ID NOT IN (SELECT ID FROM EAM_SERVER)"],
+          orphanedServices: [
+              name: localeBundle['queryOrphanedServices'],
+              query: "SELECT COUNT(*) FROM EAM_RESOURCE WHERE RESOURCE_TYPE_ID = 305 " +
+                     "AND INSTANCE_ID NOT IN (SELECT ID FROM EAM_SERVICE)"],
+          orphanedPlatforms: [
+              name: localeBundle['queryOrphanedPlatforms'],
+              query: "SELECT COUNT(*) FROM EAM_RESOURCE WHERE RESOURCE_TYPE_ID = 301 " +
+                     "AND INSTANCE_ID NOT IN (SELECT ID FROM EAM_PLATFORM)"],
+          orphanedResourceGroups: [
+              name: localeBundle['queryOrphanedResourceGroups'],
+              query: "SELECT COUNT(*) FROM EAM_RESOURCE WHERE RESOURCE_TYPE_ID = 3 " +
+                     "AND INSTANCE_ID NOT IN (SELECT ID FROM EAM_RESOURCE_GROUP)"],
           resourceAlertsActiveButDisabled: [ 
              name: localeBundle['queryResourceAlertDefsActiveButDisabled'], 
              query: {conn -> "select id, name, description, resource_id from EAM_ALERT_DEFINITION where "+
@@ -529,6 +596,9 @@ class HealthController
           version: [ 
               name: localeBundle['queryVersion'],     
               query:  {conn -> getDatabaseVersionQuery(conn)}],
+          dbCharacterSet: [
+              name: localeBundle['queryDatabaseCharacterSet'],
+              query: {conn -> getDatabaseCharacterSet(conn)}],
         ]
         
         def res = [:]
@@ -575,6 +645,17 @@ class HealthController
         }
     }
     
+    private getDatabaseCharacterSet(conn) {
+        if (DBUtil.isOracle(conn)){
+            return "SELECT * FROM NLS_DATABASE_PARAMETERS WHERE PARAMETER = 'NLS_CHARACTERSET'"
+        } else if (DBUtil.isMySQL(conn)){
+            return "SHOW VARIABLES LIKE 'C%_DATABASE'"
+        } else if (DBUtil.isPostgreSQL(conn)){
+            return "SHOW SERVER_ENCODING" 
+        } 
+        
+    }
+    
     private h(str) {
         str.toString().toHtml()
     }
@@ -592,6 +673,16 @@ class HealthController
         runQuery(params, true)
     }
     
+	def runAllOrphanQueries(){
+		def allResults = [:]
+		getDatabaseQueries().each{ queryEntry ->
+			if (queryEntry.key.startsWith("orphaned")) {
+				allResults.put(queryEntry.key,runQueryAsText(queryEntry.key))
+			}
+		}
+		return allResults
+	}
+	
     def runQuery(params, returnHtml) {
         def id    = params.getOne('query')
         def query
@@ -607,7 +698,7 @@ class HealthController
         def name  = databaseQueries[id].name
         def start = now()
 
-        log.info("Running query [${query}]")
+        log.debug("Running query [${query}]")
         def res = withConnection() { conn ->
             def sql    = new Sql(conn)
             def output = new StringBuffer()
@@ -686,7 +777,7 @@ class HealthController
         def name  = databaseActions[id].name
         def start = now()
 
-        log.info("Running queries [${queries}]")
+        log.debug("Running queries [${queries}]")
         def res = withConnection() { conn ->
             def sql    = new Sql(conn)
             def output = new StringBuffer()
