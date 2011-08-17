@@ -246,35 +246,35 @@ public class SenderThread
         double value;
         
         byte[] b = Base64.decode(val);
-        derivedID = (b[0] << 24)
-            + ((b[1] & 0xFF) << 16)
-            + ((b[2] & 0xFF) << 8)
-            + (b[3] & 0xFF);
+        derivedID = ((b[0] & 0xFF) << 24)
+        + ((b[1] & 0xFF) << 16)
+        + ((b[2] & 0xFF) << 8)
+        + ((b[3] & 0xFF) << 0);
         
         retTime =
-            (b[4] << 56)
-            + ((b[5] & 0xFF) << 48)
-            + ((b[6] & 0xFF) << 40)
-            + ((b[7] & 0xFF) << 24)
-            + ((b[8] & 0xFF) << 16)
+            ((long)b[4] << 56)
+            + ((long)(b[5] & 0xFF) << 48)
+            + ((long)(b[6] & 0xFF) << 40)
+            + ((long)(b[7] & 0xFF) << 32)
+            + ((long)(b[8] & 0xFF) << 24)
             + ((b[9] & 0xFF) << 16)
             + ((b[10] & 0xFF) << 8)
-            + (b[11] & 0xFF);
+            + ((b[11] & 0xFF) << 0);
 
-        dsnID = (b[12] << 24)
+        dsnID = ((b[12] & 0xFF) << 24)
             + ((b[13] & 0xFF) << 16)
             + ((b[14] & 0xFF) << 8)
-            + (b[15] & 0xFF);
+            + ((b[15] & 0xFF) << 0);
 
         long lvalue =
-            (b[16] << 56)
-            + ((b[17] & 0xFF) << 48)
-            + ((b[18] & 0xFF) << 40)
-            + ((b[19] & 0xFF) << 24)
-            + ((b[20] & 0xFF) << 16)
+            ((long)b[16] << 56)
+            + ((long)(b[17] & 0xFF) << 48)
+            + ((long)(b[18] & 0xFF) << 40)
+            + ((long)(b[19] & 0xFF) << 32)
+            + ((long)(b[20] & 0xFF) << 24)
             + ((b[21] & 0xFF) << 16)
             + ((b[22] & 0xFF) << 8)
-            + (b[23] & 0xFF);
+            + ((b[23] & 0xFF) << 0);
         
         value = Double.longBitsToDouble(lvalue);        
         measVal = new MetricValue(value, retTime);
@@ -288,7 +288,7 @@ public class SenderThread
     {
         long d = Double.doubleToLongBits(value);
         byte[] bytes = new byte[] {
-                //dsnId
+                //derivedID
                 (byte)(derivedID >>> 24),
                 (byte)(derivedID >>> 16),
                 (byte)(derivedID >>> 8),
@@ -302,7 +302,7 @@ public class SenderThread
                 (byte)(timestamp >>> 16),
                 (byte)(timestamp >>> 8),
                 (byte)(timestamp >>> 0),                
-                //derivedID
+                //dsnId
                 (byte)(dsnId >>> 24),
                 (byte)(dsnId >>> 16),
                 (byte)(dsnId >>> 8),
