@@ -239,20 +239,46 @@ public class SenderThread
     private static Record decodeRecord(String val)
         throws IOException
     {
-        ByteArrayInputStream bIs;
-        DataInputStream dIs;
         MetricValue measVal;
-        int derivedID, dsnID;
+        int derivedID;
         long retTime;
+        int dsnID;
+        double value;
         
-        bIs = new ByteArrayInputStream(Base64.decode(val));
-        dIs = new DataInputStream(bIs);
+        byte[] b = Base64.decode(val);
+        derivedID = (b[0] << 24)
+            + ((b[1] & 0xFF) << 16)
+            + ((b[2] & 0xFF) << 8)
+            + (b[3] & 0xFF);
+        
+        retTime =
+            (b[4] << 56)
+            + ((b[5] & 0xFF) << 48)
+            + ((b[6] & 0xFF) << 40)
+            + ((b[7] & 0xFF) << 24)
+            + ((b[8] & 0xFF) << 16)
+            + ((b[9] & 0xFF) << 16)
+            + ((b[10] & 0xFF) << 8)
+            + (b[11] & 0xFF);
 
-        derivedID = dIs.readInt();
-        retTime   = dIs.readLong();
-        dsnID     = dIs.readInt();
+        dsnID = (b[12] << 24)
+            + ((b[13] & 0xFF) << 16)
+            + ((b[14] & 0xFF) << 8)
+            + (b[15] & 0xFF);
+
+        long lvalue =
+            (b[16] << 56)
+            + ((b[17] & 0xFF) << 48)
+            + ((b[18] & 0xFF) << 40)
+            + ((b[19] & 0xFF) << 24)
+            + ((b[20] & 0xFF) << 16)
+            + ((b[21] & 0xFF) << 16)
+            + ((b[22] & 0xFF) << 8)
+            + (b[23] & 0xFF);
         
-        measVal = new MetricValue(dIs.readDouble(), retTime);
+        value = Double.longBitsToDouble(lvalue);        
+        measVal = new MetricValue(value, retTime);
+        
         return new Record(dsnID, measVal, derivedID);
     }
 
@@ -260,17 +286,38 @@ public class SenderThread
                                        double value, int derivedID)
         throws IOException 
     {
-        ByteArrayOutputStream bOs;
-        DataOutputStream dOs;
-
-        bOs = new ByteArrayOutputStream();
-        dOs = new DataOutputStream(bOs);
-
-        dOs.writeInt(derivedID);
-        dOs.writeLong(timestamp);
-        dOs.writeInt(dsnId);
-        dOs.writeDouble(value);
-        return Base64.encode(bOs.toByteArray());
+        long d = Double.doubleToLongBits(value);
+        byte[] bytes = new byte[] {
+                //dsnId
+                (byte)(derivedID >>> 24),
+                (byte)(derivedID >>> 16),
+                (byte)(derivedID >>> 8),
+                (byte)derivedID,
+                //timestamp
+                (byte)(timestamp >>> 56),
+                (byte)(timestamp >>> 48),
+                (byte)(timestamp >>> 40),
+                (byte)(timestamp >>> 32),
+                (byte)(timestamp >>> 24),
+                (byte)(timestamp >>> 16),
+                (byte)(timestamp >>> 8),
+                (byte)(timestamp >>> 0),                
+                //derivedID
+                (byte)(dsnId >>> 24),
+                (byte)(dsnId >>> 16),
+                (byte)(dsnId >>> 8),
+                (byte)dsnId,
+                //value
+                (byte)(d >>> 56),
+                (byte)(d >>> 48),
+                (byte)(d >>> 40),
+                (byte)(d >>> 32),
+                (byte)(d >>> 24),
+                (byte)(d >>> 16),
+                (byte)(d >>> 8),
+                (byte)(d >>> 0)              
+                };
+        return Base64.encode(bytes);
     }
 
     public void processData(int dsnId, MetricValue data, int derivedID){
