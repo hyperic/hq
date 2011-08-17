@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -152,29 +153,63 @@ class MeasurementSchedule {
         ArrayList r = new ArrayList();
         Iterator i;
 
-        i = this.store.getListIterator(MeasurementSchedule.PROP_MSCHED);
-        
-        for(; i != null && i.hasNext(); ){
-            String value = (String)i.next();
-            ScheduledMeasurement metric;
+        if(!this.store.isKeyAndQueryProvider()) {
+            i = this.store.getListIterator(MeasurementSchedule.PROP_MSCHED);            
+            for(; i != null && i.hasNext(); ){
+                String value = (String)i.next();
+                ScheduledMeasurement metric;
 
-            if((metric = ScheduledMeasurement.decode(value)) == null){
-                this.log.error("Unable to decode metric from storage, deleting.");
-                i.remove();
-                continue;
+                if((metric = ScheduledMeasurement.decode(value)) == null){
+                    this.log.error("Unable to decode metric from storage, deleting.");
+                    i.remove();
+                    continue;
+                }
+
+                r.add(metric);
             }
-
-            r.add(metric);
+        } else {
+            String queryString = "SELECT DISTINCT * FROM /" + MeasurementSchedule.PROP_MSCHED  + ".entries entry ORDER BY entry.key";
+            i = this.store.getListIterator(MeasurementSchedule.PROP_MSCHED, queryString);
+            for(; i != null && i.hasNext(); ){
+                List value = (List)i.next();
+                for (Object object : value) {
+                    ScheduledMeasurement metric;
+                    if((metric = ScheduledMeasurement.decode((String)object)) == null){
+                        // XXX: should we delete?
+                        this.log.error("Unable to decode metric from storage, should delete.");                        
+                        continue;
+                    }
+                    r.add(metric);                    
+                }
+            }
+            
         }
+        
         return r.iterator();
     }
 
     void storeMeasurement(ScheduledMeasurement newMeas)
         throws AgentStorageException 
     {
-        this.store.addToList(MeasurementSchedule.PROP_MSCHED,
-                             newMeas.encode());
-        this.store.flush();
+        if(!this.store.isKeyAndQueryProvider()) {
+            this.store.addToList(MeasurementSchedule.PROP_MSCHED,
+                    newMeas.encode());
+            this.store.flush();
+        } else {
+            String key = newMeas.getEntity().toString();
+            List<String> meas = (List<String>)this.store.getFromList(PROP_MSCHED, key);
+            
+            // we get null if there's no value
+            if(meas == null)
+                meas = new ArrayList<String>();
+            
+            // add new encoded ScheduledMeasurement to list 
+            // associated with the key
+            meas.add(newMeas.encode());
+            
+            // store supports queries, so it must support keys
+            this.store.addToList(PROP_MSCHED, meas, key);
+        }
     }
 
     void updateSRN(SRN updSRN)
@@ -264,21 +299,42 @@ class MeasurementSchedule {
         boolean debug = this.log.isDebugEnabled();
         Iterator i;
 
-        i = this.store.getListIterator(MeasurementSchedule.PROP_MSCHED);
-        for(; i != null && i.hasNext(); ){
-            String value = (String)i.next();
-            ScheduledMeasurement meas;
+        if(!this.store.isKeyAndQueryProvider()) {
+            i = this.store.getListIterator(MeasurementSchedule.PROP_MSCHED);
+            for(; i != null && i.hasNext(); ){
+                String value = (String)i.next();
+                ScheduledMeasurement meas;
 
-            if((meas = ScheduledMeasurement.decode(value)) == null){
-                this.log.error("Unable to decode metric from storage, "
-                                    + "removing metric for entity " + ent);
-                i.remove();
-                continue;
+                if((meas = ScheduledMeasurement.decode(value)) == null){
+                    this.log.error("Unable to decode metric from storage, "
+                            + "removing metric for entity " + ent);
+                    i.remove();
+                    continue;
+                }
+
+                if(meas.getEntity().equals(ent)){
+                    this.log.debug("Removing scheduled measurement " + meas);
+                    i.remove();
+                }
             }
-
-            if(meas.getEntity().equals(ent)){
-                this.log.debug("Removing scheduled measurement " + meas);
-                i.remove();
+        } else {
+            this.log.info("Removing scheduled measurements for  " + ent);
+            // with this query we should get only one result.
+            String queryString = "SELECT DISTINCT * FROM /" + MeasurementSchedule.PROP_MSCHED + ".entries entry WHERE entry.key = '" + ent.getAppdefKey() + "'";
+            i = this.store.getListIterator(MeasurementSchedule.PROP_MSCHED, queryString);
+            
+            // check if we got something
+            if(i.hasNext()) {
+                i.next();
+                
+                // don't try to remove if we got more than one result
+                if(i.hasNext()) {
+                    this.log.error("Query " + queryString + " returned more than one result. Can't remove...");
+                } else {
+                    i.remove();                
+                }                
+            } else {
+                this.log.info("No measurements found for " + ent);
             }
         }
 

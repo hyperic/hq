@@ -406,6 +406,20 @@ public class AgentDListProvider
         }
     }
 
+    public void addToList(String listName, Object value, Object key)
+        throws AgentStorageException
+    {
+        // no requests should come to this method
+        throw new AgentStorageException("This AgentDListProvider doesn't support keys.");
+    }
+
+    public Object getFromList(String listName, Object key)
+        throws AgentStorageException
+    {
+        // no requests should come to this method
+        throw new AgentStorageException("This AgentDListProvider doesn't support keys.");
+    }
+
     public void deleteList(String listName){
         DiskList dList;
 
@@ -447,6 +461,19 @@ public class AgentDListProvider
         }
 
         return dList.getListIterator();
+    }
+    
+    public Iterator getListIterator(String listName, String query){
+        // instead of throwing e.g. UnsupportedOperationException
+        // or AgentStorageException, route request to 
+        // getListIterator(String listName).
+        return getListIterator(listName);
+    }
+    
+    public boolean isKeyAndQueryProvider() {
+        // we don't support queries or access
+        // to values through keys
+        return false;
     }
 
     private static class ListInfo {

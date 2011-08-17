@@ -104,9 +104,34 @@ public interface AgentStorageProvider extends GenericValueMap {
      * @param listName Name of the column to add to
      * @param value    Value to add to the column
      */
-
     public void addToList(String listName, String value)
         throws AgentStorageException;
+
+    /**
+     * This is similar method compared to addToList(String listName, String value)
+     * but is used with a key. This method is not supported by
+     * providers which only uses lists to store its data.
+     * 
+     * e.g. AgentDListProvider doesn't use keys to access data items.
+     * 
+     * @param listName Name of the column to add to
+     * @param value Value to add to the column
+     * @param key Key associated to the value
+     * @throws AgentStorageException
+     */
+    public void addToList(String listName, Object value, Object key)
+    throws AgentStorageException;
+
+    /**
+     * Gets value from storage column. 
+     * 
+     * @param listName Name of the column.
+     * @param key Key used to access value
+     * @return Object stored under key, null if column or value doesn't exist.
+     * @throws AgentStorageException
+     */
+    public Object getFromList(String listName, Object key)
+    throws AgentStorageException;
 
     /**
      * Get an iterator for a named list.  If there is no list currently
@@ -115,6 +140,19 @@ public interface AgentStorageProvider extends GenericValueMap {
      * @param listName name of the list to get an iterator for.
      */
     public Iterator getListIterator(String listName);
+
+    /**
+     * Get an iterator for a named list based on results from query.
+     * 
+     * This method is not supported by
+     * providers which only uses lists to store its data.
+     * 
+     * e.g. AgentDListProvider doesn't use keys to access data items.
+     * 
+     * @param listName listName name of the list to get an iterator for.
+     * @param query Query string to run against data.
+     */
+    public Iterator getListIterator(String listName, String query);
 
     /**
      * Delete an entire list from storage.  This is basically a shortcut
@@ -132,4 +170,14 @@ public interface AgentStorageProvider extends GenericValueMap {
         throws AgentStorageException;
 
     public void addOverloadedInfo(String listName, String info);
+    
+    /**
+     * Call to this function is meant to separate provider implementations
+     * which doesn't support queries or key based access.
+     * 
+     * e.g. AgentDListProvider vs. provider backed by gemfire
+     * 
+     * @return True if storage implementation supports queries.
+     */
+    public boolean isKeyAndQueryProvider();
 }
