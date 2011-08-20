@@ -36,7 +36,9 @@ import java.util.Properties;
 import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.InstanceNotFoundException;
+import javax.management.ListenerNotFoundException;
 import javax.management.MBeanServerConnection;
+import javax.management.NotificationListener;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
@@ -387,6 +389,31 @@ public class GFJmxConnection extends AbstractGFJmxConnection {
 
     public boolean isDistributionAlive() {
         return connectToSystem() != null ? true : false;
+    }
+    
+    public MBeanServerConnection addAlertNotificationListener(NotificationListener listener) {
+        try {
+            MBeanServerConnection mServer = MxUtil.getMBeanServer(props);
+            ObjectName obj = connectToSystem();
+            mServer.addNotificationListener(obj, listener, null, null);
+            return mServer;
+        } catch (MalformedURLException e) {
+        } catch (IOException e) {
+        } catch (InstanceNotFoundException e) {
+        }
+        return null;
+    }
+
+    public void removeAlertNotificationListener(NotificationListener listener) {
+        try {
+            MBeanServerConnection mServer = MxUtil.getMBeanServer(props);
+            ObjectName obj = connectToSystem();
+            mServer.removeNotificationListener(obj, listener);
+        } catch (MalformedURLException e) {
+        } catch (IOException e) {
+        } catch (InstanceNotFoundException e) {
+        } catch (ListenerNotFoundException e) {
+        }
     }
 
 }

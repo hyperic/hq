@@ -155,11 +155,22 @@
                 class="org.hyperic.hq.plugin.gfee.detector.GemfirePlatformDetector"/>
         <plugin type="measurement"
                 class="org.hyperic.hq.plugin.gfee.metric.GFDistMeasurementPlugin" />
+        <plugin type="log_track"
+                class="org.hyperic.hq.plugin.gfee.log.GFNotificationTrack" />
         
         <config include="jmx">
               <option name="jmx.url"
                       description="JMX URL to MBeanServer"
                       default="service:jmx:rmi:///jndi/rmi://localhost:1099/jmxconnector"/>
+              <option name="force.error"
+                      optional="true"
+                      description="Regex to force error level"/>      
+              <option name="force.warn"
+                      optional="true"
+                      description="Regex to force warn level"/>      
+              <option name="force.info"
+                      optional="true"
+                      description="Regex to force info level"/>                    
         </config>
 
         <metric name="Availability" indicator="true" defaultOn="true" interval="300000"
