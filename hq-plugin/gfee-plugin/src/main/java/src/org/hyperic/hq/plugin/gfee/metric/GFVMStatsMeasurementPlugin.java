@@ -170,7 +170,6 @@ public class GFVMStatsMeasurementPlugin extends GFMeasurementPlugin {
         MetricCache metricCache = getMetricCache(gfid);
 
         if(metricCache.getMetricCacheLastUpdate() < System.currentTimeMillis()-55000) {
-//            String[] keys = metricCache.getTrackCache().keySet().toArray(new String[0]);
             String[] keys = metricCache.getTrackKeySet();
 
             if(log.isDebugEnabled()) {
@@ -181,7 +180,9 @@ public class GFVMStatsMeasurementPlugin extends GFMeasurementPlugin {
             }
 
             Map<String, Double> stats = collectVMStats(mProps, keys);
-            metricCache.setMemberOnline(stats != null); 
+            
+            // if null or empty, set member offline
+            metricCache.setMemberOnline(stats != null && stats.size() > 0); 
             if(!metricCache.isMemberOnline()) {
                 memberCache.refresh(mProps);
             }
@@ -213,7 +214,8 @@ public class GFVMStatsMeasurementPlugin extends GFMeasurementPlugin {
 
         if(metricCache.isMemberOnline()) {
             log.debug("Resource online, returning metric:" + value);
-            return new MetricValue(value);          
+            // if we get null from cache, return none
+            return new MetricValue(value != null ? value : MetricValue.VALUE_NONE);          
         } else {
             if(metric.isAvail()) {
                 log.debug("Resource not online, returning down for avail.");
@@ -256,6 +258,9 @@ public class GFVMStatsMeasurementPlugin extends GFMeasurementPlugin {
             // get needed prefix from first metric for back mapping
             String prefix = metrics[0].substring(0,metrics[0].indexOf('-'));
             Map<String, Double> values = gf.getStatValues(member, key, removePrefixes(metrics));
+            // if we get null from stats, move on to next iteration
+            if(values == null)
+                continue;
             Set<Entry<String,Double>> set = values.entrySet();
             for (Entry<String, Double> entry : set) {
                 map.put(prefix+"-"+entry.getKey(), entry.getValue());

@@ -35,6 +35,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.gfee.GFMXConstants;
 import org.hyperic.hq.plugin.gfee.GFProductPlugin;
 import org.hyperic.hq.plugin.gfee.cache.MemberCache;
+import org.hyperic.hq.plugin.gfee.cache.MemberInfo;
 import org.hyperic.hq.plugin.gfee.mx.GFJmxConnection;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricNotFoundException;
@@ -70,23 +71,39 @@ public class GFApplicationPeerMeasurementPlugin extends GFMeasurementPlugin {
         String host = mProps.getProperty(GFMXConstants.ATTR_HOST);
         String name = mProps.getProperty(GFMXConstants.ATTR_NAME);
         
-        GFJmxConnection gf = new GFJmxConnection(mProps);
-        // handle pwd vs. name
-        String gfid = memberCache.getGfid(workingDirectory == null ? "" : workingDirectory, host, name);
-
+        boolean needMemberUpdate = false;
+        double value = Metric.AVAIL_DOWN;
         Map<String, Object> map;
 
-        try {
-            map = gf.getApplicationAttributes(gfid, new String[]{"id"});
-            if(map.containsKey("id")) {
-                return new MetricValue(Metric.AVAIL_UP);
-            } else {
-                return new MetricValue(Metric.AVAIL_DOWN);			
-            }			
-        } catch (InstanceNotFoundException e) {
+        GFJmxConnection gf = new GFJmxConnection(mProps);
+        
+        // switch workingDirectory from null to ""
+        MemberInfo member = memberCache.getMember(workingDirectory == null ? "" : workingDirectory, host, name);
+        if(member == null) {
+            needMemberUpdate = true;
+        } else {
+            String gfid = member.getGfid();
+            try {
+                map = gf.getApplicationAttributes(gfid, new String[]{"id"});
+                if(map.containsKey("id"))
+                    value = Metric.AVAIL_UP;   
+            } catch (Exception e) {
+                needMemberUpdate = true;
+            }
         }
 
-        return new MetricValue(Metric.AVAIL_DOWN);			
+        if(needMemberUpdate)
+            memberCache.refresh(mProps);
+        
+        if(log.isDebugEnabled()) {
+            if(member == null) {
+                log.debug("[getValue] member is null");                
+            } else {
+                log.debug("[getValue] for " + member.getGfid() + " is " + value);
+            }            
+        }
+
+        return new MetricValue(value);          
     }
 
 

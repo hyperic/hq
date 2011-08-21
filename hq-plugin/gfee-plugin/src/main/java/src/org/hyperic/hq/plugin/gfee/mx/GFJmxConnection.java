@@ -128,49 +128,33 @@ public class GFJmxConnection extends AbstractGFJmxConnection {
         return map;
     }
 
-    public Map<String, Object> getCacheVmAttributes(String gfid, String[] keys) throws InstanceNotFoundException{
+    public Map<String, Object> getCacheVmAttributes(String gfid, String[] keys) throws InstanceNotFoundException, MalformedURLException, IOException, ReflectionException{
 
         Map<String, Object> map = new Hashtable<String, Object>();
 
-        try {
-            MBeanServerConnection mServer = MxUtil.getMBeanServer(props);
-            ObjectName bean = getCacheServerObject(gfid);
-            AttributeList attlist = mServer.getAttributes(bean, keys);
+        MBeanServerConnection mServer = MxUtil.getMBeanServer(props);
+        ObjectName bean = getCacheServerObject(gfid);
+        AttributeList attlist = mServer.getAttributes(bean, keys);
 
-            for(int i = 0; i < attlist.size(); i++) {
-                Attribute o = (Attribute)attlist.get(i);
-                map.put(keys[i], o.getValue());
-            }
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ReflectionException e) {
-            e.printStackTrace();
+        for(int i = 0; i < attlist.size(); i++) {
+            Attribute o = (Attribute)attlist.get(i);
+            map.put(keys[i], o.getValue());
         }
 
         return map;
     }
 
-    public Map<String, Object> getApplicationAttributes(String gfid, String[] keys) throws InstanceNotFoundException{
+    public Map<String, Object> getApplicationAttributes(String gfid, String[] keys) throws InstanceNotFoundException, MalformedURLException, IOException, ReflectionException{
 
         Map<String, Object> map = new Hashtable<String, Object>();
 
-        try {
-            MBeanServerConnection mServer = MxUtil.getMBeanServer(props);
-            ObjectName bean = getApplicationObject(gfid);
-            AttributeList attlist = mServer.getAttributes(bean, keys);
+        MBeanServerConnection mServer = MxUtil.getMBeanServer(props);
+        ObjectName bean = getApplicationObject(gfid);
+        AttributeList attlist = mServer.getAttributes(bean, keys);
 
-            for(int i = 0; i < attlist.size(); i++) {
-                Attribute o = (Attribute)attlist.get(i);
-                map.put(keys[i], o.getValue());
-            }
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ReflectionException e) {
-            e.printStackTrace();
+        for(int i = 0; i < attlist.size(); i++) {
+            Attribute o = (Attribute)attlist.get(i);
+            map.put(keys[i], o.getValue());
         }
 
         return map;

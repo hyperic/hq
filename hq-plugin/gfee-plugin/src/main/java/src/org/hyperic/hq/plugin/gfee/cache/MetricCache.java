@@ -55,13 +55,18 @@ public class MetricCache {
         return metricCache;
     }
 
-//    public ConcurrentMap<String, Double> getTrackCache() {
-//        return trackCache;
-//    }
-    
     public String[] getTrackKeySet() {
         synchronized (trackLock) {
-            return trackCache.keySet().toArray(new String[0]);            
+            // XXX: for some reason there has been NoSuchElementException
+            //      coming out from guava libs when toArray is executed.
+            //      can't reproduce, so is case of that, return empty map
+            //      which then falls back to full item retrieval.
+            //      (remove this if possible bug can be re-produced)
+            try {
+                return trackCache.keySet().toArray(new String[0]);
+            } catch (Exception e) {
+            }
+            return new String[0];
         }
     }
     

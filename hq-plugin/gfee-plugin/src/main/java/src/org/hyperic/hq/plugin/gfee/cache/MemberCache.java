@@ -110,7 +110,7 @@ public class MemberCache {
         MemberInfo[] members = gf.getCacheVmMembers();
 
         for (MemberInfo memberInfo : members) {
-            cacheVMMap.put(memberInfo.getGfid(), memberInfo);
+            cacheVMMap.forcePut(memberInfo.getGfid(), memberInfo);
         }
     }
 
@@ -127,7 +127,7 @@ public class MemberCache {
         MemberInfo[] members = gf.getSystemMemberApplications();
 
         for (MemberInfo memberInfo : members) {
-            cacheVMMap.put(memberInfo.getGfid(), memberInfo);
+            cacheVMMap.forcePut(memberInfo.getGfid(), memberInfo);
         }		
     }
 

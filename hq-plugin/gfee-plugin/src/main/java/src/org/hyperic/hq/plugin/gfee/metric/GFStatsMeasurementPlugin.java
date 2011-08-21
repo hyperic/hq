@@ -104,7 +104,9 @@ public class GFStatsMeasurementPlugin extends GFMeasurementPlugin {
             }
 
             Map<String, Double> stats = collectStats(mProps, keys);
-            metricCache.setMemberOnline(stats != null); 
+            
+            // if null or empty, set member offline
+            metricCache.setMemberOnline(stats != null && stats.size() > 0); 
             if(!metricCache.isMemberOnline()) {
                 memberCache.refresh(mProps);
             }
@@ -141,7 +143,8 @@ public class GFStatsMeasurementPlugin extends GFMeasurementPlugin {
                     log.debug("Availability is " + value);
                 }
             }
-            return new MetricValue(value);          
+            // if we get null from cache, return none
+            return new MetricValue(value != null ? value : MetricValue.VALUE_NONE);          
         } else {
             if(metric.isAvail()) {
                 log.debug("Resource not online, returning down for avail.");

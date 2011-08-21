@@ -82,12 +82,19 @@ public class MemberUpdater extends AbstractExecutionThreadService {
     protected void run() throws Exception {
 
         while(isRunning()) {
-            updateMembers();
+            
+            try {
+                updateMembers();
+            } catch (Exception e) {
+                log.debug("Exception in MemberUpdater: " + e.toString());
+            }
+            
             try {
                 Thread.sleep(10000);
             } catch (InterruptedException e) {
                 log.debug("Got interrupt, continue...");
-            }        }
+            }
+        }
 
         log.debug("I'm done baby...");
     }
