@@ -31,6 +31,9 @@
   USA.
  --%>
 
+<c:set var="longMaxValue">
+    <%= Long.MAX_VALUE %>
+</c:set>
 <jsu:importScript path="/js/scriptaculous.js" />
 <jsu:importScript path="/js/dashboard.js" />
 <jsu:importScript path="/js/effects.js" />
@@ -102,7 +105,7 @@
         	}
     
         	if (allowPause) {
-            	if (tmp.escalation.maxWaitTime == <%= Long.MAX_VALUE %>) {
+            	if (tmp.escalation.maxWaitTime == ${longMaxValue}) {
                 	hqDojo.byId('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.pause.indefinitely" />';
             	} else {
             		hqDojo.byId('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.pause" /> ' + maxWaitTime;
@@ -1285,7 +1288,7 @@
 	    document.EscalationForm.reset();
 	}
 </jsu:script>
-<<jsu:script onLoad="true">
+<jsu:script onLoad="true">
 	requestViewEscalation();
 		
     hqDojo.connect(document, 'onkeypress', document.toggleSubmit);

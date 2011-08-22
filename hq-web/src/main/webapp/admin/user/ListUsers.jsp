@@ -31,7 +31,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
-<jsu:jsIncludes path="/js/listWidget.js" />
+<jsu:importScript path="/js/listWidget.js" />
 <c:set var="widgetInstanceName" value="listUser"/>
 <jsu:script>
 	var pageData = new Array();
