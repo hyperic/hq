@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2011], VMWare, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -38,15 +38,18 @@ import java.util.Map;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
+import org.hyperic.hq.common.shared.TransactionRetry;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.shared.SRNManager;
 import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.product.MeasurementInfo;
 import org.hyperic.hq.product.TypeInfo;
+import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -64,22 +67,22 @@ public class TemplateManagerImpl implements TemplateManager {
     private MeasurementDAO measurementDAO;
     private MeasurementTemplateDAO measurementTemplateDAO;
     private MonitorableTypeDAO monitorableTypeDAO;
-    private ScheduleRevNumDAO scheduleRevNumDAO;
     private SRNManager srnManager;
-    private SRNCache srnCache;
+    private ZeventManager zEventManager;
+    private TransactionRetry transactionRetry;
 
     @Autowired
     public TemplateManagerImpl(MeasurementDAO measurementDAO,
                                MeasurementTemplateDAO measurementTemplateDAO,
                                MonitorableTypeDAO monitorableTypeDAO,
-                               ScheduleRevNumDAO scheduleRevNumDAO, SRNManager srnManager,
-                               SRNCache srnCache) {
+                               SRNManager srnManager, ZeventManager zEventManager,
+                               TransactionRetry transactionRetry) {
         this.measurementDAO = measurementDAO;
         this.measurementTemplateDAO = measurementTemplateDAO;
         this.monitorableTypeDAO = monitorableTypeDAO;
-        this.scheduleRevNumDAO = scheduleRevNumDAO;
         this.srnManager = srnManager;
-        this.srnCache = srnCache;
+        this.zEventManager = zEventManager;
+        this.transactionRetry = transactionRetry;
     }
 
     /**
@@ -317,42 +320,41 @@ public class TemplateManagerImpl implements TemplateManager {
      * @param interval - the interval of collection to set to
      */
     public void updateTemplateDefaultInterval(AuthzSubject subject, Integer[] templIds,
-                                              long interval) {
-        HashSet<AppdefEntityID> toReschedule = new HashSet<AppdefEntityID>();
+                                              final long interval) {
+        final HashSet<AppdefEntityID> toReschedule = new HashSet<AppdefEntityID>();
+        final Map<Integer, Collection<Measurement>> measTemplMap =
+            measurementDAO.getMeasurementsByTemplateIds(templIds);
         for (int i = 0; i < templIds.length; i++) {
-            MeasurementTemplate template = measurementTemplateDAO.findById(templIds[i]);
-
+            final MeasurementTemplate template = measurementTemplateDAO.get(templIds[i]);
+            if (template == null) {
+                continue;
+            }
             if (interval != template.getDefaultInterval()) {
                 template.setDefaultInterval(interval);
             }
-
             if (!template.isDefaultOn()) {
                 template.setDefaultOn(interval != 0);
             }
-            final List<Measurement> measurements = measurementDAO.findByTemplate(template.getId());
-            for (Measurement m : measurements) {
+            final Collection<Measurement> measurements = measTemplMap.get(template.getId());
+            if (measurements == null) {
+                continue;
+            }
+            for (final Measurement m : measurements) {
                 m.setEnabled(template.isDefaultOn());
                 m.setInterval(template.getDefaultInterval());
-            }
-
-            List<AppdefEntityID> appdefEntityIds = measurementDAO
-                .findAppdefEntityIdsByTemplate(template.getId());
-
-            toReschedule.addAll(appdefEntityIds);
-        }
-
-        int count = 0;
-        for (AppdefEntityID id : toReschedule) {
-            ScheduleRevNum srn = srnCache.get(id);
-            if (srn != null) {
-                srnManager.incrementSrn(id, Math.min(interval, srn.getMinInterval()));
-                if (++count % 100 == 0) {
-                    scheduleRevNumDAO.flushSession();
-                }
+                final AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(m.getResource());
+                toReschedule.add(aeid);
             }
         }
-
-        scheduleRevNumDAO.flushSession();
+        final Runnable runner = new Runnable() {
+            public void run() {
+                srnManager.incrementSrnsInNewTran(toReschedule, interval);
+            }
+        };
+        transactionRetry.runTransaction(runner, 3, 1000);
+        if (!toReschedule.isEmpty()) {
+            zEventManager.enqueueEventAfterCommit(new AgentScheduleSyncZevent(toReschedule));
+        }
     }
 
     /**
@@ -482,8 +484,8 @@ public class TemplateManagerImpl implements TemplateManager {
      * Set the measurement templates to be "designated" for a monitorable type.
      */
     public void setDesignatedTemplates(String mType, Integer[] desigIds) {
-        List<MeasurementTemplate> derivedTemplates = measurementTemplateDAO
-            .findDerivedByMonitorableType(mType);
+        List<MeasurementTemplate> derivedTemplates =
+            measurementTemplateDAO.findDerivedByMonitorableType(mType);
 
         HashSet<Integer> designates = new HashSet<Integer>();
         designates.addAll(Arrays.asList(desigIds));

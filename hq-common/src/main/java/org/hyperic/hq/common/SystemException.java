@@ -27,10 +27,8 @@ package org.hyperic.hq.common;
 
 import java.io.Serializable;
 
-public class SystemException 
-    extends RuntimeException 
-    implements Serializable 
-{
+@SuppressWarnings("serial")
+public class SystemException extends RuntimeException implements Serializable  {
     public SystemException() {
         super();
     }

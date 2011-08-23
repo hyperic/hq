@@ -26,6 +26,7 @@
 package org.hyperic.hq.measurement.shared;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -103,5 +104,19 @@ public interface SRNManager {
      */
     public void reschedule(List<AppdefEntityID> aeids) throws MeasurementScheduleException, MonitorAgentException,
         MeasurementUnscheduleException;
+
+    public void incrementSrnsInNewTran(HashSet<AppdefEntityID> toReschedule, long interval);
+
+    /**
+     * Checks if the server SRN matches the SRN from an agent report, if not it will either add it
+     * to the reschedule Collection or the toUnschedule if it the associated AppdefEntityID does
+     * not exist.
+     * @param intervalMultiplier - may be null, if the srn report comes such that
+     * (now() - lastCheckedIn) > (intervalMultiplier * srn.getMinInterval())
+     * The associated {@link AppdefEntityID} will be added to the toReschedule
+     */
+    public void setOutOfSyncEntities(Integer interval, SRN[] srns,
+                                     Collection<AppdefEntityID> toReschedule,
+                                     Collection<AppdefEntityID> toUnschedule);
 
 }
