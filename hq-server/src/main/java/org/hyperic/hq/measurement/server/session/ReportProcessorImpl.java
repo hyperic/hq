@@ -327,7 +327,9 @@ public class ReportProcessorImpl implements ReportProcessor {
 
         // Check the SRNs to make sure the agent is up-to-date
         if (debug) watch.markTimeBegin("reportAgentSRNs");
-        Collection<AppdefEntityID> toReschedule = srnManager.reportAgentSRNs(report.getSRNList());
+        srnManager.reportAgentSRNs(report.getSRNList());
+        final Set<AppdefEntityID> toReschedule = new HashSet<AppdefEntityID>();
+        srnManager.setOutOfSyncEntities(3, report.getSRNList(), toReschedule, toUnschedule);
         if (debug) watch.markTimeEnd("reportAgentSRNs");
         final Set<AppdefEntityID> potentialNonEntitiesToUnschedule = new HashSet<AppdefEntityID>();
         final SRN[] srnList = report.getSRNList();

@@ -336,7 +336,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                 }
                 tmp.add(eid);
             } catch (AgentNotFoundException e) {
-                log.warn(e.getMessage());
+                log.debug(e,e);
             }
         }
         return rtn;

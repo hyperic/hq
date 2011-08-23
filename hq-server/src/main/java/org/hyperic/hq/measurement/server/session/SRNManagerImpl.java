@@ -35,7 +35,9 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.measurement.MeasurementScheduleException;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
@@ -45,6 +47,7 @@ import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.pager.PageControl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -60,14 +63,17 @@ public class SRNManagerImpl implements SRNManager {
     private MeasurementManager measurementManager;
     private ScheduleRevNumDAO scheduleRevNumDAO;
     private SRNCache srnCache;
+    private ResourceManager resourceManager;
 
     @Autowired
     public SRNManagerImpl(AuthzSubjectManager authzSubjectManager, MeasurementManager measurementManager,
-                          ScheduleRevNumDAO scheduleRevNumDAO, SRNCache srnCache) {
+                          ScheduleRevNumDAO scheduleRevNumDAO, SRNCache srnCache,
+                          ResourceManager ressourceManager) {
         this.authzSubjectManager = authzSubjectManager;
         this.measurementManager = measurementManager;
         this.scheduleRevNumDAO = scheduleRevNumDAO;
         this.srnCache = srnCache;
+        this.resourceManager = ressourceManager;
     }
 
     /**
@@ -136,7 +142,7 @@ public class SRNManagerImpl implements SRNManager {
     /**
      * Increment SRN for the given entity.
      * 
-     * @param aid The AppdefEntityID to remove.
+     * @param aid The AppdefEntityID to increment the associated srn.
      * @param newMin The new minimum interval
      * @return The ScheduleRevNum for the given entity id
      */
@@ -189,6 +195,7 @@ public class SRNManagerImpl implements SRNManager {
      * @return A Collection of ScheduleRevNum objects that do not have a
      *         corresponding appdef entity. (i.e. Out of sync)
      */
+    
     public Collection<AppdefEntityID> reportAgentSRNs(SRN[] srns) {
         HashSet<AppdefEntityID> nonEntities = new HashSet<AppdefEntityID>();
         final boolean debug = log.isDebugEnabled();
@@ -235,7 +242,7 @@ public class SRNManagerImpl implements SRNManager {
             }
         }
         if (!eids.isEmpty()) {
-           AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(eids);
+            AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(eids);
             ZeventManager.getInstance().enqueueEventAfterCommit(event);
         }
         return nonEntities;
@@ -259,31 +266,19 @@ public class SRNManagerImpl implements SRNManager {
         return toReschedule;
     }
 
-    /**
-     * Get the list of out-of-sync SRNs based on the number of intervals back to
-     * allow.
-     * 
-     * @param intervals The number of intervals to go back
-     * @return A List of ScheduleRevNum objects.
-     */
-    @Transactional(readOnly=true)
     public List<ScheduleRevNum> getOutOfSyncSRNs(int intervals) {
         List<SrnId> srnIds = srnCache.getKeys();
-
         ArrayList<ScheduleRevNum> toReschedule = new ArrayList<ScheduleRevNum>();
-
         long current = System.currentTimeMillis();
         final boolean debug = log.isDebugEnabled();
-        for (SrnId id : srnIds) {
-            ScheduleRevNum srn = srnCache.get(id);
-
+        for (final SrnId id : srnIds) {
+            final ScheduleRevNum srn = srnCache.get(id);
             long maxInterval = intervals * srn.getMinInterval();
             long curInterval = current - srn.getLastReported();
             if (debug) {
                 log.debug("Checking " + id.getAppdefType() + ":" + id.getInstanceId() + ", last heard from " +
                           curInterval + "ms ago (max=" + maxInterval + ")");
             }
-
             if (curInterval > maxInterval) {
                 if (debug) {
                     log.debug("Reschedule " + id.getAppdefType() + ":" + id.getInstanceId());
@@ -291,8 +286,49 @@ public class SRNManagerImpl implements SRNManager {
                 toReschedule.add(srn);
             }
         }
-
         return toReschedule;
+    }
+
+    @Transactional(readOnly=true)
+    public void setOutOfSyncEntities(Integer intervalMultiplier, SRN[] srns,
+                                     Collection<AppdefEntityID> toReschedule,
+                                     Collection<AppdefEntityID> toUnschedule) {
+        if (srns == null || srns.length == 0) {
+            return;
+        }
+        final long current = System.currentTimeMillis();
+        final boolean debug = log.isDebugEnabled();
+        for (final SRN srnObj : srns) {
+            final AppdefEntityID aeid = srnObj.getEntity();
+            if (aeid == null) {
+                continue;
+            }
+            final Resource res = resourceManager.findResource(aeid);
+            if (res == null || res.isInAsyncDeleteState()) {
+                toUnschedule.add(aeid);
+                continue;
+            }
+            final ScheduleRevNum srn = srnCache.get(aeid);
+            if (srn == null) {
+                continue;
+            }
+            if (srn.getSrn() != srnObj.getRevisionNumber()) {
+                toReschedule.add(aeid);
+                continue;
+            }
+            if (intervalMultiplier != null) {
+                final long maxInterval = intervalMultiplier * srn.getMinInterval();
+                final long curInterval = current - srn.getLastReported();
+                if (debug) {
+                    log.debug("Checking " + aeid + ", last heard from " + curInterval +
+                              "ms ago (max=" + maxInterval + ")");
+                }
+                if (curInterval > maxInterval) {
+                    if (debug) log.debug("Reschedule " + aeid);
+                    toReschedule.add(aeid);
+                }
+            }
+        }
     }
 
     /**
@@ -338,4 +374,18 @@ public class SRNManagerImpl implements SRNManager {
         measurementManager.scheduleSynchronous(toReschedule);
         measurementManager.unschedule(toUnschedule);
     }
+
+    @Transactional(propagation=Propagation.REQUIRES_NEW)
+    public void incrementSrnsInNewTran(HashSet<AppdefEntityID> toReschedule, long interval) {
+        if (toReschedule == null || toReschedule.isEmpty()) {
+            return;
+        }
+        for (final AppdefEntityID aeid : toReschedule) {
+            final ScheduleRevNum srn = srnCache.get(aeid);
+            if (srn != null) {
+                incrementSrn(aeid, Math.min(interval, srn.getMinInterval()));
+            }
+        }
+    }
+
 }

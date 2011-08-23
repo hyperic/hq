@@ -64,7 +64,9 @@
 <jsu:importScript path="/js/functions.js" />
 <jsu:importScript path="/js/lib/lib.js" />
 <jsu:importScript path="/js/lib/charts.js" />
-<c:set var="maxLongValue" value="<%= Long.MAX_VALUE %>" />
+<c:set var="maxLongValue">
+	<%= Long.MAX_VALUE %>
+</c:set>
 <jsu:script>
 	var imagePath = "/images/";
 	hqDojo.require('dojo.date');

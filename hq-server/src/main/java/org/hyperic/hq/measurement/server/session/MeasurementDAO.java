@@ -809,4 +809,25 @@ public class MeasurementDAO
         String sql = "SELECT id FROM Measurement WHERE resource IS NULL";
         return getSession().createQuery(sql).list();
     }
+
+    public Map<Integer, Collection<Measurement>> getMeasurementsByTemplateIds(Integer[] templIds) {
+        final String hql = "from Measurement where template.id in (:ids)";
+        @SuppressWarnings("unchecked")
+        final List<Measurement> list =
+            getSession().createQuery(hql)
+                        .setParameterList("ids", templIds, new IntegerType())
+                        .list();
+        final Map<Integer, Collection<Measurement>> rtn =
+            new HashMap<Integer, Collection<Measurement>>(list.size());
+        for (final Measurement m : list) {
+            final Integer templId = m.getTemplate().getId();
+            Collection<Measurement> measurements = rtn.get(templId);
+            if (measurements == null) {
+                measurements = new ArrayList<Measurement>();
+                rtn.put(templId, measurements);
+            }
+            measurements.add(m);
+        }
+        return rtn;
+    }
 }
