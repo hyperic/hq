@@ -47,6 +47,7 @@ import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.ui.Constants;
@@ -76,6 +77,7 @@ public class CurrentHealthAction
     private final PageControl pc = new PageControl(0, Constants.DEFAULT_CHART_POINTS);
 
     protected MeasurementBoss measurementBoss;
+    protected AvailabilityManager availabilityManager;
 
     @Autowired
     public CurrentHealthAction(MeasurementBoss measurementBoss) {
@@ -119,7 +121,10 @@ public class CurrentHealthAction
 
             List<HighLowMetricValue> data = measurementBoss.findMeasurementData(sessionId, aeid, mt, begin, end,
                 interval, true, pc);
-
+            final AppdefEntityID[] aeids = new AppdefEntityID[]{aeid};
+            double availAvg = measurementBoss.getAvailabilityAverage(aeids, begin, end);
+            UnitNumber average = new UnitNumber(availAvg, UnitsConstants.UNIT_PERCENTAGE);
+            String formattedAverage = UnitsFormat.format(average).toString();
             // Seems like sometimes Postgres does not average cleanly for
             // groups, and the value ends up being like 0.9999999999. We don't
             // want the insignificant amount to mess up our display.
@@ -132,7 +137,7 @@ public class CurrentHealthAction
             }
 
             request.setAttribute(Constants.CAT_AVAILABILITY_METRICS_ATTR, data);
-            request.setAttribute(Constants.AVAIL_METRICS_ATTR, getFormattedAvailability(data));
+            request.setAttribute(Constants.AVAIL_METRICS_ATTR, getFormattedAvailability(availAvg));
         } catch (MeasurementNotFoundException e) {
             // No utilization metric
             if(debug) {
@@ -146,18 +151,8 @@ public class CurrentHealthAction
         return null;
     }
 
-    protected String getFormattedAvailability(List<? extends MetricValue> values) {
-        double sum = 0;
-        int count = 0;
-        for (MetricValue mv : values) {
-            if (Double.isNaN(mv.getValue()) || mv.getValue() > 1 || mv.getValue() < 0) {
-                continue;
-            }
-            sum += mv.getValue();
-            count++;
-        }
-
-        UnitNumber average = new UnitNumber(sum / count, UnitsConstants.UNIT_PERCENTAGE);
+    protected String getFormattedAvailability(double values) {
+        UnitNumber average = new UnitNumber(values, UnitsConstants.UNIT_PERCENTAGE);
         return UnitsFormat.format(average).toString();
     }
 
