@@ -75,8 +75,17 @@ Environment:
 <% for (p in jvmProps.entrySet().sort {a,b->a.key <=> b.key}) { %>
 - ${p.key} = ${p.value} <% } %>
 
+<% for (d in diagnostics) { %>
+<!-- filter out the diagnostic ehcache in order to give a more detailed on-demand output -->
+<% if (!"EhCache Diagnostics".equals(d.name)){ %>
+--- ${l.diagnostics}:  ${d.name} --
 
--- EHCache Diagnostics --
+${d.status}
+
+<% } %>
+<% } %>
+
+-- EhCache Diagnostics --
 
 <% print "Cache Region".padRight(70) + "Size".padRight(15) + "Hits".padRight(20) + "Misses".padRight(20) + "Limit".padRight(15) + "Memory Usage".padRight(10) %>
 <% print "------------".padRight(70) + "----".padRight(15) + "----".padRight(20) + "------".padRight(20) + "-----".padRight(15) + "------------".padRight(10) %>
