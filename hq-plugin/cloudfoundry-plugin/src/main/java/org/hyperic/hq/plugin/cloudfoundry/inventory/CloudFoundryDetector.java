@@ -234,7 +234,8 @@ public class CloudFoundryDetector extends ServerDetector implements AutoServerDe
 		for (CloudApplication app : cf.getApplications()) {
 			try {
 	        	JSONObject jsonConfig = discoverResourceHierarchy(app);
-	        	JSONArray jsonServices = jsonConfig.getJSONArray("service");
+	        	JSONObject jsonServices = jsonConfig.getJSONArray("service").getJSONObject(0);
+	        	JSONArray jsonServiceNames = jsonServices.getJSONArray("name");
 	
 	            ServiceResource service = new ServiceResource();
 	            service.setType(PROTOTYPE_CLOUD_FOUNDRY_APP);
@@ -277,8 +278,8 @@ public class CloudFoundryDetector extends ServerDetector implements AutoServerDe
             	}
 	    		
 	        	String appServices = "";
-	        	if (jsonServices.length() > 0) {
-	        		appServices = jsonServices.toString().replace("\"", "");
+	        	if (jsonServiceNames.length() > 0) {
+	        		appServices = jsonServiceNames.toString().replace("\"", "");
 	        		appServices = appServices.substring(1, appServices.length()-1);
 	        	}
 	        	custom.setValue("app.services", appServices);
@@ -301,16 +302,32 @@ public class CloudFoundryDetector extends ServerDetector implements AutoServerDe
     	throws JSONException {
     	
 		JSONObject jsonConfig = new JSONObject();
-		JSONArray jsonServices = new JSONArray();
-				
-		for (String s : app.getServices()) {
-			jsonServices.put(s);
-		}
-
-		jsonConfig.put("service", jsonServices);
+		
+		jsonConfig.put("service", getApplicationServices(app));
 		jsonConfig.put("createTs", System.currentTimeMillis());
 		
     	return jsonConfig;
+    }
+    
+    private JSONArray getApplicationServices(CloudApplication app) {
+		JSONArray jsonServices = new JSONArray();
+		
+		try {
+			JSONObject jsonService = new JSONObject();
+			JSONArray jsonServiceNames = new JSONArray();
+					
+			for (String s : app.getServices()) {
+				jsonServiceNames.put(s);
+			}
+	
+			jsonService.put("rid", new JSONArray());
+			jsonService.put("name", jsonServiceNames);
+			jsonServices.put(jsonService);
+		} catch (Exception e) {
+			_log.debug("Cannot get application services for " + app.getName(), e);
+		}
+		
+		return jsonServices;
     }
     
     private List<ServiceResource> discoverCloudServices(CloudFoundryProxy cf,
