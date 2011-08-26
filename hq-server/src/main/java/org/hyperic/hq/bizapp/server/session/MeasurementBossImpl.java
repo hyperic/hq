@@ -207,6 +207,9 @@ public class MeasurementBossImpl implements MeasurementBoss {
         
         final List<Integer> mids = new ArrayList<Integer>();
         for(List<Measurement> measurementList : measurements.values()){
+            if(measurementList == null){
+                continue;
+            }
             for (Measurement measurement: measurementList){
                 if(measurement == null) {
                     continue;
