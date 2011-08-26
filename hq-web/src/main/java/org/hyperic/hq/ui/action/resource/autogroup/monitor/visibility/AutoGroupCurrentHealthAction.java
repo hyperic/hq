@@ -46,7 +46,6 @@ import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
-import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.ui.Constants;

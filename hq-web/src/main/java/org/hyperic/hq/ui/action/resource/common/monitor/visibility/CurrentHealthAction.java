@@ -47,7 +47,6 @@ import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
-import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.ui.Constants;
@@ -73,12 +72,9 @@ public class CurrentHealthAction
     extends TilesAction {
 
     protected final Log log = LogFactory.getLog(CurrentHealthAction.class.getName());
-
-    private final PageControl pc = new PageControl(0, Constants.DEFAULT_CHART_POINTS);
-
     protected MeasurementBoss measurementBoss;
-    protected AvailabilityManager availabilityManager;
-
+    private final PageControl pc = new PageControl(0, Constants.DEFAULT_CHART_POINTS);
+    
     @Autowired
     public CurrentHealthAction(MeasurementBoss measurementBoss) {
         super();
@@ -123,8 +119,7 @@ public class CurrentHealthAction
                 interval, true, pc);
             final AppdefEntityID[] aeids = new AppdefEntityID[]{aeid};
             double availAvg = measurementBoss.getAvailabilityAverage(aeids, begin, end);
-            UnitNumber average = new UnitNumber(availAvg, UnitsConstants.UNIT_PERCENTAGE);
-            String formattedAverage = UnitsFormat.format(average).toString();
+
             // Seems like sometimes Postgres does not average cleanly for
             // groups, and the value ends up being like 0.9999999999. We don't
             // want the insignificant amount to mess up our display.
