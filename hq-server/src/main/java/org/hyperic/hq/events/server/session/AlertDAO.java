@@ -24,6 +24,7 @@
  */
 package org.hyperic.hq.events.server.session;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -168,21 +169,34 @@ public class AlertDAO
         return pageInfo.pageResults(q).list();
     }
 
-    Number countByCreateTimeAndPriority(Integer subj, long begin, long end, int priority,
-                                         boolean inEsc, boolean notFixed, Integer groupId,
-                                         Integer alertDefId) {
-      
-        String sql = PermissionManagerFactory.getInstance().getAlertsHQL(inEsc, notFixed, groupId,
-            alertDefId, true);
+    Map<Integer,List<Alert>> getUnfixedByResource(Integer subj, long begin, long end, int priority,
+                                                  boolean inEsc, boolean notFixed)
+    {
+        String sql = PermissionManagerFactory.getInstance().getAlertsHQL(inEsc, notFixed, null,
+                                                                         null, false);
 
-        Query q = getSession().createQuery(sql).setLong("begin", begin).setLong("end", end).setInteger(
-            "priority", priority);
+        Query q = getSession().createQuery(sql)
+                .setLong("begin", begin)
+                .setLong("end", end)
+                .setInteger("priority", priority);
 
         if (sql.indexOf("subj") > 0) {
             q.setInteger("subj", subj.intValue()).setParameterList("ops", AuthzConstants.VIEW_ALERTS_OPS);
         }
 
-        return (Number) q.uniqueResult();
+        List<Alert> alerts = q.list();
+
+        Map<Integer,List<Alert>> lastAlerts = new HashMap<Integer,List<Alert>>();
+        for (Alert a : alerts ) {
+            List<Alert> alertsByResource = lastAlerts.get(a.getAlertDefinition().getResource().getId());
+            if (alertsByResource == null) {
+                alertsByResource = new ArrayList<Alert>();
+                lastAlerts.put(a.getAlertDefinition().getResource().getId(), alertsByResource);
+            }
+            alertsByResource.add(a);
+        }
+
+        return lastAlerts;
     }
 
     @SuppressWarnings("unchecked")
