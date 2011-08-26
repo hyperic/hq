@@ -194,20 +194,27 @@ public class MeasurementBossImpl implements MeasurementBoss {
     
     @Transactional(readOnly = true)
     public double getAvailabilityAverage(AppdefEntityID[] aeids, long begin, long end){
-        final List<Integer> mids = new ArrayList<Integer>();
-
+        
+        Collection<Resource> resources = new ArrayList<Resource>();
         for(AppdefEntityID aeid:aeids){
             Resource resource = resourceManager.findResource(aeid);
-            Map<Integer, List<Measurement>> measurements = measurementManager.getAvailMeasurements(Collections.singletonList(resource));
-            for(List<Measurement> measurementList : measurements.values()){
-                for (Measurement measurement: measurementList){
-                    if(measurement == null) {
-                        continue;
-                    }
-                    mids.add(measurement.getId());
+            if (resource == null || resource.isInAsyncDeleteState()){
+                continue;
+            }
+            resources.add(resource);
+        }
+        Map<Integer, List<Measurement>> measurements = measurementManager.getAvailMeasurements(resources);
+        
+        final List<Integer> mids = new ArrayList<Integer>();
+        for(List<Measurement> measurementList : measurements.values()){
+            for (Measurement measurement: measurementList){
+                if(measurement == null) {
+                    continue;
                 }
+                mids.add(measurement.getId());
             }
         }
+        
         Map<Integer, double[]> availData = 
             availabilityManager.getAggregateDataByTemplate(mids.toArray(new Integer[mids.size()]),  begin, end);
         //will get multi entries for mix group, so we need to average it    
