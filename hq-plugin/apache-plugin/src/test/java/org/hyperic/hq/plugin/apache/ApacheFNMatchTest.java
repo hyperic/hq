@@ -1,14 +1,6 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.hyperic.hq.plugin.apache;
 
-import java.util.Set;
 import java.io.File;
-import java.util.regex.PatternSyntaxException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -98,6 +90,12 @@ public class ApacheFNMatchTest {
         }
     }
 
+    @Test
+    public void config() throws Exception {
+        ApacheConf apacheConf = new ApacheConf(new File("target/test-classes/httpd.conf"));
+        assertSame(apacheConf.getVHosts().size(),5);
+    }
+    
     private class TestCase {
 
         protected String pattern, filename;
