@@ -492,6 +492,23 @@ public class AlertManagerImpl implements AlertManager,
         }
         return alertDAO.findByCreateTimeAndPriority(subj, endTime - timeRange, endTime, priority,
             inEsc, notFixed, groupId, alertDefId, pageInfo);
+
+    }
+
+    @Transactional(readOnly = true)
+    public List<Alert> findAlerts(Integer subj, int priority, long timeRange, long endTime,
+                                  boolean inEsc, boolean notFixed, List<Integer>groupIds, Integer alertDefId,
+                                  List<Resource>resources, PageInfo pageInfo) throws PermissionException {
+        // [HHQ-2946] Only round up if end time is not a multiple of a minute
+        long mod = endTime % 60000;
+        if (mod > 0) {
+            // Time voodoo the end time to the nearest minute so that we might
+            // be able to use cached results.
+            endTime = TimingVoodoo.roundUpTime(endTime, 60000);
+        }
+        return alertDAO.findByCreateTimeAndPriorityByResources(subj, endTime - timeRange, endTime, priority,
+                inEsc, notFixed, groupIds, alertDefId, resources, pageInfo);
+
     }
 
     /**
@@ -552,6 +569,46 @@ public class AlertManagerImpl implements AlertManager,
     }
 
     /**
+     * Search alerts given a set of criteria
+     * 
+     * @param timeRange the amount of milliseconds prior to current that the
+     *        alerts will be contained in. e.g. the beginning of the time range
+     *        will be (current - timeRante)
+     * @param inEsc if only alerts in escalation should be requested
+     * @param notFixed if only unfixed alerts should be requested
+     * 
+     * @param includes {@link List} of {@link AppdefEntityID}s to filter, may be
+     *        null for all.
+     * 
+     */
+    @Transactional(readOnly = true)
+    public List<Alert> findAlerts(AuthzSubject subj, int count, int priority, long timeRange,
+                                  long endTime, List<AppdefEntityID> includes, boolean inEsc, boolean notFixed, boolean useGroupMembers)
+        throws PermissionException {
+        
+        List<Integer> groupIds = null;
+        List<Resource> resources = null;
+        if(includes != null && !includes.isEmpty()) {
+            groupIds = new ArrayList<Integer>();
+            resources = new ArrayList<Resource>();
+            for (AppdefEntityID appdefEntityID : includes) {
+                Resource res = resourceManager.findResource(appdefEntityID);
+                if(useGroupMembers && appdefEntityID.isGroup()) {
+                    // need to find groupIds if caller want's to include group members.
+                    groupIds.add(res.getInstanceId());
+                }
+                resources.add(res);
+            }            
+        }
+
+        PageInfo pInfo = PageInfo.create(0, count, AlertSortField.DATE, false);
+        List<Alert> alerts = findAlerts(subj.getId(), priority, timeRange, endTime, inEsc,
+                notFixed, groupIds, null, resources, pInfo);
+        
+        return alerts;
+    }
+
+    /**
      * Find escalatables for a resource in a given time range.
      * 
      * @see findAlerts(AuthzSubject, int, int, long, long, List)
@@ -563,7 +620,24 @@ public class AlertManagerImpl implements AlertManager,
                                               long timeRange, long endTime,
                                               List<AppdefEntityID> includes)
         throws PermissionException {
-        List<Alert> alerts = findAlerts(subj, count, priority, timeRange, endTime, includes);
+        return findEscalatables(subj, count, priority, timeRange, endTime, includes, false, false, false);
+    }
+
+    /**
+     * Find escalatables for a resource in a given time range, only under escalation and
+     * unfixed.
+     * 
+     * @see findAlerts(AuthzSubject, int, int, long, long, List, boolean, boolean)
+     * 
+     * 
+     */
+    @Transactional(readOnly = true)
+    public List<Escalatable> findEscalatables(AuthzSubject subj, int count, int priority,
+                                              long timeRange, long endTime,
+                                              List<AppdefEntityID> includes,
+                                              boolean inEsc, boolean notFixed, boolean useGroupMembers)
+        throws PermissionException {
+        List<Alert> alerts = findAlerts(subj, count, priority, timeRange, endTime, includes, inEsc, notFixed, useGroupMembers);
         return convertAlertsToEscalatables(alerts);
     }
 

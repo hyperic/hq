@@ -109,6 +109,10 @@
              <td class="BlockContent" colspan="3" valign="center">
                  <fmt:message key="dash.settings.criticalAlerts.last"/>
                  &nbsp;
+                 <html:select property="show" disabled="${not sessionScope.modifyDashboard}">
+                     <html:option value="notFixed"><fmt:message key="dash.settings.criticalAlerts.notfixed"/></html:option>
+                     <html:option value="all"><fmt:message key="dash.settings.criticalAlerts.all"/></html:option>
+                 </html:select>
                  <html:select property="numberOfAlerts" disabled="${not sessionScope.modifyDashboard}">
                      <html:option value="5"/>
                      <html:option value="10"/>
@@ -150,6 +154,13 @@
                      <html:option value="selected">selected resources</html:option>
                      <html:option value="all">all resources</html:option>
                  </html:select>
+                 &nbsp;
+                 <html:select property="withgroupmembers" disabled="${not sessionScope.modifyDashboard}">
+                     <html:option value="without"><fmt:message key="dash.settings.criticalAlerts.without"/></html:option>
+                     <html:option value="with"><fmt:message key="dash.settings.criticalAlerts.with"/></html:option>
+                 </html:select>
+                 &nbsp;
+                 <fmt:message key="dash.settings.criticalAlerts.withinGroupMembers"/>
                  &nbsp;
                  <fmt:message key="dash.settings.criticalAlerts.period"/>
              </td>

@@ -410,6 +410,13 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
         return _logDAO.findUnfixedByTimeWindow(group, begin, end);
     }
 
+    public List<Escalatable> findEscalatables(AuthzSubject subj, int count, int priority,
+                                              long timeRange, long endTime,
+                                              List<AppdefEntityID> includes)
+        throws PermissionException {
+        return findEscalatables(subj, count, priority, timeRange, endTime, includes, false, false);
+    }
+    
     /**
      * @see findAlerts
      * @return a list of {@link Escalatable}s
@@ -417,9 +424,10 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
      */
     public List<Escalatable> findEscalatables(AuthzSubject subj, int count, int priority,
                                               long timeRange, long endTime,
-                                              List<AppdefEntityID> includes)
+                                              List<AppdefEntityID> includes,
+                                              boolean inEsc, boolean notFixed)
         throws PermissionException {
-        List<GalertLog> alerts = findAlerts(subj, count, priority, timeRange, endTime, includes);
+        List<GalertLog> alerts = findAlerts(subj, count, priority, timeRange, endTime, includes, inEsc, notFixed);
         List<Escalatable> res = new ArrayList<Escalatable>(alerts.size());
 
         for (GalertLog alert : alerts) {
@@ -427,6 +435,13 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
         }
         return res;
     }
+    
+    public List<GalertLog> findAlerts(AuthzSubject subj, int count, int priority, long timeRange,
+                                      long endTime, List<AppdefEntityID> includes)
+        throws PermissionException {
+        return findAlerts(subj, count, priority, timeRange, endTime, includes, false, false);
+    }
+
 
     /**
      * Find group alerts based on a set of criteria
@@ -444,7 +459,8 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
      * 
      */
     public List<GalertLog> findAlerts(AuthzSubject subj, int count, int priority, long timeRange,
-                                      long endTime, List<AppdefEntityID> includes)
+                                      long endTime, List<AppdefEntityID> includes,
+                                      boolean inEsc, boolean notFixed)
         throws PermissionException {
         PageInfo pInfo = PageInfo.create(0, count, GalertLogSortField.DATE, false);
 
@@ -456,7 +472,7 @@ public class GalertManagerImpl implements GalertManager, ApplicationListener<App
         
         AlertSeverity s = AlertSeverity.findByCode(priority);
         List<GalertLog> alerts = _logDAO.findByCreateTimeAndPriority(subj.getId(),
-            endTime - timeRange, endTime, s, false, false, null, null, pInfo);
+            endTime - timeRange, endTime, s, inEsc, notFixed, null, null, pInfo);
 
         List<GalertLog> result = new ArrayList<GalertLog>();
         for (GalertLog l : alerts) {

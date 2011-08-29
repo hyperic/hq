@@ -24,6 +24,7 @@
  */
 package org.hyperic.hq.events.server.session;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -167,6 +168,48 @@ public class AlertDAO
 
         return pageInfo.pageResults(q).list();
     }
+    
+    @SuppressWarnings("unchecked")
+    List<Alert> findByCreateTimeAndPriorityByResources(Integer subj, long begin, long end, int priority,
+                                            boolean inEsc, boolean notFixed, List<Integer> groupIds, Integer alertDefId,
+                                            List<Resource> resources, PageInfo pageInfo) {
+        
+        AlertSortField sort = (AlertSortField) pageInfo.getSort();
+        
+        String sql = PermissionManagerFactory.getInstance().getAlertsByResourcesHQL(inEsc, notFixed, groupIds,
+                resources, alertDefId, false) +
+                " order by " +
+                sort.getSortString("a", "d", "r") +
+                (pageInfo.isAscending() ? "" : " DESC");
+        
+        // If sorting by something other than date, do a secondary sort by
+        // date, descending
+        if (!sort.equals(AlertSortField.DATE)) {
+            sql += ", " + AlertSortField.DATE.getSortString("a", "d", "r") + " DESC";
+        }
+        
+        List<Alert> alerts = new ArrayList<Alert>();
+        int BATCH_SIZE = 50;
+        Query query = getSession().createQuery(sql);
+        int size = (resources != null ? resources.size() : 1);
+        for (int i = 0; i < size; i += BATCH_SIZE) {
+            int tail = Math.min(i + BATCH_SIZE, size);
+            query = query.setLong("begin", begin).setLong("end", end).setInteger("priority", priority);
+            if(resources != null && !resources.isEmpty())
+                query = query.setParameterList("resources", resources.subList(i, tail));
+            if(groupIds != null && !groupIds.isEmpty())
+                query = query.setParameterList("groupIds", groupIds);
+
+            if (sql.indexOf("subj") > 0) {
+                query.setInteger("subj", subj.intValue()).setParameterList("ops", AuthzConstants.VIEW_ALERTS_OPS);
+            }
+
+            alerts.addAll(query.list());
+        }
+        
+        return alerts;
+    }
+
 
     Number countByCreateTimeAndPriority(Integer subj, long begin, long end, int priority,
                                          boolean inEsc, boolean notFixed, Integer groupId,

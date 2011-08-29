@@ -38,7 +38,9 @@ public class PropertiesForm
     public final static String PRIORITY = ".dashContent.criticalalerts.priority";
     public final static String SELECTED_OR_ALL = ".dashContent.criticalalerts.selectedOrAll";
     public final static String TITLE = ".dashContent.criticalAlerts.title";
-
+    public final static String SHOW = ".dashContent.criticalalerts.show";
+    public final static String WITHGROUPMEMBERS = ".dashContent.criticalalerts.withgroupmembers";
+    
     private Integer _numberOfAlerts;
     private String _priority;
     private long _past;
@@ -46,7 +48,9 @@ public class PropertiesForm
     private String _key;
     private String[] _ids;
     private String _title;
-
+    private String _show;
+    private String _withgroupmembers;
+    
     public PropertiesForm() {
         super();
     }
@@ -111,4 +115,21 @@ public class PropertiesForm
     public void setTitle(String title) {
         this._title = title;
     }
+    
+    public String getShow() {
+        return _show;
+    }
+
+    public void setShow(String show) {
+        this._show = show;
+    }
+
+    public String getWithgroupmembers() {
+        return _withgroupmembers;
+    }
+
+    public void setWithgroupmembers(String withgroupmembers) {
+        this._withgroupmembers = withgroupmembers;
+    }
+
 }

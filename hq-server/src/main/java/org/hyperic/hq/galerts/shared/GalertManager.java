@@ -145,12 +145,18 @@ public interface GalertManager {
 
     public List<GalertLog> findUnfixedAlertLogsByTimeWindow(ResourceGroup group, long begin,
                                                             long end);
-
+    public List<Escalatable> findEscalatables(AuthzSubject subj, int count, int priority,
+                                              long timeRange, long endTime,
+                                              List<AppdefEntityID> includes,
+                                              boolean inEsc, boolean notFixed)
+        throws PermissionException;
+    
     public List<Escalatable> findEscalatables(AuthzSubject subj, int count, int priority,
                                               long timeRange, long endTime,
                                               List<AppdefEntityID> includes)
         throws PermissionException;
 
+    
     /**
      * Find group alerts based on a set of criteria
      * @param subj Subject doing the finding

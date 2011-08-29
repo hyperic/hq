@@ -89,6 +89,8 @@ public class PrepareAction
         String timeKey = PropertiesForm.PAST;
         String selOrAllKey = PropertiesForm.SELECTED_OR_ALL;
         String titleKey = PropertiesForm.TITLE;
+        String showKey = PropertiesForm.SHOW;
+        String withgroupmembersKey = PropertiesForm.WITHGROUPMEMBERS;
 
         if (token != null) {
             resKey += token;
@@ -97,6 +99,8 @@ public class PrepareAction
             timeKey += token;
             selOrAllKey += token;
             titleKey += token;
+            showKey += token;
+            withgroupmembersKey += token;
         }
 
         // This quarantees that the session dosen't contain any resources it
@@ -109,6 +113,8 @@ public class PrepareAction
         long past;
         String priority;
         String selectedOrAll;
+        String show;
+        String withgroupmembers;
 
         pForm.setTitle(dashPrefs.getValue(titleKey, ""));
 
@@ -120,12 +126,18 @@ public class PrepareAction
 
         selectedOrAll = dashPrefs.getValue(selOrAllKey, dashPrefs.getValue(PropertiesForm.SELECTED_OR_ALL));
 
+        show = dashPrefs.getValue(showKey, dashPrefs.getValue(PropertiesForm.SHOW));
+
+        withgroupmembers = dashPrefs.getValue(withgroupmembersKey, dashPrefs.getValue(PropertiesForm.WITHGROUPMEMBERS));
+
         DashboardUtils.verifyResources(resKey, getServlet().getServletContext(), dashPrefs, user, appdefBoss, authzBoss);
 
         pForm.setNumberOfAlerts(numberOfAlerts);
         pForm.setPast(past);
         pForm.setPriority(priority);
         pForm.setSelectedOrAll(selectedOrAll);
+        pForm.setShow(show);
+        pForm.setWithgroupmembers(withgroupmembers);
 
         List<AppdefEntityID> entityIds = DashboardUtils.preferencesAsEntityIds(resKey, dashPrefs);
         AppdefEntityID[] aeids = entityIds.toArray(new AppdefEntityID[entityIds.size()]);

@@ -226,6 +226,25 @@ public interface EventsBoss {
      * @param priority allowable values: 0 (all), 1, 2, or 3
      * @param timeRange the amount of time from current time to include
      * @param ids the IDs of resources to include or null for ALL
+     * @param inEsc if only alerts in escalation should be requested
+     * @param notFixed if only unfixed alerts should be requested
+     * @param useGroupMembers if groups are included, find alerts from its members
+     * @return a list of {@link Escalatable}s
+     */
+    public List<Escalatable> findRecentAlerts(int sessionID, int count, int priority,
+                                              long timeRange,
+                                              org.hyperic.hq.appdef.shared.AppdefEntityID[] ids,
+                                              boolean inEsc, boolean notFixed,
+                                              boolean useGroupMembers)
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException;
+
+    /**
+     * Search recent alerts given a set of criteria
+     * @param sessionID the session token
+     * @param count the maximum number of alerts to return
+     * @param priority allowable values: 0 (all), 1, 2, or 3
+     * @param timeRange the amount of time from current time to include
+     * @param ids the IDs of resources to include or null for ALL
      * @return a list of {@link Escalatable}s
      */
     public List<Escalatable> findRecentAlerts(int sessionID, int count, int priority,

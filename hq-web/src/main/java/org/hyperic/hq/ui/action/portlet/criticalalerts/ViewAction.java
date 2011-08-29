@@ -114,6 +114,8 @@ public class ViewAction
         String timeKey = PropertiesForm.PAST;
         String selOrAllKey = PropertiesForm.SELECTED_OR_ALL;
         String titleKey = PropertiesForm.TITLE;
+        String showKey = PropertiesForm.SHOW;
+        String withgroupmembersKey = PropertiesForm.WITHGROUPMEMBERS;
 
         if (token != null) {
             resKey += token;
@@ -122,6 +124,8 @@ public class ViewAction
             timeKey += token;
             selOrAllKey += token;
             titleKey += token;
+            showKey += token;
+            withgroupmembersKey += token;
         }
 
         List<AppdefEntityID> entityIds = DashboardUtils.preferencesAsEntityIds(resKey, dashPrefs);
@@ -131,6 +135,8 @@ public class ViewAction
         int priority = Integer.parseInt(dashPrefs.getValue(priorityKey).trim());
         long timeRange = Long.parseLong(dashPrefs.getValue(timeKey));
         boolean all = "all".equals(dashPrefs.getValue(selOrAllKey));
+        boolean showall = "all".equals(dashPrefs.getValue(showKey));
+        boolean withgroupmembers= "with".equals(dashPrefs.getValue(withgroupmembersKey));
 
         int sessionID = user.getSessionId().intValue();
 
@@ -138,7 +144,7 @@ public class ViewAction
             arrayIds = null;
         }
 
-        List<Escalatable> criticalAlerts = eventsBoss.findRecentAlerts(sessionID, count, priority, timeRange, arrayIds);
+        List<Escalatable> criticalAlerts = eventsBoss.findRecentAlerts(sessionID, count, priority, timeRange, arrayIds, false, !showall, withgroupmembers);
 
         JSONObject alerts = new JSONObject();
         List<JSONObject> a = new ArrayList<JSONObject>();
@@ -155,7 +161,7 @@ public class ViewAction
             AppdefEntityID eid;
             Escalation escalation;
             long maxPauseTime = 0;
-
+            
             String date = df.format(new Date(alert.getAlertInfo().getTimestamp()));
             def = alert.getDefinition().getDefinitionInfo();
             escalation = alert.getDefinition().getEscalation();

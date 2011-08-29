@@ -838,11 +838,36 @@ public class EventsBossImpl implements EventsBoss {
     public List<Escalatable> findRecentAlerts(int sessionID, int count, int priority,
                                               long timeRange, AppdefEntityID[] ids)
         throws SessionNotFoundException, SessionTimeoutException, PermissionException {
+        return findRecentAlerts(sessionID, count, priority, timeRange, ids, false, false, false);
+    }
+
+    /**
+     * Search recent alerts given a set of criteria
+     * @param sessionID the session token
+     * @param count the maximum number of alerts to return
+     * @param priority allowable values: 0 (all), 1, 2, or 3
+     * @param timeRange the amount of time from current time to include
+     * @param ids the IDs of resources to include or null for ALL
+     * @param inEsc if only alerts in escalation should be requested
+     * @param notFixed if only unfixed alerts should be requested
+     * @param useGroupMembers if groups are included, find alerts from its members
+     * @return a list of {@link Escalatable}s
+     * 
+     */
+    @Transactional(readOnly = true)
+    public List<Escalatable> findRecentAlerts(int sessionID, int count, int priority,
+                                              long timeRange, AppdefEntityID[] ids,
+                                              boolean inEsc, boolean notFixed,
+                                              boolean useGroupMembers)
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         long cur = System.currentTimeMillis();
         final boolean debug = log.isDebugEnabled();
         final StopWatch watch = new StopWatch();
 
+        // TODO: split to two lists. Basically there are no
+        //       need to pass aeid list to galertManager.findEscalatables
+        //       containing other than group resources.
         List<AppdefEntityID> appentResources = ids != null ? appentResources = Arrays.asList(ids)
                                                           : null;
 
@@ -850,7 +875,7 @@ public class EventsBossImpl implements EventsBoss {
         // otherwise, it'll be filtered out later anyways
         if (debug) watch.markTimeBegin("findEscalatables");
         List<Escalatable> alerts = alertManager.findEscalatables(subject, count, priority,
-            timeRange, cur, appentResources);
+            timeRange, cur, appentResources, inEsc, notFixed, useGroupMembers);
         if (debug) watch.markTimeEnd("findEscalatables");
 
         // CheckAlertingScope now only used for galerts
@@ -863,7 +888,7 @@ public class EventsBossImpl implements EventsBoss {
 
         if (debug) watch.markTimeBegin("galertManager.findEscalatables");
         List<Escalatable> galerts = galertManager.findEscalatables(subject, count, priority,
-            timeRange, cur, appentResources);
+            timeRange, cur, appentResources, inEsc, notFixed);
         if (debug) watch.markTimeEnd("galertManager.findEscalatables");
         alerts.addAll(galerts);
 

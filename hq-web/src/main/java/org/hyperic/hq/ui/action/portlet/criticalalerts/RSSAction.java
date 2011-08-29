@@ -90,7 +90,7 @@ public class RSSAction
         // Set title
         MessageResources res = getResources(request);
         feed.setTitle(res.getMessage("dash.home.CriticalAlerts"));
-
+        
         String user = getUsername(request);
         List<Escalatable> list;
         try {

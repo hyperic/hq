@@ -356,6 +356,36 @@ public class PermissionManagerImpl
                (inEscalation ? "and a.id = es.alertId and " + "es.alertDefinitionId = d.id " : "");
     }
 
+    public String getAlertsByResourcesHQL(boolean inEscalation, boolean notFixed, List<Integer> groupIds,
+                                          List<Resource> resources, Integer alertDefId, boolean count) {
+        
+        boolean hasGroupIds = !(groupIds == null || groupIds.isEmpty());
+        boolean hasResources = !(resources == null || resources.isEmpty());
+        
+        StringBuilder b = new StringBuilder();
+        b.append("select ");
+        b.append((count ? "count(a)" : "a"));
+        b.append(" from ");
+        b.append((inEscalation ? "EscalationState es, " : ""));
+        b.append("Alert a ");
+        b.append("join a.alertDefinition d ");
+        b.append("join d.resource r ");
+        b.append("where r.resourceType is not null and ");
+        if(hasGroupIds || hasResources)
+            b.append("( ");        
+        b.append((!hasGroupIds ? "" : "exists (select rg from r.groupBag rg " +
+                "where rg.group.id in (:groupIds) ) " + (!hasResources ? "" : "or ")));
+        b.append((!hasResources ? "" : "r in (:resources) "));
+        if(hasGroupIds || hasResources)
+            b.append(") and ");
+        b.append("a.ctime between :begin and :end and " + (notFixed ? " a.fixed = false and " : ""));
+        b.append((alertDefId == null ? "" : "d.id = " + alertDefId + " and "));
+        b.append("d.priority >= :priority ");
+        b.append((inEscalation ? "and a.id = es.alertId and " + "es.alertDefinitionId = d.id " : ""));
+        
+        return b.toString();
+    }
+    
     public String getAlertDefsHQL() {
         return "select d from AlertDefinition d " + "join d.resource r "
                + "where r.resourceType is not null and d.priority >= :priority";

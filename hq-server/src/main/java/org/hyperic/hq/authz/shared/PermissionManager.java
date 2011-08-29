@@ -731,6 +731,9 @@ public abstract class PermissionManager {
 
     public abstract String getAlertsHQL(boolean inEscalation, boolean notFixed, Integer groupId,
                                         Integer resourceId, Integer alertDefId, boolean count);
+    
+    public abstract String getAlertsByResourcesHQL(boolean inEscalation, boolean notFixed, List<Integer> groupIds,
+                                                   List<Resource> resources, Integer alertDefId, boolean count);
 
     public abstract String getAlertDefsHQL();
 

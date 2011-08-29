@@ -164,6 +164,18 @@ public interface AlertManager {
         throws PermissionException;
 
     /**
+     * Find escalatables for a resource in a given time range, only under escalation and
+     * unfixed.
+     * @see findAlerts(AuthzSubject, int, int, long, long, List, boolean, boolean)
+     */
+    public List<Escalatable> findEscalatables(AuthzSubject subj, int count, int priority,
+                                              long timeRange, long endTime,
+                                              List<AppdefEntityID> includes,
+                                              boolean inEsc, boolean notFixed, boolean useGroupMembers)
+        throws PermissionException;
+    
+    
+    /**
      * Find escalatables for a resource in a given time range.
      * @see findAlerts(AuthzSubject, int, int, long, long, List)
      */

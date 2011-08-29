@@ -93,6 +93,8 @@ public class ModifyAction
         String timeKey = PropertiesForm.PAST;
         String selOrAllKey = PropertiesForm.SELECTED_OR_ALL;
         String titleKey = PropertiesForm.TITLE;
+        String showKey = PropertiesForm.SHOW;
+        String withgroupmembersKey = PropertiesForm.WITHGROUPMEMBERS;
 
         if (token != null) {
             resKey += token;
@@ -101,6 +103,8 @@ public class ModifyAction
             timeKey += token;
             selOrAllKey += token;
             titleKey += token;
+            showKey += token;
+            withgroupmembersKey += token;
         }
         DashboardConfig dashConfig = dashboardManager.findDashboard((Integer) session
             .getAttribute(Constants.SELECTED_DASHBOARD_ID), user, authzBoss);
@@ -121,12 +125,16 @@ public class ModifyAction
         String past = String.valueOf(pForm.getPast());
         String prioritity = pForm.getPriority();
         String selectedOrAll = pForm.getSelectedOrAll();
+        String show = pForm.getShow();
+        String withgroupmembers = pForm.getWithgroupmembers();
 
         dashPrefs.setValue(countKey, numberOfAlerts.toString());
         dashPrefs.setValue(timeKey, past);
         dashPrefs.setValue(priorityKey, prioritity);
         dashPrefs.setValue(selOrAllKey, selectedOrAll);
         dashPrefs.setValue(titleKey, pForm.getTitle());
+        dashPrefs.setValue(showKey, show);        
+        dashPrefs.setValue(withgroupmembersKey, withgroupmembers);
 
         configurationProxy.setDashboardPreferences(session, user, dashPrefs);
 
