@@ -307,24 +307,14 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
                 }
                 return ALERT_WARN;
             } else {
-                // Is it that there are no alerts or that there are no alert
-                // definitions?
+                // Is it that there are no alerts or that there are no alert definitions?
                 // TODO: Should query these all at once - once complete we can
-                // remove the query cache for AlertDefinition.findByResource
-                PageControl pc = new PageControl(0, 1);
-
-                List<AlertDefinitionValue> alertDefs = null;
+                // remove the query cache for AlertDefinition.findByResource.  This
+                // used to check alerting permission, but now that's already done
+                // on the master list of alerts.
+                List<AlertDefinition> alertDefs;
                 for (Resource r : resources) {
-
-                    AppdefEntityID aId = AppdefUtil.newAppdefEntityId(r);
-
-                    try {
-                        permissionManager.checkViewPermission(subj, aId);
-                    } catch (PermissionException pe) {
-                        // go to next resource
-                        continue;
-                    }
-                    alertDefs = alertDefinitionManager.findAlertDefinitions(subj, AppdefUtil.newAppdefEntityId(r), pc);
+                    alertDefs = alertDefinitionManager.findAlertDefinitions(subj, r);
                     if (alertDefs.size() > 0) {
                         return ALERT_OK;
                     }
