@@ -1,0 +1,10 @@
+# Command definitions for the win32 architecture, overriding the definitions in helper-commands.common when needed.
+#
+# See helper-commands.common for details on the purpose of this file.
+#
+# See support-commands.common for details on the file structure.
+#
+
+# TODO Embed the zipping executable
+archive : all : %(base_working_folder)s : %(simple_tar)s %(support_package_name)s.tar.gz *
+verify-archive : all : %(base_working_folder)s : dir %(support_package_full_path)s.tar.gz

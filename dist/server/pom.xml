@@ -44,6 +44,20 @@
 						<configuration>
 							<outputDirectory>${project.build.directory}/generated-resources</outputDirectory>
 							<includeGroupIds>org.hyperic.hq.dist</includeGroupIds>
+							<includeArtifactIds>bootstrap</includeArtifactIds>
+							<excludeTransitive>true</excludeTransitive>
+						</configuration>
+					</execution>
+					<execution>
+						<id>unpack-support</id>
+						<goals>
+							<goal>unpack-dependencies</goal>
+						</goals>
+						<phase>generate-resources</phase>
+						<configuration>
+							<outputDirectory>${project.build.directory}/generated-resources</outputDirectory>
+							<includeGroupIds>org.hyperic.hq.dist</includeGroupIds>
+							<includeArtifactIds>support</includeArtifactIds>
 							<excludeTransitive>true</excludeTransitive>
 						</configuration>
 					</execution>
@@ -66,6 +80,12 @@
 	</build>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.hyperic.hq.dist</groupId>
+			<artifactId>support</artifactId>
+			<version>${project.version}</version>
+			<type>tar.gz</type>
+		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq.dist</groupId>
 			<artifactId>bootstrap</artifactId>

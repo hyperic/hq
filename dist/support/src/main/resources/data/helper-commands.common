@@ -1,0 +1,31 @@
+#
+# This file and its helper-commands.* siblings have the same structure as the support-commands.* files, but is meant for internal
+# use of the support-package tool.
+#
+# Each line in the file defines one command, and has the following format:
+#
+#   <name> : <hq-type> : <folder-to-run-from> : <command>
+#
+# <name> - The name of the command, which acts as an id. It also dictates the filename of the output in the result support package.
+# <hq-type> - Which HQ machines is the command relevant for - Can be one of "server-only","agent-only", "all" or "none".
+# <folder-to-run-from> - The folder to change to before running the command, or '.' if you don't care. See further explanation below.
+# <command> - The actual OS command to run (e.g. ps -ef, ls -ltr etc.). In case there is a need for a proprietary script, see below.
+#
+# Plese read the explanations in support-commands.* for more details on the file structure and variables that can be used.
+#
+#
+# Mandatory Commands for the helper-commands.* files
+# --------------------------------------------------
+# There are two mandatory commands definitions that need to be defined by these files:
+#   * archive - A command definition for compressing the contents of the base_working_folder into a compressed archive. The
+#               convension is that the resulting archive will use the 'support_package_name' filename, along with the suitable
+#               extension.
+#   * verify-archive - A command definition for making sure that the archive file has been created and is ok. Verifying the content
+#                      is optional, but it must check for the existence of the archive file. This command must return a return-code 
+#                      of 0 to identify success or else the support-package tool would assume that the archive has not been created properly,
+#                      and would not delete the 'detail_working_folder' so its content won't be lost.
+#
+#
+archive : all : %(base_working_folder)s : tar cvfz %(support_package_name)s.tar.gz *
+verify-archive : all : %(base_working_folder)s : stat %(support_package_name)s.tar.gz
+
