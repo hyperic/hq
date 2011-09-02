@@ -423,6 +423,9 @@ This service checks availability of <b>hostname</b> using the
 java.net.InetAddress.isReachable</a></b> method.  This method requires
 the HQ Agent to be running with a Java version 5 VM or higher.
 <p>
+On Windows based platforms this service will not do ICMP Echo, instead it will attempt to connect to TCP Port 7. See 
+Java documentation link above for more details
+<p>
 The HQ Agent must also be running as user
 <b><a href="http://bordet.blogspot.com/2006/07/icmp-and-inetaddressisreachable.html">
 root</a></b> on Unix systems to perform an ICMP ping.
