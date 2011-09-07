@@ -380,6 +380,7 @@ public class PlatformManagerImpl implements PlatformManager {
         final Audit audit = resourceAuditFactory.deleteResource(resourceManager
             .findResourceById(AuthzConstants.authzHQSystem), subject, 0, 0);
         boolean pushed = false;
+        final Agent agent = platform.getAgent();
         try {
         	auditManager.pushContainer(audit);
             pushed = true;
@@ -403,6 +404,11 @@ public class PlatformManagerImpl implements PlatformManager {
             cpropManager.deleteValues(aeid.getType(), aeid.getID());
             resourceManager.removeAuthzResource(subject, aeid, r);
             platformDAO.getSession().flush();
+            if ( agent.getPlatforms().size() == 0) {
+                log.debug("Removing agent " + agent.getAddress() + ":" + agent.getPort() +
+                          " as there are no more platforms left for agent to service.");
+                agentManager.removeAgent(agent);
+            }
 
         } catch (PermissionException e) {
             log.debug("Error while removing Platform");
