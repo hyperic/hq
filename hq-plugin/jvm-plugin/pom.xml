@@ -4,7 +4,6 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.hyperic.hq.plugin</groupId>
-
 	<artifactId>jvm-plugin</artifactId>
 	<packaging>pom</packaging>
 	<name>Hyperic HQ Plugin - JVM Plugin</name>

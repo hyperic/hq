@@ -175,13 +175,7 @@ public interface AlertManager {
     /**
      * A more optimized look up for a group which includes the permission checking
      */
-    public int getUnfixedCount(Integer subj, long timeRange, long endTime, Integer groupId)
-        throws PermissionException;
-
-    /**
-     * A more optimized look up a resource which includes the permission checking
-     */
-    public int getUnfixedCount(Integer subj, long timeRange, long endTime, Resource r)
+    public Map<Integer,List<Alert>> getUnfixedByResource(Integer subj, long timeRange, long endTime)
         throws PermissionException;
 
     /**

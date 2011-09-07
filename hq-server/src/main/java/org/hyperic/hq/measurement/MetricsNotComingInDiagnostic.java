@@ -78,6 +78,7 @@ implements DiagnosticObject, ApplicationContextAware, ApplicationListener<Contex
     private static final Object LOCK = new Object();
     private String lastVerboseStatus = null;
     private String lastNonVerboseStatus = null;
+    private static String METRICSNOTCOMINGINDIAGNOSTIC_DISABLE = "MetricsNotComingInDiagnostic.disable";
     private DiagnosticsLogger diagnosticsLogger;
     private AuthzSubjectManager authzSubjectManager;
     private AvailabilityManager availabilityManager;
@@ -86,6 +87,7 @@ implements DiagnosticObject, ApplicationContextAware, ApplicationListener<Contex
     private PlatformManager platformManager;
     private MetricDataCache metricDataCache;
     private ApplicationContext ctx;
+    private Boolean disabled;
 
     @Autowired
     public MetricsNotComingInDiagnostic(DiagnosticsLogger diagnosticsLogger,
@@ -102,6 +104,13 @@ implements DiagnosticObject, ApplicationContextAware, ApplicationListener<Contex
         this.resourceManager = resourceManager;
         this.platformManager = platformManager;
         this.metricDataCache = metricDataCache;
+
+        String isDisabled = System.getProperty(METRICSNOTCOMINGINDIAGNOSTIC_DISABLE, "false");
+        if (isDisabled.equals("false")) {
+            setDisabled(false);
+        } else {
+            setDisabled(true);
+        }
     }
 
     public String getName() {
@@ -119,11 +128,25 @@ implements DiagnosticObject, ApplicationContextAware, ApplicationListener<Contex
     public String getShortStatus() {
         return getReport(false);
     }
+
+    public Boolean getDisabled() {
+        return this.disabled;
+    }
+    
+    public void setDisabled(Boolean disabled) {
+        log.info("Setting disabled flag to " + disabled.toString());
+        this.disabled = disabled;
+    }
     
     private String getReport(final boolean isVerbose) {
         if (!HAUtil.isMasterNode()) {
             return "Server must be the primary node in the HA configuration before this report is valid.";
         }
+
+        if (getDisabled()) {
+            return "Report disabled";
+        }
+
         if ((now() - last.get()) < REPORT_THRESHOLD) {
             synchronized (LOCK) {
                 String rtn = (isVerbose) ? lastVerboseStatus : lastNonVerboseStatus;

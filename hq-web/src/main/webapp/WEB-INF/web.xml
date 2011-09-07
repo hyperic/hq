@@ -435,10 +435,12 @@
             <param-name>org.hyperic.lather.aiSendReport</param-name>
             <param-value>50</param-value>
         </init-param>
-        <init-param>
-            <param-name>org.hyperic.lather.maxConns</param-name>
-            <param-value>3000</param-value>
-        </init-param>
+		<!-- maxConns should be less than tomcat maxThreads in server.xml
+		keep at least 5% tomcat threads for UI access -->
+		<init-param>
+			<param-name>org.hyperic.lather.maxConns</param-name>
+			<param-value>475</param-value>
+		</init-param>
         <init-param>
             <param-name>org.hyperic.lather.execTimeout</param-name>
             <param-value>300000</param-value>
