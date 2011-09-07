@@ -189,6 +189,41 @@ public class SigarMeasurementPlugin extends MeasurementPlugin {
         return new MetricValue(returnVal, System.currentTimeMillis());
     }
 
+    private MetricValue getTimeSinceMetrics(Metric m)
+        throws MetricNotFoundException
+    {
+        String attribute = m.getAttributeName();
+        Object mtime, ctime, atime;
+
+        SigarInvokerJMX invoker =
+            SigarInvokerJMX.getInstance(sigarProxy, m.getObjectName());
+        synchronized (sigar) {
+            try {
+                mtime = invoker.invoke("Mtime");
+                ctime = invoker.invoke("Ctime");
+                atime = invoker.invoke("Atime");
+        } catch (SigarNotImplementedException e) {
+                throw new MetricInvalidException("Unable to gather FileInfo metrics", e);
+            } catch (SigarException e) {
+                throw new MetricInvalidException("Unable to gather FileInfo metrics", e);
+            }
+        }
+
+        Double returnVal;
+        Long now = System.currentTimeMillis();
+        
+        if (attribute.equals("SMtime")) {
+            returnVal = now - convertToDouble(mtime, false);
+        } else if (attribute.equals("SAtime")) {
+            returnVal = now - convertToDouble(atime, false);
+        } else if (attribute.equals("SCtime")) {
+            returnVal = now - convertToDouble(ctime, false);
+        } else {
+            throw new MetricNotFoundException("Unhandled attribute " + attribute);
+        }
+        return new MetricValue(returnVal, System.currentTimeMillis());
+    }
+
     public MetricValue getValue(Metric metric) 
         throws PluginException,
                MetricNotFoundException,
@@ -209,6 +244,10 @@ public class SigarMeasurementPlugin extends MeasurementPlugin {
         String mType = props.getProperty("Type");
         if (mType.equals("Swap") && (attr.equals("UsedPercent") || attr.equals("FreePercent"))) {
             return getSwapPercentage(metric);
+        }
+
+        if (mType.equals("FileInfo") && attr.equals("SMtime") || (attr.equals("SCtime") || attr.equals("SAtime"))) {
+            return getTimeSinceMetrics(metric);
         }
 
         if (domain.equals(PTQL_DOMAIN)) {
