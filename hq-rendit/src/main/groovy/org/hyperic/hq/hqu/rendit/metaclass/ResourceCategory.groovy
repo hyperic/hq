@@ -239,7 +239,8 @@ class ResourceCategory {
 	 * Get the unfixed alert count for a Resouce
 	 */
 	static int getUnfixedAlertCount(Resource r, AuthzSubject user, long timeRange, long end) {
-		alertMan.getUnfixedCount(user.id, timeRange, end, r)
+        def includes = [r.entityId]
+        alertMan.findAlerts(user, false, 0, end - timeRange, end, includes)
 	}
 	
 	/**

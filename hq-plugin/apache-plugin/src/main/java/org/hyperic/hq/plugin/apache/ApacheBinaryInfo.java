@@ -338,7 +338,7 @@ public class ApacheBinaryInfo {
             String msg =
                 "Error running binary '" + binary + "': " +
                 e.getMessage();
-            log.error(msg, e);
+            log.debug(msg, e);
         } finally {
             if (is != null) {
                 try {
@@ -353,8 +353,13 @@ public class ApacheBinaryInfo {
         throws IOException {
 
         File binaryFile = new File(binary);
+        if (!binaryFile.exists()) {
+            this.errmsg = "'" + binaryFile + "' not found";
+            return;
+        }
+
         if (binaryFile.isDirectory()) {
-            this.errmsg = binaryFile + " is a directory";
+            this.errmsg = "'" + binaryFile + "' is a directory";
             return;
         }
 

@@ -726,6 +726,13 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
+  <cache name="AlertDefinition.findByResource"
+         maxElementsInMemory="10000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+
 
   <!-- Availability Down Alert Definition cache, used outside of hibernate -->
   <cache name="AvailabilityDownAlertDefinitionCache"

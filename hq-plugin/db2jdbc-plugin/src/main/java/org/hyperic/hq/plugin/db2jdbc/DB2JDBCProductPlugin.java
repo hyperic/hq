@@ -66,7 +66,7 @@ public class DB2JDBCProductPlugin extends ProductPlugin {
         CLASSPATH = manager.getProperties().getProperty(PROP_CLASSPATH);
 
         if (log.isDebugEnabled()) {
-            log.debug("[getServerResources] " + PROP_DB2LS + "=" + DB2LS + ", "
+            log.debug("[getClassPath] " + PROP_DB2LS + "=" + DB2LS + ", "
                     + PROP_ENTRY_TYPES + "=" + ENTRY_TYPES + ", "
                     + PROP_LIST_DATABASE + "=" + LIST_DATABASE + ", "
                     + PROP_INSTALL_PATH + "=" + INSTALL_PATH + ", "

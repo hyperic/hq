@@ -41,6 +41,10 @@ import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.product.ExecutableProcess;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
@@ -51,7 +55,6 @@ import org.hyperic.util.config.ConfigResponse;
  * @author laullon
  */
 public class DataBaseServerDetector extends DefaultServerDetector {
-
     private Pattern regExpDataBases = Pattern.compile("Database (\\d*) entry:");
     //private Pattern regExpDataBases = Pattern.compile("Database name[^=]*= (\\S*)[^L]*Local database directory[^=]*= (\\S*)");
 
@@ -162,55 +165,60 @@ public class DataBaseServerDetector extends DefaultServerDetector {
 
     protected List createServers(String installPath) {
         List res = new ArrayList();
-        try {
+        
             String command = getListDatabaseCommand();
+            File db2exe = null;
             // http://www.db2ude.com/?q=node/121 for wind db2.exe
             if (command == null) {
-                File db2exe = new File(installPath + (installPath.endsWith(File.separator) ? "" : File.separator) + "bin" + File.separator + "db2" + (isWin32() ? "cmd.exe" : ""));
-                getLog().debug("[createDataBases] db2 exe = '" + db2exe.getAbsolutePath() + "' " + (db2exe.exists() ? "OK" : "KO"));
+                db2exe = new File(installPath + (installPath.endsWith(File.separator) ? "" : File.separator) + "bin" + File.separator + "db2" + (isWin32() ? "cmd.exe" : ""));
                 command = db2exe.getAbsolutePath() + (isWin32() ? " /c /i /w db2 " : " ") + "list database directory";
             }
-            getLog().debug("[createDataBases] command= '" + command + "'");
-            Process cmd = Runtime.getRuntime().exec(command);
-            String sal = inputStreamAsString(cmd.getInputStream());
-            String err = inputStreamAsString(cmd.getErrorStream());
-            cmd.waitFor();
+        if (db2exe.isFile()) {
+            try {
+                getLog().debug("[createDataBases] command= '" + command + "'");
+                Process cmd = Runtime.getRuntime().exec(command);
+                String sal = inputStreamAsString(cmd.getInputStream());
+                String err = inputStreamAsString(cmd.getErrorStream());
+                cmd.waitFor();
 
-            if (getLog().isDebugEnabled()) {
-                if (cmd.exitValue() != 0) {
-                    getLog().error("[createDataBases] exit=" + cmd.exitValue());
-                    getLog().error("[createDataBases] sal=" + sal);
-                } else {
-                    getLog().debug("[createDataBases] sal=" + sal);
-                }
-                if (sal.length() == 0) {
-                    getLog().debug("[createDataBases] (" + cmd.exitValue() + ") err=" + err);
-                }
-            }
-
-            Matcher m = regExpDataBases.matcher(sal);
-            int ini = 0, end = 0;
-            if (m.find()) {
-                ini = m.start();
-                do {
-                    if (m.find()) {
-                        end = m.end();
+                if (getLog().isDebugEnabled()) {
+                    if (cmd.exitValue() != 0) {
+                        getLog().error("[createDataBases] exit=" + cmd.exitValue());
+                        getLog().error("[createDataBases] sal=" + sal);
                     } else {
-                        end = sal.length();
+                        getLog().debug("[createDataBases] sal=" + sal);
                     }
+                    if (sal.length() == 0) {
+                        getLog().debug("[createDataBases] (" + cmd.exitValue() + ") err=" + err);
+                    }
+                }
 
-                    String db = sal.substring(ini, end).trim();
-                    Properties db_props = parseProperties(db);
-                    getLog().debug("db_props --> " + db_props);
-                    ServerResource svr = createDataBase(db_props);
-                    if (svr != null) {
-                        res.add(svr);
-                    }
-                    ini = end;
-                } while (end != sal.length());
+                Matcher m = regExpDataBases.matcher(sal);
+                int ini = 0, end = 0;
+                if (m.find()) {
+                    ini = m.start();
+                    do {
+                        if (m.find()) {
+                            end = m.end();
+                        } else {
+                            end = sal.length();
+                        }
+
+                        String db = sal.substring(ini, end).trim();
+                        Properties db_props = parseProperties(db);
+                        getLog().debug("db_props --> " + db_props);
+                        ServerResource svr = createDataBase(db_props);
+                        if (svr != null) {
+                            res.add(svr);
+                        }
+                        ini = end;
+                    } while (end != sal.length());
+                }
+            } catch (Exception ex) {
+                getLog().error(ex.getMessage(), ex);
             }
-        } catch (Exception ex) {
-            getLog().error(ex.getMessage(), ex);
+        } else {
+            getLog().debug("DB2 executable was not found: " + db2exe);
         }
         return res;
     }
