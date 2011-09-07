@@ -621,6 +621,12 @@
             units="epoch-millis"
             collectionType="static"/>
 
+    <metric name="Time Since Last Modified"
+            alias="TimeSinceLastModified"
+            template="sigar:Type=FileInfo,Arg=%path%:SMtime"
+            category="UTILIZATION"
+            units="ms"/>
+
     <metric name="Last Change Time"
             alias="LastChange"
             template="sigar:Type=FileInfo,Arg=%path%:Ctime"
@@ -628,12 +634,24 @@
             units="epoch-millis"
             collectionType="static"/>
 
+    <metric name="Time Since Last Change"
+            alias="TimeSinceLastChange"
+            template="sigar:Type=FileInfo,Arg=%path%:SCtime"
+            category="UTILIZATION"
+            units="ms"/>
+
     <metric name="Last Access Time"
             alias="LastAccess"
             template="sigar:Type=FileInfo,Arg=%path%:Atime"
             category="UTILIZATION"
             units="epoch-millis"
             collectionType="static"/>
+
+    <metric name="Time Since Last Access"
+            alias="TimeSinceLastAccess"
+            template="sigar:Type=FileInfo,Arg=%path%:SAtime"
+            category="UTILIZATION"
+            units="ms"/>
 
     <metric name="Permissions"
             alias="Permissions"
