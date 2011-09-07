@@ -743,10 +743,16 @@
 					<module>hq-installer</module>
 					<module>hq-bootstrap</module>
 					<module>hq-web</module>
-	    			<module>dist</module>
+		    			<module>dist</module>
 			</modules>
 		</profile>
-        <profile>
+		<profile>
+                        <id>dist-only</id>
+                        <modules>
+                                        <module>dist</module>
+                        </modules>
+                </profile>
+	        <profile>
 			<id>no-dist</id>
 			<modules>
 					<module>hq-util</module>
@@ -763,7 +769,7 @@
 					<module>hq-web</module>
 			</modules>
 		</profile>
-        <profile>
+	        <profile>
 			<id>web-app</id>
 			<modules>
 					<module>hq-util</module>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assembly>
+        <id>win32</id>
+        <formats>
+                <format>zip</format>
+        </formats>
+
+        <componentDescriptors>
+                <componentDescriptor>src/main/assembly/component.xml</componentDescriptor>
+        </componentDescriptors>
+</assembly>

@@ -1,0 +1,207 @@
+# Command definitions for the support-package script, which collects data from a running system and 
+# creates a compressed file called a "support package" which contains that data.
+# 
+# Each command is run during support-package creation and its output is collected as part of the resulting support package.
+#
+# The commands that are actually run are merged from two files: A common command-file (called support-commands.common) 
+# and a per-architecture command-file (called support-commands.<architecture-name>). The per-architecture definitions
+# take precedence over the common ones and can override a common definition (See below for details).  The structure of the 
+# two file types are obviously identical in nature.
+#
+# Command Definitions
+# -------------------
+# Each command has a name which acts as a string id which identifies the command and is also the name of the resulting 
+# output file in the support package. For example, the output of a command with the name "process-list" will be saved
+# in the resulting support package under two files, as follows:
+#   * process-list.output
+#   * process-list.error
+# These two files are the standard output and standard error of the command execution.
+#
+# Each line in the file defines one command, and has the following format:
+#
+#   <name> : <installation-types> : <folder-to-run-from> : <command>
+#
+# <name> - The name of the command, which acts as an id. It also dictates the filename of the output in the result support package.
+# <installation-type> - Which installation types is the command relevant for - Can be a comma separated list of "server","agent" or "dev", 
+#                       "all" or "none". All will match with all installation types, and none will remove any existing definition with 
+#                       with the same name.
+# <folder-to-run-from> - The folder to change to before running the command, or '.' if you don't care. See further explanation below.
+# <command> - The actual OS command to run (e.g. ps -ef, ls -ltr etc.). In case there is a need for a proprietary script, see below.
+#
+# Example 1:
+#   list-mounts : all : . : df -h
+# Adding this line would cause both server and agent support packages to run the "df -h" command and store the output in list-mounts.output
+# and list-mounts.error. The third part of the line is "." means that the command can be run from the current directory, whatever it is.
+#
+# Example 2:
+#   etc-file-list : server-only : /etc : ls -ltr
+# Adding this line would run "ls -ltr" only for HQ servers and store the output in etc-file-list.output and etc-file-list.error.
+# Before running the command, it would change the current working directory to /etc, allowing the command to actually list 
+# the files in the etc folder. Note that there is no need to handle the directory change after the command has been run,
+# or to do it as part of the command itself. The move to /etc is handled by the framework.
+#
+# Variables
+# ---------
+# The framework exposes several variables which can be used in command definitions, allowing the commands to collect dynamic information. 
+# Below there is a list of the basic variables that are exposed. The usage of these variables will be discussed in the next section.
+# 
+# server_home - The home folder of the HQ server (defined only when running on a server installation)
+# agent_home - The home folder of the HQ agent (defined only when running on an agent installation)
+# hq_home - The home folder of either the server or the agent
+# arch - A string denoting the machine's architecture
+# server_jre - The JRE folder of the server, if one exists
+# agent_jre - The JRE folder of the agent, if one exists
+# installation_type - One of "server","agent" or "dev". "dev" denotes a dev machine
+# base_working_folder - The folder that the resulting support package file will be written to.
+# detail_working_folder - The folder in which all the output from the various commands is written to. The support package
+#                         will eventually contain all the content in that folder.
+# support_package_name - The name of the resulting support package file (filename format is support-package-<hostname>-<timestamp>).
+#                        Please note that the name does not contain an extension, since it is supposed to be platform dependent.
+# support_package_full_path - The absolute path of the support package name. Full path which includes the name, but again, without
+#                             the file extension due to it's platform dependence nature.
+# scripts_path - The path to the /support/scripts/ folder. This is usually not required for anything which uses the operating
+#                system's own scripts, but it can be used in order to access custom written scripts. See below on custom scripts.
+# jre - A path to the jre (either server's, agent's or $JAVA_HOME based for dev machines)
+# java_executable - The full path of the java executable. Can be used to run java command-lines
+# lib_folder - the lib folder which contains jython.jar. Other jars can be put in that folder as well
+# jython_jar_location - The location of the jython.jar file (full path)
+# run_jython - A variable containing the full command line of running jython. Can be used to run python scripts
+#              For example - %(run_jython)s <my-python-script-path>
+# simple_tar - A variable with the complete command-line for running a platform-indepdendent simplistic tar packing
+#              utility. The utility gets two parameters: A tar.gz filename and one folder name.
+#                For example: %(simple_tar)s my-tar-file.tar.gz folder-to-tar/
+#              This utility can be used for platforms that don't have a built in file-packing utility (e.g. win32)
+# sigar_jar - Location of sigar JAR file
+# run_sigar - A variable with the complete command-line for running sigar
+#   
+# For an updated list of the exposed variables and their explanations, run "./support-package -s".
+#
+# Using variables in a command definition
+# ---------------------------------------
+# The <folder-to-run-from> and the <command> parts can use the variables defined above in order to provide more power.
+# Using the variables is done in python-style string interpolation, which is very simple to write and readable. It is 
+# actually an extension of the familiar %s placeholder for strings, but the placeholder includes the name of the variable.
+# The format is as follows:
+#   %(variable-name)s
+# For example, in order to use the server home folder, you will use %(server_home)s.
+# 
+# Let's see how this can be used in a complete command definition:
+#   server-file-tree : server-only : %(server_home)s : find ./ -ls
+# This command definition changes the working folder to the server home folder and executes a "find ./ -ls" command.
+# Another option which would have an almost-identical result would be:
+#   server-file-tree : server-only : . : find %(server_home)s/ -ls
+# The only difference, of course, would be that the resulting file names would have the absolute path instead of the relative
+# one.
+#
+# Now we'll take a look on a more complicated example. We would like to collect the HQ server logs as part of the support package.
+# For that we'll use the following command:
+#   server-logs : server-only : %(server_home)s : tar cvfz %(detail_working_folder)s/server-logs.tar.gz logs/
+# The nature of this command is more complicated because we want to store additional data (e.g. the log files) and not
+# only the standard output/error of the command. For that to happen, we need the command to write its output to the 
+# "detail_working_folder" folder. Once it's written to that folder, the packaging process would collect it automatically.
+# So let's look at the command definition (which eventually runs a tar command for the server logs):
+#  * The command is called server-logs (which means that the output of the tar command would be written to server-logs.output/error)
+#  * The command will run only if it's an HQ server installation
+#  * Before running the command, a change to the server home folder will occur
+#  * A tar command will be run which creates a "server-logs.tar.gz" file inside "detail_working_folder". The files included
+#    in the tar will be all the files in logs/ folder (relative to the server home folder, which is the "current folder")
+#
+# NOTE1: The resulting support package will contain three files - server-logs.output, server-logs.error and server-logs.tar.gz
+# NOTE2: Multiple variables can be used in the same command definition.
+# NOTE3: We've chosen to run the tar command from the server home folder and not from the %(server_home)s/logs. The reason
+#        for this is the usability of the resulting support package. If we would choose to tar the file from their own folder
+#        it would mean that extracting the server-logs.tar.gz file (by the developer) would extract the file to the 
+#        same folder as the other command output, which in inconvenient. Running it from the server home folder and compressing
+#        the logs/* files ensures that extracting the server-logs.tar.gz file would extract the files to a separate folder.
+#        This is, of course, not mandatory in any way, but it leads to a better experience.
+#
+#
+# Writing custom scripts
+# ----------------------
+# Sometimes there will be cases where something more complicated needs to be achieved and the operating system's
+# facilities don't provide it. In these cases, a custom script would be needed. An easy way to achieve it would be as follows:
+#  * Write the custom script in ./support/scripts/common or ./support/scripts/<architecture-name>.
+#  * Create a command definition which access the script using the %(scripts_home)s variable.
+# Example: 
+# Let's assume that we have a script called myscript.sh which performs a really needed collection that can't be done using
+# the OS commands. Let's also assume that it is needed only for the linux-x86-64 architecture. Another assumption is that
+# the script requires the server JRE folder in order to work properly.
+# In order to provide it, we'll do the following:
+#   * Put the myscript.sh file in support/scripts/linux-x86-64/myscript.sh
+#   * Define a command as follows:
+#        my-important-data : server-only : . : %(scripts_path)s/linux-x86-64/myscript.sh %(server_jre)s
+# There are several things to note here:
+#   * We run the script using the scripts_path folder and its linux-x86-64 folder
+#   * The script is provided with the server JRE path (by using a variable)
+#   * The script should write its collected output to stdout/stderr and the data will be collected automatically
+#   * If the script needs to output additional files (such as a tar.gz file), then it needs to know where to put it. In that
+#     case, the script should be provided with the 'detail_working_folder' variable as well.
+#
+# A more complicated example can have multiple versions of the same script for multiple architectures, by putting the following 
+# command definition in the support-commands.common file instead of the per-architecture file:
+#        my-important-data : server-only : . : %(scripts_path)s/%(arch)s/myscript.sh %(server_jre)s
+# This example uses the 'arch' variable in order to run the relevant script for each architecture. Of course, multiple scripts
+# would have to exist below the scripts path, each in the correct architecture folder.
+#
+# Overriding common command definitions
+# -------------------------------------
+# As mentioned above, the command definitions are split to multiple files, one with a .common extension, and other files with 
+# the extension relevant for each architecture. The "key" for each commnad definition is the name of the command, which is 
+# the first field in each line. Adding a line with the same command name in the per-architecture file overrides any definition
+# with the same name that exists in the .common file. For example, if all architectures use the "pwd" command
+# for getting the current directory, but there is one strange architecture in which the command is "cwd", then
+# the command in the .common file can be "process-list : ... : pwd" and in the .strange-arch can be "process-list : ... : cwd". 
+# The name identity (e.g. "process-list") will cause the override.
+#
+# In order to remove a previously defined command definition, override the command using the "none" installation type. For example,
+# if the .common file defines a "process-list" command, but you don't want it to run in the win32 architecture, then write the following
+# line in the .win32 file:
+#   process-list : none : . : . 
+# Note that the folder and the actual command are irrelevant using this syntax - The convention is to use "." on both.
+#
+# In cases where you want to remove ALL previously defined commands (as in the case where all the .common definitions are unsuitable),
+# you can use the following special syntax (a wildcard * for the command name).
+#   * : none : . : . 
+# This will remove all previously defined command definitions, and will allow creating a set of definitions, indepdendent of the 
+# previous ones.
+
+current-working-dir : all : . : pwd
+check-java-location : all : . : which java
+java-version : all : . : java -version
+list-mounts : all : . : %(run_sigar)s df
+list-open-files : all : . : lsof -n
+process-list : all : . : %(run_sigar)s ps
+top-processes : all : . : top -b -d 2 -n 2
+vmstat : all : . : vmstat 1 5
+netstat : all : . : %(run_sigar)s netstat
+ifconfig : all : . : %(run_sigar)s ifconfig
+route : all : . : %(run_sigar)s route
+free : all : . : %(run_sigar)s free
+meminfo : all : . : cat /proc/meminfo
+cpuinfo : all : . : %(run_sigar)s cpuinfo
+sysinfo : all : . : %(run_sigar)s sysinfo
+uptime : all : . : %(run_sigar)s uptime
+who : all : . : %(run_sigar)s who
+uname : all : . : uname -a
+env : all : . : env
+iostat : all : . : %(run_sigar)s iostat
+date : all : . : date
+bash-history : all : . : cat ~/.bash_history
+hostname : all : . : hostname
+netinfo : all : . : %(run_sigar)s netinfo
+
+
+
+# Server only command definitions
+server-logs : server : %(server_home)s : tar cvfz %(detail_working_folder)s/server-logs.tar.gz logs/
+hq-engine-logs : server : %(server_home)s : tar cvfz %(detail_working_folder)s/hq-engine-logs.tar.gz hq-engine/hq-server/logs/
+server-file-tree : server : %(server_home)s : find ./ -ls
+server-conf : server : %(server_home)s : tar cvfz %(detail_working_folder)s/server-conf.tar.gz conf/
+
+# Agent only command definitions
+agent-logs : agent : %(agent_home)s : tar cvfz %(detail_working_folder)s/agent-logs.tar.gz log/
+agent-file-tree : agent : %(agent_home)s : find ./ -ls
+agent-conf : agent : %(agent_home)s : tar cvfz %(detail_working_folder)s/agent-conf.tar.gz conf/
+
+heap-dumps : server,agent : %(hq_home)s : tar cvfz %(detail_working_folder)s/heap-dumps.tar.gz %(hq_home)s/*.hprof
+# TODO Add logs/conf collection for dev machines

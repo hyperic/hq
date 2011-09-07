@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component>
+	<fileSets>
+		<fileSet>
+			<directory>src/main/resources</directory>
+			<outputDirectory>/</outputDirectory>
+			<includes>
+				<include>**/*</include>
+			</includes>
+			<excludes>
+				<exclude>**/*$py.class</exclude>
+				<exclude>**/*.pyc</exclude>
+			</excludes>
+			<fileMode>0755</fileMode>
+			<directoryMode>0755</directoryMode>
+                </fileSet>
+		<fileSet>
+			<directory>${project.build.directory}/generated-resources/lib-sigar</directory>
+                        <outputDirectory>/lib/sigar</outputDirectory>
+                        <includes>    
+                                <include>**/*</include>
+                        </includes>
+                        <fileMode>0755</fileMode>
+                        <directoryMode>0755</directoryMode>
+		</fileSet>
+        </fileSets>
+
+</component>

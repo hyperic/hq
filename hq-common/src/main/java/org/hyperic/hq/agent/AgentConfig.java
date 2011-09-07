@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 
@@ -233,7 +234,7 @@ public class AgentConfig {
     
     private static boolean loadProps(Properties props, File file) {
         FileInputStream fin = null;
-
+        Properties tmpProps = new Properties(); 
         if (!file.exists()) {
             return false;
         }
@@ -243,7 +244,13 @@ public class AgentConfig {
 
         try {
             fin = new FileInputStream(file);
-            props.load(fin);
+            tmpProps.load(fin);
+            for (Enumeration propKeys = tmpProps.propertyNames(); propKeys.hasMoreElements();) {
+                String tmpKey = (String)propKeys.nextElement();
+                String tmpValue = tmpProps.getProperty(tmpKey);
+                tmpValue = tmpValue.trim();
+                props.put(tmpKey, tmpValue);
+            }
             return true;
         } catch (IOException e) {
             return false;
@@ -252,6 +259,7 @@ public class AgentConfig {
                 try { fin.close(); } catch (IOException e) {}
             }
         }
+
     }
     
     /**
