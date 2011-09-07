@@ -57,7 +57,8 @@
   	};
 </script>
 <![endif]-->
-<jsu:importScript path="/static/js/dojo/1.5/dojo/dojo.js" />
+<script type="text/javascript" src="<html:rewrite page="/static/js/dojo/1.5/dojo/dojo.js" />"></script>
+
 <jsu:importScript path="/js/prototype.js" />
 <jsu:importScript path="/js/popup.js" />
 <jsu:importScript path="/js/diagram.js" />
