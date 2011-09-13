@@ -1135,7 +1135,7 @@
 	    	}
 	
 	    	var finalEmailAddresses = new Array();
-	    	var reg = new RegExp("^[0-9a-zA-Z_.-]+@[0-9a-zA-Z-]+[\.]{1}[0-9a-zA-Z]+[\.]?[0-9a-zA-Z]+$");
+	    	var reg = new RegExp("^[a-z0-9._%+-]+@(?:[a-z0-9-]+\.)+[a-z]{2,6}$");
 	    	
 	    	// now find the real emails in the list
 	    	for (var x = 0; x < emailAddressCandidates.length; x++) {
