@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.hyperic.hq</groupId>
 		<artifactId>hq-parent</artifactId>
-		<version>4.5.2.1.BUILD-SNAPSHOT</version>
+		<version>4.5.2.2.BUILD-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>hq-server</artifactId>
@@ -158,6 +158,10 @@
 			<artifactId>jboss-common</artifactId>
 			<version>4.2.3.GA</version>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.jsr107cache</groupId>
+			<artifactId>jsr107cache</artifactId>
 		</dependency>
 		<dependency>
   			<groupId>org.easymock</groupId>

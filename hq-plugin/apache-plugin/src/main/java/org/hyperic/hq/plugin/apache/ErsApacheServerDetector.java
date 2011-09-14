@@ -32,8 +32,11 @@ import java.util.List;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.RegistryServerDetector;
+import org.hyperic.hq.product.Win32ControlPlugin;
 
 import org.hyperic.sigar.win32.RegistryKey;
+import org.hyperic.sigar.win32.Service;
+import org.hyperic.sigar.win32.Win32Exception;
 import org.hyperic.util.config.ConfigResponse;
 
 public class ErsApacheServerDetector
@@ -59,9 +62,10 @@ public class ErsApacheServerDetector
      * for each server defined in the covalent/ers-2.x/servers
      * directory.
      */
-    public List getServerList(String installpath)
+    public List getServerList(String installpath,ApacheBinaryInfo binary)
         throws PluginException {
 
+        getLog().debug("[getServerList] installpath="+installpath);
         File serversDir = new File(installpath, "servers");
         File[] serverList = serversDir.listFiles();
         List servers;
@@ -79,12 +83,14 @@ public class ErsApacheServerDetector
                 continue;
             }
             String serverRoot = serverList[i].getAbsolutePath();
-            String serverName = serverList[i].getName();
-            if (!new File(serverRoot, getDefaultPidFile()).exists()) {
+            File pidFile=new File(serverRoot, getDefaultPidFile());
+            if (!pidFile.exists()) {
                 //filters non-apache servers (i.e. tomcat) and
                 //unused servers, such as "default1.3"
+                getLog().debug("[getServerList] pidFile ("+pidFile+") not found.");
                 continue;
             }
+            String serverName = serverList[i].getName();
             
             ServerResource server = createServerResource(serverRoot);
             String name = server.getName();
@@ -95,18 +101,46 @@ public class ErsApacheServerDetector
 
             server.setIdentifier(getAIID(serverRoot));
 
-            if (configureServer(server, null)) {
+            if (configureServer(server, binary)) {
+                if (isWin32()) {
+                    ConfigResponse cf = new ConfigResponse();
+                    String sname = getWindowsServiceName(serverName);
+                    if (sname != null) {
+                        cf.setValue(Win32ControlPlugin.PROP_SERVICENAME, sname);
+                        setControlConfig(server, cf);
+                    }
+                }
+                getLog().debug("[getServerList] serverRoot="+serverRoot+" serverName="+serverName+" OK");
                 servers.add(server);
+            }else{
+                getLog().debug("[getServerList] serverRoot="+serverRoot+" serverName="+serverName+" no configured");
             }
         }
 
         return servers;
     }
 
+    @Override
     protected String getWindowsServiceName() {
-        return
-            "Covalent" + getPlatformName() + "ApacheERS" +
-            getTypeInfo().getVersion();
+        return null;
+    }
+
+    protected String getWindowsServiceName(String serverName) {
+        String name =  "ERS"+serverName+"httpsd";
+        try {
+            List services = Service.getServiceNames();
+            if (!services.contains(name)) {
+                name = "Covalent" + getPlatformName() + "ApacheERS" + getTypeInfo().getVersion();
+                if (!services.contains(name)) {
+                    name = null;
+                }
+            }
+        } catch (Win32Exception ex) {
+            getLog().debug("[getWindowsServiceName] " + ex.getMessage(), ex);
+            name = null;
+        }
+        getLog().debug("[getWindowsServiceName] name=" + name);
+        return name;
     }
 
     public List getServerResources(ConfigResponse platformConfig) throws PluginException {
@@ -115,9 +149,14 @@ public class ErsApacheServerDetector
         }
 
         List servers = new ArrayList();
-        List binaries = getServerProcessList("2.", PTQL_QUERIES_20);
+        List binaries = new ArrayList();
+        
+        final String version = getTypeInfo().getVersion();
 
-        if (getTypeInfo().getVersion().equals("3.x")) {
+        if (version.equals("4.x")) {
+            binaries.addAll(getServerProcessList("2.2", PTQL_QUERIES_20));
+        }else if (version.equals("3.x")) {
+            binaries.addAll(getServerProcessList("2.0", PTQL_QUERIES_20));
             List binaries_13 =
                 getServerProcessList("1.3", PTQL_QUERIES_13);
             if (binaries_13 != null) {
@@ -148,7 +187,7 @@ public class ErsApacheServerDetector
             if (!new File(path, versionFile).exists()) {
                 continue;
             }
-            List found = getServerList(path);
+            List found = getServerList(path,info);
             if (found != null) {
                 servers.addAll(found);
             }
@@ -161,8 +200,27 @@ public class ErsApacheServerDetector
      * The path argument here is a path to an apache_startup.sh script.
      * So the corresponding ERS server base dir is two dirs up from that.
      */
+    @Override
     public List getServerResources(ConfigResponse platformConfig, String path) throws PluginException {
-        return getServerList(getParentDir(path, 3));
+        String version = getTypeInfo().getVersion();
+        ApacheBinaryInfo binary = ApacheBinaryInfo.getInfo(path);
+
+        if ((binary == null) || (binary.version == null)) {
+            getLog().debug("[getServerResources] no Binary Info path=" + path + " version=" + version);
+            return null; //does not match our server type version
+        }
+        if (version.equals("4.x") && !binary.version.startsWith("2.2")) {
+            getLog().debug("[getServerResources] Binary Info path=" + path + " version=" + version + " no ERS4.x");
+            return null; //does not match our server type version
+        }
+        if (version.equals("3.x") && !binary.version.startsWith("2.0")) {
+            getLog().debug("[getServerResources] Binary Info path=" + path + " version=" + version + " no ERS4.x");
+            return null; //does not match our server type version
+        }
+
+        getLog().debug("[getServerResources] Binary Info path=" + path + " version=" + version + " IS ERS ="+version);
+        
+        return getServerList(getParentDir(binary.binary, 3), binary);
     }
 
     /**
@@ -174,26 +232,7 @@ public class ErsApacheServerDetector
      */
     public List getServerResources(ConfigResponse platformConfig, String path, RegistryKey current)
         throws PluginException {
-
-        String key = current.getSubKeyName();
-
-        if (key.indexOf("Apache") == -1) {
-            return null; //e.g. Covalent$hostnameTomcatERS2.4
-        }
-
-        String version = getTypeInfo().getVersion();
-        if (!key.endsWith(version)) {
-            // e.g. 2.4, but 2.3 detector..
-            return null;
-        }
-
-        //convert:
-        //"C:\Program Files\covalent\ers\apache\bin\httpsd.exe" -k runservice
-        //to:
-        //C:\Program Files\covalent\ers
-        path = getCanonicalPath(path);
-
-        return getServerList(getParentDir(path, 3));
+        return getServerResources(platformConfig, path);
     }
 
     private String getAIID (String serverRoot) {
