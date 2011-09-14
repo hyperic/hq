@@ -469,10 +469,10 @@
     <c:param name="ft" value="${param.ft}"/>
   </c:if>
   <c:if test="${not empty param.g}">
-    <c:param name="fg" value="${param.g}"/>
+    <c:param name="g" value="${param.g}"/>
   </c:if>
   <c:if test="${not empty param.fg}">
-    <c:param name="g" value="${param.fg}"/>
+    <c:param name="fg" value="${param.fg}"/>
   </c:if>
   <c:if test="${not empty param.unavail}">
     <c:param name="unavail" value="${param.unavail}"/>
