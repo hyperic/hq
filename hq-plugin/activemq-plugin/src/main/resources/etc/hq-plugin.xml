@@ -369,6 +369,15 @@
     <config>
       <option name="process.query"
               description="Process Query"/>
+      <option name="jmx.username"
+              description="JMX Username"
+              default=""/>
+      <option name="jmx.password"
+              description="JMX Password"
+              default=""/>
+      <option name="jmx.url"
+              description="The JMX service URL"
+              default="service:jmx:rmi:///jndi/rmi://localhost:1099/jmxrmi"/>
     </config>
 
     <plugin type="autoinventory"
@@ -500,6 +509,15 @@
     <config>
       <option name="process.query"
               description="Process Query"/>
+      <option name="jmx.username"
+              description="JMX Username"
+              default=""/>
+      <option name="jmx.password"
+              description="JMX Password"
+              default=""/>
+      <option name="jmx.url"
+              description="The JMX service URL"
+              default="service:jmx:rmi:///jndi/rmi://localhost:1099/jmxrmi"/>
     </config>
 
     <plugin type="autoinventory"
