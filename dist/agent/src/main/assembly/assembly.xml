@@ -166,6 +166,9 @@
 					<include>javax.activation:*</include>
 					<include>com.sun.xml.bind:*</include>
 					<include>javax.xml.stream:*</include>
+					<include>org.apache.xmlrpc:*</include>
+					<include>org.apache.ws.commons.util:*</include>
+					<include>org.dnsjava:*</include>
 				</includes>
 		</dependencySet>
 	</dependencySets>
