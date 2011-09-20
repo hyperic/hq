@@ -36,6 +36,7 @@ import org.hyperic.util.PrintfFormat
 import org.hyperic.util.units.UnitsFormat
 import org.hyperic.util.units.UnitsConstants
 import org.hyperic.util.units.UnitNumber
+import org.hyperic.hq.hqu.rendit.helpers.ResourceHelper 
 import org.hyperic.hq.hqu.rendit.html.HtmlUtil
 import org.hyperic.hq.hqu.rendit.html.DojoUtil
 import org.hyperic.hq.hqu.rendit.BaseController
@@ -72,7 +73,7 @@ class HealthController
     HealthController() {
         onlyAllowSuperUsers()
         setJSONMethods(['getSystemStats', 'getDiag', 'cacheData', 
-                        'agentData', 'runQuery', 'executeQuery', 'totalCacheSizeInBytes'])
+                        'agentData', 'runQuery', 'executeQuery', 'executeMaintenanceOp', 'totalCacheSizeInBytes'])
     }
 
     boolean logRequests() {
@@ -325,6 +326,7 @@ class HealthController
            
             databaseQueries:   databaseQueries,
             databaseActions:   databaseActions,
+            maintenanceOps:    maintenanceOps,
             jvmSupportsTraces: getJVMSupportsTraces() ])
     }
     
@@ -490,7 +492,8 @@ class HealthController
             AgentSortField:   AgentSortField,
             licenseInfo:      [:],
             cacheHealths:     getCacheHealths(),
-			dbQueries:        runAllOrphanQueries(),
+            dbQueries:        runAllOrphanQueries(),
+            orphanedNodes:    _findOrphanedData(params),
         ] + getSystemStats([:]) 
         
         if (HQUtil.isEnterpriseEdition()) {
@@ -499,7 +502,34 @@ class HealthController
         
         render(locals: locals)
     }
-
+	
+	private def _findOrphanedData(params) {
+		def overlord = HQUtil.getOverlord()
+		def rHelp = new ResourceHelper(overlord)
+		 
+		def orphans = []
+		 
+		def servers = rHelp.findAllServers()
+		 
+		servers.each { s ->
+			def server = s.toServer()
+			if (server.getPlatform() == null) {
+				orphans << ['id': server.id, 'type':'Server', 'name': server.name, 'obj': s, 'overlord': overlord]
+			}
+		}
+		 
+		def services = rHelp.findAllServices()
+		 
+		services.each { s ->
+			def service = s.toService()
+			if (service.getServer() == null) {
+				orphans << ['id': service.id, 'type':'Service', 'name': service.name, 'obj': s, 'overlord': overlord]
+			}
+		}
+		
+		return orphans
+	}
+	
     def serverProp(params) {
         def s = Humidor.instance.sigar
         def dateFormat  = DateFormat.dateTimeInstance
@@ -839,4 +869,42 @@ class HealthController
             return res
         }
     }
+	
+	def getMaintenanceOps() {
+		def ops = [
+			findOrphanedNodes: [
+			   name: localeBundle['maintenceOpFindOrphanNodes'],
+			   op: { params ->
+				   def output = "<table><tr><th>ID</th><th>Type</th><th>Name</th></tr>"
+				   for (node in _findOrphanedData(params)) {
+					   output += "<tr><td>${node.id}</td><td>${node.type}</td><td>${node.name}</td></tr>"
+				   }
+				   output += "</table>"
+				   return output
+			   }
+			],
+			cleanupOrphanedNodes: [
+				name: localeBundle['maintenanceOpCleanupOrphanNodes'],
+				op: { params ->
+				   def output = "<table><tr><th>ID</th><th>Type</th><th>Name</th></tr>"
+				   for (node in _findOrphanedData(params)) {
+					   output += "<tr><td>${node.id}</td><td>${node.type}</td><td>${node.name}</td></tr>"
+					   node.obj.remove(node.overlord)
+				   }
+				   output += "</table>"
+				   return output
+				}
+			]
+		  ]
+  
+	}
+	
+	def executeMaintenanceOp(params) {
+        def id    = params.getOne('op')
+		def name = maintenanceOps[id].name
+		def start = now()
+		def res = maintenanceOps[id].op(params)
+		def maintenanceOpData = "${name} executed in ${now() - start} ms<br/><br/>"
+		return [maintenanceOpData: maintenanceOpData + res]
+	}
 }

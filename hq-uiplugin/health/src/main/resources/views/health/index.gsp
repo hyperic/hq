@@ -332,6 +332,20 @@
                    refresh:600, url:urlFor(action:'agentData'),
                    schema:agentSchema, numRows:17) %>
     	<% } %>
+    	<% dojoTabPane(id:'maintenanceTab', label:l.maintenance) { %>
+    		<div id="maintenanceOpControls">
+    			<span>${l.selectActionLabel}</span>
+    			<select id="maintenanceOpExecute">
+    				<option value='none'>-- ${l.selectMaintenanceOp} --</option>
+    				<% for (op in maintenanceOps.entrySet().sort {a,b -> a.key <=> b.key}) { %>
+    					<option value='${op.key}'>${h op.value.name}</option>
+    				<% } %>
+    			</select>
+    			<img src="/images/tbb_go.gif" onclick="maintenanceOpAction()"/>
+    			<p></p>
+    		</div>
+    		<div id="maintenanceOpData"></div>
+    	<% } %>
   	<% } %>
 </div>
 <script type="text/javascript">
@@ -424,6 +438,34 @@
 	}
 
 	refreshQuery();
+	
+	function maintenanceOpAction() {
+	  	var selectDrop = hqDojo.byId('maintenanceOpExecute');
+
+		executeMaintenanceOp(selectDrop.options[selectDrop.selectedIndex].value);
+	}
+	
+	function executeMaintenanceOp(op) {
+		if (op == 'none') {
+	    	hqDojo.byId('maintenanceOpData').innerHTML = '';
+	    	return;
+	    }
+	    
+	  	hqDojo.xhrGet({
+	    	url: '<%= urlFor(action:"executeMaintenanceOp", encodeUrl:true) %>',
+	    	handleAs: "json-comment-filtered",
+	    	preventCache: true,
+	    	content: {
+	    		op: op
+	        },
+	    	load: function(response, args) {
+	      		hqDojo.byId('maintenanceOpData').innerHTML = response.maintenanceOpData;
+	      		
+				hqDojo.query("#maintenanceOpData tr:nth-child(even)").style("backgroundColor", "#FFFFCC");
+	    	}
+	  	});
+	}
+	
     
     hqDojo.subscribe("XHRComplete", function() {
     	setFoot();

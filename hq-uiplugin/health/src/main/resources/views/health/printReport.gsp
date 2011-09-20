@@ -63,6 +63,8 @@ Environment:
 <% for (p in procEnv.entrySet().sort {a,b->a.key <=> b.key}) { %>
 - ${p.key} = ${p.value} <% } %>
 
+-- Orphaned Nodes -- <% for (n in orphanedNodes) { %>
+- ID: ${n.id} - Type: ${n.type} - ${n.name} <% } %>
 
 -- ${l.jvm} --
 - ${l.jvmPercMem}: ${jvmPercMem}
