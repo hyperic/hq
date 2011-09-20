@@ -192,7 +192,7 @@ public class AgentDaemon
     }
     
     /**
-     * Retreive a plugin manager.
+     * Retrieve a plugin manager.
      *
      * @param type The type of plugin manager that is wanted
      * @return The plugin manager for the type given
@@ -215,7 +215,7 @@ public class AgentDaemon
     }
 
     /**
-     * Retreive the storage object in use by the Agent.  This routine should
+     * Retrieve the storage object in use by the Agent.  This routine should
      * be used primarily by server handlers wishing to do any kind of 
      * storage.
      *
@@ -274,7 +274,7 @@ public class AgentDaemon
     }
 
     /**
-     * Register an object to be called when a notifiation of the specified
+     * Register an object to be called when a notification of the specified
      * message class occurs;
      *
      * @param handler  Handler to call to process the notification message
@@ -322,7 +322,7 @@ public class AgentDaemon
      * not be running when this function is called.  It may raise an 
      * exception if some of the cleanup fails, however the Agent will be
      * in a pristine state after calling this function.  Cleanup may be
-     * called more than one time without re-configuring inbetween cleanup()
+     * called more than one time without re-configuring in between cleanup()
      * calls.
      *
      * @throws AgentRunningException indicating the Agent was running when
