@@ -287,10 +287,9 @@ public class MeasurementBossImpl implements MeasurementBoss {
      * Update the templates to be indicators or not
      * 
      */
-    public void updateIndicatorMetrics(int sessionId, AppdefEntityTypeID aetid, Integer[] tids)
+    public void updateIndicatorMetrics(int sessionId, Integer[] tids)
         throws TemplateNotFoundException, SessionTimeoutException, SessionNotFoundException {
-        String typeName = aetid.getAppdefResourceType().getName();
-        templateManager.setDesignatedTemplates(typeName, tids);
+        templateManager.setDesignatedTemplates(tids,true);
     }
 
     /**

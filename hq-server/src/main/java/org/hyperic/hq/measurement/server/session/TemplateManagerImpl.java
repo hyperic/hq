@@ -35,6 +35,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -63,6 +65,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class TemplateManagerImpl implements TemplateManager {
+    private final Log log = LogFactory.getLog(TemplateManagerImpl.class);
    
     private MeasurementDAO measurementDAO;
     private MeasurementTemplateDAO measurementTemplateDAO;
@@ -483,23 +486,56 @@ public class TemplateManagerImpl implements TemplateManager {
     /**
      * Set the measurement templates to be "designated" for a monitorable type.
      */
-    public void setDesignatedTemplates(String mType, Integer[] desigIds) {
-        List<MeasurementTemplate> derivedTemplates =
-            measurementTemplateDAO.findDerivedByMonitorableType(mType);
+    public void setDesignatedTemplates(Integer[] desigIds,boolean designated) {
 
-        HashSet<Integer> designates = new HashSet<Integer>();
-        designates.addAll(Arrays.asList(desigIds));
+        // If there are no ids, then just return
+        if (desigIds == null) {
+            return;
+        }
 
-        for (MeasurementTemplate template : derivedTemplates) {
-            // Never turn off Availability as an indicator
-            if (template.isAvailability()) {
+        // For each of the ids,
+        for (Integer id : desigIds) {
+            // If id is null, skip it
+            if (id == null) {
+                continue;
+            }
+            
+            // Find the matching template
+            MeasurementTemplate mt = measurementTemplateDAO.get(id);
+    
+            // If it can't be found,
+            if (mt == null) {
+                log.warn(String.format("Could not find measurement template with id %d. Skipping.",id));
+                // Then just skip to the next one
                 continue;
             }
 
-            boolean designated = designates.contains(template.getId());
+            // If it's an availability template
+            if (mt.isAvailability()) {
+                // Cannot change designated status for availability, just skip
+                // it
+                if (log.isTraceEnabled()) {
+                    log.trace(String.format(
+                        "Measurement template with id %d is an availability template. Skipping.",
+                        id));
+                }
+                continue;
+            }
 
-            if (designated != template.isDesignate()) {
-                template.setDesignate(designated);
+            // If the required status is different than the current one,
+            if (mt.isDesignate() != designated) {
+                // Change it
+                if (log.isTraceEnabled()) {
+                    log.trace(String.format(
+                        "Setting designated state of template with id %d to %b", id, designated));
+                }
+                mt.setDesignate(designated);
+            } else {
+                if (log.isTraceEnabled()) {
+                    log.trace(String.format(
+                        "Designated state of template with id %d is already %b. Not changing", id,
+                        designated));
+                }
             }
         }
     }

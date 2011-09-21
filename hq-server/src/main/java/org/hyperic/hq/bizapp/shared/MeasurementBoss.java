@@ -99,7 +99,7 @@ public interface MeasurementBoss {
     /**
      * Update the templates to be indicators or not
      */
-    public void updateIndicatorMetrics(int sessionId, AppdefEntityTypeID aetid, Integer[] tids)
+    public void updateIndicatorMetrics(int sessionId, Integer[] tids)
         throws TemplateNotFoundException, SessionTimeoutException, SessionNotFoundException;
 
     public List<MeasurementTemplate> findMeasurementTemplates(int sessionId, AppdefEntityTypeID typeId,
