@@ -346,6 +346,11 @@
     		</div>
     		<div id="maintenanceOpData"></div>
     	<% } %>
+        <% dojoTabPane(id:'inventoryTab', label:l.inventory) { %>
+            <%= dojoTable(id:'inventoryTable', title:l.inventory,
+                   refresh:600, url:urlFor(action:'inventoryData'),
+                   schema:inventorySchema, numRows:17, pageSize:500, pageControls:false) %>
+        <% } %>
   	<% } %>
 </div>
 <script type="text/javascript">

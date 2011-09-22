@@ -31,6 +31,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID
 import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue
 import org.hyperic.hq.appdef.server.session.AgentSortField
+import org.hyperic.hq.authz.server.session.ResourceSortField
 import org.hyperic.hq.appdef.Agent
 import org.hyperic.util.PrintfFormat
 import org.hyperic.util.units.UnitsFormat
@@ -73,7 +74,7 @@ class HealthController
     HealthController() {
         onlyAllowSuperUsers()
         setJSONMethods(['getSystemStats', 'getDiag', 'cacheData', 
-                        'agentData', 'runQuery', 'executeQuery', 'executeMaintenanceOp', 'totalCacheSizeInBytes'])
+                        'agentData', 'inventoryData', 'runQuery', 'executeQuery', 'executeMaintenanceOp', 'totalCacheSizeInBytes'])
     }
 
     boolean logRequests() {
@@ -304,6 +305,7 @@ class HealthController
             diags:             diagnostics,
             cacheSchema:       cacheSchema,
             agentSchema:       agentSchema,
+            inventorySchema:   inventorySchema,
             metricsPerMinute:  metricsPerMinute,
             numPlatforms:      resourceHelper.find(count:'platforms'),
             numCpus:   resourceHelper.find(count:'cpus'),
@@ -338,6 +340,47 @@ class HealthController
             total = total + (float)v.total / (float)v.interval
         }
         (int)total
+    }
+
+    private getInventorySchema() {
+        def resourceTypeCol = new CacheColumn('resourceType', 'Resource Type', true)
+        def totalCol   = new CacheColumn('total',   'Total',   true)
+        
+        def globalId = 0
+        [
+            getData: {pageInfo, params ->
+                getInventoryData(pageInfo)
+            },
+            defaultSort: resourceTypeCol,
+            defaultSortOrder: 1,  // descending
+            rowId: {globalId++},
+            columns: [
+                [field:  resourceTypeCol,
+                 width:  '40%',
+                 label:  {it.name}],
+                [field:  totalCol,
+                 width:  '10%',
+                 label:  {it.total}],
+            ],
+        ]
+
+    }
+
+    def inventoryData(params) {
+        DojoUtil.processTableRequest(inventorySchema, params)
+    }
+    
+    private getInventoryData(params) {
+        def types = []
+        resourceHelper.findAppdefPrototypes().each { p ->
+            types.add(['name': p.name, 
+                       'total': getResourceTypeCount(p)] )
+        }
+        return types
+    }
+            
+    private getResourceTypeCount(p) {
+        return resourceHelper.findByPrototype(['byPrototype': p.name]).size()
     }
     
     def getDiag(params) {
@@ -454,6 +497,7 @@ class HealthController
         def cmdLine     = s.getProcArgs('$$')
         def procEnv     = s.getProcEnv('$$')
         def agentPager  = PageInfo.getAll(AgentSortField.ADDR, true) 
+        def inventoryPager  = PageInfo.getAll(ResourceSortField.NAME, true)
         
         def locals = [
             numCpu:           Runtime.runtime.availableProcessors(),
@@ -488,6 +532,7 @@ class HealthController
             cpuInfos:         s.cpuInfoList,
             jvmSupportsTraces: getJVMSupportsTraces(),
             agentData:        getAgentData(agentPager),
+            inventoryData:    getInventoryData(),
             agentFmt:         agentFmt,
             AgentSortField:   AgentSortField,
             licenseInfo:      [:],
