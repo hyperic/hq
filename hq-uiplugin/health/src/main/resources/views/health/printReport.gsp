@@ -108,6 +108,12 @@ Platforms: ${licenseInfo.licensePlatforms}
 Count:     ${licenseInfo.platformCount}
 <% } %>
 
+-- Inventory Summary --
+
+<% print "Resource Type".padRight(100) + "Total".padRight(15) %>
+<% print "------------".padRight(100) + "----".padRight(15) %>
+<% for (data in inventoryData.sort {a,b->a.name.toLowerCase() <=> b.name.toLowerCase()}){ %>
+<% print data.name.padRight(100) + (data.total+"").padRight(15)  %><% } %>
 
 
 -- Agents --
