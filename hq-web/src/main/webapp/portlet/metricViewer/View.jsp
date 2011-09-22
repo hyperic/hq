@@ -34,10 +34,17 @@
 <tiles:importAttribute name="portlet"/>
 
 <script type="text/javascript">
-function requestMetricsResponse<c:out value="${portlet.token}"/>() {
-    var dummyStr = '&hq=' + new Date().getTime();
-    var metricsUrl = "<html:rewrite page="/dashboard/ViewMetricViewer.do?token=${portlet.token}"/>" + dummyStr;
-	new Ajax.Request(metricsUrl, {method: 'get', onSuccess:showMetricsResponse});
+    function requestMetricsResponse<c:out value="${portlet.token}"/>() {
+        var dummyStr = '&hq=' + new Date().getTime();
+        var metricsUrl = "<html:rewrite page="/dashboard/ViewMetricViewer.do?token=${portlet.token}"/>" + dummyStr;
+	new Ajax.Request(metricsUrl, {
+            method: 'get', 
+            onSuccess:function(response) {
+                showMetricsResponse(response);
+                setTimeout("requestMetricsResponse<c:out value="${portlet.token}"/>()", 30000);
+            }
+        },
+    });
 }
 onloads.push(requestMetricsResponse<c:out value="${portlet.token}"/>);
 </script>
