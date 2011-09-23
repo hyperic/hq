@@ -373,9 +373,9 @@
         //rTimer = setTimeout(availFunc, 60000);
     }
 
-    function showMetricsResponse(originalRequest) {
+    function showMetricsResponse(response, args)  {
 
-        var metricText = eval("(" + originalRequest.responseText + ")");
+        var metricText = response;
         var metricValues = metricText.metricValues;
         var resourceNameHeader = metricValues.resourceTypeName;
         var resourceLoadTypeHeader = metricValues.metricName;
