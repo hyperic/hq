@@ -7,10 +7,9 @@ import org.hyperic.util.config.ConfigResponse;
 public class GatewayServerDetector extends MemberDetector {
 
     boolean isValidMember(Map memberDetails) {
-        boolean iserver = "true".equalsIgnoreCase(memberDetails.get("gemfire.member.isserver.boolean").toString());
         boolean isgateway = "true".equalsIgnoreCase(memberDetails.get("gemfire.member.isgateway.boolean").toString());
-        boolean res = iserver && isgateway;
-        getLog().debug("[isValidMember] iserver=" + iserver + " isgateway=" + isgateway + " res=" + res);
+        boolean res = isgateway;
+        getLog().debug("[isValidMember] isgateway=" + isgateway + " res=" + res);
         return res;
     }
 
