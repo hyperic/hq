@@ -85,60 +85,7 @@
 	        dojo.byId('addContentsPortlet' + wide).style.visibility='visible';
 	    }
 	}
-	
-	function refreshPortlets() {
-	
-	    var problemPortlet = dojo.byId('problemResourcesTable');
-	    var favoritePortlet = dojo.byId('favoriteTable');
-	
-	    var nodes = document.getElementsByTagName('table');
-	    var getRecentForm = document.getElementsByTagName('form')
-	
-	    for (i = 0; i < nodes.length; i++) {
-	        if (/metricTable/.test(nodes[i].id)) {
-	            //alert('in metric table')
-	            var metricTblId = nodes[i].id;
-	            var getId = metricTblId.split('_');
-	            var metricIdPart = getId[1];
-	
-	            if (metricIdPart) {
-	                var metricIdToken = '_' + metricIdPart;
-	
-	                setInterval("requestMetricsResponse" + metricIdToken + "()", 30000);
-	            } else {
-	                setInterval("requestMetricsResponse()", 30000);
-	            }
-	        }
-	    }
-	
-	
-	    for (i = 0; i < nodes.length; i++) {
-	        if (/availTable/.test(nodes[i].id)) {
-	            // alert('in avail table')
-	            var availTblId = nodes[i].id;
-	            var getId = availTblId.split('_');
-	            var availIdPart = getId[1];
-	
-	            if (availIdPart) {
-	                var availIdToken = '_' + availIdPart;
-	
-	                setInterval("requestAvailSummary" + availIdToken + "()", 30000);
-	            } else {
-	                setInterval("requestAvailSummary()", 30000);
-	            }
-	        }
-	    }
-	
-	    if (problemPortlet) {
-	        setInterval("requestProblemResponse()", 30000);
-	    }
-	
-	    if (favoritePortlet) {
-	        setInterval("requestFavoriteResources()", 30000);
-	    }
-	}
-	
-	onloads.push(refreshPortlets);
+		
 </script>
 <html:link action="/Resource" linkName="viewResUrl" styleId="viewResUrl" style="display:none;">
 	<html:param name="eid" value="{eid}"/>

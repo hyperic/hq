@@ -50,8 +50,14 @@
 				content: {
 					hq: (new Date()).getTime()
 				},
-				load: showFavoriteResponse,
-				error: reportError
+				load: function(response, args) {
+				    showFavoriteResponse(response, args);
+				    setTimeout("requestFavoriteResources()", 30000);
+				},
+				error: function(response, args) {
+				    reportError(response, args);
+				    setTimeout("requestFavoriteResources()", 30000);
+				}
 			});
 		}
 		
