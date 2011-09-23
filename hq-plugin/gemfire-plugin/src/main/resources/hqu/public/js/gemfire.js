@@ -4,20 +4,27 @@ var sid=-1;
 jQuery(document).ready(function() {
     refresh();
 
-    jQuery('#data').everyTime(5000, function() {
+    jQuery('#data').everyTime(8000, function() {
         refresh();
     });
 });
 
-var refresing=false;
-function init(){
-    jQuery('#gemfirePlugin a.member').click(function($){
-        var id=jQuery(this).attr('id');
-        setSelectedResource(id);
-        return false;
-    });
-    jQuery("#data .loading").hide();
-    refresing=false;
+var refreshing=false;
+var stopRefreshing=false;
+function init(response, status, xhr){
+	if (status == "error") {
+	    var msg = "An error occurred: ";
+	    jQuery('#error').html("<font color='red'>" + msg + " " + xhr.statusText+ "</font>");
+        stopRefreshing=true;
+    } else {
+	    jQuery('#gemfirePlugin a.member').click(function($) {
+			var id = jQuery(this).attr('id');
+			setSelectedResource(id);
+			return false;
+		});
+		jQuery("#data .loading").hide();
+		refreshing=false;
+    }
 }
 
 function setSelectedResource(id) {
@@ -32,14 +39,14 @@ function setSelectedResource(id) {
     sid=id;
 }
 
-function reloadTree(){
-    init();
+function reloadTree(response, status, xhr){
+    init(response, status, xhr);
     jQuery('#tree').load('/hqu/gemfire/gemfire/tree.hqu?eid='+eid,init);
 }
 
 
 function refresh() {
-    if(!refresing){
+    if(!refreshing && !stopRefreshing){
         refresing=true;
         setSelectedResource(sid);        
     }

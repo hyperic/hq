@@ -3,6 +3,8 @@ package com.vmware.springsource.hyperic.plugin.gemfire;
 import com.vmware.springsource.hyperic.plugin.gemfire.collectors.MemberCollector;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
@@ -33,8 +35,12 @@ public class GemFireLiveData extends LiveDataPlugin {
             } else {
                 throw new PluginException("command '" + command + "' not found");
             }
-        } catch (Exception e) {
-            throw new PluginException(e.getMessage(), e);
+        } catch (MBeanException e) {
+            throw new PluginException("Unable to invoke command on mbean " + command + ": " + e.getMessage(), e);
+        } catch (PluginException e){
+            throw e;
+        } catch (Exception e){
+            throw new PluginException("Unable to execute " + command + ": " + e.getMessage(), e);
         }
         return res;
     }
@@ -47,7 +53,7 @@ public class GemFireLiveData extends LiveDataPlugin {
         ObjectName mbean = new ObjectName("GemFire:type=MemberInfoWithStatsMBean");
         String id = (String) mServer.getAttribute(mbean, "Id");
         if (id.equalsIgnoreCase("n/a")) {
-            getMembers(mServer);    // initialitze the id Attribute on MemberInfoWithStatsMBean
+            getMembers(mServer);    // initialize the id Attribute on MemberInfoWithStatsMBean
             id = getSystemID(mServer);
         }
         return id;
@@ -56,19 +62,33 @@ public class GemFireLiveData extends LiveDataPlugin {
     private static String[] getMembers(MBeanServerConnection mServer) throws Exception {
         Object[] args = new Object[0];
         String[] def = new String[0];
-        String[] members = (String[]) mServer.invoke(new ObjectName("GemFire:type=MemberInfoWithStatsMBean"), "getMembers", args, def);
-        return members;
+        ObjectName objName = new ObjectName("GemFire:type=MemberInfoWithStatsMBean");
+        try {
+            String[] members = (String[]) mServer.invoke(objName, "getMembers", args, def);
+            return members;
+        } catch (MBeanException e) {
+            throw new PluginException(
+                "Unable to get members while invoking method 'getMembers' on '" +
+                    objName.getCanonicalName() + "'", e);
+        }
     }
 
     private static Map getDetails(MBeanServerConnection mServer) throws Exception {
         Object[] args = new Object[0];
         String[] def = new String[0];
-        String[] members = (String[]) mServer.invoke(new ObjectName("GemFire:type=MemberInfoWithStatsMBean"), "getMembers", args, def);
-        Map data = new HashMap();
-        for (String member : members) {
-            data.put(member, getMemberDetails(mServer, member));
+        ObjectName objName = new ObjectName("GemFire:type=MemberInfoWithStatsMBean");
+        try {
+            String[] members = (String[]) mServer.invoke(objName, "getMembers", args, def);
+            Map data = new HashMap();
+            for (String member : members) {
+                data.put(member, getMemberDetails(mServer, member));
+            }
+            return data;
+        } catch (MBeanException e) {
+            throw new PluginException(
+                "Unable to get member details while invoking method 'getMembers' on '" +
+                    objName.getCanonicalName() + "'", e);
         }
-        return data;
     }
 
     private static Map getMemberDetails(MBeanServerConnection mServer, String member) throws Exception {

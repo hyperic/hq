@@ -41,17 +41,20 @@ public class MemberCollector extends Collector {
     public static Map getMetrics(String memberID, MBeanServerConnection mServer, boolean hqu) throws PluginException {
         Map res = new java.util.HashMap<String, Object>();
         Map<String, Object> memberDetails = null;
+        String objStringName = "GemFire:type=MemberInfoWithStatsMBean";
         try {
+            ObjectName objName = new ObjectName(objStringName);
             Object[] args2 = {memberID};
             String[] def2 = {String.class.getName()};
-            memberDetails = (Map) mServer.invoke(new ObjectName("GemFire:type=MemberInfoWithStatsMBean"), "getMemberDetails", args2, def2);
+            memberDetails = (Map) mServer.invoke(objName, "getMemberDetails", args2, def2);
         } catch (Exception ex) {
-            throw new PluginException(ex.getMessage(), ex);
+            throw new PluginException("Unable to get member details while invoking method 'getMembersDetails' on '" +
+                objStringName + "' with parameter '" + memberID + "'", ex);
         }
 
         log.debug("[getMetrics] memberDetails=" + memberDetails);
         if ((memberDetails==null) || memberDetails.isEmpty()) {
-            throw new PluginException("Member '" + memberID + "' not found!!!");
+            throw new PluginException("Member '" + memberID + "' not found.");
         }
 
         for (String k : memberDetails.keySet()) {
