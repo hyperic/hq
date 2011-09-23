@@ -212,7 +212,7 @@ class HealthController
         def hitsCol   = new CacheColumn('hits',   'Hits',   true)
         def missCol   = new CacheColumn('misses', 'Misses', true)
         def limitCol  = new CacheColumn('limit', 'Limit', true)
-        def memUsgCol = new CacheColumn('memoryUsage', 'Memory Usage', true)
+        def memUsgCol = new CacheColumn('memoryUsage', 'Memory Usage (KB)', true)
         
         def globalId = 0
         [
@@ -277,7 +277,7 @@ class HealthController
             Map<String,Object> health = new HashMap<String,Object>();
             health.put("region", cache.getName());
             health.put("limit", limit)
-            health.put("memoryUsage", formatBytes(memoryUsage))
+            health.put("memoryUsage", formatMemoryUsage(memoryUsage))
             health.put("size", new Integer(cache.getSize()));
             health.put("hits", new Integer(cache.getHitCount()));
             health.put("misses", new Integer(cache.getMissCountNotFound()));
@@ -290,7 +290,7 @@ class HealthController
         health.put("hits", 0);
         health.put("misses", 0);
         health.put("limit", 0);
-        health.put("memoryUsage", formatBytes(totalCacheInBytes))
+        health.put("memoryUsage", formatMemoryUsage(totalCacheInBytes))
         healths.add(health)
         return healths;
     }
@@ -409,6 +409,21 @@ class HealthController
                            locale, null).toString()
     }
 
+    private formatMemoryUsage(b) {
+        def kb
+        if (b == -1) {
+            return 'unknown'.padLeft(18)
+        } else if (b == null) {
+            return 'null'.padLeft(18)
+        } else if (b > 0) {
+            kb = (b / 1024)
+        } else {
+            kb = 0
+        }
+        def fkb = sprintf("%.2f", kb.toFloat())
+        return fkb.padLeft(18)
+    }
+    
     private formatPercent(n, total) {
         if (total == 0)
            return 0
