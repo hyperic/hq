@@ -26,6 +26,7 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -91,6 +92,20 @@ public class MeasurementUnionStatementBuilder {
                                                  final Integer[] measIds, final HQDialect dialect) {
         final String measInStmt = (measIds.length == 0) ?
             "" : MeasTabManagerUtil.getMeasInStmt(measIds, true);
+        return getUnionStatement(begin, end, measInStmt, dialect);
+    }
+
+    public static final String getUnionStatement(final long begin,
+                                                 final long end,
+                                                 Collection<Integer> measIds, final HQDialect dialect) {
+        final String measInStmt = (measIds.isEmpty()) ?
+            "" : MeasTabManagerUtil.getMeasInStmt(measIds, true);
+        return getUnionStatement(begin, end, measInStmt, dialect);
+    }
+    
+    private static final String getUnionStatement(final long begin,
+                                                  final long end,
+                                                  final String measInStmt, final HQDialect dialect) {
         final StringBuilder sql = new StringBuilder();
         final MeasRangeObj measRangeObj = MeasRangeObj.getInstance();
         final List ranges = (dialect.useMetricUnion()) ?
@@ -141,6 +156,12 @@ public class MeasurementUnionStatementBuilder {
         long timeNow = System.currentTimeMillis(),
              begin   = (timeNow - millisBack);
         return getUnionStatement(begin, timeNow, dialect);
+    }
+
+    public static String getUnionStatement(long millisBack, Collection<Integer> measIds, final HQDialect dialect) {
+        long timeNow = System.currentTimeMillis(),
+             begin   = (timeNow - millisBack);
+        return getUnionStatement(begin, timeNow, measIds, dialect);
     }
 
     public static String getUnionStatement(long millisBack, Integer[] measIds, final HQDialect dialect) {
