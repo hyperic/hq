@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -249,7 +250,7 @@ class MeasurementSchedule {
     }
 
     /**
-     * Delete measurements matching a specific client ID.  
+     * Delete measurements matching a specific client IDs.
      * 
      * @param clientID Metrics matching this ID will be deleted
      * @param srnInfo  Updated SRN information for the entity which
@@ -258,44 +259,38 @@ class MeasurementSchedule {
      *                 an update of the SRN is unnecessary), then the
      *                 SRN will not be updated.
      */
-    void deleteMeasurements(AppdefEntityID ent)
-        throws AgentStorageException 
-    {
-        boolean debug = this.log.isDebugEnabled();
-        Iterator i;
-
-        i = this.store.getListIterator(MeasurementSchedule.PROP_MSCHED);
-        for(; i != null && i.hasNext(); ){
-            String value = (String)i.next();
-            ScheduledMeasurement meas;
-
-            if((meas = ScheduledMeasurement.decode(value)) == null){
-                this.log.error("Unable to decode metric from storage, "
-                                    + "removing metric for entity " + ent);
+    void deleteMeasurements(Set<AppdefEntityID> aeids) throws AgentStorageException  {
+        if (aeids == null || aeids.isEmpty()) {
+            return;
+        }
+        final Iterator<String> i = store.getListIterator(MeasurementSchedule.PROP_MSCHED);
+        while (i != null && i.hasNext()){
+            final String value = (String) i.next();
+            final ScheduledMeasurement meas = ScheduledMeasurement.decode(value);
+            if (null == meas) {
+                log.error("Unable to decode metric from storage, removing metric for entity");
                 i.remove();
                 continue;
             }
-
-            if(meas.getEntity().equals(ent)){
-                this.log.debug("Removing scheduled measurement " + meas);
+            final AppdefEntityID entity = meas.getEntity();
+            if (aeids.contains(entity)) {
+                log.debug("Removing scheduled measurement " + meas);
                 i.remove();
             }
         }
-
+        final Iterator<SRN> it = srnList.iterator();
         // Clear out the SRN 
         synchronized(this.srnList){
-            for(i=this.srnList.iterator(); i.hasNext(); ){
-                SRN srn = (SRN)i.next();
-
-                if(srn.getEntity().equals(ent)){
-                    i.remove();
+            while (it.hasNext()) {
+                final SRN srn = (SRN) it.next();
+                final AppdefEntityID entity = srn.getEntity();
+                if (aeids.contains(entity)) {
+                    it.remove();
                 }
             }
-
-            this.writeSRNs();
+            writeSRNs();
         }
-
-        this.store.flush();
+        store.flush();
     }
 
     SRN[] getSRNsAsArray(){
