@@ -515,10 +515,14 @@ public final class ConcurrentStatsCollector {
                 try {
                     if (_isComposite) {
                         long val = getComposite(_names[i]);
-                        return (_isTrend) ? (_last = val - _last) : val;
+                        long rtn = (_isTrend) ? (val - _last) : val;
+                        _last = val;
+                        return rtn;
                     } else {
                         long val = getValue(_names[i]);
-                        return (_isTrend) ? (_last = val - _last) : val;
+                        long rtn = (_isTrend) ? (val - _last) : val;
+                        _last = val;
+                        return rtn;
                     }
                 } catch (Exception e) {
                     exception = e;
