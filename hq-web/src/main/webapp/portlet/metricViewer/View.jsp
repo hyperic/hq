@@ -44,11 +44,11 @@
             }, 
             load: function(response, args) { 
                 showMetricsResponse(response, args); 
-                setTimeout("requestMetricsResponse<c:out value="${portlet.token}"/>()", 30000); 
+                setTimeout("requestMetricsResponse<c:out value="${portlet.token}"/>()", portlets_reload_time); 
             }, 
             error: function(response, args) { 
                 reportError(response, args); 
-                setTimeout("requestMetricsResponse<c:out value="${portlet.token}"/>()", 30000); 
+                setTimeout("requestMetricsResponse<c:out value="${portlet.token}"/>()", portlets_reload_time); 
             } 
         }); 
     } 

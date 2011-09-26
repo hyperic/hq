@@ -48,11 +48,11 @@
             handleAs: "json",
             load: function(response, args) {
                 showAvailSummary(response, args);
-                setTimeout("requestAvailSummary${portlet.token}()", 30000);
+                setTimeout("requestAvailSummary${portlet.token}()", portlets_reload_time);
             },
             error: function(response, args) {
                 reportError(response, args);
-                setTimeout("requestAvailSummary${portlet.token}()", 30000);
+                setTimeout("requestAvailSummary${portlet.token}()", portlets_reload_time);
             }
         });
     }

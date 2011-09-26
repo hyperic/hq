@@ -52,11 +52,11 @@
 				},
 				load: function(response, args) {
 				    showFavoriteResponse(response, args);
-				    setTimeout("requestFavoriteResources()", 30000);
+				    setTimeout("requestFavoriteResources()", portlets_reload_time);
 				},
 				error: function(response, args) {
 				    reportError(response, args);
-				    setTimeout("requestFavoriteResources()", 30000);
+				    setTimeout("requestFavoriteResources()", portlets_reload_time);
 				}
 			});
 		}
