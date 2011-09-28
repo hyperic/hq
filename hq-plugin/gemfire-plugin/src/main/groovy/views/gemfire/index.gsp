@@ -12,13 +12,6 @@
 <div id="gemfirePlugin">
   <table width="100%">
     <tr>
-      <td>
-         <div id="error"></div>
-      </td>
-    </tr>
-  </table>
-  <table width="100%">
-    <tr>
       <td width="250px" valign="top">
         <div id="tree"></div>
       </td>
