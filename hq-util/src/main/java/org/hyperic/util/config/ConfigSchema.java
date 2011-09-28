@@ -33,6 +33,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -43,7 +44,8 @@ public class ConfigSchema implements Serializable {
 	private static final long serialVersionUID = 8171794117881852319L;
 
 	private ArrayList configOptions;
-	
+    private static final Object configLock = new Object();
+
 	private static HashMap secrets = new HashMap();
 
     public ConfigSchema(){
@@ -62,7 +64,7 @@ public class ConfigSchema implements Serializable {
     }
 
     public List<ConfigOption> getOptions(){
-        return this.configOptions;
+        return Collections.unmodifiableList(new ArrayList(this.configOptions));
     }
 
     /**
@@ -71,14 +73,14 @@ public class ConfigSchema implements Serializable {
     public Map getOptionsMap() {
         //XXX would use this.optionsMap but dont
         //want to break serial uid
-        Map opts = new HashMap();
-        int size = this.configOptions.size();
-        for (int i=0; i<size; i++) {
-            ConfigOption option =
-                (ConfigOption)this.configOptions.get(i);
-            opts.put(option.getName(), option);
+        synchronized (configLock) {
+            Map opts = new HashMap();
+            for (Object configOption : this.configOptions) {
+                ConfigOption option = (ConfigOption) configOption;
+                opts.put(option.getName(), option);
+            }
+            return opts;
         }
-        return opts;
     }
 
     /**
@@ -90,36 +92,43 @@ public class ConfigSchema implements Serializable {
     }
 
     public String[] getOptionNames() {
-        int size = this.configOptions.size();
-        String[] names = new String[size];
-        for (int i=0; i<size; i++) {
-            ConfigOption option =
-                (ConfigOption)this.configOptions.get(i);
-            names[i] = option.getName();
+        synchronized (configLock) {
+            int size = this.configOptions.size();
+            String[] names = new String[size];
+            for (int i=0; i<size; i++) {
+                ConfigOption option = (ConfigOption)this.configOptions.get(i);
+                names[i] = option.getName();
+            }
+            return names;
         }
-        return names;
     }
 
     public Map getDefaultProperties() {
-        HashMap props = new HashMap();
-        for (int i=0; i<this.configOptions.size(); i++) {
-            ConfigOption opt = (ConfigOption)this.configOptions.get(i);
-            String defVal = opt.getDefault();
-            if (defVal != null) {
-                props.put(opt.getName(), defVal);
+        synchronized (configLock) {
+            HashMap props = new HashMap();
+            for (Object configOption : this.configOptions) {
+                ConfigOption opt = (ConfigOption) configOption;
+                String defVal = opt.getDefault();
+                if (defVal != null) {
+                    props.put(opt.getName(), defVal);
+                }
             }
+            return props;
         }
-        return props;
     }
 
     public void addOption(ConfigOption option){
-        this.configOptions.remove(option);
-        this.configOptions.add(option);
+        synchronized (configLock) {
+            this.configOptions.remove(option);
+            this.configOptions.add(option);
+        }
     }
 
     public void addOptions(List options){
-        this.configOptions.removeAll(options);
-        this.configOptions.addAll(options);
+        synchronized (configLock) {
+            this.configOptions.removeAll(options);
+            this.configOptions.addAll(options);
+        }
     }
     
     public byte[] encode() throws EncodingException {
@@ -128,11 +137,14 @@ public class ConfigSchema implements Serializable {
     	try {
     		final ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
     		objectStream = new ObjectOutputStream(byteStream);
-    	
-    		for (Iterator iterator = configOptions.iterator(); iterator.hasNext();) {
-    			final ConfigOption configOption = (ConfigOption) iterator.next();
-    			objectStream.writeObject(configOption);
-    		}
+
+            synchronized (configLock) {
+    		    for (Iterator iterator = configOptions.iterator(); iterator.hasNext();) {
+    			    final ConfigOption configOption = (ConfigOption) iterator.next();
+    			    objectStream.writeObject(configOption);
+    		    }
+            }
+
     		objectStream.writeObject(null);
     		objectStream.flush();
     		retVal = byteStream.toByteArray();
@@ -176,11 +188,13 @@ public class ConfigSchema implements Serializable {
      * Change the default value for a given property within the schema.
      */
     public void setDefault(String prop, String value){
-        for (int i=0; i<this.configOptions.size(); i++) {
-            ConfigOption opt = (ConfigOption)this.configOptions.get(i);
-            if (opt.getName().equals(prop)) {
-                opt.setDefault(value);
-                break;
+        synchronized(configLock) {
+            for (int i=0; i<this.configOptions.size(); i++) {
+                ConfigOption opt = (ConfigOption)this.configOptions.get(i);
+                if (opt.getName().equals(prop)) {
+                    opt.setDefault(value);
+                    break;
+                }
             }
         }
     }
