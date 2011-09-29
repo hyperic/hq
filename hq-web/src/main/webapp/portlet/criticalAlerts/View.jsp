@@ -60,7 +60,7 @@
 	}
 
 	function _hqu_<c:out value="${widgetInstanceName}${portlet.token}"/>_autoRefresh() {
-    	_hqu_<c:out value="${widgetInstanceName}${portlet.token}"/>_refreshTimeout = setTimeout("_hqu_<c:out value="${widgetInstanceName}${portlet.token}"/>_autoRefresh()", 30000);
+    	_hqu_<c:out value="${widgetInstanceName}${portlet.token}"/>_refreshTimeout = setTimeout("_hqu_<c:out value="${widgetInstanceName}${portlet.token}"/>_autoRefresh()", portlets_reload_time);
 		requestRecentAlerts<c:out value="${portlet.token}"/>();
 	}
 
