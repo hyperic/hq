@@ -4,8 +4,6 @@ import org.hyperic.util.config.ConfigResponse
 import org.json.JSONArray
 import org.json.JSONObject
 
-import javax.servlet.http.HttpServletResponse
-
 class GemfireController extends BaseController {
     def s=0,g=0,c=0;
     def static Map cpu_cache=new HashMap()
@@ -18,7 +16,7 @@ class GemfireController extends BaseController {
             _members.each{i -> members.add(HtmlUtil.escapeHtml(i))}
             log.debug("[tree] members="+members)
         }else{
-            invokeArgs.response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, liveData.errorMessage);
+            log.error(liveData.errorMessage);
         }
         render(locals:[members:members])
     }
@@ -27,14 +25,8 @@ class GemfireController extends BaseController {
         def mid=params.getOne("mid")
         //mid = (mid =~ /([^(]*).(\d*)..(\w*)..(\d*).(\d*)/).replaceAll("\$1(\$2)<\$3>:\$4/\$5")
         log.debug("mid="+mid)
-        def members
-        def member
-        try {
-            members = getMembersList(params)
-            member=((Map)members).get(mid)
-        }catch (Exception e){
-            invokeArgs.response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.message);
-        }
+        def members = getMembersList(params)
+        def member=((Map)members).get(mid)
         if(member!=null){
             render(locals:[member:member])
         }else{
@@ -86,14 +78,8 @@ class GemfireController extends BaseController {
     }
 
     def membersList(params) {
-        def members
-        def name
-        try{
-            members = getMembersList(params)
-            name = getGMFSName()
-        }catch (Exception e){
-            invokeArgs.response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.message);
-        }
+        def members = getMembersList(params)
+        def name = getGMFSName()
         render(locals:[members:members,systemName:name, s:s, g:g, c:c])
     }
 
@@ -104,7 +90,7 @@ class GemfireController extends BaseController {
             name = liveData.objectResult
             log.debug("name="+name)
         }else{
-            throw new RuntimeException(liveData.errorMessage)
+            log.error(liveData.errorMessage);
         }
         name
     }
@@ -115,7 +101,7 @@ class GemfireController extends BaseController {
         if(!liveData.hasError()){
             members = liveData.objectResult
         }else{
-            throw new RuntimeException(liveData.errorMessage)
+            log.error(liveData.errorMessage);
         }
 
         translate(members)
