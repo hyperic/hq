@@ -454,25 +454,21 @@ public class MxUtil {
             map.put(Context.SECURITY_CREDENTIALS, pass);
         }
 
-        JMXConnector connector =
-            JMXConnectorFactory.connect(url, map);
-
+        JMXConnector connector = JMXConnectorFactory.connect(url, map);
+        if (log.isDebugEnabled()) {
+            log.debug("created new JMXConnector url=" + url +
+                      ", classloader=" + Thread.currentThread().getContextClassLoader());
+        }
         return connector;
     }
 
     private static void disconnect(String jmxUrl) {
         Object obj = cache.remove(jmxUrl);
         if (obj != null) {
-            JMXConnector connector =
-                ((ConnectorInstance)obj).connector;
-            try {
-                connector.close();
-                log.debug("Closed previous connector (" +
-                          address(connector) + ") for: " + jmxUrl);
-            } catch (IOException e) {
-                log.debug("Previous connector (" +
-                           address(connector) + ") already closed (" +
-                           e.getMessage() + ") for: " + jmxUrl);
+            JMXConnector connector = ((ConnectorInstance)obj).connector;
+            close(connector);
+            if (log.isDebugEnabled()) {
+                log.debug("Closed previous connector (" + address(connector) + ") for: " + jmxUrl);
             }
         }        
     }
@@ -558,29 +554,31 @@ public class MxUtil {
             }
         }
     }
-
-    public static Object getValue(Properties config, String objectName,
-                                  String attribute)
-        throws MalformedURLException,
-               MalformedObjectNameException,
-               IOException,
-               MBeanException,
-               AttributeNotFoundException,
-               InstanceNotFoundException,
-               ReflectionException,
-               PluginException
-    {
+    
+    public static Object getValue(Properties config, String objectName, String attribute)
+    throws MalformedURLException,
+           MalformedObjectNameException,
+           IOException,
+           MBeanException,
+           AttributeNotFoundException,
+           InstanceNotFoundException,
+           ReflectionException,
+           PluginException {
         ObjectName objName = new ObjectName(objectName);
-        MBeanServerConnection mServer = getMBeanServer(config);
-
-        if (attribute.startsWith(STATS_PREFIX)) {
-            return getJSR77Statistic(mServer, objName, attribute);
-        }
-        else if (attribute.startsWith(COMPOSITE_PREFIX)) {
-            return getCompositeMetric(mServer, objName, attribute);
-        }
-        else {
-            return mServer.getAttribute(objName, attribute);
+        JMXConnector connector = null;
+        try {
+            connector = getMBeanConnector(config);
+            if (attribute.startsWith(STATS_PREFIX)) {
+                return getJSR77Statistic(connector.getMBeanServerConnection(), objName, attribute);
+            }
+            else if (attribute.startsWith(COMPOSITE_PREFIX)) {
+                return getCompositeMetric(connector.getMBeanServerConnection(), objName, attribute);
+            }
+            else {
+                return connector.getMBeanServerConnection().getAttribute(objName, attribute);
+            }
+        } finally {
+            close(connector);
         }
     }
 
@@ -682,12 +680,27 @@ public class MxUtil {
         } catch (IOException e) {
             throw error(objectName, e, method);
         } finally {
-            if (connector != null) {
-                try {
-                    connector.close();
-                } catch (IOException e) {
-                    throw error(objectName, e, method);
-                }
+            close(connector, objectName, method);
+        }
+    }
+    
+    public static void close(JMXConnector connector) {
+        if (connector != null) {
+            try {
+                connector.close();
+            } catch (IOException e) {
+                log.error("error closing connector: " + e, e);
+            }
+        }
+    }
+    
+    public static void close(JMXConnector connector, String objectName, String method) {
+        if (connector != null) {
+            try {
+                connector.close();
+            } catch (IOException e) {
+                log.error("error closing connector " + e +
+                          ".  objectName=" + objectName + "method=" + method, e);
             }
         }
     }

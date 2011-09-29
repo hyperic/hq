@@ -145,24 +145,21 @@ public class EmbeddedActiveMQServerDetector
     protected List discoverServices(ConfigResponse serverConfig)
             throws PluginException {
 
-        JMXConnector connector;
+        JMXConnector connector = null;
         MBeanServerConnection mServer;
 
         try {
             connector = MxUtil.getMBeanConnector(serverConfig.toProperties());
             mServer = connector.getMBeanServerConnection();
         } catch (Exception e) {
+            MxUtil.close(connector);
             throw new PluginException(e.getMessage(), e);
         }
 
         try {
             return _discoverMxServices(mServer, serverConfig);
         } finally {
-            try {
-                connector.close();
-            } catch (IOException e) {
-                throw new PluginException(e.getMessage(), e);
-            }
+            MxUtil.close(connector);
         }
     }
 
