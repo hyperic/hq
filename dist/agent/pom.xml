@@ -148,6 +148,13 @@
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq.agent.handler</groupId>
+			<artifactId>hq-agent-handler-ha</artifactId>
+			<version>${project.version}</version>
+			<classifier>agent</classifier>
+		    <type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>org.hyperic.hq.agent.handler</groupId>
 			<artifactId>hq-agent-handler-measurement</artifactId>
 			<version>${project.version}</version>
 			<classifier>agent</classifier>
