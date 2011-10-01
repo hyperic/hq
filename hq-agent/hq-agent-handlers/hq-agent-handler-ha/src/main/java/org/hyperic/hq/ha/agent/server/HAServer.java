@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.logging.Log;
@@ -44,7 +45,7 @@ import org.hyperic.hq.agent.server.AgentStartException;
 public class HAServer implements AgentServerHandler, Runnable {
 
     private Log log = LogFactory.getLog(HAServer.class);
-    private static boolean STOP = false;
+    private static final AtomicBoolean STOP = new AtomicBoolean(false);
     private static File flag;
 
     public String[] getCommandSet() {
@@ -79,21 +80,25 @@ public class HAServer implements AgentServerHandler, Runnable {
 
     public void shutdown() {
         log.info("shutdown()");
-        STOP = true;
+        STOP.set(true);
     }
 
     public void run() {
         log.info("run()");
-        while (!STOP) {
-            if (!flag.exists()) {
-                log.error("PING....");
-            } else {
-                log.error("pong....");
-            }
+        while (!STOP.get()) {
             try {
-                Thread.sleep(5 * 1000);
-            } catch (InterruptedException ex) {
-                STOP = true;
+                if (!flag.exists()) {
+                    log.error("PING....");
+                } else {
+                    log.error("pong....");
+                }
+                try {
+                    Thread.sleep(5 * 1000);
+                } catch (InterruptedException ex) {
+                    STOP.set(true);
+                    log.error(ex.getMessage(), ex);
+                }
+            } catch (Throwable ex) {
                 log.error(ex.getMessage(), ex);
             }
         }
