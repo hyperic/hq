@@ -89,11 +89,11 @@ public class SystemMeasurementPlugin
             double avail;
 
             int value = (int)super.getValue(metric).getValue();
-
-            if ((value & NetFlags.IFF_UP) > 0) {
+            if (((value & NetFlags.IFF_UP) > 0) && ((value & NetFlags.IFF_RUNNING) == NetFlags.IFF_RUNNING)) {
                 avail = Metric.AVAIL_UP;
-            }
-            else {
+            } else if ((value & NetFlags.IFF_UP) > 0 ) {
+                avail = Metric.AVAIL_WARN;
+            } else {
                 avail = Metric.AVAIL_DOWN;
             }
 
