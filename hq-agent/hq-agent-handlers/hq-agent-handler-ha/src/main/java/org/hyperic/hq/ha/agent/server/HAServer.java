@@ -47,6 +47,7 @@ public class HAServer implements AgentServerHandler, Runnable {
     private Log log = LogFactory.getLog(HAServer.class);
     private static final AtomicBoolean STOP = new AtomicBoolean(false);
     private static File flag;
+    private VMGuestAppMonitor appMon;
 
     public String[] getCommandSet() {
         return new String[]{};
@@ -72,6 +73,8 @@ public class HAServer implements AgentServerHandler, Runnable {
         }
         try {
             log.info("flag = " + flag.getCanonicalPath());
+            appMon = new VMGuestAppMonitor();
+            appMon.enable();
         } catch (IOException ex) {
             log.error(ex.getMessage(), ex);
         }
@@ -80,6 +83,7 @@ public class HAServer implements AgentServerHandler, Runnable {
 
     public void shutdown() {
         log.info("shutdown()");
+        appMon.disable();
         STOP.set(true);
     }
 
@@ -87,11 +91,16 @@ public class HAServer implements AgentServerHandler, Runnable {
         log.info("run()");
         while (!STOP.get()) {
             try {
-                if (!flag.exists()) {
-                    log.error("PING....");
-                } else {
-                    log.error("pong....");
+                log.info("status: " + appMon.getAppStatus() + " isEnabled:" + appMon.isEnabled());
+                if (appMon.isEnabled() == 1) {
+                    if (!flag.exists()) {
+                        log.error("PING....");
+                        appMon.markActive();
+                    } else {
+                        log.error("pong....");
+                    }
                 }
+
                 try {
                     Thread.sleep(5 * 1000);
                 } catch (InterruptedException ex) {
