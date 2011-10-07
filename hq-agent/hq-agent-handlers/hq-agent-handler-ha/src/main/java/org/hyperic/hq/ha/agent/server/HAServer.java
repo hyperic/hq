@@ -25,13 +25,10 @@
 package org.hyperic.hq.ha.agent.server;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentAPIInfo;
@@ -66,19 +63,22 @@ public class HAServer implements AgentServerHandler, Runnable {
 
     public void startup(AgentDaemon agent) throws AgentStartException {
         log.info("startup()");
-        String data = agent.getBootConfig().getBootProperties().getProperty(AgentConfig.PROP_DATADIR[0]);
-        flag = new File(data, "stopHeartbeat");
-        if (flag.exists()) {
-            flag.delete();
-        }
         try {
+            String data = agent.getBootConfig().getBootProperties().getProperty(AgentConfig.PROP_DATADIR[0]);
+            flag = new File(data, "stopHeartbeat");
+            if (flag.exists()) {
+                flag.delete();
+            }
             log.info("flag = " + flag.getCanonicalPath());
             appMon = new VMGuestAppMonitor();
             appMon.enable();
-        } catch (IOException ex) {
+            new Thread(this).start();
+        } catch (UnsatisfiedLinkError ex) {
+            log.error("java.library.path = '"+System.getProperty("java.library.path") +"'");
+            log.error(ex.getMessage(), ex);
+        } catch (Throwable ex) {
             log.error(ex.getMessage(), ex);
         }
-        new Thread(this).start();
     }
 
     public void shutdown() {
