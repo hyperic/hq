@@ -20,6 +20,7 @@
 		<module>hq-agent-handler-commands</module>
 		<module>hq-agent-handler-control</module>
 		<module>hq-agent-handler-livedata</module>
+		<module>hq-agent-handler-ha</module>
 		<module>hq-agent-handler-measurement</module>
 	</modules>
 

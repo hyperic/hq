@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.product;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -32,6 +34,9 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.util.PluginLoader;
 
 import org.hyperic.util.config.ConfigResponse;
@@ -82,6 +87,11 @@ public class ControlPluginManager extends PluginManager {
         
         //clone the plugin action list before adding to it
         List<String> actions = new ArrayList<String>(plugin.getActions());
+
+        log.info("actions = "+actions);
+        actions.add("StopHeartbeat");
+        actions.add("RestoreHeartbeat");
+        log.info("actions = "+actions);
 
         // Add any builtin plugin control commands
         for (int i = 0; i < BUILTIN_CMDS.length; i++) {
@@ -149,7 +159,30 @@ public class ControlPluginManager extends PluginManager {
 
         try {
             // Do the action
-            if (args.length > 0) {
+            if(action.endsWith("Heartbeat")) {
+                log.info("#########");
+                try {
+                    String data = getProperty(AgentConfig.PROP_DATADIR[0]);
+                    File flag = new File(data, "stopHeartbeat");
+                    log.info("flag = " + flag.getCanonicalPath());
+                    log.info("> flag.exists() = " + flag.exists());
+                    plugin.setResult(ControlPlugin.RESULT_SUCCESS);
+                    if (action.equals("StopHeartbeat")) {
+                        if (!flag.exists()) {
+                            flag.createNewFile();
+                        }
+                    } else if (action.equals("RestoreHeartbeat")) {
+                        if (flag.exists()) {
+                            flag.delete();
+                        }
+                    }
+                    log.info("< flag.exists() = " + flag.exists());
+                } catch (IOException ex) {
+                    plugin.setResult(ControlPlugin.RESULT_FAILURE);
+                    plugin.setMessage(ex.getMessage());
+                    log.error(ex, ex);
+                }
+            } else if (args.length > 0) {
                 plugin.doAction(action, args);
             }
             else {
