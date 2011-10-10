@@ -116,8 +116,8 @@ public class ProductBossImpl implements ProductBoss {
             Map<String,Object> health = new HashMap<String,Object>();
             health.put("region", cache.getName());
             health.put("size", new Integer(cache.getSize()));
-            health.put("hits", new Integer(cache.getHitCount()));
-            health.put("misses", new Integer(cache.getMissCountNotFound()));
+            health.put("hits", new Long(cache.getStatistics().getCacheHits()));
+            health.put("misses", new Long(cache.getStatistics().getCacheMisses()));
             healths.add(health);
         }
         return healths;

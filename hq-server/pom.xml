@@ -16,6 +16,10 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>antlr</groupId>
+			<artifactId>antlr</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.hyperic.hq</groupId>
 			<artifactId>hq-common</artifactId>
 			<version>${project.version}</version>
@@ -70,10 +74,9 @@
   			<groupId>org.springframework.security</groupId>
   			<artifactId>spring-security-core</artifactId>
 		</dependency>
-		<!--  We maintain a patched version of ehcache -->
 		<dependency>
-			<groupId>org.hyperic</groupId>
-			<artifactId>ehcache</artifactId>
+			<groupId>net.sf.ehcache</groupId>
+			<artifactId>ehcache-core</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -94,6 +97,10 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-orm</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>javassist</groupId>
+			<artifactId>javassist</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>javax.mail</groupId>
@@ -135,7 +142,8 @@
 		<dependency>
 			<groupId>org.apache.tomcat</groupId>
 			<artifactId>tomcat-jdbc</artifactId>
-			<scope>runtime</scope>
+			<!--<scope>runtime</scope>-->
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.tomcat</groupId>

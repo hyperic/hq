@@ -33,6 +33,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.measurement.server.session.SRN;
 import org.hyperic.hq.measurement.server.session.Measurement;
+import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.measurement.agent.commands.GetMeasurements_args;
 import org.hyperic.hq.measurement.agent.commands.GetMeasurements_result;
 import org.hyperic.hq.measurement.agent.commands.ScheduleMeasurements_args;
@@ -64,8 +65,14 @@ public class AgentMonitor
     private MeasurementCommandsClientFactory measurementCommandsClientFactory;
     private AgentCommandsClientFactory agentCommandsClientFactory;
     
+    // TODO: autowiring templateManager outside of constructor to pass through
+    //       circular reference.
     @Autowired
-    public AgentMonitor(MeasurementCommandsClientFactory measurementCommandsClientFactory, AgentCommandsClientFactory agentCommandsClientFactory) {
+    private TemplateManager templateManager;
+    
+    @Autowired
+    public AgentMonitor(MeasurementCommandsClientFactory measurementCommandsClientFactory,
+                        AgentCommandsClientFactory agentCommandsClientFactory) {
         this.measurementCommandsClientFactory = measurementCommandsClientFactory;
         this.agentCommandsClientFactory = agentCommandsClientFactory;
     } 
@@ -110,7 +117,8 @@ public class AgentMonitor
         args.setSRN(srn);
         for(int i=0; i<schedule.length; i++){
             Measurement m = schedule[i];
-            String category = m.getTemplate().getCategory().getName();
+//            String category = m.getTemplate().getCategory().getName();
+            String category = templateManager.getCategoryNameFromTemplateId(m.getTemplate().getId());
             args.addMeasurement(m.getDsn(), m.getInterval(),
                                 m.getId().intValue(), m.getId().intValue(),
                                 category);

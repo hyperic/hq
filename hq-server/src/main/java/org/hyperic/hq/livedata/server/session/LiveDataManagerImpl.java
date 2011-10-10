@@ -32,10 +32,6 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.Element;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentRemoteException;
@@ -51,6 +47,7 @@ import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.cache.CacheDataManager;
 import org.hyperic.hq.livedata.FormatType;
 import org.hyperic.hq.livedata.LiveDataFormatter;
 import org.hyperic.hq.livedata.agent.client.LiveDataCommandsClient;
@@ -88,7 +85,6 @@ public class LiveDataManagerImpl implements LiveDataManager {
     private Log log = LogFactory.getLog(LiveDataManagerImpl.class);
 
     private LiveDataPluginManager manager;
-    private Cache cache;
 
     private final String CACHENAME = "LiveData";
     private final long NO_CACHE = -1;
@@ -98,13 +94,17 @@ public class LiveDataManagerImpl implements LiveDataManager {
     private ConfigManager configManager;
 
     private LiveDataCommandsClientFactory liveDataCommandsClientFactory;
+    
+    CacheDataManager cacheDataManager;
 
     @Autowired
     public LiveDataManagerImpl(ProductManager productManager, ConfigManager configManager,
-                               LiveDataCommandsClientFactory liveDataCommandsClientFactory) {
+                               LiveDataCommandsClientFactory liveDataCommandsClientFactory,
+                               CacheDataManager cacheDataManager) {
         this.productManager = productManager;
         this.configManager = configManager;
         this.liveDataCommandsClientFactory = liveDataCommandsClientFactory;
+        this.cacheDataManager = cacheDataManager;
     }
 
     @PostConstruct
@@ -113,7 +113,6 @@ public class LiveDataManagerImpl implements LiveDataManager {
         try {
             manager = (LiveDataPluginManager) productManager
                 .getPluginManager(ProductPlugin.TYPE_LIVE_DATA);
-            cache = CacheManager.getInstance().getCache(CACHENAME);
         } catch (Exception e) {
             log.error("Unable to initialize LiveData manager", e);
         }
@@ -181,8 +180,7 @@ public class LiveDataManagerImpl implements LiveDataManager {
     private void putElement(LiveDataCommand[] cmds, LiveDataResult[] res) {
         LiveDataCacheKey key = new LiveDataCacheKey(cmds);
         LiveDataCacheObject obj = new LiveDataCacheObject(res);
-        Element e = new Element(key, obj);
-        cache.put(e);
+        cacheDataManager.put(CACHENAME, key, obj);
     }
 
     private LiveDataResult getElement(LiveDataCommand cmd, long timeout) {
@@ -192,16 +190,15 @@ public class LiveDataManagerImpl implements LiveDataManager {
 
     private LiveDataResult[] getElement(LiveDataCommand[] cmds, long timeout) {
         LiveDataCacheKey key = new LiveDataCacheKey(cmds);
-        Element e = cache.get(key);
-        if (e == null) {
+        Object value = cacheDataManager.get(CACHENAME, key);
+        if(value == null)
             return null;
-        }
 
-        LiveDataCacheObject obj = (LiveDataCacheObject) e.getObjectValue();
+        LiveDataCacheObject obj = (LiveDataCacheObject) value;
 
         if (System.currentTimeMillis() > obj.getCtime() + timeout) {
             // Object is expired
-            cache.remove(key);
+            cacheDataManager.remove(CACHENAME, key);
             return null;
         }
 

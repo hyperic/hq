@@ -125,6 +125,10 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     private MeasurementDAO measurementDAO;
     private MeasurementTemplateDAO measurementTemplateDAO;
     private AgentManager agentManager;
+    
+    // TODO: autowiring agentMonitor outside of constructor to pass through
+    // circular reference.
+    @Autowired
     private AgentMonitor agentMonitor;
     private ApplicationContext applicationContext;
 
@@ -137,7 +141,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                                   ConfigManager configManager, MetricDataCache metricDataCache,
                                   MeasurementDAO measurementDAO,
                                   MeasurementTemplateDAO measurementTemplateDAO,
-                                  AgentManager agentManager, AgentMonitor agentMonitor) {
+                                  AgentManager agentManager) {
         this.resourceManager = resourceManager;
         this.resourceGroupManager = resourceGroupManager;
         this.applicationDAO = applicationDAO;
@@ -148,7 +152,6 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         this.measurementDAO = measurementDAO;
         this.measurementTemplateDAO = measurementTemplateDAO;
         this.agentManager = agentManager;
-        this.agentMonitor = agentMonitor;
     }
 
     // TODO: Resolve circular dependency

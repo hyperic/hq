@@ -87,6 +87,16 @@ public class TemplateManagerImpl implements TemplateManager {
         this.zEventManager = zEventManager;
         this.transactionRetry = transactionRetry;
     }
+    
+    /*
+     * (non-Javadoc)
+     * @see org.hyperic.hq.measurement.shared.TemplateManager#getCategoryNameFromTemplateId(java.lang.Integer)
+     */
+    @Transactional(readOnly = true)
+    public String getCategoryNameFromTemplateId(Integer id) {
+        return measurementTemplateDAO.get(id).getCategory().getName();
+    }
+    
 
     /**
      * Get a MeasurementTemplate

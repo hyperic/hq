@@ -44,6 +44,15 @@ import org.hyperic.util.pager.PageControl;
  * Local interface for TemplateManager.
  */
 public interface TemplateManager {
+    
+    /**
+     * Get measurement category name.
+     * 
+     * @param id Template id
+     * @return Category name
+     */
+    public String getCategoryNameFromTemplateId(Integer id);
+    
     /**
      * Get a MeasurementTemplate
      */

@@ -381,6 +381,7 @@ public class ResourceManagerImpl implements ResourceManager {
      */
     @Transactional(readOnly = true)
     public Resource findResource(AppdefEntityID aeid) {
+        Resource rtn = null;
         try {
             final Integer id = aeid.getId();
             switch (aeid.getType()) {
@@ -389,29 +390,37 @@ public class ResourceManagerImpl implements ResourceManager {
                     if (server == null) {
                         return null;
                     }
-                    return server.getResource();
+                    rtn = server.getResource();
+                    break;
                 case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                    return findPlatformById(id).getResource();
+                    rtn = findPlatformById(id).getResource();
+                    break;
                 case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
                     org.hyperic.hq.appdef.server.session.Service service = serviceDAO.get(id);
                     if (service == null) {
                         return null;
                     }
-                    return service.getResource();
+                    rtn = service.getResource();
+                    break;
                 case AppdefEntityConstants.APPDEF_TYPE_GROUP:
                     // XXX not sure about appdef group mapping since 4.0
-                    return resourceDAO.findByInstanceId(aeid.getAuthzTypeId(), id);
+                    rtn = resourceDAO.findByInstanceId(aeid.getAuthzTypeId(), id);
+                    break;
                 case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
                     AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
-                    return findApplicationById(overlord, id).getResource();
+                    rtn = findApplicationById(overlord, id).getResource();
+                    break;
                 default:
-                    return resourceDAO.findByInstanceId(aeid.getAuthzTypeId(), id);
+                    rtn = resourceDAO.findByInstanceId(aeid.getAuthzTypeId(), id);
+                    break;
             }
         } catch (ApplicationNotFoundException e) {
         } catch (PermissionException e) {
         } catch (PlatformNotFoundException e) {
         }
-        return null;
+        // return real object instead of a proxy
+        return (rtn == null) ? null : getResourceById(rtn.getId());
+
     }
 
     private Application findApplicationById(AuthzSubject subject, Integer id)
