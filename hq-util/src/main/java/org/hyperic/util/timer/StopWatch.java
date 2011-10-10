@@ -25,45 +25,45 @@
 
 package org.hyperic.util.timer;
 
-import org.hyperic.util.StringUtil;
-
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+
+import org.hyperic.util.StringUtil;
 
 public class StopWatch {
 
     private long _start;
     private long _end;
-    private Map _markerMap;
+    private Map<String, LinkedList<TimeSlice>> _markerMap;
     
     public StopWatch() {
         reset();
     }
 
     public void markTimeBegin (String marker) {
-        List list;
-        if (null == (list = (List)_markerMap.get(marker))) {
-            list = new ArrayList();
+        LinkedList<TimeSlice> list;
+        if (null == (list = _markerMap.get(marker))) {
+            list = new LinkedList<TimeSlice>();
             _markerMap.put(marker, list);
         }
         list.add(new TimeSlice(marker));
     }
 
     public void markTimeEnd (String marker) {
-        if (!_markerMap.containsKey(marker)) {
+        final LinkedList<TimeSlice> list = _markerMap.get(marker);
+        if (list == null) {
             throw new IllegalArgumentException("Invalid marker");
         }
-        List list = (List)_markerMap.get(marker);
-        TimeSlice ts = (TimeSlice)list.get(list.size()-1);
+        final TimeSlice ts = list.getLast();
         ts.setFinished();
     }
 
     public StopWatch(long start) {
         _start = start;
-        _markerMap = new HashMap();
+        _markerMap = new HashMap<String, LinkedList<TimeSlice>>();
     }
 
     public long reset() {
@@ -71,7 +71,7 @@ public class StopWatch {
             return this.getElapsed();
         } finally {
             _start = now();
-            _markerMap = new HashMap();
+            _markerMap = new HashMap<String, LinkedList<TimeSlice>>();
         }
     }
     
@@ -85,17 +85,14 @@ public class StopWatch {
     }
 
     public String toString() {
-        long elap = this.getElapsed();
-
-        StringBuffer buf = new StringBuffer();
+        final long elap = getElapsed();
+        final StringBuilder buf = new StringBuilder(64);
         buf.append(StringUtil.formatDuration(elap, 2, true));
-
         if (_markerMap.size() > 0) {
             buf.append(" { Markers: ");
-            for (Iterator i=_markerMap.entrySet().iterator();i.hasNext();) {
-                Map.Entry entry = (Map.Entry)i.next();
-                final String marker = (String)entry.getKey();
-                final List list = (List)entry.getValue();
+            for (Entry<String, LinkedList<TimeSlice>> entry : _markerMap.entrySet()) {
+                final String marker = entry.getKey();
+                final LinkedList<TimeSlice> list = entry.getValue();
                 writeBuf(marker, list, buf);
             }
             buf.append(" } ");
@@ -103,18 +100,20 @@ public class StopWatch {
         return buf.toString();
     }
 
-    private void writeBuf(String marker, List tsList, StringBuffer buf) {
+    private void writeBuf(String marker, List<TimeSlice> tsList, StringBuilder buf) {
         long total = -1;
-        for (Iterator it=tsList.iterator();it.hasNext();) {
-            TimeSlice ts = (TimeSlice)it.next();
-            Long elapsed = ts.getElapsed();
+        for (final TimeSlice ts : tsList) {
+            final Long elapsed = ts.getElapsed();
             if (elapsed == null) {
                 continue;
+            }
+            if (total == -1) {
+                total = 0;
             }
             total += elapsed.longValue();
         }
         buf.append(" [").append(marker).append("=")
-           .append((total < 0) ? "null" : StringUtil.formatDuration(total, 2, true))
+           .append((total == -1) ? "null" : StringUtil.formatDuration(total, 2, true))
            .append("]");
     }
 
@@ -122,20 +121,17 @@ public class StopWatch {
         String _marker;
         long _begin;
         long _end;
-
         public TimeSlice (String marker) {
             _marker = marker;
             _begin = now();
             _end = 0;
         }
-
         public void setFinished () {
             _end= now();
         }
-        
         public Long getElapsed() {
             if (_end == 0) {
-                return null;
+                return now();
             }
             return new Long(_end - _begin);
         }
