@@ -102,19 +102,19 @@ public class ConfigManagerImpl implements ConfigManager {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
                 Platform platform = platformDAO.get(id.getId());
                 if(platform != null) {
-                    config = platform.getConfigResponse();
+                    config = configResponseDAO.get(platform.getConfigResponse().getId());
                 }
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
                 Server server = serverDAO.get(id.getId());
                 if(server != null) {
-                    config = server.getConfigResponse();
+                    config = configResponseDAO.get(server.getConfigResponse().getId());
                 }
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
                 Service service = serviceDAO.get(id.getId());
                 if(service != null) {
-                    config = service.getConfigResponse();
+                    config = configResponseDAO.get(service.getConfigResponse().getId());
                 }
                 break;
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:

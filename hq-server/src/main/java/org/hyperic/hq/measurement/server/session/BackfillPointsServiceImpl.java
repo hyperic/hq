@@ -145,6 +145,9 @@ public class BackfillPointsServiceImpl implements BackfillPointsService {
                                            long timems, boolean restarting) {
         final boolean debug = log.isDebugEnabled();
         final Agent agent = agentDAO.get(agentId);
+        if (agent == null) {
+            return;
+        }
         final Collection<Platform> platforms = agent.getPlatforms();
         for (final Platform platform : platforms) {
             if (debug) {

@@ -1100,6 +1100,9 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     throws AgentNotFoundException, PermissionException, AgentConnectionException, IOException,
            ConfigPropertyException, AgentRemoteException {
         final Agent agent = agentDao.get(agentId);
+        if (agent == null) {
+            throw new AgentNotFoundException("agent with id=" + agentId + " could not be found, ping failed");
+        }
         return pingAgent(subject, agent);
     }
 

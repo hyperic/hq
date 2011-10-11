@@ -1151,6 +1151,9 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     
     public void disableMeasurementsForDeletion(AuthzSubject subject, Agent agent,
                     AppdefEntityID[] ids) throws PermissionException {
+        if (subject == null || agent == null) {
+            return;
+        }
         List<Resource> resources = new ArrayList<Resource>();
         for (int i = 0; i < ids.length; i++) {
             permissionManager.checkModifyPermission(subject.getId(), ids[i]);
