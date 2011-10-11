@@ -1421,7 +1421,13 @@ public class AgentClient {
     private static boolean checkCanWriteToLog (Properties props) {
 
         String logFileName = props.getProperty("agent.logFile");
+        if (logFileName == null) {
+            SYSTEM_ERR.println("agent.logFile not set. "
+                + "\nCannot start HQ agent.");
+            return false;
+        }
         File logFile = new File(logFileName);
+
         File logDir = logFile.getParentFile();
         if (!logDir.exists()) {
             if (!logDir.mkdirs()) {
