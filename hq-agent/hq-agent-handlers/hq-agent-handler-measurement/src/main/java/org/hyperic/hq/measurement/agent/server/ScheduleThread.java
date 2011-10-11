@@ -627,8 +627,11 @@ public class ScheduleThread
                     GenericPlugin p = manager.getPlugin(tmpl.plugin).getProductPlugin();
                     plugin = p.getName();
                 } catch (PluginNotFoundException e) {
-                    // Proxied plugin?
-                    plugin = tmpl.plugin;
+                    if (log.isDebugEnabled()) {
+                        log.debug("Could not find plugin name from template '" + tmpl.plugin +
+                                  "'. Associated plugin might not be initialized yet.");
+                    }
+                    continue;
                 }
 
                 executor = executors.get(plugin);
