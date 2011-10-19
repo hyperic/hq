@@ -8,7 +8,7 @@
 	<artifactId>weblogic-plugin</artifactId>
 	<packaging>jar</packaging>
 	<name>Hyperic HQ Plugin - Weblogic Plugin</name>
-	<version>4.6</version>
+	<version>4.6.0.1.BUILD-SNAPSHOT</version>
 	<properties>
 		<junit.version>4.6</junit.version>
 	</properties>
