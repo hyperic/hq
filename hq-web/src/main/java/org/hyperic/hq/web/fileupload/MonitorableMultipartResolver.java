@@ -53,7 +53,8 @@ public class MonitorableMultipartResolver extends CommonsMultipartResolver {
 			MultipartParsingResult parsingResult = parseFileItems(fileItems, encoding);
 			
 			return new DefaultMultipartHttpServletRequest(request, 
-					parsingResult.getMultipartFiles(), parsingResult.getMultipartParameters());
+					parsingResult.getMultipartFiles(), parsingResult.getMultipartParameters(),
+					parsingResult.getMultipartParameterContentTypes());
 		} catch (FileUploadBase.SizeLimitExceededException ex) {
 			throw new MaxUploadSizeExceededException(fileUpload.getSizeMax(), ex);
 		} catch (FileUploadException ex) {
