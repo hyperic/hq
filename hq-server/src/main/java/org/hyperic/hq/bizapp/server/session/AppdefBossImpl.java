@@ -2133,6 +2133,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * @param entity for use in group member filtering.
      * @return List containing AppdefGroupValue.
      * 
+     * XXX needs to be optimized
      */
     @Transactional(readOnly = true)
     public PageList<AppdefGroupValue> findAllGroupsMemberExclusive(int sessionId, PageControl pc,

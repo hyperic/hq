@@ -25,7 +25,6 @@
  */
 package org.hyperic.hq.measurement.shared;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -167,7 +166,9 @@ public interface DataManager {
     /**
      * Get data points from cache only
      */
-    public ArrayList<Integer> getCachedDataPoints(Integer[] ids, Map<Integer, MetricValue> data, long timestamp);
+    public Collection<Integer> getCachedDataPoints(Collection<Integer> mids,
+                                                   Map<Integer, MetricValue> data,
+                                                   long timestamp);
 
     /**
      * Get a Baseline data.
@@ -217,6 +218,6 @@ public interface DataManager {
      * 
      * 
      */
-    public Collection getRawData(Measurement m, long begin, long end, AtomicLong publishedInterval);
+    public Collection<HighLowMetricValue> getRawData(Measurement m, long begin, long end, AtomicLong publishedInterval);
 
 }
