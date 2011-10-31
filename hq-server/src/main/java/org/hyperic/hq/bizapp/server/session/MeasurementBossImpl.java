@@ -827,10 +827,10 @@ public class MeasurementBossImpl implements MeasurementBoss {
         long after = System.currentTimeMillis() - (3 * interval);
         Map<Integer, MetricValue> data = dataManager.getLastDataPoints(measurements, after);
 
-        for (int i = 0; i < measurements.size(); i++) {
-            Measurement m = (Measurement) measurements.get(i);
+        int i=0;
+        for (final Measurement m : measurements) {
             if (m != null && data.containsKey(m.getId())) {
-                ret[i] = (MetricValue) data.get(m.getId());
+                ret[i++] = (MetricValue) data.get(m.getId());
             }
         }
 
@@ -855,11 +855,9 @@ public class MeasurementBossImpl implements MeasurementBoss {
             }
         }
 
-        Integer[] mids = new Integer[metrics.size()];
-        int i = 0;
-        for (Iterator<Measurement> it = metrics.iterator(); it.hasNext();) {
-            Measurement m = it.next();
-            mids[i++] = m.getId();
+        Collection<Integer> mids = new ArrayList<Integer>(metrics.size());
+        for (final Measurement m : metrics) {
+            mids.add(m.getId());
         }
 
         final long after = System.currentTimeMillis() - (3 * interval);

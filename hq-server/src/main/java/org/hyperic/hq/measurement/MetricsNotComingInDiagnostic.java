@@ -130,7 +130,7 @@ implements DiagnosticObject, ApplicationContextAware, ApplicationListener<Contex
     }
 
     public Boolean getDisabled() {
-        return this.disabled;
+        return disabled.get();
     }
     
     public void setDisabled(Boolean disabled) {

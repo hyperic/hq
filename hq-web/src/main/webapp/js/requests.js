@@ -2,6 +2,7 @@
 {
     var rtimer = null;
 
+    var portlets_reload_time=2*60*1000;
 
     function showProblemResponse(response, args) {
         var probResp = response;
