@@ -33,6 +33,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.logging.Log;
@@ -87,7 +88,7 @@ implements DiagnosticObject, ApplicationContextAware, ApplicationListener<Contex
     private PlatformManager platformManager;
     private MetricDataCache metricDataCache;
     private ApplicationContext ctx;
-    private Boolean disabled;
+    private AtomicBoolean disabled = new AtomicBoolean(false);
 
     @Autowired
     public MetricsNotComingInDiagnostic(DiagnosticsLogger diagnosticsLogger,
@@ -135,7 +136,7 @@ implements DiagnosticObject, ApplicationContextAware, ApplicationListener<Contex
     
     public void setDisabled(Boolean disabled) {
         log.info("Setting disabled flag to " + disabled.toString());
-        this.disabled = disabled;
+        this.disabled.set(disabled);
     }
     
     private String getReport(final boolean isVerbose) {
