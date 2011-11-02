@@ -29,6 +29,7 @@ package org.hyperic.bootstrap;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -92,14 +93,13 @@ public class HQServer {
                 return;
             }
         } catch (SigarException e) {
-            log.error("Unable to determine if HQ server is already running.  Cause: " +
-                      e.getMessage());
+            log.error("Unable to determine if HQ server is already running.  Cause: " + e, e);
             return;
         }
         try {
             serverConfigurator.configure();
         } catch (Exception e) {
-            log.error("Error configuring server: " + e.getMessage());
+            log.error("Error configuring server: " + e, e);
         }
         if (embeddedDatabaseController.shouldUse()) {
             log.debug("Calling startBuiltinDB");
@@ -110,7 +110,7 @@ public class HQServer {
                     return;
                 }
             } catch (Exception e) {
-                log.error("Error starting built-in database: " + e.getMessage());
+                log.error("Error starting built-in database: " + e, e);
                 return;
             }
             log.debug("startBuiltinDB completed");
@@ -120,7 +120,7 @@ public class HQServer {
         try {
             upgradeDB();
         } catch (Exception e) {
-            log.error("Error running database upgrade routine: " + e.getMessage());
+            log.error("Error running database upgrade routine: " + e, e);
             return;
         }
         
@@ -138,14 +138,14 @@ public class HQServer {
         try {
             engineController.stop();
         } catch (Exception e) {
-            log.error("Error stopping HQ server: " + e.getMessage());
+            log.error("Error stopping HQ server: " + e, e);
             return;
         }
         if (embeddedDatabaseController.shouldUse()) {
             try {
                 embeddedDatabaseController.stopBuiltInDB();
             } catch (Exception e) {
-                log.error("Error stopping built-in database: " + e.getMessage());
+                log.error("Error stopping built-in database: " + e, e);
                 return;
             }
         }
@@ -170,6 +170,7 @@ public class HQServer {
         Connection conn = null;
         try {
             conn = dataSource.getConnection();
+log.info("conn=" + conn);
             stmt = conn.createStatement();
             final String sql = "select propvalue from EAM_CONFIG_PROPS " + "WHERE propkey = '" +
                                HQConstants.SchemaVersion + "'";
@@ -188,7 +189,13 @@ public class HQServer {
                 }
             }
         } catch (SQLException e) {
-            log.error("Error verifying if HQ schema is valid.  Cause: " + e.getMessage());
+            try {
+				DatabaseMetaData metaData = (conn == null) ? null : conn.getMetaData();
+				String url = (metaData == null) ? null : metaData.getURL();
+				log.error("Error verifying if HQ schema is valid.  url= " + url + ", Cause: " + e, e);
+			} catch (SQLException e1) {
+				log.error(e,e);
+			}
         } finally {
             DBUtil.closeJDBCObjects(HQServer.class.getName(), conn, stmt, rs);
         }
@@ -201,7 +208,7 @@ public class HQServer {
             logConfigFileUrl = new File(serverHome + "/conf/log4j.xml").toURI().toURL().toString();
         } catch (MalformedURLException e) {
             log.error("Unable to determine URL for logging config file " + serverHome +
-                      "/conf/log4j.xml.  Cause: " + e.getMessage());
+                      "/conf/log4j.xml.  Cause: " + e, e);
             return 1;
         }
 
