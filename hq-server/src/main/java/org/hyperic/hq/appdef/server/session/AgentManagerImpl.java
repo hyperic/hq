@@ -1557,7 +1557,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                 continue;
             }
             AgentPluginStatus status = map.get(agent);
-            if (status == null || !status.getMD5().equals(plugin.getMD5())) {
+            if (status == null || status.getMD5() == null || !status.getMD5().equals(plugin.getMD5())) {
                 toSync.put(agent.getId(), Collections.singletonList(plugin));
                 if (status == null) {
                     status = new AgentPluginStatus();
