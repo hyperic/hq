@@ -170,7 +170,6 @@ public class HQServer {
         Connection conn = null;
         try {
             conn = dataSource.getConnection();
-log.info("conn=" + conn);
             stmt = conn.createStatement();
             final String sql = "select propvalue from EAM_CONFIG_PROPS " + "WHERE propkey = '" +
                                HQConstants.SchemaVersion + "'";
@@ -190,12 +189,12 @@ log.info("conn=" + conn);
             }
         } catch (SQLException e) {
             try {
-				DatabaseMetaData metaData = (conn == null) ? null : conn.getMetaData();
-				String url = (metaData == null) ? null : metaData.getURL();
-				log.error("Error verifying if HQ schema is valid.  url= " + url + ", Cause: " + e, e);
-			} catch (SQLException e1) {
-				log.error(e,e);
-			}
+                DatabaseMetaData metaData = (conn == null) ? null : conn.getMetaData();
+                String url = (metaData == null) ? null : metaData.getURL();
+                log.error("Error verifying if HQ schema is valid.  url= " + url + ", Cause: " + e, e);
+            } catch (SQLException e1) {
+                log.error(e,e);
+            }
         } finally {
             DBUtil.closeJDBCObjects(HQServer.class.getName(), conn, stmt, rs);
         }
