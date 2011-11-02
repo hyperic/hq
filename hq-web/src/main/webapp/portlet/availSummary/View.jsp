@@ -37,18 +37,24 @@
 	<html:param name="ff" value="{ff}"/> 
 </html:link>
 <jsu:script>
-	function requestAvailSummary${portlet.token}() {
-		hqDojo.xhrGet({
-			url: "<html:rewrite action="/dashboard/ViewAvailSummary" />",
-			content: {
-				token: "${portlet.token}",
-				hq: (new Date()).getTime()
-			},
-			handleAs: "json",
-			load: showAvailSummary,
-			error: reportError
-		});
-	}
+     function requestAvailSummary${portlet.token}() {
+         hqDojo.xhrGet({
+             url: "<html:rewrite action="/dashboard/ViewAvailSummary" />",
+             content: {
+                 token: "${portlet.token}",
+                 hq: (new Date()).getTime()
+             },
+             handleAs: "json",
+             load: function(response, args) {
+                 showAvailSummary(response, args);
+                 setTimeout("requestAvailSummary${portlet.token}()", portlets_reload_time);
+             },
+             error: function(response, args) {
+                 reportError(response, args);
+                 setTimeout("requestAvailSummary${portlet.token}()", portlets_reload_time);
+             }
+         });
+     }
 </jsu:script>
 <jsu:script onLoad="true">
 	requestAvailSummary${portlet.token}();

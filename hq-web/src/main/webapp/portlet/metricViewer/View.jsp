@@ -34,17 +34,25 @@
 
 <tiles:importAttribute name="portlet"/>
 <jsu:script>
-	function requestMetricsResponse${portlet.token}() {
-	    hqDojo.xhrGet({
-			url: "<html:rewrite action="/dashboard/ViewMetricViewer" />",
-			content: {
-				token: "${portlet.token}",
-				hq: (new Date()).getTime()
-			},
-			handleAs: "json",
-			load: showMetricsResponse
-		});			
-	}
+    function requestMetricsResponse<c:out value="${portlet.token}"/>() {
+        hqDojo.xhrGet({
+            url: "<html:rewrite page="/dashboard/ViewMetricViewer.do?"/>",
+            handleAs: "json",
+            content: {
+                hq: (new Date()).getTime(),
+                token: "<c:out value="${portlet.token}"/>"
+            },
+            load: function(response, args) {
+                showMetricsResponse(response, args);
+                setTimeout("requestMetricsResponse<c:out value="${portlet.token}"/>()", portlets_reload_time);
+            },
+            error: function(response, args) {
+                reportError(response, args);
+                setTimeout("requestMetricsResponse<c:out value="${portlet.token}"/>()", portlets_reload_time);
+            }
+        });
+    }
+
 </jsu:script>
 <jsu:script onLoad="true">
 	requestMetricsResponse${portlet.token}();
