@@ -314,18 +314,17 @@ public class MxServerDetector
         return Pattern.compile(regex).matcher(source).find();
     }
 
-    protected List getServerProcessList()
-    {
+    protected List getServerProcessList() {
         List procs = new ArrayList();
-        long[] pids = getPids(getProcQuery());
-        log.debug(getProcQuery() + " matched " + pids.length + " processes");
+        String query = getProcQuery();
+        long[] pids = getPids(query);
+        if (log.isDebugEnabled()) log.debug("ptql=" + query + " matched pids=" + Arrays.asList(pids));
  
         String homeProp = getProcHomeProperty();
         final boolean isMatch = isMatch(homeProp);
         if (isMatch) {
             homeProp = "-D" +  homeProp;
-        }
-        else {
+        } else {
             homeProp = "-D" +  homeProp + "=";
         }
 
