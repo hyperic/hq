@@ -47,6 +47,7 @@ import java.util.Hashtable;
 import java.util.Properties;
 import java.util.TreeSet;
 import javax.naming.CommunicationException;
+import org.apache.commons.logging.Log;
 import org.hyperic.hq.product.PluginManager;
 
 public class OpenLDAPMeasurementPlugin
@@ -54,12 +55,13 @@ public class OpenLDAPMeasurementPlugin
 
     private DirContext ctx = null;
     private boolean hasMonitoringEnabled = false;
+    private final Log log = getLog();
 
     public DirContext getDirContext(Properties props) throws NamingException {
         if (this.ctx == null) {
             synchronized (this) {
                 if (this.ctx == null) {
-                    getLog().info("[getDirContext] creating new connection");
+                    log.debug("[getDirContext] creating new connection");
                     Collection rtn = new TreeSet();
                     Hashtable ldapEnv = new Hashtable();
                     String ldapDriver = props.getProperty("ldapDriver"),
@@ -106,7 +108,7 @@ public class OpenLDAPMeasurementPlugin
                 res = new MetricValue(Metric.AVAIL_DOWN, System.currentTimeMillis());
                 hasMonitoringEnabled = false;
                 this.ctx = null; // reset connection [HHQ-4986]
-                getLog().info("[getValue] error:" + ex, ex);
+                log.debug("[getValue] error:" + ex, ex);
             }
         } else {
             try {
@@ -124,11 +126,11 @@ public class OpenLDAPMeasurementPlugin
                     }
                 }
             } catch (CommunicationException ex) {
-                getLog().info("[getValue] error:" + ex, ex);
+                log.debug("[getValue] error:" + ex, ex);
                 this.ctx = null; // reset connection [HHQ-4986]
                 throw new MetricNotFoundException(ex.getMessage(), ex);
             } catch (NamingException ex) {
-                getLog().info("[getValue] error:" + ex, ex);
+                log.debug("[getValue] error:" + ex, ex);
                 throw new MetricNotFoundException("Service " + objectName + ", " + alias + " not found", ex);
             }
         }
@@ -210,7 +212,7 @@ public class OpenLDAPMeasurementPlugin
             }
         }
 
-        getLog().info("[hasMonitoringEnabled] res=" + res + " metric:" + metric);
+        log.debug("[hasMonitoringEnabled] res=" + res + " metric:" + metric);
         return res;
     }
 }
