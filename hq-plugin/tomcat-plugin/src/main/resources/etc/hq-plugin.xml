@@ -598,6 +598,8 @@
   <server name="Apache Tomcat"
           version="7.0"
           include="6.0">
+    <property name="VERSION_FILE"
+              value="lib/tomcat-api.jar"/>
     <property name="PROC_HOME_PROPERTY"
               value="catalina.base"/>
      &internal-services;
