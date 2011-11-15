@@ -32,12 +32,17 @@ import org.hyperic.cm.filemonitor.FileMonitor;
 import org.hyperic.cm.filemonitor.IFileMonitor;
 import org.hyperic.cm.filemonitor.MonitorStatus;
 import org.hyperic.hq.agent.AgentConfig;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ConfigTrackPluginManager extends TrackEventPluginManager {
 
-    private static IFileMonitor fileMonitor = FileMonitor.getInstance();
+    private static IFileMonitor fileMonitor = null;// = FileMonitor.getInstance();
 
-     public ConfigTrackPluginManager() {
+    public ConfigTrackPluginManager() {
         super();        
         initMonitor();
     }
@@ -52,6 +57,18 @@ public class ConfigTrackPluginManager extends TrackEventPluginManager {
         final String dataDir = getProperty(AgentConfig.PROP_DATADIR[0],
             AgentConfig.PROP_DATADIR[1]);
         final File f = new File(dataDir);
+
+        if (!f.exists()){
+    		log.info("Running on Server, FileMonitor not initiated");
+    		return;
+    	}
+
+    		
+    	if (fileMonitor == null){ 
+        	log.info("Running on Agent, initiating FileMonitor");
+    		fileMonitor = FileMonitor.getInstance();
+    	}
+    	
 
         // get property for max diff size
         fileMonitor.setAppDataDir(f.getAbsolutePath());
@@ -81,10 +98,12 @@ public class ConfigTrackPluginManager extends TrackEventPluginManager {
 
     @Override
     public void shutdown() throws PluginException {
-        fileMonitor.stop();
-        fileMonitor = null;
+    	if (fileMonitor != null){
+	        fileMonitor.stop();
+	        fileMonitor = null;
+    	}
         super.shutdown();
     }
-    
+
     
 }

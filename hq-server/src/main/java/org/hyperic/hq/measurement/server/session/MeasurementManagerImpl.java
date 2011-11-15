@@ -127,6 +127,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
     private AgentManager agentManager;
     private AgentMonitor agentMonitor;
     private ApplicationContext applicationContext;
+	private ZeventManager zeventManager;
 
     @Autowired
     public MeasurementManagerImpl(ResourceManager resourceManager,
@@ -137,7 +138,8 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                                   ConfigManager configManager, MetricDataCache metricDataCache,
                                   MeasurementDAO measurementDAO,
                                   MeasurementTemplateDAO measurementTemplateDAO,
-                                  AgentManager agentManager, AgentMonitor agentMonitor) {
+                                  AgentManager agentManager, AgentMonitor agentMonitor,
+                                  ZeventManager zeventManager) {
         this.resourceManager = resourceManager;
         this.resourceGroupManager = resourceGroupManager;
         this.applicationDAO = applicationDAO;
@@ -149,6 +151,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         this.measurementTemplateDAO = measurementTemplateDAO;
         this.agentManager = agentManager;
         this.agentMonitor = agentMonitor;
+        this.zeventManager = zeventManager;
     }
 
     // TODO: Resolve circular dependency
@@ -194,7 +197,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
         MeasurementScheduleZevent event = new MeasurementScheduleZevent(dm.getId().intValue(),
             interval);
-        ZeventManager.getInstance().enqueueEventAfterCommit(event);
+        zeventManager.enqueueEventAfterCommit(event);
     }
 
     /**
@@ -212,7 +215,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                 events.add(new MeasurementScheduleZevent(mid.intValue(), 0));
             }
         }
-        ZeventManager.getInstance().enqueueEventsAfterCommit(events);
+        zeventManager.enqueueEventsAfterCommit(events);
     }
 
     private Measurement createMeasurement(Resource instanceId, MeasurementTemplate mt,
@@ -301,7 +304,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         permissionManager.checkModifyPermission(subject.getId(), id);
 
         List<Measurement> dmList = createMeasurements(id, templates, intervals, props);
-        ZeventManager.getInstance().enqueueEventAfterCommit(
+        zeventManager.enqueueEventAfterCommit(
             new AgentScheduleSyncZevent(Collections.singletonList(id)));
         return dmList;
     }
@@ -1033,7 +1036,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         List<AppdefEntityID> toSchedule = Arrays.asList(aeids);
         if (!toSchedule.isEmpty()) {
             AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(toSchedule);
-            ZeventManager.getInstance().enqueueEventAfterCommit(event);
+            zeventManager.enqueueEventAfterCommit(event);
         }
     }
 
@@ -1066,7 +1069,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         if (!appIdList.isEmpty()) {
             watch.markTimeBegin("enqueueZevents");
             AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(appIdList);
-            ZeventManager.getInstance().enqueueEventAfterCommit(event);
+            zeventManager.enqueueEventAfterCommit(event);
             watch.markTimeEnd("enqueueZevents");
 
             log.debug("enableMeasurements: total=" + appIdList.size() + ", time=" + watch);
@@ -1094,7 +1097,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         }
         List<AppdefEntityID> eids = Collections.singletonList(appId);
         AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(eids);
-        ZeventManager.getInstance().enqueueEventAfterCommit(event);
+        zeventManager.enqueueEventAfterCommit(event);
     }
 
     /**
@@ -1116,7 +1119,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         if (sendToAgent) {
             List<AppdefEntityID> eids = Collections.singletonList(appId);
             AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(eids);
-            ZeventManager.getInstance().enqueueEventAfterCommit(event);
+            zeventManager.enqueueEventAfterCommit(event);
         }
     }
 
@@ -1170,7 +1173,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
         
         enqueueZeventsForMeasScheduleCollectionDisabled(mids);
     
-        ZeventManager.getInstance().enqueueEventAfterCommit(new AgentUnscheduleZevent(Arrays.asList(ids), agent.getAgentToken()));
+        zeventManager.enqueueEventAfterCommit(new AgentUnscheduleZevent(Arrays.asList(ids), agent.getAgentToken()));
     }
     
     /**
@@ -1223,7 +1226,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             
             enqueueZeventsForMeasScheduleCollectionDisabled(mids);
         }
-        ZeventManager.getInstance().enqueueEventAfterCommit(new AgentUnscheduleZevent(Arrays.asList(ids), agent.getAgentToken()));
+        zeventManager.enqueueEventAfterCommit(new AgentUnscheduleZevent(Arrays.asList(ids), agent.getAgentToken()));
     }
 
 
@@ -1320,7 +1323,7 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
 
         List<AppdefEntityID> eids = Collections.singletonList(id);
         AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(eids);
-        ZeventManager.getInstance().enqueueEventAfterCommit(event);
+        zeventManager.enqueueEventAfterCommit(event);
     }
 
     /**
@@ -1474,14 +1477,20 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
             if (r == null || r.isInAsyncDeleteState()) {
                 continue;
             }
-            boolean isCreate = z instanceof ResourceCreatedZevent;
+            /**
+             * Create - create new measurements and schedule them to the agent
+             * Refresh - Simple resend = schedule current measurement to the agent with no update.
+             * 	  Most commonly will happen if agent is reinitialized (data dir erased).
+             * Update - Config changed - update measurements with new config and schedule to agent.
+             */
+            boolean isCreate = z instanceof ResourceCreatedZevent;    
             boolean isRefresh = z instanceof ResourceRefreshZevent;
             boolean isUpdate = z instanceof ResourceUpdatedZevent;
 
             try {
                 // Handle reschedules for when agents are updated.
                 if (isUpdate) {
-                    if (debug) log.debug("Refreshing metric schedule for [" + id + "]");
+                    if (debug) log.debug("Updated metric schedule for [" + id + "]");
                     eids.add(id);
                 }
                 if (isRefresh) {
@@ -1518,13 +1527,30 @@ public class MeasurementManagerImpl implements MeasurementManager, ApplicationCo
                 log.warn("Config not set for [" + id + "] (this is usually ok): " + e);
             } catch (Exception e) {
                 log.warn("Unable to enable default metrics for [" + id + "]", e);
-            }
+            } 
         }
         if (!eids.isEmpty()) {
             AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(eids);
-            ZeventManager.getInstance().enqueueEventAfterCommit(event);
+            zeventManager.enqueueEventAfterCommit(event);
         }
     }
+    
+    public void setZeventManager(ZeventManager zeventManager) {
+    	this.zeventManager = zeventManager;
+    }
+    
+    public void setMeasurementDao(MeasurementDAO dao) {
+    	this.measurementDAO = dao;
+    }
+    
+	public void setResourceManager(ResourceManager resourceManager){
+		this.resourceManager = resourceManager;
+	}
+	
+	public void setMeasurementTemplateDao(MeasurementTemplateDAO mTemplateDao){
+		this.measurementTemplateDAO = mTemplateDao; 
+	}
+
 
     private String[] getTemplatesToCheck(AuthzSubject s, AppdefEntityID id)
         throws AppdefEntityNotFoundException, PermissionException {

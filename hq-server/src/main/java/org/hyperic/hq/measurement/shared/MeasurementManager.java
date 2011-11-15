@@ -42,6 +42,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
@@ -52,8 +53,11 @@ import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.server.session.CollectionSummary;
 import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.server.session.Measurement;
+import org.hyperic.hq.measurement.server.session.MeasurementDAO;
 import org.hyperic.hq.measurement.server.session.MeasurementEnabler;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplateDAO;
+import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 
@@ -416,5 +420,13 @@ public interface MeasurementManager {
      * @return {@link MeasurementTemplate}s
      */
     MeasurementTemplate getTemplatesByMeasId(Integer measId);
+
+	void setZeventManager(ZeventManager zeventManager);
+	
+	void setMeasurementDao(MeasurementDAO dao);
+	
+	void setResourceManager(ResourceManager resourceManager);
+	
+	void setMeasurementTemplateDao(MeasurementTemplateDAO mTemplateDao);
 
 }
