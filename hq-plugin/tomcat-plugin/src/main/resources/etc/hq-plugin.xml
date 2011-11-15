@@ -595,6 +595,15 @@
     
   </server>
 
+  <server name="Apache Tomcat"
+          version="7.0"
+          include="6.0">
+    <property name="PROC_HOME_PROPERTY"
+              value="catalina.base"/>
+     &internal-services;
+     &hibernate-services;
+  </server>
+
   <server name="JBoss Web" version="2.0" include="Apache Tomcat 6.0">
     <property name="JBOSS_VERSION" value="4"/>
     <property name="VERSION_FILE" value="deploy/jboss-web.deployer/jbossweb.jar"/>

@@ -18,11 +18,14 @@
 package org.hyperic.hq.plugin.tomcat;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.jar.Attributes;
+import java.util.jar.JarFile;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -150,23 +153,45 @@ public class TomcatServerDetector
         return serverMap;
     }
 
+    @Override
     protected boolean isInstallTypeVersion(MxProcess process) {
         final String[] processArgs = process.getArgs();
         String catalinaHome = getCatalinaHome(processArgs);
         String catalinaBase = getCatalinaBase(processArgs);
+        String bootstrapJar = getBootstrapJar(processArgs);
+
+        boolean correctVersion=false;
         
-        //check catalina base first - we are using it for the process query, so it must be present
-        boolean correctVersion = isInstallTypeVersion(catalinaBase);
-        if(! correctVersion) {
-            //check catalina home for version file
-            if (catalinaHome == null) {
-                getLog().warn("Unable to determine Tomcat version of possible Tomcat process with install path: " +
-                          process.getInstallPath() +
-                          ".  Could not find value of catalina.home in process system properties.  This process will be skipped.");
-                return false;
+        if (bootstrapJar != null) {
+            // new style using bootstarp.jar meta-inf
+            try {
+                JarFile jarFile = new JarFile(bootstrapJar);
+                log.debug("[isInstallTypeVersion] bootstrapJar='" + jarFile.getName() + "'");
+                Attributes attributes = jarFile.getManifest().getMainAttributes();
+                jarFile.close();
+                String tomcatVersion = attributes.getValue("Specification-Version");
+                log.debug("[isInstallTypeVersion] tomcatVersion='" + tomcatVersion + "' (" + getTypeInfo().getVersion() + ")");
+                correctVersion = tomcatVersion.equals(getTypeInfo().getVersion());
+            } catch (IOException e) {
+                log.debug("Error getting Tomcat version (" + e + ")", e);
             }
-            correctVersion = isInstallTypeVersion(catalinaHome);
+        } else {
+            // old style
+            //check catalina base first - we are using it for the process query, so it must be present
+            correctVersion = isInstallTypeVersion(catalinaBase);
+
+            if (!correctVersion) {
+                //check catalina home for version file
+                if (catalinaHome == null) {
+                    getLog().warn("Unable to determine Tomcat version of possible Tomcat process with install path: "
+                            + process.getInstallPath()
+                            + ".  Could not find value of catalina.home in process system properties.  This process will be skipped.");
+                    return false;
+                }
+                correctVersion = isInstallTypeVersion(catalinaHome);
+            }
         }
+
         if (!correctVersion) {
             return false;
         }
@@ -241,6 +266,21 @@ public class TomcatServerDetector
         return servers;
     }
 
+    private String getBootstrapJar(String[] args) {
+        String res = null;
+        for (int i = 0; (i < args.length) && (res == null); i++) {
+            if (args[i].equalsIgnoreCase("-classpath")) {
+                String[] cp = args[i + 1].split(File.pathSeparator);
+                for (int c = 0; (c < cp.length) && (res == null); c++) {
+                    if(cp[c].endsWith("bootstrap.jar")){
+                        res = cp[c];
+                    }
+                }
+            }
+        }
+        return res;
+    }
+    
     private String getCatalinaBase(String[] args) {
         for (int i = 0; i < args.length; i++) {
             if (args[i].startsWith(CATALINA_BASE_PROP)) {
