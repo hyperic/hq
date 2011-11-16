@@ -1815,7 +1815,7 @@ public class DataManagerImpl implements DataManager {
             conn = dbUtil.getConnection();
             stmt = conn.createStatement();
             for (int i=0; i<ids.size(); i+=BATCH_SIZE) {
-                final int max = Math.min(mids.size(), i+BATCH_SIZE);
+                final int max = Math.min(ids.size(), i+BATCH_SIZE);
                 // Create sub array
                 Collection<Integer> subids = ids.subList(i, max);
                 if (debug) watch.markTimeBegin("setDataPoints");
