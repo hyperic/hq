@@ -1678,4 +1678,8 @@
             <plugin type="control" class="JBoss6StateServiceControlPlugin"/>
         </service>
     </server>
+    
+    <server name="JBoss" version="7.0" include="6.0">
+        <plugin type="autoinventory" class="JBossDetector7"/>
+    </server>
 </plugin>
