@@ -27,11 +27,12 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -252,10 +253,12 @@ public class ReportProcessorImpl implements ReportProcessor {
         /** idea here is that if an agent checks in don't wait for its platform availability
             to come in.  We know that the platform is up if the agent checks in. */
         boolean setPlatformAvail = true;
+        final Map<Integer, Boolean> alreadyChecked = new HashMap<Integer, Boolean>();
+        final Map<Integer, Measurement> measMap = new HashMap<Integer, Measurement>();
         for (final DSNList dsnList : dsnLists) {
-            Integer dmId = new Integer(dsnList.getClientId());
+            final Integer mid = new Integer(dsnList.getClientId());
             if (debug) watch.markTimeBegin("getMeasurement");
-            Measurement m = measurementManager.getMeasurement(dmId);
+            final Measurement m = getMeasurement(mid, measMap);
             if (debug) watch.markTimeEnd("getMeasurement");
 
             // Can't do much if we can't look up the derived measurement
@@ -283,7 +286,12 @@ public class ReportProcessorImpl implements ReportProcessor {
             // TODO reosurceMatchesAgent() and the call to getAgent() can be
             // consolidated, the agent match can be checked by getting the agent
             // for the instanceID from the resource
-            if (!resourceMatchesAgent(res, agent)) {
+            Boolean match = alreadyChecked.get(res.getId());
+            if (match == null) {
+            	match = resourceMatchesAgent(res, agent);
+            	alreadyChecked.put(res.getId(), match);
+            }
+            if (!match) {
                 String ipAddr = agent.getAddress();
                 String portString = agent.getPort().toString();
                              
@@ -365,7 +373,16 @@ public class ReportProcessorImpl implements ReportProcessor {
         }
     }
 
-    /**
+    private Measurement getMeasurement(Integer mid, Map<Integer, Measurement> measMap) {
+    	Measurement measurement = measMap.get(mid);
+    	if (measurement == null) {
+    		measurement = measurementManager.getMeasurement(mid);
+    		measMap.put(mid, measurement);
+        }
+        return measurement;
+    }
+
+	/**
      * checks if the agentToken matches resource's agentToken
      */
     private boolean resourceMatchesAgent(Resource resource, Agent agent) {
