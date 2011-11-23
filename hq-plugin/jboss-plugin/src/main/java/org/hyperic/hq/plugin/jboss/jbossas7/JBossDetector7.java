@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-package org.hyperic.hq.plugin.jboss;
+package org.hyperic.hq.plugin.jboss.jbossas7;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -30,9 +30,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
-import javax.naming.Context;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPathConstants;
@@ -44,6 +46,7 @@ import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.DaemonDetector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerResource;
+import org.hyperic.hq.product.ServiceResource;
 import org.hyperic.util.config.ConfigResponse;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -51,6 +54,11 @@ import org.w3c.dom.NodeList;
 public class JBossDetector7 extends DaemonDetector implements AutoServerDetector {
 
     private static final Log log = LogFactory.getLog(JBossDetector7.class.getName());
+    protected static final String USERNAME = "jboss7.user";
+    protected static final String PASSWORD = "jboss7.pass";
+    protected static final String HTTPS = "jboss7.https";
+    protected static final String ADDR = "jboss7.addr";
+    protected static final String PORT = "jboss7.port";
 
     @Override
     public List getServerResources(ConfigResponse platformConfig) throws PluginException {
@@ -62,21 +70,64 @@ public class JBossDetector7 extends DaemonDetector implements AutoServerDetector
             String version = getVersion(args);
             log.debug("[getServerResources] pid='" + pid + "' version='" + version + "'");
             if (version.startsWith(getTypeInfo().getVersion())) {
-                ServerResource server = createServerResource(args.get("jboss.home.dir"));
+                File cfgFile = getConfigFile(args);
+                String installPath;
+                try { // cosmetic
+                    installPath = cfgFile.getCanonicalPath();
+                } catch (IOException ex) {
+                    installPath = cfgFile.getAbsolutePath();
+                }
+                ServerResource server = createServerResource(installPath);
                 setProductConfig(server, getProductConfig(args));
+                server.setName(server.getName() + " " + cfgFile.getName());
                 servers.add(server);
                 adjustClassPath(args.get("jboss.home.dir"));
-
             }
         }
         return servers;
     }
 
-    ConfigResponse getProductConfig(HashMap<String, String> args) {
-        ConfigResponse cfg = new ConfigResponse();
-        String port = null;
-        String address = null;
+    @Override
+    protected List discoverServices(ConfigResponse config) {
+        List<ServiceResource> services = new ArrayList<ServiceResource>();
+        log.debug("[discoverServices] config=" + config);
 
+        JBossAdminHttp admin = null;
+        try {
+            admin = new JBossAdminHttp(config);
+        } catch (PluginException ex) {
+            log.error(ex, ex);
+        }
+
+        try {
+            List<String> datasources = admin.getDatasources();
+            log.debug(datasources);
+            for (String ds : datasources) {
+                Map<String, String> datasource = admin.getDatasource(ds, false);
+                ServiceResource service = createServiceResource("Datasource");
+                service.setName("XXXX Datasource " + ds);
+
+                ConfigResponse cp = new ConfigResponse();
+                cp.setValue("jndi", datasource.get("jndi-name"));
+                cp.setValue("driver", datasource.get("driver-name"));
+
+                ConfigResponse pc = new ConfigResponse();
+                pc.setValue("name", ds);
+
+                setProductConfig(service, pc);
+                service.setCustomProperties(cp);
+                service.setMeasurementConfig();
+                service.setControlConfig();
+                services.add(service);
+            }
+        } catch (PluginException ex) {
+            log.error(ex, ex);
+        }
+
+        return services;
+    }
+
+    File getConfigFile(HashMap<String, String> args) {
         String serverConfig = args.get("server-config");
         if (serverConfig == null) {
             serverConfig = "standalone.xml";
@@ -94,6 +145,16 @@ public class JBossDetector7 extends DaemonDetector implements AutoServerDetector
             }
             cfgFile = new File(configDir, serverConfig);
         }
+        return cfgFile;
+    }
+
+    ConfigResponse getProductConfig(HashMap<String, String> args) {
+        ConfigResponse cfg = new ConfigResponse();
+        String port = null;
+        String address = null;
+
+        File cfgFile = getConfigFile(args);
+
         try {
             log.debug("[getProductConfig] cfgFile=" + cfgFile.getCanonicalPath());
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -101,18 +162,18 @@ public class JBossDetector7 extends DaemonDetector implements AutoServerDetector
             Document doc = (Document) dBuilder.parse(cfgFile);
 
             XPathFactory factory = XPathFactory.newInstance();
-            XPathExpression expr = factory.newXPath().compile("//server/socket-binding-group/socket-binding[@name='jmx-connector-server']");
+            XPathExpression expr = factory.newXPath().compile("//server/management/management-interfaces/http-interface");
             Object result = expr.evaluate(doc, XPathConstants.NODESET);
             NodeList nodeList = (NodeList) result;
 
-            String jmxInterface = null;
+            String mgntIf = null;
             for (int i = 0; i < nodeList.getLength(); i++) {
                 port = nodeList.item(i).getAttributes().getNamedItem("port").getNodeValue();
-                jmxInterface = nodeList.item(i).getAttributes().getNamedItem("interface").getNodeValue();
+                mgntIf = nodeList.item(i).getAttributes().getNamedItem("interface").getNodeValue();
             }
 
-            if (jmxInterface != null) {
-                expr = factory.newXPath().compile("//server/interfaces/interface[@name='" + jmxInterface + "']/inet-address");
+            if (mgntIf != null) {
+                expr = factory.newXPath().compile("//server/interfaces/interface[@name='" + mgntIf + "']/inet-address");
                 result = expr.evaluate(doc, XPathConstants.NODESET);
                 nodeList = (NodeList) result;
 
@@ -138,9 +199,8 @@ public class JBossDetector7 extends DaemonDetector implements AutoServerDetector
                     address = args.get(address);
                 }
             }
-
-            String jnpUrl = "service:jmx:rmi:///jndi/rmi://" + address + ":" + port + "/jmxrmi";
-            cfg.setValue(Context.PROVIDER_URL, jnpUrl);
+            cfg.setValue(PORT, port);
+            cfg.setValue(ADDR, address);
         }
         return cfg;
     }
