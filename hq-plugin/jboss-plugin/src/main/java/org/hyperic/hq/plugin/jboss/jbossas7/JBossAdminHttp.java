@@ -54,6 +54,8 @@ import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.protocol.BasicHttpContext;
 import org.hyperic.hq.agent.AgentKeystoreConfig;
+import org.hyperic.hq.plugin.jboss.jbossas7.objects.Connector;
+import org.hyperic.hq.plugin.jboss.jbossas7.objects.WebSubsystem;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.http.HQHttpClient;
@@ -117,7 +119,7 @@ public final class JBossAdminHttp {
             }
 
             GsonBuilder gsb = new GsonBuilder();
-            gsb.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
+//            gsb.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
             Gson gson = gsb.create();
 
             res = gson.fromJson(responseBody, type);
@@ -135,6 +137,23 @@ public final class JBossAdminHttp {
         return res;
     }
 
+    public WebSubsystem getWebSubsystem() throws PluginException {
+        Type type = new TypeToken<WebSubsystem>() {
+        }.getType();
+        return get("/subsystem/web?recursive=true", type);
+    }
+
+    public Connector getConnector(String connector) throws PluginException {
+        Type type = new TypeToken<Connector>() {
+        }.getType();
+        try {
+            connector = URLEncoder.encode(connector, "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            throw new RuntimeException(ex);
+        }
+        return get("/subsystem/web/connector/"+connector+"?include-runtime=true", type);
+    }
+
     public List<String> getDatasources() throws PluginException {
         Type type = new TypeToken<HashMap<String, HashMap<String, Object>>>() {
         }.getType();
@@ -149,7 +168,7 @@ public final class JBossAdminHttp {
         return res;
     }
 
-    public Map<String, String> getDatasource(String ds,boolean runtime) throws PluginException {
+    public Map<String, String> getDatasource(String ds, boolean runtime) throws PluginException {
         Type type = new TypeToken<Map<String, String>>() {
         }.getType();
         try {
@@ -157,10 +176,10 @@ public final class JBossAdminHttp {
         } catch (UnsupportedEncodingException ex) {
             throw new RuntimeException(ex);
         }
-        if(runtime){
-            ds+="?include-runtime=true";
+        if (runtime) {
+            ds += "?include-runtime=true";
         }
-        Map<String, String> res= get("/subsystem/datasources/data-source/" + ds,type);
+        Map<String, String> res = get("/subsystem/datasources/data-source/" + ds, type);
         return res;
     }
 

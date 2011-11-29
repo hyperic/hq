@@ -42,6 +42,8 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.plugin.jboss.jbossas7.objects.Connector;
+import org.hyperic.hq.plugin.jboss.jbossas7.objects.WebSubsystem;
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.DaemonDetector;
 import org.hyperic.hq.product.PluginException;
@@ -99,6 +101,7 @@ public class JBossDetector7 extends DaemonDetector implements AutoServerDetector
             log.error(ex, ex);
         }
 
+        // DATA SOURCES
         try {
             List<String> datasources = admin.getDatasources();
             log.debug(datasources);
@@ -113,6 +116,32 @@ public class JBossDetector7 extends DaemonDetector implements AutoServerDetector
 
                 ConfigResponse pc = new ConfigResponse();
                 pc.setValue("name", ds);
+
+                setProductConfig(service, pc);
+                service.setCustomProperties(cp);
+                service.setMeasurementConfig();
+                service.setControlConfig();
+                services.add(service);
+            }
+        } catch (PluginException ex) {
+            log.error(ex, ex);
+        }
+
+        // CONECTORS
+        try {
+            WebSubsystem ws = admin.getWebSubsystem();
+            log.debug(ws);
+            for (String name : ws.getConector().keySet()) {
+                Connector connector = ws.getConector().get(name);
+                ServiceResource service = createServiceResource("Connector");
+                service.setName("XXXX Connector " + name);
+
+                ConfigResponse cp = new ConfigResponse();
+                cp.setValue("protocol", connector.getProtocol());
+                cp.setValue("scheme", connector.getScheme());
+
+                ConfigResponse pc = new ConfigResponse();
+                pc.setValue("name", name);
 
                 setProductConfig(service, pc);
                 service.setCustomProperties(cp);
