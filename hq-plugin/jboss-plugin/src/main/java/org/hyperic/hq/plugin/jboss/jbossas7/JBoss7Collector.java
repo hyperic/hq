@@ -2,6 +2,7 @@ package org.hyperic.hq.plugin.jboss.jbossas7;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.plugin.jboss.jbossas7.objects.ServerMemory;
 import org.hyperic.hq.plugin.jboss.jbossas7.objects.ThreadsInfo;
 import org.hyperic.hq.product.PluginException;
 
@@ -22,6 +23,22 @@ public class JBoss7Collector extends JBoss7DefaultCollector {
             setValue("current-thread-user-time", th.getCurrentThreadUserTime());
         } catch (PluginException ex) {
             setAvailability(false);
+            log.debug(ex.getMessage(), ex);
+        }
+
+        try {
+            ServerMemory sm = admin.getServerMemory();
+            setValue("h.used.p", sm.getHeapMemoryUsage().getUsedPercentage());
+            setValue("h.init", sm.getHeapMemoryUsage().getInit());
+            setValue("h.used", sm.getHeapMemoryUsage().getUsed());
+            setValue("h.committed", sm.getHeapMemoryUsage().getCommitted());
+            setValue("h.max", sm.getHeapMemoryUsage().getMax());
+            setValue("nh.used.p", sm.getNonHeapMemoryUsage().getUsedPercentage());
+            setValue("nh.init", sm.getNonHeapMemoryUsage().getInit());
+            setValue("nh.used", sm.getNonHeapMemoryUsage().getUsed());
+            setValue("nh.committed", sm.getNonHeapMemoryUsage().getCommitted());
+            setValue("nh.max", sm.getNonHeapMemoryUsage().getMax());
+        } catch (PluginException ex) {
             log.debug(ex.getMessage(), ex);
         }
     }

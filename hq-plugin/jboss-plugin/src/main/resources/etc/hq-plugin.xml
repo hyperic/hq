@@ -1681,6 +1681,8 @@
     
     <server name="JBoss" version="7.0">
         <plugin type="autoinventory" class="org.hyperic.hq.plugin.jboss.jbossas7.JBossDetector7"/>
+        <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+        <plugin type="collector" class="org.hyperic.hq.plugin.jboss.jbossas7.JBoss7Collector"/>
         <config>
             <option name="jboss7.addr" description="Http Address" default="localhost"/>
             <option name="jboss7.port" description="Http Port" default="9990"/>
@@ -1689,6 +1691,24 @@
             <option name="jboss7.pass" description="Password" default="guest" type="secret"/>
         </config>
         <filter name="server-connection" value="jboss7.addr=%jboss7.addr%,jboss7.port=%jboss7.port%,jboss7.user=%jboss7.user%,jboss7.pass=%jboss7.pass%,jboss7.https=%jboss7.https%"/>
+        <property name="template" value="jboss7:${server-connection}:${alias}"/>
+        <metric name="thread-count"/>
+        <metric name="peak-thread-count" />
+        <metric name="total-started-thread-count" />
+        <metric name="daemon-thread-count" />
+        <metric name="current-thread-cpu-time" units="ns"/>
+        <metric name="current-thread-user-time" units="ns"/>
+        <metric name="Heap Used %" alias="h.used.p" units="percentage" indicator="true"/>
+        <metric name="Heap Init" alias="h.init" units="B"/>
+        <metric name="Heap used" alias="h.used" units="B"/>
+        <metric name="Heap Commited" alias="h.committed" units="B"/>
+        <metric name="Heap Max" alias="h.max" units="B"/>
+        <metric name="Non-Heap Used %" alias="nh.used.p" units="percentage" indicator="true"/>
+        <metric name="Non-Heap Init" alias="nh.init" units="B"/>
+        <metric name="Non-Heap used" alias="nh.used" units="B"/>
+        <metric name="Non-Heap Commited" alias="nh.committed" units="B"/>
+        <metric name="Non-Heap Max" alias="nh.max" units="B"/>
+        <metric name="Object Pending Finalization" alias="object-pending-finalization-count"/>
         <service name="Datasource">
             <plugin type="collector" class="org.hyperic.hq.plugin.jboss.jbossas7.DataSourceCollector"/>
             <config>

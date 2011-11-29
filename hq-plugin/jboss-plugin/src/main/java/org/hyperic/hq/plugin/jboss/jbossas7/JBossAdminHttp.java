@@ -55,6 +55,7 @@ import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.protocol.BasicHttpContext;
 import org.hyperic.hq.agent.AgentKeystoreConfig;
 import org.hyperic.hq.plugin.jboss.jbossas7.objects.Connector;
+import org.hyperic.hq.plugin.jboss.jbossas7.objects.ServerMemory;
 import org.hyperic.hq.plugin.jboss.jbossas7.objects.ThreadsInfo;
 import org.hyperic.hq.plugin.jboss.jbossas7.objects.WebSubsystem;
 import org.hyperic.hq.product.PluginException;
@@ -159,6 +160,12 @@ public final class JBossAdminHttp {
         Type type = new TypeToken<ThreadsInfo>() {
         }.getType();
         return get("/core-service/platform-mbean/type/threading", type);
+    }
+
+    public ServerMemory getServerMemory() throws PluginException  {
+        Type type = new TypeToken<ServerMemory>() {
+        }.getType();
+        return get("/core-service/platform-mbean/type/memory?include-runtime=true", type);
     }
 
     public List<String> getDatasources() throws PluginException {
