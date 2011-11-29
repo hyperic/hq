@@ -14,7 +14,6 @@ public class ConnectorCollector extends JBoss7DefaultCollector {
         String connector = (String) getProperties().get("connector");
         try {
             Connector c = admin.getConnector(connector);
-            log.debug(c);
             setAvailability(true);
             setValue("bytesReceived", c.getBytesReceived());
             setValue("bytesSent", c.getBytesSent());

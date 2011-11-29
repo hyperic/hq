@@ -55,6 +55,7 @@ import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.protocol.BasicHttpContext;
 import org.hyperic.hq.agent.AgentKeystoreConfig;
 import org.hyperic.hq.plugin.jboss.jbossas7.objects.Connector;
+import org.hyperic.hq.plugin.jboss.jbossas7.objects.ThreadsInfo;
 import org.hyperic.hq.plugin.jboss.jbossas7.objects.WebSubsystem;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
@@ -119,7 +120,7 @@ public final class JBossAdminHttp {
             }
 
             GsonBuilder gsb = new GsonBuilder();
-//            gsb.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
+            gsb.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_DASHES);
             Gson gson = gsb.create();
 
             res = gson.fromJson(responseBody, type);
@@ -151,7 +152,13 @@ public final class JBossAdminHttp {
         } catch (UnsupportedEncodingException ex) {
             throw new RuntimeException(ex);
         }
-        return get("/subsystem/web/connector/"+connector+"?include-runtime=true", type);
+        return get("/subsystem/web/connector/" + connector + "?include-runtime=true", type);
+    }
+
+    public ThreadsInfo getThreadsInfo() throws PluginException {
+        Type type = new TypeToken<ThreadsInfo>() {
+        }.getType();
+        return get("/core-service/platform-mbean/type/threading", type);
     }
 
     public List<String> getDatasources() throws PluginException {
