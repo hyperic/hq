@@ -35,7 +35,7 @@ public abstract class JBoss7DefaultCollector extends Collector {
             admin = null;
         }
 
-        boolean https = "true".equals(getProperties().getProperty(JBossDetector7.HTTPS));
+        boolean https = "true".equals(getProperties().getProperty(JBossStandaloneDetector.HTTPS));
         if (https) {
             admin = null;
         }

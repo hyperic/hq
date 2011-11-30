@@ -29,8 +29,12 @@
 
 <plugin name="jboss7">
     <property name="PLUGIN_VERSION" value="@project.version@"/>
-    <server name="JBoss" version="7.0">
-        <plugin type="autoinventory" class="org.hyperic.hq.plugin.jboss7.JBossDetector7"/>
+    <server name="JBoss Host Controller" version="7">
+        <plugin type="autoinventory" class="org.hyperic.hq.plugin.jboss7.JBossHostControllerDetector"/>
+    </server>
+        
+    <server name="JBoss" version="7">
+        <plugin type="autoinventory" class="org.hyperic.hq.plugin.jboss7.JBossStandaloneDetector"/>
         <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
         <plugin type="collector" class="org.hyperic.hq.plugin.jboss7.JBoss7Collector"/>
         <config>
@@ -40,7 +44,7 @@
             <option name="jboss7.user" description="Username" default="guest"/>
             <option name="jboss7.pass" description="Password" default="guest" type="secret"/>
         </config>
-        <filter name="server-connection" value="jboss7.addr=%jboss7.addr%,jboss7.port=%jboss7.port%,jboss7.user=%jboss7.user%,jboss7.pass=%jboss7.pass%,jboss7.https=%jboss7.https%"/>
+        <filter name="server-connection" value="jboss7.addr=%jboss7.addr%,jboss7.port=%jboss7.port%,jboss7.user=%jboss7.user%,jboss7.pass=%jboss7.pass%,jboss7.https=%jboss7.https%,jboss7.host=%jboss7.host%"/>
         <property name="template" value="jboss7:${server-connection}:${alias}"/>
         <metric name="thread-count"/>
         <metric name="peak-thread-count" />
@@ -107,5 +111,17 @@
             <metric name="bytesReceived" collectionType="trendsup"/>
             <metric name="processingTime" collectionType="trendsup" units="ms"/>
         </service>
+    </server>
+    
+    <server name="JBoss Managed" version="7" include="JBoss 7">
+        <plugin type="autoinventory" class="org.hyperic.hq.plugin.jboss7.JBossManagedDetector"/>
+        <config>
+            <option name="jboss7.addr" description="Http Address" default="localhost"/>
+            <option name="jboss7.port" description="Http Port" default="9990"/>
+            <option name="jboss7.https" description="Use SSL" default="false" type="boolean"/>
+            <option name="jboss7.user" description="Username" default="guest"/>
+            <option name="jboss7.pass" description="Password" default="guest" type="secret"/>
+                <option name="jboss7.host" description="Host Name"/>
+        </config>
     </server>
 </plugin>

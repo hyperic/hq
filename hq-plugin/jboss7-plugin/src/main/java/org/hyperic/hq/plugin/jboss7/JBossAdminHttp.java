@@ -71,13 +71,16 @@ public final class JBossAdminHttp {
     private String pass;
     private BasicHttpContext localcontext;
     private HttpHost targetHost;
+    private String hostName;
 
     public JBossAdminHttp(Properties props) throws PluginException {
-        int port = Integer.parseInt(props.getProperty(JBossDetector7.PORT));
-        String addr = props.getProperty(JBossDetector7.ADDR);
-        boolean https = "true".equals(props.getProperty(JBossDetector7.HTTPS));
-        this.user = props.getProperty(JBossDetector7.USERNAME);
-        this.pass = props.getProperty(JBossDetector7.PASSWORD);
+        int port = Integer.parseInt(props.getProperty(JBossStandaloneDetector.PORT));
+        String addr = props.getProperty(JBossStandaloneDetector.ADDR);
+        boolean https = "true".equals(props.getProperty(JBossStandaloneDetector.HTTPS));
+        this.user = props.getProperty(JBossStandaloneDetector.USERNAME);
+        this.pass = props.getProperty(JBossStandaloneDetector.PASSWORD);
+        this.hostName = props.getProperty(JBossStandaloneDetector.HOST);
+        log.debug("props=" + props);
 
         targetHost = new HttpHost(addr, port, https ? "https" : "http");
         log.debug("targetHost=" + targetHost);
@@ -105,7 +108,11 @@ public final class JBossAdminHttp {
     private <T extends Object> T get(String api, Type type) throws PluginException {
         T res = null;
         try {
-            HttpGet get = new HttpGet(targetHost.toURI() + "/management" + api);
+            String url = targetHost.toURI() + "/management";
+            if(hostName!=null){
+                url += "/host/master/server/" + hostName;
+            }
+            HttpGet get = new HttpGet(url + api);
             HttpResponse response = client.execute(get, localcontext);
             int r = response.getStatusLine().getStatusCode();
             // response must be read in order to "close" the connection.
@@ -117,7 +124,7 @@ public final class JBossAdminHttp {
             }
 
             if (r != 200) {
-                throw new PluginException("[" + api + "] http error code: '" + r + "'");
+                throw new PluginException("[" + get.getURI() + "] http error code: '" + r + "'");
             }
 
             GsonBuilder gsb = new GsonBuilder();
