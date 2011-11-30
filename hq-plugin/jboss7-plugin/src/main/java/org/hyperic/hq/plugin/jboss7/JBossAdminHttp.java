@@ -23,7 +23,7 @@
  *  USA.
  *
  */
-package org.hyperic.hq.plugin.jboss.jbossas7;
+package org.hyperic.hq.plugin.jboss7;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
@@ -54,10 +54,10 @@ import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.protocol.BasicHttpContext;
 import org.hyperic.hq.agent.AgentKeystoreConfig;
-import org.hyperic.hq.plugin.jboss.jbossas7.objects.Connector;
-import org.hyperic.hq.plugin.jboss.jbossas7.objects.ServerMemory;
-import org.hyperic.hq.plugin.jboss.jbossas7.objects.ThreadsInfo;
-import org.hyperic.hq.plugin.jboss.jbossas7.objects.WebSubsystem;
+import org.hyperic.hq.plugin.jboss7.objects.Connector;
+import org.hyperic.hq.plugin.jboss7.objects.ServerMemory;
+import org.hyperic.hq.plugin.jboss7.objects.ThreadsInfo;
+import org.hyperic.hq.plugin.jboss7.objects.WebSubsystem;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.http.HQHttpClient;

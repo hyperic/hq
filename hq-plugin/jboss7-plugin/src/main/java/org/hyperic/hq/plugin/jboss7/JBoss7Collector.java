@@ -1,9 +1,9 @@
-package org.hyperic.hq.plugin.jboss.jbossas7;
+package org.hyperic.hq.plugin.jboss7;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.jboss.jbossas7.objects.ServerMemory;
-import org.hyperic.hq.plugin.jboss.jbossas7.objects.ThreadsInfo;
+import org.hyperic.hq.plugin.jboss7.objects.ServerMemory;
+import org.hyperic.hq.plugin.jboss7.objects.ThreadsInfo;
 import org.hyperic.hq.product.PluginException;
 
 public class JBoss7Collector extends JBoss7DefaultCollector {

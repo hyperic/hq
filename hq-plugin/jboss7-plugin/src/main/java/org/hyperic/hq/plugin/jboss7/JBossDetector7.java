@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-package org.hyperic.hq.plugin.jboss.jbossas7;
+package org.hyperic.hq.plugin.jboss7;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -42,8 +42,8 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.plugin.jboss.jbossas7.objects.Connector;
-import org.hyperic.hq.plugin.jboss.jbossas7.objects.WebSubsystem;
+import org.hyperic.hq.plugin.jboss7.objects.Connector;
+import org.hyperic.hq.plugin.jboss7.objects.WebSubsystem;
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.DaemonDetector;
 import org.hyperic.hq.product.PluginException;
@@ -93,7 +93,9 @@ public class JBossDetector7 extends DaemonDetector implements AutoServerDetector
     protected List discoverServices(ConfigResponse config) {
         List<ServiceResource> services = new ArrayList<ServiceResource>();
         log.debug("[discoverServices] config=" + config);
-
+        
+        System.exit(-1);
+        
         JBossAdminHttp admin = null;
         try {
             admin = new JBossAdminHttp(config);

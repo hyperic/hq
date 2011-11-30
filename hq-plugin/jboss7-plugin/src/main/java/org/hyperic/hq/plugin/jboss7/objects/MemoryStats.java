@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.hyperic.hq.plugin.jboss.jbossas7.objects;
+package org.hyperic.hq.plugin.jboss7.objects;
 
 /**
  *

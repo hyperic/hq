@@ -1,4 +1,4 @@
-package org.hyperic.hq.plugin.jboss.jbossas7.objects;
+package org.hyperic.hq.plugin.jboss7.objects;
 
 public class ServerMemory {
 

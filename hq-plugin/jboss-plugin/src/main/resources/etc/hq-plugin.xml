@@ -97,7 +97,7 @@
     
     <filter name="template" value="${OBJECT_NAME}:${alias}" />
 	
-    <property name="template" value="${OBJECT_NAME}:${alias}" />
+	<property name="template" value="${OBJECT_NAME}:${alias}" />
 
   <!-- appended to each template by MeasurementInfoXML -->
     <property name="template-config"
@@ -124,10 +124,10 @@
     <property name="JCAConnectionPool"
 	    value="jboss.jca:service=ManagedConnectionPool,name=%jca.connpool%"/>
   
-    <property name="measurement-class"
+  <property name="measurement-class"
 		value="org.hyperic.hq.plugin.jboss.JBossMeasurementPlugin" />
   
-    <property name="control-class"
+  <property name="control-class"
 		value="org.hyperic.hq.plugin.jboss.JBossServiceControlPlugin" />
 
     <metrics name="JBoss 3.2">
@@ -893,21 +893,21 @@
             <actions include="stop,start,restart,flush"/>
         </service>
         
-        <filter name="conf" value=".*\.xml|.*\.cfg|.*\.properties|.*\.ini|.*\.conf|.*\.config"/>
-        <filter name="code" value=".*\.jar|.*\.dll|.*\.class|.*\.jsp|.*\.asp|.*\.aspx|.*\.php|.*\.pl|.*\.vb|.*\.vbs|.*\.js|.*\.py|.*\.pyc|.*\.cgi"/>    
-        <plugin type="config_track"
+	<filter name="conf" value=".*\.xml|.*\.cfg|.*\.properties|.*\.ini|.*\.conf|.*\.config"/>
+    <filter name="code" value=".*\.jar|.*\.dll|.*\.class|.*\.jsp|.*\.asp|.*\.aspx|.*\.php|.*\.pl|.*\.vb|.*\.vbs|.*\.js|.*\.py|.*\.pyc|.*\.cgi"/>    
+    <plugin type="config_track"
     		class="org.hyperic.hq.product.FileChangeTrackPlugin">
-            <monitored>
-                <folder path="server/all/conf" recursive="true" filter="${conf}"/>
-                <folder path="server/default/conf" recursive="true" filter="${conf}"/>
-                <folder path="server/default/deploy" recursive="true" filter="${code}|${conf}"/>
-                <folder path="server/minimal/conf" recursive="true" filter="${conf}"/>
-                <folder path="server/standard/conf" recursive="true" filter="${conf}"/>
-                <folder path="server/web/conf" recursive="true" filter="${conf}"/>
-                <folder path="" recursive="false" filter="jar-versions.xml"/>
-            </monitored>
-        </plugin>
-        <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="true" />
+      <monitored>
+        <folder path="server/all/conf" recursive="true" filter="${conf}"/>
+        <folder path="server/default/conf" recursive="true" filter="${conf}"/>
+        <folder path="server/default/deploy" recursive="true" filter="${code}|${conf}"/>
+        <folder path="server/minimal/conf" recursive="true" filter="${conf}"/>
+        <folder path="server/standard/conf" recursive="true" filter="${conf}"/>
+        <folder path="server/web/conf" recursive="true" filter="${conf}"/>
+        <folder path="" recursive="false" filter="jar-versions.xml"/>
+      </monitored>
+    </plugin>
+    <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="true" />
         
     </server>
 
@@ -982,7 +982,7 @@
     <server name="JBoss"
           version="4.3"
           include="4.2">
-        <service name="JMS Queue Destination" internal="true">
+          <service name="JMS Queue Destination" internal="true">
             <config>
                 <option name="name"
                 description="JMS Destination"
@@ -1001,18 +1001,18 @@
             <actions include="stop,start,removeAllMessages"/>
 
             <properties>
-                <property name="RedeliveryDelay" description="Redelivery Delay" />
-                <property name="JNDIName" description="JNDI Name" />
+				<property name="RedeliveryDelay" description="Redelivery Delay" />
+				<property name="JNDIName" description="JNDI Name" />
                 <property name="ServerPeer" description="Server Peer" />
-                <property name="CreatedProgrammatically" description="Created Programmatically" />
-                <property name="MaxSize" description="Max Size" />
-                <property name="FullSize" description="Full Size" />
-                <property name="PageSize" description="Page Size" />
-                <property name="DownCacheSize" description="Down Cache Size" />
-                <property name="Clustered" description="Clustered" />
-                <property name="MaxDeliveryAttempts" description="Max Delivery Attempts" />
-                <property name="MessageCount" description="All Message Count" />
-                <property name="ConsumerCount" description="All Subscriptions Count" />
+				<property name="CreatedProgrammatically" description="Created Programmatically" />
+				<property name="MaxSize" description="Max Size" />
+				<property name="FullSize" description="Full Size" />
+				<property name="PageSize" description="Page Size" />
+				<property name="DownCacheSize" description="Down Cache Size" />
+				<property name="Clustered" description="Clustered" />
+				<property name="MaxDeliveryAttempts" description="Max Delivery Attempts" />
+				<property name="MessageCount" description="All Message Count" />
+				<property name="ConsumerCount" description="All Subscriptions Count" />
             </properties>
 
             <metric name="Availability" template="jboss.system:service=MainDeployer:StateString"
@@ -1057,18 +1057,18 @@
             <actions include="stop,start,removeAllMessages"/>
 
             <properties>
-                <property name="RedeliveryDelay" description="Redelivery Delay" />
-                <property name="ServerPeer" description="Server Peer" />
-                <property name="JNDIName" description="JNDI Name" />
+				<property name="RedeliveryDelay" description="Redelivery Delay" />
+				<property name="ServerPeer" description="Server Peer" />
+				<property name="JNDIName" description="JNDI Name" />
                 <property name="CreatedProgrammatically" description="Created Programmatically" />
-                <property name="MaxSize" description="Max Size" />
-                <property name="FullSize" description="Full Size" />
-                <property name="PageSize" description="Page Size" />
-                <property name="DownCacheSize" description="Down Cache Size" />
-                <property name="Clustered" description="Clustered" />
-                <property name="MaxDeliveryAttempts" description="Max Delivery Attempts" />
-                <property name="AllMessageCount" description="All Message Count" />
-                <property name="AllSubscriptionsCount" description="All Subscriptions Count" />
+				<property name="MaxSize" description="Max Size" />
+				<property name="FullSize" description="Full Size" />
+				<property name="PageSize" description="Page Size" />
+				<property name="DownCacheSize" description="Down Cache Size" />
+				<property name="Clustered" description="Clustered" />
+				<property name="MaxDeliveryAttempts" description="Max Delivery Attempts" />
+				<property name="AllMessageCount" description="All Message Count" />
+				<property name="AllSubscriptionsCount" description="All Subscriptions Count" />
             </properties>
 
             <metric name="Availability" template="jboss.system:service=MainDeployer:StateString"
@@ -1672,90 +1672,10 @@
             <metric name="Durable Message Count" alias="DurableMessageCount" category="THROUGHPUT" indicator="true"/>
             <metric name="NonDurableMessageCount" alias="NonDurableMessageCount" category="THROUGHPUT"/>
         </service>
-        <service name="WebApp" internal="true">
+       <service name="WebApp" internal="true">
             <property name="CONTROL_OBJECT_NAME"
                 value="jboss.web:j2eeType=WebModule,name=//localhost%path%,J2EEApplication=none,J2EEServer=none"/>
             <plugin type="control" class="JBoss6StateServiceControlPlugin"/>
-        </service>
-    </server>
-    
-    <server name="JBoss" version="7.0">
-        <plugin type="autoinventory" class="org.hyperic.hq.plugin.jboss.jbossas7.JBossDetector7"/>
-        <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
-        <plugin type="collector" class="org.hyperic.hq.plugin.jboss.jbossas7.JBoss7Collector"/>
-        <config>
-            <option name="jboss7.addr" description="Http Address" default="localhost"/>
-            <option name="jboss7.port" description="Http Port" default="9990"/>
-            <option name="jboss7.https" description="Use SSL" default="false" type="boolean"/>
-            <option name="jboss7.user" description="Username" default="guest"/>
-            <option name="jboss7.pass" description="Password" default="guest" type="secret"/>
-        </config>
-        <filter name="server-connection" value="jboss7.addr=%jboss7.addr%,jboss7.port=%jboss7.port%,jboss7.user=%jboss7.user%,jboss7.pass=%jboss7.pass%,jboss7.https=%jboss7.https%"/>
-        <property name="template" value="jboss7:${server-connection}:${alias}"/>
-        <metric name="thread-count"/>
-        <metric name="peak-thread-count" />
-        <metric name="total-started-thread-count" />
-        <metric name="daemon-thread-count" />
-        <metric name="current-thread-cpu-time" units="ns"/>
-        <metric name="current-thread-user-time" units="ns"/>
-        <metric name="Heap Used %" alias="h.used.p" units="percentage" indicator="true"/>
-        <metric name="Heap Init" alias="h.init" units="B"/>
-        <metric name="Heap used" alias="h.used" units="B"/>
-        <metric name="Heap Commited" alias="h.committed" units="B"/>
-        <metric name="Heap Max" alias="h.max" units="B"/>
-        <metric name="Non-Heap Used %" alias="nh.used.p" units="percentage" indicator="true"/>
-        <metric name="Non-Heap Init" alias="nh.init" units="B"/>
-        <metric name="Non-Heap used" alias="nh.used" units="B"/>
-        <metric name="Non-Heap Commited" alias="nh.committed" units="B"/>
-        <metric name="Non-Heap Max" alias="nh.max" units="B"/>
-        <metric name="Object Pending Finalization" alias="object-pending-finalization-count"/>
-        <service name="Datasource">
-            <plugin type="collector" class="org.hyperic.hq.plugin.jboss.jbossas7.DataSourceCollector"/>
-            <config>
-                <option name="name" description="********"/>
-            </config>
-            <properties>
-                <property name="jndi" description="JNDI Name"/>
-                <property name="driver" description="Driver"/>
-            </properties>
-            <property name="template" value="jboss7:datasource=%name%,${server-connection}:${alias}"/>
-            <metric name="Availability" alias="Availability" indicator="true"/>
-            <metric name="ActiveCount" alias="ActiveCount" indicator="true"/>
-            <metric name="AvailableCount" alias="AvailableCount" indicator="true"/>
-            <metric name="AverageBlockingTime" alias="AverageBlockingTime" units="ms"/>
-            <metric name="AverageCreationTime" alias="AverageCreationTime" units="ms"/>
-            <metric name="CreatedCount" alias="CreatedCount" collectionType="trendsup"/>
-            <metric name="DestroyedCount" alias="DestroyedCount" collectionType="trendsup"/>
-            <metric name="MaxCreationTime" alias="MaxCreationTime" units="ms"/>
-            <metric name="MaxUsedCount" alias="MaxUsedCount" collectionType="trendsup"/>
-            <metric name="MaxWaitCount" alias="MaxWaitCount" collectionType="trendsup"/>
-            <metric name="MaxWaitTime" alias="MaxWaitTime" units="ms" indicator="true"/>
-            <metric name="PreparedStatementCacheAccessCount" alias="PreparedStatementCacheAccessCount" collectionType="trendsup"/>
-            <metric name="PreparedStatementCacheAddCount" alias="PreparedStatementCacheAddCount" collectionType="trendsup"/>
-            <metric name="PreparedStatementCacheCurrentSize" alias="PreparedStatementCacheCurrentSize" collectionType="trendsup"/>
-            <metric name="PreparedStatementCacheDeleteCount" alias="PreparedStatementCacheDeleteCount" collectionType="trendsup"/>
-            <metric name="PreparedStatementCacheHitCount" alias="PreparedStatementCacheHitCount" collectionType="trendsup" indicator="true"/>
-            <metric name="PreparedStatementCacheMissCount" alias="PreparedStatementCacheMissCount" collectionType="trendsup" indicator="true"/>
-            <metric name="TimedOut" alias="TimedOut" collectionType="trendsup"/>
-            <metric name="TotalBlockingTime" alias="TotalBlockingTime" units="ms"/>
-            <metric name="TotalCreationTime" alias="TotalCreationTime" units="ms"/>
-        </service>
-        <service name="Connector">
-            <plugin type="collector" class="org.hyperic.hq.plugin.jboss.jbossas7.ConnectorCollector"/>
-            <config>
-                <option name="name" description="********"/>
-            </config>
-            <properties>
-                <property name="protocol" description="protocol"/>
-                <property name="scheme" description="scheme"/>
-            </properties>
-            <property name="template" value="jboss7:connector=%name%,${server-connection}:${alias}"/>
-            <metric name="errorCount" collectionType="trendsup" indicator="true"/>
-            <metric name="requestCount" collectionType="trendsup" indicator="true"/>
-            <metric name="maxTime" units="ms" indicator="true"/>
-            <metric name="bytesSent" collectionType="trendsup"/>
-            <metric name="bytesReceived" collectionType="trendsup"/>
-            <metric name="processingTime" collectionType="trendsup" units="ms"/>
         </service>
     </server>
 </plugin>

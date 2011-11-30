@@ -1,4 +1,4 @@
-package org.hyperic.hq.plugin.jboss.jbossas7;
+package org.hyperic.hq.plugin.jboss7;
 
 import java.util.Properties;
 import org.apache.commons.logging.Log;
