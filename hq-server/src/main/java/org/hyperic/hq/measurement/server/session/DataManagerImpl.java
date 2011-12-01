@@ -1322,6 +1322,11 @@ public class DataManagerImpl implements DataManager {
                                                           long begin, long end, long interval,
                                                           int type, boolean returnMetricNulls,
                                                           PageControl pc) {
+        // [HHQ-5244] Need to round to make sure that begin time is gathered
+        final long MINUTE = 60000l;
+        begin = TimingVoodoo.roundDownTime(begin, MINUTE);
+        end = TimingVoodoo.roundUpTime(end, MINUTE);
+
         final List<Integer> availIds = new ArrayList<Integer>();
         final List<Integer> measIds = new ArrayList<Integer>();
         checkTimeArguments(begin, end, interval);
