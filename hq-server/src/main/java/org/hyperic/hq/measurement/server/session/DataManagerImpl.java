@@ -1377,14 +1377,13 @@ public class DataManagerImpl implements DataManager {
         for (int ii = 0; ii < values.length; ii++) {
             final AggMetricValue val = values[ii];
             if (null == val && returnNulls) {
-                rtn.add(new HighLowMetricValue(Double.NaN, tmp));
+                rtn.add(new HighLowMetricValue(Double.NaN, tmp + (ii * windowSize)));
                 continue;
             } else if (null == val) {
                 continue;
             } else {
                 rtn.add(val.getHighLowMetricValue());
             }
-            start += windowSize;
         }
         return rtn;
     }
