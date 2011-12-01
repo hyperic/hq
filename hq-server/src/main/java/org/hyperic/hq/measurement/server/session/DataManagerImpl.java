@@ -1323,7 +1323,6 @@ public class DataManagerImpl implements DataManager {
                                                           int type, boolean returnMetricNulls,
                                                           PageControl pc) {
         // [HHQ-5244] Need to round to make sure that begin time is gathered
-        final long MINUTE = 60000l;
         begin = TimingVoodoo.roundDownTime(begin, MINUTE);
         end = TimingVoodoo.roundUpTime(end, MINUTE);
 
