@@ -163,10 +163,6 @@
     agent process to allow the agent to collect metrics.
     </p>
     
-    <p><b>NOTE:</b> Due to the expensive nature of collection of metrics 
-    for NTPd, measurement will not be automatically enabled by autodiscovery.  
-    </p>
-
     <p>hostname is optional. An empty field will not invoke ntpdc with a host
     option.
 
