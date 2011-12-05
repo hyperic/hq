@@ -59,6 +59,7 @@ import org.hyperic.hq.agent.AgentKeystoreConfig;
 import org.hyperic.hq.plugin.jboss7.objects.Connector;
 import org.hyperic.hq.plugin.jboss7.objects.ServerMemory;
 import org.hyperic.hq.plugin.jboss7.objects.ThreadsInfo;
+import org.hyperic.hq.plugin.jboss7.objects.TransactionsStats;
 import org.hyperic.hq.plugin.jboss7.objects.WebSubsystem;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.util.config.ConfigResponse;
@@ -174,6 +175,12 @@ public final class JBossAdminHttp {
         Type type = new TypeToken<ServerMemory>() {
         }.getType();
         return get("/core-service/platform-mbean/type/memory?include-runtime=true", type);
+    }
+
+    public TransactionsStats getTransactionsStats() throws PluginException {
+        Type type = new TypeToken<TransactionsStats>() {
+        }.getType();
+        return get("/subsystem/transactions?include-runtime=true", type);
     }
 
     public List<String> getDatasources() throws PluginException {

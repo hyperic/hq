@@ -4,6 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.plugin.jboss7.objects.ServerMemory;
 import org.hyperic.hq.plugin.jboss7.objects.ThreadsInfo;
+import org.hyperic.hq.plugin.jboss7.objects.TransactionsStats;
 import org.hyperic.hq.product.PluginException;
 
 public class JBoss7Collector extends JBoss7DefaultCollector {
@@ -38,6 +39,21 @@ public class JBoss7Collector extends JBoss7DefaultCollector {
             setValue("nh.used", sm.getNonHeapMemoryUsage().getUsed());
             setValue("nh.committed", sm.getNonHeapMemoryUsage().getCommitted());
             setValue("nh.max", sm.getNonHeapMemoryUsage().getMax());
+        } catch (PluginException ex) {
+            log.debug(ex.getMessage(), ex);
+        }
+
+        try {
+            TransactionsStats ts = admin.getTransactionsStats();
+            setValue("aborted-transactions", ts.getAbortedTransactions());
+            setValue("application-rollbacks", ts.getApplicationRollbacks());
+            setValue("committed-transactions", ts.getCommittedTransactions());
+            setValue("heuristics", ts.getHeuristics());
+            setValue("inflight-transactions", ts.getInflightTransactions());
+            setValue("nested-transactions", ts.getNestedTransactions());
+            setValue("resource-rollbacks", ts.getResourceRollbacks());
+            setValue("timed-out-transactions", ts.getTimedOutTransactions());
+            setValue("transactions", ts.getTransactions());
         } catch (PluginException ex) {
             log.debug(ex.getMessage(), ex);
         }
