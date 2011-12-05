@@ -2722,7 +2722,7 @@ hyperic.dashboard.summaryWidget = function(args) {
     	                    }
     	            );
         		}, 
-    	        60000);
+    	        portlets_reload_time);
     };
     
     that.pauseRefreshCycle = function() {

@@ -385,10 +385,16 @@ public class ApacheServerDetector
                 }
             }
 
+<<<<<<< HEAD
             if (binary.conf != null) {
                 productConfig.setValue("ServerConf", binary.conf);
             }
+=======
+>>>>>>> 4.5.2.2
             if (productConfig != null) {
+                if (binary.conf != null) {
+                    productConfig.setValue("ServerConf", binary.conf);
+                }
                 addTrackConfig(productConfig);
                 setProductConfig(server, productConfig);
                 setMeasurementConfig(server, metricConfig);

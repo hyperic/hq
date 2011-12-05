@@ -118,7 +118,7 @@ public class OpenLDAPServerDetector
         setProductConfig(server, new ConfigResponse());
         // sets a default Measurement Config property with no values
         server.setMeasurementConfig();
-        server.setName(SERVER_NAME+" "+version);
+        server.setName(getPlatformName()+" "+SERVER_NAME+" "+version);
         servers.add(server);
 
         return servers;

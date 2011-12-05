@@ -33,6 +33,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+<<<<<<< HEAD
+=======
+import java.util.concurrent.atomic.AtomicBoolean;
+>>>>>>> 4.5.2.2
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.logging.Log;
@@ -78,6 +82,10 @@ implements DiagnosticObject, ApplicationContextAware, ApplicationListener<Contex
     private static final Object LOCK = new Object();
     private String lastVerboseStatus = null;
     private String lastNonVerboseStatus = null;
+<<<<<<< HEAD
+=======
+    private static String METRICSNOTCOMINGINDIAGNOSTIC_DISABLE = "MetricsNotComingInDiagnostic.disable";
+>>>>>>> 4.5.2.2
     private DiagnosticsLogger diagnosticsLogger;
     private AuthzSubjectManager authzSubjectManager;
     private AvailabilityManager availabilityManager;
@@ -86,6 +94,10 @@ implements DiagnosticObject, ApplicationContextAware, ApplicationListener<Contex
     private PlatformManager platformManager;
     private MetricDataCache metricDataCache;
     private ApplicationContext ctx;
+<<<<<<< HEAD
+=======
+    private AtomicBoolean disabled = new AtomicBoolean(false);
+>>>>>>> 4.5.2.2
 
     @Autowired
     public MetricsNotComingInDiagnostic(DiagnosticsLogger diagnosticsLogger,
@@ -102,8 +114,18 @@ implements DiagnosticObject, ApplicationContextAware, ApplicationListener<Contex
         this.resourceManager = resourceManager;
         this.platformManager = platformManager;
         this.metricDataCache = metricDataCache;
+
+<<<<<<< HEAD
+=======
+        String isDisabled = System.getProperty(METRICSNOTCOMINGINDIAGNOSTIC_DISABLE, "false");
+        if (isDisabled.equals("false")) {
+            setDisabled(false);
+        } else {
+            setDisabled(true);
+        }
     }
 
+>>>>>>> 4.5.2.2
     public String getName() {
         return "Enabled Metrics Not Coming In";
     }
@@ -119,11 +141,24 @@ implements DiagnosticObject, ApplicationContextAware, ApplicationListener<Contex
     public String getShortStatus() {
         return getReport(false);
     }
+
+    public Boolean getDisabled() {
+        return disabled.get();
+    }
     
+<<<<<<< HEAD
+=======
+    public void setDisabled(Boolean disabled) {
+        log.info("Setting disabled flag to " + disabled.toString());
+        this.disabled.set(disabled);
+    }
+    
+>>>>>>> 4.5.2.2
     private String getReport(final boolean isVerbose) {
         if (!HAUtil.isMasterNode()) {
             return "Server must be the primary node in the HA configuration before this report is valid.";
         }
+<<<<<<< HEAD
         if ((now() - last.get()) < REPORT_THRESHOLD) {
             synchronized (LOCK) {
                 String rtn = (isVerbose) ? lastVerboseStatus : lastNonVerboseStatus;
@@ -133,6 +168,22 @@ implements DiagnosticObject, ApplicationContextAware, ApplicationListener<Contex
                 return rtn;
             }
         }
+=======
+
+        if (getDisabled()) {
+            return "Report disabled";
+        }
+
+        if ((now() - last.get()) < REPORT_THRESHOLD) {
+            synchronized (LOCK) {
+                String rtn = (isVerbose) ? lastVerboseStatus : lastNonVerboseStatus;
+                if (rtn == null) {
+                    return "report will not be executed until the server is up for 60 minutes\n";
+                }
+                return rtn;
+            }
+        }
+>>>>>>> 4.5.2.2
         final StringBuilder verbose = new StringBuilder();
         final StringBuilder nonVerbose = new StringBuilder();
         try {

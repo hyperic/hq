@@ -76,6 +76,7 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
@@ -190,7 +191,54 @@ public class MeasurementBossImpl implements MeasurementBoss {
         this.critterTranslator = critterTranslator;
         this.problemMetricManager = problemMetricManager;
     }
+    
+    @Transactional(readOnly = true)
+    public double getAvailabilityAverage(AppdefEntityID[] aeids, long begin, long end){
+        
+        Collection<Resource> resources = new ArrayList<Resource>();
+        for(AppdefEntityID aeid:aeids){
+            Resource resource = resourceManager.findResource(aeid);
+            if (resource == null || resource.isInAsyncDeleteState()){
+                continue;
+            }
+            resources.add(resource);
+        }
+        Map<Integer, List<Measurement>> measurements = measurementManager.getAvailMeasurements(resources);
+        
+        final List<Integer> mids = new ArrayList<Integer>();
+        for(List<Measurement> measurementList : measurements.values()){
+            if(measurementList == null){
+                continue;
+            }
+            for (Measurement measurement: measurementList){
+                if(measurement == null) {
+                    continue;
+                }
+                mids.add(measurement.getId());
+            }
+        }
+        
+        Map<Integer, double[]> availData = 
+            availabilityManager.getAggregateDataByTemplate(mids.toArray(new Integer[mids.size()]),  begin, end);
+        //will get multi entries for mix group, so we need to average it    
+        double sum = 0;
+        for(Integer availDataKey : availData.keySet()){
+            sum += availData.get(availDataKey)[MeasurementConstants.IND_AVG];
+        }
+        if(availData.size()==0) return 0;
+        return sum/availData.size();
+    }
+    
+    @Transactional(readOnly = true)
+    public double getAGAvailabilityAverage(int sessionId, AppdefEntityID aid, AppdefEntityTypeID ctype, 
+                                           long begin, long end) throws AppdefEntityNotFoundException, PermissionException, SessionNotFoundException, SessionTimeoutException{
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
 
+        // Find the autogroup members
+        List<AppdefEntityID> entIds = getAGMemberIds(subject,aid,ctype);
+        return getAvailabilityAverage(entIds.toArray(new AppdefEntityID[entIds.size()]),begin,end);
+    }
+    
     private List<Measurement> findDesignatedMetrics(AuthzSubject subject, AppdefEntityID id,
                                                     Set<String> cats) {
         final List<Measurement> metrics;
@@ -339,7 +387,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
         final AuthzSubject subject = sessionManager.getSubject(sessionId);
 
         // Find the autogroup members
-        List<AppdefEntityID> entIds = getAGMemberIds(subject, new AppdefEntityID[] { aid }, ctype);
+        List<AppdefEntityID> entIds = getAGMemberIds(subject, aid, ctype);
 
         for (AppdefEntityID aeId : entIds) {
 
@@ -779,10 +827,10 @@ public class MeasurementBossImpl implements MeasurementBoss {
         long after = System.currentTimeMillis() - (3 * interval);
         Map<Integer, MetricValue> data = dataManager.getLastDataPoints(measurements, after);
 
-        for (int i = 0; i < measurements.size(); i++) {
-            Measurement m = (Measurement) measurements.get(i);
+        int i=0;
+        for (final Measurement m : measurements) {
             if (m != null && data.containsKey(m.getId())) {
-                ret[i] = (MetricValue) data.get(m.getId());
+                ret[i++] = (MetricValue) data.get(m.getId());
             }
         }
 
@@ -807,11 +855,9 @@ public class MeasurementBossImpl implements MeasurementBoss {
             }
         }
 
-        Integer[] mids = new Integer[metrics.size()];
-        int i = 0;
-        for (Iterator<Measurement> it = metrics.iterator(); it.hasNext();) {
-            Measurement m = it.next();
-            mids[i++] = m.getId();
+        Collection<Integer> mids = new ArrayList<Integer>(metrics.size());
+        for (final Measurement m : metrics) {
+            mids.add(m.getId());
         }
 
         final long after = System.currentTimeMillis() - (3 * interval);
