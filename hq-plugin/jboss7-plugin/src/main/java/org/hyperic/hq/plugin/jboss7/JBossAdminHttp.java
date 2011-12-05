@@ -49,8 +49,10 @@ import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.AuthCache;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.params.AuthPolicy;
 import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.auth.DigestScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.protocol.BasicHttpContext;
 import org.hyperic.hq.agent.AgentKeystoreConfig;
@@ -86,19 +88,18 @@ public final class JBossAdminHttp {
         log.debug("targetHost=" + targetHost);
         AgentKeystoreConfig config = new AgentKeystoreConfig();
         client = new HQHttpClient(config, new HttpConfig(5000, 5000, null, 0), config.isAcceptUnverifiedCert());
-        client.getCredentialsProvider().setCredentials(
-                new AuthScope(targetHost.getHostName(), targetHost.getPort(), "Management: Web UI"),
-                new UsernamePasswordCredentials(user, pass));
-        List authPrefs = new ArrayList(1);
-        authPrefs.add("Management: Web UI");
+        if ((user != null) && (pass != null)) {
+            client.getCredentialsProvider().setCredentials(
+                    new AuthScope(targetHost.getHostName(), targetHost.getPort()),
+                    new UsernamePasswordCredentials(user, pass));
+        }
 
-
-        AuthCache authCache = new BasicAuthCache();
-        BasicScheme basicAuth = new BasicScheme();
-        authCache.put(targetHost, basicAuth);
-
-        localcontext = new BasicHttpContext();
-        localcontext.setAttribute(ClientContext.AUTH_CACHE, authCache);
+//        AuthCache authCache = new BasicAuthCache();
+//        DigestScheme digestAuth = new DigestScheme();
+//        digestAuth.overrideParamter("realm", "'TestRealm'");
+//        authCache.put(targetHost, digestAuth);
+//        localcontext = new BasicHttpContext();
+//        localcontext.setAttribute(ClientContext.AUTH_CACHE, authCache);
     }
 
     public JBossAdminHttp(ConfigResponse props) throws PluginException {
@@ -109,7 +110,7 @@ public final class JBossAdminHttp {
         T res = null;
         try {
             String url = targetHost.toURI() + "/management";
-            if(hostName!=null){
+            if (hostName != null) {
                 url += "/host/master/server/" + hostName;
             }
             HttpGet get = new HttpGet(url + api);
@@ -120,7 +121,7 @@ public final class JBossAdminHttp {
             String responseBody = readInputString(response.getEntity().getContent());
 
             if (log.isDebugEnabled()) {
-                log.debug("[" + api + "] -(" + r + ")-> " + responseBody);
+                log.debug("[" + api + "] -(" + get.getURI() + ")-> " + responseBody);
             }
 
             if (r != 200) {
@@ -169,7 +170,7 @@ public final class JBossAdminHttp {
         return get("/core-service/platform-mbean/type/threading", type);
     }
 
-    public ServerMemory getServerMemory() throws PluginException  {
+    public ServerMemory getServerMemory() throws PluginException {
         Type type = new TypeToken<ServerMemory>() {
         }.getType();
         return get("/core-service/platform-mbean/type/memory?include-runtime=true", type);
