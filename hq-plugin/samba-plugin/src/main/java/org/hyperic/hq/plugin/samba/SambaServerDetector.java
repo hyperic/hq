@@ -27,35 +27,21 @@ package org.hyperic.hq.plugin.samba;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Iterator;
 import java.util.regex.Pattern;
-
-import org.hyperic.hq.product.AutoServerDetector;
-import org.hyperic.hq.product.FileServerDetector;
-import org.hyperic.hq.product.MeasurementPlugin;
-import org.hyperic.hq.product.Metric;
-import org.hyperic.hq.product.MetricUnreachableException;
-import org.hyperic.hq.product.MetricInvalidException;
-import org.hyperic.hq.product.MetricNotFoundException;
-import org.hyperic.hq.product.MetricValue;
-import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.ServerDetector;
-import org.hyperic.hq.product.ServerResource;
-import org.hyperic.hq.product.ServiceResource;
-import org.hyperic.hq.product.ProductPlugin;
-
-import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.config.ConfigSchema;
-import org.hyperic.util.config.SchemaBuilder;
-
-import org.hyperic.sigar.win32.RegistryKey;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.product.AutoServerDetector;
+import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.hq.product.ServerDetector;
+import org.hyperic.hq.product.ServerResource;
+import org.hyperic.hq.product.ServiceResource;
+import org.hyperic.util.config.ConfigResponse;
 
 public class SambaServerDetector
     extends ServerDetector
@@ -68,6 +54,8 @@ public class SambaServerDetector
     // this PTQL query matches the PROCESS_NAME and returns the parent process id
     private static final String PTQL_QUERY = 
         "State.Name.eq="+PROCESS_NAME+",State.Name.Pne=$1";
+    
+    private static final String SMBD_DEFAULT_INSTALLATION_PATH = "/usr/sbin/";
 
     private static Log log = LogFactory.getLog(SambaServerDetector.class);
 
@@ -86,9 +74,9 @@ public class SambaServerDetector
         return servers;
     }
 
-    private static List getServerProcessList()
+    private static List<String> getServerProcessList()
     {
-        List servers = new ArrayList();
+        List<String> servers = new ArrayList<String>();
         long[] pids = getPids(PTQL_QUERY);
         for (int i=0; i<pids.length; i++)
         {
@@ -96,8 +84,10 @@ public class SambaServerDetector
             if (exe == null)
                 continue;
             File binary = new File(exe);
-            if (!binary.isAbsolute())
-                continue;
+            if (!binary.isAbsolute()) {
+            	servers.add(SMBD_DEFAULT_INSTALLATION_PATH + exe);
+            	continue;
+            }
             servers.add(binary.getAbsolutePath());
         }
         return servers;
@@ -128,7 +118,7 @@ public class SambaServerDetector
     public List getServerList(String path) throws PluginException
     {
         List servers = new ArrayList();
-        String installpath = getParentDir(path, 2);
+        String installpath = getParentDir(path, 1);
 
         ConfigResponse productConfig = new ConfigResponse();
         productConfig.setValue("installpath", installpath);
@@ -155,7 +145,8 @@ public class SambaServerDetector
         return servers;
     }
 
-    protected List discoverServices(ConfigResponse config)
+    @Override
+	protected List discoverServices(ConfigResponse config)
         throws PluginException
     {
         String installpath = config.getValue(ProductPlugin.PROP_INSTALLPATH);
