@@ -40,6 +40,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
@@ -50,6 +51,7 @@ import org.apache.log4j.Logger;
 import org.hyperic.hq.agent.AgentAssertionException;
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.agent.AgentConfigException;
+import org.hyperic.hq.agent.AgentLifecycle;
 import org.hyperic.hq.agent.AgentMonitorValue;
 import org.hyperic.hq.agent.AgentStartupCallback;
 import org.hyperic.hq.agent.AgentUpgradeManager;
@@ -104,7 +106,7 @@ public class AgentDaemon
     private AgentConfig          bootConfig;
     private Hashtable<String, Vector<AgentNotificationHandler>>            notifyHandlers = new Hashtable<String, Vector<AgentNotificationHandler>>();
     private Hashtable<String, AgentMonitorInterface>            monitorClients;
-    private volatile boolean     running;         // Are we running?
+    private AtomicBoolean running = new AtomicBoolean(false);
 
     private ProductPluginManager ppm;
     
@@ -122,7 +124,6 @@ public class AgentDaemon
             PluginLoader.create("ServerHandlerLoader",
                                 getClass().getClassLoader());
         this.handlerLoader = new ServerHandlerLoader(this.handlerClassLoader);        
-        this.running       = false;
         this.startTime     = System.currentTimeMillis();
 
         synchronized(AgentDaemon.mainInstanceLock){
@@ -177,16 +178,12 @@ public class AgentDaemon
      * @throws AgentConfigException indicating the passed configuration is 
      *                              invalid.
      */
-    public static AgentDaemon newInstance(AgentConfig cfg)
-        throws AgentConfigException 
-    {
+    public static AgentDaemon newInstance(AgentConfig cfg) throws AgentConfigException {
         AgentDaemon res = new AgentDaemon();
-
         try {
             res.configure(cfg);
         } catch(AgentRunningException exc){
-            throw new AgentAssertionException("New agent should not be " +
-                                              "running");
+            throw new AgentAssertionException("New agent should not be running", exc);
         } 
         return res;
     }
@@ -328,17 +325,14 @@ public class AgentDaemon
      * @throws AgentRunningException indicating the Agent was running when
      *                               the routine was called.
      */
-    private void cleanup()
-        throws AgentRunningException 
-    {
+    private synchronized void cleanup() throws AgentRunningException {
         if(this.isRunning()){
-            throw new AgentRunningException("Agent cannot be cleaned up " +
-                                            "while running");
+            throw new AgentRunningException("Agent cannot be cleaned up while running");
         }
 
         // Shutdown the serverhandlers first, in case they need to write
         // something to storage
-        if(this.startedHandlers != null){
+        if (this.startedHandlers != null){
             for(int i=0; i < this.startedHandlers.size(); i++){
                 AgentServerHandler handler = 
                     (AgentServerHandler)this.startedHandlers.get(i);
@@ -650,7 +644,7 @@ public class AgentDaemon
      */
 
     public boolean isRunning(){
-        return this.running;
+        return running.get();
     }
 
     /**
@@ -660,13 +654,12 @@ public class AgentDaemon
      *                               when die() was called.
      */
 
-    public void die() 
-        throws AgentRunningException 
-    {
-        if(!this.running){
+    public void die() throws AgentRunningException {
+        if(!running.get()){
             throw new AgentRunningException("Agent is not running");
         }
-        this.listener.die();
+        listener.die();
+        running.set(false);
     }
 
     /**
@@ -857,7 +850,7 @@ public class AgentDaemon
     public void start() 
         throws AgentStartException 
     {
-        this.running = true;
+        running.set(true);
         boolean agentStarted = false;
         
         try {
@@ -958,9 +951,13 @@ public class AgentDaemon
                 this.agentTransportLifecycle.stopAgentTransport();
             }
             
-            this.running = false;
+            running.set(false);
             
-            try {this.cleanup();} catch(AgentRunningException exc){}
+            try {
+                cleanup();
+            } catch(AgentRunningException e) {
+                logger.error(e,e);
+            }
         
             if(this.storageProvider != null) {
                 this.storageProvider.dispose();                
@@ -981,18 +978,26 @@ public class AgentDaemon
         }
     }
 
-    public static class RunnableAgent implements Runnable {
+    public static class RunnableAgent implements Runnable, AgentLifecycle {
         
         private final AgentConfig config;
-        
+        private AgentDaemon agent;
         
         public RunnableAgent(AgentConfig config) {
             this.config = config;
         }
+        
+        public void shutdown() {
+            try {
+                agent.die();
+                agent.cleanup();
+            } catch (AgentRunningException e) {
+                logger.error(e,e);
+            }
+        }
                 
         public void run() {            
             boolean isConfigured = false;            
-            AgentDaemon agent = null;
             
             try {
                 agent = AgentDaemon.newInstance(config);

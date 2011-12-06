@@ -552,9 +552,7 @@ public class DiskList {
             return this.nextIdx != -1;
         }
 
-        public Object next()
-            throws NoSuchElementException
-        {
+        public Object next() throws NoSuchElementException {
             Record rec;
 
             if(this.nextIdx == -1){
@@ -569,14 +567,15 @@ public class DiskList {
 
                 try {
                     rec = this.diskList.readRecord(this.curIdx);
-                } catch(IOException exc){
+                } catch(IOException e){
                     log.error("IOException while reading record");
                     if (log.isDebugEnabled()) {
-                        log.debug("IOException while trying to read record number " + this.curIdx, exc);
+                        log.debug("IOException while trying to read record number " + this.curIdx, e);
                     }
-                    throw new NoSuchElementException("Error getting next " +
-                                                     "element: " +
-                                                     exc.getMessage());
+                    NoSuchElementException ex = new NoSuchElementException(
+                        "Error getting next element: " + e);
+                    ex.initCause(e);
+                    throw ex;
                 }
             }
 

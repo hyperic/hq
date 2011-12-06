@@ -37,7 +37,7 @@ public final class AgentCommandsAPI extends AgentAPIInfo {
     private static final byte MINOR_VER  = 0x00;
     private static final byte BUGFIX_VER = 0x01;
 
-    private static final String commandPrefix = "agent:";
+    public static final String commandPrefix = "agent:";
     public static final int DEFAULT_PORT = 2144;
     public static final String command_getCurrentAgentBundle =
         commandPrefix + "getCurrentAgentBundle";
