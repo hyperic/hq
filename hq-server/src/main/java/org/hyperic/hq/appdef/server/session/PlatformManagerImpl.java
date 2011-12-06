@@ -2012,21 +2012,4 @@ public class PlatformManagerImpl implements PlatformManager {
         valuePager = Pager.getPager(VALUE_PROCESSOR);
     }
     
-    @Transactional(readOnly = true)
-    public Platform getPlatformByAgentId(Integer agentId) {
-        final Agent agent = agentDAO.get(agentId);
-        if (agent == null) {
-            return null;
-        }
-        final Collection<Platform> platforms = agent.getPlatforms();
-        for (final Platform platform : platforms) {
-            final Resource resource = platform.getResource();
-            if (PlatformDetector.isSupportedPlatform(resource.getPrototype().getName())) {
-                return platform;
-            }
-        }
-        return null;
-    }
-
-
 }

@@ -205,11 +205,7 @@ public class ErsApacheServerDetector
         String version = getTypeInfo().getVersion();
         ApacheBinaryInfo binary = ApacheBinaryInfo.getInfo(path);
 
-<<<<<<< HEAD
-        if (binary == null) {
-=======
         if ((binary == null) || (binary.version == null)) {
->>>>>>> 4.5.2.2
             getLog().debug("[getServerResources] no Binary Info path=" + path + " version=" + version);
             return null; //does not match our server type version
         }

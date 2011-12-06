@@ -1,25 +1,19 @@
-<<<<<<< HEAD
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-=======
->>>>>>> 4.5.2.2
 package org.hyperic.hq.plugin.apache;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
 import java.io.BufferedReader;
 import java.io.File;
-<<<<<<< HEAD
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-=======
 import java.io.FileReader;
 import java.io.IOException;
->>>>>>> 4.5.2.2
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -30,10 +24,7 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-<<<<<<< HEAD
-=======
 import java.util.regex.PatternSyntaxException;
->>>>>>> 4.5.2.2
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.PluginException;
@@ -45,19 +36,11 @@ import org.hyperic.hq.product.PluginException;
 public class ApacheConf {
 
     private String config;
-<<<<<<< HEAD
-    private static final Pattern virtualHostPatter = Pattern.compile("<VirtualHost ([^>]*)>");
-    private static final Pattern serverNamePatter = Pattern.compile("ServerName (.*)");
-    private static final Pattern serverRootPatter = Pattern.compile("ServerRoot \"?([^\\s|\"]*)\"?");
-    private static final Pattern includePatter = Pattern.compile("Include (.*)");
-    private static final Pattern ipPattern = Pattern.compile("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
-=======
     private static final Pattern virtualHostPatter = Pattern.compile("<VirtualHost ([^>]*)>", Pattern.CASE_INSENSITIVE);
     private static final Pattern serverNamePatter = Pattern.compile("ServerName (.*)", Pattern.CASE_INSENSITIVE);
     private static final Pattern serverRootPatter = Pattern.compile("ServerRoot \"?([^\\s|\"]*)\"?", Pattern.CASE_INSENSITIVE);
     private static final Pattern includePatter = Pattern.compile("Include (.*)", Pattern.CASE_INSENSITIVE);
     private static final Pattern ipPattern = Pattern.compile("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}", Pattern.CASE_INSENSITIVE);
->>>>>>> 4.5.2.2
     private static final Log log = LogFactory.getLog(ApacheConf.class);
 
     public ApacheConf(File configFile) throws PluginException {
@@ -154,19 +137,6 @@ public class ApacheConf {
         StringBuffer newConf = new StringBuffer();
 
         while (mach.find()) {
-<<<<<<< HEAD
-            if (!mach.group().startsWith("#")) {
-                File cf = new File(serverRoot, mach.group(1));
-                if (log.isDebugEnabled()) {
-                    log.debug("[replaceIncludes] ->" + mach.group());
-                    log.debug("[replaceIncludes] ->" + cf + " (" + (cf.exists() && cf.isFile()) + ")");
-                }
-                if (cf.exists() && cf.isFile()) {
-                    String includeConfig = readFile(cf);
-                    String replace = replaceIncludes(includeConfig, serverRoot);
-                    mach.appendReplacement(newConf, replace);
-                }
-=======
             log.debug("[replaceIncludes] found:'" + mach.group() + "'");
             String found = mach.group(1);
             String pattern = null;
@@ -207,15 +177,12 @@ public class ApacheConf {
                 }
             } else {
                 log.debug("[replaceIncludes] File Not Found!! '" + cf + "'");
->>>>>>> 4.5.2.2
             }
         }
         mach.appendTail(newConf);
         return newConf.toString();
     }
 
-<<<<<<< HEAD
-=======
     private static List<File> listFiles(File dir) {
         List<File> files = new ArrayList<File>();
         File ls[] = dir.listFiles();
@@ -265,7 +232,6 @@ public class ApacheConf {
         return m.matches();
     }
 
->>>>>>> 4.5.2.2
     private static String readFile(File file) throws IOException {
         final char[] buffer = new char[0x10000];
         StringBuilder out = new StringBuilder();

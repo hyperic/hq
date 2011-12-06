@@ -574,7 +574,7 @@ public class AlertManagerImpl implements AlertManager,
     @Transactional(readOnly = true)
     public Map<Integer,List<Alert>> getUnfixedByResource(Integer subj, long timeRange, long endTime)
         throws PermissionException {
-        return getUnfixedCount(subj, timeRange, endTime, groupId, null);
+        return getUnfixedByResource(subj, timeRange, endTime, null);
     }
 
     /**
@@ -584,25 +584,16 @@ public class AlertManagerImpl implements AlertManager,
     @Transactional(readOnly = true)
     public int getUnfixedCount(Integer subj, long timeRange, long endTime, Resource r)
         throws PermissionException {
-        return getUnfixedCount(subj, timeRange, endTime, null, r.getId());
+        return getUnfixedByResource(subj, timeRange, endTime, r.getId()).size();
     }
     
-    private int getUnfixedCount(Integer subj, long timeRange, long endTime, Integer groupId, Integer resourceId)
+    private Map<Integer, List<Alert>> getUnfixedByResource(Integer subj, long timeRange, long endTime, Integer resourceId)
     	throws PermissionException {
         // Time voodoo the end time to the nearest minute so that we might
         // be able to use cached results
         endTime = TimingVoodoo.roundUpTime(endTime, 60000);
-<<<<<<< HEAD
-        Number count = alertDAO.countByCreateTimeAndPriority(subj, endTime - timeRange, endTime, 0,
-            false, true, groupId, resourceId, null);
-        if (count != null)
-            return count.intValue();
-
-        return 0;
-=======
         return alertDAO.getUnfixedByResource(subj, endTime - timeRange, endTime, 0,
                                             false, true);
->>>>>>> 4.5.2.2
     }
 
     private List<Escalatable> convertAlertsToEscalatables(Collection<Alert> alerts) {

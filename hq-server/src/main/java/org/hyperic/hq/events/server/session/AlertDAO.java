@@ -173,7 +173,7 @@ public class AlertDAO
                                                   boolean inEsc, boolean notFixed)
     {
         String sql = PermissionManagerFactory.getInstance().getAlertsHQL(inEsc, notFixed, null,
-                                                                         null, false);
+                                                                         null, null, false);
 
         Query q = getSession().createQuery(sql)
                 .setLong("begin", begin)
