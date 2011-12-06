@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.hyperic.hq.plugin.jboss7.objects.Connector;
+import org.hyperic.hq.plugin.jboss7.objects.Deployment;
 import org.hyperic.hq.plugin.jboss7.objects.WebSubsystem;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServiceResource;
@@ -91,6 +92,29 @@ public class JBossStandaloneDetector extends JBossDetectorBase {
 
                 ConfigResponse pc = new ConfigResponse();
                 pc.setValue("name", name);
+
+                setProductConfig(service, pc);
+                service.setCustomProperties(cp);
+                service.setMeasurementConfig();
+                service.setControlConfig();
+                services.add(service);
+            }
+        } catch (PluginException ex) {
+            log.error(ex, ex);
+        }
+
+        // deployments
+        try {
+            List<Deployment> deployments = admin.getDeployments();
+            for(Deployment d : deployments){
+                ServiceResource service = createServiceResource("deployment");
+                service.setName("XXXX Deployment " + d.getName());
+
+                ConfigResponse cp = new ConfigResponse();
+                cp.setValue("runtime-name", d.getRuntimeName());
+
+                ConfigResponse pc = new ConfigResponse();
+                pc.setValue("name", d.getName());
 
                 setProductConfig(service, pc);
                 service.setCustomProperties(cp);

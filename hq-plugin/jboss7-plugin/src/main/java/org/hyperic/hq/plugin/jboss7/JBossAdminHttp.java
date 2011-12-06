@@ -57,6 +57,7 @@ import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.protocol.BasicHttpContext;
 import org.hyperic.hq.agent.AgentKeystoreConfig;
 import org.hyperic.hq.plugin.jboss7.objects.Connector;
+import org.hyperic.hq.plugin.jboss7.objects.Deployment;
 import org.hyperic.hq.plugin.jboss7.objects.ServerMemory;
 import org.hyperic.hq.plugin.jboss7.objects.ThreadsInfo;
 import org.hyperic.hq.plugin.jboss7.objects.TransactionsStats;
@@ -181,6 +182,12 @@ public final class JBossAdminHttp {
         Type type = new TypeToken<TransactionsStats>() {
         }.getType();
         return get("/subsystem/transactions?include-runtime=true", type);
+    }
+
+    public List<Deployment> getDeployments() throws PluginException {
+        Type type = new TypeToken<List<Deployment>>() {
+        }.getType();
+        return get("/deployment/*?recursive=true", type);
     }
 
     public List<String> getDatasources() throws PluginException {

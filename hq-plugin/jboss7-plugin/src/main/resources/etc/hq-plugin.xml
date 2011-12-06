@@ -121,6 +121,17 @@
             <metric name="bytesReceived" collectionType="trendsup"/>
             <metric name="processingTime" collectionType="trendsup" units="ms"/>
         </service>
+        <service name="deployment">
+            <plugin type="collector" class="org.hyperic.hq.plugin.jboss7.DeploymentCollector"/>
+            <config>
+                <option name="name" description="********"/>
+            </config>
+            <properties>
+                <property name="runtime-name" description="runtime-name"/>
+            </properties>
+            <property name="template" value="jboss7:${server-connection}:%name%.${alias}"/>
+            <metric name="Availability"  indicator="true" />
+        </service>
     </server>
     
     <server name="JBoss Managed" version="7" include="JBoss 7">
