@@ -37,6 +37,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AgentType;
@@ -60,19 +61,15 @@ public class AgentDAO extends HibernateDAO<Agent> {
         new HibernateTemplate(sessionFactory, true).execute(new HibernateCallback() {
             public Object doInHibernate(Session session) throws HibernateException, SQLException {
                 List<String> tokens = session.createQuery("select agentToken from Agent").list();
-                String hql = "from Agent where agentToken=?";
                 log.info("preloading Agent.findByAgentToken cache");
                 for(String token : tokens) {
                     //HQ-2575 Preload findByAgentToken query cache to minimize DB connections when multiple agents
                     //send measurement reports to a restarted server 
-                    session.createQuery(hql).setString(0,token)
-                           .setCacheRegion("Agent.findByAgentToken")
-                           .setCacheable(true)
-                           .uniqueResult();
+                    findByAgentToken(token, session);
                 }
                 // pre-fetch platforms bag to optimize ReportProcessor.handleMeasurementData
                 log.info("preloading Agent.platforms bag");
-                hql = "from Agent a left outer join fetch a.platforms";
+                String hql = "from Agent a left outer join fetch a.platforms";
                 session.createQuery(hql).list();
                 return null;
             }
@@ -115,27 +112,33 @@ public class AgentDAO extends HibernateDAO<Agent> {
             .uniqueResult();
     }
 
+    private Agent findByAgentToken(String token, Session session) {
+        return (Agent) session.createCriteria(Agent.class)
+                              .add(Restrictions.eq("agentToken", token))
+                              .setCacheRegion("Agent.findByAgentToken")
+                              .setCacheable(true)
+                              .uniqueResult();
+    }
+
     public Agent findByAgentToken(String token) {
-        String sql = "from Agent where agentToken=?";
-        return (Agent) getSession().createQuery(sql).setString(0, token).setCacheRegion(
-            "Agent.findByAgentToken").setCacheable(true).uniqueResult();
+        return findByAgentToken(token, getSession());
     }
 
     @SuppressWarnings("unchecked")
     public List<Agent> findAgents(PageInfo pInfo) {
         final AgentSortField sort = (AgentSortField) pInfo.getSort();
-        final StringBuilder sql = new StringBuilder().append("select distinct a from Platform p ")
-            .append(" JOIN p.agent a").append(" JOIN p.resource r").append(
-                " WHERE r.resourceType is not null").append(" ORDER BY ").append(
-                sort.getSortString("a")).append((pInfo.isAscending() ? "" : " DESC"));
-
+        final StringBuilder sql = new StringBuilder()
+            .append("select distinct a from Platform p ")
+            .append(" JOIN p.agent a")
+            .append(" JOIN p.resource r")
+            .append(" WHERE r.resourceType is not null")
+            .append(" ORDER BY ").append(sort.getSortString("a"))
+            .append((pInfo.isAscending() ? "" : " DESC"));
         // Secondary sort by CTime
         if (!sort.equals(AgentSortField.CTIME)) {
             sql.append(", ").append(AgentSortField.CTIME.getSortString("a")).append(" DESC");
         }
-
         final Query q = getSession().createQuery(sql.toString());
-
         return (List<Agent>) pInfo.pageResults(q).list();
     }
 }
