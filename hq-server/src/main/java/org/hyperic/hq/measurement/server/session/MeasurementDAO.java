@@ -203,9 +203,8 @@ public class MeasurementDAO
     
     @SuppressWarnings("unchecked")
     List<Measurement> findByResources(List<Resource> resources) {
-        List<Measurement> measurements = new ArrayList<Measurement>();
-        String hql="select m from Measurement m "
-                     + "where m.resource in (:resources)";
+        final List<Measurement> measurements = new ArrayList<Measurement>();
+        final String hql = "select m from Measurement m where m.resource in (:resources)";
         final Query query = getSession().createQuery(hql);
         final int size = resources.size();
         for (int i = 0; i < size; i += BATCH_SIZE) {
@@ -218,8 +217,7 @@ public class MeasurementDAO
 
     @SuppressWarnings("unchecked")
     List<Measurement> findByResource(Resource resource) {
-        return createCriteria().add(Restrictions.eq("resource", resource)).setCacheable(true)
-            .setCacheRegion("Measurement.findByResource").list();
+        return createCriteria().add(Restrictions.eq("resource", resource)).list();
     }
 
     int deleteByIds(List<Integer> ids) {

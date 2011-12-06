@@ -12,6 +12,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -22,6 +24,7 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import java.util.regex.PatternSyntaxException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.PluginException;
@@ -33,11 +36,11 @@ import org.hyperic.hq.product.PluginException;
 public class ApacheConf {
 
     private String config;
-    private static final Pattern virtualHostPatter = Pattern.compile("<VirtualHost ([^>]*)>");
-    private static final Pattern serverNamePatter = Pattern.compile("ServerName (.*)");
-    private static final Pattern serverRootPatter = Pattern.compile("ServerRoot \"?([^\\s|\"]*)\"?");
-    private static final Pattern includePatter = Pattern.compile("Include (.*)");
-    private static final Pattern ipPattern = Pattern.compile("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}");
+    private static final Pattern virtualHostPatter = Pattern.compile("<VirtualHost ([^>]*)>", Pattern.CASE_INSENSITIVE);
+    private static final Pattern serverNamePatter = Pattern.compile("ServerName (.*)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern serverRootPatter = Pattern.compile("ServerRoot \"?([^\\s|\"]*)\"?", Pattern.CASE_INSENSITIVE);
+    private static final Pattern includePatter = Pattern.compile("Include (.*)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern ipPattern = Pattern.compile("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}", Pattern.CASE_INSENSITIVE);
     private static final Log log = LogFactory.getLog(ApacheConf.class);
 
     public ApacheConf(File configFile) throws PluginException {
@@ -134,21 +137,99 @@ public class ApacheConf {
         StringBuffer newConf = new StringBuffer();
 
         while (mach.find()) {
-            if (!mach.group().startsWith("#")) {
-                File cf = new File(serverRoot, mach.group(1));
-                if (log.isDebugEnabled()) {
-                    log.debug("[replaceIncludes] ->" + mach.group());
-                    log.debug("[replaceIncludes] ->" + cf + " (" + (cf.exists() && cf.isFile()) + ")");
-                }
-                if (cf.exists() && cf.isFile()) {
+            log.debug("[replaceIncludes] found:'" + mach.group() + "'");
+            String found = mach.group(1);
+            String pattern = null;
+            if (isFnmatch(found)) {
+                int idx = found.lastIndexOf("/");
+                pattern = found.substring(idx + 1);
+                found = found.substring(0, idx);
+            }
+
+            File cf = new File(found);
+            if (!cf.isAbsolute()) {
+                cf = new File(serverRoot, found);
+            }
+
+            if (cf.exists()) {
+                if (cf.isFile()) {
+                    log.debug("[replaceIncludes] Including file: '" + cf + "'");
                     String includeConfig = readFile(cf);
+                    includeConfig = Matcher.quoteReplacement(includeConfig);
                     String replace = replaceIncludes(includeConfig, serverRoot);
                     mach.appendReplacement(newConf, replace);
                 }
+                if (cf.isDirectory()) {
+                    List<File> files = listFiles(cf);
+                    log.debug("[replaceIncludes] Browsing directory: '" + cf + "' (" + files.size() + " files)");
+                    StringBuilder replace = new StringBuilder();
+                    for (File file : files) {
+                        if ((pattern == null) || fnmatch(pattern, file.getName())) {
+                            log.debug("[replaceIncludes] Including file: '" + file + "'");
+                            String includeConfig = readFile(file);
+                            includeConfig = Matcher.quoteReplacement(includeConfig);
+                            replace.append(replaceIncludes(includeConfig, serverRoot));
+                        } else {
+                            log.debug("[replaceIncludes] Ignoring file:  '" + file + "' pattern='" + pattern + "'");
+                        }
+                    }
+                    mach.appendReplacement(newConf, replace.toString());
+                }
+            } else {
+                log.debug("[replaceIncludes] File Not Found!! '" + cf + "'");
             }
         }
         mach.appendTail(newConf);
         return newConf.toString();
+    }
+
+    private static List<File> listFiles(File dir) {
+        List<File> files = new ArrayList<File>();
+        File ls[] = dir.listFiles();
+        for (File file : ls) {
+            if (file.isDirectory()) {
+                files.addAll(listFiles(file));
+            } else {
+                files.add(file);
+            }
+        }
+        return files;
+    }
+
+    private static boolean isFnmatch(String pattern) {
+        if (pattern.contains("*") || pattern.contains("*")) {
+            return true;
+        } else if (pattern.contains("[") || pattern.contains("]")) {
+            return true;
+        } else if (pattern.contains("\\") && !pattern.endsWith("\\")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public static boolean fnmatch(String pattern, String filename) {
+        if (filename.startsWith(".") && !pattern.startsWith(".")) {
+            return false;
+        }
+        if (filename.contains("/.") && !pattern.contains("/.")) {
+            return false;
+        }
+
+        pattern = pattern.replace("?", ".");
+        pattern = pattern.replace("*", ".*");
+        pattern = pattern.replaceAll("\\\\(\\w)", "$1");
+        pattern = pattern.replace("[!", "[^");
+
+        Pattern p;
+        try {
+            p = Pattern.compile(pattern + "$");
+        } catch (PatternSyntaxException ex) {
+            log.debug(ex, ex);
+            return false;
+        }
+        Matcher m = p.matcher(filename);
+        return m.matches();
     }
 
     private static String readFile(File file) throws IOException {

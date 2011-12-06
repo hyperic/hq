@@ -375,7 +375,7 @@ public class ResourceManagerImpl implements ResourceManager {
 
         return platform;
     }
-
+    
     /**
      * 
      */

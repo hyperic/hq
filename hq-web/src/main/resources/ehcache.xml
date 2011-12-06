@@ -107,12 +107,15 @@
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="org.hyperic.hq.measurement.server.session.Baseline"
          maxElementsInMemory="500000"
+<<<<<<< HEAD
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
   <cache name="Measurement.findByResource"
          maxElementsInMemory="10000"
+=======
+>>>>>>> 4.5.2.2
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
@@ -726,6 +729,13 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
+  <cache name="AlertDefinition.findByResource"
+         maxElementsInMemory="10000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+
 
   <!-- Availability Down Alert Definition cache, used outside of hibernate -->
   <cache name="AvailabilityDownAlertDefinitionCache"
