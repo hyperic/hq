@@ -34,28 +34,31 @@
 
 package org.hyperic.hq.types;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for anonymous complex type.
+ * <p>Java class for AlertAction complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType>
+ * &lt;complexType name="AlertAction">
  *   &lt;complexContent>
- *     &lt;extension base="{}Response">
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="AlertDefinition" type="{}AlertDefinition" maxOccurs="unbounded"/>
+ *         &lt;element name="AlertActionConfig" type="{}AlertActionConfig" maxOccurs="unbounded"/>
  *       &lt;/sequence>
- *     &lt;/extension>
+ *       &lt;attribute name="className" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="id" type="{http://www.w3.org/2001/XMLSchema}integer" />
+ *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
@@ -63,44 +66,93 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = {
-    "alertDefinition"
+@XmlType(name = "AlertAction", propOrder = {
+    "alertActionConfig"
 })
-@XmlRootElement(name = "AlertDefinitionsResponse")
-public class AlertDefinitionsResponse
-    extends Response
-{
+public class AlertAction {
 
-    @XmlElement(name = "AlertDefinition", required = true)
-    protected List<AlertDefinition> alertDefinition;
+    @XmlElement(name = "AlertActionConfig", required = true)
+    protected List<AlertActionConfig> alertActionConfig;
+    @XmlAttribute(name = "className", required = true)
+    protected String className;
+    @XmlAttribute(name = "id")
+    protected BigInteger id;
 
     /**
-     * Gets the value of the alertDefinition property.
+     * Gets the value of the alertActionConfig property.
      * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the alertDefinition property.
+     * This is why there is not a <CODE>set</CODE> method for the alertActionConfig property.
      * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
-     *    getAlertDefinition().add(newItem);
+     *    getAlertActionConfig().add(newItem);
      * </pre>
      * 
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link AlertDefinition }
+     * {@link AlertActionConfig }
      * 
      * 
      */
-    public List<AlertDefinition> getAlertDefinition() {
-        if (alertDefinition == null) {
-            alertDefinition = new ArrayList<AlertDefinition>();
+    public List<AlertActionConfig> getAlertActionConfig() {
+        if (alertActionConfig == null) {
+            alertActionConfig = new ArrayList<AlertActionConfig>();
         }
-        return this.alertDefinition;
+        return this.alertActionConfig;
+    }
+
+    /**
+     * Gets the value of the className property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getClassName() {
+        return className;
+    }
+
+    /**
+     * Sets the value of the className property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setClassName(String value) {
+        this.className = value;
+    }
+
+    /**
+     * Gets the value of the id property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link BigInteger }
+     *     
+     */
+    public BigInteger getId() {
+        return id;
+    }
+
+    /**
+     * Sets the value of the id property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link BigInteger }
+     *     
+     */
+    public void setId(BigInteger value) {
+        this.id = value;
     }
 
 }
