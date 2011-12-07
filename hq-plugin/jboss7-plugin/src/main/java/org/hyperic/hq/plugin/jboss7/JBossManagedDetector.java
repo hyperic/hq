@@ -26,7 +26,6 @@ package org.hyperic.hq.plugin.jboss7;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -88,22 +87,7 @@ public class JBossManagedDetector extends JBossHostControllerDetector {
     }
 
     @Override
-    String getPidsQuery() {
-        return "State.Name.sw=java,Args.*.eq=org.jboss.as.host-controller";
-    }
-
-    @Override
-    String getConfigRoot() {
-        return "//host";
-    }
-
-    @Override
-    String getDefaultConfigName() {
-        return "host.xml";
-    }
-
-    @Override
-    String getDefaultConfigDir() {
-        return "/domain";
+    boolean haveServices() {
+        return true;
     }
 }

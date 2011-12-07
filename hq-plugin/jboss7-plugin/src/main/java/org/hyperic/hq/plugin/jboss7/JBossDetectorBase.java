@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import javax.xml.parsers.DocumentBuilder;
@@ -39,11 +40,14 @@ import javax.xml.xpath.XPathException;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.plugin.jboss7.objects.Connector;
+import org.hyperic.hq.plugin.jboss7.objects.Deployment;
+import org.hyperic.hq.plugin.jboss7.objects.WebSubsystem;
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.DaemonDetector;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerResource;
+import org.hyperic.hq.product.ServiceResource;
 import org.hyperic.util.config.ConfigResponse;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -86,6 +90,96 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
             }
         }
         return servers;
+    }
+
+    @Override
+    protected final List discoverServices(ConfigResponse config) {
+        List<ServiceResource> services = new ArrayList<ServiceResource>();
+        log.debug("[discoverServices] config=" + config);
+        if (haveServices()) {
+            JBossAdminHttp admin = null;
+            try {
+                admin = new JBossAdminHttp(config);
+            } catch (PluginException ex) {
+                log.error(ex, ex);
+            }
+
+            // DATA SOURCES
+            try {
+                List<String> datasources = admin.getDatasources();
+                log.debug(datasources);
+                for (String ds : datasources) {
+                    Map<String, String> datasource = admin.getDatasource(ds, false);
+                    ServiceResource service = createServiceResource("Datasource");
+                    service.setName("XXXX Datasource " + ds);
+
+                    ConfigResponse cp = new ConfigResponse();
+                    cp.setValue("jndi", datasource.get("jndi-name"));
+                    cp.setValue("driver", datasource.get("driver-name"));
+
+                    ConfigResponse pc = new ConfigResponse();
+                    pc.setValue("name", ds);
+
+                    setProductConfig(service, pc);
+                    service.setCustomProperties(cp);
+                    service.setMeasurementConfig();
+                    service.setControlConfig();
+                    services.add(service);
+                }
+            } catch (PluginException ex) {
+                log.error(ex, ex);
+            }
+
+            // CONECTORS
+            try {
+                WebSubsystem ws = admin.getWebSubsystem();
+                log.debug(ws);
+                for (String name : ws.getConector().keySet()) {
+                    Connector connector = ws.getConector().get(name);
+                    ServiceResource service = createServiceResource("Connector");
+                    service.setName("XXXX Connector " + name);
+
+                    ConfigResponse cp = new ConfigResponse();
+                    cp.setValue("protocol", connector.getProtocol());
+                    cp.setValue("scheme", connector.getScheme());
+
+                    ConfigResponse pc = new ConfigResponse();
+                    pc.setValue("name", name);
+
+                    setProductConfig(service, pc);
+                    service.setCustomProperties(cp);
+                    service.setMeasurementConfig();
+                    service.setControlConfig();
+                    services.add(service);
+                }
+            } catch (PluginException ex) {
+                log.error(ex, ex);
+            }
+
+            // deployments
+            try {
+                List<Deployment> deployments = admin.getDeployments();
+                for (Deployment d : deployments) {
+                    ServiceResource service = createServiceResource("deployment");
+                    service.setName("XXXX Deployment " + d.getName());
+
+                    ConfigResponse cp = new ConfigResponse();
+                    cp.setValue("runtime-name", d.getRuntimeName());
+
+                    ConfigResponse pc = new ConfigResponse();
+                    pc.setValue("name", d.getName());
+
+                    setProductConfig(service, pc);
+                    service.setCustomProperties(cp);
+                    service.setMeasurementConfig();
+                    service.setControlConfig();
+                    services.add(service);
+                }
+            } catch (PluginException ex) {
+                log.error(ex, ex);
+            }
+        }
+        return services;
     }
 
     final String parseAddress(String address, HashMap<String, String> args) {
@@ -232,4 +326,6 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
     abstract String getDefaultConfigName();
 
     abstract String getDefaultConfigDir();
+
+    abstract boolean haveServices();
 }

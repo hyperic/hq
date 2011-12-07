@@ -41,14 +41,6 @@ public class JBossHostControllerDetector extends JBossDetectorBase {
     private final Log log = getLog();
 
     @Override
-    protected List discoverServices(ConfigResponse config) {
-        List<ServiceResource> services = new ArrayList<ServiceResource>();
-        log.debug("[discoverServices] config=" + config);
-
-        return services;
-    }
-
-    @Override
     void setUpExtraProductConfig(ConfigResponse cfg, Document doc) throws XPathException {
         XPathFactory factory = XPathFactory.newInstance();
         XPathExpression expr = factory.newXPath().compile(getConfigRoot());
@@ -76,5 +68,10 @@ public class JBossHostControllerDetector extends JBossDetectorBase {
     @Override
     String getDefaultConfigDir() {
         return "/domain";
+    }
+
+    @Override
+    boolean haveServices() {
+        return false;
     }
 }
