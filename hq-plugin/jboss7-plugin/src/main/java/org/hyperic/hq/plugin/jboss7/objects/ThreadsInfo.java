@@ -1,99 +1,43 @@
 package org.hyperic.hq.plugin.jboss7.objects;
 
+import java.util.Map;
+
 public class ThreadsInfo {
+
     private String threadCount;
     private String peakThreadCount;
     private String totalStartedThreadCount;
     private String daemonThreadCount;
     private String currentThreadCpuTime;
     private String currentThreadUserTime;
+    private Map<String,ThreadsInfo> domainResults;
 
-    /**
-     * @return the threadCount
-     */
     public String getThreadCount() {
-        return threadCount;
+        return domainResults == null ? threadCount : domainResults.get("step-1").threadCount;
     }
 
-    /**
-     * @param threadCount the threadCount to set
-     */
-    public void setThreadCount(String threadCount) {
-        this.threadCount = threadCount;
-    }
-
-    /**
-     * @return the peakThreadCount
-     */
     public String getPeakThreadCount() {
-        return peakThreadCount;
+        return domainResults == null ? threadCount : domainResults.get("step-1").threadCount;
     }
 
-    /**
-     * @param peakThreadCount the peakThreadCount to set
-     */
-    public void setPeakThreadCount(String peakThreadCount) {
-        this.peakThreadCount = peakThreadCount;
-    }
-
-    /**
-     * @return the totalStartedThreadCount
-     */
     public String getTotalStartedThreadCount() {
-        return totalStartedThreadCount;
+        return domainResults == null ? totalStartedThreadCount : domainResults.get("step-1").totalStartedThreadCount;
     }
 
-    /**
-     * @param totalStartedThreadCount the totalStartedThreadCount to set
-     */
-    public void setTotalStartedThreadCount(String totalStartedThreadCount) {
-        this.totalStartedThreadCount = totalStartedThreadCount;
-    }
-
-    /**
-     * @return the daemonThreadCount
-     */
     public String getDaemonThreadCount() {
-        return daemonThreadCount;
+        return domainResults == null ? daemonThreadCount : domainResults.get("step-1").daemonThreadCount;
     }
 
-    /**
-     * @param daemonThreadCount the daemonThreadCount to set
-     */
-    public void setDaemonThreadCount(String daemonThreadCount) {
-        this.daemonThreadCount = daemonThreadCount;
-    }
-
-    /**
-     * @return the currentThreadCpuTime
-     */
     public String getCurrentThreadCpuTime() {
-        return currentThreadCpuTime;
+        return domainResults == null ? currentThreadCpuTime : domainResults.get("step-1").currentThreadCpuTime;
     }
 
-    /**
-     * @param currentThreadCpuTime the currentThreadCpuTime to set
-     */
-    public void setCurrentThreadCpuTime(String currentThreadCpuTime) {
-        this.currentThreadCpuTime = currentThreadCpuTime;
-    }
-
-    /**
-     * @return the currentThreadUserTime
-     */
     public String getCurrentThreadUserTime() {
-        return currentThreadUserTime;
-    }
-
-    /**
-     * @param currentThreadUserTime the currentThreadUserTime to set
-     */
-    public void setCurrentThreadUserTime(String currentThreadUserTime) {
-        this.currentThreadUserTime = currentThreadUserTime;
+        return domainResults == null ? currentThreadUserTime : domainResults.get("step-1").currentThreadUserTime;
     }
 
     @Override
     public String toString() {
-        return "ThreadsInfo{" + "threadCount=" + threadCount + ", peakThreadCount=" + peakThreadCount + ", totalStartedThreadCount=" + totalStartedThreadCount + ", daemonThreadCount=" + daemonThreadCount + ", currentThreadCpuTime=" + currentThreadCpuTime + ", currentThreadUserTime=" + currentThreadUserTime + '}';
+        return "ThreadsInfo{" + "threadCount=" + threadCount + ", peakThreadCount=" + peakThreadCount + ", totalStartedThreadCount=" + totalStartedThreadCount + ", daemonThreadCount=" + daemonThreadCount + ", currentThreadCpuTime=" + currentThreadCpuTime + ", currentThreadUserTime=" + currentThreadUserTime + ", domainResults=" + domainResults + '}';
     }
 }

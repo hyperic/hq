@@ -26,9 +26,15 @@ package org.hyperic.hq.plugin.jboss7;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathException;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathFactory;
 import org.apache.commons.logging.Log;
 import org.hyperic.hq.product.ServiceResource;
 import org.hyperic.util.config.ConfigResponse;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
 
 public class JBossHostControllerDetector extends JBossDetectorBase {
 
@@ -40,6 +46,16 @@ public class JBossHostControllerDetector extends JBossDetectorBase {
         log.debug("[discoverServices] config=" + config);
 
         return services;
+    }
+
+    @Override
+    void setUpExtraProductConfig(ConfigResponse cfg, Document doc) throws XPathException {
+        XPathFactory factory = XPathFactory.newInstance();
+        XPathExpression expr = factory.newXPath().compile(getConfigRoot());
+        Object result = expr.evaluate(doc, XPathConstants.NODESET);
+        NodeList nodeList = (NodeList) result;
+        String name = nodeList.item(0).getAttributes().getNamedItem("name").getNodeValue();
+        cfg.setValue(HOST, name);
     }
 
     @Override

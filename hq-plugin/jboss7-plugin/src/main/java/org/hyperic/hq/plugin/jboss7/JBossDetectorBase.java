@@ -35,6 +35,7 @@ import java.util.jar.JarFile;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathException;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 import org.apache.commons.logging.Log;
@@ -55,8 +56,9 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
     protected static final String HTTPS = "jboss7.https";
     protected static final String ADDR = "jboss7.addr";
     protected static final String PORT = "jboss7.port";
+    protected static final String SERVER = "jboss7.server";
     protected static final String HOST = "jboss7.host";
-    
+
     abstract String getPidsQuery();
 
     @Override
@@ -186,6 +188,9 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
                     address = nodeList.item(i).getAttributes().getNamedItem("value").getNodeValue();
                 }
             }
+
+            setUpExtraProductConfig(cfg, doc);
+
         } catch (Exception ex) {
             log.debug("Error discovering the jmx.url : " + ex, ex);
         }
@@ -196,6 +201,9 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
             cfg.setValue(ADDR, parseAddress(address, args));
         }
         return cfg;
+    }
+
+    void setUpExtraProductConfig(ConfigResponse cfg, Document doc) throws XPathException {
     }
 
     final File getConfigFile(HashMap<String, String> args) {

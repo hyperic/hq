@@ -40,7 +40,7 @@ import org.hyperic.util.config.ConfigResponse;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
-public class JBossManagedDetector extends JBossStandaloneDetector {
+public class JBossManagedDetector extends JBossHostControllerDetector {
 
     private final Log log = getLog();
 
@@ -54,7 +54,7 @@ public class JBossManagedDetector extends JBossStandaloneDetector {
                 ServerResource server = createServerResource(controller.getInstallPath());
                 server.setIdentifier(serverName + "-" + controller.getInstallPath());
                 ConfigResponse pc = controller.getProductConfig();
-                pc.setValue(HOST, serverName);
+                pc.setValue(SERVER, serverName);
                 setProductConfig(server, pc);
                 server.setName(server.getName() + " " + serverName);
                 servers.add(server);

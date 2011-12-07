@@ -76,6 +76,7 @@ public final class JBossAdminHttp {
     private BasicHttpContext localcontext;
     private HttpHost targetHost;
     private String hostName;
+    private String serverName;
 
     public JBossAdminHttp(Properties props) throws PluginException {
         int port = Integer.parseInt(props.getProperty(JBossStandaloneDetector.PORT));
@@ -84,6 +85,7 @@ public final class JBossAdminHttp {
         this.user = props.getProperty(JBossStandaloneDetector.USERNAME);
         this.pass = props.getProperty(JBossStandaloneDetector.PASSWORD);
         this.hostName = props.getProperty(JBossStandaloneDetector.HOST);
+        this.serverName = props.getProperty(JBossStandaloneDetector.SERVER);
         log.debug("props=" + props);
 
         targetHost = new HttpHost(addr, port, https ? "https" : "http");
@@ -113,7 +115,10 @@ public final class JBossAdminHttp {
         try {
             String url = targetHost.toURI() + "/management";
             if (hostName != null) {
-                url += "/host/master/server/" + hostName;
+                url += "/host/" + hostName;
+                if (serverName != null) {
+                    url += "/server/" + serverName;
+                }
             }
             HttpGet get = new HttpGet(url + api);
             HttpResponse response = client.execute(get, localcontext);
