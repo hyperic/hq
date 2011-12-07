@@ -126,7 +126,7 @@
 		    						<tiles:put name="addToListUrl">
 		    							<html:rewrite action="/alerts/Config">
 		    								<html:param name="mode" value="${addMode}"/>
-		    								<html:param name="eid" value="${ResourceType.appdefTypeKey}"/>
+		    								<html:param name="aetid" value="${ResourceType.appdefTypeKey}"/>
 		    								<html:param name="ad" value="${alertDef.id}"/>
 		    							</html:rewrite>
 		    						</tiles:put>

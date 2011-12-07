@@ -512,7 +512,20 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
         if (avails.size() == 1) {
             AvailabilityDataRLE rle = avails.get(0);
             return new HighLowMetricValue(rle.getAvailVal(), timestamp);
-        }
+        } else if (avails.size() == 2) {
+            AvailabilityDataRLE rle = null;
+            // HHQ-5244
+            // If there are only two RLEs then averaging them doesn't make sense as it can make
+            // a value of 0 show up as .5 for an interval
+            // The following logic makes sure that the actual value is provided
+            if (avails.get(0).getEndtime() < timestamp && avails.get(1).getStartime() >= timestamp) {
+                rle = avails.get(0);
+            } else {
+                rle = avails.get(1);
+            }
+            return new HighLowMetricValue(rle.getAvailVal(), timestamp);
+         }
+
         double value = 0;
         for (AvailabilityDataRLE rle : avails) {
             double availVal = rle.getAvailVal();
