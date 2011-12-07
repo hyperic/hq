@@ -125,6 +125,7 @@
                 <property name="scheme" description="scheme"/>
             </properties>
             <property name="template" value="jboss7:connector=%name%,${server-connection}:${alias}"/>
+            <metric name="Availability"  indicator="true"/>
             <metric name="errorCount" collectionType="trendsup" indicator="true"/>
             <metric name="requestCount" collectionType="trendsup" indicator="true"/>
             <metric name="maxTime" units="ms" indicator="true"/>

@@ -136,7 +136,10 @@ public final class JBossAdminHttp {
             }
 
             GsonBuilder gsb = new GsonBuilder();
-            gsb.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_DASHES);
+            if (!((type instanceof Class)
+                    && ((Class) type).getCanonicalName().equals(Connector.class.getCanonicalName()))) {
+                gsb.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_DASHES);
+            }
             Gson gson = gsb.create();
 
             res = gson.fromJson(responseBody, type);
