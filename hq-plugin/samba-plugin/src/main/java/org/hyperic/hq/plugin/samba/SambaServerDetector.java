@@ -44,127 +44,157 @@ import org.hyperic.hq.product.ServiceResource;
 import org.hyperic.util.config.ConfigResponse;
 
 public class SambaServerDetector
-    extends ServerDetector
-    implements AutoServerDetector
+extends ServerDetector
+implements AutoServerDetector
 {
-    private static final String VERSION_3_x = "3.x";
-    private static final String SERVER_NAME = "Samba";
-    // generic process name, generic server daemon
-    private static final String PROCESS_NAME = "smbd";
-    // this PTQL query matches the PROCESS_NAME and returns the parent process id
-    private static final String PTQL_QUERY = 
-        "State.Name.eq="+PROCESS_NAME+",State.Name.Pne=$1";
-    
-    private static final String SMBD_DEFAULT_INSTALLATION_PATH = "/usr/sbin/";
+	private static final String VERSION_3_x = "3.x";
+	private static final String SERVER_NAME = "Samba";
+	// generic process name, generic server daemon
+	private static final String PROCESS_NAME = "smbd";
+	// this PTQL query matches the PROCESS_NAME and returns the parent process id
+	private static final String PTQL_QUERY = 
+			"State.Name.eq="+PROCESS_NAME+",State.Name.Pne=$1";
 
-    private static Log log = LogFactory.getLog(SambaServerDetector.class);
+	private static final String SMBD_DEFAULT_INSTALLATION_PATH = "/usr/sbin/";
+	private static boolean mUsingDefaultInstallationPath = false;
+	
+	private static Log log = LogFactory.getLog(SambaServerDetector.class);
 
-    public List getServerResources(ConfigResponse platformConfig)
-        throws PluginException
-    {
-        List servers = new ArrayList();
-        List paths = getServerProcessList();
-        for (int i=0; i<paths.size(); i++)
-        {
-            String dir = (String)paths.get(i);
-            List found = getServerList(dir);
-            if (!found.isEmpty())
-                servers.addAll(found);
-        }
-        return servers;
-    }
+	public List getServerResources(ConfigResponse platformConfig)
+			throws PluginException
+			{
+		List servers = new ArrayList();
+		List paths = getServerProcessList();
+		for (int i=0; i<paths.size(); i++)
+		{
+			String dir = (String)paths.get(i);
+			List found = getServerList(dir);
+			if (!found.isEmpty())
+				servers.addAll(found);
+		}
+		return servers;
+			}
 
-    private static List<String> getServerProcessList()
-    {
-        List<String> servers = new ArrayList<String>();
-        long[] pids = getPids(PTQL_QUERY);
-        for (int i=0; i<pids.length; i++)
-        {
-            String exe = getProcExe(pids[i]);
-            if (exe == null)
-                continue;
-            File binary = new File(exe);
-            if (!binary.isAbsolute()) {
-            	servers.add(SMBD_DEFAULT_INSTALLATION_PATH + exe);
-            	continue;
-            }
-            servers.add(binary.getAbsolutePath());
-        }
-        return servers;
-    }
+	private static List<String> getServerProcessList()
+	{
+		List<String> servers = new ArrayList<String>();
+		long[] pids = getPids(PTQL_QUERY);
+		for (int i=0; i<pids.length; i++)
+		{
+			String exe = getProcExe(pids[i]);
+			if (exe == null)
+				continue;
+			File binary = new File(exe);
+			//in some cases the exe will not contain the full installation path
+			//of the smbd program
+			if (!binary.isAbsolute()) {
+				if(useDefaultInstallationPath(exe)) {
+					mUsingDefaultInstallationPath = true;
+					servers.add(SMBD_DEFAULT_INSTALLATION_PATH + exe);
+				}
+				continue;
+			}
+			servers.add(binary.getAbsolutePath());
+		}
+		return servers;
+	}
 
-    private String getVersion(String path)
-    {
-        String[] cmd = {path, "-V"};
-        try
-        {
-            Process process = Runtime.getRuntime().exec(cmd);
-            BufferedReader fp = new BufferedReader( new InputStreamReader(process.getInputStream()) );
-            String output = "";
-            String line;
-            while( null != (line = fp.readLine()) )
-                output = output + line;
-            Pattern p_3_x = Pattern.compile("\\s+3\\.[0-9]");
+	/**
+	 * Check if the found proc exe is installed in the default path in case
+	 * that the exe does not contain the full installation path of the Samba program
+	 * Returns true if the exe does exist in the default path
+	 * @param exe
+	 */
+	private static boolean useDefaultInstallationPath(String exe) 
+	{
+		try {
+			Runtime.getRuntime().exec(SMBD_DEFAULT_INSTALLATION_PATH + exe);
+			return true;
+		}
+		catch (IOException e) {
+			return false;
+		}
+	}
 
-            if (p_3_x.matcher(output).find())
-                return VERSION_3_x;
-        }
-        catch (IOException e) {
-            log.warn("Cannot get version info from "+path, e);
-        }
-        return null;
-    }
+	private String getVersion(String path)
+	{
+		String[] cmd = {path, "-V"};
+		try
+		{
+			Process process = Runtime.getRuntime().exec(cmd);
+			BufferedReader fp = new BufferedReader( new InputStreamReader(process.getInputStream()) );
+			String output = "";
+			String line;
+			while( null != (line = fp.readLine()) )
+				output = output + line;
+			Pattern p_3_x = Pattern.compile("\\s+3\\.[0-9]");
 
-    public List getServerList(String path) throws PluginException
-    {
-        List servers = new ArrayList();
-        String installpath = getParentDir(path, 1);
+			if (p_3_x.matcher(output).find())
+				return VERSION_3_x;
+		}
+		catch (IOException e) {
+			log.warn("Cannot get version info from "+path, e);
+		}
+		return null;
+	}
 
-        ConfigResponse productConfig = new ConfigResponse();
-        productConfig.setValue("installpath", installpath);
+	public List<ServerResource> getServerList(String path) throws PluginException
+	{
+		String installpath;
+		List<ServerResource> servers;
+		
+		servers = new ArrayList<ServerResource>();
+		if (mUsingDefaultInstallationPath)
+			installpath = getParentDir(path, 1);
+		else
+			installpath = getParentDir(path, 2);
+		
+		ConfigResponse productConfig = new ConfigResponse();
+		productConfig.setValue("installpath", installpath);
 
-        String version = "";
-        if ( null == (version = getVersion(path)) )
-            return servers;
+		String version = "";
+		if ( null == (version = getVersion(path)) )
+			return servers;
 
-        // Only check the binaries if they match the path we expect
-        if (path.indexOf(PROCESS_NAME) == -1)
-            return servers;
+		// Only check the binaries if they match the path we expect
+		if (path.indexOf(PROCESS_NAME) == -1)
+			return servers;
 
-        ServerResource server = createServerResource(installpath);
-        // Set custom properties
-        ConfigResponse cprop = new ConfigResponse();
-        cprop.setValue("version", version);
-        server.setCustomProperties(cprop);
-        setProductConfig(server, productConfig);
-        // sets a default Measurement Config property with no values
-        server.setMeasurementConfig();
-        server.setName(SERVER_NAME+" "+version);
-        servers.add(server);
+		ServerResource server = createServerResource(installpath);
+		// Set custom properties
+		ConfigResponse cprop = new ConfigResponse();
+		cprop.setValue("version", version);
+		server.setCustomProperties(cprop);
+		setProductConfig(server, productConfig);
+		// sets a default Measurement Config property with no values
+		server.setMeasurementConfig();
+		server.setName(SERVER_NAME+" "+version);
+		servers.add(server);
 
-        return servers;
-    }
+		return servers;
+	}
 
-    @Override
+	@Override
 	protected List discoverServices(ConfigResponse config)
-        throws PluginException
-    {
-        String installpath = config.getValue(ProductPlugin.PROP_INSTALLPATH);
-        List services = new ArrayList();
-        return services;
-    }
+			throws PluginException
+			{
+		String installpath = config.getValue(ProductPlugin.PROP_INSTALLPATH);
+		List services = new ArrayList();
+		return services;
+			}
 
-    private ServiceResource getService(String name, String installpath)
-    {
-        ServiceResource service = new ServiceResource();
-        service.setType(this, name);
-        service.setServiceName(name);
-        ConfigResponse productConfig = new ConfigResponse();
-        productConfig.setValue(ProductPlugin.PROP_INSTALLPATH, installpath);
-        setProductConfig(service, productConfig);
-        // set an empty measurement config
-        service.setMeasurementConfig();
-        // set an empty control config
-        return service;
-    }
+	private ServiceResource getService(String name, String installpath)
+	{
+		ServiceResource service = new ServiceResource();
+		service.setType(this, name);
+		service.setServiceName(name);
+		ConfigResponse productConfig = new ConfigResponse();
+		productConfig.setValue(ProductPlugin.PROP_INSTALLPATH, installpath);
+		setProductConfig(service, productConfig);
+		// set an empty measurement config
+		service.setMeasurementConfig();
+		// set an empty control config
+		return service;
+	}
+
 }
