@@ -555,7 +555,7 @@ public class MxServerDetector
         MBeanServerConnection mServer;
     
         try {
-            connector = MxUtil.getMBeanConnector(serverConfig.toProperties());
+            connector = MxUtil.getCachedMBeanConnector(serverConfig.toProperties());
             mServer = connector.getMBeanServerConnection();
         } catch (Exception e) {
             MxUtil.close(connector);
@@ -586,8 +586,8 @@ public class MxServerDetector
          }
          
          try {
-             connector = MxUtil.getMBeanConnector(serverConfig.toProperties());
-             mServer = connector.getMBeanServerConnection();
+            connector = MxUtil.getCachedMBeanConnector(serverConfig.toProperties());
+            mServer = connector.getMBeanServerConnection();
          } catch (Exception e) {
              MxUtil.close(connector);
              throw new PluginException(e.getMessage(), e);

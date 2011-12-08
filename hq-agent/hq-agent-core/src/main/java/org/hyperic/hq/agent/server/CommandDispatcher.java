@@ -116,9 +116,11 @@ public class CommandDispatcher {
             throw exc;
         } catch(Exception exc){
             this.log.error("Error while processing request", exc);
-            throw new AgentRemoteException(exc.toString());
+            throw new AgentRemoteException(exc.toString(), exc);
         } catch(LinkageError err){
-            throw new AgentRemoteException(err.toString());
+            AgentRemoteException e = new AgentRemoteException(err.toString());
+            e.initCause(err);
+            throw e;
         }
     }
 }

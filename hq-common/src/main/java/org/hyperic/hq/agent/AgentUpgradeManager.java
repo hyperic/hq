@@ -46,12 +46,17 @@ public class AgentUpgradeManager {
     public static final String UPDATED_PLUGIN_EXTENSION = "-update";
     public static final String REMOVED_PLUGIN_EXTENSION = "-remove";
     private static AtomicReference<Thread> agentDaemonThread = new AtomicReference<Thread>();;
+    private static AtomicReference<AgentLifecycle> agent = new AtomicReference<AgentLifecycle>();;
     
     /**
      * Request a JVM restart if in Java Service Wrapper mode
      */
     public static void setAgentDaemonThread(Thread thread) {
         agentDaemonThread.set(thread);
+    }
+
+    public static void setAgent(AgentLifecycle runnableAgent) {
+        agent.set(runnableAgent);
     }
     
     /**
@@ -60,6 +65,9 @@ public class AgentUpgradeManager {
     public static void restartJVM() {
         if (WrapperManager.isControlledByNativeWrapper()) {
             log.info("restart requested");
+            if (agent.get() != null) {
+                agent.get().shutdown();
+            }
             if (agentDaemonThread.get() != null) {
                 try {
                     if (agentDaemonThread.get().isAlive()) {

@@ -60,6 +60,7 @@ import org.hyperic.hq.agent.AgentUpgradeManager;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.client.LegacyAgentCommandsClientImpl;
 import org.hyperic.hq.agent.server.AgentDaemon;
+import org.hyperic.hq.agent.server.AgentDaemon.RunnableAgent;
 import org.hyperic.hq.agent.server.LoggingOutputStream;
 import org.hyperic.hq.bizapp.agent.ProviderInfo;
 import org.hyperic.hq.bizapp.agent.commands.CreateToken_args;
@@ -1117,10 +1118,11 @@ public class AgentClient {
 
             startupSock = new ServerSocket(0);
             startupSock.setSoTimeout(iSleepTime);
-        } catch(IOException exc){
-            throw new AgentInvokeException("Unable to setup a socket to " +
-                                           "listen for Agent startup: " +
-                                           exc.getMessage());
+        } catch(IOException e){
+            AgentInvokeException ex =
+                new AgentInvokeException("Unable to setup a socket to listen for Agent startup: " + e);
+            ex.initCause(e);
+            throw ex;
         }
 
         SYSTEM_OUT.println("- Invoking agent");
@@ -1131,9 +1133,11 @@ public class AgentClient {
             throw new AgentInvokeException("Invalid notify up port: "+startupSock.getLocalPort());
         }
                 
-        agentDaemonThread = new Thread(new AgentDaemon.RunnableAgent(this.config));
+        RunnableAgent runnableAgent = new AgentDaemon.RunnableAgent(this.config);
+        agentDaemonThread = new Thread(runnableAgent);
         agentDaemonThread.setName("AgentDaemonMain");
         AgentUpgradeManager.setAgentDaemonThread(agentDaemonThread);
+        AgentUpgradeManager.setAgent(runnableAgent);
         agentDaemonThread.setDaemon(true);
         agentDaemonThread.start();
         SYSTEM_OUT.println("- Agent thread running");

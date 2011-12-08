@@ -425,23 +425,19 @@ public class ProductPluginManager
 
     public void shutdown() throws PluginException {
 
-        this.managers.remove(getName()); // skip this
-
-        // shutdown all managers and plugins registered within
-
-        for (Map.Entry<String, PluginManager> entry : this.managers.entrySet()) {
-            PluginManager manager = entry.getValue();
-
-            try {
-                manager.shutdown();
-            } catch (PluginException e) {
-                log.error(manager.getName() + ".shutdown() failed", e);
+        synchronized (managers) {
+            managers.remove(getName());
+            for (Map.Entry<String, PluginManager> entry : managers.entrySet()) {
+                PluginManager manager = entry.getValue();
+                try {
+                    manager.shutdown();
+                } catch (PluginException e) {
+                    log.error(manager.getName() + ".shutdown() failed", e);
+                }
             }
+            this.types.clear();
+            this.managers.clear();
         }
-
-        this.types.clear();
-
-        this.managers.clear();
 
         // shutdown() all registered ProductPlugins
         super.shutdown();
