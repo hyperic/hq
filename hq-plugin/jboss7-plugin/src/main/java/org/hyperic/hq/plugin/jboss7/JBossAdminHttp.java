@@ -58,6 +58,7 @@ import org.apache.http.protocol.BasicHttpContext;
 import org.hyperic.hq.agent.AgentKeystoreConfig;
 import org.hyperic.hq.plugin.jboss7.objects.Connector;
 import org.hyperic.hq.plugin.jboss7.objects.Deployment;
+import org.hyperic.hq.plugin.jboss7.objects.ServerInfo;
 import org.hyperic.hq.plugin.jboss7.objects.ServerMemory;
 import org.hyperic.hq.plugin.jboss7.objects.ThreadsInfo;
 import org.hyperic.hq.plugin.jboss7.objects.TransactionsStats;
@@ -225,6 +226,12 @@ public final class JBossAdminHttp {
         }
         Map<String, String> res = get("/subsystem/datasources/data-source/" + ds, type);
         return res;
+    }
+
+    void getTestConnection() throws PluginException {
+        Type type = new TypeToken<ServerInfo>() {
+        }.getType();
+        get("/",type);
     }
 
     public static String readInputString(InputStream in) throws IOException {

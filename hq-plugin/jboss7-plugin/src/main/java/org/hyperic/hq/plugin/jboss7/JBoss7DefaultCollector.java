@@ -18,7 +18,7 @@ public abstract class JBoss7DefaultCollector extends Collector {
         }
 
         admin = new JBossAdminHttp(props);
-//        admin.getOverview(); // test the connection.
+        admin.getTestConnection();
     }
 
     public final void collect() {
