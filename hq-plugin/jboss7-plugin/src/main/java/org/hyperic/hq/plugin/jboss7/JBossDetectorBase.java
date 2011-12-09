@@ -62,6 +62,7 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
     protected static final String PORT = "jboss7.port";
     protected static final String SERVER = "jboss7.server";
     protected static final String HOST = "jboss7.host";
+    protected static final String CONFIG = "jboss7.conf";
 
     abstract String getPidsQuery();
 
@@ -85,7 +86,7 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
                 }
                 ServerResource server = createServerResource(installPath);
                 setProductConfig(server, getServerProductConfig(args));
-                server.setName(server.getName() + " " + cfgFile.getName());
+                server.setName(prepareServerName(server.getProductConfig()));
                 servers.add(server);
             }
         }
@@ -111,7 +112,7 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
                 for (String ds : datasources) {
                     Map<String, String> datasource = admin.getDatasource(ds, false);
                     ServiceResource service = createServiceResource("Datasource");
-                    service.setName("XXXX Datasource " + ds);
+                    service.setName(prepareServerName(config) + " Datasource " + ds);
 
                     ConfigResponse cp = new ConfigResponse();
                     cp.setValue("jndi", datasource.get("jndi-name"));
@@ -137,7 +138,7 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
                 for (String name : ws.getConector().keySet()) {
                     Connector connector = ws.getConector().get(name);
                     ServiceResource service = createServiceResource("Connector");
-                    service.setName("XXXX Connector " + name);
+                    service.setName(prepareServerName(config) + " Connector " + name);
 
                     ConfigResponse cp = new ConfigResponse();
                     cp.setValue("protocol", connector.getProtocol());
@@ -161,7 +162,7 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
                 List<Deployment> deployments = admin.getDeployments();
                 for (Deployment d : deployments) {
                     ServiceResource service = createServiceResource("deployment");
-                    service.setName("XXXX Deployment " + d.getName());
+                    service.setName(prepareServerName(config) + " Deployment " + d.getName());
 
                     ConfigResponse cp = new ConfigResponse();
                     cp.setValue("runtime-name", d.getRuntimeName());
@@ -180,6 +181,22 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
             }
         }
         return services;
+    }
+
+    protected String prepareServerName(ConfigResponse cfg) {
+        String type = getTypeInfo().getName();
+        String name = getPlatformName() + " " + type + " ";
+        String host = cfg.getValue(HOST);
+        String server = cfg.getValue(SERVER);
+        if (host != null) {
+            name += host;
+            if (server != null) {
+                name += " " + server;
+            }
+        } else {
+            name += cfg.getValue(ADDR) + ":" + cfg.getValue(PORT);
+        }
+        return name;
     }
 
     final String parseAddress(String address, HashMap<String, String> args) {

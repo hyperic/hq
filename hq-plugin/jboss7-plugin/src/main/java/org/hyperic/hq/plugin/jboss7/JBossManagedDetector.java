@@ -55,7 +55,7 @@ public class JBossManagedDetector extends JBossHostControllerDetector {
                 ConfigResponse pc = controller.getProductConfig();
                 pc.setValue(SERVER, serverName);
                 setProductConfig(server, pc);
-                server.setName(server.getName() + " " + serverName);
+                server.setName(prepareServerName(server.getProductConfig()));
                 servers.add(server);
             }
         }
