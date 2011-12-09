@@ -245,17 +245,36 @@ public abstract class NetServicesCollector extends Collector {
     	return getSocketWrapper(false);
     }
     
+    protected void connect(Socket socket)
+                            throws IOException {
+        InetSocketAddress saddr = getSocketAddress();
+        try {
+            socket.connect(saddr, getTimeoutMillis());
+            socket.setSoTimeout(getTimeoutMillis());
+            setMessage("OK");
+        } catch (IOException e) {
+            setMessage("connect " + saddr, e);
+            throw e;
+        }        
+    }
+    
     public SocketWrapper getSocketWrapper(boolean acceptUnverifiedCertificatesOverride) throws IOException {
-    	// Somtimes we may want to override what's set in the keystore config...mostly for init purposes...
-    	boolean accept = acceptUnverifiedCertificatesOverride ? true : keystoreConfig.isAcceptUnverifiedCert();
-    	SSLProvider sslProvider = new DefaultSSLProviderImpl(keystoreConfig, accept);
-        SSLSocketFactory factory = sslProvider.getSSLSocketFactory();
-        Socket socket = factory.createSocket();
+        if (isSSL()) { 
+            // Sometimes we may want to override what's set in the keystore config...mostly for init purposes...
+            boolean accept = acceptUnverifiedCertificatesOverride ? true : keystoreConfig.isAcceptUnverifiedCert();
+            SSLProvider sslProvider = new DefaultSSLProviderImpl(keystoreConfig, accept);
+            SSLSocketFactory factory = sslProvider.getSSLSocketFactory();
+            Socket socket = factory.createSocket();
 
-        socket.connect(getSocketAddress(), getTimeoutMillis());
-        socket.setSoTimeout(getTimeoutMillis());
-        ((SSLSocket) socket).startHandshake();       
+            socket.connect(getSocketAddress(), getTimeoutMillis());
+            socket.setSoTimeout(getTimeoutMillis());
+            ((SSLSocket) socket).startHandshake();       
 
-        return new SocketWrapper(socket);
+            return new SocketWrapper(socket);
+        } else {
+            Socket socket = new Socket();
+            connect(socket);
+            return new SocketWrapper(socket);
+        }
     }
 }

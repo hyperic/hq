@@ -34,28 +34,24 @@
 
 package org.hyperic.hq.types;
 
-import java.util.ArrayList;
-import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for anonymous complex type.
+ * <p>Java class for AlertActionConfig complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType>
+ * &lt;complexType name="AlertActionConfig">
  *   &lt;complexContent>
- *     &lt;extension base="{}Response">
- *       &lt;sequence>
- *         &lt;element name="AlertDefinition" type="{}AlertDefinition" maxOccurs="unbounded"/>
- *       &lt;/sequence>
- *     &lt;/extension>
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ *       &lt;attribute name="value" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="key" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
@@ -63,44 +59,60 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = {
-    "alertDefinition"
-})
-@XmlRootElement(name = "AlertDefinitionsResponse")
-public class AlertDefinitionsResponse
-    extends Response
-{
+@XmlType(name = "AlertActionConfig")
+public class AlertActionConfig {
 
-    @XmlElement(name = "AlertDefinition", required = true)
-    protected List<AlertDefinition> alertDefinition;
+    @XmlAttribute(name = "value", required = true)
+    protected String value;
+    @XmlAttribute(name = "key", required = true)
+    protected String key;
 
     /**
-     * Gets the value of the alertDefinition property.
+     * Gets the value of the value property.
      * 
-     * <p>
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the alertDefinition property.
-     * 
-     * <p>
-     * For example, to add a new item, do as follows:
-     * <pre>
-     *    getAlertDefinition().add(newItem);
-     * </pre>
-     * 
-     * 
-     * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link AlertDefinition }
-     * 
-     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
      */
-    public List<AlertDefinition> getAlertDefinition() {
-        if (alertDefinition == null) {
-            alertDefinition = new ArrayList<AlertDefinition>();
-        }
-        return this.alertDefinition;
+    public String getValue() {
+        return value;
+    }
+
+    /**
+     * Sets the value of the value property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    /**
+     * Gets the value of the key property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getKey() {
+        return key;
+    }
+
+    /**
+     * Sets the value of the key property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setKey(String value) {
+        this.key = value;
     }
 
 }

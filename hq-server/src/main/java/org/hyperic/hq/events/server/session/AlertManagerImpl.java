@@ -568,12 +568,27 @@ public class AlertManagerImpl implements AlertManager,
     }
 
     /**
-     * A more optimized look up which includes the permission checking
-     *
+     * A more optimized look up for a group which includes the permission checking
+     * 
      */
     @Transactional(readOnly = true)
     public Map<Integer,List<Alert>> getUnfixedByResource(Integer subj, long timeRange, long endTime)
         throws PermissionException {
+        return getUnfixedByResource(subj, timeRange, endTime, null);
+    }
+
+    /**
+     * A more optimized look up for a resource which includes the permission checking
+     * 
+     */
+    @Transactional(readOnly = true)
+    public int getUnfixedCount(Integer subj, long timeRange, long endTime, Resource r)
+        throws PermissionException {
+        return getUnfixedByResource(subj, timeRange, endTime, r.getId()).size();
+    }
+    
+    private Map<Integer, List<Alert>> getUnfixedByResource(Integer subj, long timeRange, long endTime, Integer resourceId)
+    	throws PermissionException {
         // Time voodoo the end time to the nearest minute so that we might
         // be able to use cached results
         endTime = TimingVoodoo.roundUpTime(endTime, 60000);
