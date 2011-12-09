@@ -34,8 +34,6 @@
 
 package org.hyperic.hq.types;
 
-import java.util.ArrayList;
-import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -53,7 +51,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;extension base="{}Response">
  *       &lt;sequence>
- *         &lt;element name="AlertDefinition" type="{}AlertDefinition" maxOccurs="unbounded"/>
+ *         &lt;element name="AlertDefinition" type="{}AlertDefinition"/>
  *       &lt;/sequence>
  *     &lt;/extension>
  *   &lt;/complexContent>
@@ -66,41 +64,36 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "", propOrder = {
     "alertDefinition"
 })
-@XmlRootElement(name = "AlertDefinitionsResponse")
-public class AlertDefinitionsResponse
+@XmlRootElement(name = "AlertDefinitionResponse")
+public class AlertDefinitionResponse
     extends Response
 {
 
     @XmlElement(name = "AlertDefinition", required = true)
-    protected List<AlertDefinition> alertDefinition;
+    protected AlertDefinition alertDefinition;
 
     /**
      * Gets the value of the alertDefinition property.
      * 
-     * <p>
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the alertDefinition property.
-     * 
-     * <p>
-     * For example, to add a new item, do as follows:
-     * <pre>
-     *    getAlertDefinition().add(newItem);
-     * </pre>
-     * 
-     * 
-     * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link AlertDefinition }
-     * 
-     * 
+     * @return
+     *     possible object is
+     *     {@link AlertDefinition }
+     *     
      */
-    public List<AlertDefinition> getAlertDefinition() {
-        if (alertDefinition == null) {
-            alertDefinition = new ArrayList<AlertDefinition>();
-        }
-        return this.alertDefinition;
+    public AlertDefinition getAlertDefinition() {
+        return alertDefinition;
+    }
+
+    /**
+     * Sets the value of the alertDefinition property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link AlertDefinition }
+     *     
+     */
+    public void setAlertDefinition(AlertDefinition value) {
+        this.alertDefinition = value;
     }
 
 }

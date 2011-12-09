@@ -2011,5 +2011,5 @@ public class PlatformManagerImpl implements PlatformManager {
     public void afterPropertiesSet() throws Exception {
         valuePager = Pager.getPager(VALUE_PROCESSOR);
     }
-
+    
 }

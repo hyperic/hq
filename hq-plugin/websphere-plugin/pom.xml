@@ -139,6 +139,7 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-resources-plugin</artifactId>
+				<version>2.5</version>
 				<executions>
 					<execution>
 						<id>copy-resources</id>
@@ -147,6 +148,7 @@
 							<goal>copy-resources</goal>
 						</goals>
 						<configuration>
+							<useDefaultDelimiters>false</useDefaultDelimiters>
 							<delimiters>
   									<delimiter>@</delimiter>
 							</delimiters>
@@ -166,7 +168,7 @@
           									<exclude>**/*.xml</exclude>
         								</excludes>
       								</resource>
-    						</resources>
+    							</resources>
 						</configuration>
 					</execution>
 				</executions>

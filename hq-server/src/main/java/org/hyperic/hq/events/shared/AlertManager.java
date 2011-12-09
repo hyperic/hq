@@ -179,6 +179,12 @@ public interface AlertManager {
         throws PermissionException;
 
     /**
+     * A more optimized look up a resource which includes the permission checking
+     */
+    public int getUnfixedCount(Integer subj, long timeRange, long endTime, Resource r)
+        throws PermissionException;
+
+    /**
      * Get the long reason for an alert
      */
     public String getShortReason(Alert alert);
