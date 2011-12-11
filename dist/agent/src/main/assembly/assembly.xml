@@ -170,6 +170,7 @@
 					<include>org.apache.xmlrpc:*</include>
 					<include>org.apache.ws.commons.util:*</include>
 					<include>org.dnsjava:*</include>
+					<include>org.jasypt:*</include>
 				</includes>
 		</dependencySet>
 	</dependencySets>

@@ -1322,6 +1322,9 @@ public class DataManagerImpl implements DataManager {
                                                           long begin, long end, long interval,
                                                           int type, boolean returnMetricNulls,
                                                           PageControl pc) {
+        begin = TimingVoodoo.roundDownTime(begin, MINUTE);
+        end = TimingVoodoo.roundUpTime(end, MINUTE);
+
         final List<Integer> availIds = new ArrayList<Integer>();
         final List<Integer> measIds = new ArrayList<Integer>();
         checkTimeArguments(begin, end, interval);
@@ -1373,14 +1376,13 @@ public class DataManagerImpl implements DataManager {
         for (int ii = 0; ii < values.length; ii++) {
             final AggMetricValue val = values[ii];
             if (null == val && returnNulls) {
-                rtn.add(new HighLowMetricValue(Double.NaN, tmp));
+                rtn.add(new HighLowMetricValue(Double.NaN, tmp + (ii * windowSize)));
                 continue;
             } else if (null == val) {
                 continue;
             } else {
                 rtn.add(val.getHighLowMetricValue());
             }
-            tmp += windowSize;
         }
         return rtn;
     }
@@ -1815,7 +1817,7 @@ public class DataManagerImpl implements DataManager {
             conn = dbUtil.getConnection();
             stmt = conn.createStatement();
             for (int i=0; i<ids.size(); i+=BATCH_SIZE) {
-                final int max = Math.min(mids.size(), i+BATCH_SIZE);
+                final int max = Math.min(ids.size(), i+BATCH_SIZE);
                 // Create sub array
                 Collection<Integer> subids = ids.subList(i, max);
                 if (debug) watch.markTimeBegin("setDataPoints");

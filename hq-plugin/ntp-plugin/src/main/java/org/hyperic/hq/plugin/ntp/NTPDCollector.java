@@ -77,8 +77,6 @@ public class NTPDCollector extends Collector {
         Boolean hasHost = false;
         int initialArraySize = 3;
 
-        System.out.println("host = " + host);
-
         if (!host.equals("")) { // if no host present don't add it to the command
             initialArraySize = 4;
             hasHost = true;
