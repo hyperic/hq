@@ -2059,6 +2059,7 @@
 			<monitored>
 				<folder path="/etc" recursive="false" filter="my\.conf"/>
 				<folder path="/etc/mysql" recursive="false" filter="my\.conf"/>
+				<folder path="/etc/mysql" recursive="false" filter="my\.cnf"/>
 				<folder path="" recursive="false" filter="my\.conf"/>
 				<folder path="~/" recursive="false" filter="\.my\.cnf"/>
 				<!-- datadir: for versions before 5.1 -->
