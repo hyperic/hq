@@ -2057,15 +2057,14 @@
 		<plugin type="config_track" class="org.hyperic.hq.product.FileChangeTrackPlugin"
 			platform="Unix">
 			<monitored>
-				<folder path="/etc" recursive="false" filter="my\.conf"/>
-				<folder path="/etc/mysql" recursive="false" filter="my\.conf"/>
+				<folder path="/etc" recursive="false" filter="my\.cnf"/>
 				<folder path="/etc/mysql" recursive="false" filter="my\.cnf"/>
-				<folder path="" recursive="false" filter="my\.conf"/>
+				<folder path="" recursive="false" filter="my\.cnf"/>
 				<folder path="~/" recursive="false" filter="\.my\.cnf"/>
 				<!-- datadir: for versions before 5.1 -->
 				<!-- note - cases where datadir is not in the default location have not been addressed -->
-				<folder path="/usr/local/mysql/data" recursive="false" filter="my\.conf"/>
-				<folder path="/usr/local/var" recursive="false" filter="my\.conf"/>
+				<folder path="/usr/local/mysql/data" recursive="false" filter="my\.cnf"/>
+				<folder path="/usr/local/var" recursive="false" filter="my\.cnf"/>
 			</monitored>
 		</plugin>
 	
@@ -2073,9 +2072,9 @@
 			platform="Win32">
 			<monitored>
 	            <!-- system variable WINDIR -->
-				<folder path="%WINDIR%" recursive="false" filter="my\.ini|my\.conf"/>
-				<folder path="c:" recursive="false" filter="my\.ini|my\.conf"/>
-				<folder path="" recursive="false" filter="my\.ini|my\.conf"/>
+				<folder path="%WINDIR%" recursive="false" filter="my\.ini|my\.cnf"/>
+				<folder path="c:" recursive="false" filter="my\.ini|my\.cnf"/>
+				<folder path="" recursive="false" filter="my\.ini|my\.cnf"/>
 			</monitored>
 		</plugin>
 		<property name="DEFAULT_CONFIG_TRACK_ENABLE" value="true" />
