@@ -83,37 +83,37 @@
 						<dependency>
 							<groupId>org.hyperic.jre</groupId>
 							<artifactId>amd64-linux</artifactId>
-							<version>1.5</version>
+							<version>1.6_29</version>
 							<type>tar.gz</type>
 						</dependency>
 						<dependency>
 							<groupId>org.hyperic.jre</groupId>
 							<artifactId>x86-linux</artifactId>
-							<version>1.5</version>
+							<version>1.6_29</version>
 							<type>tar.gz</type>
 						</dependency>
 						<dependency>
 							<groupId>org.hyperic.jre</groupId>
 							<artifactId>sparc-sun-solaris</artifactId>
-							<version>1.5</version>
+							<version>1.6_29</version>
 							<type>tar.gz</type>
 						</dependency> 
 						<dependency>
 							<groupId>org.hyperic.jre</groupId>
-							<artifactId>hpux-11</artifactId>
-							<version>1.5</version>
+							<artifactId>hpux-11-risc</artifactId>
+							<version>1.6_012</version>
 							<type>tar.gz</type>
 						</dependency>
 						<dependency>
 							<groupId>org.hyperic.jre</groupId>
 							<artifactId>x86-win32</artifactId>
-							<version>1.5</version>
-							<type>tar.gz</type>
+							<version>1.6_29</version>
+							<type>zip</type>
 						</dependency>
 						<dependency>
 							<groupId>org.hyperic.jre</groupId>
-							<artifactId>ppc-aix</artifactId>
-							<version>1.5</version>
+							<artifactId>ppc-aix32</artifactId>
+							<version>1.6_29</version>
 							<type>tar.gz</type>
 						</dependency>
 					</dependencies>
@@ -165,8 +165,8 @@
 				<dependencies>
 						<dependency>
 							<groupId>org.hyperic.jre</groupId>
-							<artifactId>hpux-11</artifactId>
-							<version>1.5</version>
+							<artifactId>hpux-11-risc</artifactId>
+							<version>1.6_012</version>
 							<type>tar.gz</type>
 						</dependency>
 				</dependencies>
@@ -188,8 +188,8 @@
 				<dependencies>
 					<dependency>
 						<groupId>org.hyperic.jre</groupId>
-						<artifactId>ppc-aix</artifactId>
-						<version>1.5</version>
+						<artifactId>ppc-aix32</artifactId>
+						<version>1.6_29</version>
 						<type>tar.gz</type>
 					</dependency>
 				</dependencies>
@@ -212,7 +212,7 @@
 					<dependency>
 						<groupId>org.hyperic.jre</groupId>
 						<artifactId>sparc-sun-solaris</artifactId>
-						<version>1.5</version>
+						<version>1.6_29</version>
 						<type>tar.gz</type>
 					</dependency>
 				</dependencies>
@@ -235,8 +235,8 @@
 						<dependency>
 							<groupId>org.hyperic.jre</groupId>
 							<artifactId>x86-win32</artifactId>
-							<version>1.5</version>
-							<type>tar.gz</type>
+							<version>1.6_29</version>
+							<type>zip</type>
 						</dependency>
 				</dependencies>
   		</profile>
@@ -258,7 +258,7 @@
 						<dependency>
 							<groupId>org.hyperic.jre</groupId>
 							<artifactId>x86-linux</artifactId>
-							<version>1.5</version>
+							<version>1.6_29</version>
 							<type>tar.gz</type>
 						</dependency>
 				</dependencies>
@@ -281,7 +281,7 @@
 						<dependency>
 							<groupId>org.hyperic.jre</groupId>
 							<artifactId>amd64-linux</artifactId>
-							<version>1.5</version>
+							<version>1.6_29</version>
 							<type>tar.gz</type>
 						</dependency>
 				</dependencies>
