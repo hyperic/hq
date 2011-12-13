@@ -86,7 +86,7 @@ public class SambaServerDetector
             	//The smbd process exists but the ps does not return the
             	//full installation path
             	String proccessFullPath = getProcessFullPath(exe);
-				if (null != proccessFullPath && !proccessFullPath.isEmpty())
+				if (null != proccessFullPath && !proccessFullPath.equalsIgnoreCase(""))
             		servers.add(proccessFullPath);
             	continue;
             }
