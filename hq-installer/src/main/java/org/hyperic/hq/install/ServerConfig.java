@@ -124,6 +124,10 @@ public class ServerConfig
     public static final String Q_SERVER_KEYSTORE_PATH = "What is the file path to your java keystore?";
     public static final String Q_SERVER_KEYSTORE_PASSWORD = "What is the password to your java keystore?";
     private static final String SERVER_DATABASE_UPGRADE_CHOICE = "server.database.upgrade.choice";
+    public static final String Q_PROFILE = 	"What is the istallation profile?" +
+    										"(\"small\" for topologies with less than 50 servers," +
+    										" \"medium\" for 50-250 servers," + 
+    										" \"large\" for more than 250 servers)";
 
     // convenience constants
     private static final String nl = System.getProperty("line.separator");
@@ -132,11 +136,13 @@ public class ServerConfig
         super("server");
     }
 
-    public String getName() {
+    @Override
+	public String getName() {
         return PN + " server";
     }
 
-    protected ConfigSchema getUpgradeSchema(ConfigResponse previous, int iterationCount)
+    @Override
+	protected ConfigSchema getUpgradeSchema(ConfigResponse previous, int iterationCount)
         throws EarlyExitException {
         ConfigSchema schema = super.getUpgradeSchema(previous, iterationCount);
         if (schema == null)
@@ -159,7 +165,8 @@ public class ServerConfig
         }
     }
 
-    protected ConfigSchema getInstallSchema(ConfigResponse previous, int iterationCount)
+    @Override
+	protected ConfigSchema getInstallSchema(ConfigResponse previous, int iterationCount)
         throws EarlyExitException {
 
         ConfigSchema schema = super.getInstallSchema(previous, iterationCount);
@@ -289,8 +296,7 @@ public class ServerConfig
                 // We always ask for username and password now per HQ-3627, 
                 // so probably shouldn't auto enter the email value
                 schema.addOption(new StringConfigOption("server.mail.sender", Q_MAIL_FROM, "hqadmin@" + domain));
-
-                break;
+                schema.addOption(new StringConfigOption("install.profile", Q_PROFILE, "small"));
 
             case 6:
                 if (installMode.isOracle()) {
@@ -584,11 +590,13 @@ public class ServerConfig
                                                  "bin/ams-server.sh",
                                                  "bin/ams-server.exe" };
 
-    protected String[] getMarkerFiles() {
+    @Override
+	protected String[] getMarkerFiles() {
         return MARKER_FILES;
     }
 
-    public void canUpgrade(String dir) throws InvalidOptionValueException {
+    @Override
+	public void canUpgrade(String dir) throws InvalidOptionValueException {
         // If the 'dir' points to a pointbase-backed installation, we can't
         // upgrade it.
 
@@ -633,7 +641,8 @@ public class ServerConfig
         }
     }
 
-    public String getProductInstallDir(ConfigResponse config) {
+    @Override
+	public String getProductInstallDir(ConfigResponse config) {
         String installDir = getInstallDir(config);
         if (Boolean.parseBoolean(getProjectProperty("eula.present"))) {
             return installDir + getBaseName() + "-" + getProjectProperty("version") + "-EE" +
@@ -644,7 +653,8 @@ public class ServerConfig
         }
     }
 
-    public String getCompletionText(ConfigResponse config) {
+    @Override
+	public String getCompletionText(ConfigResponse config) {
         StringBuffer s = new StringBuffer();
         String sp = File.separator;
         String startup = getProductInstallDir(config);
