@@ -424,7 +424,8 @@ public class ServerConfig
                         	
             case 8:
             	if("yes".equalsIgnoreCase(previous.getValue("server.encryption-key.auto"))) {
-            		String encryptionKey = UUID.randomUUID().toString().substring(0, 13);
+            		//Create an auto generated random key
+            		String encryptionKey = UUID.randomUUID().toString().substring(0, 13).replaceAll("-", "");
             		schema.addOption(new HiddenConfigOption("server.encryption-key", encryptionKey));
             		break;
             	}
