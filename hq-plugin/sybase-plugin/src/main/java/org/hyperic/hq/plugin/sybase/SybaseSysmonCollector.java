@@ -139,7 +139,7 @@ public class SybaseSysmonCollector extends Collector {
             //
             // regex should only find lines starting with "Engine X                        X.X %"
             // engineid and percentage are in regex groups 1 and 2
-            pat = Pattern.compile("\n +Engine (\\d)+\\s+(\\d+\\.\\d+) %.*\n");
+            pat = Pattern.compile("\n +Engine (\\d)+\\s+(\\d+\\.\\d+) %.*");
             m = pat.matcher(res);
             while (m.find()) {
                 try {
