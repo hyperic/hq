@@ -265,6 +265,8 @@
     <service name="sp_sysmonEngine">
       <plugin type="measurement"
               class="EngineMeasurementPlugin"/>
+      <plugin type="collector"
+              class="SybaseSysmonCollector"/>
       <config>
         <option name="engine"
                 description="Sybase Engine Stats"/>

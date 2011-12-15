@@ -37,6 +37,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Properties;
+
+import org.hyperic.hq.product.Collector;
 import org.hyperic.hq.product.JDBCMeasurementPlugin;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricNotFoundException;
@@ -64,6 +66,8 @@ public class EngineMeasurementPlugin extends SigarMeasurementPlugin {
             res = getSigarValue(metric);
         } else if (metric.getAttributeName().equals(Metric.ATTR_AVAIL)) {
             res = getAvailability(metric);
+        } else if (metric.getAttributeName().startsWith("EngineUtilization")) {
+            res =  Collector.getValue(this, metric);
         } else {
             throw new MetricNotFoundException(metric.getAttributeName());
         }
@@ -202,6 +206,10 @@ public class EngineMeasurementPlugin extends SigarMeasurementPlugin {
                 template = template.substring(0, ri);
             }
             template += ",id=" + config.getValue("id") + rate;
+        } else if(template.contains(":EngineUtilization")) {
+            // need to postfix attribute with engineid from configuration because
+            // collector collects multiple values
+            template = template.replace(":EngineUtilization", ":EngineUtilization"+config.getValue("id"));
         }
 
         return super.translate(template, config);
