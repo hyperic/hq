@@ -206,10 +206,11 @@ public class EngineMeasurementPlugin extends SigarMeasurementPlugin {
                 template = template.substring(0, ri);
             }
             template += ",id=" + config.getValue("id") + rate;
-        } else if(template.contains(":EngineUtilization")) {
-            // need to postfix attribute with engineid from configuration because
-            // collector collects multiple values
-            template = template.replace(":EngineUtilization", ":EngineUtilization"+config.getValue("id"));
+        } else if (template.contains(":EngineUtilization")) {
+            // need to postfix attribute with engineid from configuration
+            // because collector collects multiple values
+            template = template.replace(":EngineUtilization",
+                ":EngineUtilization" + config.getValue("id"));
         }
 
         return super.translate(template, config);
