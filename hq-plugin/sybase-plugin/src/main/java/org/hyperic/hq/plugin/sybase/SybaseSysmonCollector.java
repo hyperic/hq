@@ -145,16 +145,22 @@ public class SybaseSysmonCollector extends Collector {
                 try {
                     final String engineId = m.group(1);
                     final String cpuBusyVal = m.group(2);
-                    if(engineId != null && cpuBusyVal != null) 
-                        setValue("EngineUtilization"+engineId.trim(), Double.parseDouble(cpuBusyVal.trim())/100);
-                    if (trace.isDebugEnabled())
-                        trace.debug("Found Engine Utilization for engineid="+engineId.trim()+" with value "+Double.parseDouble(cpuBusyVal.trim())/100);
+                    if (engineId != null && cpuBusyVal != null) {
+                        setValue("EngineUtilization" + engineId.trim(),
+                            Double.parseDouble(cpuBusyVal.trim()) / 100);
+                    }
+                    if (trace.isDebugEnabled()) {
+                        trace.debug("Found Engine Utilization for engineid=" + engineId.trim() +
+                            " with value " + Double.parseDouble(cpuBusyVal.trim()) / 100);                        
+                    }
                 } catch (NumberFormatException e) {
-                    if (trace.isDebugEnabled())
-                        trace.debug("Unable to parse number from: " + e.toString());
+                    if (trace.isDebugEnabled()) {
+                        trace.debug("Unable to parse number from: " + e.toString());                        
+                    }
                 } catch (IndexOutOfBoundsException e) {
-                    if (trace.isDebugEnabled())
-                        trace.debug("Unable to find group from matcher: " + e.toString());
+                    if (trace.isDebugEnabled()) {
+                        trace.debug("Unable to find group from matcher: " + e.toString());                        
+                    }
                 }
             }
             
