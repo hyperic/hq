@@ -33,6 +33,15 @@
     <if>
       <equals arg1="${install.mode}" arg2="upgrade"/>
       <then>
+      	<echo>^^^INFO:
+      		*
+      		******************************************************************************************************************
+      		Warning: There is no undo for the upgrade process.${line.separator}
+      		Before upgrading Hyperic Server, archive your existing Hyperic Server directory and back up the Hyperic Database, ${line.separator}to ensure that you can roll back to the prior version if desired.
+      		******************************************************************************************************************
+      		${line.separator}Press enter to continue...
+      		        </echo>
+      		<input />
         <property name="setup.upgrade" value="true"/>
       </then>
     </if>
