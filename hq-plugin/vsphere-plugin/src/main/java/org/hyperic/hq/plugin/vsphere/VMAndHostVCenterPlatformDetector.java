@@ -228,53 +228,47 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
             if (nics != null) {
                 for (int i=0; i<nics.length; i++) {
                     String mac = nics[i].getMacAddress();
-                    if (mac.equals("00:00:00:00:00:00")) {
-                        log.info("Skipping " + VM_TYPE + "[name=" + info.getName()
-                          + ", UUID=" + uuid
-                          + ", NIC=" + nics[i].getIpAddress()
-                          + ", MAC=" + mac
-                          + "]. Will be re-discovered when the MAC address is valid.");
-                        return null;
-                    }
                     String[] ips = nics[i].getIpAddress();
-                    if ((mac != null) && (ips != null) && (ips.length != 0)) {
+                    if (mac != null) {
                         cprops.setValue("macAddress", mac);
-                        cprops.setValue("ip", ips[0]);
-                        platform.addIp(ips[0], "", mac);
+                        if ((ips != null) && (ips.length != 0)) {
+                            cprops.setValue("ip", ips[0]);
+                            platform.addIp(ips[0], "", mac);
+                            log.info("MAC="+mac+" IP="+ips[0]+" : " + VM_TYPE + "[name=" + info.getName() + ", UUID=" + uuid);
+                        } else {
+                            platform.addIp("N/A", "", mac);
+                            log.info("MAC="+mac+" No IP info for: " + VM_TYPE + "[name=" + info.getName() + ", UUID=" + uuid);
+                        }
+                    } else {
+                        log.info("No MAC info for: " + VM_TYPE + "[name=" + info.getName() + ", UUID=" + uuid);
                     }
                 }
+            } else {
+                log.info("No network info for: " + VM_TYPE + "[name=" + info.getName() + ", UUID=" + uuid);
             }
-            if (platform.getIp().isEmpty()) {
-                log.info("Skipping " + VM_TYPE + "[name=" + info.getName()
+
+            ManagedObjectReference hmor = runtime.getHost();
+            if (hmor != null) {
+                HostSystem host = new HostSystem(vm.getServerConnection(), hmor);
+                cprops.setValue(ESX_HOST, host.getName());
+            }
+
+            platform.addProperties(cprops);
+
+            if (log.isDebugEnabled()) {
+                log.debug("Discovered " + VM_TYPE + "[name=" + info.getName()
+                        + ", UUID=" + uuid
+                        + ", powerState=" + state + "]");
+            }
+
+            return platform;
+        } else {
+            log.info("Skipping " + VM_TYPE + "[name=" + info.getName()
                     + ", UUID=" + uuid
-                    + "] because the MAC address does not exist. "
-                    + "Will be re-discovered when the MAC address is valid.");
-                return null;
-            }
-        }
-        else {
-            log.info("Skipping " + VM_TYPE + "[name=" + info.getName() 
-                + ", UUID=" + uuid
-                + ", powerState=" + state + "]. "
-                + "Will be re-discovered when it is powered on.");
+                    + ", powerState=" + state + "]. "
+                    + "Will be re-discovered when it is powered on.");
             return null;
         }
-
-        ManagedObjectReference hmor = runtime.getHost();
-        if (hmor != null) {
-            HostSystem host = new HostSystem(vm.getServerConnection(), hmor);
-            cprops.setValue(ESX_HOST, host.getName());
-        }
-
-        platform.addProperties(cprops);
-        
-        if (log.isDebugEnabled()) {
-            log.debug("Discovered " + VM_TYPE + "[name=" + info.getName()
-                          + ", UUID=" + uuid
-                          + ", powerState=" + state + "]");
-        }
-        
-        return platform;
     }
     
    
