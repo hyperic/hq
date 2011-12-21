@@ -143,7 +143,7 @@ public class ResourceGroup extends PersistedObject
     /* (non-Javadoc)
      * @see org.hyperic.hq.authz.server.session.AuthzNamedBean#setName(java.lang.String)
      */
-    void setName(String name) {
+    public void setName(String name) {
         if (_resource != null)
             _resource.setName(name);
     }

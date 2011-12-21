@@ -2133,6 +2133,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * @param entity for use in group member filtering.
      * @return List containing AppdefGroupValue.
      * 
+     * XXX needs to be optimized
      */
     @Transactional(readOnly = true)
     public PageList<AppdefGroupValue> findAllGroupsMemberExclusive(int sessionId, PageControl pc,
@@ -2242,6 +2243,9 @@ public class AppdefBossImpl implements AppdefBoss {
             for (final Integer resourceId : resourceIds) {
                 final Resource r = resourceManager.findResourceById(resourceId);
                 if (r == null || r.isInAsyncDeleteState()) {
+                    continue;
+                }
+                if (rName != null && !r.getName().toLowerCase().contains(rName.toLowerCase())) {
                     continue;
                 }
                 try {

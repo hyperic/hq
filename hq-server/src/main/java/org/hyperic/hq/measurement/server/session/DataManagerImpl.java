@@ -1322,6 +1322,10 @@ public class DataManagerImpl implements DataManager {
                                                           long begin, long end, long interval,
                                                           int type, boolean returnMetricNulls,
                                                           PageControl pc) {
+        // [HHQ-5244] Need to round to make sure that begin time is gathered
+        begin = TimingVoodoo.roundDownTime(begin, MINUTE);
+        end = TimingVoodoo.roundUpTime(end, MINUTE);
+
         final List<Integer> availIds = new ArrayList<Integer>();
         final List<Integer> measIds = new ArrayList<Integer>();
         checkTimeArguments(begin, end, interval);
@@ -1373,14 +1377,13 @@ public class DataManagerImpl implements DataManager {
         for (int ii = 0; ii < values.length; ii++) {
             final AggMetricValue val = values[ii];
             if (null == val && returnNulls) {
-                rtn.add(new HighLowMetricValue(Double.NaN, tmp));
+                rtn.add(new HighLowMetricValue(Double.NaN, tmp + (ii * windowSize)));
                 continue;
             } else if (null == val) {
                 continue;
             } else {
                 rtn.add(val.getHighLowMetricValue());
             }
-            start += windowSize;
         }
         return rtn;
     }
@@ -1711,12 +1714,13 @@ public class DataManagerImpl implements DataManager {
         try {
             conn = dbUtil.getConnection();
 
-            final String metricUnion = MeasurementUnionStatementBuilder.getUnionStatement(8 * HOUR,
-                m.getId().intValue(), measurementDAO.getHQDialect());
-            StringBuilder sqlBuf = new StringBuilder().append("SELECT timestamp, value FROM ")
-                .append(metricUnion).append(", (SELECT MAX(timestamp) AS maxt").append(" FROM ")
-                .append(metricUnion).append(") mt ").append("WHERE measurement_id = ").append(
-                    m.getId()).append(" AND timestamp = maxt");
+            final String metricUnion =
+                MeasurementUnionStatementBuilder.getUnionStatement(8 * HOUR, m.getId(), measurementDAO.getHQDialect());
+            final StringBuilder sqlBuf = new StringBuilder()
+                .append("SELECT timestamp, value FROM ").append(metricUnion)
+                    .append(", (SELECT MAX(timestamp) AS maxt").append(" FROM ").append(metricUnion)
+                    .append(") mt ")
+                .append("WHERE measurement_id = ").append(m.getId()).append(" AND timestamp = maxt");
 
             stmt = conn.createStatement();
 
@@ -1757,11 +1761,10 @@ public class DataManagerImpl implements DataManager {
     @Transactional(readOnly = true)
     public Map<Integer, MetricValue> getLastDataPoints(List<Measurement> measurements,
                                                        long timestamp) {
-        List<Integer> availIds = new ArrayList<Integer>();
-        List<Integer> measurementIds = new ArrayList<Integer>();
+        List<Integer> availIds = new ArrayList<Integer>(measurements.size());
+        List<Integer> measurementIds = new ArrayList<Integer>(measurements.size());
 
         for (Measurement m : measurements) {
-
             if (m == null) {
                 // XXX: See above.
                 measurementIds.add(null);
@@ -1772,95 +1775,90 @@ public class DataManagerImpl implements DataManager {
             }
         }
 
-        Integer[] sepMids = (Integer[]) measurementIds.toArray(new Integer[measurementIds.size()]);
-        Integer[] avIds = (Integer[]) availIds.toArray(new Integer[availIds.size()]);
+        Integer[] avIds = availIds.toArray(new Integer[0]);
 
-        Map<Integer, MetricValue> data = getLastDataPts(sepMids, timestamp);
+        final StopWatch watch = new StopWatch();
+        final boolean debug = log.isDebugEnabled();
+        if (debug) watch.markTimeBegin("getLastDataPts");
+        Map<Integer, MetricValue> data = getLastDataPts(measurementIds, timestamp);
+        if (debug) watch.markTimeEnd("getLastDataPts");
 
         if (availIds.size() > 0) {
+            if (debug) watch.markTimeBegin("getLastAvail");
             data.putAll(availabilityManager.getLastAvail(avIds));
+            if (debug) watch.markTimeEnd("getLastAvail");
         }
 
+        if (debug) log.debug(watch);
         return data;
     }
 
-    private Map<Integer, MetricValue> getLastDataPts(Integer[] ids, long timestamp) {
-        final int MAX_ID_LEN = 10;
-        // The return map
-        Map<Integer, MetricValue> data = new HashMap<Integer, MetricValue>();
-        if (ids.length == 0) {
-            return data;
+    private Map<Integer, MetricValue> getLastDataPts(Collection<Integer> mids, long timestamp) {
+        final int BATCH_SIZE = 500;
+        final Map<Integer, MetricValue> rtn = new HashMap<Integer, MetricValue>(mids.size());
+        if (mids == null || mids.isEmpty()) {
+            return rtn;
         }
-
-        // Try to get the values from the cache first
-        ArrayList<Integer> nodata = getCachedDataPoints(ids, data, timestamp);
-
-        if (nodata.size() == 0) {
-            return data;
+        // all cached values are inserted into rtn
+        // nodata represents values that are not cached
+        final Collection<Integer> nodata = getCachedDataPoints(mids, rtn, timestamp);
+        ArrayList<Integer> ids = null;
+        final boolean debug = log.isDebugEnabled();
+        if (nodata.isEmpty()) {
+            if (debug) log.debug("got data from cache");
+            // since we have all the data from cache (nodata is empty), just return it
+            return rtn;
         } else {
-            ids = (Integer[]) nodata.toArray(new Integer[nodata.size()]);
+            ids = new ArrayList<Integer>(nodata);
         }
-
         Connection conn = null;
         Statement stmt = null;
-        StopWatch timer = new StopWatch();
-
+        final StopWatch watch = new StopWatch();
         try {
             conn = dbUtil.getConnection();
-
-            int length;
             stmt = conn.createStatement();
-            for (int ind = 0; ind < ids.length;) {
-                length = Math.min(ids.length - ind, MAX_ID_LEN);
+            for (int i=0; i<ids.size(); i+=BATCH_SIZE) {
+                final int max = Math.min(ids.size(), i+BATCH_SIZE);
                 // Create sub array
-                Integer[] subids = new Integer[length];
-                for (int j = 0; j < subids.length; j++) {
-                    subids[j] = ids[ind++];
-                    if (log.isDebugEnabled())
-                        log.debug("arg" + (j + 1) + ": " + subids[j]);
-                }
-                setDataPoints(data, timestamp, subids, stmt);
+                Collection<Integer> subids = ids.subList(i, max);
+                if (debug) watch.markTimeBegin("setDataPoints");
+                setDataPoints(rtn, timestamp, subids, stmt);
+                if (debug) watch.markTimeEnd("setDataPoints");
             }
         } catch (SQLException e) {
             throw new SystemException("Cannot get last values", e);
         } finally {
             DBUtil.closeJDBCObjects(LOG_CTX, conn, stmt, null);
-            if (log.isDebugEnabled()) {
-                log.debug("getLastDataPoints(): Statement query elapsed " + "time: " +
-                          timer.getElapsed());
-            }
+            if (debug) log.debug(watch);
         }
-        List<DataPoint> dataPoints = convertMetricId2MetricValueMapToDataPoints(data);
+        List<DataPoint> dataPoints = convertMetricId2MetricValueMapToDataPoints(rtn);
         updateMetricDataCache(dataPoints);
-        return data;
+        return rtn;
     }
 
     /**
      * Get data points from cache only
-     * 
-     * 
      */
     @Transactional(readOnly = true)
-    public ArrayList<Integer> getCachedDataPoints(Integer[] ids, Map<Integer, MetricValue> data,
-                                                  long timestamp) {
-
+    public Collection<Integer> getCachedDataPoints(Collection<Integer> mids,
+                                                   Map<Integer, MetricValue> data,
+                                                   long timestamp) {
         ArrayList<Integer> nodata = new ArrayList<Integer>();
-        for (int i = 0; i < ids.length; i++) {
-            if (ids[i] == null) {
+        for (Integer mid : mids) {
+            if (mid == null) {
                 continue;
             }
-
-            MetricValue mval = metricDataCache.get(ids[i], timestamp);
+            final MetricValue mval = metricDataCache.get(mid, timestamp);
             if (mval != null) {
-                data.put(ids[i], mval);
+                data.put(mid, mval);
             } else {
-                nodata.add(ids[i]);
+                nodata.add(mid);
             }
         }
         return nodata;
     }
 
-    private void setDataPoints(Map<Integer, MetricValue> data, long timestamp, Integer[] measIds,
+    private void setDataPoints(Map<Integer, MetricValue> data, long timestamp, Collection<Integer> measIds,
                                Statement stmt) throws SQLException {
         ResultSet rs = null;
         try {
@@ -1884,21 +1882,12 @@ public class DataManagerImpl implements DataManager {
         }
     }
 
-    private StringBuilder getLastDataPointsSQL(long timestamp, Integer[] measIds) {
-        String tables = (timestamp != MeasurementConstants.TIMERANGE_UNLIMITED) ? MeasurementUnionStatementBuilder
-                                                                                   .getUnionStatement(
-                                                                                       timestamp,
-                                                                                       System
-                                                                                           .currentTimeMillis(),
-                                                                                       measIds,
-                                                                                       measurementDAO
-                                                                                           .getHQDialect())
-                                                                               : MeasurementUnionStatementBuilder
-                                                                                   .getUnionStatement(
-                                                                                       getPurgeRaw(),
-                                                                                       measIds,
-                                                                                       measurementDAO
-                                                                                           .getHQDialect());
+    private StringBuilder getLastDataPointsSQL(long timestamp, Collection<Integer> measIds) {
+        String tables = (timestamp != MeasurementConstants.TIMERANGE_UNLIMITED) ?
+            MeasurementUnionStatementBuilder.getUnionStatement(timestamp, now(), measIds,
+                                                               measurementDAO.getHQDialect()) :
+            MeasurementUnionStatementBuilder.getUnionStatement(getPurgeRaw(), measIds,
+                                                               measurementDAO.getHQDialect());
 
         StringBuilder sqlBuf = new StringBuilder(
             "SELECT measurement_id, value, timestamp" + " FROM " + tables + ", " +
@@ -1914,14 +1903,17 @@ public class DataManagerImpl implements DataManager {
         return sqlBuf;
     }
 
+    private long now() {
+        return System.currentTimeMillis();
+    }
+
     /**
      * Convert the MetricId->MetricValue map to a list of DataPoints.
      * 
      * @param metricId2MetricValueMap The map to convert.
      * @return The list of DataPoints.
      */
-    private List<DataPoint> convertMetricId2MetricValueMapToDataPoints(
-                                                                       Map<Integer, MetricValue> metricId2MetricValueMap) {
+    private List<DataPoint> convertMetricId2MetricValueMapToDataPoints(Map<Integer, MetricValue> metricId2MetricValueMap) {
 
         List<DataPoint> dataPoints = new ArrayList<DataPoint>(metricId2MetricValueMap.size());
 
@@ -2246,4 +2238,5 @@ public class DataManagerImpl implements DataManager {
         }
         return null;
     }
+
 }

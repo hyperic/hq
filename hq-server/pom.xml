@@ -160,6 +160,10 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>net.sf.jsr107cache</groupId>
+			<artifactId>jsr107cache</artifactId>
+		</dependency>
+		<dependency>
   			<groupId>org.easymock</groupId>
   			<artifactId>easymock</artifactId>
 		</dependency>

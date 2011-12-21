@@ -99,42 +99,46 @@ public abstract class DefaultServerDetector extends ServerDetector implements Au
                         res.add(path.trim());
                     } else {
                         if (debug) {
-                            log.debug("[getServerResources] bad version: '" + instances[n] + " " + version + "'");
+                            log.debug("[getInstallPaths] bad version: '" + instances[n] + " " + version + "'");
                         }
                     }
                 }
             } catch (Win32Exception ex) {
                 if (debug) {
-                    log.debug("[getServerResources] error: " + ex.getMessage(), ex);
+                    log.debug("[getInstallPaths] error: " + ex.getMessage(), ex);
                 }
             }
         } else {
             try {
                 Process cmd = Runtime.getRuntime().exec(DB2JDBCProductPlugin.DB2LS);
                 cmd.waitFor();
-                String sal = inputStreamAsString(cmd.getInputStream());
+                String resultString = inputStreamAsString(cmd.getInputStream());
                 if (debug) {
-                    log.debug("[getServerResources] sal=" + sal);
+                    log.debug("[getInstallPaths] command result=" + resultString);
                 }
-                String[] installs = sal.split("\n");
+                String[] installs = resultString.split("\n");
                 for (int n = 0; n < installs.length; n++) {
                     Matcher m = regExpInstall.matcher(installs[n]);
                     if (m.find()) {
                         if (regExpVersion.matcher(m.group(2)).find()) {
                             if (debug) {
-                                log.debug("[getServerResources] found: '" + m.group() + "'");
+                                log.debug("[getInstallPaths] found: '" + m.group() + "'");
                             }
                             res.add(m.group(1));
                         } else {
                             if (debug) {
-                                log.debug("[getServerResources] bad version: '" + m.group() + "'");
+                                log.debug("[getInstallPaths] bad version: '" + m.group() + "'");
                             }
                         }
                     }
                 }
-            } catch (Exception ex) {
+            } catch (IOException ex) {
                 if (debug) {
-                    log.debug("[getServerResources] error: " + ex.getMessage(), ex);
+                    log.debug("[getInstallPaths] " + ex.getMessage());
+                }
+            } catch (Exception e){
+                if (debug) {
+                    log.debug("[getInstallPaths] error: " + e.getMessage(), e);
                 }
             }
         }

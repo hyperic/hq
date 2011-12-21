@@ -37,6 +37,7 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.ObjectNotFoundException;
 import org.hibernate.SessionFactory;
@@ -792,8 +793,16 @@ public class AlertManagerTest
         alertManager.setAlertFixed(alert3);
         alertManager.setAlertFixed(alert4);
         flushSession();
-        int unfixedCounts = alertManager.getUnfixedCount(overlord.getId(), 10 * 60000l,
-            time1 + 60000l, resGrp.getId());
+        Map<Integer,List<Alert>> alertMap = alertManager.getUnfixedByResource(overlord.getId(), 10 * 60000l,
+            time1 + 60000l);
+
+        int unfixedCounts = 0;
+        Collection<Resource> resources = resourceGroupManager.getMembers(resGrp);
+        for (Resource r : resources) {
+            List<Alert> alerts = alertMap.get(r.getId());
+            unfixedCounts += alerts.size();
+        }
+
         assertEquals("Unfixed alerts count is incorrect", 4, unfixedCounts);
     }
 

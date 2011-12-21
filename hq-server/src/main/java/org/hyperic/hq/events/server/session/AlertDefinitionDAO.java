@@ -227,7 +227,7 @@ public class AlertDefinitionDAO
         String sql = "from AlertDefinition a where a.resource = :res and " +
                      "a.deleted = false order by a." + sort + (asc ? " ASC" : " DESC");
 
-        return getSession().createQuery(sql).setParameter("res", res).list();
+        return getSession().createQuery(sql).setParameter("res", res).setCacheable(true).setCacheRegion("AlertDefinition.findByResource").list();
     }
 
     public List<AlertDefinition> findByResource(Resource res) {

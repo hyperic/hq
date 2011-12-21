@@ -467,24 +467,21 @@ public class MxServerDetector
         throws PluginException {
         log.debug("[discoverServices] serverConfig="+serverConfig);
 
-        JMXConnector connector;
+        JMXConnector connector = null;
         MBeanServerConnection mServer;
     
         try {
             connector = MxUtil.getMBeanConnector(serverConfig.toProperties());
             mServer = connector.getMBeanServerConnection();
         } catch (Exception e) {
+            MxUtil.close(connector);
             throw new PluginException(e.getMessage(), e);
         }
 
         try {
             return discoverMxServices(mServer, serverConfig);
         } finally {
-            try {
-                connector.close();
-            } catch (IOException e) {
-                throw new PluginException(e.getMessage(), e);
-            }
+            MxUtil.close(connector);
         }
     }
     
@@ -492,7 +489,7 @@ public class MxServerDetector
     
     public Set discoverServiceTypes(ConfigResponse serverConfig)
 	throws PluginException {
-    	 JMXConnector connector;
+    	 JMXConnector connector = null;
          MBeanServerConnection mServer;
          Set serviceTypes = new HashSet();
          
@@ -508,6 +505,7 @@ public class MxServerDetector
              connector = MxUtil.getMBeanConnector(serverConfig.toProperties());
              mServer = connector.getMBeanServerConnection();
          } catch (Exception e) {
+             MxUtil.close(connector);
              throw new PluginException(e.getMessage(), e);
          } 
 
@@ -517,12 +515,9 @@ public class MxServerDetector
 		} catch (Exception e) {
 			 throw new PluginException(e.getMessage(), e);
 		} finally {
-            try {
-                connector.close();
-            } catch (IOException e) {
-                throw new PluginException(e.getMessage(), e);
-            }
+		    MxUtil.close(connector);
         }
 		return serviceTypes;
     }
+
 }

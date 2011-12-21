@@ -33,14 +33,27 @@
 
 <tiles:importAttribute name="portlet"/>
 
-<script type="text/javascript">
-function requestMetricsResponse<c:out value="${portlet.token}"/>() {
-    var dummyStr = '&hq=' + new Date().getTime();
-    var metricsUrl = "<html:rewrite page="/dashboard/ViewMetricViewer.do?token=${portlet.token}"/>" + dummyStr;
-	new Ajax.Request(metricsUrl, {method: 'get', onSuccess:showMetricsResponse});
-}
-onloads.push(requestMetricsResponse<c:out value="${portlet.token}"/>);
-</script>
+<script type="text/javascript"> 
+    function requestMetricsResponse<c:out value="${portlet.token}"/>() { 
+        dojo11.xhrGet({ 
+            url: "<html:rewrite page="/dashboard/ViewMetricViewer.do?"/>", 
+            handleAs: "json", 
+            content: { 
+                hq: (new Date()).getTime(), 
+                token: "<c:out value="${portlet.token}"/>" 
+            }, 
+            load: function(response, args) { 
+                showMetricsResponse(response, args); 
+                setTimeout("requestMetricsResponse<c:out value="${portlet.token}"/>()", portlets_reload_time); 
+            }, 
+            error: function(response, args) { 
+                reportError(response, args); 
+                setTimeout("requestMetricsResponse<c:out value="${portlet.token}"/>()", portlets_reload_time); 
+            } 
+        }); 
+    } 
+    onloads.push(requestMetricsResponse<c:out value="${portlet.token}"/>); 
+</script> 
 
 <div class="effectsPortlet">
 <tiles:insert definition=".header.tab">

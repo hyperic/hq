@@ -209,22 +209,20 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
         throws PermissionException {
         final long PORTLET_RANGE = MeasurementConstants.DAY * 3;
         final int maxRecords = pageInfo.getStartRow() + pageInfo.getPageSize();
-        
+
+        Map<Integer, List<Alert>> resourceAlertMap =
+                alertManager.getUnfixedByResource(subj.getId(), PORTLET_RANGE, System.currentTimeMillis());
+
         Map<Integer, List<String>> result = new HashMap<Integer, List<String>>();
-        int index = 0;
-        
         for (int x = pageInfo.getStartRow(); x < groupIds.length && (maxRecords == 0 || x <= maxRecords); x++) {
             ResourceGroup group = resourceGroupManager.findResourceGroupById(subj, groupIds[x]);
             
             if (group != null) {
             	List<String> alertStatus = new ArrayList<String>();
-            	
-            	alertStatus.add(getResourceStatus(subj, group, PORTLET_RANGE));
+                alertStatus.add(getResourceStatus(subj, group, resourceAlertMap, PORTLET_RANGE));
             	alertStatus.add(getGroupStatus(subj, group, PORTLET_RANGE));
             	result.put(group.getId(), alertStatus);
             }
-            
-            index++;
         }
         
         return result;
@@ -280,59 +278,43 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
         }
     }
 
-    private String getResourceStatus(AuthzSubject subj, ResourceGroup group, long range) {
+    private String getResourceStatus(AuthzSubject subj, ResourceGroup group,
+                                     Map<Integer,List<Alert>>resourceAlertMap,
+                                     long range) {
         boolean debug = log.isDebugEnabled();
         long now = System.currentTimeMillis();
         StopWatch watch = new StopWatch(now);
 
         try {
-            long begin = now - range;
-
             watch.markTimeBegin("getResourceStatus: getUnfixedCount");
-
-            int unfixed = alertManager.getUnfixedCount(subj.getId(), begin, now, group.getId());
+            Collection<Resource> resources = resourceGroupManager.getMembers(group);
+            List<Alert> alerts = new ArrayList<Alert>();
+            for (Resource r : resources) {
+                List<Alert> resourceAlerts = resourceAlertMap.get(r.getId());
+                if (resourceAlerts != null) {
+                    alerts.addAll(resourceAlerts);
+                }
+            }
             watch.markTimeEnd("getResourceStatus: getUnfixedCount");
 
-            // There are unfixed alerts
-            if (unfixed > 0) {
-                watch.markTimeBegin("getResourceStatus: findAlerts");
-                List<Alert> alerts = alertManager.findAlerts(subj.getId(), 0, begin, now, true, true, group.getId(),
-                    PageInfo.getAll(AlertSortField.FIXED, true));
-                watch.markTimeEnd("getResourceStatus: findAlerts");
-
-                // Are all unfixed alerts in escalation?
-                if (alerts.size() != unfixed) {
-                    return ALERT_CRITICAL;
-                }
-
-                // Make sure that all unfixed alerts have been ack'ed
-
+            // There are unfixed alerts for resources in this group.
+            if (alerts.size() > 0) {
+                // If all alerts are ack'ed, return WARN, otherwise CRITICAL.
                 for (Alert alert : alerts) {
-
                     if (!isAckd(subj, alert)) {
                         return ALERT_CRITICAL;
                     }
                 }
                 return ALERT_WARN;
             } else {
-                // Is it that there are no alerts or that there are no alert
-                // definitions?
-
-                Collection<Resource> resources = resourceGroupManager.getMembers(group);
-                PageControl pc = new PageControl(0, 1);
-
-                List<AlertDefinitionValue> alertDefs = null;
+                // Is it that there are no alerts or that there are no alert definitions?
+                // TODO: Should query these all at once - once complete we can
+                // remove the query cache for AlertDefinition.findByResource.  This
+                // used to check alerting permission, but now that's already done
+                // on the master list of alerts.
+                List<AlertDefinition> alertDefs;
                 for (Resource r : resources) {
-
-                    AppdefEntityID aId = AppdefUtil.newAppdefEntityId(r);
-
-                    try {
-                        permissionManager.checkViewPermission(subj, aId);
-                    } catch (PermissionException pe) {
-                        // go to next resource
-                        continue;
-                    }
-                    alertDefs = alertDefinitionManager.findAlertDefinitions(subj, AppdefUtil.newAppdefEntityId(r), pc);
+                    alertDefs = alertDefinitionManager.findAlertDefinitions(subj, r);
                     if (alertDefs.size() > 0) {
                         return ALERT_OK;
                     }

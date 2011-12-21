@@ -118,7 +118,7 @@ class ResourceHelper extends BaseHelper {
                 case 'alerts': return Bootstrap.getBean(AlertManager.class).alertCount
                 case 'alertDefs': return Bootstrap.getBean(AlertDefinitionManager.class).activeCount
                 case 'resources': return rman.resourceCount
-                case 'resourceTypes': return rman.resourceTypeCount
+                case 'resourceTypes': return rman.findAppdefPrototypes().size()
                 case 'groups': return groupMan.groupCount
                 case 'escalations': return Bootstrap.getBean(EscalationManager.class).escalationCount
                 case 'activeEscalations': return Bootstrap.getBean(EscalationManager.class).activeEscalationCount

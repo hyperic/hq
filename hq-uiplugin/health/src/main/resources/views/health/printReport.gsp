@@ -5,6 +5,7 @@ ${reportTime}
 ${userName} @ ${fqdn}
 
 ${dbVersion}
+${dbCharacterSet}
 
 -- HQ Load --
 ${l.metricsPerMinute}: ${metricsPerMinute}
@@ -74,15 +75,28 @@ Environment:
 <% for (p in jvmProps.entrySet().sort {a,b->a.key <=> b.key}) { %>
 - ${p.key} = ${p.value} <% } %>
 
-
 <% for (d in diagnostics) { %>
--- ${l.diagnostics}:  ${d.name} --
+<!-- filter out the diagnostic ehcache in order to give a more detailed on-demand output -->
+<% if (!"EhCache Diagnostics".equals(d.name)){ %>
+--- ${l.diagnostics}:  ${d.name} --
 
 ${d.status}
 
-
+<% } %>
 <% } %>
 
+-- EhCache Diagnostics --
+
+<% print "Cache Region".padRight(70) + "Size".padRight(15) + "Hits".padRight(20) + "Misses".padRight(20) + "Limit".padRight(15) + "Memory Usage".padRight(10) %>
+<% print "------------".padRight(70) + "----".padRight(15) + "----".padRight(20) + "------".padRight(20) + "-----".padRight(15) + "------------".padRight(10) %>
+<% for (data in cacheHealths.sort {a,b->a.region.toLowerCase() <=> b.region.toLowerCase()}){ %>
+<% print data.region.padRight(70) + (data.size+"").padRight(15) +  (data.hits+"").padRight(20) + (data.misses+"").padRight(20) + (data.limit+"").padRight(15) +  (data.memoryUsage+"").padRight(10) %><% } %>
+
+
+-- Database Queries --
+<% for (q in dbQueries.entrySet().sort {a,b->a.key <=> b.key}){ %>
+${q.value}
+<% } %>
 
 <% if (licenseInfo) { %>
 -- License --

@@ -46,23 +46,24 @@
 	initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 	widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');  
 	
-	function requestRecentAlerts<c:out value="${portlet.token}"/>() {
-	    dojo11.xhrGet({
-			url: "<html:rewrite action="/dashboard/ViewCriticalAlerts" />",
-			content: {
-				token: "${portlet.token}",
-				hq: (new Date()).getTime()
-			},
-			handleAs: "json",
-			load: showRecentAlerts,
-			error: reportError
-		});
-	}
-
-	function _hqu_<c:out value="${widgetInstanceName}${portlet.token}"/>_autoRefresh() {
-    	_hqu_<c:out value="${widgetInstanceName}${portlet.token}"/>_refreshTimeout = setTimeout("_hqu_<c:out value="${widgetInstanceName}${portlet.token}"/>_autoRefresh()", 30000);
-		requestRecentAlerts<c:out value="${portlet.token}"/>();
-	}
+        function requestRecentAlerts<c:out value="${portlet.token}"/>() {
+            dojo11.xhrGet({
+                url: "<html:rewrite action="/dashboard/ViewCriticalAlerts" />",
+                content: {
+                    token: "${portlet.token}",
+                    hq: (new Date()).getTime()
+                },
+                handleAs: "json",
+                load: function(response, args) {
+                    showRecentAlerts(response, args);
+                    setTimeout("requestRecentAlerts<c:out value="${portlet.token}"/>()", portlets_reload_time);
+                },
+                error: function(response, args) {
+                    reportError(response, args);
+                    setTimeout("requestRecentAlerts<c:out value="${portlet.token}"/>()", portlets_reload_time);
+                }
+            });
+        }
 
 	dojo11.require("dijit.dijit");
 	dojo11.require("dijit.Dialog");
@@ -76,7 +77,7 @@
 
 		dojo11.connect("requestRecentAlerts<c:out value="${portlet.token}"/>", function() { MyAlertCenter.resetAlertTable(dojo11.byId('<c:out value="${widgetInstanceName}${portlet.token}"/>_FixForm')); });
 
-		_hqu_<c:out value="${widgetInstanceName}${portlet.token}"/>_autoRefresh();
+		requestRecentAlerts<c:out value="${portlet.token}"/>();
 	});
 </script>
 <c:set var="rssUrl" value="/rss/ViewCriticalAlerts.rss"/>

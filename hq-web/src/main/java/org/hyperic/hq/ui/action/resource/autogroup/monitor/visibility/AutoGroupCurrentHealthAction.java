@@ -146,7 +146,7 @@ public class AutoGroupCurrentHealthAction
 
             List<HighLowMetricValue> data = measurementBoss.findAGMeasurementData(sessionId.intValue(), entityIds, mt,
                 childTypeId, begin, end, interval, true, pc);
-
+            double availAvg = measurementBoss.getAGAvailabilityAverage(sessionId.intValue(),entityIds[0],childTypeId,begin, end);
             // Seems like sometimes Postgres does not average cleanly, and
             // the value ends up being like 0.9999999999. We don't want the
             // insignificant amount to mess up our display.
@@ -157,7 +157,7 @@ public class AutoGroupCurrentHealthAction
             }
 
             request.setAttribute(Constants.CAT_AVAILABILITY_METRICS_ATTR, data);
-            request.setAttribute(Constants.AVAIL_METRICS_ATTR, getFormattedAvailability(data));
+            request.setAttribute(Constants.AVAIL_METRICS_ATTR, getFormattedAvailability(availAvg));
         } catch (MeasurementNotFoundException e) {
             // No utilization metric
             log.debug(MeasurementConstants.CAT_AVAILABILITY + " not found for autogroup" + childTypeId);

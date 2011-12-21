@@ -72,11 +72,9 @@ public class CurrentHealthAction
     extends TilesAction {
 
     protected final Log log = LogFactory.getLog(CurrentHealthAction.class.getName());
-
-    private final PageControl pc = new PageControl(0, Constants.DEFAULT_CHART_POINTS);
-
     protected MeasurementBoss measurementBoss;
-
+    private final PageControl pc = new PageControl(0, Constants.DEFAULT_CHART_POINTS);
+    
     @Autowired
     public CurrentHealthAction(MeasurementBoss measurementBoss) {
         super();
@@ -119,6 +117,8 @@ public class CurrentHealthAction
 
             List<HighLowMetricValue> data = measurementBoss.findMeasurementData(sessionId, aeid, mt, begin, end,
                 interval, true, pc);
+            final AppdefEntityID[] aeids = new AppdefEntityID[]{aeid};
+            double availAvg = measurementBoss.getAvailabilityAverage(aeids, begin, end);
 
             // Seems like sometimes Postgres does not average cleanly for
             // groups, and the value ends up being like 0.9999999999. We don't
@@ -132,7 +132,7 @@ public class CurrentHealthAction
             }
 
             request.setAttribute(Constants.CAT_AVAILABILITY_METRICS_ATTR, data);
-            request.setAttribute(Constants.AVAIL_METRICS_ATTR, getFormattedAvailability(data));
+            request.setAttribute(Constants.AVAIL_METRICS_ATTR, getFormattedAvailability(availAvg));
         } catch (MeasurementNotFoundException e) {
             // No utilization metric
             if(debug) {
@@ -146,18 +146,8 @@ public class CurrentHealthAction
         return null;
     }
 
-    protected String getFormattedAvailability(List<? extends MetricValue> values) {
-        double sum = 0;
-        int count = 0;
-        for (MetricValue mv : values) {
-            if (Double.isNaN(mv.getValue()) || mv.getValue() > 1 || mv.getValue() < 0) {
-                continue;
-            }
-            sum += mv.getValue();
-            count++;
-        }
-
-        UnitNumber average = new UnitNumber(sum / count, UnitsConstants.UNIT_PERCENTAGE);
+    protected String getFormattedAvailability(double values) {
+        UnitNumber average = new UnitNumber(values, UnitsConstants.UNIT_PERCENTAGE);
         return UnitsFormat.format(average).toString();
     }
 

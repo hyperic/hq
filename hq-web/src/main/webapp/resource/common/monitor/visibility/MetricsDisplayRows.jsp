@@ -90,23 +90,18 @@
 	<c:url var="chartLink" value="/resource/common/monitor/Visibility.do">
 		<c:param name="eid" value="${Resource.entityId}" />
 		<c:param name="m" value="${metricDisplaySummary.templateId}" />
+
 		<c:choose>
-			<c:when test="${metricDisplaySummary.availUp > 1}">
+			<c:when test="${not empty childResourceType}">
+				<c:param name="mode" value="${MODE_MON_CHART_SMMR}" />
+				<c:param name="ctype" value="${ctype}" />
+			</c:when>
+			<c:when test="${Resource.entityId.group}">
 				<c:param name="mode" value="${MODE_MON_CHART_SMMR}" />
 			</c:when>
 			<c:otherwise>
 				<c:param name="mode" value="${MODE_MON_CHART_SMSR}" />
 			</c:otherwise>
-		</c:choose>
-		<c:choose>
-			<%-- 
-      		the measurement bean doesn't know the resource type, it really
-      		should.... the favorites can't link to the charts properly without
-      		them (see pr 7223)
-      		--%>
-			<c:when test="${not empty childResourceType}">
-				<c:param name="ctype" value="${ctype}" />
-			</c:when>
 		</c:choose>
 	</c:url>
 	<tr class="ListRow">

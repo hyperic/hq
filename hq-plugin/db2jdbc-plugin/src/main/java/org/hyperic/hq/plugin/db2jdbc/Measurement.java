@@ -65,7 +65,7 @@ public class Measurement extends CachedJDBCMeasurement {
         } catch (ClassNotFoundException ex) {
             // log in debug mode only for
             // environments without the driver
-            getLog().debug(ex.getMessage(), ex);
+            getLog().debug("DB2 driver not found: " + ex.getMessage());
             throw ex;
         }
     }

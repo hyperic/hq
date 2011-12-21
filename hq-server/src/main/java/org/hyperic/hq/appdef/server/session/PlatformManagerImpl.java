@@ -1372,6 +1372,12 @@ public class PlatformManagerImpl implements PlatformManager {
             return new PageList<Platform>();
         }
     }
+    
+    @Transactional(readOnly=true)
+    public Collection<Platform> findAll(AuthzSubject superUser) throws PermissionException {
+        permissionManager.checkIsSuperUser(superUser);
+        return platformDAO.findAll();
+    }
 
     /**
      * Get the scope of viewable platforms for a given user
@@ -2021,5 +2027,22 @@ public class PlatformManagerImpl implements PlatformManager {
     public void afterPropertiesSet() throws Exception {
         valuePager = Pager.getPager(VALUE_PROCESSOR);
     }
+    
+    @Transactional(readOnly = true)
+    public Platform getPlatformByAgentId(Integer agentId) {
+        final Agent agent = agentDAO.get(agentId);
+        if (agent == null) {
+            return null;
+        }
+        final Collection<Platform> platforms = agent.getPlatforms();
+        for (final Platform platform : platforms) {
+            final Resource resource = platform.getResource();
+            if (PlatformDetector.isSupportedPlatform(resource.getPrototype().getName())) {
+                return platform;
+            }
+        }
+        return null;
+    }
+
 
 }

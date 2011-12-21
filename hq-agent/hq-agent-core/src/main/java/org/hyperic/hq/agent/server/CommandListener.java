@@ -213,8 +213,11 @@ public class CommandListener
                     if(dispatchResult instanceof AgentRemoteException){
                         this.logger.warn("Error invoking method",
                                          (Exception)dispatchResult);
-                        conn.sendErrorResponse(((AgentRemoteException)dispatchResult)
-                                               .getMessage());
+                        String message = ((AgentRemoteException)dispatchResult).getMessage();
+                        if (message == null){
+                            message = "Problem occurred without an error message, see stacktrace for more information.";
+                        }
+                        conn.sendErrorResponse(message);
                     } else if(dispatchResult instanceof Exception){
                         this.logger.warn("Error invoking method",
                                          (Exception)dispatchResult);

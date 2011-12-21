@@ -90,7 +90,13 @@ class ConsoleController extends BaseController {
     
     def execute(params) {            
         log.info "Params is ${params}"
-        executeCode(params.getOne('code'))
+        def data = executeCode(params.getOne('code'))
+        
+        // generate a new CSRF token for subsequent requests if needed
+        def opts = [action:"execute", encodeUrl:true]
+        data["actionToken"] = urlFor(opts)
+        
+        return data
     }
     
     private Map executeCode(code) {

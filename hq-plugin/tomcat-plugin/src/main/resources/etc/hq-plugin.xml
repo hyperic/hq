@@ -165,9 +165,8 @@
 
     <metrics include="Heap Metrics"/>
 
-    <!-- remove -DISABLED to enable server discovery for 5.5 -->
     <property name="PROC_HOME_PROPERTY"
-              value="catalina.base-DISABLED"/>
+              value="catalina.base"/>
 
     <property name="PROC_QUERY"
               value="State.Name.re=java|jsvc,State.Name.Pne=jsvc,Args.*.sw=-Dcatalina.base="/>

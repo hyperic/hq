@@ -160,6 +160,9 @@ public class RemoveAction
 
         if ("json".equals(nwForm.getOutput())) {
             JSONObject ajaxJson = new JSONObject();
+            String requestURI = request.getRequestURI();
+            // generate a new CSRF token for subsequent requests if needed
+            ajaxJson.put("actionToken", response.encodeURL(requestURI));
             request.setAttribute(Constants.AJAX_JSON, ajaxJson);
             return constructForward(request, mapping, "json");
         } else if (nwForm.getEid() == null) {

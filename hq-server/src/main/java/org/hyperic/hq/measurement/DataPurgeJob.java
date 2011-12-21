@@ -37,6 +37,7 @@ import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.events.shared.AlertManager;
 import org.hyperic.hq.events.shared.EventLogManager;
+import org.hyperic.hq.ha.HAUtil;
 import org.hyperic.hq.measurement.shared.DataCompress;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
@@ -129,7 +130,11 @@ public class DataPurgeJob implements Runnable {
 
     public synchronized void run() {
         try {
-
+            if (!HAUtil.isMasterNode()) {
+                log.warn("Data Purge invoked on the secondary HQ node.  " +
+                         "It should not be run if the node is not master.  Not running");
+                return;
+            }
             compressData();
             Properties conf = null;
             try {

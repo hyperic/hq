@@ -678,6 +678,9 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
         // now build a collection for all of them
         Collection<ResourceGroup> groups = new ArrayList<ResourceGroup>();
         for (Integer groupId : groupIds) {
+            if (groupId == null) {
+                continue;
+            }
             ResourceGroup rgloc = resourceGroupDAO.findById(groupId);
             if (excludeRoot) {
                 String name = rgloc.getName();

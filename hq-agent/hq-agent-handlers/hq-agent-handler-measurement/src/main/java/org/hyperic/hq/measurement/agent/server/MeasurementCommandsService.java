@@ -25,8 +25,15 @@
 
 package org.hyperic.hq.measurement.agent.server;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -78,7 +85,9 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
     private final LogTrackPluginManager _ltPluginManager;
     private final ConfigTrackPluginManager _ctPluginManager;
     private final ScheduleThread _scheduleObject;
-    
+    private final LinkedBlockingQueue<ScheduleMeasurements_args> argQueue =
+        new LinkedBlockingQueue<ScheduleMeasurements_args>();
+    private Scheduler _scheduler;
     
     public MeasurementCommandsService(AgentStorageProvider storage, 
                                       Map validProps, 
@@ -94,6 +103,8 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
         _ltPluginManager = ltPluginManager;
         _ctPluginManager = ctPluginManager;
         _scheduleObject = scheduleObject;
+        _scheduler = new Scheduler();
+        _scheduler.start();
     }
     
     /**
@@ -270,56 +281,90 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
         removeTrackPlugin(id, pluginType);
     }
 
+    
     /**
      * @see org.hyperic.hq.measurement.agent.client.MeasurementCommandsClient#scheduleMeasurements(org.hyperic.hq.measurement.agent.commands.ScheduleMeasurements_args)
      */
-    public void scheduleMeasurements(ScheduleMeasurements_args args) 
-        throws AgentRemoteException {
-        
-        AppdefEntityID ent;
-        int nMeas = args.getNumMeasurements();
-        SRN srn;
-
-        srn = args.getSRN();
-        ent = srn.getEntity();
-
-        _log.debug("Scheduling " + nMeas + " metrics for " + ent + 
-                       ": new SRN = " + srn.getRevisionNumber());
-        try {
-            unscheduleMeasurements(ent);
-            _schedStorage.deleteMeasurements(ent);
-        } catch(UnscheduledItemException exc){
-            // OK to ignore
-        } catch(AgentStorageException exc){
-            _log.error("Unable to remove metrics for entity " + ent + 
-                           " from storage: " + exc.getMessage());
+    public void scheduleMeasurements(ScheduleMeasurements_args args) throws AgentRemoteException {
+        argQueue.add(args);
+    }
+    
+    private class Scheduler extends Thread {
+        final AtomicBoolean shutdown = new AtomicBoolean(false);
+        private Scheduler() {
+            setDaemon(true);
         }
-
-        for(int i=0; i<nMeas; i++){
-            ScheduleMeasurements_metric metric = args.getMeasurement(i);
-            ScheduledMeasurement sMetric;
-
-            sMetric = new ScheduledMeasurement(metric.getDSN(), 
-                                               metric.getInterval(),
-                                               metric.getDerivedID(),
-                                               metric.getDSNID(),
-                                               ent,
-                                               metric.getCategory());
+        public void run() {
             try {
-                _schedStorage.storeMeasurement(sMetric);
-            } catch(AgentStorageException exc){
-                _log.debug("Failed to put measurement in storage: " + 
-                               exc.getMessage());
+                while (!shutdown.get()) {
+                    try {
+                        final List<ScheduleMeasurements_args> list =
+                            new ArrayList<ScheduleMeasurements_args>();
+                        argQueue.drainTo(list);
+                        if (!list.isEmpty()) {
+                            scheduleMeasurements(list);
+                        }
+                        Thread.sleep(30000);
+                    } catch (InterruptedException e) {
+                        _log.debug(e,e);
+                    }
+                }
+            } catch (Throwable t) {
+                _log.error(t,t);
             }
-            scheduleMeasurement(sMetric);
         }
+        private void shutdown() {
+            shutdown.set(true);
+        }
+    }
 
+    private void scheduleMeasurements(Collection<ScheduleMeasurements_args> args)
+    throws AgentRemoteException {
+        final Map<AppdefEntityID, SRN> aeids = new HashMap<AppdefEntityID, SRN>();
+        for (final ScheduleMeasurements_args arg : args) {
+            final SRN srn = arg.getSRN();
+            final AppdefEntityID aeid = srn.getEntity();
+            aeids.put(aeid, srn);
+            try {
+                unscheduleMeasurements(aeid);
+            } catch (UnscheduledItemException e) {
+                // ok to ignore
+                _log.debug(e,e);
+            }
+        }
         try {
-            _schedStorage.updateSRN(srn);
-        } catch(AgentStorageException exc){
-            _log.error("Unable to update SRN in storage: " + 
-                           exc.getMessage());
-        }    
+            _schedStorage.deleteMeasurements(aeids.keySet());
+        } catch (AgentStorageException e) {
+            _log.error("unable to cleanup metric storage " + e, e);
+        }
+        // we may be able to consolidate loops here to the loop above, but i don't want to change
+        // too much at this time
+        for (final ScheduleMeasurements_args arg : args) {
+            int numMeasurements = arg.getNumMeasurements();
+            final SRN srn = arg.getSRN();
+            final AppdefEntityID aeid = srn.getEntity();
+            for (int i=0; i<numMeasurements; i++){
+                final ScheduleMeasurements_metric metric = arg.getMeasurement(i);
+                final ScheduledMeasurement sMetric =
+                    new ScheduledMeasurement(metric.getDSN(), 
+                                             metric.getInterval(),
+                                             metric.getDerivedID(),
+                                             metric.getDSNID(),
+                                             aeid, metric.getCategory());
+                try {
+                    _schedStorage.storeMeasurement(sMetric);
+                } catch(AgentStorageException exc){
+                    _log.debug("Failed to put measurement in storage: " + 
+                                   exc.getMessage());
+                }
+                scheduleMeasurement(sMetric);
+            }
+            try {
+                _schedStorage.updateSRN(srn);
+            } catch(AgentStorageException e){
+                _log.error("Unable to update SRN in storage: " + e, e);
+            }
+        }
     }
     
     void scheduleMeasurement(ScheduledMeasurement m) {
@@ -377,7 +422,7 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
                 }
 
                 if(resExc == null){
-                        _schedStorage.deleteMeasurements(ent);
+                    _schedStorage.deleteMeasurements(Collections.singletonMap(ent, null).keySet());
                 }
             } catch(AgentStorageException exc){
                 _log.error("Failed to delete measurement from storage");

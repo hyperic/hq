@@ -33,7 +33,7 @@
 		<groovy.version>1.6.7</groovy.version>
 		<hibernate.version>3.2.6.ga</hibernate.version>
 		<hibernate-tools.version>3.2.3.GA</hibernate-tools.version>
-		<hqapi.version>4.2.0</hqapi.version>
+		<hqapi.version>4.3.0</hqapi.version>
 		<httpclient.version>3.1</httpclient.version>
 		<j2ee-management.version>1.1</j2ee-management.version>
         <jackson-mapper-asl.version>1.5.5</jackson-mapper-asl.version>
@@ -44,6 +44,7 @@
 		<jsch.version>0.1.42</jsch.version>
 		<json.version>20090211</json.version>
 		<jsp.version>2.1</jsp.version>
+		<jsr107cache.version>1.0</jsr107cache.version>
 		<jstl.version>1.1.2</jstl.version>
 		<jug.version>2.0.0</jug.version>
 		<junit.version>4.6</junit.version>
@@ -436,6 +437,11 @@
 				<groupId>javax.servlet.jsp</groupId>
 				<artifactId>jsp-api</artifactId>
 				<version>${jsp.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.sf.jsr107cache</groupId>
+				<artifactId>jsr107cache</artifactId>
+				<version>${jsr107cache.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.servlet</groupId>

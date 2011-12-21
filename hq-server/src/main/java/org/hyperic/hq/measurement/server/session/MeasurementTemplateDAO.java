@@ -101,6 +101,7 @@ public class MeasurementTemplateDAO
         mt.setCollectionType(info.getCollectionType());
         mt.setPlugin(pluginName);
         mt.setCategory(cat);
+        mt.setUnits(info.getUnits());
 
         // Don't reset indicator, defaultOn or interval if it's been
         // changed

@@ -70,6 +70,21 @@ import org.hyperic.util.pager.PageList;
  * Local interface for MeasurementBoss.
  */
 public interface MeasurementBoss {
+    
+    /**
+     * Get the availability average of the resources
+     * @param aeIds the id of the resources
+     */
+    public double getAvailabilityAverage(AppdefEntityID[] aeIds, long begin, long end);
+
+    /**
+     * Get the availability average of the auto group. aid is their parent's entity id.
+     * @param aid the entity id of their parent
+     * @param ctype the cilde type of this auto group
+     */
+    public double getAGAvailabilityAverage(int sessionId, AppdefEntityID aid, AppdefEntityTypeID ctype, 
+                                           long begin, long end) throws AppdefEntityNotFoundException, PermissionException, 
+                                           SessionNotFoundException, SessionTimeoutException;  
     /**
      * Get Autogroup member ids
      */

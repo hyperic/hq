@@ -29,6 +29,7 @@ package org.hyperic.hq.web.dashboard;
 import org.easymock.EasyMock;
 import org.hyperic.hq.appdef.shared.AppdefResourcePermissions;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.DashboardPortletBoss;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
@@ -42,6 +43,7 @@ public abstract class BaseDashboardControllerTest extends BaseControllerTest {
 	private DashboardManager mockDashboardManager;
 	private DashboardPortletBoss mockDashboardPortletBoss;
 	private ResourceManager mockResourceManager;
+    private ResourceGroupManager mockResourceGroupManager;
 
 	protected void setUp() {
 		super.setUp();
@@ -50,6 +52,7 @@ public abstract class BaseDashboardControllerTest extends BaseControllerTest {
 		mockDashboardManager = EasyMock.createMock(DashboardManager.class);
 		mockDashboardPortletBoss = EasyMock.createMock(DashboardPortletBoss.class);
 		mockResourceManager = EasyMock.createMock(ResourceManager.class);
+        mockResourceGroupManager = EasyMock.createMock(ResourceGroupManager.class);
 	}
 
 	protected AppdefResourcePermissions constructAppdefResourcePermissions() {
@@ -95,4 +98,8 @@ public abstract class BaseDashboardControllerTest extends BaseControllerTest {
 	protected ResourceManager getMockResourceManager() {
 		return mockResourceManager;
 	}
+
+    protected ResourceGroupManager getMockResourceGroupManager() {
+        return mockResourceGroupManager;
+    }
 }

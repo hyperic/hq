@@ -1271,7 +1271,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager,
     public List<AlertDefinition> findAlertDefinitions(AuthzSubject subject, Resource prototype)
         throws PermissionException {
         // TODO: Check admin permission?
-        return alertDefDao.findAllByResource(prototype);
+        return alertDefDao.findByResource(prototype);
     }
 
     /**

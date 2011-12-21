@@ -32,6 +32,7 @@ import java.sql.Statement;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -95,6 +96,29 @@ public class MeasTabManagerUtil {
             retTables[i] = tables[i];
         }
         return retTables;
+    }
+
+    public static String getMeasInStmt(Collection<Integer> measIds, boolean prependAnd) {
+        if (measIds.isEmpty()) {
+            return "";
+        }
+        StringBuilder rtn = new StringBuilder();
+        rtn.append(" "+((prependAnd) ? "AND" : "")+" measurement_id");
+        // mysql gets a perf boost from using "=" as apposed to "in"
+        if (measIds.size() == 1) {
+            rtn.append(" = " + measIds.iterator().next());
+            return rtn.toString();
+        }
+        rtn.append(" in (");
+        for (Integer measId : measIds) {
+            if (measId == null) {
+                continue;
+            }
+            rtn.append(measId).append(",");
+        }
+        rtn.deleteCharAt(rtn.length()-1);
+        rtn.append(")");
+        return rtn.toString();
     }
 
     public static String getMeasInStmt(Integer[] measIds, boolean prependAnd) {

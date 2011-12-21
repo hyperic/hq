@@ -32,13 +32,14 @@
 </div>
 <script type="text/javascript">
 document.navTabCat = "Admin";
+var gconsoleExecuteUrl = "<%= urlFor(action:"execute", encodeUrl:true) %>";
 
 dojo11.addOnLoad(function() {
 	dojo11.connect(dojo11.byId("executeLink"), "onclick", function(e) {
 		dojo11.byId('timeStatus').innerHTML = '... executing';
 		
 		dojo11.xhrPost({
-    		url: "<%= urlFor(action:"execute", encodeUrl:true) %>",
+    		url: gconsoleExecuteUrl,
 	    	handleAs: "json-comment-filtered",
     		content: {
         		code:   dojo11.byId("code").value
@@ -46,6 +47,11 @@ dojo11.addOnLoad(function() {
     		load: function(response, args) {
       			dojo11.byId('result').innerHTML = response.result;
       			dojo11.byId('timeStatus').innerHTML = response.timeStatus;
+      			
+      			if (response.actionToken) {
+      				// use new CSRF token for subsequent POST requests
+      				gconsoleExecuteUrl = response.actionToken;
+      			}
 	    	},
     		error: function(response, args) {
       			alert('error! ' + response);

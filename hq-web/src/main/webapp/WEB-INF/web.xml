@@ -412,9 +412,11 @@
 	<servlet>
 		<servlet-name>lather</servlet-name>
 		<servlet-class>org.hyperic.lather.server.LatherServlet</servlet-class>
+		<!-- maxConns should be less than tomcat maxThreads in server.xml
+		keep at least 5% tomcat threads for UI access -->
 		<init-param>
 			<param-name>org.hyperic.lather.maxConns</param-name>
-			<param-value>3000</param-value>
+			<param-value>475</param-value>
 		</init-param>
 		<init-param>
 			<param-name>org.hyperic.lather.execTimeout</param-name>

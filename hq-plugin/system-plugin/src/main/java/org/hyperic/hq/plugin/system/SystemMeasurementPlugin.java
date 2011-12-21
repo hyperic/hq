@@ -131,8 +131,13 @@ public class SystemMeasurementPlugin
         }
 
         if (type.equals("CpuPercList")) {
-            //people like green lights.
-            return new MetricValue(Metric.AVAIL_UP);
+            try {
+                super.getValue(metric);
+                // If we can get the metric, return avail up
+                return new MetricValue(Metric.AVAIL_UP);
+            } catch (Exception e) {
+                return new MetricValue(Metric.AVAIL_DOWN);
+            }
         }
 
         if (type.equals("MultiProcCpu")) {

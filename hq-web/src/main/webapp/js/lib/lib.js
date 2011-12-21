@@ -2686,7 +2686,7 @@ hyperic.dashboard.summaryWidget = function(args) {
     	                    }
     	            );
         		}, 
-    	        60000);
+    	        portlets_reload_time);
     };
     
     that.pauseRefreshCycle = function() {
@@ -3518,6 +3518,10 @@ hyperic.alert_center = function(title_name) {
 	    	content: myParam,
 	    	handleAs: 'json',
 	    	load: function(data) {
+				if (data.actionToken) {
+					// use new CSRF token for subsequent POST requests
+					myInput.form.action = data.actionToken;
+				}
 	    		that.startAutoRefresh(that.dialogs.AckAlert.data.subgroup);
 	    	},
 	    	error: function(data){
@@ -3534,6 +3538,10 @@ hyperic.alert_center = function(title_name) {
 	    	content: Form.serialize(myForm,true),
 	    	handleAs: 'json',
 	    	load: function(data){
+				if (data.actionToken) {
+					// use new CSRF token for subsequent POST requests
+					myForm.action = data.actionToken;
+				}
 				that.current.dialog.hide();
 	    		that.startAutoRefresh(that.current.dialog.data.subgroup);
 	    	},
@@ -3584,6 +3592,10 @@ hyperic.alert_center = function(title_name) {
 					
 				// submit next selection
 				if (++alertIndex < ealerts.length) {
+					if (data.actionToken) {
+						// use new CSRF token for subsequent batch POST requests
+						myForm.action = data.actionToken;
+					}
 					that.xhrBatchSubmit(myDialog, alertIndex);
 				} else {
 					that.current.dialog.hide();

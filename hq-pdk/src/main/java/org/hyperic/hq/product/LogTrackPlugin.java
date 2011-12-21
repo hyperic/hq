@@ -435,6 +435,9 @@ public class LogTrackPlugin extends GenericPlugin {
                     "Invalid " + EXCLUDE_PROPS[type] + ": " + e;
                 throw new PluginException(msg);
             }
+        } else {
+            // [HHQ-5053] force to null in case user cleared config field
+            this.matcher = null;
         }
 
         if (debugLogging) {

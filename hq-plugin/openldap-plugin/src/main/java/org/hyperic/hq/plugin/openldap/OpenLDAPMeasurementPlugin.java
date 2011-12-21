@@ -42,6 +42,7 @@ import javax.naming.directory.InvalidSearchControlsException;
 import javax.naming.directory.InvalidSearchFilterException;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
+import javax.naming.CommunicationException;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 
@@ -129,6 +130,11 @@ public class OpenLDAPMeasurementPlugin
                 return getMetric(metric, attrs[0], attrs[1]);
             }
             throw new MetricNotFoundException("");
+        }
+        catch (CommunicationException e) {
+            // [HHQ-4986] Force ctx to reconnect case of connection issue
+            this.ctx = null;
+            throw new MetricNotFoundException("Service "+objectName+", "+alias+" not found", e);
         }
         catch (NamingException e) {
             throw new MetricNotFoundException("Service "+objectName+", "+alias+" not found", e);

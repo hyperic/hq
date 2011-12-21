@@ -306,4 +306,6 @@ public interface ResourceManager {
                                                    Collection<ResourceType> resourceTypes);
 
     ResourceType getResourceTypeById(Integer resourceTypeId);
+    
+    public Resource getResourceById(Integer id);
 }

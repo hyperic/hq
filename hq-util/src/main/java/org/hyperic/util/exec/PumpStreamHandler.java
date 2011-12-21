@@ -87,7 +87,6 @@ import java.io.OutputStream;
  * Copies standard output and error of subprocesses to standard output and
  * error of the parent process.
  *
- * TODO: standard input of the subprocess is not implemented.
  *
  * @author thomas.haas@softwired-inc.com
  */
@@ -122,7 +121,15 @@ public class PumpStreamHandler implements ExecuteStreamHandler {
     }
 
 
+    /**
+     * Standard input is not processed. So we are closing the stream as required for the Windows powershell scenario.
+     */
     public void setProcessInputStream(OutputStream os) {
+        try {
+            os.close();
+        } catch (IOException e) {
+            // not a problem in this case.
+        }
     }
 
 

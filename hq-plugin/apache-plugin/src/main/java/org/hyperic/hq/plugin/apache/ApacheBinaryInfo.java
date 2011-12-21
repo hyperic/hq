@@ -45,6 +45,8 @@ import org.hyperic.util.file.FileUtil;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.product.GenericPlugin;
+import org.hyperic.hq.product.PlatformDetector;
 
 public class ApacheBinaryInfo {
 
@@ -92,29 +94,20 @@ public class ApacheBinaryInfo {
     }
 
     public static synchronized ApacheBinaryInfo getInfo(String binary) {
-        if (cache == null) {
-            cache = new HashMap();
+        ApacheBinaryInfo info = new ApacheBinaryInfo();
+
+        if (binary.startsWith("\"")) {
+            binary = binary.substring(1, binary.indexOf("\"", 1));
         }
 
-        ApacheBinaryInfo info = (ApacheBinaryInfo)cache.get(binary);
-
-        long lastModified = new File(binary).lastModified();
-
-        if ((info == null) || (lastModified != info.lastModified)) {
-            info = new ApacheBinaryInfo();
-            info.binary = binary;
-            info.ctl = binary;
-            info.lastModified = lastModified;
-            cache.put(binary, info);
-
-            try {
-                info.getApacheBinaryInfo(binary);
-            } catch (IOException e) {
-                info.errmsg = e.getMessage();
-            }
+        info.binary = binary;
+        info.ctl = binary;
+        try {
+            info.getApacheBinaryInfo(binary);
+        } catch (IOException e) {
+            log.debug(e, e);
         }
-
-        return new ApacheBinaryInfo(info);
+        return info;
     }
 
     public static ApacheBinaryInfo getInfo(String binary,
@@ -297,6 +290,11 @@ public class ApacheBinaryInfo {
             new Execute(new PumpStreamHandler(stdOut, stdErr),
                         watchdog);
 
+        if (!PlatformDetector.isWin32()) {
+            File lib = new File(new File(binary).getParentFile().getParentFile(), "lib");
+            String[] env = {"LD_LIBRARY_PATH=" + lib.getAbsolutePath()};
+            ex.setEnvironment(env);
+        }
         ex.setCommandline(new String[] { binary, "-V" });
         BufferedReader is = null;
         
@@ -340,7 +338,7 @@ public class ApacheBinaryInfo {
             String msg =
                 "Error running binary '" + binary + "': " +
                 e.getMessage();
-            log.error(msg, e);
+            log.debug(msg, e);
         } finally {
             if (is != null) {
                 try {
@@ -348,14 +346,20 @@ public class ApacheBinaryInfo {
                 } catch (IOException e) {}
             }
         }
+        log.debug("[getVersionCmdInfo] this="+this);
     }
 
     private void getApacheBinaryInfo(String binary)
         throws IOException {
 
         File binaryFile = new File(binary);
+        if (!binaryFile.exists()) {
+            this.errmsg = "'" + binaryFile + "' not found";
+            return;
+        }
+
         if (binaryFile.isDirectory()) {
-            this.errmsg = binaryFile + " is a directory";
+            this.errmsg = "'" + binaryFile + "' is a directory";
             return;
         }
 

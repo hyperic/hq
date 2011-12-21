@@ -178,36 +178,35 @@ public class OracleServerDetector
 
     /**
      * Utility method to determine oracle version by file layout
+     * This method requires the path to the oracle exe. From there is verifies and creates a
+     * server resource for the oracle server instance.
+     * @param oracleExePath The path to the oracle exe, either from process scan or file scan.
      */
-    private List getServerList (String path) 
+    private ServerResource getOracleServer (String oracleExePath) 
         throws PluginException
     {
-        List servers = new ArrayList();
+        log.debug("Found oracle exe path=" + oracleExePath);
+        ServerResource oracleServer = null;
         String version = getTypeInfo().getVersion();
         boolean found = false;
-
-        File oracle = new File(path);
-        File bin = oracle.getParentFile();
-        if (!isWin32()) {
-            bin = new File(oracle, "bin");
+        String oracleHome;
+        File oracleExe = new File(oracleExePath);
+        File binDirectory = oracleExe.getParentFile();
+        if (binDirectory.getName().equals("bin")) {
+            oracleHome = binDirectory.getParent();
+        } else {
+            throw new PluginException("Unable to locate correct oracle home: " + binDirectory.getParent());
         }
-        if (bin.getName().equals("bin")) {
-            path = bin.getParent();
-        }
-        // in HHQ-3577, changed the default installpath.  Therefore we need to
-        // make sure that a new oracle inst is not detected, rather it should
-        // just modify the existing one.
-        String aiid = oracle.getParent();
 
         // Make sure that oracle exists, and is a normal file
-        if (oracle.exists() && bin.isDirectory()) {
-            if (hasExe(bin, "adrci")) {
+        if (oracleExe.exists() && binDirectory.isDirectory()) {
+            if (hasExe(binDirectory, "adrci")) {
                 found = version.equals(VERSION_11g);
             }
-            else if (hasExe(bin, "trcsess") || hasFile(bin, "orasql10.")) {
+            else if (hasExe(binDirectory, "trcsess") || hasFile(binDirectory, "orasql10.")) {
                 found = version.equals(VERSION_10g);
             }
-            else if (hasExe(bin, "dgmgrl")) {
+            else if (hasExe(binDirectory, "dgmgrl")) {
                 found = version.equals(VERSION_9i);
             }
             else {
@@ -218,27 +217,26 @@ public class OracleServerDetector
 
         if (found) {
             ConfigResponse productConfig = new ConfigResponse();
-            ServerResource server = createServerResource(path);
-            server.setIdentifier(aiid);
+            oracleServer = createServerResource(oracleHome);
+            oracleServer.setIdentifier(oracleHome);
 
             // Set custom properties
             ConfigResponse cprop = new ConfigResponse();
             cprop.setValue("version", version);
-            server.setCustomProperties(cprop);
-            setProductConfig(server, productConfig);
+            oracleServer.setCustomProperties(cprop);
+            setProductConfig(oracleServer, productConfig);
             if (configureProperties(productConfig)) {
-                server.setMeasurementConfig();
+                oracleServer.setMeasurementConfig();
             }
-            servers.add(server);
         }
         
         // HHQ-3577 allow listener names in tnsnames.ora to be used in the url
         String fs = File.separator;
-        String tnsDir = getTnsNamesDir(path, "network" + fs + "admin" + fs + "tnsnames.ora");
+        String tnsDir = getTnsNamesDir(oracleHome, "network" + fs + "admin" + fs + "tnsnames.ora");
         if (log.isDebugEnabled()) log.debug("using tns dir as " + tnsDir);
         System.setProperty("oracle.net.tns_admin", tnsDir);
 
-        return servers;
+        return oracleServer;
     }
 
     // Auto-scan.. Does process scan first, falls back to oratab
@@ -246,14 +244,15 @@ public class OracleServerDetector
         throws PluginException
     {
         List servers = new ArrayList();
-
+        
         // First do process table scan
         List paths = getServerProcessList();
         for (int i = 0; i < paths.size(); i++) {
-            String dir = (String)paths.get(i);
-            List found = getServerList(dir);
-            if (!found.isEmpty()) {
-                servers.addAll(found);
+            String pathToOracleExe = (String)paths.get(i);
+            log.debug("Found oracle process path in process scan = " + pathToOracleExe);
+            ServerResource oracleServer = getOracleServer(pathToOracleExe);
+            if (oracleServer != null) {
+                servers.add(oracleServer);
             }
         }
 
@@ -275,9 +274,19 @@ public class OracleServerDetector
                     x1 = line.indexOf(':');
                     x2 = line.indexOf(':', x1+1);
                     if (x1 != -1 && x2 != -1) {
+                        String oraSid = line.substring(0, x1);
+                        log.debug("Found oracle sid = " + oraSid);
                         String oraHome = line.substring(x1+1, x2);
-                        log.debug("Found ORACLE_HOME=" + oraHome);
-                        servers.addAll(getServerList(oraHome));
+                        log.debug("Found ORACLE_HOME in /etc/oratab =" + oraHome);
+                        //getServerList expects the oracle exe path
+                        // the path below should exist off of the ORACLE_HOME
+                        String oracleExePath = oraHome + File.separator + "bin" + File.separator + "oracle";
+                        ServerResource oracleServer = getOracleServer(oracleExePath);
+                        // This will automatically add the ORACLE_SID from the oratab file to the jdbcUrl.
+                        ConfigResponse productConfig = oracleServer.getProductConfig();
+                        productConfig.setValue("jdbcUrl", "jdbc:oracle:thin:@localhost:1521:" + oraSid);
+                        oracleServer.setProductConfig(productConfig);
+                        servers.add(oracleServer);
                     }
                 }
             }
@@ -296,7 +305,9 @@ public class OracleServerDetector
     public List getServerResources (ConfigResponse platformConfig, String path)
         throws PluginException
     {
-        return getServerList(path);
+        List serverResources = new ArrayList();
+        serverResources.add(getOracleServer(path));
+        return serverResources;
     }
 
     // Discover Oracle services

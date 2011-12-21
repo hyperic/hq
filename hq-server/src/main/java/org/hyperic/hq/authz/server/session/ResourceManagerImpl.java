@@ -346,6 +346,11 @@ public class ResourceManagerImpl implements ResourceManager {
 
         return platform;
     }
+    
+    @Transactional(readOnly = true)
+    public Resource getResourceById(Integer id) {
+        return resourceDAO.get(id);
+    }
 
     /**
      * 
