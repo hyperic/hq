@@ -10,5 +10,4 @@ junit_results
 activemq-data
 ExecutionStrategyStates.dat
 logs
-
-
+.DS_Store
