@@ -822,7 +822,8 @@ ${errMsg}
 		<property name="server.jms.jmxport" value="1099"/>	
 		 <unzip src="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/lib/hq-server-${version}.jar"
 		        dest="${server.installdir}/hq-tmp-jar"/>
-		    <substProps src="${server.installdir}/hq-tmp-jar/META-INF/spring/jms-context.xml"/>
+	        <jmsContextConfigure jmsContextFile="${server.installdir}/hq-tmp-jar/META-INF/spring/jms-context.xml"
+		            useJmx="${server.jms.usejmx}" jmxPort="${server.jms.jmxport}"/>
 		    <jar update="true" basedir="${server.installdir}/hq-tmp-jar" 
 		        destfile="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/lib/hq-server-${version}.jar"/>
 		    <delete dir="${server.installdir}/hq-tmp-jar"/>
