@@ -114,13 +114,5 @@ private void validate() throws BuildException {
 	}
 }
 
-public static void main(String[] args) {
-	JmsContextConfigure jms = new JmsContextConfigure();
-	jms.setJmsContextFile("/tmp/jms-context.xml");
-	jms.setUseJmx("false");
-	jms.setJmxPort("2222");
-	jms.execute();
-}
-
 
 }
