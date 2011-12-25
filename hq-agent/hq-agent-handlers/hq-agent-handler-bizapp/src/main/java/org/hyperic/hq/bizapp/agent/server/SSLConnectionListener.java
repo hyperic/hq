@@ -218,7 +218,8 @@ class SSLConnectionListener
         // the agent to start
         while (true) {
             try {
-                listenSock = (SSLServerSocket)sFactory.createServerSocket(port, 50, addr);
+            	listenSock = (SSLServerSocket)sFactory.createServerSocket(port, 50, addr);
+                listenSock.setEnabledCipherSuites(cfg.getEnabledCiphers());
                 listenSock.setSoTimeout(timeout);
                 break;
             } catch(IOException exc){

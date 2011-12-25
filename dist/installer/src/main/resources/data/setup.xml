@@ -33,6 +33,16 @@
     <if>
       <equals arg1="${install.mode}" arg2="upgrade"/>
       <then>
+         <echo>^^^INFO:
+*
+******************************************************************************************************************
+Warning: There is no undo for the upgrade process.${line.separator}
+Before upgrading Hyperic Server, archive your existing Hyperic Server directory and back up the Hyperic Database, ${line.separator}
+to ensure that you can roll back to the prior version if desired.
+******************************************************************************************************************
+${line.separator}Press enter to continue...
+          </echo>
+        <input />
         <property name="setup.upgrade" value="true"/>
       </then>
     </if>
@@ -45,17 +55,17 @@
 
   <!-- The server uses a 1.6 JRE. -->
   <target name="pick-server-jre" if="use.builtin.jre">
-    <condition property="jre.tar.name" value="amd64-linux-1.6.tar.gz">
-        <available file="${install.dir}/jres/amd64-linux-1.6.tar.gz"/>
+    <condition property="jre.tar.name" value="amd64-linux-1.6_29.tar.gz">
+        <available file="${install.dir}/jres/amd64-linux-1.6_29.tar.gz"/>
     </condition>
-    <condition property="jre.tar.name" value="x86-linux-1.6.tar.gz">
-        <available file="${install.dir}/jres/x86-linux-1.6.tar.gz"/>
+    <condition property="jre.tar.name" value="x86-linux-1.6_29.tar.gz">
+        <available file="${install.dir}/jres/x86-linux-1.6_29.tar.gz"/>
     </condition>
-    <condition property="jre.tar.name" value="sparc-sun-solaris-1.6.tar.gz">
-        <available file="${install.dir}/jres/sparc-sun-solaris-1.6.tar.gz"/>
+    <condition property="jre.tar.name" value="sparc-sun-solaris-1.6_29.tar.gz">
+        <available file="${install.dir}/jres/sparc-sun-solaris-1.6_29.tar.gz"/>
     </condition>
-    <condition property="jre.exe.name" value="x86-win32-1.6.exe">
-        <available file="${install.dir}/jres/x86-win32-1.6.exe"/>
+    <condition property="jre.exe.name" value="x86-win32-1.6_29.exe">
+        <available file="${install.dir}/jres/x86-win32-1.6_29.exe"/>
     </condition>
   </target>
 
@@ -540,6 +550,7 @@ ${errMsg}
     <serverConfigUpgrade existing="${server.upgradedir}/conf/hq-server.conf" 
         new="${server.product.dir}/conf/hq-server.conf" upgradeDir="${server.upgradedir}"/>
         
+    
     <!-- Copy the existing license file, if there is one -->
     <!-- Disable copying of license.xml file for 4.6 upgrade bc it's now different, post 4.6 upgrades should
          copying the serial file, if one exists...
@@ -597,7 +608,7 @@ ${errMsg}
     <copy todir="${server.product.dir}/hq-engine/hq-server" failonerror="false">
       <fileset dir="${server.upgradedir}/hq-engine/hq-server" includes="*Inserter.tmp"/>
     </copy>
-
+  
     <echo>^^^COMPLETION:
       Server successfully upgraded to: ${server.product.dir}
     </echo>
@@ -619,40 +630,43 @@ ${errMsg}
               value="${server.installdir}/${server.vname}"/>
    </target>
 
-    <target name="generate-hq-server-conf" unless="setup.upgrade">
-        <foreach target="generate-hq-server-conf-file" param="install-profile-name" inheritall="true" 
-                list="small,medium,large,default" >
-        </foreach>
-        <antcall target="install-hq-server-profile"/>
-    </target>
-
-    <target name="generate-hq-server-conf-file">
-        <substProps src="${install.dir}/data/hq-server-${install-profile-name}.conf"
-                    dest="${conf-dir}/hq-server-${install-profile-name}.conf"/>
-        <replace file="${conf-dir}/hq-server-${install-profile-name}.conf" token="@SERVER_CONF@" value="${conf-dir}" />
-    </target>
-
     <target name="install-hq-server-profile">
-        <property name="install.profile" value="default"/>
+        <property name="install.profile" value="small"/>
         <echo>^^^DEBUG: Using "${install.profile}" installing profile...</echo>
-        <echo>^^^DETAILED: Coping ${server.product.dir}/conf/hq-server-${install.profile}.conf to ${server.product.dir}/conf/hq-server.conf</echo>
-        <copy tofile="${server.product.dir}/conf/hq-server.conf"
-              file="${server.product.dir}/conf/hq-server-${install.profile}.conf"
-              overwrite="true"/>
-        <echo>^^^DETAILED: Coping ${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/classes/ehcache.xml to ${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-IN/Fclasses/ehcache-${install.profile}.xml</echo>
-        <copy tofile="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/classes/ehcache.xml"
-              file="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/classes/ehcache-${install.profile}.xml"
-              overwrite="true"/>
-        <echo>^^^DETAILED: Coping ${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/web-${install.profile}.xml to ${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/web.xml</echo>
-        <copy tofile="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/web.xml"
-              file="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/web-${install.profile}.xml"
-              overwrite="true"/>
-        <echo>^^^DETAILED: Coping ${server.product.dir}/hq-engine/hq-server/conf/server-${install.profile}.xml to ${server.product.dir}/hq-engine/hq-server/conf/server.xml</echo>
-        <copy tofile="${server.product.dir}/hq-engine/hq-server/conf/server.xml"
-              file="${server.product.dir}/hq-engine/hq-server/conf/server-${install.profile}.xml"
-              overwrite="true"/>
+        
+        <antcall target="load-properties"/>
+        <antcall target="load-properties-to-conf-file"/>
+        <antcall target="load-properties-to-web-xml-file"/>
+    <!--After the properties has been loaded, we can delete the file-->
+    <delete file="${server.product.dir}/conf/hq-server.properties"/> 
     </target>
 
+
+    <target name="load-properties-to-web-xml-file">
+         <echo>^^^DETAILED: Loading properties into web.xml</echo>
+             <loadproperties srcFile="${server.product.dir}/conf/hq-server.properties"/>
+                 <substProps src="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/web.xml"/>
+    </target>
+    
+    <target name="load-properties-to-conf-file"  unless="setup.upgrade">
+        <echo>^^^DETAILED: Loading properties into hq-server.conf</echo>
+        <loadproperties srcFile="${server.product.dir}/conf/hq-server.properties"/>             
+        <substProps src="${install.dir}/data/hq-server.conf"
+                            dest="${conf-dir}/hq-server.conf"/>
+                <replace file="${conf-dir}/hq-server.conf" token="@SERVER_CONF@" value="${conf-dir}" />
+    </target>
+        
+    <target name="load-properties">
+        <echo>^^^DETAILED: Loading properties according to the selected installation profile</echo>
+                <copy tofile="${server.product.dir}/conf/hq-server.properties"
+                                      file="${install.dir}/data/hq-server.properties"
+                                      overwrite="true"/>
+                <replaceregexp file="${server.product.dir}/conf/hq-server.properties"
+                       match="(.${install.profile})"
+                       replace=""
+                       byline="true"/>
+      </target>
+    
     <target name="unpack-server">
         <echo> 
               ^^^INFO: Unpacking server to: ${server.installdir}...
@@ -677,11 +691,10 @@ ${errMsg}
     <property name="conf-dir" value="${server.product.dir}/conf"/>
     <antcall target="copy-license"/>
     <antcall target="copy-keystore" />
-    <antcall target="generate-hq-server-conf"/>
+    <antcall target="install-hq-server-profile"/>
     <property name="tomcat.home"
               value="${server.product.dir}/hq-engine"/>
-   
-
+  	<antcall target="update-jms-context"/>
     <echo>^^^INFO: Copying binaries and libraries to server installation...</echo>
 
     <!-- We only keep this file around for debugging, in case we need
@@ -734,7 +747,7 @@ ${errMsg}
     <!-- Do DB-specific stuff -->
     <echo>^^^INFO: Setting up server database...</echo>
     <ant antfile="setup-db-${server.database}.xml" target="setup"/>
-
+    
     <antcall target="install-server-jre">
       <param name="destination" value="${server.product.dir}" />
     </antcall>
@@ -798,7 +811,25 @@ ${errMsg}
     <antcall target="debug-setup"/>
   </target>
 
-      <target name="copy-license" unless="setup.upgrade">
+	<target name="update-jms-context">
+		<!--This steps are made as a work around to the following bug - 
+	       	https://issues.apache.org/jira/browse/AMQ-3168.
+	       	When this bug will be fixed this code should be removed and this values (server.jms.usejmx, server.jms.jmxport)
+	       	will be loaded into the jms-context file in run time. Now this values needs to be hard coded into
+	       	the file so changing this values in the hq-server.conf file and restarting the server won't
+	       	have any effect and this is not the right behaviour-->
+		<property name="server.jms.usejmx" value="true"/>
+		<property name="server.jms.jmxport" value="1099"/>	
+		 <unzip src="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/lib/hq-server-${version}.jar"
+		        dest="${server.installdir}/hq-tmp-jar"/>
+	        <jmsContextConfigure jmsContextFile="${server.installdir}/hq-tmp-jar/META-INF/spring/jms-context.xml"
+		            useJmx="${server.jms.usejmx}" jmxPort="${server.jms.jmxport}"/>
+		    <jar update="true" basedir="${server.installdir}/hq-tmp-jar" 
+		        destfile="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/lib/hq-server-${version}.jar"/>
+		    <delete dir="${server.installdir}/hq-tmp-jar"/>
+	</target>
+     
+	<target name="copy-license" unless="setup.upgrade">
         <copy file="${install.dir}/data/license.xml" todir="${conf-dir}"
               failonerror="false"/>
       </target>
@@ -895,7 +926,4 @@ ${errMsg}
       <property name="tomcat.home" value="${tomcat.home}"/>
     </ant>
   </target>
-    
-    
-
 </project>

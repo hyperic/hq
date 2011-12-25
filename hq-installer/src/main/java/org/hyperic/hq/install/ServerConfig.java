@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Properties;
 import java.util.StringTokenizer;
+import java.util.UUID;
 
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
@@ -61,6 +62,15 @@ public class ServerConfig
     // convenience, PN for "product name"
     public static final String PN = PRODUCT;
 
+    //environments names for selection as an installation profile
+    public static final String ENV_SMALL = "small";
+    public static final String ENV_MEDIUM = "medium";
+    public static final String ENV_LARGE = "large";
+    
+    public static final String ENV_SMALL_DESC = " for environments with less than 50 platforms";
+    public static final String ENV_MEDIUM_DESC = " for 50-250 platforms";
+    public static final String ENV_LARGE_DESC = " for more than 250 platforms";    
+    
     // database names that appear in the select list
     public static final String DBC_ORA10 = "Oracle 10g/11g";
     public static final String DBC_PGSQL = "PostgreSQL";
@@ -116,6 +126,7 @@ public class ServerConfig
     public static final String Q_JDBC_URL = "Enter the JDBC connection URL for the %%DBNAME%% database";
     public static final String Q_JDBC_USER = "Enter the username to use to connect to the database";
     public static final String Q_JDBC_PASSWORD = "Enter the password to use to connect to the database.";
+    public static final String Q_ENCRYPTION_KEY_CREATE = "Would you like to use an auto generated encryption key to encrypt the database password?";
     public static final String Q_ENCRYPTION_KEY = "Enter an encryption key to use to encrypt the database password.";
     public static final String Q_ADMIN_USER = "What should the username be for the initial admin user?";
     public static final String Q_ADMIN_PASSWORD = "What should the password be for the initial admin user?";
@@ -124,11 +135,10 @@ public class ServerConfig
     public static final String Q_SERVER_KEYSTORE_PATH = "What is the file path to your java keystore?";
     public static final String Q_SERVER_KEYSTORE_PASSWORD = "What is the password to your java keystore?";
     private static final String SERVER_DATABASE_UPGRADE_CHOICE = "server.database.upgrade.choice";
-    public static final String Q_PROFILE = 	"What is the istallation profile?" +
-    										"(\"small\" for topologies with less than 50 servers," +
-    										" \"medium\" for 50-250 servers," + 
-    										" \"large\" for more than 250 servers)";
-
+    public static final String Q_PROFILE = 	"What is the installation profile?";
+    public static final String Q_USE_ACTIVEMQ_JMX = "Should ActiveMQ open up a JMX port for HQ monitoring?";
+    public static final String Q_ACTIVEMQ_JMX_PORT = "Which port should ActiveMQ listen on?";
+    
     // convenience constants
     private static final String nl = System.getProperty("line.separator");
 
@@ -296,7 +306,17 @@ public class ServerConfig
                 // We always ask for username and password now per HQ-3627, 
                 // so probably shouldn't auto enter the email value
                 schema.addOption(new StringConfigOption("server.mail.sender", Q_MAIL_FROM, "hqadmin@" + domain));
-                schema.addOption(new StringConfigOption("install.profile", Q_PROFILE, "small"));
+               
+                ConfigOptionDisplay smallOption = new ConfigOptionDisplay(ENV_SMALL, ENV_SMALL_DESC);
+                ConfigOptionDisplay mediumOption = new ConfigOptionDisplay(ENV_MEDIUM, ENV_MEDIUM_DESC);
+                ConfigOptionDisplay largeOption = new ConfigOptionDisplay(ENV_LARGE, ENV_LARGE_DESC);
+                ConfigOptionDisplay[] envs = {smallOption, mediumOption, largeOption};
+                    
+                if(!installMode.isQuick())
+                	schema.addOption(new InstallConfigOption("install.profile", Q_PROFILE, smallOption, envs));
+                else
+                	schema.addOption(new HiddenConfigOption("install.profile", ENV_SMALL));
+                break;
 
             case 6:
                 if (installMode.isOracle()) {
@@ -415,11 +435,38 @@ public class ServerConfig
                     passwordOption.setSecret(true);
                     schema.addOption(passwordOption);
                 }
+                schema.addOption(new YesNoConfigOption("server.encryption-key.auto", Q_ENCRYPTION_KEY_CREATE,
+                        YesNoConfigOption.YES));
+                break;
+                        	
+            case 8:
+            	if("yes".equalsIgnoreCase(previous.getValue("server.encryption-key.auto"))) {
+            		//Create an auto generated random key
+            		String encryptionKey = UUID.randomUUID().toString().substring(0, 13).replaceAll("-", "");
+            		schema.addOption(new HiddenConfigOption("server.encryption-key", encryptionKey));
+            		break;
+            	}
+            	StringConfigOption encryptionKeyOption = new StringConfigOption(
+                        "server.encryption-key", Q_ENCRYPTION_KEY);
+                    encryptionKeyOption.setMinLength(8);
+                    schema.addOption(encryptionKeyOption);
+                   break;
+                   
+            case 9:
+                // Get encryption key
+                String encryptionKey = previous.getValue("server.encryption-key");
 
-                StringConfigOption encryptionKeyOption = new StringConfigOption(
-                    "server.encryption-key", Q_ENCRYPTION_KEY);
-                encryptionKeyOption.setMinLength(8);
-                schema.addOption(encryptionKeyOption);
+                // Encrypt database password
+                String encryptedPw = encryptPassword("PBEWithMD5AndDES", encryptionKey, previous
+                    .getValue("server.database-password"));
+
+                schema.addOption(new HiddenConfigOption("server.encryption-key", encryptionKey));
+                //Make this optional for non-interactive installers so the default value created here will be used instead
+                HiddenConfigOption encryptedPwOption = new HiddenConfigOption("server.database-password-encrypted",
+                    encryptedPw.toString());
+                encryptedPwOption.setOptional(true);
+                schema.addOption(encryptedPwOption);
+                
 
                 senderChoice = previous.getValue("server.mail.sender");
                 // dont ask about admin username if this is an HA node
@@ -441,23 +488,7 @@ public class ServerConfig
                 
                 break;
 
-            case 8:
-                // Get encryption key
-                String encryptionKey = previous.getValue("server.encryption-key");
-
-                // Encrypt database password
-                String encryptedPw = encryptPassword("PBEWithMD5AndDES", encryptionKey, previous
-                    .getValue("server.database-password"));
-
-                schema.addOption(new HiddenConfigOption("server.encryption-key", encryptionKey));
-                //Make this optional for non-interactive installers so the default value created here will be used instead
-                HiddenConfigOption encryptedPwOption = new HiddenConfigOption("server.database-password-encrypted",
-                    encryptedPw.toString());
-                encryptedPwOption.setOptional(true);
-                schema.addOption(encryptedPwOption);
-                break;
-
-            case 9:
+            case 10:
                 // For servers using the builtinDB we have only gotten the port
                 // at
                 // this point. Now we setup the url based on the port selection
@@ -469,7 +500,7 @@ public class ServerConfig
                 }
                 break;
 
-            case 10:
+            case 11:
                 // Now that they have made their jdbc selections, do a sanity
                 // check:
                 // If we are in "quick" mode and the database already exists,
@@ -493,7 +524,7 @@ public class ServerConfig
                 }
                 break;
 
-            case 11:
+            case 12:
                 String dbUpgradeChoice = previous.getValue(SERVER_DATABASE_UPGRADE_CHOICE);
                 if (dbUpgradeChoice.equals(DB_CHOICE_OVERWRITE)) {
                     schema.addOption(new HiddenConfigOption("server.database.create",
@@ -505,8 +536,29 @@ public class ServerConfig
                     throw new EarlyExitException("No modifications made to existing database.  "
                                                  + "Exiting installer.");
                 }
-                break;            
-            case 12:
+                break;    
+                
+            case 13:
+            	if (!installMode.isQuick()) 
+            		schema.addOption(new YesNoConfigOption("server.jms.usejmx", Q_USE_ACTIVEMQ_JMX,
+                            YesNoConfigOption.YES));
+            	else
+            		schema.addOption(new HiddenConfigOption("server.jms.usejmx", YesNoConfigOption.YES));
+            	break;
+            	
+            case 14:
+            	if(previous.getValue("server.jms.usejmx").equalsIgnoreCase(YesNoConfigOption.YES)) {
+            		schema.addOption(new HiddenConfigOption("server.jms.usejmx", "true"));
+            		if (!installMode.isQuick())
+            			schema.addOption(new PortConfigOption("server.jms.jmxport", Q_ACTIVEMQ_JMX_PORT, 1099));
+            		else
+            			schema.addOption(new HiddenConfigOption("server.jms.jmxport", "1099"));
+            	}
+            	else {
+            		schema.addOption(new HiddenConfigOption("server.jms.usejmx", "false"));
+            		schema.addOption(new HiddenConfigOption("server.jms.jmxport", "1099"));
+            	}
+            case 15:
                 if(isEEInstall) {
                     schema.addOption(new HiddenConfigOption("accept.eula",YesNoConfigOption.NO));
                 }
@@ -811,4 +863,5 @@ public class ServerConfig
             return _postgresQuickMode || _oracleQuickMode || _mysqlQuickMode || _quickMode;
         }
     }
+    
 }

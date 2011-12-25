@@ -35,7 +35,7 @@
   
     <!--The connectors can use a shared executor, you can define one or more named thread pools-->
     <Executor name="tomcatThreadPool" namePrefix="catalina-exec-" 
-        maxThreads="500" minSpareThreads="50"/>
+        maxThreads="${tomcat.maxthreads}" minSpareThreads="${tomcat.minsparethreads}"/>
    
     
     <Connector port="${server.webapp.port}" executor="tomcatThreadPool" maxHttpHeaderSize="8192"
@@ -53,7 +53,8 @@
          keystoreFile="${server.keystore.path}"
          keystorePass="${server.keystore.password}"
          truststoreFile="${server.keystore.path}"
-         truststorePass="${server.keystore.password}" 
+         truststorePass="${server.keystore.password}"
+         ciphers="SSL_RSA_WITH_RC4_128_MD5,SSL_RSA_WITH_RC4_128_SHA,SSL_RSA_WITH_3DES_EDE_CBC_SHA,SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA,SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA,TLS_DHE_RSA_WITH_AES_128_CBC_SHA,TLS_DHE_DSS_WITH_AES_128_CBC_SHA,TLS_RSA_WITH_AES_128_CBC_SHA,TLS_DHE_RSA_WITH_AES_256_CBC_SHA,TLS_DHE_DSS_WITH_AES_256_CBC_SHA,TLS_RSA_WITH_AES_256_CBC_SHA"
          sslProtocol = "TLS" />
     
 

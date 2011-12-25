@@ -24,6 +24,8 @@
  *
  */
 
+
+
 package org.hyperic.bootstrap;
 
 import static org.junit.Assert.assertEquals;
@@ -40,6 +42,7 @@ import org.hyperic.sigar.SigarException;
 import org.junit.Before;
 import org.junit.Test;
 
+
 /**
  * Unit test of the {@link TomcatEngineController}
  * @author jhickey
@@ -48,10 +51,10 @@ import org.junit.Test;
 public class TomcatEngineControllerTest {
 
     private ProcessManager processManager;
-    private String serverHome = "/Applications/Evolution/server-5.0.0-EE";
-    private String engineHome = "/Applications/Evolution/server-5.0.0-EE/hq-engine";
-    private String catalinaHome = engineHome + "/hq-server";
-    private String catalinaBase = catalinaHome;
+    private final String serverHome = "/Applications/Evolution/server-5.0.0-EE";
+    private final String engineHome = "/Applications/Evolution/server-5.0.0-EE/hq-engine";
+    private final String catalinaHome = engineHome + "/hq-server";
+    private final String catalinaBase = catalinaHome;
     private TomcatEngineController tomcatEngineController;
 
     @Before

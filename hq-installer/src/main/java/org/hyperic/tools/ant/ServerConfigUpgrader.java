@@ -87,7 +87,8 @@ public class ServerConfigUpgrader
         UNUSED_PROPS.add("hq-engine.server.port");
     }
 
-    public void execute() throws BuildException {
+    @Override
+	public void execute() throws BuildException {
         Properties config = upgradeServerConfig();
         parseMailConfig(config);
         exportConfig(config);
@@ -263,7 +264,15 @@ public class ServerConfigUpgrader
         
         if (!StringUtils.hasText(serverProps.getProperty("server.keystore.password"))) {
         	serverProps.setProperty("server.keystore.password", "hyperic");
-        }        
+        }
+        
+        if (!StringUtils.hasText(serverProps.getProperty("tomcat.maxthreads"))) {
+        	serverProps.setProperty("tomcat.maxthreads", "500");
+        }
+        
+        if (!StringUtils.hasText(serverProps.getProperty("tomcat.minsparethreads"))) {
+        	serverProps.setProperty("tomcat.minsparethreads", "50");
+        }
     }
 
     private String encryptPassword(String encryptionKey, String clearTextPassword) {
