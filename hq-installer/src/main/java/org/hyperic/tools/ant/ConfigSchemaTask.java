@@ -34,23 +34,21 @@ import java.security.KeyStoreException;
 import java.util.Iterator;
 import java.util.Properties;
 
+import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
-import org.apache.tools.ant.BuildException;
-import org.hyperic.tools.ant.installer.InstallerConfigSchemaProvider;
-
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
 import org.hyperic.sigar.util.Getline;
-
-import org.hyperic.util.config.ConfigSchema;
-import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.config.EarlyExitException;
+import org.hyperic.tools.ant.installer.InstallerConfigSchemaProvider;
 import org.hyperic.util.config.AutomatedResponseBuilder;
+import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.ConfigSchema;
+import org.hyperic.util.config.EarlyExitException;
 import org.hyperic.util.config.InteractiveResponseBuilder;
 import org.hyperic.util.config.InteractiveResponseBuilder_IOHandler;
+import org.hyperic.util.config.ReturnStepsException;
 import org.hyperic.util.config.SkipConfigException;
-import org.hyperic.util.config.YesNoConfigOption;
 import org.hyperic.util.security.KeystoreConfig;
 import org.hyperic.util.security.KeystoreManager;
 
@@ -71,7 +69,7 @@ public class ConfigSchemaTask
     private Project itsProject;
     private InstallerConfigSchemaProvider itsSchemaProvider;
     private ConfigResponse itsResponse;
-    private Getline gl;
+    private final Getline gl;
 
     public ConfigSchemaTask () {
         try {
@@ -117,7 +115,8 @@ public class ConfigSchemaTask
     public void setReplaceInstallDir( boolean b ) {
         itsReplaceInstallDir = b;
     }
-    public void execute () throws BuildException {
+    @Override
+	public void execute () throws BuildException {
         
         validateAttributes();
         itsProject = getProject();
@@ -174,8 +173,16 @@ public class ConfigSchemaTask
             i++;
             try {
                 schema = itsSchemaProvider.getSchema(mergedResponse, i);
-            } catch (EarlyExitException e) {
+            } 
+            catch (EarlyExitException e) {
                 throw new BuildException(e);
+            }
+            catch (ReturnStepsException e) {
+            	errOutput("---------------------------------------------------------------------------------");
+            	errOutput(e.getMessage());
+            	errOutput("---------------------------------------------------------------------------------");
+            	i = e.getStepToReturnTo();
+            	schema = itsSchemaProvider.getSchema(mergedResponse, i);
             }
         }
         
