@@ -7,7 +7,7 @@
     <artifactId>jboss7-plugin</artifactId>
     <packaging>jar</packaging>
     <name>Hyperic HQ Plugin - JBoss 7 Plugin</name>
-    <version>4.7.0.BUILD-SNAPSHOT</version>
+    <version>4.6.5.BUILD-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
@@ -32,13 +32,13 @@
         <dependency>
             <groupId>org.hyperic.hq</groupId>
             <artifactId>hq-util</artifactId>
-            <version>4.7.0.BUILD-SNAPSHOT</version>
+            <version>4.6.5.BUILD-SNAPSHOT</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.hyperic.hq</groupId>
             <artifactId>hq-common</artifactId>
-            <version>4.7.0.BUILD-SNAPSHOT</version>
+            <version>4.6.5.BUILD-SNAPSHOT</version>
             <type>jar</type>
         </dependency>
     </dependencies>
