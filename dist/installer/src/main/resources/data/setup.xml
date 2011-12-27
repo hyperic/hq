@@ -638,19 +638,19 @@ ${errMsg}
         <antcall target="load-properties-to-conf-file"/>
         <antcall target="load-properties-to-web-xml-file"/>
     <!--After the properties has been loaded, we can delete the file-->
-    <delete file="${server.product.dir}/conf/hq-server.properties"/> 
+    <delete file="${server.product.dir}/conf/hq-profiles.properties"/> 
     </target>
 
 
     <target name="load-properties-to-web-xml-file">
          <echo>^^^DETAILED: Loading properties into web.xml</echo>
-             <loadproperties srcFile="${server.product.dir}/conf/hq-server.properties"/>
+             <loadproperties srcFile="${server.product.dir}/conf/hq-profiles.properties"/>
                  <substProps src="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/web.xml"/>
     </target>
     
     <target name="load-properties-to-conf-file"  unless="setup.upgrade">
         <echo>^^^DETAILED: Loading properties into hq-server.conf</echo>
-        <loadproperties srcFile="${server.product.dir}/conf/hq-server.properties"/>             
+        <loadproperties srcFile="${server.product.dir}/conf/hq-profiles.properties"/>             
         <substProps src="${install.dir}/data/hq-server.conf"
                             dest="${conf-dir}/hq-server.conf"/>
                 <replace file="${conf-dir}/hq-server.conf" token="@SERVER_CONF@" value="${conf-dir}" />
@@ -658,10 +658,10 @@ ${errMsg}
         
     <target name="load-properties">
         <echo>^^^DETAILED: Loading properties according to the selected installation profile</echo>
-                <copy tofile="${server.product.dir}/conf/hq-server.properties"
-                                      file="${install.dir}/data/hq-server.properties"
+                <copy tofile="${server.product.dir}/conf/hq-profiles.properties"
+                                      file="${install.dir}/data/hq-profiles.properties"
                                       overwrite="true"/>
-                <replaceregexp file="${server.product.dir}/conf/hq-server.properties"
+                <replaceregexp file="${server.product.dir}/conf/hq-profiles.properties"
                        match="(.${install.profile})"
                        replace=""
                        byline="true"/>

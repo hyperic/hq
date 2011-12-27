@@ -51,8 +51,8 @@ public class EditPasswordAction
     extends BaseAction {
 
     private final Log log = LogFactory.getLog(NewAction.class.getName());
-    private AuthBoss authBoss;
-    private AuthzBoss authzBoss;
+    private final AuthBoss authBoss;
+    private final AuthzBoss authzBoss;
     
 
     @Autowired
@@ -66,7 +66,8 @@ public class EditPasswordAction
      * Edit the user's password. Make sure that the <code>currentPassword</code>
      * is valid.
      */
-    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+    @Override
+	public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                  HttpServletResponse response) throws Exception {
 
         log.trace("Editing password for user.");
@@ -91,6 +92,14 @@ public class EditPasswordAction
                 break;
             }
         }
+
+        String [] vals = request.getParameterValues("u");
+        String val = null;
+        if (vals != null && vals.length > 0)
+        	val = vals[0];
+   	    // if the admin user is changing her own pw, require authentication of current pw 
+		if (val != null)
+			admin = admin & String.valueOf(user.getId()).equals(val) == false;
 
         if (!admin) {
             try {
