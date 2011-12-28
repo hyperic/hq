@@ -83,7 +83,7 @@ ${line.separator}Press enter to continue...
       Unpacking JRE ${jre.exe.name} to: ${destination}...
     </echo>
     <exec executable="${install.dir}/jres/${jre.exe.name}">
-      <arg line="-d '${destination}'"/>
+      <arg line="-y -o'${destination}'"/>
     </exec>
   </target>
 
