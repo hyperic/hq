@@ -39,24 +39,27 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.util.exec.Execute;
 import org.hyperic.util.exec.ExecuteWatchdog;
 import org.hyperic.util.exec.PumpStreamHandler;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 public class KeystoreManager {
     private Log log;
     private static KeystoreManager keystoreManager= new KeystoreManager();
     
-    private KeystoreManager(){
+    private KeystoreManager() {
         this.log = LogFactory.getLog(KeystoreManager.class);
     }
     
-    public static KeystoreManager getKeystoreManager(){
+    public static KeystoreManager getKeystoreManager() {
         return keystoreManager;
     }
     
-    private String getDName(KeystoreConfig keystoreConfig){
-        
+    private String getDName(KeystoreConfig keystoreConfig) {
         return "CN=" + keystoreConfig.getKeyCN()+
-                " (HQ Self-Signed Cert), OU=HQ, O=hyperic.net, L=Unknown, ST=Unknown, C=US";
+               " (HQ Self-Signed Cert), OU=HQ, O=hyperic.net, L=Unknown, ST=Unknown, C=US";
     }
     
     public KeyStore getKeyStore(KeystoreConfig keystoreConfig) throws KeyStoreException, IOException {
@@ -81,7 +84,7 @@ public class KeystoreManager {
         }
         
 	    try {
-	        KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+            KeyStore keystore = DbKeyStore.getInstance(KeyStore.getDefaultType());
 	        File file = new File(filePath);
 	        char[] password = null;
 	            
@@ -171,4 +174,5 @@ public class KeystoreManager {
             }
         }
     }
+
 }
