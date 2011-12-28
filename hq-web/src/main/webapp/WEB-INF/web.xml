@@ -438,7 +438,7 @@
         keep at least 5% tomcat threads for UI access -->
         <init-param>
             <param-name>org.hyperic.lather.maxConns</param-name>
-            <param-value>${max.conns}</param-value>
+            <param-value>475</param-value>
         </init-param>
         <init-param>
             <param-name>org.hyperic.lather.execTimeout</param-name>
