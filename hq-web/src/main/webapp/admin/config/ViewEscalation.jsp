@@ -58,7 +58,7 @@ var selActionTypeEsc;
 function requestViewEscalation() {
     var url = '<html:rewrite action="/escalation/jsonByEscalationId"/>';
     var pars = {
-    	"id": escape('${param.escId}'),
+    	"id": escape('<c:out value="${param.escId}"/>'),
     	"preventCache": (new Date()).getTime()
     };
     
