@@ -110,8 +110,8 @@ public final class JBossAdminHttp {
         this(props.toProperties());
     }
 
-    private <T extends Object> T get(String api, Type type) throws PluginException {
-        T res = null;
+    private Object get(String api, Type type) throws PluginException {
+        Object res = null;
         try {
             String url = targetHost.toURI() + "/management";
             if (hostName != null) {
@@ -160,7 +160,7 @@ public final class JBossAdminHttp {
     public WebSubsystem getWebSubsystem() throws PluginException {
         Type type = new TypeToken<WebSubsystem>() {
         }.getType();
-        return get("/subsystem/web?recursive=true", type);
+        return (WebSubsystem) get("/subsystem/web?recursive=true", type);
     }
 
     public Connector getConnector(String connector) throws PluginException {
@@ -171,37 +171,37 @@ public final class JBossAdminHttp {
         } catch (UnsupportedEncodingException ex) {
             throw new RuntimeException(ex);
         }
-        return get("/subsystem/web/connector/" + connector + "?include-runtime=true", type);
+        return (Connector) get("/subsystem/web/connector/" + connector + "?include-runtime=true", type);
     }
 
     public ThreadsInfo getThreadsInfo() throws PluginException {
         Type type = new TypeToken<ThreadsInfo>() {
         }.getType();
-        return get("/core-service/platform-mbean/type/threading", type);
+        return (ThreadsInfo) get("/core-service/platform-mbean/type/threading", type);
     }
 
     public ServerMemory getServerMemory() throws PluginException {
         Type type = new TypeToken<ServerMemory>() {
         }.getType();
-        return get("/core-service/platform-mbean/type/memory?include-runtime=true", type);
+        return (ServerMemory) get("/core-service/platform-mbean/type/memory?include-runtime=true", type);
     }
 
     public TransactionsStats getTransactionsStats() throws PluginException {
         Type type = new TypeToken<TransactionsStats>() {
         }.getType();
-        return get("/subsystem/transactions?include-runtime=true", type);
+        return (TransactionsStats) get("/subsystem/transactions?include-runtime=true", type);
     }
 
     public List<Deployment> getDeployments() throws PluginException {
         Type type = new TypeToken<List<Deployment>>() {
         }.getType();
-        return get("/deployment/*?recursive=true", type);
+        return (List<Deployment>) get("/deployment/*?recursive=true", type);
     }
 
     public List<String> getDatasources() throws PluginException {
         Type type = new TypeToken<HashMap<String, HashMap<String, Object>>>() {
         }.getType();
-        HashMap<String, HashMap<String, Object>> ds = get("/subsystem/datasources", type);
+        HashMap<String, HashMap<String, Object>> ds = (HashMap<String, HashMap<String,Object>>) get("/subsystem/datasources", type);
         List<String> res = new ArrayList<String>();
         if (ds.get("data-source") != null) {
             res.addAll(ds.get("data-source").keySet());
@@ -223,7 +223,7 @@ public final class JBossAdminHttp {
         if (runtime) {
             ds += "?include-runtime=true";
         }
-        Map<String, String> res = get("/subsystem/datasources/data-source/" + ds, type);
+        Map<String, String> res = (Map<String, String>) get("/subsystem/datasources/data-source/" + ds, type);
         return res;
     }
 
