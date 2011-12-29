@@ -31,8 +31,6 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateExpiredException;
 import java.security.cert.X509Certificate;
 
 import javax.net.ssl.KeyManagerFactory;
@@ -47,7 +45,6 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.conn.ssl.AbstractVerifier;
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
@@ -103,10 +100,9 @@ public class DefaultSSLProviderImpl implements SSLProvider {
             KeyManagerFactory keyManagerFactory = getKeyManagerFactory(trustStore, keystoreConfig.getFilePassword());
             TrustManagerFactory trustManagerFactory = getTrustManagerFactory(trustStore);
             X509TrustManager defaultTrustManager = (X509TrustManager) trustManagerFactory.getTrustManagers()[0];
-            X509TrustManager customTrustManager = new CustomTrustManager(defaultTrustManager,
-                                                                         keystoreConfig,
-                                                                         acceptUnverifiedCertificates,
-                                                                         trustStore);
+            X509TrustManager customTrustManager =
+                keystoreMgr.getCustomTrustManager(defaultTrustManager, keystoreConfig,
+                                                  acceptUnverifiedCertificates, trustStore);
             sslContext = SSLContext.getInstance("TLS");
             sslContext.init(keyManagerFactory.getKeyManagers(),
                             new TrustManager[] { customTrustManager },
@@ -140,86 +136,14 @@ public class DefaultSSLProviderImpl implements SSLProvider {
                 try {
                     internalVerifier.verify(host, ssl);
                 } catch (SSLPeerUnverifiedException e) {
-                    throw new SSLPeerUnverifiedException("The authenticity of host '" + host +
-                                                         "' can't be established.");
+                    SSLPeerUnverifiedException sslPeerUnverifiedException =
+                        new SSLPeerUnverifiedException("The authenticity of host '" + host +
+                                                       "' can't be established: " + e);
+                    sslPeerUnverifiedException.initCause(e);
+                    throw sslPeerUnverifiedException;
                 }
             }
         };
-    }
-
-    private class CustomTrustManager implements X509TrustManager {
-        private final Log log = LogFactory.getLog(X509TrustManager.class);
-        private final X509TrustManager defaultTrustManager;
-        private final KeystoreConfig keystoreConfig;
-        private final boolean acceptUnverifiedCertificates;
-        private final KeyStore trustStore;
-        private CustomTrustManager(X509TrustManager defaultTrustManager,
-                                   KeystoreConfig keystoreConfig,
-                                   boolean acceptUnverifiedCertificates,
-                                   KeyStore trustStore) {
-            this.defaultTrustManager = defaultTrustManager;
-            this.keystoreConfig = keystoreConfig;
-            this.acceptUnverifiedCertificates = acceptUnverifiedCertificates;
-            this.trustStore = trustStore;
-        }
-        public X509Certificate[] getAcceptedIssuers() {
-            return defaultTrustManager.getAcceptedIssuers();
-        }
-        public void checkServerTrusted(X509Certificate[] chain, String authType)
-        throws CertificateException {
-            try {
-                defaultTrustManager.checkServerTrusted(chain, authType);
-            } catch (CertificateException e){
-                CertificateExpiredException expiredCertException = getCertExpiredException(e);
-                if (expiredCertException!=null){
-                    log.error("Fail the connection because received certificate is expired. " +
-                    		"Please update the certificate.",expiredCertException);
-                    throw new CertificateException(e);
-                }
-                if (acceptUnverifiedCertificates) {
-                    log.info("Import the certification. (Received certificate is not trusted by keystore)");
-                    importCertificate(chain);
-                } else {
-                    log.warn("Fail the connection because received certificate is not trusted by " +
-                             "keystore: alias=" + keystoreConfig.getAlias());
-                    log.debug("Fail the connection because received certificate is not trusted by " +
-                              "keystore: alias=" + keystoreConfig.getAlias() +
-                              ", acceptUnverifiedCertificates="+acceptUnverifiedCertificates,e);
-                    throw new CertificateException(e);
-                }
-            }
-        }
-        private CertificateExpiredException getCertExpiredException(Exception e){  
-            while (e !=null){
-                if (e instanceof CertificateExpiredException){
-                    return (CertificateExpiredException)e;
-                }
-                e = (Exception) e.getCause();
-            }
-            return null;
-        }
-        public void checkClientTrusted(X509Certificate[] chain,
-            String authType) throws CertificateException {
-            defaultTrustManager.checkClientTrusted(chain, authType);
-        }
-        private void importCertificate(X509Certificate[] chain)
-            throws CertificateException {
-            final boolean debug = log.isDebugEnabled();
-            final StopWatch watch = new StopWatch();
-            try {
-                for (X509Certificate cert : chain) {
-                    String[] cnValues = AbstractVerifier.getCNs(cert);
-                    String alias =
-                        (cnValues != null && cnValues.length > 0) ? cnValues[0] : "UnknownCN";
-                    alias += "-ts=" + System.currentTimeMillis();
-                    trustStore.setCertificateEntry(alias, cert);
-                }
-            } catch (KeyStoreException e) {
-                log.error("Exception when trying to import certificate: " + e, e);
-            } finally {
-                if (debug) log.debug("importCert: " + watch);
-            }
-        }
     }
 
     public SSLContext getSSLContext() {

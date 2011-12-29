@@ -154,7 +154,7 @@ public class DbKeyStoreSpi extends KeyStoreSpi {
     @Override
     public void engineStore(OutputStream stream, char[] password)
     throws IOException, NoSuchAlgorithmException, CertificateException {
-        throw new UnsupportedOperationException("engineStore() is not supported");
+        // do nothing
     }
 
     @Override

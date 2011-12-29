@@ -421,14 +421,12 @@ public class AgentClient {
     /**
      * Test the connection information.
      */
-    private BizappCallbackClient getConnection(String provider,
-                                               boolean secure)
-        throws AutoQuestionException, AgentCallbackClientException
-    {
+    private BizappCallbackClient getConnection(String provider, boolean secure)
+    throws AutoQuestionException, AgentCallbackClientException {
         BizappCallbackClient bizapp;
         Properties bootP = this.config.getBootProperties();
         long start = System.currentTimeMillis();
-        boolean acceptUnverifiedCertificates = "true".equalsIgnoreCase(bootP.getProperty(AgentConfig.SSL_KEYSTORE_ACCEPT_UNVERIFIED_CERT));
+        boolean acceptUnverifiedCertificates = secure;
         
         while (true) {
             String sec = secure ? "secure" : "insecure";
@@ -449,6 +447,7 @@ public class AgentClient {
                 if (exc.getExceptionOfType(SSLPeerUnverifiedException.class) != null) {
                 	SYSTEM_OUT.println();
                 	SYSTEM_OUT.println(exc.getMessage());
+                	log.error(exc,exc);
                 	String question = "Are you sure you want to continue connecting?";
 	                	
 	                try {
@@ -703,18 +702,17 @@ public class AgentClient {
                                      " password", null, true,
                                      QPROP_PWORD);
             try {
-                if(bizapp.userIsValid(user, pword))
+                if(bizapp.userIsValid(user, pword)) {
                     break;
+                }
             } catch(AgentCallbackClientException exc){
-                SYSTEM_ERR.println("Error validating user: " + 
-                                   exc.getMessage());
+                log.error(exc,exc);
+                SYSTEM_ERR.println("Error validating user: " + exc);
                 return;
             }
             
             SYSTEM_ERR.println("- Invalid username/password");
-            if(bootP.getProperty(QPROP_LOGIN) != null ||
-               bootP.getProperty(QPROP_PWORD) != null)
-            {
+            if (bootP.getProperty(QPROP_LOGIN) != null || bootP.getProperty(QPROP_PWORD) != null) {
                 throw new AutoQuestionException("Invalid username/password");
             }
         }

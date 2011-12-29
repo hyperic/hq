@@ -31,6 +31,7 @@ import java.security.KeyStoreException;
 import java.security.KeyStoreSpi;
 import java.security.Provider;
 import java.security.Security;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,7 +48,7 @@ public class DbKeyStore extends KeyStore {
      * returns the regular
      * {@link KeyStore}
      */
-    public static KeyStore getInstance(String type) 
+    public static KeyStore getInstance(String type, AtomicBoolean isDb) 
     throws KeyStoreException {
         DbKeystoreManager dbKeystoreManager = null;
         try {
@@ -59,6 +60,7 @@ public class DbKeyStore extends KeyStore {
             log.debug("could not instantiate DbKeystoreManager class: " + e,e);
         }
         if (dbKeystoreManager == null) {
+            isDb.set(false);
             return KeyStore.getInstance(type);
         }
         try {
@@ -68,10 +70,13 @@ public class DbKeyStore extends KeyStore {
             final Object[] objs = (Object[]) method.invoke(null, type, "KeyStore", null);
             final DbKeyStoreSpi dbKeyStoreSpi = new DbKeyStoreSpi(dbKeystoreManager);
             Security.getProviders();
+            isDb.set(true);
             return new DbKeyStore(dbKeyStoreSpi, (Provider)objs[1], type);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
+    
+    
 
 }
