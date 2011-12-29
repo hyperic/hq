@@ -30,12 +30,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
-import org.hyperic.util.config.ConfigOptionDisplay;
-import org.hyperic.util.config.InstallConfigOption;
-
 public class InteractiveResponseBuilder implements ResponseBuilder {
 
-    private InteractiveResponseBuilder_IOHandler inout;
+    private final InteractiveResponseBuilder_IOHandler inout;
 
     public InteractiveResponseBuilder(InteractiveResponseBuilder_IOHandler io)
     {
@@ -201,8 +198,8 @@ public class InteractiveResponseBuilder implements ResponseBuilder {
                 }
                 
                 if (val.equals(opt.getConfirm())) {
-                sendToErrStream(val + " compare with " + opt.getConfirm() + " "
-                                + val.equals(opt.getConfirm()));
+             //   sendToErrStream(val + " compare with " + opt.getConfirm() + " "
+               //                 + val.equals(opt.getConfirm()));
                 
                     // Double check with user
                     YesNoConfigOption confirmOpt =
@@ -230,7 +227,7 @@ public class InteractiveResponseBuilder implements ResponseBuilder {
             } catch(InvalidOptionValueException exc){
                 sendToErrStream(exc.getMessage());
                 continue;
-            }
+            } 
             i++;
         }
         return res;

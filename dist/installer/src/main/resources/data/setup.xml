@@ -819,7 +819,7 @@ ${errMsg}
 	       	will be loaded into the jms-context file in run time. Now this values needs to be hard coded into
 	       	the file so changing this values in the hq-server.conf file and restarting the server won't
 	       	have any effect and this is not the right behaviour-->
-		<property name="server.jms.usejmx" value="true"/>
+		<property name="server.jms.usejmx" value="false"/>
 		<property name="server.jms.jmxport" value="1099"/>	
 		 <unzip src="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/lib/hq-server-${version}.jar"
 		        dest="${server.installdir}/hq-tmp-jar"/>

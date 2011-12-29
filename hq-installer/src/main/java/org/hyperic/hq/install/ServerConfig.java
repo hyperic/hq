@@ -68,9 +68,9 @@ extends BaseConfig {
 	public static final String ENV_MEDIUM = "medium";
 	public static final String ENV_LARGE = "large";
 
-	public static final String ENV_SMALL_DESC = " for environments with less than 50 platforms";
-	public static final String ENV_MEDIUM_DESC = " for 50-250 platforms";
-	public static final String ENV_LARGE_DESC = " for more than 250 platforms";    
+	public static final String ENV_SMALL_DESC = " (less than 50 platforms)";
+	public static final String ENV_MEDIUM_DESC = " (50-250 platforms)";
+	public static final String ENV_LARGE_DESC = " (larger than 250 platforms)";    
 
 	// database names that appear in the select list
 	public static final String DBC_ORA10 = "Oracle 10g/11g";
@@ -140,8 +140,6 @@ extends BaseConfig {
 	public static final String Q_SERVER_KEYSTORE_PASSWORD = "What is the password to your java keystore?";
 	private static final String SERVER_DATABASE_UPGRADE_CHOICE = "server.database.upgrade.choice";
 	public static final String Q_PROFILE = 	"What is the installation profile?";
-	public static final String Q_USE_ACTIVEMQ_JMX = "Should ActiveMQ open up a JMX port for HQ monitoring?";
-	public static final String Q_ACTIVEMQ_JMX_PORT = "Which port should ActiveMQ listen on?";
 
 	// convenience constants
 	private static final String nl = System.getProperty("line.separator");
@@ -577,26 +575,6 @@ extends BaseConfig {
 			break;    
 
 		case 14:
-			if (!installMode.isQuick()) 
-				schema.addOption(new YesNoConfigOption("server.jms.usejmx", Q_USE_ACTIVEMQ_JMX,
-						YesNoConfigOption.YES));
-			else
-				schema.addOption(new HiddenConfigOption("server.jms.usejmx", YesNoConfigOption.YES));
-			break;
-
-		case 15:
-			if(previous.getValue("server.jms.usejmx").equalsIgnoreCase(YesNoConfigOption.YES)) {
-				schema.addOption(new HiddenConfigOption("server.jms.usejmx", "true"));
-				if (!installMode.isQuick())
-					schema.addOption(new PortConfigOption("server.jms.jmxport", Q_ACTIVEMQ_JMX_PORT, 1099));
-				else
-					schema.addOption(new HiddenConfigOption("server.jms.jmxport", "1099"));
-			}
-			else {
-				schema.addOption(new HiddenConfigOption("server.jms.usejmx", "false"));
-				schema.addOption(new HiddenConfigOption("server.jms.jmxport", "1099"));
-			}
-		case 16:
 			if(isEEInstall) {
 				schema.addOption(new HiddenConfigOption("accept.eula",YesNoConfigOption.NO));
 			}
