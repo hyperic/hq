@@ -36,6 +36,7 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ExceptionHandler;
 import org.apache.struts.config.ExceptionConfig;
 import org.hyperic.hq.ui.servlet.RenditServlet;
+import org.hyperic.util.StringUtil;
 
 public class UIErrorHandler extends ExceptionHandler
 {
@@ -48,7 +49,7 @@ public class UIErrorHandler extends ExceptionHandler
 					throws ServletException {
 
 		//log the error message
-		_log.error(ex);
+		_log.error(StringUtil.getStackTrace(ex));
 
 		return super.execute(ex, ae, mapping, formInstance, request, response);
 	}
