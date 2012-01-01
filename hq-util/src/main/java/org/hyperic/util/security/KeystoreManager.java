@@ -28,25 +28,31 @@ package org.hyperic.util.security;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateExpiredException;
+import java.security.cert.X509Certificate;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.conn.ssl.AbstractVerifier;
 import org.hyperic.util.exec.Execute;
 import org.hyperic.util.exec.ExecuteWatchdog;
 import org.hyperic.util.exec.PumpStreamHandler;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.stereotype.Component;
+import org.hyperic.util.timer.StopWatch;
 import org.springframework.util.StringUtils;
 
 public class KeystoreManager {
     private Log log;
+    private AtomicBoolean isDB = new AtomicBoolean(false);
     private static KeystoreManager keystoreManager= new KeystoreManager();
     
     private KeystoreManager() {
@@ -84,7 +90,7 @@ public class KeystoreManager {
         }
         
 	    try {
-            KeyStore keystore = DbKeyStore.getInstance(KeyStore.getDefaultType());
+            KeyStore keystore = DbKeyStore.getInstance(KeyStore.getDefaultType(), isDB);
 	        File file = new File(filePath);
 	        char[] password = null;
 	            
@@ -172,6 +178,113 @@ public class KeystoreManager {
             	//can't have password in log
             	throw new KeyStoreException("Failed to create keystore:"+keystoreConfig.getAlias()+", "+msg);
             }
+        }
+    }
+
+    public X509TrustManager getCustomTrustManager(X509TrustManager defaultTrustManager,
+                                                  KeystoreConfig keystoreConfig,
+										          boolean acceptUnverifiedCertificates,
+										          KeyStore trustStore) {
+        return new CustomTrustManager(defaultTrustManager, keystoreConfig,
+                                      acceptUnverifiedCertificates, trustStore, isDB.get());
+    }
+    
+    private class CustomTrustManager implements X509TrustManager {
+        private final Log log = LogFactory.getLog(X509TrustManager.class);
+        private final X509TrustManager defaultTrustManager;
+        private final KeystoreConfig keystoreConfig;
+        private final boolean acceptUnverifiedCertificates;
+        private final KeyStore trustStore;
+        private final boolean isDB;
+        private CustomTrustManager(X509TrustManager defaultTrustManager,
+                                   KeystoreConfig keystoreConfig,
+                                   boolean acceptUnverifiedCertificates,
+                                   KeyStore trustStore, boolean isDB) {
+            this.defaultTrustManager = defaultTrustManager;
+            this.keystoreConfig = keystoreConfig;
+            this.acceptUnverifiedCertificates = acceptUnverifiedCertificates;
+            this.trustStore = trustStore;
+            this.isDB = isDB;
+        }
+        public X509Certificate[] getAcceptedIssuers() {
+            return defaultTrustManager.getAcceptedIssuers();
+        }
+        public void checkServerTrusted(X509Certificate[] chain, String authType)
+        throws CertificateException {
+            try {
+                defaultTrustManager.checkServerTrusted(chain, authType);
+            } catch (CertificateException e){
+                CertificateExpiredException expiredCertException = getCertExpiredException(e);
+                if (expiredCertException!=null){
+                    log.error("Fail the connection because received certificate is expired. " +
+                            "Please update the certificate.",expiredCertException);
+                    throw new CertificateException(e);
+                }
+                if (acceptUnverifiedCertificates) {
+                    log.info("Import the certification. (Received certificate is not trusted by keystore)");
+                    importCertificate(chain);
+                } else {
+                    log.warn("Fail the connection because received certificate is not trusted by " +
+                             "keystore: alias=" + keystoreConfig.getAlias());
+                    log.debug("Fail the connection because received certificate is not trusted by " +
+                              "keystore: alias=" + keystoreConfig.getAlias() +
+                              ", acceptUnverifiedCertificates="+acceptUnverifiedCertificates,e);
+                    throw new CertificateException(e);
+                }
+            }
+        }
+        private CertificateExpiredException getCertExpiredException(Exception e){  
+            while (e !=null){
+                if (e instanceof CertificateExpiredException){
+                    return (CertificateExpiredException)e;
+                }
+                e = (Exception) e.getCause();
+            }
+            return null;
+        }
+        public void checkClientTrusted(X509Certificate[] chain,
+            String authType) throws CertificateException {
+            defaultTrustManager.checkClientTrusted(chain, authType);
+        }
+        
+        private void importCertificate(X509Certificate[] chain)
+            throws CertificateException {
+            FileOutputStream ksFileOutputStream = null;
+            final boolean debug = log.isDebugEnabled();
+            final StopWatch watch = new StopWatch();
+            try {
+                for (X509Certificate cert : chain) {
+                    String[] cnValues = AbstractVerifier.getCNs(cert);
+                    String alias = (cnValues != null && cnValues.length > 0) ? cnValues[0] : "UnknownCN";
+                    alias += "-ts=" + System.currentTimeMillis();
+                    trustStore.setCertificateEntry(alias, cert);
+                }
+                if (!isDB) {
+                    ksFileOutputStream = new FileOutputStream(keystoreConfig.getFilePath());
+                    trustStore.store(ksFileOutputStream, keystoreConfig.getFilePassword().toCharArray());
+                }
+            } catch (FileNotFoundException e) {
+                // Can't find the keystore in the path
+                log.error("Can't find the keystore in " + keystoreConfig.getFilePath() +
+                          ". Error message: " + e, e);
+            } catch (NoSuchAlgorithmException e) {
+                log.error("The algorithm is not supported. Error message: " + e, e);
+            } catch (Exception e) {
+                // expect KeyStoreException, IOException
+                log.error("Exception when trying to import certificate: " + e, e);
+            } finally {
+                close(ksFileOutputStream);
+                ksFileOutputStream = null;
+                if (debug) log.debug("importCert: " + watch);
+            }
+        }
+        private void close(FileOutputStream fos) {
+            if (fos == null) {
+                return;
+            }
+            try {
+                fos.close();
+            } catch (IOException e) {}
         }
     }
 
