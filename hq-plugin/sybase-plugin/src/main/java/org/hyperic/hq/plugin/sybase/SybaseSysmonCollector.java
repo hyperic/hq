@@ -133,7 +133,37 @@ public class SybaseSysmonCollector extends Collector {
                 setValue(cacheName + ".CacheHitsRatio", get(sec, "Cache Hits", 5) / 100);
                 setValue(cacheName + ".CacheMissesRatio", get(sec, "Cache Misses", 5) / 100);
             }
-
+            
+            // output per engine:
+            // Engine 0                        0.0 %      0.0 %    100.0 %
+            //
+            // regex should only find lines starting with "Engine X                        X.X %"
+            // engineid and percentage are in regex groups 1 and 2
+            pat = Pattern.compile("\n +Engine (\\d)+\\s+(\\d+\\.\\d+) %.*");
+            m = pat.matcher(res);
+            while (m.find()) {
+                try {
+                    final String engineId = m.group(1);
+                    final String cpuBusyVal = m.group(2);
+                    if (engineId != null && cpuBusyVal != null) {
+                        setValue("EngineUtilization" + engineId.trim(),
+                            Double.parseDouble(cpuBusyVal.trim()) / 100);
+                    }
+                    if (trace.isDebugEnabled()) {
+                        trace.debug("Found Engine Utilization for engineid=" + engineId.trim() +
+                            " with value " + Double.parseDouble(cpuBusyVal.trim()) / 100);                        
+                    }
+                } catch (NumberFormatException e) {
+                    if (trace.isDebugEnabled()) {
+                        trace.debug("Unable to parse number from: " + e.toString());                        
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                    if (trace.isDebugEnabled()) {
+                        trace.debug("Unable to find group from matcher: " + e.toString());                        
+                    }
+                }
+            }
+            
             setValue("Deadlocks", get(res, "Deadlock Percentage", 5));
             setValue("TotalLockReqs", get(res, "Total Lock Requests", 5));
             setValue("AvgLockContention", get(res, "Avg Lock Contention", 5));

@@ -28,6 +28,7 @@ package org.hyperic.hq.install;
 import java.io.File;
 import java.io.IOException;
 import java.util.Hashtable;
+
 import org.hyperic.tools.ant.installer.InstallerConfigSchemaProvider;
 import org.hyperic.util.JDK;
 import org.hyperic.util.StringUtil;
@@ -49,7 +50,7 @@ public abstract class BaseConfig implements InstallerConfigSchemaProvider {
     public static final String INSTALLMODE_MYSQL      = "mysql";
     public static final String INSTALLMODE_FULL       = "full";
 
-    private String baseName;
+    private final String baseName;
     private Hashtable projectProps;
     private String installDir;
     
@@ -149,7 +150,7 @@ public abstract class BaseConfig implements InstallerConfigSchemaProvider {
         ConfigSchema schema = new ConfigSchema();
         if (iterationCount == 0) {
             schema.addOption(new UpgradeDirConfigOption(baseName+".upgradedir",
-                                                        "Enter full path of " 
+                                                        "Enter current installation path of " 
                                                         + getName()
                                                         + " to upgrade: ",
                                                         "", this));
@@ -163,8 +164,7 @@ public abstract class BaseConfig implements InstallerConfigSchemaProvider {
             }
 
             schema.addOption(new DirConfigOption(baseName + ".installdir",
-                                                 getName() + " installation " +
-                                                 "path",
+                                                 "Enter new " + getName() + " directory",
                                                  installDir));
             return schema;
         }

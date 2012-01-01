@@ -55,7 +55,7 @@
 	    hqDojo.xhrGet({
 	    	url: "<html:rewrite action="/escalation/jsonByEscalationId" />",
 	    	content: {
-	    		id: escape("${param.escId}"),
+	    		id: escape('<c:out value="${param.escId}"/>'),
 	    		preventCache: (new Date()).getTime()
 	    	},
 	    	handleAs: "json",

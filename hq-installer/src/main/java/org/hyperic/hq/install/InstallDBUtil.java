@@ -40,42 +40,55 @@ import org.hyperic.util.jdbc.DriverLoadException;
 import org.hyperic.util.jdbc.JDBC;
 
 public class InstallDBUtil {
-    
-    private static final Log log = LogFactory.getLog(InstallDBUtil.class);
 
-    public static boolean checkTableExists(Connection conn, String table) throws SQLException {
+	private static final Log log = LogFactory.getLog(InstallDBUtil.class);
 
-        HQDialect dialect = HQDialectUtil.getHQDialect(conn);
+	public static boolean checkTableExists(Connection conn, String table) throws SQLException {
 
-        Statement stmt = null;
-        boolean exists = false;
+		HQDialect dialect = HQDialectUtil.getHQDialect(conn);
 
-        try {
-            stmt = conn.createStatement();
-            exists = dialect.tableExists(stmt, table);
-        } finally {
-            DBUtil.closeStatement(log, stmt);
-        }
+		Statement stmt = null;
+		boolean exists = false;
 
-        return exists;
-    }
+		try {
+			stmt = conn.createStatement();
+			exists = dialect.tableExists(stmt, table);
+		} finally {
+			DBUtil.closeStatement(log, stmt);
+		}
 
-    public static boolean checkTableExists(String url, String user, String password, String table)
-        throws DriverLoadException, SQLException {
+		return exists;
+	}
 
-        try {
-            Class.forName(JDBC.getDriverString(url)).newInstance();
-        } catch (Exception e) {
-            throw new DriverLoadException(e);
-        }
-        Connection conn = null;
-        try {
-            conn = DriverManager.getConnection(url, user, password);
-            return checkTableExists(conn, table);
+	public static boolean checkTableExists(String url, String user, String password, String table)
+			throws DriverLoadException, SQLException {
 
-        } finally {
-            DBUtil.closeConnection(log, conn);
-        }
-    }
+		try {
+			Class.forName(JDBC.getDriverString(url)).newInstance();
+		} catch (Exception e) {
+			throw new DriverLoadException(e);
+		}
+		Connection conn = null;
+		try {
+			conn = DriverManager.getConnection(url, user, password);
+			return checkTableExists(conn, table);
 
+		} finally {
+			DBUtil.closeConnection(log, conn);
+		}
+	}
+
+	public static boolean checkConnectionExists(String url, String user, String password)  {
+
+		String	driver = JDBC.getDriverString(url);
+		try {
+			JDBC.loadDriver(driver);
+			DriverManager.getConnection(url, user, password);
+		} 
+		catch (Exception e) {
+			return false;
+		}
+		return true;
+	}
+	
 }
