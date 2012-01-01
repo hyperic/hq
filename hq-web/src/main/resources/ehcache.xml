@@ -959,6 +959,14 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
 
+  <!-- DbKeystore cache -->
+  <cache name="org.hyperic.hq.security.server.session.KeystoreEntryImpl"
+         maxElementsInMemory="1000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+
   <!-- UI Plugin caches -->
   <cache name="org.hyperic.hq.hqu.server.session.Attachment"
          maxElementsInMemory="100"
