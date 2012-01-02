@@ -35,21 +35,18 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.action.ExceptionHandler;
 import org.apache.struts.config.ExceptionConfig;
-import org.hyperic.hq.ui.servlet.RenditServlet;
-import org.hyperic.util.StringUtil;
 
 public class UIErrorHandler extends ExceptionHandler
 {
-	private static final Log _log = LogFactory.getLog(RenditServlet.class);
+	private static final Log _log = LogFactory.getLog(UIErrorHandler.class);
 
 	@Override
 	public ActionForward execute(Exception ex, ExceptionConfig ae,
 			ActionMapping mapping, ActionForm formInstance,
 			HttpServletRequest request, HttpServletResponse response)
 					throws ServletException {
-
 		//log the error message
-		_log.error(StringUtil.getStackTrace(ex));
+		_log.error("An exception was thrown for the following request URI '" + request.getRequestURI() + "'  : " , ex);
 
 		return super.execute(ex, ae, mapping, formInstance, request, response);
 	}
