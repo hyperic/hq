@@ -35,7 +35,6 @@ import java.lang.reflect.Type;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -46,13 +45,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.AuthCache;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.params.AuthPolicy;
-import org.apache.http.client.protocol.ClientContext;
-import org.apache.http.impl.auth.BasicScheme;
-import org.apache.http.impl.auth.DigestScheme;
-import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.protocol.BasicHttpContext;
 import org.hyperic.hq.agent.AgentKeystoreConfig;
 import org.hyperic.hq.plugin.jboss7.objects.Connector;
@@ -122,7 +115,7 @@ public final class JBossAdminHttp {
             }
             HttpGet get = new HttpGet(url + api);
             HttpResponse response = client.execute(get, localcontext);
-            int r = response.getStatusLine().getStatusCode();
+            int statusCode = response.getStatusLine().getStatusCode();
             // response must be read in order to "close" the connection.
             // https://jira.hyperic.com/browse/HHQ-5063#comment-154101
             String responseBody = readInputString(response.getEntity().getContent());
@@ -131,8 +124,8 @@ public final class JBossAdminHttp {
                 log.debug("[" + api + "] -(" + get.getURI() + ")-> " + responseBody);
             }
 
-            if (r != 200) {
-                throw new PluginException("[" + get.getURI() + "] http error code: '" + r + "'");
+            if (statusCode != 200) {
+                throw new PluginException("[" + get.getURI() + "] http error code: '" + statusCode + "' msg='" + response.getStatusLine().getReasonPhrase() + "'");
             }
 
             GsonBuilder gsb = new GsonBuilder();
@@ -145,9 +138,9 @@ public final class JBossAdminHttp {
             res = gson.fromJson(responseBody, type);
             if (log.isDebugEnabled()) {
                 if (res.getClass().isArray()) {
-                    log.debug("[" + api + "] -(" + r + ")*> " + Arrays.asList((Object[]) res));
+                    log.debug("[" + api + "] -(" + statusCode + ")*> " + Arrays.asList((Object[]) res));
                 } else {
-                    log.debug("[" + api + "] -(" + r + ")-> " + res);
+                    log.debug("[" + api + "] -(" + statusCode + ")-> " + res);
                 }
             }
         } catch (IOException ex) {
@@ -199,9 +192,9 @@ public final class JBossAdminHttp {
     }
 
     public List<String> getDatasources() throws PluginException {
-        Type type = new TypeToken<HashMap<String, HashMap<String, Object>>>() {
+        Type type = new TypeToken<Map<String, Map<String, Object>>>() {
         }.getType();
-        HashMap<String, HashMap<String, Object>> ds = (HashMap<String, HashMap<String,Object>>) get("/subsystem/datasources", type);
+        Map<String, Map<String, Object>> ds = (Map<String, Map<String, Object>>) get("/subsystem/datasources", type);
         List<String> res = new ArrayList<String>();
         if (ds.get("data-source") != null) {
             res.addAll(ds.get("data-source").keySet());
@@ -227,7 +220,7 @@ public final class JBossAdminHttp {
         return res;
     }
 
-    void getTestConnection() throws PluginException {
+    void testConnection() throws PluginException {
         Type type = new TypeToken<ServerInfo>() {
         }.getType();
         get("/", type);
