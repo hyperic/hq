@@ -129,6 +129,7 @@
         <set-property property="title" value="Alert.Detail"/>
               <exception key="exception.AlertNotFoundException"
                          type="org.hyperic.hq.events.AlertNotFoundException"
+                         handler="org.hyperic.hq.ui.util.UIErrorHandler"
                          path="/common/GenericError.jsp"/>
       </action>
 

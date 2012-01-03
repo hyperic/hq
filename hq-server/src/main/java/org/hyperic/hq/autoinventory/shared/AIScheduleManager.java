@@ -39,7 +39,7 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
 /**
- * Local interface for AIScheduleManager.
+ * Local interface for AIScheduleManager .
  */
 public interface AIScheduleManager {
     /**

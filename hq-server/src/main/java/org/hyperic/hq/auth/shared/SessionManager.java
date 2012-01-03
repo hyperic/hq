@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.auth.shared;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 import org.apache.commons.logging.Log;
@@ -39,8 +41,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class SessionManager {
     private final Log _log = LogFactory.getLog(SessionManager.class);
-    private Random _random = new Random();
-    private IntHashMap _cache = new IntHashMap();
+    private final Random _random = new Random();
+    private final IntHashMap _cache = new IntHashMap();
+    private final Map<String, Integer> _userToSessionId = new HashMap<String, Integer>();
     private static final long DEFAULT_TIMEOUT = 90 * 1000 * 60;
     private static final long HOUR = MeasurementConstants.HOUR;
 
@@ -102,7 +105,7 @@ public class SessionManager {
                 ",sessionId=" + key + ",timeout=" + timeout);
         }
         _cache.put(key, new AuthSession(subject, timeout));
-        
+        _userToSessionId.put(subject.getName(), key);
         return key;
     }
 
@@ -113,40 +116,22 @@ public class SessionManager {
      * @return sessionId 
      */
     public synchronized int getIdFromUsername (String username) 
-        throws SessionNotFoundException, SessionTimeoutException
-    {
-        int sessionId = -1;
+    		throws SessionNotFoundException, SessionTimeoutException {
+    	
+    	Integer sessionId = _userToSessionId.get(username);
+    	if (null != sessionId) {
+    		AuthSession session = (AuthSession) _cache.get(sessionId);
+    		// check expiration...
+    		if (session.isExpired()) {
+    			invalidate(sessionId);
+    			throw new SessionTimeoutException();
+    		} 
+    	}
+    	else {
+    		throw new SessionNotFoundException();
+    	}
+    	return sessionId;
 
-        try {
-            int[] keys = _cache.getKeys();
-
-            // iterate existing sessions look for matching username
-            for (int i = 0; i < keys.length; i++) {
-                int sessKey = keys[i];
-
-                AuthSession session = (AuthSession) _cache.get(sessKey);
-                // If found...
-                if (session.getAuthzSubject().getName().equals(username)) {
-
-                    // check expiration...
-                    if (session.isExpired()) {
-                        invalidate(sessionId);
-                        throw new SessionTimeoutException();
-                    } else
-                        return sessKey; // short circuit for efficiency.
-                }
-            } // end while
-        } catch (NullPointerException e) {
-            // this shouldn't ever happen since their will always be atleast
-            // one session (belonging to authzsubject) in cache.
-            _log.error(e, e);
-        }
-
-        // If the session not found, then throw exception.
-        if (sessionId < 0) {
-            throw new SessionNotFoundException();
-        }
-        return sessionId;
     }
 
     /**
@@ -200,17 +185,18 @@ public class SessionManager {
      * @param sessionId The session id
      */
     public synchronized void invalidate(int sessionId) {
-        AuthSession sess = (AuthSession)_cache.remove(sessionId);
-        if (_log.isDebugEnabled()) {
-        	String name = null;
-        	
-        	if (sess != null && sess.getAuthzSubject() != null) {
-        		name = sess.getAuthzSubject().getName();
-        	}
-        	
-            _log.debug("removed session sessionId=" + sessionId +
-                ",user=" + name);
-        }
+    	String name = null;	
+    	AuthSession sess = (AuthSession)_cache.remove(sessionId);
+    	if (sess != null && sess.getAuthzSubject() != null) 
+    		name = sess.getAuthzSubject().getName();
+    	
+    	if (null != name)
+    		_userToSessionId.remove(name);
+    	
+    	if (_log.isDebugEnabled()) {
+    		_log.debug("removed session sessionId=" + sessionId +
+    				",user=" + name);
+    	}
     }
     
     private synchronized int cleanupExpired() {

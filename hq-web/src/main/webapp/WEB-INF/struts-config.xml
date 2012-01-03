@@ -276,27 +276,32 @@
   <global-exceptions>
         <exception
             key="exception.ParameterNotFoundException"
-            type="org.hyperic.hq.ui.exception.ParameterNotFoundException"                  
+            type="org.hyperic.hq.ui.exception.ParameterNotFoundException"  
+            handler="org.hyperic.hq.ui.util.UIErrorHandler"                
             path="/common/GenericError.jsp"/>
             
         <exception
             key="exception.ObjectNotFoundException"
-            type="org.hyperic.hq.common.ObjectNotFoundException"                  
+            type="org.hyperic.hq.common.ObjectNotFoundException"
+            handler="org.hyperic.hq.ui.util.UIErrorHandler"                  
             path="/common/GenericError.jsp"/>
             
         <exception
             key="exception.DuplicateObjectException"
-            type="org.hyperic.hq.common.DuplicateObjectException"                  
+            type="org.hyperic.hq.common.DuplicateObjectException"        
+            handler="org.hyperic.hq.ui.util.UIErrorHandler"          
             path="/common/GenericError.jsp"/>
  
         <exception
             key="exception.CreateFailedException"
-            type="org.hyperic.hq.common.CreateFailedException"                  
+            type="org.hyperic.hq.common.CreateFailedException"  
+            handler="org.hyperic.hq.ui.util.UIErrorHandler"                
             path="/common/GenericError.jsp"/>
             
         <exception
             key="exception.PermissionException"
-            type="org.hyperic.hq.authz.shared.PermissionException"                  
+            type="org.hyperic.hq.authz.shared.PermissionException" 
+            handler="org.hyperic.hq.ui.util.UIErrorHandler"                 
             path="/common/NoRights.jsp"/>   
 
         <exception
@@ -311,7 +316,8 @@
                                          
         <exception
             key="exception.SystemException"
-            type="org.hyperic.hq.common.SystemException"                  
+            type="org.hyperic.hq.common.SystemException"    
+            handler="org.hyperic.hq.ui.util.UIErrorHandler"              
             path="/common/GenericError.jsp"/>
             
         <exception
@@ -322,45 +328,54 @@
         <exception
             key="exception.InvalidOptionException"
             type="org.hyperic.util.config.InvalidOptionException"
+            handler="org.hyperic.hq.ui.util.UIErrorHandler"
             path="/common/GenericError.jsp"/>
         
         <exception
             key="org.hyperic.util.config.InvalidOptionValueException"
             type="org.hyperic.util.config.InvalidOptionException"
+            handler="org.hyperic.hq.ui.util.UIErrorHandler"
             path="/common/GenericError.jsp"/>    
         <exception
             key="resource.application.inventory.error.RemoveServices"
             type="org.hyperic.hq.appdef.shared.ApplicationNotFoundException"
+            handler="org.hyperic.hq.ui.util.UIErrorHandler"
             path="/common/GenericError.jsp"/>    
         
         <exception
             key="resource.application.inventory.error.RemoveServices"
             type="org.hyperic.hq.product.ConfigFetchException"
+            handler="org.hyperic.hq.ui.util.UIErrorHandler"
             path="/common/GenericError.jsp"/>
         
         <exception
             key="resource.common.error.ControlNotEnabled"
             type="org.hyperic.hq.product.ControlPluginException"
+            handler="org.hyperic.hq.ui.util.UIErrorHandler"
             path="/common/GenericError.jsp"/>
         
         <exception
             key="resource.common.error.PluginNotFound"
             type="org.hyperic.hq.product.PluginNotFoundException"
+            handler="org.hyperic.hq.ui.util.UIErrorHandler"
             path="/common/GenericError.jsp"/>                                        
             
         <exception
             key="resource.common.error.ConfigError"
             type="org.hyperic.hq.product.ProductPluginException"
+            handler="org.hyperic.hq.ui.util.UIErrorHandler"
             path="/common/GenericError.jsp"/>    
             
         <exception
             key="resource.common.error.ConfigError"
             type="org.hyperic.util.config.EncodingException"
+            handler="org.hyperic.hq.ui.util.UIErrorHandler"
             path="/common/GenericError.jsp"/>
             
         <exception
             key="exception.Exception"
             type="java.lang.Exception"
+            handler="org.hyperic.hq.ui.util.UIErrorHandler"
             path="/common/GenericError.jsp"/>        
   </global-exceptions>
         
