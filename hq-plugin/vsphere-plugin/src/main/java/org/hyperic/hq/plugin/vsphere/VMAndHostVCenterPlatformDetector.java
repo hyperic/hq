@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.plugin.vsphere;
 
+import com.vmware.vim25.mo.Datastore;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -54,6 +55,8 @@ import org.hyperic.hq.hqapi1.types.ResourceInfo;
 import org.hyperic.hq.hqapi1.types.ResourceProperty;
 import org.hyperic.hq.hqapi1.types.ResourcePrototype;
 import org.hyperic.hq.hqapi1.types.ResourcePrototypeResponse;
+import org.hyperic.hq.hqapi1.types.ResourcePrototypesResponse;
+import org.hyperic.hq.hqapi1.types.ResourceResponse;
 import org.hyperic.hq.hqapi1.types.ResourceTo;
 import org.hyperic.hq.hqapi1.types.ResourcesResponse;
 import org.hyperic.hq.hqapi1.types.Response;
@@ -84,6 +87,7 @@ import com.vmware.vim25.mo.HostSystem;
 import com.vmware.vim25.mo.ManagedEntity;
 import com.vmware.vim25.mo.ResourcePool;
 import com.vmware.vim25.mo.VirtualMachine;
+import java.util.Arrays;
 
 /**
  * HQApi based auto-discovery for vSphere Host and VM platform types. 
@@ -93,6 +97,8 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
     static final String VC_TYPE = AuthzConstants.serverPrototypeVmwareVcenter;
     static final String VM_TYPE = AuthzConstants.platformPrototypeVmwareVsphereVm;
     static final String HOST_TYPE = AuthzConstants.platformPrototypeVmwareVsphereHost;
+    static final String HOST_DS_TYPE = "VMware vSphere Host DS";
+    static final String VM_DS_TYPE = "VMware vSphere VM DS";
     static final String ESX_HOST = "esxHost";
 
     private static final Log log = LogFactory.getLog(VMAndHostVCenterPlatformDetector.class);
@@ -103,6 +109,7 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
         throws PluginException {
 
         if (ResponseStatus.SUCCESS.equals(response.getStatus())) {
+            log.debug(msg + " OK");
             return;
         }
         String reason;
@@ -167,6 +174,11 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
         throws IOException, PluginException {
 
         ResourceApi api = hqApi.getResourceApi();
+//        List<ResourcePrototype> tps = api.getResourcePrototypes().getResourcePrototype();
+//        for (ResourcePrototype type : tps) {
+//            log.debug(type.getName()+" -> "+type.getId());
+//        }
+//        
         ResourcePrototypeResponse rpr =
             api.getResourcePrototype(name);
         assertSuccess(rpr, "getResourcePrototype(" + name + ")", true);
@@ -228,53 +240,47 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
             if (nics != null) {
                 for (int i=0; i<nics.length; i++) {
                     String mac = nics[i].getMacAddress();
-                    if (mac.equals("00:00:00:00:00:00")) {
-                        log.info("Skipping " + VM_TYPE + "[name=" + info.getName()
-                          + ", UUID=" + uuid
-                          + ", NIC=" + nics[i].getIpAddress()
-                          + ", MAC=" + mac
-                          + "]. Will be re-discovered when the MAC address is valid.");
-                        return null;
-                    }
                     String[] ips = nics[i].getIpAddress();
-                    if ((mac != null) && (ips != null) && (ips.length != 0)) {
+                    if (mac != null) {
                         cprops.setValue("macAddress", mac);
-                        cprops.setValue("ip", ips[0]);
-                        platform.addIp(ips[0], "", mac);
+                        if ((ips != null) && (ips.length != 0)) {
+                            cprops.setValue("ip", ips[0]);
+                            platform.addIp(ips[0], "", mac);
+                            log.info("MAC="+mac+" IP="+ips[0]+" : " + VM_TYPE + "[name=" + info.getName() + ", UUID=" + uuid);
+                        } else {
+                            platform.addIp("N/A", "", mac);
+                            log.info("MAC="+mac+" No IP info for: " + VM_TYPE + "[name=" + info.getName() + ", UUID=" + uuid);
+                        }
+                    } else {
+                        log.info("No MAC info for: " + VM_TYPE + "[name=" + info.getName() + ", UUID=" + uuid);
                     }
                 }
+            } else {
+                log.info("No network info for: " + VM_TYPE + "[name=" + info.getName() + ", UUID=" + uuid);
             }
-            if (platform.getIp().isEmpty()) {
-                log.info("Skipping " + VM_TYPE + "[name=" + info.getName()
+
+            ManagedObjectReference hmor = runtime.getHost();
+            if (hmor != null) {
+                HostSystem host = new HostSystem(vm.getServerConnection(), hmor);
+                cprops.setValue(ESX_HOST, host.getName());
+            }
+
+            platform.addProperties(cprops);
+
+            if (log.isDebugEnabled()) {
+                log.debug("Discovered " + VM_TYPE + "[name=" + info.getName()
+                        + ", UUID=" + uuid
+                        + ", powerState=" + state + "]");
+            }
+
+            return platform;
+        } else {
+            log.info("Skipping " + VM_TYPE + "[name=" + info.getName()
                     + ", UUID=" + uuid
-                    + "] because the MAC address does not exist. "
-                    + "Will be re-discovered when the MAC address is valid.");
-                return null;
-            }
-        }
-        else {
-            log.info("Skipping " + VM_TYPE + "[name=" + info.getName() 
-                + ", UUID=" + uuid
-                + ", powerState=" + state + "]. "
-                + "Will be re-discovered when it is powered on.");
+                    + ", powerState=" + state + "]. "
+                    + "Will be re-discovered when it is powered on.");
             return null;
         }
-
-        ManagedObjectReference hmor = runtime.getHost();
-        if (hmor != null) {
-            HostSystem host = new HostSystem(vm.getServerConnection(), hmor);
-            cprops.setValue(ESX_HOST, host.getName());
-        }
-
-        platform.addProperties(cprops);
-        
-        if (log.isDebugEnabled()) {
-            log.debug("Discovered " + VM_TYPE + "[name=" + info.getName()
-                          + ", UUID=" + uuid
-                          + ", powerState=" + state + "]");
-        }
-        
-        return platform;
     }
     
    
@@ -387,6 +393,8 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
         List<Resource> resources = new ArrayList<Resource>();
         ResourcePrototype hostType = getResourceType(HOST_TYPE, hqApi);
         ResourcePrototype vmType = getResourceType(VM_TYPE, hqApi);
+        ResourcePrototype hdsType = getResourceType(HOST_DS_TYPE, hqApi);
+        ResourcePrototype vmdsType = getResourceType(VM_DS_TYPE, hqApi);
 
         try {
             ManagedEntity[] hosts = vim.find(VSphereUtil.HOST_SYSTEM);
@@ -408,15 +416,53 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
                     platform.setAgent(agent);
                     mergeVSphereConfig(platform, props);
                     
+                    Datastore[] datastores = host.getDatastores();
+                    for (Datastore datastore : datastores) {
+                        Resource ds=new Resource();
+                        ds.setName(platform.getName() + " " + HOST_DS_TYPE + " " + datastore.getName());
+                        ds.setResourcePrototype(hdsType);
+
+                        List<String> urlComponents = Arrays.asList(datastore.getInfo().getUrl().split("/"));
+                        ResourceProperty prop = new ResourceProperty();
+                        prop.setKey("id");
+                        prop.setValue(urlComponents.get(urlComponents.size() - 1));
+                        ds.getResourceProperty().add(prop);
+
+                        platform.getResource().add(ds);
+                        log.debug("## HOST #### " + datastore.getName());
+                        log.debug("############ " + urlComponents);
+                        log.debug("############ " + datastore.getInfo().getDynamicType());
+                        log.debug("############ " + datastore.getInfo().getFreeSpace());
+                        log.debug("############ " + datastore.getInfo().getMaxFileSize());
+                    }
+                    
                     VirtualMachine[] hostVms = host.getVms();
                    
-                    for (int v=0; v<hostVms.length; v++) {
+                    for (int v = 0; v < hostVms.length; v++) {
                         VSphereResource vm = discoverVM(hostVms[v]);
                         if (vm != null) {
                             vm.setResourcePrototype(vmType);
                             vm.setAgent(agent);
                             mergeVSphereConfig(vm, props);
                             platform.getVirtualMachines().add(vm);
+                            datastores = hostVms[v].getDatastores();
+                            for (Datastore datastore : datastores) {
+                                Resource ds = new Resource();
+                                ds.setName(vm.getName() + " " + VM_DS_TYPE + " " + datastore.getName());
+                                ds.setResourcePrototype(vmdsType);
+
+                                List<String> urlComponents = Arrays.asList(datastore.getInfo().getUrl().split("/"));
+                                ResourceProperty prop = new ResourceProperty();
+                                prop.setKey("id");
+                                prop.setValue(urlComponents.get(urlComponents.size() - 1));
+                                ds.getResourceProperty().add(prop);
+
+                                vm.getResource().add(ds);
+
+                                log.debug("## VM ###### " + datastore.getName());
+                                log.debug("############ " + datastore.getInfo().getFreeSpace());
+                                log.debug("############ " + datastore.getInfo().getMaxFileSize());
+                            }
                         }
                     }
                     
@@ -486,12 +532,36 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
                 if (debug) watch.markTimeEnd("syncVms");
                 assertSuccess(response, "sync " + vms.size() + " VMs", false);
 
+//                List<Resource> vmPlatforms = new ArrayList<Resource>();
+//                for (VSphereResource vm : vms) {
+//                    ResourceResponse p = api.getPlatformResource(vm.getName(), false, false);
+//                    assertSuccess(p, "looking for " + vm.getName() + " VM", false);
+//                    Resource platform = p.getResource();
+//                    log.debug("-> name=" + platform.getName() + " id=" +platform.getId() + " ("+platform.getClass().getName()+")");
+//                    vm.getResource().addAll(vm.getDataSources());
+//                    vmPlatforms.add(vm);
+//                }
+//                response = api.syncResources(vmPlatforms);
+//                assertSuccess(response, "sync " + vmPlatforms.size() + " VM (DS)", false);
+                
                 if (debug) watch.markTimeBegin("syncHosts");
                 response = api.syncResources(hosts);
                 if (debug) watch.markTimeEnd("syncHosts");
                 assertSuccess(response, "sync " + hosts.size() + " Hosts", false);
                 
-              	Map<String, Resource> existingHosts = new HashMap<String, Resource>();
+//                List<Resource> hostsPlatforms = new ArrayList<Resource>(); 
+//                for (VSphereHostResource host : hosts) {
+//                    ResourceResponse p = api.getPlatformResource(host.getName(), false, false);
+//                    assertSuccess(p, "looking for " + host.getName() + " Host", false);
+//                    Resource platform = p.getResource();
+//                    log.debug("-> name=" + platform.getName() + " id=" +platform.getId() + " ("+platform.getClass().getName()+")");
+//                    platform.getResource().addAll(host.getDataSources());
+//                    hostsPlatforms.add(platform);
+//                }
+//                response = api.syncResources(hostsPlatforms);
+//                assertSuccess(response, "sync " + hostsPlatforms.size() + " hosts (DS)", false);
+//
+                Map<String, Resource> existingHosts = new HashMap<String, Resource>();
                 Map<String, List<Resource>> existingHostVms = new HashMap<String, List<Resource>>();
                 
                 if (debug) watch.markTimeBegin("syncResourceEdges");

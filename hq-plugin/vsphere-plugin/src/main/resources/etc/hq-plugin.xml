@@ -246,6 +246,26 @@
             alias="mem.sysUsage.average"
             units="KB"/>
 
+        <server name="VMware vSphere Host DS">
+            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+            <plugin type="collector"   class="org.hyperic.hq.plugin.vsphere.VSphereHostCollector"/>
+            <config>
+                <option name="id" description="DataSource ID"/>
+            </config>
+            <property name="template" value="${host.template}:${alias}.%id%"/>
+            <metric name="Availability" indicator="true"/>
+            <metric name="numberReadAveraged" alias="datastore.numberReadAveraged.average3" units="KB"/>
+            <metric name="numberWriteAveraged" alias="datastore.numberWriteAveraged.average" units="KB"/>
+            <metric name="totalReadLatency" alias="datastore.totalReadLatency.average" units="KB"/>
+            <metric name="totalWriteLatency" alias="datastore.totalWriteLatency.average" units="KB"/>
+            <metric name="datastoreIops" alias="datastore.datastoreIops.averag." units="KB"/>
+            <metric name="sizeNormalizedDatastoreLatency" alias="datastore.sizeNormalizedDatastoreLatency.average" units="KB"/>
+            <metric name="datastoreReadIops" alias="datastore.datastoreReadIops.latest" units="KB"/>
+            <metric name="datastoreWriteIops" alias="datastore.datastoreWriteIops.latest" units="KB"/>
+            <metric name="datastoreReadOIO" alias="datastore.datastoreReadOIO.latest" units="KB"/>
+            <metric name="datastoreWriteOIO" alias="datastore.datastoreWriteOIO.latest" units="KB"/>
+            <metric name="datastoreMaxQueueDepth" alias="datastore.datastoreMaxQueueDepth.latest" units="KB"/>
+        </server>
   </platform>
 
   <platform name="VMware vSphere VM">
@@ -417,6 +437,20 @@
     <metric name="Memory Consumed"
             alias="mem.consumed.average"
             units="KB"/>
+            
+        <server name="VMware vSphere VM DS">
+            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+            <plugin type="collector"   class="org.hyperic.hq.plugin.vsphere.VSphereVmCollector"/>
+            <config>
+                <option name="id" description="DataSource ID"/>
+            </config>
+            <property name="template" value="${host.template}:${alias}.%id%"/>
+            <metric name="Availability" indicator="true"/>
+            <metric name="Read Averaged" alias="datastore.numberReadAveraged.average" units="KB"/>
+            <metric name="Write Averaged" alias="datastore.numberWriteAveraged.average" units="KB"/>
+            <metric name="Read Latency" alias="datastore.totalReadLatency.average" units="KB"/>
+            <metric name="Write Latency" alias="datastore.totalWriteLatency.average" units="KB"/>
+        </server>
   </platform>
 
   <server name="VMware vCenter">
