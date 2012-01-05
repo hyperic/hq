@@ -123,8 +123,10 @@
           </c:choose>
       <html:hidden property="order"/>
       <tiles:insert definition=".form.buttons">
-        <tiles:put name="noCancel" value="true"/>
+       <c:if test='${not sessionScope.modifyDashboard}'>
+        <tiles:put name="cancelOnly" value="true"/>
         <tiles:put name="noReset" value="true"/>
+      </c:if>
       </tiles:insert>
       </html:form>
 
