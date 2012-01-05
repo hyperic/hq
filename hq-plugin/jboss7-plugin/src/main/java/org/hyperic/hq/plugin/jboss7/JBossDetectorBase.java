@@ -73,7 +73,7 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
         long[] pids = getPids(getPidsQuery());
         log.debug("[getServerResources] pids.length:" + pids.length);
         for (long pid : pids) {
-            HashMap<String, String> args = parseArgs(getProcArgs(pid));
+            Map<String, String> args = parseArgs(getProcArgs(pid));
             String version = getVersion(args);
             log.debug("[getServerResources] pid='" + pid + "' version='" + version + "'");
             if (version.startsWith(getTypeInfo().getVersion())) {
@@ -199,7 +199,7 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
         return name;
     }
 
-    final String parseAddress(String address, HashMap<String, String> args) {
+    final String parseAddress(String address, Map<String, String> args) {
         if (address.startsWith("${")) {
             address = address.substring(2, address.length() - 1);
             if (address.contains(":")) {
@@ -215,7 +215,7 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
         return address;
     }
 
-    final String getVersion(HashMap<String, String> args) {
+    final String getVersion(Map<String, String> args) {
         String version = "not found";
 
         String mp = args.get("mp");
@@ -249,8 +249,8 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
         return version;
     }
 
-    private static HashMap<String, String> parseArgs(String args[]) {
-        HashMap<String, String> props = new HashMap<String, String>();
+    private static Map<String, String> parseArgs(String args[]) {
+        Map<String, String> props = new HashMap<String, String>();
         for (int n = 0; n < args.length; n++) {
             if (args[n].startsWith("-X")) {
             } else if ((args[n].startsWith("-D") || args[n].startsWith("--")) && args[n].contains("=")) {
@@ -266,7 +266,7 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
         return props;
     }
 
-    final ConfigResponse getServerProductConfig(HashMap<String, String> args) {
+    final ConfigResponse getServerProductConfig(Map<String, String> args) {
         ConfigResponse cfg = new ConfigResponse();
         String port = null;
         String address = null;
@@ -317,7 +317,7 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
     void setUpExtraProductConfig(ConfigResponse cfg, Document doc) throws XPathException {
     }
 
-    final File getConfigFile(HashMap<String, String> args) {
+    final File getConfigFile(Map<String, String> args) {
         String serverConfig = args.get("server-config");
         if (serverConfig == null) {
             serverConfig = getDefaultConfigName();

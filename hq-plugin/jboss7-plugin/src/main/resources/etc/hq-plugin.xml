@@ -87,7 +87,7 @@
         <service name="Datasource">
             <plugin type="collector" class="org.hyperic.hq.plugin.jboss7.DataSourceCollector"/>
             <config>
-                <option name="name" description="********"/>
+                <option name="name" description="DataSource Name"/>
             </config>
             <properties>
                 <property name="jndi" description="JNDI Name"/>
@@ -118,7 +118,7 @@
         <service name="Connector">
             <plugin type="collector" class="org.hyperic.hq.plugin.jboss7.ConnectorCollector"/>
             <config>
-                <option name="name" description="********"/>
+                <option name="name" description="Connector Name"/>
             </config>
             <properties>
                 <property name="protocol" description="protocol"/>
@@ -136,7 +136,7 @@
         <service name="deployment">
             <plugin type="collector" class="org.hyperic.hq.plugin.jboss7.DeploymentCollector"/>
             <config>
-                <option name="name" description="********"/>
+                <option name="name" description="Deployment Name"/>
             </config>
             <properties>
                 <property name="runtime-name" description="runtime-name"/>
