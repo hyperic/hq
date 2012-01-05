@@ -429,11 +429,10 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
                         ds.getResourceProperty().add(prop);
 
                         platform.getResource().add(ds);
-                        log.debug("## HOST #### " + datastore.getName());
-                        log.debug("############ " + urlComponents);
-                        log.debug("############ " + datastore.getInfo().getDynamicType());
-                        log.debug("############ " + datastore.getInfo().getFreeSpace());
-                        log.debug("############ " + datastore.getInfo().getMaxFileSize());
+                        if (log.isDebugEnabled()) {
+                            log.debug("Discovered " + HOST_DS_TYPE + "[name=" + ds.getName()
+                                    + ", host=" + host.getName() + "]");
+                        }
                     }
                     
                     VirtualMachine[] hostVms = host.getVms();
@@ -458,10 +457,11 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
                                 ds.getResourceProperty().add(prop);
 
                                 vm.getResource().add(ds);
-
-                                log.debug("## VM ###### " + datastore.getName());
-                                log.debug("############ " + datastore.getInfo().getFreeSpace());
-                                log.debug("############ " + datastore.getInfo().getMaxFileSize());
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Discovered " + VM_DS_TYPE + "[name=" + ds.getName()
+                                            + ", host=" + host.getName()
+                                            + ", vm=" + vm.getName() + "]");
+                                }
                             }
                         }
                     }
@@ -532,35 +532,11 @@ public class VMAndHostVCenterPlatformDetector implements VCenterPlatformDetector
                 if (debug) watch.markTimeEnd("syncVms");
                 assertSuccess(response, "sync " + vms.size() + " VMs", false);
 
-//                List<Resource> vmPlatforms = new ArrayList<Resource>();
-//                for (VSphereResource vm : vms) {
-//                    ResourceResponse p = api.getPlatformResource(vm.getName(), false, false);
-//                    assertSuccess(p, "looking for " + vm.getName() + " VM", false);
-//                    Resource platform = p.getResource();
-//                    log.debug("-> name=" + platform.getName() + " id=" +platform.getId() + " ("+platform.getClass().getName()+")");
-//                    vm.getResource().addAll(vm.getDataSources());
-//                    vmPlatforms.add(vm);
-//                }
-//                response = api.syncResources(vmPlatforms);
-//                assertSuccess(response, "sync " + vmPlatforms.size() + " VM (DS)", false);
-                
                 if (debug) watch.markTimeBegin("syncHosts");
                 response = api.syncResources(hosts);
                 if (debug) watch.markTimeEnd("syncHosts");
                 assertSuccess(response, "sync " + hosts.size() + " Hosts", false);
                 
-//                List<Resource> hostsPlatforms = new ArrayList<Resource>(); 
-//                for (VSphereHostResource host : hosts) {
-//                    ResourceResponse p = api.getPlatformResource(host.getName(), false, false);
-//                    assertSuccess(p, "looking for " + host.getName() + " Host", false);
-//                    Resource platform = p.getResource();
-//                    log.debug("-> name=" + platform.getName() + " id=" +platform.getId() + " ("+platform.getClass().getName()+")");
-//                    platform.getResource().addAll(host.getDataSources());
-//                    hostsPlatforms.add(platform);
-//                }
-//                response = api.syncResources(hostsPlatforms);
-//                assertSuccess(response, "sync " + hostsPlatforms.size() + " hosts (DS)", false);
-//
                 Map<String, Resource> existingHosts = new HashMap<String, Resource>();
                 Map<String, List<Resource>> existingHostVms = new HashMap<String, List<Resource>>();
                 

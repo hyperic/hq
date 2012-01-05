@@ -109,7 +109,6 @@ public class VSphereHostCollector extends VSphereCollector {
     }
     
     protected void init() throws PluginException {
-        _log.debug("[init] cfg="+getProperties());
         super.init();
     }
 
@@ -216,7 +215,6 @@ public class VSphereHostCollector extends VSphereCollector {
             String instance = series.getId().getInstance();
             if (instance.length() != 0) {
                 //CPU,NIC,Disk
-//                _log.debug("[collect] instance='"+instance+"'");
                 instance = instance.replaceAll(":", "_");
                 key += "." + instance;
                 setValue(Metric.ATTR_AVAIL + "." + instance, Metric.AVAIL_UP); //XXX
@@ -225,8 +223,6 @@ public class VSphereHostCollector extends VSphereCollector {
             if (info.getUnitInfo().getLabel().equals("Percent")) {
                 val /= 100;
             }
-            
-            _log.debug("[collect] key='"+key+"' val='"+val+"'");
             
             String type = info.getStatsType().toString();
             if (type.equals("absolute") ||
