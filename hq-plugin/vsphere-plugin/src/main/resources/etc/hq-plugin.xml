@@ -254,17 +254,43 @@
             </config>
             <property name="template" value="${host.template}:${alias}.%id%"/>
             <metric name="Availability" indicator="true"/>
-            <metric name="numberReadAveraged" alias="datastore.numberReadAveraged.average3" units="KB"/>
-            <metric name="numberWriteAveraged" alias="datastore.numberWriteAveraged.average" units="KB"/>
-            <metric name="totalReadLatency" alias="datastore.totalReadLatency.average" units="KB"/>
-            <metric name="totalWriteLatency" alias="datastore.totalWriteLatency.average" units="KB"/>
-            <metric name="datastoreIops" alias="datastore.datastoreIops.averag." units="KB"/>
-            <metric name="sizeNormalizedDatastoreLatency" alias="datastore.sizeNormalizedDatastoreLatency.average" units="KB"/>
-            <metric name="datastoreReadIops" alias="datastore.datastoreReadIops.latest" units="KB"/>
-            <metric name="datastoreWriteIops" alias="datastore.datastoreWriteIops.latest" units="KB"/>
-            <metric name="datastoreReadOIO" alias="datastore.datastoreReadOIO.latest" units="KB"/>
-            <metric name="datastoreWriteOIO" alias="datastore.datastoreWriteOIO.latest" units="KB"/>
-            <metric name="datastoreMaxQueueDepth" alias="datastore.datastoreMaxQueueDepth.latest" units="KB"/>
+            <metric name="Average read requests per second"
+                    alias="datastore.numberReadAveraged.average"
+                    indicator="true"
+                    units="none"/>
+            <metric name="Average write requests per second"
+                    alias="datastore.numberWriteAveraged.average"
+                    indicator="true"
+                    units="none"/>
+            <metric name="Read latency"
+                    alias="datastore.totalReadLatency.average"
+                    indicator="true"
+                    units="ms"/>
+            <metric name="Write latency"
+                    alias="datastore.totalWriteLatency.average"
+                    indicator="true"
+                    units="ms"/>
+            <metric name="Storage I/O Control aggregated IOPS"
+                    alias="datastore.datastoreIops.average"
+                    units="none"/>
+            <metric name="Storage I/O Control normalized latency"
+                    alias="datastore.sizeNormalizedDatastoreLatency.average"
+                    units="none"/>
+            <metric name="Storage DRS datastore read I/O rate"
+                    alias="datastore.datastoreReadIops.latest"
+                    units="none"/>
+            <metric name="Storage DRS datastore write I/O rate"
+                    alias="datastore.datastoreWriteIops.latest"
+                    units="none"/>
+            <metric name="Storage DRS datastore outstanding read requests"
+                    alias="datastore.datastoreReadOIO.latest"
+                    units="none"/>
+            <metric name="Storage DRS datastore outstanding write requests"
+                    alias="datastore.datastoreWriteOIO.latest"
+                    units="none"/>
+            <metric name="Storage I/O Control datastore maximum queue depth"
+                    alias="datastore.datastoreMaxQueueDepth.latest"
+                    units="none"/>
         </server>
   </platform>
 
@@ -446,10 +472,22 @@
             </config>
             <property name="template" value="${host.template}:${alias}.%id%"/>
             <metric name="Availability" indicator="true"/>
-            <metric name="Read Averaged" alias="datastore.numberReadAveraged.average" units="KB"/>
-            <metric name="Write Averaged" alias="datastore.numberWriteAveraged.average" units="KB"/>
-            <metric name="Read Latency" alias="datastore.totalReadLatency.average" units="KB"/>
-            <metric name="Write Latency" alias="datastore.totalWriteLatency.average" units="KB"/>
+            <metric name="Average read requests per second"
+                    alias="datastore.numberReadAveraged.average"
+                    indicator="true"
+                    units="none"/>
+            <metric name="Average write requests per second"
+                    alias="datastore.numberWriteAveraged.average"
+                    indicator="true"
+                    units="none"/>
+            <metric name="Read latency"
+                    alias="datastore.totalReadLatency.average"
+                    indicator="true"
+                    units="ms"/>
+            <metric name="Write latency"
+                    alias="datastore.totalWriteLatency.average"
+                    indicator="true"
+                    units="ms"/>
         </server>
   </platform>
 
