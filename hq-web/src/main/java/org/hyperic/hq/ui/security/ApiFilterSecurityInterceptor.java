@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  *  "derived work".
  *
- *  Copyright (C) [2009-2010], VMware, Inc.
+ *  Copyright (C) [2009-2012], VMware, Inc.
  *  This file is part of HQ.
  *
  *  HQ is free software; you can redistribute it and/or modify
@@ -41,11 +41,10 @@ import org.springframework.security.web.access.intercept.FilterSecurityIntercept
 public class ApiFilterSecurityInterceptor extends FilterSecurityInterceptor 
 {
 	private final SessionManager _sessionManager;
-	 private final Log log = LogFactory.getLog(ApiFilterSecurityInterceptor.class);
+	private final Log log = LogFactory.getLog(ApiFilterSecurityInterceptor.class);
 	 
 	@Autowired
-	public ApiFilterSecurityInterceptor(SessionManager sessionManager)
-	{
+	public ApiFilterSecurityInterceptor(SessionManager sessionManager) {
 		_sessionManager = sessionManager;
 	}
 
