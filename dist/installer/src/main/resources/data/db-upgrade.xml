@@ -11781,7 +11781,19 @@ has already been defined.
 	        </statement>
 	    </schema-directSQL>
 	 </schemaSpec>
-
+	  <schemaSpec version="3.209">
+	        <schema-directSQL>
+	            <statement targetDB="mysql">
+	                ALTER TABLE EAM_KEYSTORE ADD COLUMN FILE BLOB 
+	            </statement>
+	            <statement targetDB="postgresql">
+	                ALTER TABLE EAM_KEYSTORE ADD COLUMN FILE bytea 
+	            </statement>
+	            <statement targetDB="oracle">
+	                ALTER TABLE EAM_KEYSTORE ADD COLUMN FILE BLOB 
+	            </statement>
+	        </schema-directSQL>
+	   </schemaSpec>
 </dbupgrade>
 </target>
 </project>
