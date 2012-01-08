@@ -11738,53 +11738,10 @@ has already been defined.
         </statement>
     </schema-directSQL>
  </schemaSpec> 
-	<schemaSpec version="3.208">
-	    <schema-directSQL>
-	        <statement targetDB="mysql">
-	            alter table EAM_KEYSTORE (
-	                ID integer not null,
-	                ALIAS_NAME varchar(128) not null,
-	                TYPE varchar(32) not null,
-	                CERT varchar(4000) not null,
-	                CERT_CHAIN varchar(4000),
-	                primary key (ID),
-	                unique (ALIAS_NAME)
-	            )
-	        </statement>
-	        <statement targetDB="postgresql">
-	            create table EAM_KEYSTORE (
-	                ID int4 not null,
-	                ALIAS_NAME varchar(128) not null,
-	                TYPE varchar(32) not null,
-	                CERT varchar(4000) not null,
-	                CERT_CHAIN varchar(4000),
-	                primary key (ID),
-	                unique (ALIAS_NAME)
-	            )
-	        </statement>
-	        <statement targetDB="postgresql">
-	            create sequence EAM_KEYSTORE_ID_SEQ start 10001 increment 1
-	        </statement>
-	        <statement targetDB="oracle">
-	            create table EAM_KEYSTORE (
-	                ID number(10,0) not null,
-	                ALIAS_NAME varchar2(128 char) not null,
-	                TYPE varchar2(32 char) not null,
-	                CERT varchar2(4000 char) not null,
-	                CERT_CHAIN varchar2(4000 char),
-	                primary key (ID),
-	                unique (ALIAS_NAME)
-	            )
-	        </statement>
-	        <statement targetDB="oracle">
-	            create sequence EAM_KEYSTORE_ID_SEQ start with 10001 increment by 1  cache 100
-	        </statement>
-	    </schema-directSQL>
-	 </schemaSpec>
-	  <schemaSpec version="3.209">
-	        <schema-directSQL>
+ <schemaSpec version="3.209">
+	   <schema-directSQL>
 	            <statement targetDB="mysql">
-	                ALTER TABLE EAM_KEYSTORE ADD COLUMN FILE BLOB 
+	              ALTER TABLE EAM_KEYSTORE ADD COLUMN FILE BLOB 
 	            </statement>
 	            <statement targetDB="postgresql">
 	                ALTER TABLE EAM_KEYSTORE ADD COLUMN FILE bytea 
