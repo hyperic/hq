@@ -354,6 +354,8 @@
       <config>
         <option name="table"
                 description="Table Name"/>
+        <option name="schema"
+                description="Schema Name"/>                
       </config>
 
       <metrics include="pg-table"/>
@@ -368,6 +370,8 @@
       <config>
         <option name="index"
                 description="Index Name"/>
+        <option name="schema"
+                description="Schema Name"/>                    
       </config>
 
       <metrics include="pg-index"/>

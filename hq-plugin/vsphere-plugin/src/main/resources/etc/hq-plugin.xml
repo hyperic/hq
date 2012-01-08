@@ -246,6 +246,52 @@
             alias="mem.sysUsage.average"
             units="KB"/>
 
+        <server name="VMware vSphere Host DS">
+            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+            <plugin type="collector"   class="org.hyperic.hq.plugin.vsphere.VSphereHostCollector"/>
+            <config>
+                <option name="id" description="DataSource ID"/>
+            </config>
+            <property name="template" value="${host.template}:${alias}.%id%"/>
+            <metric name="Availability" indicator="true"/>
+            <metric name="Average read requests per second"
+                    alias="datastore.numberReadAveraged.average"
+                    indicator="true"
+                    units="none"/>
+            <metric name="Average write requests per second"
+                    alias="datastore.numberWriteAveraged.average"
+                    indicator="true"
+                    units="none"/>
+            <metric name="Read latency"
+                    alias="datastore.totalReadLatency.average"
+                    indicator="true"
+                    units="ms"/>
+            <metric name="Write latency"
+                    alias="datastore.totalWriteLatency.average"
+                    indicator="true"
+                    units="ms"/>
+            <metric name="Storage I/O Control aggregated IOPS"
+                    alias="datastore.datastoreIops.average"
+                    units="none"/>
+            <metric name="Storage I/O Control normalized latency"
+                    alias="datastore.sizeNormalizedDatastoreLatency.average"
+                    units="none"/>
+            <metric name="Storage DRS datastore read I/O rate"
+                    alias="datastore.datastoreReadIops.latest"
+                    units="none"/>
+            <metric name="Storage DRS datastore write I/O rate"
+                    alias="datastore.datastoreWriteIops.latest"
+                    units="none"/>
+            <metric name="Storage DRS datastore outstanding read requests"
+                    alias="datastore.datastoreReadOIO.latest"
+                    units="none"/>
+            <metric name="Storage DRS datastore outstanding write requests"
+                    alias="datastore.datastoreWriteOIO.latest"
+                    units="none"/>
+            <metric name="Storage I/O Control datastore maximum queue depth"
+                    alias="datastore.datastoreMaxQueueDepth.latest"
+                    units="none"/>
+        </server>
   </platform>
 
   <platform name="VMware vSphere VM">
@@ -417,6 +463,32 @@
     <metric name="Memory Consumed"
             alias="mem.consumed.average"
             units="KB"/>
+            
+        <server name="VMware vSphere VM DS">
+            <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+            <plugin type="collector"   class="org.hyperic.hq.plugin.vsphere.VSphereVmCollector"/>
+            <config>
+                <option name="id" description="DataSource ID"/>
+            </config>
+            <property name="template" value="${host.template}:${alias}.%id%"/>
+            <metric name="Availability" indicator="true"/>
+            <metric name="Average read requests per second"
+                    alias="datastore.numberReadAveraged.average"
+                    indicator="true"
+                    units="none"/>
+            <metric name="Average write requests per second"
+                    alias="datastore.numberWriteAveraged.average"
+                    indicator="true"
+                    units="none"/>
+            <metric name="Read latency"
+                    alias="datastore.totalReadLatency.average"
+                    indicator="true"
+                    units="ms"/>
+            <metric name="Write latency"
+                    alias="datastore.totalWriteLatency.average"
+                    indicator="true"
+                    units="ms"/>
+        </server>
   </platform>
 
   <server name="VMware vCenter">
