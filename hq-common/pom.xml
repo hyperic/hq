@@ -63,10 +63,10 @@
 			<artifactId>jboss-common-logging-spi</artifactId>
 			<version>2.0.4.GA</version>
 		</dependency>
-		<dependency>
+		<!-- <dependency>
 			<groupId>tanukisoft</groupId>
 			<artifactId>wrapper</artifactId>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
