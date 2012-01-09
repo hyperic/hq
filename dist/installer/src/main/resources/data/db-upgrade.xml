@@ -11704,6 +11704,7 @@ has already been defined.
                 TYPE varchar(32) not null,
                 CERT varchar(4000) not null,
                 CERT_CHAIN varchar(4000),
+        	    FILE BLOB,
                 primary key (ID),
                 unique (ALIAS_NAME)
             )
@@ -11715,6 +11716,7 @@ has already been defined.
                 TYPE varchar(32) not null,
                 CERT varchar(4000) not null,
                 CERT_CHAIN varchar(4000),
+               	FILE bytea, 
                 primary key (ID),
                 unique (ALIAS_NAME)
             )
@@ -11729,6 +11731,7 @@ has already been defined.
                 TYPE varchar2(32 char) not null,
                 CERT varchar2(4000 char) not null,
                 CERT_CHAIN varchar2(4000 char),
+                FILE BLOB,  
                 primary key (ID),
                 unique (ALIAS_NAME)
             )
@@ -11738,19 +11741,6 @@ has already been defined.
         </statement>
     </schema-directSQL>
  </schemaSpec> 
- <schemaSpec version="3.209">
-	   <schema-directSQL>
-	            <statement targetDB="mysql">
-	              ALTER TABLE EAM_KEYSTORE ADD COLUMN FILE BLOB 
-	            </statement>
-	            <statement targetDB="postgresql">
-	                ALTER TABLE EAM_KEYSTORE ADD COLUMN FILE bytea 
-	            </statement>
-	            <statement targetDB="oracle">
-	                ALTER TABLE EAM_KEYSTORE ADD COLUMN FILE BLOB 
-	            </statement>
-	        </schema-directSQL>
-	   </schemaSpec>
 </dbupgrade>
 </target>
 </project>
