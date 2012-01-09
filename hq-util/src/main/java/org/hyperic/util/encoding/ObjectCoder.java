@@ -32,32 +32,39 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 /**
- * Factorization of Scot's code from {@link DbKeystoreManagerImpl}.<br> 
- * Collection of utility methods for marshalling & unmarshalling Object to/from a serialized<br>
+ * Factorization of Scot's code from {@link DbKeystoreManagerImpl}.<br>
+ * Collection of utility methods for marshalling & unmarshalling Object to/from
+ * a serialized<br>
  * Base64 representation.
+ * 
  * @author guy
- *
+ * 
  */
 public class ObjectCoder {
-	
-	/**
-	 * Unmarshals Object to/from a serialized Base64 representation. 
-	 * <p><b>Pre-condition:</b>&nbspclsType must have a <code>serialVersionUID</code>
-	 * implementation.</p>
-	 * @param encoded Base64 Serialized representation of the object to unmarshal.
-	 * @param clsType Class to unmarshal to.
-	 * @return Unmarshaled Object instance.
-	 * @throws IOException
-	 * @throws ClassNotFoundException
-	 */
-	@SuppressWarnings("unchecked")
-	public static final <T> T decode(final String sEncoded, Class<T> clsType)
-						throws IOException, ClassNotFoundException {
-        
-		if (sEncoded == null) {
+
+    /**
+     * Unmarshals Object to/from a serialized Base64 representation.
+     * <p>
+     * <b>Pre-condition:</b>&nbspclsType must have a
+     * <code>serialVersionUID</code> implementation.
+     * </p>
+     * 
+     * @param encoded
+     *            Base64 Serialized representation of the object to unmarshal.
+     * @param clsType
+     *            Class to unmarshal to.
+     * @return Unmarshaled Object instance.
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+    @SuppressWarnings("unchecked")
+    public static final <T> T decode(final String sEncoded, Class<T> clsType)
+            throws IOException, ClassNotFoundException {
+
+        if (sEncoded == null) {
             return null;
         }
-		
+
         byte[] serialized = Base64.decode(sEncoded);
         ByteArrayInputStream bis = null;
         ObjectInputStream in = null;
@@ -67,32 +74,41 @@ public class ObjectCoder {
             Object rtn = in.readObject();
             return (T) rtn;
         } finally {
-            if (in != null) in.close();
+            if (in != null)
+                in.close();
         }
-    }//EOM 
-	
-	/**
-	 * Marshals Object to/from a serialized Base64 representation. 
-	 * <p><b>Pre-condition:</b>&nbspclsType must have a <code>serialVersionUID</code>
-	 * implementation.</p>
-	 * @param alias Optional identification of the target object - unused at the moment. 
-	 * @param obj Object to marshal 
-	 * @throws IOException
-	 */
-	public static final String encode(final String sAlias, final Object obj) throws IOException{
-		if (obj == null) {
-			return null;
-	    }
-		ByteArrayOutputStream bos = null;
-	    ObjectOutputStream out = null;
-	    try {
-	    	bos = new ByteArrayOutputStream();
-	    	out = new ObjectOutputStream(bos);
-	    	out.writeObject(obj);
-	    	return new String(Base64.encode(bos.toByteArray()));
-	    } finally {
-	    	if(out != null) out.close() ; 
-	    }
-	}//EOM 
+    }// EOM
 
-}//EOC 
+    /**
+     * Marshals Object to/from a serialized Base64 representation.
+     * <p>
+     * <b>Pre-condition:</b>&nbspclsType must have a
+     * <code>serialVersionUID</code> implementation.
+     * </p>
+     * 
+     * @param alias
+     *            Optional identification of the target object - unused at the
+     *            moment.
+     * @param obj
+     *            Object to marshal
+     * @throws IOException
+     */
+    public static final String encode(final String sAlias, final Object obj)
+            throws IOException {
+        if (obj == null) {
+            return null;
+        }
+        ByteArrayOutputStream bos = null;
+        ObjectOutputStream out = null;
+        try {
+            bos = new ByteArrayOutputStream();
+            out = new ObjectOutputStream(bos);
+            out.writeObject(obj);
+            return new String(Base64.encode(bos.toByteArray()));
+        } finally {
+            if (out != null)
+                out.close();
+        }
+    }// EOM
+
+}// EOC
