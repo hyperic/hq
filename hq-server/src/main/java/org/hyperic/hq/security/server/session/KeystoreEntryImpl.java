@@ -45,8 +45,13 @@ public class KeystoreEntryImpl extends PersistedObject implements KeystoreEntry 
     }
     
     
-    public void setFile(final byte[] fileContent) {  this.file = fileContent ; }//EOM 
-    public byte[] getFile() { return this.file ; }//EOM 
+    public void setFile(final byte[] fileContent) { 
+        this.file = fileContent ; 
+    }//EOM 
+    
+    public byte[] getFile() { 
+        return this.file ; 
+    }//EOM 
 
 
 }

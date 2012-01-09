@@ -28,14 +28,18 @@ package org.hyperic.hibernate.usertypes;
 import java.security.cert.Certificate;
 
 /**
- * Responsible for the conversion of {@link Certificate} into a Serialized Base64 encoded String
- * and back. 
+ * Responsible for the conversion of {@link Certificate} into a Serialized
+ * Base64 encoded String and back.
+ * 
  * @See {@link EncodedSerializedStringUserType}
  * @author guy
- *
+ * 
  */
-public class CertificateUserType extends EncodedSerializedStringUserType<Certificate>{
+public class CertificateUserType extends
+        EncodedSerializedStringUserType<Certificate> {
 
-	public CertificateUserType() { super(Certificate.class) ; }//EOM
-	
-}//EOC 
+    public CertificateUserType() {
+        super(Certificate.class);
+    }// EOM
+
+}// EOC

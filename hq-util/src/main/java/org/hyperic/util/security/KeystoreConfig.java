@@ -104,9 +104,13 @@ public class KeystoreConfig {
      */
     public void setFilePassword(String filePassword) {
         this.filePassword = filePassword;
-        if(filePassword != null) this.m_arrFilePassword = filePassword.toCharArray() ; 
+        if(filePassword != null) { 
+            this.m_arrFilePassword = filePassword.toCharArray() ; 
+        }//EO if password was provided 
     }//EOM 
     
-    public final char[] getFilePasswordCharArray() { return this.m_arrFilePassword ;}//EOM 
+    public final char[] getFilePasswordCharArray() { 
+        return this.m_arrFilePassword ;
+    }//EOM 
     
 }
