@@ -223,22 +223,6 @@ public class PostgreSQLServerDetector
         cprop.setValue("version", version);
         server.setCustomProperties(cprop);
 
-        // Auto-configure if this is HQ's internal database
-        if (installPath.endsWith("hqdb")) {
-            ConfigResponse productConfig = new ConfigResponse();
-                
-            productConfig.setValue(PostgreSQLMeasurementPlugin.PROP_URL,
-                                   "jdbc:postgresql://localhost:9432/hqdb");
-            productConfig.setValue(PostgreSQLMeasurementPlugin.PROP_USER, 
-                                   "hqadmin");
-            productConfig.setValue(PostgreSQLMeasurementPlugin.PROP_PASSWORD,
-                                   "hqadmin");
-
-            server.setProductConfig(productConfig);
-            server.setControlConfig();
-            server.setMeasurementConfig();
-        }
-
         // Ensure 8.0 detector does not return 7.4 servers and vice versa
         if (getTypeInfo().getVersion().equals(VERSION_74)) {
             if (version.indexOf(VERSION_74) != -1) {
