@@ -25,29 +25,28 @@
 
 package org.hyperic.util.file;
 
-import org.apache.tools.tar.TarEntry;
-import org.apache.tools.tar.TarInputStream;
-import org.hyperic.util.ArrayUtil;
-import org.hyperic.util.collection.IntHashMap;
-
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.InputStreamReader;
-
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
 import java.io.OutputStream;
-import java.io.BufferedOutputStream;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
+import org.apache.tools.tar.TarEntry;
+import org.apache.tools.tar.TarInputStream;
+import org.hyperic.util.ArrayUtil;
+import org.hyperic.util.collection.IntHashMap;
 
 public class FileUtil {
     private static IntHashMap invalidChars = null;
@@ -344,6 +343,24 @@ public class FileUtil {
                 tmp.delete();
             }
         }
+    }
+    
+    /**
+     * Give read permissions to the file's owner only.
+     *
+     * @param file
+     * @throws  SecurityException
+     *          If a security manager exists and its <code>{@link
+     *          java.lang.SecurityManager#checkWrite(java.lang.String)}</code>
+     *          method denies write access to the file
+     */    
+    public static void setReadableByOwnerOnly(File file) {
+        // Remove all read permissions
+        boolean isOwnerOnly = false;
+        file.setReadable(false, isOwnerOnly);
+
+        // Add owner-only read permission
+        file.setReadable(true);
     }
 
     /**
