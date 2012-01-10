@@ -2465,7 +2465,7 @@ hyperic.dashboard.summaryWidget = function(args) {
         {
             that.swapSheets('instructions');
         }
-        that.startRefreshCycle();
+        that.startRefreshCycle(portlets_reload_time);
     };
 
     that.reset_config = function() {
@@ -2551,7 +2551,7 @@ hyperic.dashboard.summaryWidget = function(args) {
             },
             timeout: 2000
         });
-        that.startRefreshCycle();
+        that.startRefreshCycle(portlets_reload_time);
     };
     
     /**
@@ -2709,20 +2709,47 @@ hyperic.dashboard.summaryWidget = function(args) {
     	}
     }
 
-    that.startRefreshCycle = function()
+	var fib1 = 0;
+	var fib2 = 1;
+    that.startRefreshCycle = function(interval)
     {
         that.cycleId = setInterval(
         		function() {
                 	if (that.currentSheet == 'error_loading') {
+                		//If the last call to the server did not return, we don't want
+                		//to keep sending request to the server every N seconds, we will
+                		//send requests in intervals determined by Fibonacci series. 
+                		//First we will wait 1 minute and make another call, if that call fails
+                		//we will wait 2 minuts, 3, 5, 8... 30 minutes is the max wait time
+                		//between failed calls.
                 		that.swapSheets('loading');
+                		that.pauseRefreshCycle();
+                		if (30 < fib2) {
+                			that.startRefreshCycle(30*60*1000);
+                		}
+                		else {
+                			var tmp = fib2;
+                    		fib2 += fib1;
+                    		fib1 = tmp;
+                			that.startRefreshCycle(fib2*60*1000);
+                		}
                 	}
-        			that.fetchAlertGroupStatus().addCallback(
-    	                    function() {
-    	                    	that.fetchAlertGroupStatusCallback();
-    	                    }
-    	            );
+                	else {
+                		if (0 != fib1) {
+                			fib1 = 0;
+                			fib2 = 1;
+                			that.pauseRefreshCycle();
+                			that.startRefreshCycle(portlets_reload_time);
+                		}
+                		
+                	}
+                	that.fetchAlertGroupStatus().addCallback(
+        	                    function() {
+        	                    	that.fetchAlertGroupStatusCallback();
+        	                    }
+        	            );
         		}, 
-    	        portlets_reload_time);
+        		interval);
     };
     
     that.pauseRefreshCycle = function() {
@@ -2751,7 +2778,7 @@ hyperic.dashboard.summaryWidget = function(args) {
         	function() {
         		that.fetchAlertGroupStatusCallback();
 	            // periodically refresh the status
-	            that.startRefreshCycle();
+	            that.startRefreshCycle(portlets_reload_time);
 	        });
     }
 };
