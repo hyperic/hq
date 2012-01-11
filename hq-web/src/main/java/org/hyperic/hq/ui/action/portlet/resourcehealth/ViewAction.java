@@ -57,6 +57,7 @@ import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.units.FormattedNumber;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.util.HtmlUtils;
 
 /**
  * This action class is used by the Favorite Resources portlet. It's main use is
@@ -65,11 +66,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class ViewAction
     extends BaseAction {
 
-    private AuthzBoss authzBoss;
-    private AppdefBoss appdefBoss;
-    private EventsBoss eventsBoss;
-    private MeasurementBoss measurementBoss;
-    private DashboardManager dashboardManager;
+    private final AuthzBoss authzBoss;
+    private final AppdefBoss appdefBoss;
+    private final EventsBoss eventsBoss;
+    private final MeasurementBoss measurementBoss;
+    private final DashboardManager dashboardManager;
 
     @Autowired
     public ViewAction(AuthzBoss authzBoss, AppdefBoss appdefBoss, EventsBoss eventsBoss, 
@@ -82,7 +83,8 @@ public class ViewAction
         this.dashboardManager = dashboardManager;
     }
 
-    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+    @Override
+	public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                  HttpServletResponse response) throws Exception {
 
         HttpSession session = request.getSession();
@@ -105,7 +107,7 @@ public class ViewAction
             .getSessionId(request).intValue(), DashboardUtils.preferencesAsEntityIds(key, dashPrefs), appdefBoss);
 
         AppdefEntityID[] arrayIds = new AppdefEntityID[entityIds.size()];
-        arrayIds = (AppdefEntityID[]) entityIds.toArray(arrayIds);
+        arrayIds = entityIds.toArray(arrayIds);
 
         List<ResourceDisplaySummary> list;
         int sessionID = user.getSessionId().intValue();
@@ -129,7 +131,7 @@ public class ViewAction
         for (ResourceDisplaySummary bean : list) {
             JSONObject res = new JSONObject();
 
-            res.put("resourceName", bean.getResourceName());
+            res.put("resourceName", HtmlUtils.htmlEscape(bean.getResourceName()));
             res.put("resourceTypeName", bean.getResourceTypeName());
             res.put("resourceTypeId", bean.getResourceTypeId());
             res.put("resourceId", bean.getResourceId());

@@ -90,7 +90,7 @@
   								<c:when test="${not empty resources}">
   									<c:forEach var="resource" items="${resources}">
     									<li>
-    										<a href="<spring:url value="/Resource.do?eid=${resource.key}"/>">${resource.value.name}</a>
+    										<a href="<spring:url value="/Resource.do?eid=${resource.key}"/>"><c:out value="${resource.value.name}"/></a>
     									</li>
   									</c:forEach>
   								</c:when>

@@ -59,8 +59,13 @@
      <constant-name>humanName</constant-name>
      <constant-value>^[a-zA-Z0-9 \-']*$</constant-value>
     </constant>
+ 
     <constant>
-    
+     <constant-name>resourceName</constant-name>
+     <constant-value>^[^&amp;^&gt;^/^&lt;^\\^*^\?^%]*$</constant-value>
+    </constant>
+
+    <constant>       
     <constant-name>UserName</constant-name>
      <constant-value>^[-a-zA-Z0-9@._ ']*$</constant-value>
     </constant>
@@ -167,23 +172,26 @@
     </form>
 
     <form name="NewPlatformForm">
-      <field property="name" depends="required,maxlength">
-        <msg name="required"
-             key="resource.platform.inventory.error.PlatformNameIsRequired"/>
+      <field property="name" depends="required,maxlength,mask">
+        <msg name="required" key="resource.platform.inventory.error.PlatformNameIsRequired" />
         <var>
          <var-name>maxlength</var-name>
          <var-value>100</var-value>
         </var>
-        <msg name="maxlength" key="resource.common.inventory.error.NameMaxLength"/>
+        <msg name="maxlength" key="resource.common.inventory.error.NameMaxLength" />
+        <var>
+          <var-name>mask</var-name>
+          <var-value>${resourceName}</var-value>
+        </var>
+        <msg name="mask" key="resource.common.inventory.error.illegalResourceName" />
       </field>
 
       <field property="fqdn" depends="required">
-        <msg name="required"
-             key="resource.platform.inventory.error.FQDNIsRequired"/>
+        <msg name="required" key="resource.platform.inventory.error.FQDNIsRequired" />
       </field>
 
       <field property="description" depends="maxlength">
-        <arg0 key="common.header.Description"/>
+        <arg0 key="common.header.Description" />
         <arg1 name="maxlength" key="${var:maxlength}" resource="false" />
         <var>
          <var-name>maxlength</var-name>
@@ -193,9 +201,9 @@
 
       <!-- the value must be a positive integer -->
       <field property="resourceType" depends="required,intRange">
-        <arg0 key="resource.platform.inventory.type.field.MachineType"/>
-        <arg1 name="intRange" key="${var:min}" resource="false"/>
-        <arg2 name="intRange" key="${var:max}" resource="false"/>
+        <arg0 key="resource.platform.inventory.type.field.MachineType" />
+        <arg1 name="intRange" key="${var:min}" resource="false" />
+        <arg2 name="intRange" key="${var:max}" resource="false" />
         <var>
           <var-name>min</var-name>
           <var-value>0</var-value>
@@ -204,10 +212,8 @@
           <var-name>max</var-name>
           <var-value>99999</var-value>
         </var>
-        <msg name="required"
-             key="resource.platform.inventory.error.MachineTypeIsRequired"/>
-        <msg name="intRange"
-             key="resource.platform.inventory.error.MachineTypeIsRequired"/>
+        <msg name="required" key="resource.platform.inventory.error.MachineTypeIsRequired" />
+        <msg name="intRange" key="resource.platform.inventory.error.MachineTypeIsRequired" />
       </field>
 
       <!-- The IP addresses -->
@@ -216,10 +222,8 @@
          <var-name>mask</var-name>
          <var-value>${ipAddress}</var-value>
         </var>
-        <msg name="required"
-             key="resource.platform.inventory.error.IpAddressIsRequired"/>
-        <msg name="mask"
-             key="resource.platform.inventory.error.IpAddressInvalid"/>
+        <msg name="required" key="resource.platform.inventory.error.IpAddressIsRequired" />
+        <msg name="mask" key="resource.platform.inventory.error.IpAddressInvalid" />
       </field>
 
       <!-- The netmasks -->
@@ -228,16 +232,32 @@
          <var-name>mask</var-name>
          <var-value>${ipAddress}</var-value>
         </var>
-        <msg name="mask"
-             key="resource.platform.inventory.error.NetmaskInvalid"/>
+        <msg name="mask" key="resource.platform.inventory.error.NetmaskInvalid" />
       </field>
 
     </form>
  
+   <form name="EditPlatformGeneralPropertiesForm">
+      <field property="name" depends="required,maxlength,mask">
+        <msg name="required"
+             key="resource.platform.inventory.error.PlatformNameIsRequired"/>
+        <var>
+         <var-name>maxlength</var-name>
+         <var-value>100</var-value>
+        </var>
+        <msg name="maxlength" key="resource.common.inventory.error.NameMaxLength"/>
+        <var>
+          <var-name>mask</var-name>
+          <var-value>${resourceName}</var-value>
+        </var>
+        <msg name="mask" key="resource.common.inventory.error.illegalResourceName"/>
+      </field>
+    </form>
+
     <!-- for validating the general properties of an application:
     Name, description, location, resourceType -->   
     <form name="ApplicationForm">
-      <field property="name" depends="required,maxlength">
+      <field property="name" depends="required,maxlength,mask">
         <arg0 name="required"
               key="common.header.Name"/>
         <var>
@@ -245,6 +265,11 @@
          <var-value>100</var-value>
         </var>
         <msg name="maxlength" key="resource.common.inventory.error.NameMaxLength"/>
+        <var>
+          <var-name>mask</var-name>
+          <var-value>${resourceName}</var-value>
+        </var>
+        <msg name="mask" key="resource.common.inventory.error.illegalResourceName" />     
       </field>
       <field property="description" depends="maxlength">
         <arg0 key="common.header.Description"/>
@@ -293,7 +318,7 @@
 
     <!-- for validating the general properties of an application Name, description, location -->
     <form name="EditGeneralApplicationForm">
-      <field property="name" depends="required,maxlength">
+      <field property="name" depends="required,maxlength,mask">
         <arg0 name="required"
               key="common.header.Name"/>
         <var>
@@ -301,6 +326,11 @@
          <var-value>100</var-value>
         </var>
         <msg name="maxlength" key="resource.common.inventory.error.NameMaxLength"/>
+       <var>
+          <var-name>mask</var-name>
+          <var-value>${resourceName}</var-value>
+        </var>
+        <msg name="mask" key="resource.common.inventory.error.illegalResourceName" />     
       </field>
       <field property="description" depends="maxlength">
         <arg0 key="common.header.Description"/>
@@ -354,7 +384,7 @@
 
     <!-- this is for general properties, don't need resourceType validation -->
     <form name="GeneralServerForm">
-      <field property="name" depends="required,maxlength">
+      <field property="name" depends="required,maxlength,mask">
         <msg name="required"
              key="resource.server.inventory.error.ServerNameIsRequired"/>
         <var>
@@ -362,6 +392,11 @@
          <var-value>100</var-value>
         </var>
         <msg name="maxlength" key="resource.common.inventory.error.NameMaxLength"/>
+       <var>
+          <var-name>mask</var-name>
+          <var-value>${resourceName}</var-value>
+        </var>
+        <msg name="mask" key="resource.common.inventory.error.illegalResourceName" />     
       </field>
       <field property="description" depends="maxlength">
         <arg0 key="common.header.Description"/>
@@ -388,7 +423,7 @@
     </form>
           
     <form name="ServerForm">
-      <field property="name" depends="required,maxlength">
+      <field property="name" depends="required,maxlength,mask">
         <msg name="required"
              key="resource.server.inventory.error.ServerNameIsRequired"/>
         <var>
@@ -396,6 +431,12 @@
          <var-value>100</var-value>
         </var>
         <msg name="maxlength" key="resource.common.inventory.error.NameMaxLength"/>
+        <var>
+          <var-name>mask</var-name>
+          <var-value>${resourceName}</var-value>
+        </var>
+        <msg name="mask" key="resource.common.inventory.error.illegalResourceName" />     
+        
       </field>
       <field property="installPath" depends="required,maxlength">
         <msg name="required"
@@ -446,7 +487,7 @@
     </form>
 
     <form name="ServiceForm">
-      <field property="name" depends="required,maxlength">
+      <field property="name" depends="required,maxlength,mask">
         <msg name="required"
              key="resource.service.inventory.error.ServiceNameIsRequired"/>
         <var>
@@ -454,6 +495,12 @@
          <var-value>100</var-value>
         </var>
         <msg name="maxlength" key="resource.common.inventory.error.NameMaxLength"/>
+        <var>
+          <var-name>mask</var-name>
+          <var-value>${resourceName}</var-value>
+        </var>
+        <msg name="mask" key="resource.common.inventory.error.illegalResourceName" />     
+        
       </field>
       <!-- the value must be a positive integer -->
       <field property="resourceType" depends="required,intRange">
@@ -483,7 +530,7 @@
     </form>
 
     <form name="GroupForm">
-      <field property="name" depends="required,maxlength">
+      <field property="name" depends="required,maxlength,mask">
         <msg name="required"
              key="resource.group.inventory.error.GroupNameIsRequired"/>
         <var>
@@ -491,6 +538,12 @@
           <var-value>100</var-value>
         </var>
         <msg name="maxlength" key="resource.common.inventory.error.NameMaxLength"/>
+        <var>
+          <var-name>mask</var-name>
+          <var-value>${resourceName}</var-value>
+        </var>
+        <msg name="mask" key="resource.common.inventory.error.illegalResourceName" />     
+        
       </field>
       <field property="description" depends="maxlength">
         <var>
@@ -761,13 +814,19 @@
 
      <!-- alert definition forms -->
      <form name="NewAlertDefinitionForm">
-       <field property="name" depends="maxlength">
+       <field property="name" depends="maxlength,mask">
          <arg0 name="maxlength" key="common.label.Name"/>
          <arg1 name="maxlength" key="${var:maxlength}" resource="false" />
          <var>
            <var-name>maxlength</var-name>
            <var-value>255</var-value>
          </var>
+        <var>
+          <var-name>mask</var-name>
+          <var-value>${resourceName}</var-value>
+        </var>
+        <msg name="mask" key="resource.common.inventory.error.illegalResourceName" />     
+         
        </field>
        <field property="description" depends="maxlength">
          <arg0 name="maxlength" key="common.label.Description"/>
@@ -804,13 +863,19 @@
      </form>
 
      <form name="EditAlertDefinitionPropertiesForm">
-       <field property="name" depends="required,maxlength">
+       <field property="name" depends="required,maxlength,mask">
          <arg0 name="required" key="common.label.Name"/>
          <arg1 name="maxlength" key="${var:maxlength}" resource="false" />
          <var>
            <var-name>maxlength</var-name>
            <var-value>255</var-value>
          </var>
+         <var>
+          <var-name>mask</var-name>
+          <var-value>${resourceName}</var-value>
+        </var>
+        <msg name="mask" key="resource.common.inventory.error.illegalResourceName" />     
+         
        </field>
        <field property="description" depends="maxlength">
          <arg0 name="maxlength" key="common.label.Description"/>
