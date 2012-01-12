@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
-import org.hyperic.hq.appdef.shared.AIQApprovalException;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIQueueManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -14,7 +13,6 @@ import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.ScanStateCore;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
 import org.hyperic.hq.context.IntegrationTestContextLoader;
-import org.hyperic.hq.test.BaseInfrastructureTest;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.junit.Test;
