@@ -19,35 +19,30 @@
 					    This page last changed on Sep 26, 2010 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
- 
-<style type='text/css'>/*<![CDATA[*/
-div.rbtoc1285098352388 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1285098352388 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1285098352388 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1285098352388'>
+
+
 <ul>
-    <li><a href='#UsingtheAuto-DiscoveryPortlet-ContentsoftheAutoDiscoveryPortlet'>Contents of the Auto-Discovery Portlet</a></li>
-    <li><a href='#UsingtheAuto-DiscoveryPortlet-ImportorSkipResourcesinAutoDiscoveryPortlet'>Import or Skip Resources in Auto-Discovery Portlet</a></li>
-    <li><a href='#UsingtheAuto-DiscoveryPortlet-ConfiguretheNumberofAutoDiscoveriesDisplayed'>Configure the Number of Auto-Discoveries Displayed</a></li>
-</ul></div> 
+	<li><a href="#ui-Dashboard.AutoDiscovery-ContentsoftheAutoDiscoveryPortlet">Contents of the Auto&#45;Discovery Portlet</a></li>
+	<li><a href="#ui-Dashboard.AutoDiscovery-ImportorSkipResourcesinAutoDiscoveryPortlet">Import or Skip Resources in Auto&#45;Discovery Portlet</a></li>
+	<li><a href="#ui-Dashboard.AutoDiscovery-ConfiguretheNumberofAutoDiscoveriesDisplayed">Configure the Number of Auto&#45;Discoveries Displayed</a></li>
+</ul>
 
 
 
-<p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
 
- 
+<p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
 
 
-<h1><a name="ui-Dashboard.AutoDiscovery-ContentsoftheAutoDiscoveryPortlet"></a>Contents of the Auto-Discovery Portlet </h1>
+<h1><a name="ui-Dashboard.AutoDiscovery-ContentsoftheAutoDiscoveryPortlet"></a>Contents of the Auto-Discovery Portlet</h1>
 
-<p>The <b>Auto-Discovery</b> portlet on the HQ Dashboard lists recently added or modified platforms and servers, and allows an authorized user to view discovery details, and to import the new or changed resource data to the HQ database. </p>
+<p>The <b>Auto-Discovery</b> portlet on the Hyperic Dashboard lists recently added or modified platforms and servers, and allows an authorized user to view discovery details, and to import the new or changed resource data to the Hyperic database.</p>
 
-<p>By default, the <b>Auto-Discovery</b> portlet lists the (up to) five most recently new or changed platforms. To set the maximum number of platforms that can appear in the list, see <a href="#ui-Dashboard.AutoDiscovery-ConfiguretheNumberofAutoDiscoveriesDisplayed">Configure the Number of Auto-Discoveries Displayed</a>. </p>
+<p>By default, the <b>Auto-Discovery</b> portlet lists the (up to) five most recently new or changed platforms. To set the maximum number of platforms that can appear in the list, see <a href="#ui-Dashboard.AutoDiscovery-ConfiguretheNumberofAutoDiscoveriesDisplayed">Configure the Number of Auto-Discoveries Displayed</a>.</p>
 
-<p>A platform appears in the the <b>Auto-Discovery</b> portlet if it, or a server running on it, is new or changed. The rules are these: </p>
+<p>A platform appears in the the <b>Auto-Discovery</b> portlet if it, or a server running on it, is new or changed. The rules are these:</p>
 <ul>
 	<li><b>The platform is new</b> &#8212; A platform appears as new in the portlet, if neither its IP address or FQDN match that of an existing platform in inventory. In this case, any new servers discovered on the platform appear below the platform in the portlet.</li>
 </ul>
@@ -63,15 +58,14 @@ div.rbtoc1285098352388 li {margin-left: 0px;padding-left: 0px;}
 </ul>
 
 
-<p>The image below shows the Auto-Discovery portlet after the agent was started for the first time on a platform. </p>
+<p>The image below shows the Auto-Discovery portlet after the agent was started for the first time on a platform.</p>
 
-<div class="scroll-pagebreak"></div> 
-<p><span class="image-wrap" style=""><img src="attachments/71828283/71926442.png" width="400px" style="border: 0px solid black"/></span> </p>
+<p><span class="image-wrap" style=""><img src="attachments/71828283/71926442.png" style="border: 0px solid black"/></span></p>
 
-<p>The <b>Auto-Discovery</b> portlet presents the following information for each platform it contains: </p>
+<p>The <b>Auto-Discovery</b> portlet presents the following information for each platform it contains:</p>
 
 <ul>
-	<li><b>Hostname</b> &#8212; The hostname of the platform is a link to a page &#8212; the <b>Auto-Discovery Results</b> page - that contains detailed information about the scan results for the platform and servers running there. See <a href="#ui-Dashboard.AutoDiscovery-UsingtheAutoDiscoveryResultsPage">Using the Auto&#45;Discovery Results Page</a>.</li>
+	<li><b>Hostname</b> &#8212; The hostname of the platform is a link to a page &#8212; the <b>Auto-Discovery Results</b> page - that contains detailed information about the scan results for the platform and servers running there. See <a href="#ui-Dashboard.AutoDiscovery-UsingtheAutoDiscoveryResultsPage">Using the Auto-Discovery Results Page</a>.</li>
 </ul>
 
 
@@ -91,7 +85,7 @@ div.rbtoc1285098352388 li {margin-left: 0px;padding-left: 0px;}
 		<li>"server set changed" &#8212; Applies to platforms; this value indicates that changes to one or more servers on the platform were detected. The changed server(s) are listed below the platform.</li>
 		<li>"name change" &#8212; Indicates that the name of the resource has changed; a resource name can change when a resource is upgraded from one version to another, if version number forms a portion of the resource name, as is often the case.</li>
 		<li>"install path changed" &#8212; Indicates that the installation path for a server has changed; the installation path for a resource can change when a resource is upgraded from one version to another, if version number forms a portion of the path, as is often the case.</li>
-		<li>"IP set changed" &#8212; Indicates that the IP address has changed. When the agent detects an IP address not associated with an existing platform in inventory, it checks for a platform with a matching FQDN - if found, HQ recognizes the platform as existing.</li>
+		<li>"IP set changed" &#8212; Indicates that the IP address has changed. When the agent detects an IP address not associated with an existing platform in inventory, it checks for a platform with a matching FQDN - if found, Hyperic recognizes the platform as existing.</li>
 		<li>"FQDN changed"</li>
 	</ul>
 	</li>
@@ -109,11 +103,10 @@ div.rbtoc1285098352388 li {margin-left: 0px;padding-left: 0px;}
 </ul>
 
 
-<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>About Discovery and Import of Services</b><br />The <b>Auto-Discovery Portlet</b> does not display new or changed services. As described above in <a href="#ui-Dashboard.AutoDiscovery-HQAutoDiscoveryProcesses">HQ Auto&#45;Discovery Processes</a>, service discovery occurs as a result of a run-time scan, and services that are discovered are automatically added to HQ Inventory.</td></tr></table></div> 
+<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>About Discovery and Import of Services</b><br />The <b>Auto-Discovery Portlet</b> does not display new or changed services. As described above in <a href="#ui-Dashboard.AutoDiscovery-HypericAutoDiscoveryProcesses">Hyperic Auto-Discovery Processes</a>, service discovery occurs as a result of a run-time scan, and services that are discovered are automatically added to Hyperic inventory.</td></tr></table></div>
+<h1><a name="ui-Dashboard.AutoDiscovery-ImportorSkipResourcesinAutoDiscoveryPortlet"></a>Import or Skip Resources in Auto-Discovery Portlet</h1>
 
-<h1><a name="ui-Dashboard.AutoDiscovery-ImportorSkipResourcesinAutoDiscoveryPortlet"></a>Import or Skip Resources in Auto-Discovery Portlet </h1>
-
-<p>You can process the contents of the <b>Auto-Discovery Portlet</b> in these ways: </p>
+<p>You can process the contents of the <b>Auto-Discovery Portlet</b> in these ways:</p>
 <ul>
 	<li>To import all resources---leave all resources selected, and click <b>Add to Inventory</b>.</li>
 	<li>To skip all resources---leave all resources selected, and click <b>Skip Checked Resources</b>.</li>
@@ -126,24 +119,24 @@ div.rbtoc1285098352388 li {margin-left: 0px;padding-left: 0px;}
 </ul>
 
 
-<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>About Skipped Resources</b><br />If you do not import a resource displayed in the <b>Auto-Discovery</b> portlet, note: 
+<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>About Skipped Resources</b><br />If you do not import a resource displayed in the <b>Auto-Discovery</b> portlet, note:
 <ul>
 	<li>If you skip a new platform, you skip its servers as well.</li>
 	<li>During the next platform scan, skipped resources will reappear in the portlet after the next scan that detects them. If you have resources that you do not want the agent to discover, see the relevant section in <a href="#ui-Dashboard.AutoDiscovery-OptionsforRunningandControllingResourceDiscovery">Options for Running and Controlling Resource Discovery</a>.</li>
 </ul>
-</td></tr></table></div> 
-
-<div class='panelMacro'><table class='noteMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/warning.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>If the HQ Agent discovered all of the resource properties required to monitor a resource, it starts monitoring that resource as soon as you add it to inventory. This is the case for most resource types. Note however, that some level of configuration is required to start managing some resources types - see the <b>Configuration Properties</b> section on a resource's <b>Inventory</b> tab for configuration requirements.</td></tr></table></div> 
-
-<h1><a name="ui-Dashboard.AutoDiscovery-ConfiguretheNumberofAutoDiscoveriesDisplayed"></a>Configure the Number of Auto-Discoveries Displayed </h1>
+</td></tr></table></div>
+<div class='panelMacro'><table class='noteMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/warning.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>If the Hyperic Agent discovered all of the resource properties required to monitor a resource, it starts monitoring that resource as soon as you add it to inventory. This is the case for most resource types. Note however, that some level of configuration is required to start managing some resources types - see the <b>Configuration Properties</b> section on a resource's <b>Inventory</b> tab for configuration requirements.</td></tr></table></div>
+<h1><a name="ui-Dashboard.AutoDiscovery-ConfiguretheNumberofAutoDiscoveriesDisplayed"></a>Configure the Number of Auto-Discoveries Displayed</h1>
 
 <p>To set the number of completed auto-discoveries displayed in the portlet, click the gear icon in the upper left corner of the portlet. On the <b>Display Settings</b> page, select "10" or "all", and click <b>OK</b>.</p>
 
-<div class="scroll-pagebreak"></div> 
+ 
 
 				    					    <br/>
                         <div class="tabletitle">
-                            <a name="attachments">Attachments:</a>
+                            <a name="attachments">
+                                <h2>Attachments:</h2>
+                            </a>
                         </div>
 
                         <div class="greybox" align="left">
@@ -160,10 +153,10 @@ div.rbtoc1285098352388 li {margin-left: 0px;padding-left: 0px;}
 	    </table>
 	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
 			<tr>
-				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Oct 28, 2010 15:33</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jan 12, 2012 13:19</font></td>
 		    </tr>
 	    </table>
     </body>

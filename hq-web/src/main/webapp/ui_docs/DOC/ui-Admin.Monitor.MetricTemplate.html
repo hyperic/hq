@@ -16,82 +16,92 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 09, 2010 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Sep 09, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1281566689954 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1281566689954 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1281566689954 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1315590868146 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1315590868146 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1315590868146 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1281566689954'>
+/*]]>*/</style><div class='rbtoc1315590868146'>
 <ul>
-    <li><a href='#ui-Admin.Monitor.MetricTemplate-ConfigureMetricCollectionforaResourceType%26nbsp%3B'>Configure Metric Collection for a Resource Type&nbsp;</a></li>
-<ul>
+    <li><a href='#ui-Admin.Monitor.MetricTemplate-NavigatetotheMonitoringDefaultsPageforaResourceType'>Navigate to the Monitoring Defaults Page for a Resource Type</a></li>
     <li><a href='#ui-Admin.Monitor.MetricTemplate-EnableCollectionofaMetric'>Enable Collection of a Metric</a></li>
     <li><a href='#ui-Admin.Monitor.MetricTemplate-DisableCollectionofaMetric'>Disable Collection of a Metric</a></li>
     <li><a href='#ui-Admin.Monitor.MetricTemplate-ChangeaMetricCollectionInterval'>Change a Metric Collection Interval</a></li>
     <li><a href='#ui-Admin.Monitor.MetricTemplate-SetIndicatorMetrics'>Set Indicator Metrics</a></li>
     <li><a href='#ui-Admin.Monitor.MetricTemplate-APIsforMetricCollectionSettings'>APIs for Metric Collection Settings</a></li>
-</ul>
 </ul></div>
 
 
-<p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
+<p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
 
 
+<p>Metric collection settings for a resource type are configured on the <b>Monitoring Defaults</b> page for the resource type.</p>
 
-<h1><a name="ui-Admin.Monitor.MetricTemplate-ConfigureMetricCollectionforaResourceType%26nbsp%3B"></a>Configure Metric Collection for a Resource Type&nbsp;</h1>
+<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Template Changes Vs. Custom Configurations</b><br />Note that an authorized user can tailor metric collection settings on a per resource basis (on the resource's <b>Metric Data</b> minitab in the Resource Hub.) When you save changes to the metric collection settings for a resource type on the <b>Monitoring Defaults</b> page, the settings you configure will apply to <em>all</em> resources of that type in inventory.  So, any custom metric collection configuration for resources of that type will be overwritten.
 
-<p>The <b>Monitoring Defaults</b> page page allows users to specify which metrics Hyperic HQ should gather and at what time intervals for a selected resource type.</p>
+<p>Note however, that if a user has chosen a different set of indicator metrics for a resource instance (on the resource's <b>Indicators</b> minitab in the Resource Hub) changing the indicator metrics for a resource type on the <b>Monitoring Defaults</b> page will <em>not</em> override the user's selections.</p></td></tr></table></div>
 
-
-<h2><a name="ui-Admin.Monitor.MetricTemplate-EnableCollectionofaMetric"></a>Enable Collection of a Metric</h2>
-
-<p><font color="#333333">To enable the collection of a metric, follow the directions in</font> <font color="#333333"><a href="#ui-Admin.Monitor.MetricTemplate-ChangeaMetricCollectionInterval">Change a Metric Collection Interval</a></font><font color="#333333">. Collection of the metric is now enabled by default with the specified collection interval on every resource of this type.</font></p>
-
-<h2><a name="ui-Admin.Monitor.MetricTemplate-DisableCollectionofaMetric"></a>Disable Collection of a Metric</h2>
-
-<p><font color="#333333">To disable the collection of a metric, check the metric name at the left and click</font> <span class="image-wrap" style=""><img src="attachments/71828506/71926243.png" style="border: 0px solid black"/></span> <font color="#333333">at the bottom of the page.</font></p>
-
-<h2><a name="ui-Admin.Monitor.MetricTemplate-ChangeaMetricCollectionInterval"></a>Change a Metric Collection Interval</h2>
+<h1><a name="ui-Admin.Monitor.MetricTemplate-NavigatetotheMonitoringDefaultsPageforaResourceType"></a>Navigate to the Monitoring Defaults Page for a Resource Type</h1>
 
 <ol>
-	<li>Check the metric name at the left.</li>
-	<li>In <b>Collection Interval for Selected</b> at the bottom of the page, enter  a time value and select a unit of time measure for the collection interval.</li>
-	<li>Click <span class="image-wrap" style=""><img src="attachments/71828506/71926244.png" style="border: 0px solid black"/></span>.</li>
+	<li>Click the <b>Administration</b> tab.</li>
+	<li>Click <b>Monitoring Defaults</b> in the "HQ Server Settings" section of the <b>Administration</b> tab.</li>
+	<li>Scroll to the desired resource type on the <b>Monitoring Defaults</b> page, and click <b>Edit Metric Template</b> in that row.</li>
 </ol>
 
 
-<h2><a name="ui-Admin.Monitor.MetricTemplate-SetIndicatorMetrics"></a>Set Indicator Metrics</h2>
+<p>The screenshot below is the <b>Monitoring Defaults</b> page for the vSphere Host resource type.</p>
 
-<p><font color="#333333">To select the metrics that appear as indicators on the</font> <font color="#333333"><b>Monitoring</b></font> <font color="#333333">tab for resources instances, check the metric name at the left for each metric you wish to be an indicator, and click</font> <span class="image-wrap" style=""><img src="attachments/71828506/71926244.png" style="border: 0px solid black"/></span> <font color="#333333">to the right of</font> <font color="#333333"><b>Set Selected Metrics as Indicators</b></font> <font color="#333333">at the bottom of the page.</font></p>
+<p><span class="image-wrap" style=""><img src="attachments/71828283/71925873.png" width="800px" style="border: 0px solid black"/></span></p>
+
+<h1><a name="ui-Admin.Monitor.MetricTemplate-EnableCollectionofaMetric"></a>Enable Collection of a Metric</h1>
+
+<p>To enable the collection of a metric, follow the directions in <a href="#ui-Admin.Monitor.MetricTemplate-ChangeaMetricCollectionInterval">Change a Metric Collection Interval</a>. Collection of the metric is now enabled by default with the specified collection interval on every resource of this type.</p>
+
+<h1><a name="ui-Admin.Monitor.MetricTemplate-DisableCollectionofaMetric"></a>Disable Collection of a Metric</h1>
+
+<p>To disable the collection of a metric, check the metric name at the left and click <b>Disable Collection</b> at the bottom of the page.</p>
+
+<h1><a name="ui-Admin.Monitor.MetricTemplate-ChangeaMetricCollectionInterval"></a>Change a Metric Collection Interval</h1>
+
+<ol>
+	<li>Check the metric name at the left.</li>
+	<li>In <b>Collection Interval for Selected</b> at the bottom of the page, enter a time value and select a unit of time measure for the collection interval.</li>
+	<li>Click  the <b>Collection Interval for Selected</b> control at the bottom of the <b>Monitoring Defaults</b> page.</li>
+</ol>
+
+
+<h1><a name="ui-Admin.Monitor.MetricTemplate-SetIndicatorMetrics"></a>Set Indicator Metrics</h1>
+
+<p>To select the indicator metrics for a resource type (indicator metrics are the metrics that are charted on a resource's <b>Indicators</b> minitab in the Resource Hub) check the metric name at the left for each metric you wish to be an indicator, and click the <b>Set Selected Metrics as Indicators</b> control at the bottom of the <b>Monitoring Defaults</b> page.</p>
 
 <p>The metrics you configure will be the default indicators for the resource type.</p>
 
 <p>Changes to indicator metrics apply to existing resources but only for users that have not explicitly changed the default indicator page on the resources (of the specified type). If a user has changed the default indicator page for a resource, that will not be overwritten with changes made here.</p>
 
-<h2><a name="ui-Admin.Monitor.MetricTemplate-APIsforMetricCollectionSettings"></a>APIs for Metric Collection Settings</h2>
+<h1><a name="ui-Admin.Monitor.MetricTemplate-APIsforMetricCollectionSettings"></a>APIs for Metric Collection Settings</h1>
 
-
-<p>As an alternative to the updating updating metric collection settings from the HQ user interface, you can use HQ APIs to perform updates from the command line or from scripts to perform bulk updates:</p>
+<p>As an alternative to the updating updating metric collection settings from the Hyperic user interface, you can use Hyperic APIs to perform updates from the command line or from scripts to perform bulk updates:</p>
 
 <ul>
-	<li><a href="http://support.hyperic.com/confluence/display/EVO/HQApi+metric+command" title="HQApi metric command">HQApi metric command</a> &#45; for listing and updating metric collection settings for an individual resource.</li>
-	<li><a href="http://support.hyperic.com/confluence/display/EVO/HQApi+metrictemplate+command" title="HQApi metrictemplate command">HQApi metrictemplate command</a> &#45; for listing and updating metric collection settings for an all instances of a resource type.</li>
+	<li><a href="http://support.hyperic.com/display/EVO/HQApi+metric+command" title="HQApi metric command">HQApi metric command</a> &#45; for listing and updating metric collection settings for an individual resource.</li>
+	<li><a href="http://support.hyperic.com/display/EVO/HQApi+metricTemplate+command" title="HQApi metricTemplate command">HQApi metricTemplate command</a> &#45; for listing and updating metric collection settings for an all instances of a resource type.</li>
 </ul>
 
 
-<p>For general information, see <a href="http://support.hyperic.com/confluence/display/EVO/Web+Services+API" title="Web Services API">Web Services API</a>.</p>
-
-<p>Return to <a href="ui-Admin.Monitor.html" title="ui-Admin.Monitor">Monitoring Defaults Configuration</a>.</p>
+<p>For general information, see <a href="http://support.hyperic.com/display/EVO/vFabric+Hyperic+Web+Services+API" title="vFabric Hyperic Web Services API">vFabric Hyperic Web Services API</a>.</p>
 
 				    					    <br/>
                         <div class="tabletitle">
-                            <a name="attachments">Attachments:</a>
+                            <a name="attachments">
+                                <h2>Attachments:</h2>
+                            </a>
                         </div>
 
                         <div class="greybox" align="left">
@@ -108,10 +118,10 @@ div.rbtoc1281566689954 li {margin-left: 0px;padding-left: 0px;}
 	    </table>
 	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
 			<tr>
-				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Oct 28, 2010 15:34</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jan 12, 2012 13:19</font></td>
 		    </tr>
 	    </table>
     </body>

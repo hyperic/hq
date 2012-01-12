@@ -16,32 +16,32 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Sep 19, 2010 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Apr 20, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 
 <p>The <b>HQ Server Settings</b> page allows an HQ user with Super User role to configure a variety of HQ Server behaviors. Most changes take effect upon HQ Server restart.</p>
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1284925669698 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1284925669698 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1284925669698 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1303316205500 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1303316205500 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1303316205500 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1284925669698'>
+/*]]>*/</style><div class='rbtoc1303316205500'>
 <ul>
     <li><a href='#ui-Admin.HQServer-HQEmailConfigurationProperties'>HQ Email Configuration Properties</a></li>
-    <li><a href='#ui-Admin.HQServer-HypericIQProperties'>Hyperic IQ Properties <span style="color: red">*</span></a></li>
+    <li><a href='#ui-Admin.HQServer-HypericIQProperties'>Hyperic IQ Properties</a></li>
     <li><a href='#ui-Admin.HQServer-HQAnnouncementProperties'>HQ Announcement Properties</a></li>
     <li><a href='#ui-Admin.HQServer-MaintenanceProperties'>Maintenance Properties</a></li>
     <li><a href='#ui-Admin.HQServer-GlobalAlertProperties'>Global Alert Properties</a></li>
-    <li><a href='#ui-Admin.HQServer-NotificationThrottlingConfigurationProperties'>Notification Throttling Configuration Properties <span style="color: red">*</span></a></li>
-    <li><a href='#ui-Admin.HQServer-AutomaticBaselineConfigurationProperties'>Automatic Baseline Configuration Properties <span style="color: red">*</span></a></li>
-    <li><a href='#ui-Admin.HQServer-LDAPConfigurationProperties'>LDAP Configuration Properties <span style="color: red">*</span></a></li>
-    <li><a href='#ui-Admin.HQServer-KerberosConfigurationProperties'>Kerberos Configuration Properties <span style="color: red">*</span></a></li>
-    <li><a href='#ui-Admin.HQServer-SNMPServerConfigurationProperties'>SNMP Server Configuration Properties <span style="color: red">*</span></a></li>
+    <li><a href='#ui-Admin.HQServer-NotificationThrottlingConfigurationProperties'>Notification Throttling Configuration Properties</a></li>
+    <li><a href='#ui-Admin.HQServer-AutomaticBaselineConfigurationProperties'>Automatic Baseline Configuration Properties</a></li>
+    <li><a href='#ui-Admin.HQServer-LDAPConfigurationProperties'>LDAP Configuration Properties</a></li>
+    <li><a href='#ui-Admin.HQServer-KerberosConfigurationProperties'>Kerberos Configuration Properties</a></li>
+    <li><a href='#ui-Admin.HQServer-SNMPServerConfigurationProperties'>SNMP Server Configuration Properties</a></li>
 <ul>
     <li><a href='#ui-Admin.HQServer-ConfigureHQServerforSNMPv1'>Configure HQ Server for SNMP v1</a></li>
     <li><a href='#ui-Admin.HQServer-ConfigureHQServerforSNMPv2c'>Configure HQ Server for SNMP v2c</a></li>
@@ -51,8 +51,7 @@ div.rbtoc1284925669698 li {margin-left: 0px;padding-left: 0px;}
 
 
 
-<p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
-
+<p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
 
 
 <div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>HQ Server settings have a fundamental and wide-ranging impact on the functionality and behavior of your HQ deployment. Edit with extreme caution.</td></tr></table></div>
@@ -87,14 +86,15 @@ Base URL forms the prefix of an URL to any HQ appends the remainder of the URL t
 </div>
 
 
-<h1><a name="ui-Admin.HQServer-HypericIQProperties"></a>Hyperic IQ Properties<font color="red">&#42;</font></h1>
+<h1><a name="ui-Admin.HQServer-HypericIQProperties"></a>Hyperic IQ Properties</h1>
+<p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+
+
 <p>In HQ Enterprise 4.1 and later, the <b>Hyperic IQ Server URL</b> property identifies the URL of a Hyperic IQ installation. You must specify the IQ server to enable users to view IQ reports in the Hyperic IQ Reports dashboard portlet. The URL is: </p>
-<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
-<pre> 
-http://IQ_host:9080/arc 
-</pre>
-</div></div> 
-<p>where <tt><em>IQ_host</em></tt> is the address of the IQ server. </p>
+
+<p><tt><a href="http://IqHost:9080/arc">http://IqHost:9080/arc</a></tt></p>
+
+<p>where <tt>IqHost</tt> is the address of the IQ server. </p>
 
 <h1><a name="ui-Admin.HQServer-HQAnnouncementProperties"></a>HQ Announcement Properties</h1>
 
@@ -150,7 +150,7 @@ http://IQ_host:9080/arc
 </div>
 
 
-<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Warning:  Data Management Changes Require Server Restart</b><br />Any changes made in this section require the HQ Server to be restarted before they take effect.</td></tr></table></div>
+<p><b>Note</b>: You must restart the Hyperic Server for data management changes to take effect.</p>
 
 <h1><a name="ui-Admin.HQServer-GlobalAlertProperties"></a>Global Alert Properties</h1>
 
@@ -166,13 +166,16 @@ http://IQ_host:9080/arc
 
 
 <ul>
-	<li><b>Hierarchical Alerting</b> <font color="red">&#42;</font> &#45; As of HQ Enterprise 4.2, this setting controls whether alerts are evaluated using the hierarchical alerting method. When hierarchical alerting is enabled, before firing an alert for a resource, HQ considers the availability and alert status of the resource's parent. The purpose of hierarchical alerting is to avoid firing alerts for every resource affected by a single root cause. For more information, see <a href="http://support.hyperic.com/confluence/display/EVO/Controlling+Alert+and+Notification+Volume#ControllingAlertandNotificationVolume-UnderstandingHierarchicalAlerting">Understanding Hierarchical Alerting</a>.</li>
+	<li><b>Hierarchical Alerting</b> <font color="red">&#42;</font> &#45; As of HQ Enterprise 4.2, this setting controls whether alerts are evaluated using the hierarchical alerting method. When hierarchical alerting is enabled, before firing an alert for a resource, HQ considers the availability and alert status of the resource's parent. The purpose of hierarchical alerting is to avoid firing alerts for every resource affected by a single root cause. For more information, see <a href="http://support.hyperic.com/display/EVO/Controlling+Alert+and+Notification+Volume#ControllingAlertandNotificationVolume-UnderstandingHierarchicalAlerting">Understanding Hierarchical Alerting</a>.</li>
 </ul>
 
 
-<p><b>Note:</b> You can extend the effect of hierarchical alerting in HQ Enterprise 4.2 and later by configuring the relationship between a network device or virtual host and the platforms that depend on it using the <b>Network and Host Dependency Manager</b> available in the "Plugins" section of the <b>Administration</b> tab. For more information see <a href="http://support.hyperic.com/confluence/display/EVO/Controlling+Alert+and+Notification+Volume#ControllingAlertandNotificationVolume-ConfigureNetworkHostDependenciesforHierarchicalAlerting">Configure Network Host Dependencies for Hierarchical Alerting</a>.</p>
+<p><b>Note:</b> You can extend the effect of hierarchical alerting in HQ Enterprise 4.2 and later by configuring the relationship between a network device or virtual host and the platforms that depend on it using the <b>Network and Host Dependency Manager</b> available in the "Plugins" section of the <b>Administration</b> tab. For more information see <a href="http://support.hyperic.com/display/EVO/Controlling+Alert+and+Notification+Volume#ControllingAlertandNotificationVolume-ConfigureNetworkHostDependenciesforHierarchicalAlerting">Configure Network Host Dependencies for Hierarchical Alerting</a>.</p>
 
-<h1><a name="ui-Admin.HQServer-NotificationThrottlingConfigurationProperties"></a>Notification Throttling Configuration Properties<font color="red">&#42;</font></h1>
+<h1><a name="ui-Admin.HQServer-NotificationThrottlingConfigurationProperties"></a>Notification Throttling Configuration Properties</h1>
+<p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+
+
 
 <p>Starting in HQ Enterprise 4.2, you can use notification throttling to limit the number of alert email actions (notifications sent by email for a fired alert) that HQ will issue in a 15 second interval. When the threshold you specify is reached, HQ stops sending email alert notifications and instead sends a summary of alert activity every ten minutes to the recipients you specify.</p>
 
@@ -186,11 +189,14 @@ http://IQ_host:9080/arc
 </ol>
 
 
-<p>For related information, see&nbsp;<a href="http://support.hyperic.com/confluence/display/EVO/Controlling+Alert+and+Notification+Volume" title="Controlling Alert and Notification Volume">Controlling Alert and Notification Volume</a>.</p>
+<p>For related information, see&nbsp;<a href="http://support.hyperic.com/display/EVO/Controlling+Alert+and+Notification+Volume" title="Controlling Alert and Notification Volume">Controlling Alert and Notification Volume</a>.</p>
 
-<h1><a name="ui-Admin.HQServer-AutomaticBaselineConfigurationProperties"></a>Automatic Baseline Configuration Properties <font color="red">&#42;</font></h1>
+<h1><a name="ui-Admin.HQServer-AutomaticBaselineConfigurationProperties"></a>Automatic Baseline Configuration Properties </h1>
+<p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
 
-<p>In HQ Enterprise, these properties control the HQ baselining process and the accuracy of the baseline.</p>
+
+
+<p>In vFabric Hyperic, these properties control the baselining process. Changing the data set used to calculate baselines can affect baseline accuracy.</p>
 
 <div class='table-wrap'>
 <table class='confluenceTable'><tbody>
@@ -201,7 +207,7 @@ http://IQ_host:9080/arc
 </tr>
 <tr>
 <td class='confluenceTd'> <b>Baseline Frequency</b> </td>
-<td class='confluenceTd'> The frequency with which HQ calculates a baseline for each metric. </td>
+<td class='confluenceTd'> The frequency with which Hyperic calculates a baseline for each metric. </td>
 <td class='confluenceTd'> 3 days </td>
 </tr>
 <tr>
@@ -216,32 +222,68 @@ http://IQ_host:9080/arc
 </tr>
 <tr>
 <td class='confluenceTd'> <b>Track Out-of-Bounds Metrics</b> </td>
-<td class='confluenceTd'> Controls whether or not HQ tracks <a href="http://support.hyperic.com/confluence/display/EVO/Monitoring+Overview#MonitoringOverview-ProblemMetrics">OOB metrics</a>. </td>
+<td class='confluenceTd'> Controls whether or not Hyperic tracks <a href="http://support.hyperic.com/display/EVO/Monitoring+Overview#MonitoringOverview-ProblemMetrics">OOB metrics</a>. </td>
 <td class='confluenceTd'> off </td>
 </tr>
 </tbody></table>
 </div>
 
 
-<h1><a name="ui-Admin.HQServer-LDAPConfigurationProperties"></a>LDAP Configuration Properties <font color="red">&#42;</font></h1>
+<h1><a name="ui-Admin.HQServer-LDAPConfigurationProperties"></a>LDAP Configuration Properties </h1>
+<p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+
+
 
 <p>By default Hyperic HQ uses its database for storing information about users and authenticating those users. HQ can be configured to use an external LDAP directory for authenticating users in addition to its own database.</p>
 
 <p>In HQ Enterprise, these properties configure HQ to use an external LDAP directory &#8212; in addition to HQ's own database &#8212; for authenticating users.</p>
-<ul>
-	<li><b>URL</b> &#45; The LDAP URL the HQ Server will use to access the LDAP directory</li>
-	<li><b>SSL</b> &#45; Indicates whether the LDAP directory requires SSL connections.</li>
-	<li><b>Username and Password</b> &#45; Used if the LDAP directory does not allow anonymous searching, as is common in secure environments. The username must be an LDAP user with sufficient privileges to view at least the sections of the directory containing the information for HQ users.</li>
-	<li><b>Search Base</b> &#45;&nbsp; Also known as the suffix. Required for an LDAP connection. If unsure of this setting, check with the LDAP administrator.</li>
-	<li><b>Search Filter</b> &#45; Limits the users in LDAP to a subset of the entire directory</li>
-	<li><b>Login Property</b> &#45; The LDAP property that HQ will use as the username. Very important. Examples of common login properties are "cn" and "uid".</li>
-</ul>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<td class='confluenceTd'> <b>Property</b> </td>
+<td class='confluenceTd'> <b>Description</b> </td>
+</tr>
+<tr>
+<td class='confluenceTd'>Use LDAP Authentication </td>
+<td class='confluenceTd'>Checkmark this option to enable LDAP authentication. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> URL </td>
+<td class='confluenceTd'> Location of your LDAP or Active Directory server. If other than the standard LDAP port is used, specify it the URL. Add the port to the end of the URL, after a colon &#40;:&#41; character. For example: <br class="atl-forced-newline" /> <br class="atl-forced-newline" /> <tt>ldap://YourLDAPHost:44389</tt> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> SSL </td>
+<td class='confluenceTd'> Indicates whether the LDAP directory requires SSL connections. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Username and Password </td>
+<td class='confluenceTd'> Used if the LDAP directory does not allow anonymous searching, as is common in secure environments. The username must be an LDAP user with sufficient privileges to view at least the sections of the directory containing the information for HQ users. The full node path is required, for example: <br class="atl-forced-newline" /> <br class="atl-forced-newline" /> <tt>cn=admin,dc=example,dc=com</tt> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Search Base </td>
+<td class='confluenceTd'> Also known as the suffix. Required for an LDAP connection. The full path to the branch required, for example: <br class="atl-forced-newline" /> <br class="atl-forced-newline" /> <tt>ou=people,dc=example,dc=com</tt> <br class="atl-forced-newline" /> <br class="atl-forced-newline" /> If you are unsure of this setting, check with your LDAP administrator. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Search Filter </td>
+<td class='confluenceTd'> Limits the users in LDAP to a subset of the entire directory. For example, <br class="atl-forced-newline" /> <br class="atl-forced-newline" /> <tt>(!(location=SFO*))</tt> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> Login Property </td>
+<td class='confluenceTd'> The LDAP property that HQ will use as the username. Very important. Examples of common login properties are "cn" and "uid". </td>
+</tr>
+</tbody></table>
+</div>
 
 
-<p>After LDAP authentication has been successfully configured, users will be able to log into HQ with their LDAP password (using the value specified as the <ins>Login Property</ins> as their username).  The first time LDAP users log in to HQ, they will be asked to provide some identifying information before they can continue: their first and last name, email address, phone number, etc.  This is for display purposes and alert notification purposes.<b>Note:</b>&nbsp; LDAP Users Need HQ Roles, Too<br/>
-As with all new users in HQ, LDAP users are not assigned to any roles by default and therefore they will not be able to see any resources in HQ until they are added to a role.  HQ administrators will need to assign the appropriate role or roles to the user in HQ. (On the HQ <b>Administration</b> page, click <b>List Users</b>, select the user, and click <b>Add to List</b> in the "Roles Assigned To" section of the page.)</p>
+<p>After LDAP authentication has been successfully configured, users will be able to log into HQ with their LDAP password (using the value specified as the <ins>Login Property</ins> as their username). The first time LDAP users log in to HQ, they will be asked to provide some identifying information before they can continue: their first and last name, email address, phone number, etc. This is for display purposes and alert notification purposes.</p>
 
-<h1><a name="ui-Admin.HQServer-KerberosConfigurationProperties"></a>Kerberos Configuration Properties<font color="red">&#42;</font></h1>
+<p><b>Note:</b>&nbsp; LDAP users must also have one or more HQ roles.&nbsp;As with all new users in HQ, LDAP users are not assigned to any roles by default and therefore they will not be able to see any resources in HQ until they are added to a role. HQ administrators will need to assign the appropriate role or roles to the user in HQ. (On the HQ <b>Administration</b> page, click <b>List Users</b>, select the user, and click <b>Add to List</b> in the "Roles Assigned To" section of the page.)</p>
+
+<h1><a name="ui-Admin.HQServer-KerberosConfigurationProperties"></a>Kerberos Configuration Properties</h1>
+<p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+
+
 
 <p>In HQ Enterprise, these properties configure HQ to use Kerberos authentication.</p>
 <ul>
@@ -251,7 +293,10 @@ As with all new users in HQ, LDAP users are not assigned to any roles by default
 </ul>
 
 
-<h1><a name="ui-Admin.HQServer-SNMPServerConfigurationProperties"></a>SNMP Server Configuration Properties <font color="red">&#42;</font></h1>
+<h1><a name="ui-Admin.HQServer-SNMPServerConfigurationProperties"></a>SNMP Server Configuration Properties </h1>
+<p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+
+
 
 <h3><a name="ui-Admin.HQServer-ConfigureHQServerforSNMPv1"></a>Configure HQ Server for SNMP v1</h3>
 
@@ -438,10 +483,10 @@ As with all new users in HQ, LDAP users are not assigned to any roles by default
 	    </table>
 	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
 			<tr>
-				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Oct 28, 2010 15:34</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jan 12, 2012 13:19</font></td>
 		    </tr>
 	    </table>
     </body>

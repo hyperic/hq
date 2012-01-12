@@ -16,191 +16,208 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on May 20, 2010 by <font color="#0050B2">clee</font>.
+					    This page last changed on Mar 04, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <h1><a name="ui-Inventory.Group-ViewingGroupInventory"></a><a name="ui-Inventory.Group-top"></a>Viewing Group Inventory</h1>
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
-<p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
+ 
+
+<p>This page describes the contents of the <b>Inventory</b> page for a group.  </p>
 
 
-<p>This inventory screen allows users to view and manage a selected <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-group">group</a>. The screen displays a group's user-specified properties, the <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-resource">resources</a> contained within the group, and the roles assigned to the group. The group's name is at the rightmost of the path listed at the top of the screen.</p>
+
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1299269770715 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1299269770715 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1299269770715 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1299269770715'>
 <ul>
-	<li><a href="#ui-Inventory.Group-Tasks">Tasks</a> available on this screen</li>
-	<li><a href="#ui-Inventory.Group-Sections">Sections</a> on this screen</li>
-	<li><a href="#ui-Inventory.Group-Navigating">Navigating</a> via the masthead menu</li>
+    <li><a href='#ui-Inventory.Group-NavigatetotheInventoryPageforaGroup'>Navigate to the Inventory Page for a Group</a></li>
+<ul>
+    <li><a href='#ui-Inventory.Group-InventoryPageHeaderforaGroup'>Inventory Page Header for a Group</a></li>
+    <li><a href='#ui-Inventory.Group-ResourcePropertiesforaGroup'>Resource Properties for a Group</a></li>
+    <li><a href='#ui-Inventory.Group-MapControlforaCompatibleGroup'>Map Control for a Compatible Group</a></li>
+    <li><a href='#ui-Inventory.Group-ToolsMenuforaGroup'>Tools Menu for a Group</a></li>
+</ul>
+    <li><a href='#ui-Inventory.Group-GeneralPropertiesforaGroup'>General Properties for a Group</a></li>
+    <li><a href='#ui-Inventory.Group-Resources'>Resources</a></li>
+    <li><a href='#ui-Inventory.Group-RolesaGroupisAssignedTo'>Roles a Group is Assigned To</a></li>
+</ul></div> 
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Learn about Groups</b><br />See <a href="http://support.hyperic.com/display/EVO/Hyperic+Inventory+Model" title="Hyperic Inventory Model">Hyperic Inventory Model</a>.</td></tr></table></div> 
+
+
+
+<p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
+ 
+
+ 
+
+<h1><a name="ui-Inventory.Group-NavigatetotheInventoryPageforaGroup"></a>Navigate to the Inventory Page for a Group </h1>
+
+<p>To display the <b>Inventory</b> page for a compatible or mixed group, use:</p>
+
+<ul>
+	<li><b>Resources &gt; Browse &gt; Compatible Groups/Clusters</b>, or</li>
+	<li><b>Resources &gt; Browse &gt; Mixed Groups</b></li>
 </ul>
 
 
+<p>and click the <b>Inventory</b> tab. </p>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>In vFabric Hyperic, a user can view and modify resources only to the extent that the user's role(s) permit. For more information see <a href="http://support.hyperic.com/display/EVO/Create+and+Manage+Roles+in+vFabric+Hyperic#CreateandManageRolesinvFabricHyperic-UnderstandRoles">Understand Roles in vFabric Hyperic</a> in <em>Manage Hyperic Users and Roles</em>.</td></tr></table></div>
 
 
-<p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
+<p>Click the thumbnail below for a screenshot of a compatible group's <b>Inventory</b> page. </p>
 
 
-<p><a name="ui-Inventory.Group-Tasks"></a></p>
+<p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 995x617" href='http://support.hyperic.com/download/attachments/71828283/InventoryTabCompatibleGroup.png'><img src="attachments/thumbnails/71828283/72646847" style="border: 0px solid black"/></a></span> </p>
 
-<h3><a name="ui-Inventory.Group-TasksAvailableonThisScreen"></a>Tasks Available on This Screen</h3>
+<p>Click the thumbnail below for a screenshot of a mixed group's <b>Inventory</b> page. </p>
 
-<p>On this screen, users can do the following tasks:</p>
+<p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 1028x696" href='http://support.hyperic.com/download/attachments/71828283/InventoryTabMixedGroup.png'><img src="attachments/thumbnails/71828283/71925941" style="border: 0px solid black"/></a></span> </p>
 
-<p><b>To view a map representation of the group's resources:</b></p>
+<h2><a name="ui-Inventory.Group-InventoryPageHeaderforaGroup"></a>Inventory Page Header for a Group</h2>
+
+<p>The sections below describe the data and controls that appear at the top of the <b>Inventory</b> page for a group. </p>
+
+<h2><a name="ui-Inventory.Group-ResourcePropertiesforaGroup"></a>Resource Properties for a Group</h2>
+
+<p>The properties at the top of the <b>Inventory</b> page for either a compatible or mixed group are:\ </p>
+
 <ul>
-	<li>Click <span class="image-wrap" style=""><img src="attachments/71828455/71926124.png" height="16" width="40" style="border: 0px solid black"/></span> in the upper left.<br/>
-From there you can navigate to any one of the group's resources by clicking on the resource's name.</li>
+	<li><b>Description&nbsp;</b></li>
+	<li><b>Owner</b> &#8212; By default, the Hyperic user under whose account the resource was added to inventory.&nbsp; Click <b>Change...</b> to assign a different resource owner.</li>
 </ul>
 
 
-<p><b>To change the group's owner:</b></p>
+<h2><a name="ui-Inventory.Group-MapControlforaCompatibleGroup"></a>Map Control for a Compatible Group </h2>
+
+<p>The <b>Map</b> control is present on the <b>Inventory</b> tab for a compatible group, not for a mixed group. The map for a compatible group shows the members of the group. </p>
+
+<p>The screenshot below is a resource map for compatible group that contains servers of type "VMware VI3 VM" - the name of each member resource is shown as a hyperlink. </p>
+
+<p><span class="image-wrap" style=""><img src="attachments/71828283/72646848.png" style="border: 0px solid black"/></span> </p>
+
+<h2><a name="ui-Inventory.Group-ToolsMenuforaGroup"></a>Tools Menu for a Group</h2>
+
+<p>The screenshot below is the <b>Tools</b> menu for a group. </p>
+
+<p><span class="image-wrap" style=""><img src="attachments/71828283/72646845.png" width="225px" style="border: 0px solid black"/></span> </p>
+
+<p>The <b>Tools</b> menu for a compatible or a mixed group has the following commands: </p>
+
 <ul>
-	<li>In the middle near the top of the screen, click <b>Change</b> next to the listed owner and proceed to the "Edit" screen.</li>
+	<li><b>New Group</b> &#8212; Opens the <b>New Group</b> page, where you can create a new group.</li>
 </ul>
 
 
-<p><b>To change the group's general properties:</b></p>
 <ul>
-	<li>In the "General Properties" section, click <span class="image-wrap" style=""><img src="attachments/71828455/71926127.gif" height="16" width="40" style="border: 0px solid black"/></span> and proceed to the "Edit" screen.</li>
+	<li><b>Delete Group</b> &#8212; Deletes the group, but not its member resources.</li>
 </ul>
 
 
-<p><b>To add a resource to the group:</b></p>
 <ul>
-	<li>In the "Resources" section, click <span class="image-wrap" style=""><img src="attachments/71828455/71926128.gif" height="16" width="70" style="border: 0px solid black"/></span> and proceed to the "Add to Groups" screen.</li>
+	<li><b>Add to Dashboard Favorites</b> &#8212; Adds the group to the <b>Favorite Resources</b> portlet on the the current Hyperic user's Dashboard.</li>
 </ul>
 
 
-<p><b>To remove a resource from the group:</b></p>
 <ul>
-	<li>In the "Resources" section, check the resource and click <span class="image-wrap" style=""><img src="attachments/71828455/71926125.gif" height="16" width="91" style="border: 0px solid black"/></span>.</li>
-</ul>
-
-
-<p><b>To assign a role to the group:</b></p>
-<ul>
-	<li>In the "Roles Assign To" section, click <span class="image-wrap" style=""><img src="attachments/71828455/71926128.gif" height="16" width="60" style="border: 0px solid black"/></span> and proceed to the "Add Roles to Groups" screen.</li>
-</ul>
-
-
-<p><b>To remove a role from the group:</b></p>
-<ul>
-	<li>In the "Roles Assigned To" section, check the role and click <span class="image-wrap" style=""><img src="attachments/71828455/71926125.gif" height="16" width="90" style="border: 0px solid black"/></span>.</li>
-</ul>
-
-
-<p><b>To add a new group:</b></p>
-<ul>
-	<li>In the Tools Menu , select <b>New Group</b>.</li>
-</ul>
-
-
-<p><b>To add this group to the user's Dashboard favorites:</b></p>
-<ul>
-	<li>In the <b>Tools</b> menu in the upper right, select <b>Add to My Dashboard Favorites</b>.
+	<li><b>Add to Group</b> &#8212; Opens the <b>Group Manager</b> page, which lists the groups to which the group may be added. You can add a group to another group if:
 	<ul>
-		<li>In HQ Enterprise 4.2 and later, if you have edit permissions for multiple dashboards, the <b>Tools</b> menu will instead have an <b>Add to Dashboard Favorites</b> option.&nbsp; Select the option to view a list of dashboards for which you have edit permissions.&nbsp; You can select one or more dashboards, and click <b>Add</b> to add the resource to the favorites portlet of each.</li>
+		<li>You have permission to access the target group, and:</li>
+		<li>The target group is a mixed group that contains groups.</li>
 	</ul>
 	</li>
 </ul>
 
 
-<p><em><a href="#ui-Inventory.Group-top"><em>back to top</em></a></em></p>
-
-<p><a name="ui-Inventory.Group-Sections"></a></p>
-
-<h3><a name="ui-Inventory.Group-SectionsonThisScreen"></a>Sections on This Screen</h3>
-
-
-<h4><a name="ui-Inventory.Group-GeneralProperties"></a>General Properties</h4>
-
-<p>This section lists the properties the user specified when creating or last modifying the group:</p>
 <ul>
-	<li><ins>Owner</ins>: Defaults to the account that created the group</li>
-	<li><ins>Description</ins>: A description of the group</li>
-	<li><ins>Location</ins>: The physical location of the group's hardware</li>
-	<li><ins>Resource type</ins>: The type of resource that this group comprises. It can be a single <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-resourcetype">resource type</a>, for example, Exchange 3000, or a mix of types, for example, <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-server">servers</a>, <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-service">services</a>, and <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-application">applications</a>.</li>
+	<li><b>Schedule Downtime</b><font color="red">*</font> &#8212; This option, available vFabric Hyperic, opens the <b>Schedule Downtime</b> popup, where you can schedule a period of time during which alerts for members of the group will not fire. For more information see <a href="ui-Inventory.Group.Maintenance.html" title="ui-Inventory.Group.Maintenance">Schedule Downtime</a>.</li>
 </ul>
 
 
-<h4><a name="ui-Inventory.Group-Resources"></a>Resources</h4>
 
-<p>This section lists the group's resources. To view a resource listed here, click the resource's name. The resource's <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-availability">availability</a> is also indicated.</p>
+<h1><a name="ui-Inventory.Group-GeneralPropertiesforaGroup"></a>General Properties for a Group</h1>
 
-<h4><a name="ui-Inventory.Group-RolesAssignedTo"></a>Roles Assigned To</h4>
+<p>The <b>General Properties</b> section of the <b>Inventory</b> page for a service lists the following information: </p>
 
-<p>This section lists the roles assigned to the group. Only users assigned to the selected role(s) will be able to monitor this group. To view a role listed here, click the role's name.</p>
+<ul>
+	<li><b>Description</b> &#8212; A description of the service. This is an optional, user-configured value.</li>
+	<li><b>Date Created</b> &#8212; The date the service was added to the Hyperic inventory</li>
+	<li><b>Location</b></li>
+	<li><b>Date Modified</b>, <b>Modified By</b> &#8212; The date the service was last modified and the user who modified it.</li>
+	<li><b>Resource Type</b> &#8212; The service type.</li>
+</ul>
 
-<h4><a name="ui-Inventory.Group-ConfigurationProperties"></a>Configuration Properties</h4>
 
-<p>This section displays the shared, monitoring, and control <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-configprop">configuration properties</a> of the group. Only <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-compatiblegroup">compatible groups</a> that contain a <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-resourcetype">resource type</a> that itself has associated <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-controlaction">control actions</a> will have any control configuration properties specified here.</p>
+<p>Click the <b>Edit</b> button to open a page where you can edit the service's Name or Description. </p>
 
-<p>HQ often provides reasonable defaults for the configuration properties, but HQ users must provide information specific to their environment.</p>
 
-<p><em><a href="#ui-Inventory.Group-top"><em>back to top</em></a></em></p>
+<p><span class="image-wrap" style=""><img src="attachments/71828283/72646842.png" width="750px" style="border: 0px solid black"/></span> </p>
 
-<p><a name="ui-Inventory.Group-Navigating"></a></p>
-<h3><a name="ui-Inventory.Group-NavigatingviatheMastheadMenu"></a>Navigating via the Masthead Menu</h3>
 
-<p>Main screens in Hyperic contain a masthead menu. Users can navigate to the following parts of HQ using this menu:</p>
-<div class='table-wrap'>
-<table class='confluenceTable'><tbody>
-<tr>
-<td class='confluenceTd'> <b>Dashboard</b> </td>
-<td class='confluenceTd'> Displays the <a href="ui-Dashboard.html" title="ui-Dashboard">Dashboard</a>, the starting screen in HQ, which displays information about resource health, recent alerts, recently performed auto-discovery scan, and control actions </td>
-</tr>
-<tr>
-<td class='confluenceTd'> <b>Resources</b> </td>
-<td class='confluenceTd'> Click the menu name to access either <b>Browse</b> (takes users to the <a href="ui-Resources.html" title="ui-Resources">Browse Resources</a> screen, where they can locate and navigate through information about all <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-managedresource">managed resources</a>), <b>Currently Down</b> (takes users to the <a href="ui-CurrentlyDown.html" title="ui-CurrentlyDown">Currently Down</a> screen, where they can look at all managed resources that are unavailable), <b>Nagios Availability</b> (available only when Nagios is installed), or <b>Recently Viewed</b> (provides a drop-down list of <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-resource">resources</a> that the user has recently viewed. Selecting one of those resources takes the user to the <a href="ui-Monitor.CurrentHealth.html" title="ui-Monitor.CurrentHealth">Current Health</a> screen for the resource). </td>
-</tr>
-<tr>
-<td class='confluenceTd'> <b>Analyze</b> </td>
-<td class='confluenceTd'> Click the menu name to access <b>Reporting</b> <font color="red">&#42;</font> (presents the <a href="ui-Report.Center.html" title="ui-Report.Center">Reporting</a> screen, from which reports can be generated), <b>Alert Center</b> (presents the <a href="ui-Alert.Center.html" title="ui-Alert.Center">Alert Center</a>, which displays a deployment wide alert summary), or <b>Event Center</b> (presents the <a href="http://support.hyperic.com/confluence/display/DOC/ui-Event.Center" title="ui-Event.Center">Event Center</a>, which displays a deployment-wide event summary). <br class="atl-forced-newline" /> </td>
-</tr>
-<tr>
-<td class='confluenceTd'> <b>Administration</b> </td>
-<td class='confluenceTd'> Takes users (with "Administer Hyperic HQ Server Configuration" permissions) to the <a href="ui-Admin.html" title="ui-Admin">Administration</a> screen, where they can manage the system-wide settings </td>
-</tr>
-<tr>
-<td class='confluenceTd'> <b>Search</b> <br class="atl-forced-newline" /> </td>
-<td class='confluenceTd'> The Search box in the upper right of the Masthead allows you to search for HQ resources of any type and HQ users. <br class="atl-forced-newline" />
-<br class="atl-forced-newline" />
-Search results appear after four characters are entered in the text box. Results will include the first 10 platforms, servers, services, and groups whose name includes the search string. <br class="atl-forced-newline" />  <br class="atl-forced-newline" />
-Double-click a resource in the list to navigate to its Resource page. </td>
-</tr>
-</tbody></table>
-</div>
+<h1><a name="ui-Inventory.Group-Resources"></a>Resources </h1>
 
-<p>The masthead also displays the two most recently triggered alerts. Users can click the alert's time to be taken to the <a href="ui-Alert.Detail.html" title="ui-Alert.Detail">alert detail</a>.</p>
-<p><em><a href="#ui-Inventory.Group-top"><em>back to top</em></a></em></p>
-<table class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><tbody><tr>
-<div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>Next Steps</b></div><div class="panelContent">
-<p><a href="ui-Inventory.Group.AddResource.html" title="ui-Inventory.Group.AddResource">Add resources</a> to the group so that you can monitor, analyze, and control all the group's resources together.<br/>
-<a href="ui-Inventory.AssignRolesToGroups.html" title="ui-Inventory.AssignRolesToGroups">Assign a role</a> to the group.</p>
-</div></div>
-<div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>Related Information</b></div><div class="panelContent">
-<p>View resources of other inventory levels: <a href="ui-Inventory.Service.html" title="ui-Inventory.Service">services</a>, <a href="ui-Inventory.Server.html" title="ui-Inventory.Server">servers</a>, <a href="ui-Inventory.Platform.html" title="ui-Inventory.Platform">platforms</a>, and <a href="ui-Inventory.Application.html" title="ui-Inventory.Application">applications</a>.</p>
-</div></div></tr></tbody></table>
+<p>This section lists the following information for each the group of which the service is a member. </p>
+<ul>
+	<li><b>Group</b> &#8212; The resource name, presented as a hyperlink you can click to navigate to the group.</li>
+	<li><b>Description</b></li>
+</ul>
 
-<h5><a name="ui-Inventory.Group-ReturntoUserInterfaceReference."></a>Return to <a href="User Interface Reference.html" title="User Interface Reference">User Interface Reference</a>.</h5>
+
+<p>There are two controls available: </p>
+
+<ul>
+	<li><b>Add to List</b> &#8212; Click to add the service to a group.</li>
+	<li><b>Remove From Lis</b>t &#8212; If you have checkmarked one or more groups in the list, this control allows you to remove the resource from the selected groups.</li>
+</ul>
+
+
+<p>The following screenshot shows the <b>Resources</b> section for a compatible group </p>
+
+<p><span class="image-wrap" style=""><img src="attachments/71828283/72646843.png" width="750pxpx" style="border: 0px solid black"/></span> </p>
+
+<p>The following screenshot shows the <b>Resources</b> section for a mixed group </p>
+
+<p><span class="image-wrap" style=""><img src="attachments/71828283/72646849.png" width="750pxpx" style="border: 0px solid black"/></span> </p>
+
+<h1><a name="ui-Inventory.Group-RolesaGroupisAssignedTo"></a>Roles a Group is Assigned To</h1>
+<p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+
+
+<p>The "Roles Assigned To" section is present in vFabric Hyperic only ---- it lists the roles to which the group is assigned, which, along with the permission matrix for the role, governs the access that users with the role have to resources in the group.  </p>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>Form more information about roles, groups, and resource permissions, see <a href="http://support.hyperic.com/display/EVO/Create+and+Manage+Roles+in+vFabric+Hyperic#CreateandManageRolesinvFabricHyperic-UnderstandMatrix">Permission Matrix: Grants Access to Types</a> and <a href="http://support.hyperic.com/display/EVO/Create+and+Manage+Roles+in+vFabric+Hyperic#CreateandManageRolesinvFabricHyperic-UnderstandGroups">Groups: Grant Access to Specific Resources</a> in <em>Manage Hyperic Users and Roles</em>.</td></tr></table></div>
+
+
+<p><span class="image-wrap" style=""><img src="attachments/71828283/72646846.png" width="750pxpx" style="border: 0px solid black"/></span></p>
 
 				    					    <br/>
                         <div class="tabletitle">
-                            <a name="attachments">Attachments:</a>
+                            <a name="attachments">
+                                <h2>Attachments:</h2>
+                            </a>
                         </div>
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/71828455/71926126.gif">fb_ok.gif</a> (image/gif)
-                                <br/>
-                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
                                 <a href="attachments/71828455/71926124.png">icon_navmap.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/71828455/71926128.gif">tbb_addtolist.gif</a> (image/gif)
+                                <a href="attachments/71828455/71926126.gif">fb_ok.gif</a> (image/gif)
+                                <br/>
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/71828455/71926125.gif">tbb_removefromlist.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
                                 <a href="attachments/71828455/71926127.gif">tbb_edit.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/71828455/71926125.gif">tbb_removefromlist.gif</a> (image/gif)
+                                <a href="attachments/71828455/71926128.gif">tbb_addtolist.gif</a> (image/gif)
                                 <br/>
                                                     </div>
 				    
@@ -209,10 +226,10 @@ Double-click a resource in the list to navigate to its Resource page. </td>
 	    </table>
 	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
 			<tr>
-				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Oct 28, 2010 15:34</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jan 12, 2012 13:19</font></td>
 		    </tr>
 	    </table>
     </body>

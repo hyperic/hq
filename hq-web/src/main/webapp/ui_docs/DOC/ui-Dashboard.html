@@ -16,38 +16,43 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Sep 26, 2010 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Mar 15, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
-<style type='text/css'>/*<![CDATA[*/
-div.rbtoc1285543088372 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1285543088372 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1285543088372 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1285543088372'>
+
 <ul>
-    <li><a href='#ui-Dashboard-HQDashboard'>HQ Dashboard</a></li>
-    <li><a href='#ui-Dashboard-PortletQuickFactsandLinks'>Portlet Quick Facts and Links</a></li>
-    <li><a href='#ui-Dashboard-TailorDashboard'>Tailor Dashboard</a></li>
-    <li><a href='#ui-Dashboard-WorkingwithMultipleDashboardsinHQEnterprise'>Working with Multiple Dashboards in HQ Enterprise</a></li>
-</ul></div>
+	<li><a href="#ui-Dashboard-HypericDashboard">Hyperic Dashboard</a></li>
+	<li><a href="#ui-Dashboard-PortletQuickFactsandLinks">Portlet Quick Facts and Links</a></li>
+	<li><a href="#ui-Dashboard-TailorDashboard">Tailor Dashboard</a></li>
+	<li><a href="#ui-Dashboard-UsingMultipleDashboardsinvFabricHyperic">Using Multiple Dashboards in vFabric Hyperic</a></li>
+</ul>
 
-<h1><a name="ui-Dashboard-HQDashboard"></a>HQ Dashboard</h1>
 
-<p>The HQ Dashboard is the first page displayed in the HQ user interface when you log on.&nbsp;The dashboard contains multiple portlets, each of which presents a particular type of information, such as&nbsp;resource health, recent alerts, recently discovered resource or changes to resources, recently performed resource control actions, and so on.&nbsp;</p>
+
+
+<h1><a name="ui-Dashboard-HypericDashboard"></a>Hyperic Dashboard</h1>
+
+<p>The Hyperic Dashboard is the first page displayed in the Hyperic user interface when you log on.&nbsp;The dashboard contains multiple portlets, each of which presents a particular type of information, such as&nbsp;resource health, recent alerts, recently discovered resource or changes to resources, recently performed resource control actions, and so on.&nbsp;</p>
 
 <p>You can can personalize the dashboard to suit your responsibilities and preferences; you can add or remove portlets, rearrange them, and customize the contents of many of the portlets.</p>
 
-<p>In HQ Enterprise, you can have multiple dashboards &#8212; one for each role to which you are assigned. Note also that in HQ Enterprise&nbsp;the roles you are assigned to govern what resource data appears in Dashboard portlets. Portlets will contain only the resource data to which your HQ role(s) allows access. For more information, see <a href="http://support.hyperic.com/confluence/display/EVO/Understanding+Roles+in+HQ+Enterprise" title="Understanding Roles in HQ Enterprise">Understanding Roles in HQ Enterprise</a>.</p>
+<p>In vFabric Hyperic, you can have multiple dashboards &#8212; one for each role to which you are assigned. For more information, see <a href="#ui-Dashboard-UsingMultipleDashboardsinvFabricHyperic">Using Multiple Dashboards in vFabric Hyperic</a>.</p>
+
+<p>Note also that in vFabric Hyperic, the roles you are assigned to govern what resource data appears in dashboard portlets. Portlets will contain only the resource data to which your Hyperic roles allows access. For more information, see <a href="http://support.hyperic.com/display/EVO/Understand+Users+and+Roles" title="Understand Users and Roles">Understand Users and Roles</a>.</p>
 
 <p>Click the thumbnail to see a screenshot of the dashboard.</p>
 
-<p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 1200x1112" href='http://support.hyperic.com/confluence/download/attachments/71828283/Dashboard.png'><img src="attachments/thumbnails/71828283/71926660" style="border: 0px solid black"/></a></span></p>
+<p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 1200x1112" href='http://support.hyperic.com/download/attachments/71828283/Dashboard.png'><img src="attachments/thumbnails/71828283/71926660" style="border: 0px solid black"/></a></span></p>
+
+
 
 <h1><a name="ui-Dashboard-PortletQuickFactsandLinks"></a>Portlet Quick Facts and Links</h1>
+<p><a name="ui-Dashboard-PortletFacts"></a></p>
+
 
 <div class='table-wrap'>
 <table class='confluenceTable'><tbody>
@@ -57,7 +62,7 @@ div.rbtoc1285543088372 li {margin-left: 0px;padding-left: 0px;}
 <th class='confluenceTh'> More Information and Configuration Options </th>
 </tr>
 <tr>
-<td class='confluenceTd'> <b>Autodiscovery&nbsp;</b> </td>
+<td class='confluenceTd'> <b>Autodiscover</b> </td>
 <td class='confluenceTd'> Lists new and changed resources, and allows you to add them inventory. </td>
 <td class='confluenceTd'> <a href="ui-Dashboard.AutoDiscovery.html" title="ui-Dashboard.AutoDiscovery">Auto-Discovery Portlet</a> </td>
 </tr>
@@ -70,7 +75,7 @@ This portlet does not contain any resources until you configure it. </td>
 </tr>
 <tr>
 <td class='confluenceTd'> <b>Control Actions</b> </td>
-<td class='confluenceTd'> Lists the control actions that HQ has most recently performed on any managed resource, upcoming scheduled control actions, and the most frequently performed quick control actions. </td>
+<td class='confluenceTd'> Lists the control actions that Hyperic has most recently performed on any managed resource, upcoming scheduled control actions, and the most frequently performed quick control actions. </td>
 <td class='confluenceTd'> <a href="ui-Dashboard.Control.html" title="ui-Dashboard.Control">Control Actions Portlet</a> </td>
 </tr>
 <tr>
@@ -80,7 +85,7 @@ This portlet does not contain any resources until you configure it. </td>
 </tr>
 <tr>
 <td class='confluenceTd'> <b>Saved Charts</b> </td>
-<td class='confluenceTd'> Displays charts that have been saved to the Dashboard. In HQ Enterprise, charts are displayed as a slideshow. </td>
+<td class='confluenceTd'> Displays charts that have been saved to the Dashboard. In vFabric Hyperic, charts are displayed as a slideshow. </td>
 <td class='confluenceTd'> <a href="ui-Dashboard.Charts.html" title="ui-Dashboard.Charts">Saved Charts Portlet</a> </td>
 </tr>
 <tr>
@@ -100,7 +105,7 @@ This portlet does not contain any resources until you configure it. </td>
 </tr>
 <tr>
 <td class='confluenceTd'> <b>Summary Counts</b> </td>
-<td class='confluenceTd'> Displays a count of all the managed resource of each inventory type. In HQ Enterprise, the resources that appear are limited to those that you have permissions to view. </td>
+<td class='confluenceTd'> Displays a count of all the managed resource of each inventory type. In vFabric Hyperic, the resources that appear are limited to those that you have permissions to view. </td>
 <td class='confluenceTd'> <a href="ui-Dashboard.Summary.html" title="ui-Dashboard.Summary">Summary Counts</a> </td>
 </tr>
 <tr>
@@ -110,7 +115,7 @@ This portlet does not contain any resources until you configure it. </td>
 </tr>
 <tr>
 <td class='confluenceTd'> <b>Hyperic IQ Reports</b><font color="red">&#42;</font> </td>
-<td class='confluenceTd'> In deployments that include HQ Hyperic IQ, this portlet allow users to run IQ reports that reside in Hyperic IQ's Dashboard Reports directory. The HQ Server must be configured with the Hyperic IQ URL, on the <b>Administration &gt; HQ Server Settings</b>&nbsp;page. </td>
+<td class='confluenceTd'> In deployments that include Hyperic IQ, this portlet allow users to run IQ reports that reside in Hyperic IQ's Dashboard Reports directory. The Hyperic Server must be configured with the Hyperic IQ URL, on the <b>Administration &gt; HQ Server Settings</b>&nbsp;page. </td>
 <td class='confluenceTd'>&nbsp;</td>
 </tr>
 <tr>
@@ -131,7 +136,9 @@ Click the resource name to view the <b>Monitor</b>&nbsp;page for it.<br class="a
 </div>
 
 
+
 <h1><a name="ui-Dashboard-TailorDashboard"></a>Tailor Dashboard</h1>
+<p><a name="ui-Dashboard-TailorDashboard"></a></p>
 
 <p>You can customize the dashboard in these ways:</p>
 <ul>
@@ -154,9 +161,13 @@ Click the resource name to view the <b>Monitor</b>&nbsp;page for it.<br class="a
 </ul>
 
 
-<h1><a name="ui-Dashboard-WorkingwithMultipleDashboardsinHQEnterprise"></a>Working with Multiple Dashboards in HQ Enterprise</h1>
 
-<p>In HQ Enterprise, you can:</p>
+<h1><a name="ui-Dashboard-UsingMultipleDashboardsinvFabricHyperic"></a>Using Multiple Dashboards in vFabric Hyperic</h1>
+<p><a name="ui-Dashboard-MultipleDashboards"></a></p>
+
+<p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
+
+<p>In vFabric Hyperic, you can:</p>
 
 <ul>
 	<li>Select a dashboard &#8212; Select which dashboard to view using the <b>Select a Dashboard</b> pull-down in the upper left of the page. In addition to your personal dashboard, the list will contain the role-specific dashboard for each role to which you are assigned.</li>
@@ -168,22 +179,24 @@ Click the resource name to view the <b>Monitor</b>&nbsp;page for it.<br class="a
 </ul>
 
 
-<div class="scroll-pagebreak"></div>
+
 
 				    					    <br/>
                         <div class="tabletitle">
-                            <a name="attachments">Attachments:</a>
+                            <a name="attachments">
+                                <h2>Attachments:</h2>
+                            </a>
                         </div>
 
                         <div class="greybox" align="left">
+                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
+                                <a href="attachments/71828426/71926599.gif">icon_feed.gif</a> (image/gif)
+                                <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
                                 <a href="attachments/71828426/71926607.png">dash_icon_up.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
                                 <a href="attachments/71828426/71926604.png">dash_icon_down.png</a> (image/png)
-                                <br/>
-                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/71828426/71926599.gif">icon_feed.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
                                 <a href="attachments/71828426/71926600.gif">icon_ack.gif</a> (image/gif)
@@ -237,10 +250,10 @@ Click the resource name to view the <b>Monitor</b>&nbsp;page for it.<br class="a
 	    </table>
 	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
 			<tr>
-				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Oct 28, 2010 15:33</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jan 12, 2012 13:19</font></td>
 		    </tr>
 	    </table>
     </body>

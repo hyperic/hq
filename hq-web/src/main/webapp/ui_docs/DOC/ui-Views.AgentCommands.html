@@ -16,77 +16,79 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Oct 28, 2010 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on May 31, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <p><b>Available only in <font color="red">HQ Enterprise</font></b></p>
+				    <p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1288296901260 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1288296901260 ul {list-style: disc;margin-left: 0px;padding-left: 20x;}
-div.rbtoc1288296901260 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1306863602493 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1306863602493 ul {list-style: disc;margin-left: 0px;padding-left: 20x;}
+div.rbtoc1306863602493 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1288296901260'>
+/*]]>*/</style><div class='rbtoc1306863602493'>
 <ul>
-    <li><a href='#ui-Views.AgentCommands-RestartanHQAgentorGroupofAgents'>Restart an HQ Agent or Group of Agents</a></li>
-    <li><a href='#ui-Views.AgentCommands-PinganHQAgentorGroupofAgents'>Ping an HQ Agent or Group of Agents</a></li>
-    <li><a href='#ui-Views.AgentCommands-UpgradeanHQAgentorGroupofAgentstoaNewerVersion'>Upgrade an HQ Agent or Group of Agents to a Newer Version</a></li>
-    <li><a href='#ui-Views.AgentCommands-PushaPlugintoanHQAgentorGroupofAgents'>Push a Plugin to an HQ Agent or Group of Agents</a></li>
+    <li><a href='#ui-Views.AgentCommands-RestartanAgentoraGroupofAgents'>Restart an Agent or a Group of Agents</a></li>
+    <li><a href='#ui-Views.AgentCommands-PinganAgentoraGroupofAgents'>Ping an Agent or a Group of Agents</a></li>
+    <li><a href='#ui-Views.AgentCommands-UpgradeanAgentorGroupofAgentstoaNewerVersion'>Upgrade an Agent or Group of Agents to a Newer Version</a></li>
+    <li><a href='#ui-Views.AgentCommands-PushaPlugintoanAgentorGroupofAgents'>Push a Plugin to an Agent or Group of Agents</a></li>
 </ul></div>
 
 
-<p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
+<p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
 
 
+<p>In vFabric Hyperic, you can run Hyperic Agent control commands &#8212; for a single agent, or for a group of agents &#8212; from the Hyperic user interface.</p>
 
-<p>In HQ Enterprise, you can run HQ Agent control commands &#8212; for a single agent, or for a group of agents &#8212; from the HQ user interface.</p>
-
-<h1><a name="ui-Views.AgentCommands-RestartanHQAgentorGroupofAgents"></a>Restart an HQ Agent or Group of Agents</h1>
+<h1><a name="ui-Views.AgentCommands-RestartanAgentoraGroupofAgents"></a>Restart an Agent or a Group of Agents</h1>
+<p><a name="ui-Views.AgentCommands-AgentControlRestart"></a></p>
 
 <ol>
-	<li>Navigate to the HQ Agent or group of agents.</li>
+	<li>Navigate to the Hyperic Agent or group of agents.</li>
 	<li>Click the <b>Views</b> tab.</li>
 	<li>Click <b>Agent Commands</b>.</li>
 	<li>Select the <b>restart</b> command.</li>
 	<li>Click <b>Execute</b>.
 	<ul>
 		<li>This command invokes the agent's Java Service Wrapper's *restart&nbsp;*command, which shuts down the JVM process in which the agent runs, waits for the process to terminate cleanly, and spawns a new JVM process for the agent. During the restart process, the agent's metric collection and resource control functionality will be interrupted.</li>
-		<li>The <b>restart</b> command happens asynchronously. To verify successful restart, navigate to the agent in the HQ user interface check its availability. .</li>
+		<li>The <b>restart</b> command happens asynchronously. To verify successful restart, navigate to the agent in the Hyperic user interface check its availability. .</li>
 	</ul>
 	</li>
 </ol>
 
 
-<h1><a name="ui-Views.AgentCommands-PinganHQAgentorGroupofAgents"></a>Ping an HQ Agent or Group of Agents</h1>
+<h1><a name="ui-Views.AgentCommands-PinganAgentoraGroupofAgents"></a>Ping an Agent or a Group of Agents</h1>
+<p><a name="ui-Views.AgentCommands-AgentControlPing"></a></p>
 
 <ol>
-	<li>Navigate to the HQ Agent or group of agents.</li>
+	<li>Navigate to the Hyperic Agent or group of agents.</li>
 	<li>Click the <b>Views</b> tab.</li>
 	<li>Click <b>Agent Commands</b>.</li>
 	<li>Select the <b>ping</b> command.</li>
 	<li>Click <b>Execute</b>.
 	<ul>
 		<li>This command invokes the agent's Java Service Wrapper's <b>ping</b> command on the agent.</li>
-		<li>If the ping is successful, this message appears in the <b>Result</b> pane on the right side of the page:<br/>
-<tt>Failed to send ping command to agent with id</tt> <tt><em>nnnnn</em></tt><tt>. Reason: Unable to connect to</tt> <tt><em>AgentIpAddress</em></tt><tt>.</tt></li>
 		<li>If the ping is not successful, this message appears in the <b>Result</b> pane on the right side of the page:<br/>
-<tt>Successfully sent ping command to agent with id</tt> <tt><em>nnnnn</em></tt><tt>.</tt></li>
+<tt>Failed to send ping command to agent with id nnnnn. Reason: Unable to connect to AgentIpAddress.</tt></li>
+		<li>If the ping is successful, this message appears in the <b>Result</b> pane on the right side of the page:<br/>
+<tt>Successfully sent ping command to agent with id nnnnn.</tt> </li>
 	</ul>
 	</li>
 </ol>
 
 
-<h1><a name="ui-Views.AgentCommands-UpgradeanHQAgentorGroupofAgentstoaNewerVersion"></a>Upgrade an HQ Agent or Group of Agents to a Newer Version</h1>
+<h1><a name="ui-Views.AgentCommands-UpgradeanAgentorGroupofAgentstoaNewerVersion"></a>Upgrade an Agent or Group of Agents to a Newer Version</h1>
+<p><a name="ui-Views.AgentCommands-AgentControlUpgrade"></a></p>
 
 <ol>
-	<li>Navigate to the HQ Agent or group of agents.</li>
+	<li>Navigate to the Hyperic Agent or group of agents.</li>
 	<li>Click the <b>Views</b> tab.</li>
 	<li>Click <b>Agent Commands</b>.</li>
 	<li>Select the <b>upgrade</b> command.</li>
 	<li>Select a bundle from the agent bundle pull-down list.</li>
 	<li>Click <b>Execute</b>.
 	<ul>
-		<li>The selected agent bundle is transferred from the HQ Server to the target agent(s).</li>
+		<li>The selected agent bundle is transferred from the Hyperic Server to the target agent(s).</li>
 		<li>The agent expands the bundle locally.</li>
 		<li>The agent updates the local bundle property.</li>
 		<li>The server restarts the agent.</li>
@@ -97,12 +99,12 @@ div.rbtoc1288296901260 li {margin-left: 0px;padding-left: 0px;}
 
 
 
-<h1><a name="ui-Views.AgentCommands-PushaPlugintoanHQAgentorGroupofAgents"></a>Push a Plugin to an HQ Agent or Group of Agents</h1>
-
-<p>This operation allows you to transfer new, customer, updated, or patched plugins from the HQ Server's <tt>ServerHome/hq-engine/hq-server/webapps/ROOT/WEB-INF/hq-plugins</tt> directory to the target agents' <tt><em>AgentHome</em></tt><tt>/bundles/</tt><tt><em>AgentBuildDir</em></tt><tt>/pdk/plugins</tt> directory. Pushing a plugin to an agent results in an agent restart.</p>
+<h1><a name="ui-Views.AgentCommands-PushaPlugintoanAgentorGroupofAgents"></a>Push a Plugin to an Agent or Group of Agents</h1>
+<p><a name="ui-Views.AgentCommands-AgentControlPushPlugin"></a><br/>
+This operation allows you to transfer new, custom, updated, or patched plugins from the Hyperic Server's <tt>ServerHome/hq-engine/hq-server/webapps/ROOT/WEB-INF/hq-plugins</tt> directory to the target agents' <tt><em>AgentHome</em></tt><tt>/bundles/</tt><tt><em>AgentBuildDir</em></tt><tt>/pdk/plugins</tt> directory. Pushing a plugin to an agent results in an agent restart.</p>
 
 <ol>
-	<li>Navigate to the HQ Agent or group of agents.</li>
+	<li>Navigate to the Hyperic Agent or group of agents.</li>
 	<li>Click the <b>Views</b> tab.</li>
 	<li>Click <b>Agent Commands</b>.</li>
 	<li>Select the <b>push plugin</b> command.</li>
@@ -117,10 +119,10 @@ div.rbtoc1288296901260 li {margin-left: 0px;padding-left: 0px;}
 	    </table>
 	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
 			<tr>
-				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Oct 28, 2010 15:34</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jan 12, 2012 13:19</font></td>
 		    </tr>
 	    </table>
     </body>

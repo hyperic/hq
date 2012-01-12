@@ -16,18 +16,18 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Apr 20, 2010 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on May 31, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1281566319007 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1281566319007 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1281566319007 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1306870487747 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1306870487747 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1306870487747 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1281566319007'>
+/*]]>*/</style><div class='rbtoc1306870487747'>
 <ul>
     <li><a href='#ui-Admin.Escalation-CreateanEscalation'>Create an Escalation</a></li>
 <ul>
@@ -46,11 +46,10 @@ div.rbtoc1281566319007 li {margin-left: 0px;padding-left: 0px;}
 </ul></div>
 
 
-<p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
+<p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
 
 
-
-<p>For a description of the functionality that escalation schemes enable in HQ, see <a href="http://support.hyperic.com/confluence/display/EVO/Understanding+Escalations" title="Understanding Escalations">Understanding Escalations</a>.</p>
+<p>For a description of the functionality that escalation schemes enable in HQ, see <a href="http://support.hyperic.com/display/EVO/Understanding+Escalations" title="Understanding Escalations">Understanding Escalations</a>.</p>
 
 <h1><a name="ui-Admin.Escalation-CreateanEscalation"></a>Create an Escalation</h1>
 
@@ -120,7 +119,7 @@ div.rbtoc1281566319007 li {margin-left: 0px;padding-left: 0px;}
 
 <h3><a name="ui-Admin.Escalation-CreateaSysLogAction"></a>Create a Sys Log Action</h3>
 
-<p>This option is available if the configuration described in <a href="http://support.hyperic.com/confluence/display/DOC/Enable+Syslog+Notifications+for+Escalations" title="Enable Syslog Notifications for Escalations">Enable Syslog Notifications for Escalations</a> has been performed.</p>
+<p>This option is available if the configuration described in <a href="http://support.hyperic.com/display/EVO/Enable+Syslog+Notifications+for+Escalations" title="Enable Syslog Notifications for Escalations">Enable Syslog Notifications for Escalations</a> has been performed.</p>
 
 <p>After selecting the "Sys Log" action type:</p>
 <ol>
@@ -160,7 +159,7 @@ div.rbtoc1281566319007 li {margin-left: 0px;padding-left: 0px;}
 <ul>
 	<li>sysUptimeOID.0&nbsp; - No configuration is required for this binding.</li>
 	<li>snmpTrapOID.0 - This binding is configured on the HQ Server settings page.</li>
-	<li>A variable binding for the alert data specified in <tt>snmp_trap.gsp</tt>, a Groovy Server Page template that returns the  alert definition name and the "short reason" for firing.&nbsp; This template can be customized, as desired. For more information, see <a href="http://support.hyperic.com/confluence/display/EVO/Tailoring+Alert+Notification+Templates" title="Tailoring Alert Notification Templates">Tailoring Alert Notification Templates</a>.</li>
+	<li>A variable binding for the alert data specified in <tt>snmp_trap.gsp</tt>, a Groovy Server Page template that returns the  alert definition name and the "short reason" for firing.&nbsp; This template can be customized, as desired. For more information, see <a href="http://support.hyperic.com/display/EVO/Tailoring+Alert+Notification+Templates" title="Tailoring Alert Notification Templates">Tailoring Alert Notification Templates</a>.</li>
 	<li>any additional variable bindings you define.</li>
 </ul>
 
@@ -184,7 +183,7 @@ div.rbtoc1281566319007 li {margin-left: 0px;padding-left: 0px;}
 	<li>For each additional variable binding you wish to add, click <b>Add Another Variable Binding</b> and enter:
 	<ul>
 		<li><b>OID</b> &#45; Enter an additional OID to include in the notification.</li>
-		<li><b>Value</b> &#45; Enter a value for the OID. You can enter plain text, or an alert variable.  For more information, see <a href="http://support.hyperic.com/confluence/display/EVO/Tailoring+Alert+Notification+Templates#TailoringAlertNotificationTemplates-VariablesAvailableforNotificationTemplates">Variables Available for Notification Templates</a>.</li>
+		<li><b>Value</b> &#45; Enter a value for the OID. You can enter plain text, or an alert variable.  For more information, see <a href="http://support.hyperic.com/display/EVO/Tailoring+Alert+Notification+Templates#TailoringAlertNotificationTemplates-VariablesAvailableforNotificationTemplates">Variables Available for Notification Templates</a>.</li>
 	</ul>
 	</li>
 	<li>Leave "Then continue" selected if you want the next step in the escalation to occur immediately after the current one. To specify a delay before the next step is performed, select an interval from the pulldown. The intervals range from 5 minutes to 24 hours.</li>
@@ -262,7 +261,9 @@ div.rbtoc1281566319007 li {margin-left: 0px;padding-left: 0px;}
 
 				    					    <br/>
                         <div class="tabletitle">
-                            <a name="attachments">Attachments:</a>
+                            <a name="attachments">
+                                <h2>Attachments:</h2>
+                            </a>
                         </div>
 
                         <div class="greybox" align="left">
@@ -270,10 +271,10 @@ div.rbtoc1281566319007 li {margin-left: 0px;padding-left: 0px;}
                                 <a href="attachments/71828507/71926247.png">tbb_delete.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/71828507/71926246.gif">fb_ok.gif</a> (image/gif)
+                                <a href="attachments/71828507/71926245.gif">tbb_new.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/71828507/71926245.gif">tbb_new.gif</a> (image/gif)
+                                <a href="attachments/71828507/71926246.gif">fb_ok.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
                                 <a href="attachments/71828507/71926248.gif">tbb_delete.gif</a> (image/gif)
@@ -285,10 +286,10 @@ div.rbtoc1281566319007 li {margin-left: 0px;padding-left: 0px;}
 	    </table>
 	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
 			<tr>
-				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Oct 28, 2010 15:34</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jan 12, 2012 13:19</font></td>
 		    </tr>
 	    </table>
     </body>
