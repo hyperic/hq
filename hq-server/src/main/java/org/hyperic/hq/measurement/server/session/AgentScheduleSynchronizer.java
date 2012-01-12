@@ -27,6 +27,7 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -47,17 +48,16 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.TransactionRetry;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.hibernate.SessionManager;
 import org.hyperic.hq.hibernate.SessionManager.SessionRunner;
 import org.hyperic.hq.measurement.shared.MeasurementProcessor;
+import org.hyperic.hq.measurement.shared.SRNManager;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * This class is used to schedule and unschedule metrics for a given entity. The
@@ -66,11 +66,24 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class AgentScheduleSynchronizer {
 
-    private final Log log = LogFactory.getLog(AgentScheduleSynchronizer.class.getName());
+    private final Log log = LogFactory.getLog(AgentScheduleSynchronizer.class);
 
+    @Autowired
     private ZeventEnqueuer zEventManager;
-
+    @Autowired
     private AgentManager agentManager;
+    @Autowired
+    private ResourceManager resourceManager;
+    @Autowired
+    private ConcurrentStatsCollector concurrentStatsCollector;
+    @Autowired
+    private AgentSynchronizer agentSynchronizer;
+    @Autowired
+    private TransactionRetry transactionRetry;
+    @Autowired
+    private SRNManager srnManager;
+    @Autowired
+    private MeasurementProcessor measurementProcessor;
 
     private final Map<Integer, Collection<AppdefEntityID>> scheduleAeids =
         new HashMap<Integer, Collection<AppdefEntityID>>();
@@ -78,77 +91,58 @@ public class AgentScheduleSynchronizer {
     private final Map<Integer, Collection<AppdefEntityID>> unscheduleAeids =
         new HashMap<Integer, Collection<AppdefEntityID>>();
     
-    private ConcurrentStatsCollector concurrentStatsCollector;
-    private MeasurementProcessor measurementProcessor;
-    private AgentSynchronizer agentSynchronizer;
-    private TransactionRetry transactionRetry;
-    
-    @Autowired
-    public AgentScheduleSynchronizer(ZeventEnqueuer zEventManager, AgentManager agentManager,
-                                     MeasurementProcessor measurementProcessor,
-                                     AgentSynchronizer agentSynchronizer,
-                                     ConcurrentStatsCollector concurrentStatsCollector,
-                                     TransactionRetry transactionRetry) {
-        this.zEventManager = zEventManager;
-        this.agentManager = agentManager;
-        this.measurementProcessor = measurementProcessor;
-        this.concurrentStatsCollector = concurrentStatsCollector;
-        this.agentSynchronizer = agentSynchronizer;
-        this.transactionRetry = transactionRetry;
-    }
-
     @PostConstruct
     void initialize() {
         ZeventListener<Zevent> l = getScheduleListener();
         zEventManager.addBufferedListener(AgentScheduleSyncZevent.class, l);
         zEventManager.addBufferedListener(AgentUnscheduleZevent.class, l);
-
-        final ZeventListener<AgentUnscheduleNonEntityZevent> l2 = getUnscheduleUnEntityZeventListener();
-        zEventManager.addBufferedListener(AgentUnscheduleNonEntityZevent.class, l2);
-        concurrentStatsCollector.register(ConcurrentStatsCollector.SCHEDULE_QUEUE_SIZE);
-        concurrentStatsCollector.register(ConcurrentStatsCollector.UNSCHEDULE_QUEUE_SIZE);
     }
 
-    private ZeventListener<AgentUnscheduleNonEntityZevent> getUnscheduleUnEntityZeventListener() {
-        return new ZeventListener<AgentUnscheduleNonEntityZevent>() {
-            @Transactional
-            public void processEvents(List<AgentUnscheduleNonEntityZevent> events) {
-                final ResourceManager rMan = Bootstrap.getBean(ResourceManager.class);
-                final boolean debug = log.isDebugEnabled();
-                final Map<Integer, Collection<AppdefEntityID>> toUnschedule =
-                    new HashMap<Integer, Collection<AppdefEntityID>>();
-                for (final AgentUnscheduleNonEntityZevent zevent : events) {
-                    final Collection<AppdefEntityID> aeids = zevent.getAppdefEntities();
-                    Integer agentId = null;
-                    try {
-                        agentId = agentManager.getAgent(zevent.getAgentToken()).getId();
-                        if (agentId == null) {
-                            continue;
-                        }
-                    } catch (AgentNotFoundException e) {
-                        log.debug(e,e);
-                        continue;
-                    }
-                    for (final AppdefEntityID aeid : aeids) {
-                        if (null == rMan.findResource(aeid)) {
-                            Collection<AppdefEntityID> tmp = toUnschedule.get(agentId);
-                            if (tmp == null) {
-                                tmp = new LinkedList<AppdefEntityID>();
-                                toUnschedule.put(agentId, tmp);
-                            }
-                            if (debug) log.debug("unscheduling non-entity=" + aeid);
-                            tmp.add(aeid);
-                        }
-                    }
-                    synchronized (unscheduleAeids) {
-                        unscheduleAeids.putAll(toUnschedule);
-                    }
+    public void unschedule(String agentToken, Collection<AppdefEntityID> aeids) {
+        final Integer agentId = getAgentId(agentToken);
+        if (agentId == null) {
+            return;
+        }
+        final Map<Integer, Collection<AppdefEntityID>> toUnschedule = Collections.singletonMap(agentId, aeids);
+        synchronized (unscheduleAeids) {
+            unscheduleAeids.putAll(toUnschedule);
+        }
+    }
+
+    private Integer getAgentId(String agentToken) {
+        try {
+            // will throw an AgentNotFoundException if the agent is not found
+            return agentManager.getAgent(agentToken).getId();
+        } catch (AgentNotFoundException e) {
+            log.debug(e,e);
+            return null;
+        }
+    }
+
+    public Collection<AppdefEntityID> unscheduleNonEntities(String agentToken, Collection<AppdefEntityID> aeids) {
+        final boolean debug = log.isDebugEnabled();
+        final Map<Integer, Collection<AppdefEntityID>> toUnschedule = new HashMap<Integer, Collection<AppdefEntityID>>();
+        final Integer agentId = getAgentId(agentToken);
+        if (agentId == null) {
+            return Collections.emptyList();
+        }
+        final Collection<AppdefEntityID> rtn = new ArrayList<AppdefEntityID>();
+        for (final AppdefEntityID aeid : aeids) {
+            if (null == resourceManager.findResource(aeid)) {
+                Collection<AppdefEntityID> tmp = toUnschedule.get(agentId);
+                if (tmp == null) {
+                    tmp = new LinkedList<AppdefEntityID>();
+                    toUnschedule.put(agentId, tmp);
                 }
+                if (debug) log.debug("unscheduling non-entity=" + aeid);
+                tmp.add(aeid);
+                rtn.add(aeid);
             }
-            public String toString() {
-                return "AgentUnScheduleNonEntityListener";
-            }
-        };
+        }
+        synchronized (unscheduleAeids) {
+            unscheduleAeids.putAll(toUnschedule);
+        }
+        return rtn;
     }
 
     private ZeventListener<Zevent> getScheduleListener() {
@@ -293,7 +287,7 @@ public class AgentScheduleSynchronizer {
                             log.debug("scheduling " + aeids.size() + " resources to agentid=" +
                                        agent.getId());
                         }
-                        measurementProcessor.scheduleEnabled(agent, aeids);
+                        srnManager.schedule(aeids, false, true);
                     } else {
                         if (log.isDebugEnabled()) {
                             log.debug("unscheduling " + aeids.size() + " resources to agentid=" +

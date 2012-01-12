@@ -38,10 +38,17 @@ import net.sf.ehcache.CacheManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Session;
 import org.hyperic.hq.context.IntegrationTestContextLoader;
 import org.hyperic.hq.db.DatabasePopulator;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
+import org.hyperic.hq.measurement.server.session.AvailabilityCache;
+import org.hyperic.hq.measurement.server.session.AvailabilityCheckService;
+import org.hyperic.hq.measurement.server.session.AvailabilityDataDAO;
+import org.hyperic.hq.measurement.server.session.AvailabilityDataRLE;
+import org.hyperic.hq.measurement.server.session.DataPoint;
+import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.product.MetricValue;

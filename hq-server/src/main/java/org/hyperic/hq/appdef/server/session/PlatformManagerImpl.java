@@ -92,10 +92,9 @@ import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.ResourceAuditFactory;
 import org.hyperic.hq.common.shared.AuditManager;
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.measurement.server.session.AgentScheduleSyncZevent;
+import org.hyperic.hq.measurement.shared.SRNManager;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.PlatformTypeInfo;
-import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.sigar.NetFlags;
 import org.hyperic.util.pager.PageControl;
@@ -156,6 +155,8 @@ public class PlatformManagerImpl implements PlatformManager {
 
     private ResourceAuditFactory resourceAuditFactory;
 
+    private SRNManager srnManager;
+
     @Autowired
     public PlatformManagerImpl(PlatformTypeDAO platformTypeDAO,
                                PermissionManager permissionManager, AgentDAO agentDAO,
@@ -167,7 +168,7 @@ public class PlatformManagerImpl implements PlatformManager {
                                ConfigResponseDAO configResponseDAO, PlatformDAO platformDAO,
                                ServerDAO serverDAO, ServiceDAO serviceDAO,
                                AuditManager auditManager, AgentManager agentManager,
-                               ZeventEnqueuer zeventManager,
+                               ZeventEnqueuer zeventManager, SRNManager srnManager,
                                ResourceAuditFactory resourceAuditFactory) {
         this.platformTypeDAO = platformTypeDAO;
         this.permissionManager = permissionManager;
@@ -187,6 +188,7 @@ public class PlatformManagerImpl implements PlatformManager {
         this.agentManager = agentManager;
         this.zeventManager = zeventManager;
         this.resourceAuditFactory = resourceAuditFactory;
+        this.srnManager = srnManager;
     }
 
     // TODO resolve circular dependency
@@ -1889,8 +1891,7 @@ public class PlatformManagerImpl implements PlatformManager {
                 eids.add(service.getEntityId());
             }
         }
-        AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(eids);
-        zeventManager.enqueueEventAfterCommit(event);
+        srnManager.scheduleInBackground(eids, true, true);
     }
 
     /**

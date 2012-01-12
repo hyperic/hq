@@ -42,16 +42,15 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
-import org.hyperic.hq.common.shared.TransactionRetry;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.shared.SRNManager;
 import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.product.MeasurementInfo;
 import org.hyperic.hq.product.TypeInfo;
-import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -71,21 +70,16 @@ public class TemplateManagerImpl implements TemplateManager {
     private MeasurementTemplateDAO measurementTemplateDAO;
     private MonitorableTypeDAO monitorableTypeDAO;
     private SRNManager srnManager;
-    private ZeventManager zEventManager;
-    private TransactionRetry transactionRetry;
 
     @Autowired
     public TemplateManagerImpl(MeasurementDAO measurementDAO,
                                MeasurementTemplateDAO measurementTemplateDAO,
                                MonitorableTypeDAO monitorableTypeDAO,
-                               SRNManager srnManager, ZeventManager zEventManager,
-                               TransactionRetry transactionRetry) {
+                               SRNManager srnManager) {
         this.measurementDAO = measurementDAO;
         this.measurementTemplateDAO = measurementTemplateDAO;
         this.monitorableTypeDAO = monitorableTypeDAO;
         this.srnManager = srnManager;
-        this.zEventManager = zEventManager;
-        this.transactionRetry = transactionRetry;
     }
 
     /**
@@ -343,21 +337,17 @@ public class TemplateManagerImpl implements TemplateManager {
                 continue;
             }
             for (final Measurement m : measurements) {
+                final Resource r = m.getResource();
+                if (r == null || r.isInAsyncDeleteState()) {
+                    continue;
+                }
                 m.setEnabled(template.isDefaultOn());
                 m.setInterval(template.getDefaultInterval());
-                final AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(m.getResource());
+                final AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(r);
                 toReschedule.add(aeid);
             }
         }
-        final Runnable runner = new Runnable() {
-            public void run() {
-                srnManager.incrementSrnsInNewTran(toReschedule, interval);
-            }
-        };
-        transactionRetry.runTransaction(runner, 3, 1000);
-        if (!toReschedule.isEmpty()) {
-            zEventManager.enqueueEventAfterCommit(new AgentScheduleSyncZevent(toReschedule));
-        }
+        srnManager.scheduleInBackground(toReschedule, true, true);
     }
 
     /**
@@ -401,9 +391,7 @@ public class TemplateManagerImpl implements TemplateManager {
 
         for (Map.Entry<AppdefEntityID, Long> entry : aeids.entrySet()) {
             AppdefEntityID aeid = entry.getKey();
-            ScheduleRevNum srn = srnManager.get(aeid);
-            srnManager.incrementSrn(aeid, (srn == null) ? entry.getValue().longValue() : srn
-                .getMinInterval());
+            srnManager.incrementSrn(aeid);
         }
     }
 

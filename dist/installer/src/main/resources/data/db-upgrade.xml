@@ -11740,7 +11740,12 @@ has already been defined.
             create sequence EAM_KEYSTORE_ID_SEQ start with 10001 increment by 1  cache 100
         </statement>
     </schema-directSQL>
- </schemaSpec> 
+ </schemaSpec>
+
+ <schemaSpec version="3.209">
+    <schema-addColumn table="EAM_SRN" column="LAST_SCHEDULE_TIME" columnType="LONG" nullable="NOT NULL" default="0"/>
+ </schemaSpec>
+
 </dbupgrade>
 </target>
 </project>

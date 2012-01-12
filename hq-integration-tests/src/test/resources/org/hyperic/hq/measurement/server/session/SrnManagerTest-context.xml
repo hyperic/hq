@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
 
     NOTE: This copyright does *not* cover user programs that use HQ
@@ -8,7 +8,7 @@
     normal use of the program, and does *not* fall under the heading of
      "derived work".
 
-     Copyright (C) [2009-2010], VMware, Inc.
+     Copyright (C) [2010], VMware, Inc.
      This file is part of HQ.
 
      HQ is free software; you can redistribute it and/or modify
@@ -27,34 +27,18 @@
 
 -->
 
-<hibernate-mapping package="org.hyperic.hq.measurement.server.session">
+<beans xmlns="http://www.springframework.org/schema/beans"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:p="http://www.springframework.org/schema/p"
+        xmlns:context="http://www.springframework.org/schema/context"
+        xsi:schemaLocation="http://www.springframework.org/schema/beans
+                            http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+                            http://www.springframework.org/schema/context
+                            http://www.springframework.org/schema/context/spring-context-3.0.xsd">
 
-  <class name="ScheduleRevNum" table="EAM_SRN">
 
-    <cache usage="read-write"/>
+    <bean class="org.hyperic.hq.db.DatabasePopulator">
+        <property name="schemaFile" value="/data/srnManagerTests.xml.gz"/>
+    </bean>
 
-    <composite-id name="srnId" class="SrnId">
-      <key-property name="instanceId" type="integer">
-        <column name="INSTANCE_ID" not-null="true"/>
-      </key-property>
-		
-      <key-property name="appdefType" type="integer">
-        <column name="APPDEF_TYPE" not-null="true"/>
-      </key-property>
-    </composite-id>
-
-    <version name="_version_" type="long">
-      <column name="VERSION_COL" default="0"/>
-    </version>
-
-    <property name="srn" type="integer">
-      <column name="SRN" not-null="true"/>
-    </property>
-
-    <property name="lastSchedule" type="long">
-      <column name="LAST_SCHEDULE_TIME" not-null="true"/>
-    </property>
-
-  </class>
-
-</hibernate-mapping>
+</beans>

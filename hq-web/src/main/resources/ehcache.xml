@@ -236,8 +236,8 @@
   </cache>
 
   <!-- The SRN cache, used outside of hibernate -->
-  <cache name="SRNCache"
-         maxElementsInMemory="100000"
+  <cache name="org.hyperic.hq.measurement.server.session.ScheduleRevNum"
+         maxElementsInMemory="200000"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>

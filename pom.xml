@@ -25,7 +25,7 @@
 		<dns.version>2.0.6</dns.version>
 		<db2monitor.version>1.0.1</db2monitor.version>
 		<dbunit.version>2.2</dbunit.version>
-		<easymock.version>2.4</easymock.version>
+		<easymock.version>3.0</easymock.version>
 		<ehcache.version>1.5.0</ehcache.version>
 		<freemarker.version>2.3.4</freemarker.version>
 		<getopt.version>1.0.13</getopt.version>

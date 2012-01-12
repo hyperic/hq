@@ -172,6 +172,7 @@
 		<value>org.hyperic.hq.appdef.server.session.Service</value>
 	    <value>org.hyperic.hq.measurement.server.session.Category</value>
 	    <value>org.hyperic.hq.measurement.server.session.MonitorableType</value>
+	    <value>org.hyperic.hq.measurement.server.session.ScheduleRevNum</value>
 	</util:list>
 
 	<util:list id="preregisterZevents">

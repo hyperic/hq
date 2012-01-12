@@ -27,51 +27,59 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.io.Serializable;
 
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+
 public class SrnId implements Serializable {
-    private int _appdefType;
-    private int _instanceId;
+    private int appdefType;
+    private int instanceId;
 
     public SrnId() {
     }
     
+    public SrnId(AppdefEntityID aeid) {
+        this.appdefType = aeid.getType();
+        this.instanceId = aeid.getID();
+    }
+    
     public SrnId(int appdefType, int instanceId) {
-        _appdefType = appdefType;
-        _instanceId = instanceId;
+        this.appdefType = appdefType;
+        this.instanceId = instanceId;
     }
    
     public int getAppdefType() {
-        return _appdefType;
+        return appdefType;
     }
     
     protected void setAppdefType(int appdefType) {
-        _appdefType = appdefType;
+        this.appdefType = appdefType;
     }
 
     public int getInstanceId() {
-        return _instanceId;
+        return instanceId;
     }
     
     protected void setInstanceId(int  instanceId) {
-        _instanceId = instanceId;
+        this.instanceId = instanceId;
     }
 
-    public boolean equals(Object other) {
-        if (this == other) return true;
-        if (other == null) return false;
-        if (!(other instanceof SrnId)) return false;
-        SrnId castOther = (SrnId)other;
-
-        return (getAppdefType() == castOther.getAppdefType()) &&
-            (getInstanceId() == castOther.getInstanceId());
+    public boolean equals(Object rhs) {
+        if (this == rhs) {
+            return true;
+        }
+        if (rhs == null || !(rhs instanceof ScheduleRevNum)) {
+            return false;
+        }
+        final SrnId s = (SrnId) rhs;
+        final AppdefEntityID aeid = new AppdefEntityID(appdefType, instanceId);
+        final AppdefEntityID aeid2 = new AppdefEntityID(s.appdefType, s.instanceId);
+        return aeid.equals(aeid2);
     }
 
-    public int hashCode()
-    {
-        int result = 17;
-
-        result = 37 * result + getAppdefType();
-        result = 37 * result + getInstanceId();
+    public int hashCode() {
+        final AppdefEntityID aeid = new AppdefEntityID(appdefType, instanceId);
+        final int result = aeid.hashCode();
         return result;
+
     }
     
     public String toString() {

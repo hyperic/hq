@@ -50,7 +50,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.autoinventory.server.session.RuntimeReportProcessor.ServiceMergeInfo;
 import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.hq.measurement.server.session.AgentScheduleSyncZevent;
+import org.hyperic.hq.measurement.shared.SRNManager;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,23 +74,21 @@ public class ServiceMergerImpl implements ServiceMerger {
     private ServerManager serverManager;
     private ConfigManager configManager;
     private ResourceManager resourceManager;
-    private ZeventEnqueuer zEventManager;
     private AuthzSubjectManager authzSubjectManager;
-
-   
+    private SRNManager srnManager;
 
     @Autowired
     public ServiceMergerImpl(CPropManager cPropManager, ServiceManager serviceManager,
                              ServerManager serverManager, ConfigManager configManager,
-                             ResourceManager resourceManager,
-                             ZeventEnqueuer zEventManager, AuthzSubjectManager authzSubjectManager) {
+                             ResourceManager resourceManager, SRNManager srnManager,
+                             AuthzSubjectManager authzSubjectManager) {
         this.cPropManager = cPropManager;
         this.serviceManager = serviceManager;
         this.serverManager = serverManager;
         this.configManager = configManager;
         this.resourceManager = resourceManager;
-        this.zEventManager = zEventManager;
         this.authzSubjectManager = authzSubjectManager;
+        this.srnManager = srnManager;
     }
 
     @Transactional
@@ -185,7 +183,7 @@ public class ServiceMergerImpl implements ServiceMerger {
         }
         if (!toSchedule.isEmpty()) {
             resourceManager.resourceHierarchyUpdated(creator, updatedResources);
-            zEventManager.enqueueEventAfterCommit(new AgentScheduleSyncZevent(toSchedule));
+            srnManager.scheduleInBackground(toSchedule, true, true);
         }
     }
 

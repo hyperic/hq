@@ -71,37 +71,28 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class MeasurementProcessorImpl implements MeasurementProcessor {
-    private static final String LOG_CTX = MeasurementProcessorImpl.class.getName();
-    private final Log log = LogFactory.getLog(LOG_CTX);
+    private final Log log = LogFactory.getLog(MeasurementProcessorImpl.class);
 
+    @Autowired
     private AgentManager agentManager;
+    @Autowired
     private AvailabilityManager availManager;
+    @Autowired
     private MeasurementManager measurementManager;
+    @Autowired
     private SRNManager srnManager;
+    @Autowired
     private AgentMonitor agentMonitor;
+    @Autowired
     private MeasurementCommandsClientFactory measurementCommandsClientFactory;
+    @Autowired
     private ResourceManager resourceManager;
+    @Autowired
     private ZeventEnqueuer zEventManager;
+    @Autowired
     private ConcurrentStatsCollector concurrentStatsCollector;
     
-    @Autowired
-    public MeasurementProcessorImpl(AgentManager agentManager, MeasurementManager measurementManager,
-                                    SRNManager srnManager,
-                                    AgentMonitor agentMonitor,
-                                    MeasurementCommandsClientFactory measurementCommandsClientFactory, 
-                                    ResourceManager resourceManager, AvailabilityManager availManager,
-                                    ZeventEnqueuer zEventManager, ConcurrentStatsCollector concurrentStatsCollector) {
-
-        this.agentManager = agentManager;
-        this.measurementManager = measurementManager;
-        this.srnManager = srnManager;
-        this.agentMonitor = agentMonitor;
-        this.measurementCommandsClientFactory = measurementCommandsClientFactory;
-        this.resourceManager = resourceManager;
-        this.availManager = availManager;
-        this.zEventManager = zEventManager;
-        this.concurrentStatsCollector = concurrentStatsCollector;
-    }
+    public MeasurementProcessorImpl() {}
     
     @PostConstruct
     public void initStatsCollector() {
@@ -162,7 +153,7 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
     /**
      * @param aeids {@link List} of {@link AppdefEntityID}
      */
-    public void scheduleSynchronous(List<AppdefEntityID> aeids) {
+    public void scheduleSynchronous(Collection<AppdefEntityID> aeids) {
         try {
             Map<Integer, Collection<AppdefEntityID>> agents = getAgentMap(aeids);
             for (Map.Entry<Integer, Collection<AppdefEntityID>> entry : agents.entrySet()) {
@@ -244,8 +235,8 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
            
             for (AppdefEntityID eid : eids ) {
                 final long begin = now();
-                int srnNumber = srnManager.incrementSrn(eid, Long.MAX_VALUE);
-                SRN srn = new SRN(eid, srnNumber);
+                ScheduleRevNum srnObj = srnManager.get(eid);
+                SRN srn = new SRN(eid, srnObj == null ? -1 : srnObj.getSrn());
                 Resource r = resourceManager.findResource(eid);
                 if (r == null || r.isInAsyncDeleteState()) {
                     continue;
@@ -314,15 +305,20 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
      * @throws MeasurementUnscheduleException if an error occurs
      */
     @Transactional(readOnly=true)
-    public void unschedule(String agentToken, Collection<AppdefEntityID> entIds) throws MeasurementUnscheduleException {
+    public void unschedule(String agentToken, Collection<AppdefEntityID> entIds) {
         try {
             // Get the agent from agent token
             Agent a = agentManager.getAgent(agentToken);
             unschedule(a, entIds);
         } catch (MonitorAgentException e) {
             log.warn("Error unscheduling metrics: " + e.getMessage());
+            log.debug(e,e);
         } catch (AgentNotFoundException e) {
             log.warn("Error unscheduling metrics: " + e.getMessage());
+            log.debug(e,e);
+        } catch (MeasurementUnscheduleException e) {
+            log.warn("Error unscheduling metrics: " + e.getMessage());
+            log.debug(e,e);
         }
     }
 
@@ -334,15 +330,20 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
      * @throws MeasurementUnscheduleException if an error occurs
      */
     @Transactional(readOnly=true)
-    public void unschedule(AppdefEntityID agentEnt, AppdefEntityID[] entIds) throws MeasurementUnscheduleException {
+    public void unschedule(AppdefEntityID agentEnt, AppdefEntityID[] entIds){
         try {
             // Get the agent IP and Port from server ID
             Agent a = agentManager.getAgent(agentEnt);
             unschedule(a, Arrays.asList(entIds));
         } catch (MonitorAgentException e) {
-            log.warn("Error unscheduling metrics: " + e.getMessage());
+            log.warn("Error unscheduling metrics: " + e);
+            log.debug(e,e);
         } catch (AgentNotFoundException e) {
-            log.warn("Error unscheduling metrics: " + e.getMessage());
+            log.warn("Error unscheduling metrics: " + e);
+            log.debug(e,e);
+        } catch (MeasurementUnscheduleException e) {
+            log.warn("Error unscheduling metrics: " + e);
+            log.debug(e,e);
         }
     }
 
@@ -352,7 +353,7 @@ public class MeasurementProcessorImpl implements MeasurementProcessor {
      * @throws MeasurementUnscheduleException if an error occurs
      */
     @Transactional(readOnly=true)
-    public void unschedule(Collection<AppdefEntityID> aeids) throws MeasurementUnscheduleException {
+    public void unschedule(Collection<AppdefEntityID> aeids) {
         Map<Integer, Collection<AppdefEntityID>> agents = getAgentMap(aeids);
         for (Map.Entry<Integer, Collection<AppdefEntityID>> entry : agents.entrySet()) {
             Agent agent = agentManager.findAgent((Integer) entry.getKey());
