@@ -36,29 +36,32 @@
 <html:link action="/ResourceHub" linkName="browseUrl" styleId="browseUrl" style="visibility:hidden;">
 	<html:param name="ff" value="{ff}"/> 
 </html:link>
-<jsu:script>
-     function requestAvailSummary${portlet.token}() {
-         hqDojo.xhrGet({
-             url: "<html:rewrite action="/dashboard/ViewAvailSummary" />",
-             content: {
-                 token: "${portlet.token}",
-                 hq: (new Date()).getTime()
-             },
-             handleAs: "json",
-             load: function(response, args) {
-                 showAvailSummary(response, args);
-                 setTimeout("requestAvailSummary${portlet.token}()", portlets_reload_time);
-             },
-             error: function(response, args) {
-                 reportError(response, args);
-                 setTimeout("requestAvailSummary${portlet.token}()", portlets_reload_time);
-             }
-         });
-     }
-</jsu:script>
-<jsu:script onLoad="true">
-	requestAvailSummary${portlet.token}();
-</jsu:script>
+
+<jsu:script type="text/javascript">
+	function requestAvailSummary${portlet.token}() {
+		hqDojo.xhrGet({
+			url: "<html:rewrite action="/dashboard/ViewAvailSummary" />",
+			content: {
+				token: "${portlet.token}",
+				hq: (new Date()).getTime()
+			},
+			handleAs: "json",
+			load: function(response, args) {
+				showAvailSummary(response, args);
+				setTimeout("requestAvailSummary${portlet.token}()", portlets_reload_time);
+			},
+			error: function(response, args) {
+				reportError(response, args);
+				setTimeout("requestAvailSummary${portlet.token}()", portlets_reload_time);
+			}
+		});
+	}
+	
+	hqDojo.ready(function() {
+		requestAvailSummary${portlet.token}();
+	});
+</jau:script>
+
 <div class="effectsPortlet">
 	<tiles:insert definition=".header.tab">
   		<tiles:put name="tabKey" value="dash.home.AvailSummary" />

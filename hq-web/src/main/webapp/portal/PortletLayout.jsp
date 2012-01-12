@@ -47,26 +47,25 @@
 <jsu:importScript path="/js/lib/lib.js" />
 <jsu:importScript path="/js/lib/charts.js" />
 <jsu:script>
-	var imagePath = "/images/";
+    var imagePath = "/images/";
     hqDojo.require('dojo.date');
+    var onloads = [];
 	
-	var onloads = [];
-		function initOnloads() {
-	    	if (arguments.callee.done) return;
-	        
-	        arguments.callee.done = true;
-	        
-	        if(typeof(_timer)!="undefined") clearInterval(_timer);
-	        
-	        for ( var i = 0 ; i < onloads.length ; i++ )
-	        	onloads[i]();
-	};
+    function initOnloads() {
+       if (arguments.callee.done) return;
+        
+       arguments.callee.done = true;
+        
+       if(typeof(_timer)!="undefined") clearInterval(_timer);
+        
+       for ( var i = 0 ; i < onloads.length ; i++ )
+           onloads[i]();
+    };
 	
+    hqDojo.addOnLoad(function() {
+        initOnloads();
+    });
 </jsu:script>
-<jsu:script onLoad="true">
-	initOnloads();
-</jsu:script>
-
 <html:link action="/Resource" linkName="viewResUrl" styleId="viewResUrl" style="display:none;">
 	<html:param name="eid" value=""/>
 </html:link>
