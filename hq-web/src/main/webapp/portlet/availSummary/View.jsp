@@ -46,8 +46,14 @@
 				hq: (new Date()).getTime()
 			},
 			handleAs: "json",
-			load: showAvailSummary,
-			error: reportError
+			load: function(response, args) {
+				showAvailSummary(response, args);
+				setTimeout("requestAvailSummary${portlet.token}()", portlets_reload_time);
+			},
+			error: function(response, args) {
+				reportError(response, args);
+				setTimeout("requestAvailSummary${portlet.token}()", portlets_reload_time);
+			}
 		});
 	}
 	
