@@ -47,12 +47,13 @@ import org.apache.http.conn.ssl.AbstractVerifier;
 import org.hyperic.util.exec.Execute;
 import org.hyperic.util.exec.ExecuteWatchdog;
 import org.hyperic.util.exec.PumpStreamHandler;
+import org.hyperic.util.file.FileUtil;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.util.StringUtils;
 
 public class KeystoreManager {
-    private Log log;
-    private AtomicBoolean isDB = new AtomicBoolean(false);
+    private final Log log;
+    private final AtomicBoolean isDB = new AtomicBoolean(false);
     private static KeystoreManager keystoreManager= new KeystoreManager();
     
     private KeystoreManager() {
@@ -101,7 +102,8 @@ public class KeystoreManager {
 	            }
 	                
 	            password = filePassword.toCharArray();
-	            createInternalKeystore(keystoreConfig);
+	            createInternalKeystore(keystoreConfig);	            
+	            FileUtil.setReadableByOwnerOnly(file);	            
 	        }
 	            
 	        // ...keystore exist, so init the file input stream...
@@ -127,7 +129,8 @@ public class KeystoreManager {
 	    	}
 	    }        
     }
-    
+
+
     private void createInternalKeystore(KeystoreConfig keystoreConfig) throws KeyStoreException{
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         String javaHome = System.getProperty("java.home");
@@ -178,7 +181,7 @@ public class KeystoreManager {
             	//can't have password in log
             	throw new KeyStoreException("Failed to create keystore:"+keystoreConfig.getAlias()+", "+msg);
             }
-        }
+        } 
     }
 
     public X509TrustManager getCustomTrustManager(X509TrustManager defaultTrustManager,
