@@ -75,14 +75,16 @@ fi
 [ `echo "$url" | grep -i mysql` ]      && DRIVER="com.mysql.jdbc.Driver"
 [ `echo "$url" | grep -i oracle` ]     && DRIVER="oracle.jdbc.OracleDriver"
 
-LIB="$basedir/../thirdparty/lib"
+LIB="$basedir/../dbmigrate/lib/"
 DBUNIT_PKGS="${LIB}/dbunit-2.2.jar"
 PG_PKGS=${LIB}/oracle_jdbc/oracle12.jar 
 ORA_PKGS=${LIB}/postgresql/postgresql-8.2-505.jdbc3.jar 
-MYSQL_PKGS=${LIB}/mysql_jdbc/mysql-connector-java-5.1.10-bin.jar 
+MYSQL_PKGS=${LIB}/mysql-connector-java-5.0.5-bin.jar
 DB_PKGS="${PG_PKGS}:${ORA_PKGS}:${MYSQL_PKGS}"
-PKGS="${DB_PKGS}:${DBUNIT_PKGS}:$basedir/../build/hq.ear/hq.jar"
+HQ_SERVER_JAR="$basedir/../../hq-server/target/hq-server-4.6.5.BUILD-SNAPSHOT-tests.jar"
+PKGS="${DB_PKGS}:${DBUNIT_PKGS}:${HQ_SERVER_JAR}"
+echo $PKGS
 ARGS="-Djdbc.drivers=${DRIVER} -cp ${PKGS}"
 JAVA="${JAVA_HOME}/bin/java"
 
-${JAVA} ${ARGS} org.hyperic.util.unittest.util.TableExport --url $url --passwd $passwd --user $user --tables $tables --file $dest $import
+${JAVA} ${ARGS} org.hyperic.hq.db.TableExport --url $url --passwd $passwd --user $user --tables $tables --file $dest $import
