@@ -85,7 +85,7 @@
       	}
 
       	if (refreshCount < 30) {
-        	setTimeout( "refreshAlerts()", 60*1000 );
+      		setTimeout( "refreshAlerts()", portlets_reload_time );
       	} else if (autoLogout) {
     	  	top.location.href = "<html:rewrite action="/j_spring_security_logout"/>";
       	}

@@ -52,7 +52,8 @@ djConfig.baseUrl = '/static/js/dojo/1.5/dojo/';
 <script src="<html:rewrite page='/js/lib/lib.js'/>" type="text/javascript"></script>
 <script src="<html:rewrite page='/js/lib/charts.js'/>" type="text/javascript"></script>
 <script type="text/javascript">
-var onloads = [];
+	var onloads = [];
+	
 	function initOnloads() {
     	if (arguments.callee.done) return;
         
@@ -63,61 +64,9 @@ var onloads = [];
         for ( var i = 0 ; i < onloads.length ; i++ )
         	onloads[i]();
     };
-
-	function refreshPortlets() {
 	
-	    var problemPortlet = hqDojo.byId('problemResourcesTable');
-	    var favoritePortlet = hqDojo.byId('favoriteTable');
-	
-	    var nodes = document.getElementsByTagName('table');
-	    var getRecentForm = document.getElementsByTagName('form')
-	
-	    for (i = 0; i < nodes.length; i++) {
-	        if (/metricTable/.test(nodes[i].id)) {
-	            //alert('in metric table')
-	            var metricTblId = nodes[i].id;
-	            var getId = metricTblId.split('_');
-	            var metricIdPart = getId[1];
-	
-	            if (metricIdPart) {
-	                var metricIdToken = '_' + metricIdPart;
-	
-	                setInterval("requestMetricsResponse" + metricIdToken + "()", 30000);
-	            } else {
-	                setInterval("requestMetricsResponse()", 30000);
-	            }
-	        }
-	    }
-	
-	
-	    for (i = 0; i < nodes.length; i++) {
-	        if (/availTable/.test(nodes[i].id)) {
-	            // alert('in avail table')
-	            var availTblId = nodes[i].id;
-	            var getId = availTblId.split('_');
-	            var availIdPart = getId[1];
-	
-	            if (availIdPart) {
-	                var availIdToken = '_' + availIdPart;
-	
-	                setInterval("requestAvailSummary" + availIdToken + "()", 30000);
-	            } else {
-	                setInterval("requestAvailSummary()", 30000);
-	            }
-	        }
-	    }
-	
-	    if (problemPortlet) {
-	        setInterval("requestProblemResponse()", 30000);
-	    }
-	
-	    if (favoritePortlet) {
-	        setInterval("requestFavoriteResources()", 30000);
-	    }
-	}
-	
-	hqDojo.ready(function() {
-		refreshPortlets();
+	hqDojo.addOnLoad(function() {
+		initOnloads();
 	});
 </script>
 <html:link action="/Resource" linkName="viewResUrl" styleId="viewResUrl" style="display:none;">
