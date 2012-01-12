@@ -16,51 +16,17 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Sep 19, 2010 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on May 31, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <h1><a name="ui-HQHealth-HQHealth"></a><a name="ui-HQHealth-top"></a>HQ Health</h1>
+				    <h1><a name="ui-HQHealth-HQHealth"></a>HQ Health</h1>
 
-<p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
-
-
-<p>This screen provides real-time diagnostic data for the machine on which the HQ Server is installed. This data is mostly useful for HQ Support to troubleshoot problems with the system and is not intended for customers to use on their own. This screen is available to Administrators only.</p>
-
-<p>This screen displays statistics from HQ's internal caches. For information about modifying cache settings, see <a href="http://support.hyperic.com/confluence/display/EVO/Configuring+HQ+for+Large+Environments+and+Improved+Performance#ConfiguringHQforLargeEnvironmentsandImprovedPerformance-ConfigureHQCacheSettingsforImprovedPerformance">Configure HQ Cache Settings for Improved Performance.</a></p>
+<p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
-<ul>
-	<li><a href="#ui-HQHealth-Tasks">Tasks</a> available on this screen</li>
-	<li><a href="#ui-HQHealth-Sections">Sections</a> on this screen</li>
-	<li><a href="#ui-HQHealth-Navigating">Navigating</a> via the masthead menu</li>
-</ul>
+<p><b>HQ Health</b> displays real-time diagnostic data for the machine on which the HQ Server is installed. This data helps Hyperic  Support to troubleshoot problems; it is not intended for customer use. The page is available to Administrators only.</p>
 
-
-
-
-<p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
-
-
-<p><a name="ui-HQHealth-Tasks"></a></p>
-
-<h3><a name="ui-HQHealth-TasksAvailableonThisScreen"></a>Tasks Available on This Screen</h3>
-
-<p>On this screen, users can do one thing: print the displayed diagnostic data.</p>
-
-<p><b>To print the diagnostic data:</b></p>
-<ul>
-	<li>Click <b>Print</b>, located under the statistics displayed in the top of the page, in the center.</li>
-</ul>
-
-
-<p>Gathering all the data to be printed might take a few moments. When that is done, a simple text display of the statistics are displayed in a browser window, from which you can easily print.</p>
-
-<p><a href="#ui-HQHealth-top"><em>back to top</em></a></p>
-
-
-
-<p><a name="ui-HQHealth-Sections"></a></p>
-
+<p><b>HQ Health</b> displays statistics from HQ's internal caches. For information about modifying cache settings, see <a href="http://support.hyperic.com/display/EVO/Scaling+and+Tuning+Hyperic+Performance#ScalingandTuningHypericPerformance-ConfigureHQCacheSettingsforImprovedPerformance">Configure HQ Cache Settings for Improved Performance.</a></p>
 <h3><a name="ui-HQHealth-SectionsonthisScreen"></a>Sections on this Screen</h3>
 
 <p>The top of the screen displays standard health statistics for a server. Below are three tabs that display more data about the state of the server and database:</p>
@@ -169,53 +135,15 @@
 
 
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
-<pre class="code-java">org.hyperic.hq.events.AlertConditionCreateException:
-org.hyperic.hq.measurement.MeasurementNotFoundException: No measurement found <span class="code-keyword">for</span> 10288 with template 33434 at org.hyperic.hq.bizapp.server.session.EventsBossImpl.updateAlertDefinition(EventsBossImpl.java:887)
-</pre>
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">org.hyperic.hq.events.AlertConditionCreateException:
+org.hyperic.hq.measurement.MeasurementNotFoundException: No measurement found for 10288 with template 33434 at org.hyperic.hq.bizapp.server.session.EventsBossImpl.updateAlertDefinition(EventsBossImpl.java:887)</pre>
+		</div>
 </div></div>
 
 <p>The HQ Health page provides orphaned item queries for alert definitions, resources, groups, and audits.</p>
 
 <p>If these queries indicate that there are any orphaned rows in the HQ database, contact Hyperic support for assistance in removing the orphaned rows.&nbsp;</p>
-
-<p><a name="ui-HQHealth-Navigating"></a></p>
-<h3><a name="ui-HQHealth-NavigatingviatheMastheadMenu"></a>Navigating via the Masthead Menu</h3>
-
-<p>Main screens in Hyperic contain a masthead menu. Users can navigate to the following parts of HQ using this menu:</p>
-<div class='table-wrap'>
-<table class='confluenceTable'><tbody>
-<tr>
-<td class='confluenceTd'> <b>Dashboard</b> </td>
-<td class='confluenceTd'> Displays the <a href="ui-Dashboard.html" title="ui-Dashboard">Dashboard</a>, the starting screen in HQ, which displays information about resource health, recent alerts, recently performed auto-discovery scan, and control actions </td>
-</tr>
-<tr>
-<td class='confluenceTd'> <b>Resources</b> </td>
-<td class='confluenceTd'> Click the menu name to access either <b>Browse</b> (takes users to the <a href="ui-Resources.html" title="ui-Resources">Browse Resources</a> screen, where they can locate and navigate through information about all <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-managedresource">managed resources</a>), <b>Currently Down</b> (takes users to the <a href="ui-CurrentlyDown.html" title="ui-CurrentlyDown">Currently Down</a> screen, where they can look at all managed resources that are unavailable), <b>Nagios Availability</b> (available only when Nagios is installed), or <b>Recently Viewed</b> (provides a drop-down list of <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-resource">resources</a> that the user has recently viewed. Selecting one of those resources takes the user to the <a href="ui-Monitor.CurrentHealth.html" title="ui-Monitor.CurrentHealth">Current Health</a> screen for the resource). </td>
-</tr>
-<tr>
-<td class='confluenceTd'> <b>Analyze</b> </td>
-<td class='confluenceTd'> Click the menu name to access <b>Reporting</b> <font color="red">&#42;</font> (presents the <a href="ui-Report.Center.html" title="ui-Report.Center">Reporting</a> screen, from which reports can be generated), <b>Alert Center</b> (presents the <a href="ui-Alert.Center.html" title="ui-Alert.Center">Alert Center</a>, which displays a deployment wide alert summary), or <b>Event Center</b> (presents the <a href="http://support.hyperic.com/confluence/display/DOC/ui-Event.Center" title="ui-Event.Center">Event Center</a>, which displays a deployment-wide event summary). <br class="atl-forced-newline" /> </td>
-</tr>
-<tr>
-<td class='confluenceTd'> <b>Administration</b> </td>
-<td class='confluenceTd'> Takes users (with "Administer Hyperic HQ Server Configuration" permissions) to the <a href="ui-Admin.html" title="ui-Admin">Administration</a> screen, where they can manage the system-wide settings </td>
-</tr>
-<tr>
-<td class='confluenceTd'> <b>Search</b> <br class="atl-forced-newline" /> </td>
-<td class='confluenceTd'> The Search box in the upper right of the Masthead allows you to search for HQ resources of any type and HQ users. <br class="atl-forced-newline" />
-<br class="atl-forced-newline" />
-Search results appear after four characters are entered in the text box. Results will include the first 10 platforms, servers, services, and groups whose name includes the search string. <br class="atl-forced-newline" />  <br class="atl-forced-newline" />
-Double-click a resource in the list to navigate to its Resource page. </td>
-</tr>
-</tbody></table>
-</div>
-
-<p>The masthead also displays the two most recently triggered alerts. Users can click the alert's time to be taken to the <a href="ui-Alert.Detail.html" title="ui-Alert.Detail">alert detail</a>.</p>
-<p><a href="#ui-HQHealth-top"><em>back to top</em></a></p>
-
-
-
-<h5><a name="ui-HQHealth-ReturntotheUserInterfaceReference."></a>Return to the <a href="User Interface Reference.html" title="User Interface Reference">User Interface Reference</a>.</h5>
 
 				    
                     			    </td>
@@ -223,10 +151,10 @@ Double-click a resource in the list to navigate to its Resource page. </td>
 	    </table>
 	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
 			<tr>
-				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Oct 28, 2010 15:34</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jan 12, 2012 13:19</font></td>
 		    </tr>
 	    </table>
     </body>

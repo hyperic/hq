@@ -16,54 +16,63 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Sep 19, 2010 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 05, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <h1><a name="ui-Inventory.Group.New-AddingaGrouptotheHQInventory"></a>Adding a Group to the HQ Inventory</h1>
+				    <h2><a name="ui-Inventory.Group.New-CreateaGroup"></a>Create a Group </h2>
+<p><a name="ui-Inventory.Group.New-CreateAGroup"></a> </p>
 
-<p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
-
-
-<p>This screen allows users to create ("add") a new <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-group">group</a>.</p>
-
-
-<p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
-
-
-
-<h3><a name="ui-Inventory.Group.New-TasksAvailableonThisScreen"></a>Tasks Available on This Screen</h3>
-
-<p>On this screen users can do one thing: add a new group.</p>
-
-<p><b>To add a new group:</b></p>
 <ol>
-	<li>Fill in the following fields:
+	<li>Click <b>New Group</b> on either:
+	<ul>
+		<li>The Dashboard's <b>Summary Counts</b> portlet</li>
+		<li>The <b>Tools</b> menu on the <b>Browse &gt; Resources</b> page</li>
+	</ul>
+	</li>
+	<li>The&nbsp;<b>New Group</b>&nbsp;page appears.<br/>
+<span class="image-wrap" style=""><img src="attachments/71828283/71926468.png" width="850px" style="border: 0px solid black"/></span> </li>
+	<li>On the <b>New Group</b> page, enter
 	<ul>
 		<li><ins>Name</ins>: The name of the group</li>
 		<li><ins>Description</ins>: (optional) A description of the group</li>
 		<li><ins>Location</ins>: (optional) The physical location of the group's hardware</li>
-		<li><ins>Make group private</ins>: Check this box to make the group private. A private group is invisible to other users, including admin users. You can share a private group with other users by associating it with a role.&nbsp; Note that the name you assign to a private group is automatically prefixed with the string "private to <em>username</em>", where username is the creator's HQ username.</li>
-		<li><ins>Contains Resources</ins>: If, on the preceding screen, the user selected a specific resource(s), that selection determines this field's value. Otherwise, first select whether the group will contain only a single <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-resourcetype">resource type</a>, for example, Exchange 2003, ("Compatible/Cluster") or multiple resource types, for example, some Windows boxes and some Apache servers, ("Mixed"). (Mixed groups enable role-based access control to certain resources.) Then select either a specific resource type or an inventory level, respectively. (The specific resources get added later.)</li>
+		<li><ins>Make group private</ins>: Checkmark to make the group private. A private group is invisible to other users, including admin users. You can share a private group with other users by associating it with a role. Note that the name you assign to a private group is automatically prefixed with the string "private to <em>username</em>", where username is the creator's HQ username.</li>
+		<li><ins>Contains Resources</ins>: Select the type of group:
+		<ul>
+			<li>Compatible/cluster - the group will contain resources of a single type. &nbsp;For example, "Linux" or "JBoss 4.2"</li>
+			<li>Mixed &nbsp;&#45; the group will contain&nbsp;multiple resource types. Mixed groups are useful for role-based resource access control.&nbsp;</li>
+			<li>The <b>Select Resource Type</b> pulldown appears to the right of the <b>Contains Resources</b> &#8212; the options vary depending upon whether you are created a compatible or mixed group.
+			<ul>
+				<li>For a compatible group, the <b>Select Resource Type</b> pulldown contains a list of all resource types in inventory, as shown in the thumbnail screenshot below.<br/>
+<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1027x492" href='http://support.hyperic.com/download/attachments/71828283/NewCompatibleGroup.png'><img src="attachments/thumbnails/71828283/71926471" style="border: 0px solid black"/></a></span> </li>
+				<li>For a mixed group, the <b>Select Resource Type</b> pulldown contains these choices (as shown in the thumbnail screenshot below):
+				<ul>
+					<li>Groups</li>
+					<li>Platforms, Servers, &amp; Services</li>
+					<li>Applications<br/>
+<span class="image-wrap" style=""><a class="confluence-thumbnail-link 1013x352" href='http://support.hyperic.com/download/attachments/71828283/NewMixedGroup.png'><img src="attachments/thumbnails/71828283/71926473" style="border: 0px solid black"/></a></span> </li>
+				</ul>
+				</li>
+			</ul>
+			</li>
+		</ul>
+		</li>
 	</ul>
 	</li>
-	<li>Click <span class="image-wrap" style=""><img src="attachments/71828458/71926136.gif" style="border: 0px solid black"/></span>.</li>
+	<li>Click OK to create the group.
+	<ul>
+		<li>The <b>Inventory</b> page for the new group appears. The screenshot below is the <b>Inventory</b> page for a new compatible group.<br/>
+<span class="image-wrap" style=""><img src="attachments/71828283/71926472.png" width="850px" style="border: 0px solid black"/></span></li>
+	</ul>
+	</li>
 </ol>
 
 
-<p>The group's <ins>Owner</ins> defaults to the account that created the group.</p>
-<table class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><tbody><tr>
-<div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>Next Steps in UI</b></div><div class="panelContent">
-<p>See what resources and roles are included in this <a href="ui-Inventory.Group.html" title="ui-Inventory.Group">group</a>.</p>
-</div></div>
-<div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>Related Information</b></div><div class="panelContent">
-<p>An explanation of <a href="http://support.hyperic.com/confluence/display/EVO/HQ+Inventory+and+Access+Model#HQInventoryandAccessModel-groups">groups</a> as part of the HQ Inventory Model</p>
-</div></div></tr></tbody></table>
-
-<h5><a name="ui-Inventory.Group.New-ReturntoUserInterfaceReference."></a>Return to <a href="User Interface Reference.html" title="User Interface Reference">User Interface Reference</a>.</h5>
-
 				    					    <br/>
                         <div class="tabletitle">
-                            <a name="attachments">Attachments:</a>
+                            <a name="attachments">
+                                <h2>Attachments:</h2>
+                            </a>
                         </div>
 
                         <div class="greybox" align="left">
@@ -77,10 +86,10 @@
 	    </table>
 	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
 			<tr>
-				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Oct 28, 2010 15:34</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jan 12, 2012 13:19</font></td>
 		    </tr>
 	    </table>
     </body>

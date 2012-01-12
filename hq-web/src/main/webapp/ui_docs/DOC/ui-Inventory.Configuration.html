@@ -19,7 +19,7 @@
 					    This page last changed on Sep 21, 2010 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
  
 <style type='text/css'>/*<![CDATA[*/
@@ -48,8 +48,7 @@ div.rbtoc1285109097852 li {margin-left: 0px;padding-left: 0px;}
 </ul></div> 
 
 
-<p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
-
+<p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
  
 
 <h1><a name="ui-Inventory.Configuration-NavigatetoConfigurationPropertiespage."></a>Navigate to Configuration Properties page. </h1>
@@ -191,12 +190,12 @@ div.rbtoc1285109097852 li {margin-left: 0px;padding-left: 0px;}
 
 <h4><a name="ui-Inventory.Configuration-TailoringtheContentandFormatofLoggedWindowsEvents"></a>Tailoring the Content and Format of Logged Windows Events </h4>
 
-<p>Tou can configure the last portion of the log data that the agent writes for a Windows event - referred to above as <b><em>EventAttributes</em></b>. You can include additional event attributes, for example <b>User</b> and <b>Computer</b>. To do so, you add the <tt>platform.log_track.eventfmt</tt> property to the <tt>agent.properties</tt> file for the HQ Agent monitoring the Windows platform.</p>
+<p>Tou can configure the last portion of the log data that the agent writes for a Windows event - referred to above as <b><em>EventAttributes</em></b>. You can include additional event attributes, for example <b>User</b> and <b>Computer</b>. To do so, you add the <tt>platform.log_track.eventfmt</tt> property to the <tt>agent.properties</tt> file for the Hyperic Agent monitoring the Windows platform.</p>
 
 <p>Usage of <tt>platform.log_track.eventfmt</tt> property is described below.</p>
 
-<h6><a name="ui-Inventory.Configuration-platform.logtrack.eventfmt"></a>platform.log_track.eventfmt</h6>
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><p><b>Description</b></p>
+<h4><a name="ui-Inventory.Configuration-platform.logtrack.eventfmtProperty"></a>platform.log_track.eventfmt Property</h4>
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Description</b>
 
 <p>Specifies the content and format of the Windows event attributes that an HQ Agent includes when logging a  Windows event as an event in  HQ. <tt>agent.properties</tt> does not contain the <tt>platform.log_track.eventfmt</tt> property, you must explicitly add it if you want to tailor the data logged for Windows events.</p>
 
@@ -248,18 +247,17 @@ When Windows log tracking is enabled, an entry of this form is logged for events
 
 <p>This entry is for as for an Windows event written to the Windows System event log at 6:06 AM on 04/19/2010. The software associated with the event was running as "HP_Administrator" on the host "Office". The Windows event's <b>Source,</b>&nbsp;<b>Event,</b> and&nbsp;<b>Message</b> attributes, are "Print", "7", and "Printer HP LaserJet 6P was paused.", respectively.</p>
 
-<p>After you configure the content of the log entry written for a Windows event, when you configure an alert definition for a Windows resource, you can create an alert condition based on the message content, including the custom fields you have configured. For more information, see <a href="http://support.hyperic.com/confluence/display/EVO/Defining+Alerts#DefiningAlerts-conditions">Define Alert Condition Set</a>.</p></td></tr></table></div>  
+<p>After you configure the content of the log entry written for a Windows event, when you configure an alert definition for a Windows resource, you can create an alert condition based on the message content, including the custom fields you have configured. For more information, see the "Define Alert Condition Set" section in <em>Configure Monitoring Options</em>. <p> <a href="http://support.hyperic.com/display/EVO/Defining+Alerts#DefiningAlerts-conditions">Define Alert Condition Set</a> </p></p></td></tr></table></div>  
 
 <h1><a name="ui-Inventory.Configuration-ConfigureMonitoringPropertiesConfigurationTracking"></a>Configure Monitoring Properties - Configuration Tracking </h1>
 
-<p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
+<p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 
 
 
-<p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
-
+<p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
 
 
 <h2><a name="ui-Inventory.Configuration-HQConfigurationTrackingFunctionality"></a>HQ Configuration Tracking Functionality</h2>
@@ -314,7 +312,7 @@ Be sure to select <ins>Config change and match file name</ins> as a triggering c
 
 <h1><a name="ui-Inventory.Configuration-ConfigureControlProperties"></a>Configure Control Properties </h1>
 
-<p>This section lists the information necessary for HQ to perform <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-controlaction">control actions</a> on this resource. Not all resource types have associated control actions: <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-platform">Platforms</a>, <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-application">applications</a>, and <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-mixedgroup">mixed groups</a> do not have control actions. </p>
+<p>This section lists the information necessary for HQ to perform <a href="http://support.hyperic.com/display/EVO/Hyperic+Glossary#HypericGlossary-controlaction">control actions</a> on this resource. Not all resource types have associated control actions: <a href="http://support.hyperic.com/display/EVO/Hyperic+Glossary#HypericGlossary-platform">Platforms</a>, <a href="http://support.hyperic.com/display/EVO/Hyperic+Glossary#HypericGlossary-application">applications</a>, and <a href="http://support.hyperic.com/display/EVO/Hyperic+Glossary#HypericGlossary-mixedgroup">mixed groups</a> do not have control actions. </p>
 
 <p><b>Example</b> <br/>
 For an Apache server, HQ can perform these control actions: start, stop, restart, graceful, startssl, and configtest. In order for HQ to do that, the user must provide the following information about the Apache installation: </p>
@@ -329,7 +327,9 @@ For an Apache server, HQ can perform these control actions: start, stop, restart
 
 				    					    <br/>
                         <div class="tabletitle">
-                            <a name="attachments">Attachments:</a>
+                            <a name="attachments">
+                                <h2>Attachments:</h2>
+                            </a>
                         </div>
 
                         <div class="greybox" align="left">
@@ -343,10 +343,10 @@ For an Apache server, HQ can perform these control actions: start, stop, restart
 	    </table>
 	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
 			<tr>
-				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Oct 28, 2010 15:34</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jan 12, 2012 13:19</font></td>
 		    </tr>
 	    </table>
     </body>

@@ -16,45 +16,35 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Oct 19, 2010 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on May 17, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <p><b>Available only in <font color="red">HQ Enterprise</font></b></p>
+				    <p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
 
-<style type='text/css'>/*<![CDATA[*/
-div.rbtoc1287503779763 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1287503779763 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1287503779763 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1287503779763'>
 <ul>
-    <li><a href='#ui-Admin.Dependency-DefineNetworkHostRelationships'>Define Network Host Relationships <span style="color: red">*</span></a></li>
-<ul>
-    <li><a href='#ui-Admin.Dependency-Step1%3ASelectaTopLevelPlatformtoUpdate'>Step 1: Select a Top Level Platform to Update</a></li>
-    <li><a href='#ui-Admin.Dependency-Step2%3AManageaTopLevelPlatform%27sDependents'>Step 2: Manage a Top Level Platform's Dependents</a></li>
+	<li><a href="#ui-Admin.Dependency-DefineNetworkHostRelationships">Define Network Host Relationships</a></li>
+	<li><a href="#ui-Admin.Dependency-ManageaTopLevelPlatform%27sDependents">Manage a Top Level Platform's Dependents</a></li>
 </ul>
-    <li><a href='#ui-Admin.Dependency-AboutPlatformTypes'>About Platform Types</a></li>
-<ul>
-    <li><a href='#ui-Admin.Dependency-OperatingSystemPlatforms'>Operating System Platforms</a></li>
-    <li><a href='#ui-Admin.Dependency-NetworkDeviceandNetworkHostPlatforms'>Network Device and Network Host Platforms</a></li>
-</ul>
-</ul></div>
 
-<h1><a name="ui-Admin.Dependency-DefineNetworkHostRelationships"></a>Define Network Host Relationships<font color="red">&#42;</font></h1>
 
-<p>The <b>Network and Host Dependency Manager</b>, available starting in HQ Enterprise 4.2, from the "Plugins" section of the <b>Administration</b> tab, allows you to define relationships between a top level platform (a network device or virtual host) and lower level (operating system) platforms that depend on it.</p>
 
-<p>Defining dependency relationships extends the benefits of HQ hierarchical alerting to top level platforms. For more information see <a href="http://support.hyperic.com/confluence/display/DOC/Controlling+Alert+and+Notification+Volume#ControllingAlertandNotificationVolume-HierarchicalAlertingPreventaCascadeofAlertsinResourceHierarchies">Hierarchical Alerting Prevent a Cascade of Alerts in Resource Hierarchies</a>.</p>
+<h1><a name="ui-Admin.Dependency-DefineNetworkHostRelationships"></a>Define Network Host Relationships</h1>
 
-<p>See <a href="#ui-Admin.Dependency-AboutPlatformTypes">About Platform Types</a> for a summary of the operating system platform types and top level platform types in HQ.</p>
+<p>The <b>Network and Host Dependency Manager</b>, available from the "Plugins" section of the <b>Administration</b> tab, allows you to define relationships between a top level platform (a network device or virtual host) and lower level (operating system) platforms that depend on it.</p>
 
-<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>vSphere Resource Relationships</b><br />If you manage vSphere resources using the vSphere plugin, do not use the <b>Network Host Dependency Manager</b> to configure dependencies for vSphere resources. vSphere resource types will be removed from the <b>Network Host Dependency Manager</b> pulldown menus in a future release. For information about the vSphere virtual resource hierarchy, see <a href="http://support.hyperic.com/confluence/display/EVO/Monitoring+vSphere+Components" title="Monitoring vSphere Components">Monitoring vSphere Components</a>.</td></tr></table></div> 
+<p><b>Note:</b>  For information about platforms in Hyperic, see <a href="http://support.hyperic.com/display/EVO/Resources%2C+Resource+Types+and+Inventory+Types#Resources%2CResourceTypesandInventoryTypes-platforms">Platforms</a>.</p>
 
-<h2><a name="ui-Admin.Dependency-Step1%3ASelectaTopLevelPlatformtoUpdate"></a>Step 1: Select a Top Level Platform to Update</h2>
+<p>Defining dependency relationships extends the benefits of Hyperic hierarchical alerting to top level platforms. </p>
+
+<p>For more information see <a href="http://support.hyperic.com/display/EVO/Manage+Alert+and+Notification+Volume#ManageAlertandNotificationVolume-hierarchical">Hierarchical Alerting Prevents a Cascade of Alerts in Resource Hierarchies</a>.</p>
+
+<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>vSphere Resource Relationships</b><br />If you manage vSphere resources using the vSphere plugin, do not use the <b>Network Host Dependency Manager</b> to configure dependencies for vSphere resources. vSphere resource types will be removed from the <b>Network Host Dependency Manager</b> pulldown menus in a future release. For information about the vSphere virtual resource hierarchy, see <a href="http://support.hyperic.com/display/EVO/Monitoring+vSphere+Components+%28Hyperic+4.5.1+and+Later%29" title="Monitoring vSphere Components (Hyperic 4.5.1 and Later)">Monitoring vSphere Components</a>.</td></tr></table></div>
+<h2><a name="ui-Admin.Dependency-Step1SelectaTopLevelPlatformtoUpdate"></a>Step 1 - Select a Top Level Platform to Update</h2>
 
 <p>To define or change the dependent platforms for a top level platform, you first select the top level platform. For ease of navigation, the <b>Network and Host Dependency Manager</b> provides two ways to find a top level platform. Depending on how many top level platforms you have in inventory, and what you know about your target, one of the following options may be preferable.</p>
 
-<h3><a name="ui-Admin.Dependency-OptionA%3ABrowseaFilteredListofTopLevelPlatforms"></a>Option A: Browse a Filtered List of Top Level Platforms</h3>
+<h3><a name="ui-Admin.Dependency-OptionABrowseaFilteredListofTopLevelPlatforms"></a>Option A - Browse a Filtered List of Top Level Platforms</h3>
 
 <p>You can peruse a complete or filtered list of top level platforms in inventory to find the one you want to update.</p>
 <ol>
@@ -75,7 +65,7 @@ div.rbtoc1287503779763 li {margin-left: 0px;padding-left: 0px;}
 </ol>
 
 
-<h3><a name="ui-Admin.Dependency-OptionB%3ANavigatefromaDependentPlatform"></a>Option B: Navigate from a Dependent Platform</h3>
+<h3><a name="ui-Admin.Dependency-OptionBNavigatefromaDependentPlatform"></a>Option B - Navigate from a Dependent Platform</h3>
 
 <p>If the top level platform you want to update already has a dependent platform, you can start from there.</p>
 <ol>
@@ -100,7 +90,7 @@ div.rbtoc1287503779763 li {margin-left: 0px;padding-left: 0px;}
 </ol>
 
 
-<h2><a name="ui-Admin.Dependency-Step2%3AManageaTopLevelPlatform%27sDependents"></a>Step 2: Manage a Top Level Platform's Dependents</h2>
+<h2><a name="ui-Admin.Dependency-Step2ManageaTopLevelPlatform%27sDependents"></a>Step 2 - Manage a Top Level Platform's Dependents</h2>
 
 <ol>
 	<li>Navigate to the desired top level platform and select it, using one of the methods described in <b>Step 1</b>.</li>
@@ -109,10 +99,13 @@ div.rbtoc1287503779763 li {margin-left: 0px;padding-left: 0px;}
 		<li>Use the <b>Select</b> and <b>Remove</b> controls on the page.</li>
 	</ul>
 	</li>
+</ol>
+
+
+<ol>
 	<li>To add dependencies:
 	<ul>
-		<li>Click <b>Add</b>.</li>
-		<li>The <b>Available Platforms</b> popup lists operating system platforms in inventory that are not currently assigned to a top level platform.</li>
+		<li>Click <b>Add</b>.#* The <b>Available Platforms</b> popup lists operating system platforms in inventory that are not currently assigned to a top level platform.</li>
 		<li>Filter the list, as desired:
 		<ul>
 			<li>Enter the leading characters of the operating system platform name in the "Name" field.</li>
@@ -127,42 +120,6 @@ div.rbtoc1287503779763 li {margin-left: 0px;padding-left: 0px;}
 </ol>
 
 
-<h1><a name="ui-Admin.Dependency-AboutPlatformTypes"></a>About Platform Types</h1>
-<p>This section lists operating system platform types and "top level" platform types in HQ.</p>
-
-<p>There are two major kinds of platforms in HQ.</p>
-
-<h2><a name="ui-Admin.Dependency-OperatingSystemPlatforms"></a>Operating System Platforms</h2>
-
-<p>An <em>operating system platform</em> is a computer and the operating system that runs on it. The HQ Agent auto-discovers operating system platform using HQ's system plugin. You cannot manually add an operating system platform to inventory. They must be auto-discovered.</p>
-
-<p>HQ supports these operating system platform types:</p>
-<ul>
-	<li>AIX</li>
-	<li>FreeBSD</li>
-	<li>HPUX</li>
-	<li>Linux</li>
-	<li>MacOSX</li>
-	<li>Solaris</li>
-	<li>Unix</li>
-	<li>Win32</li>
-</ul>
-
-
-<h2><a name="ui-Admin.Dependency-NetworkDeviceandNetworkHostPlatforms"></a>Network Device and Network Host Platforms</h2>
-<p><a name="ui-Admin.Dependency-NetworkHostPlatforms"></a><br/>
-A <em>network host platform</em> is a virtual or network resource. Network host platforms are monitored over the network, and do not generally have an HQ Agent running on them. Network host platforms are not auto-discovered - an authorized user configures them.</p>
-
-<p>HQ supports these network host platform types:</p>
-<ul>
-	<li>Cisco IOS</li>
-	<li>Cisco Pixos</li>
-	<li>Network Device</li>
-	<li>Network Host</li>
-	<li>VMware VI3 Host</li>
-	<li>Xen Host</li>
-</ul>
-
 
 				    
                     			    </td>
@@ -170,10 +127,10 @@ A <em>network host platform</em> is a virtual or network resource. Network host 
 	    </table>
 	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
 			<tr>
-				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Oct 28, 2010 15:34</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jan 12, 2012 13:19</font></td>
 		    </tr>
 	    </table>
     </body>

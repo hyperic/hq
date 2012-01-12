@@ -16,82 +16,56 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on May 20, 2010 by <font color="#0050B2">clee</font>.
+					    This page last changed on Mar 10, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <p><a name="ui-Event.Center-top"></a></p>
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1299798992012 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1299798992012 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1299798992012 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1299798992012'>
+<ul>
+    <li><a href='#ui-Event.Center-EventCenter'>Event Center</a></li>
+    <li><a href='#ui-Event.Center-FiltertheEventList'>Filter the Event List</a></li>
+    <li><a href='#ui-Event.Center-ContentsoftheEventCenterPage'>Contents of the Event Center Page</a></li>
+</ul></div>
+
+
+<p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
+
 
 <h1><a name="ui-Event.Center-EventCenter"></a>Event Center</h1>
 
-<p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
+<p>The <b>Event Center</b> page, available on the <b>Analyze tab</b> in the Masthead, is a deployment wide view of events that have been logged for resources in your Hyperic deployment. Events are ordered by date, with most recent events first. To reverse the sort order, click the control in the <b>Date</b> column header.</p>
 
+<p>Click <span class="image-wrap" style=""><img src="attachments/71828503/71926239.gif" style="border: 0px solid black"/></span> at the top right to refresh the list.</p>
 
-<p>This screen allows users to centrally view <em>all</em> the Events across the entire HQ deployment.</p>
-<ul>
-	<li><a href="#ui-Event.Center-Tasks">Tasks</a> available on this screen</li>
-	<li><a href="#ui-Event.Center-Sections">Sections</a> on this screen</li>
-	<li><a href="#ui-Event.Center-Navigating">Navigating</a> via the masthead menu</li>
-</ul>
+<p><span class="image-wrap" style=""><img src="attachments/71828283/71926919.png" width="750pxpx" style="border: 0px solid black"/></span></p>
 
-
-
-
-<p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
-
-
-<p><a name="ui-Event.Center-Tasks"></a></p>
-
-<h3><a name="ui-Event.Center-"></a></h3>
-
-
-<h3><a name="ui-Event.Center-Screenshot"></a>Screenshot</h3>
-
-<p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 1151x528" href='http://support.hyperic.com/confluence/download/attachments/71828503/EventCenterPage.gif'><img src="attachments/thumbnails/71828503/71926238" height="32" width="32" style="border: 0px solid black"/></a></span></p>
-
-<h3><a name="ui-Event.Center-TasksAvailableonThisScreen"></a>Tasks Available on This Screen</h3>
-
-<p>On this screen, users can do the following tasks:</p>
-
-<p><b>To refresh the list:</b></p>
-<ul>
-	<li>Click <span class="image-wrap" style=""><img src="attachments/71828503/71926239.gif" style="border: 0px solid black"/></span> at the top right.</li>
-</ul>
-
-
-<p><b>To sort the list:</b></p>
-<ul>
-	<li>Click the 'Date' column heading on the right side.<br/>
-When viewing events, the sort will apply to all events from the database, not just the events currently displayed on the screen.</li>
-</ul>
-
-
-<h4><a name="ui-Event.Center-"></a></h4>
-
-<p><a name="ui-Event.Center-Sections"></a></p>
-
-<h3><a name="ui-Event.Center-SectionsonThisScreen"></a>Sections on This Screen</h3>
-
-
-<h4><a name="ui-Event.Center-Filter"></a>Filter</h4>
+<h1><a name="ui-Event.Center-FiltertheEventList"></a>Filter the Event List</h1>
 
 <p>To limit the events displayed in the Events section, choose one or more filter options.</p>
 <ul>
-	<li>Minimum Status - Select a status to limit the log tracking events in the list to those of that level or higher.&nbsp; Log tracking event levels, in decreasing order of severity, are:
+	<li><b>Minimum Status</b> &#8212; Select a status to limit the log tracking events in the list to those of that level or higher. Log tracking event levels, in decreasing order of severity, are:
 	<ul>
 		<li>Error</li>
-		<li>Warning&nbsp;</li>
-		<li>Info&nbsp;</li>
+		<li>Warning</li>
+		<li>Info</li>
 		<li>Debug</li>
 	</ul>
 	</li>
-	<li>Type - Select a type to limit events in the list to those of that type:
+	<li><b>Type</b> &#8212; Select a type to limit events in the list to those of that type:
 	<ul>
 		<li>Log track</li>
 		<li>Event Track</li>
 		<li>Alerts</li>
 	</ul>
 	</li>
-	<li>Time Range - Select on the following time ranges to limit th events in the list to those occurred during the range:
+	<li><b>Time Range</b> &#8212; Select on the following time ranges to limit th events in the list to those occurred during the range:
 	<ul>
 		<li>Last 4 hours</li>
 		<li>Last 8 hours</li>
@@ -100,73 +74,31 @@ When viewing events, the sort will apply to all events from the database, not ju
 		<li>Last month</li>
 	</ul>
 	</li>
-	<li>Groups - Select one or more groups to limit the events in the list to those related to resources in the selected group(s).</li>
+	<li><b>Groups</b> &#8212; Select one or more groups to limit the events in the list to those related to resources in the selected group(s).</li>
 </ul>
 
 
-<h4><a name="ui-Event.Center-Events"></a>Events</h4>
+<h1><a name="ui-Event.Center-ContentsoftheEventCenterPage"></a>Contents of the Event Center Page</h1>
 
-<p>This section lists all the events across the HQ deployment. In the "Filter" section, users can filter the list of events displayed at the right.</p>
+<p>The following data is shown for each event that matches the filter criteria selected in the <b>Filter</b> pane:</p>
 
 <p>The following information is shown for each event in the list:</p>
 <ul>
-	<li><ins>Date</ins>: Date and time the event happened</li>
-	<li><ins>Status</ins>: For log track events, the level is shown. For alerts, the status column contains "alert".</li>
-	<li><ins>Resource</ins>: The name of the resource that caused the event</li>
-	<li><ins>Subject</ins>: For an alert, the alert name; for a Nagios check, the plugin name, including path.</li>
-	<li><ins>Detail</ins>: Information about the event detail or triggering condition.</li>
+	<li><b>Date</b> &#8212; Date and time the event happened</li>
+	<li><b>Status</b> &#8212; For log track events, the level is shown. For alerts, the status column contains "alert".</li>
+	<li><b>Resource</b> &#8212; The name of the resource that caused the event</li>
+	<li><b>Subject</b> &#8212; For an alert, the alert name; for a Nagios check, the plugin name, including path.</li>
+	<li><b>Detail</b> &#8212; Information about the event detail or triggering condition.</li>
 </ul>
 
 
-<p><a href="#ui-Event.Center-top">back to top</a></p>
 
-<p><a name="ui-Event.Center-Navigating"></a></p>
-<h3><a name="ui-Event.Center-NavigatingviatheMastheadMenu"></a>Navigating via the Masthead Menu</h3>
-
-<p>Main screens in Hyperic contain a masthead menu. Users can navigate to the following parts of HQ using this menu:</p>
-<div class='table-wrap'>
-<table class='confluenceTable'><tbody>
-<tr>
-<td class='confluenceTd'> <b>Dashboard</b> </td>
-<td class='confluenceTd'> Displays the <a href="ui-Dashboard.html" title="ui-Dashboard">Dashboard</a>, the starting screen in HQ, which displays information about resource health, recent alerts, recently performed auto-discovery scan, and control actions </td>
-</tr>
-<tr>
-<td class='confluenceTd'> <b>Resources</b> </td>
-<td class='confluenceTd'> Click the menu name to access either <b>Browse</b> (takes users to the <a href="ui-Resources.html" title="ui-Resources">Browse Resources</a> screen, where they can locate and navigate through information about all <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-managedresource">managed resources</a>), <b>Currently Down</b> (takes users to the <a href="ui-CurrentlyDown.html" title="ui-CurrentlyDown">Currently Down</a> screen, where they can look at all managed resources that are unavailable), <b>Nagios Availability</b> (available only when Nagios is installed), or <b>Recently Viewed</b> (provides a drop-down list of <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-resource">resources</a> that the user has recently viewed. Selecting one of those resources takes the user to the <a href="ui-Monitor.CurrentHealth.html" title="ui-Monitor.CurrentHealth">Current Health</a> screen for the resource). </td>
-</tr>
-<tr>
-<td class='confluenceTd'> <b>Analyze</b> </td>
-<td class='confluenceTd'> Click the menu name to access <b>Reporting</b> <font color="red">&#42;</font> (presents the <a href="ui-Report.Center.html" title="ui-Report.Center">Reporting</a> screen, from which reports can be generated), <b>Alert Center</b> (presents the <a href="ui-Alert.Center.html" title="ui-Alert.Center">Alert Center</a>, which displays a deployment wide alert summary), or <b>Event Center</b> (presents the <a href="http://support.hyperic.com/confluence/display/DOC/ui-Event.Center" title="ui-Event.Center">Event Center</a>, which displays a deployment-wide event summary). <br class="atl-forced-newline" /> </td>
-</tr>
-<tr>
-<td class='confluenceTd'> <b>Administration</b> </td>
-<td class='confluenceTd'> Takes users (with "Administer Hyperic HQ Server Configuration" permissions) to the <a href="ui-Admin.html" title="ui-Admin">Administration</a> screen, where they can manage the system-wide settings </td>
-</tr>
-<tr>
-<td class='confluenceTd'> <b>Search</b> <br class="atl-forced-newline" /> </td>
-<td class='confluenceTd'> The Search box in the upper right of the Masthead allows you to search for HQ resources of any type and HQ users. <br class="atl-forced-newline" />
-<br class="atl-forced-newline" />
-Search results appear after four characters are entered in the text box. Results will include the first 10 platforms, servers, services, and groups whose name includes the search string. <br class="atl-forced-newline" />  <br class="atl-forced-newline" />
-Double-click a resource in the list to navigate to its Resource page. </td>
-</tr>
-</tbody></table>
-</div>
-
-<p>The masthead also displays the two most recently triggered alerts. Users can click the alert's time to be taken to the <a href="ui-Alert.Detail.html" title="ui-Alert.Detail">alert detail</a>.</p>
-<p><a href="#ui-Event.Center-top">back to top</a></p>
-<table class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><tbody><tr>
-<div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>Next Steps</b></div><div class="panelContent">
-<p>TBD</p>
-</div></div>
-<div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>Related Information</b></div><div class="panelContent">
-<p><a href="http://support.hyperic.com/confluence/display/hypcomm/HQU+Event+Center" title="HQU Event Center">HQU Event Center Plugin</a></p>
-</div></div></tr></tbody></table>
-
-<h5><a name="ui-Event.Center-ReturntotheUserInterfaceReference."></a>Return to the <a href="User Interface Reference.html" title="User Interface Reference">User Interface Reference</a>.</h5>
 
 				    					    <br/>
                         <div class="tabletitle">
-                            <a name="attachments">Attachments:</a>
+                            <a name="attachments">
+                                <h2>Attachments:</h2>
+                            </a>
                         </div>
 
                         <div class="greybox" align="left">
@@ -183,10 +115,10 @@ Double-click a resource in the list to navigate to its Resource page. </td>
 	    </table>
 	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
 			<tr>
-				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Oct 28, 2010 15:34</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jan 12, 2012 13:19</font></td>
 		    </tr>
 	    </table>
     </body>

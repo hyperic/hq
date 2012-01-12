@@ -16,233 +16,86 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on May 20, 2010 by <font color="#0050B2">clee</font>.
+					    This page last changed on Mar 10, 2011 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <h1><a name="ui-CurrentlyDown-CurrentlyDownResources"></a><a name="ui-CurrentlyDown-top"></a>Currently Down Resources</h1>
-
-<p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1299797909462 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1299797909462 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1299797909462 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1299797909462'>
+<ul>
+    <li><a href='#ui-CurrentlyDown-CurrentlyDownResources'>Currently Down Resources</a></li>
+    <li><a href='#ui-CurrentlyDown-ContentsoftheCurrentlyDownPage'>Contents of the Currently Down Page</a></li>
+    <li><a href='#ui-CurrentlyDown-FilterResourcesoftheCurrentlyDownPage'>Filter Resources of the Currently Down Page</a></li>
+</ul></div>
+
+
+<p><font color="gray"><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></font></p>
 
 
 
-<p>This screen allows users to centrally view all the managed resources (platforms, servers, and services) that are currently unavailable and when they went down. The screen automatically refreshes every minute, but users can also refresh it manually. </p>
+<h1><a name="ui-CurrentlyDown-CurrentlyDownResources"></a>Currently Down Resources</h1>
 
+<p>The <b>Currently Down Resources</b> page, available on the <b>Resource</b> tab is lists resources that are not currently available, up to a maximum of 1000 resources. </p>
 
+<p><span class="image-wrap" style=""><img src="attachments/71828283/74219895.png" width="750px" style="border: 0px solid black"/></span></p>
+
+<h1><a name="ui-CurrentlyDown-ContentsoftheCurrentlyDownPage"></a>Contents of the Currently Down Page</h1>
+
+<p>The right pane of the <b>Currently Down Resources</b> pane lists resources that match the filter criteria selected in the "Resource Types" panel on the left, ordered by <b>Down Time</b>, from longest to shortest. Click a column header to sort by that column's contents &#8212; except for the "Alerts" column.</p>
+
+<p>By default, the page will list up to 50 resources. You can choose to list up to 100, or up to 1000, using the <b>Show Most Recent</b> control. </p>
+
+<p>The following data is shown for each resource on the list:</p>
 
 <ul>
-	<li><a href="#ui-CurrentlyDown-Tasks">Tasks</a> available on this screen</li>
+	<li><b>Resource</b> &#8212; Name of the down resource. Click to view the resource's <b>Indicators</b> page.</li>
+	<li><b>Type</b> &#8212; The resource's platform, server, or service type.</li>
+	<li><b>Down Since</b> &#8212; The time at which the resource became unavailable.</li>
+	<li><b>Down Time</b> &#8212; The length of time the resource has been unavailable.</li>
+	<li><b>Alerts</b> &#8212; Click the icon in this column to see a list of alerts fired for the resource.</li>
 </ul>
 
 
-<ul>
-	<li><a href="#ui-CurrentlyDown-Sections">Sections</a> on this screen</li>
-</ul>
+<p>Click <span class="image-wrap" style=""><img src="attachments/71828498/71926229.gif" style="border: 0px solid black"/></span> at the top right to refresh the page.</p>
 
+<h1><a name="ui-CurrentlyDown-FilterResourcesoftheCurrentlyDownPage"></a>Filter Resources of the Currently Down Page</h1>
 
-<ul>
-	<li><a href="#ui-CurrentlyDown-Navigating">Navigating</a> via the masthead menu</li>
-</ul>
+<ol>
+	<li>To list all currently unavailable resources of a particular inventory level click one of the top level links in <b>Resource Types</b> pane:
+	<ul>
+		<li>Platforms</li>
+		<li>Servers</li>
+		<li>Services</li>
+	</ul>
+	</li>
+	<li>To further narrow the list to unavailable resources of a particular resource type, expand the link for the inventory level, and click select the desired resource type from list that appears.</li>
+</ol>
 
 
 
 
 
 
-<p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
 
 
 
 
 
-<p><a name="ui-CurrentlyDown-Tasks"></a></p>
 
 
-
-<h3><a name="ui-CurrentlyDown-TasksAvailableonThisScreen"></a>Tasks Available on This Screen</h3>
-
-
-
-<p>On this screen, users can do the following tasks:</p>
-
-
-
-<p><b>To view all the down resources of a specific type:</b></p>
-
-<ul>
-	<li>Click the resource type under "Resource Types" at left.</li>
-</ul>
-
-
-
-
-<p><b>To refresh the list:</b></p>
-
-<ul>
-	<li>Click <span class="image-wrap" style=""><img src="attachments/71828498/71926229.gif" style="border: 0px solid black"/></span> at the top right.</li>
-</ul>
-
-
-
-
-<p><b>To sort the list:</b></p>
-
-<ul>
-	<li>Click any column heading (except "Alerts") in the list at right.</li>
-</ul>
-
-
-
-
-<p><b>To display a different number of down resources:</b></p>
-
-<ul>
-	<li>Click the number of resources to be displayed in <ins>Show Most Recent</ins> at the top right.</li>
-</ul>
-
-
-<p>The screen lists all the resources on only one page (not across multiple pages). If the number of down resources exceeds the <ins>Show Most Recent</ins> value, the list will be truncated: it will not show all the down resources.</p>
-
-
-
-<p><b>To view all the alerts for a listed resource:</b></p>
-
-<ul>
-	<li>Click <span class="image-wrap" style=""><img src="attachments/71828498/71926230.gif" style="border: 0px solid black"/></span> in the "Alert" column and proceed to the "<a href="ui-Alert.ListDefinition.html" title="ui-Alert.ListDefinition">Triggered Alerts</a>" screen.</li>
-</ul>
-
-
-
-
-<p><b>To view the Current Health of a listed resource:</b></p>
-
-<ul>
-	<li>Click the resource's name in the "Resource" column and proceed to the "<a href="ui-Monitor.CurrentHealth.html" title="ui-Monitor.CurrentHealth">Current Health</a>" screen.</li>
-</ul>
-
-
-
-
-<p><em><a href="#ui-CurrentlyDown-top">back to top</a></em></p>
-
-
-
-<p><a name="ui-CurrentlyDown-Sections"></a></p>
-
-<h3><a name="ui-CurrentlyDown-SectionsonThisScreen"></a>Sections on This Screen</h3>
-
-
-
-<h4><a name="ui-CurrentlyDown-ResourceTypes"></a>Resource Types</h4>
-
-
-
-<p>This section organizes all the down resources by inventory level and then resource type. Users can expand or collapse the inventory-level listings. Users can view all down resources of a particular resource type by clicking the type here.</p>
-
-
-
-<h4><a name="ui-CurrentlyDown-Availability"></a>Availability</h4>
-
-
-
-<p>This section lists all the down resources of the resource type selected in "Resource Types." The default sort order is by <ins>Down Time</ins> (from longest to shortest). Users cannot page through the list of down resources; they must instead select a number of resources to be displayed. This section also provides a link to the resource's alerts (where any alerts triggered by the resource's unavailability will be listed).</p>
-
-<ul>
-	<li><ins>Resource</ins>: Name of the down resource</li>
-</ul>
-
-
-<ul>
-	<li><ins>Type</ins>: The resource's platform, server, or service type</li>
-</ul>
-
-
-<ul>
-	<li><ins>Down Since</ins>: The time at which the resource became unavailable</li>
-</ul>
-
-
-<ul>
-	<li><ins>Down Time</ins>: The length of time the resource has been unavailable</li>
-</ul>
-
-
-<ul>
-	<li><ins>Alerts</ins>: The icon links to a <a href="ui-Alert.ListDefinition.html" title="ui-Alert.ListDefinition">list of alerts for this resource</a></li>
-</ul>
-
-
-
-
-<p><em><a href="#ui-CurrentlyDown-top">back to top</a></em></p>
-
-
-
-<p><a name="ui-CurrentlyDown-Navigating"></a></p>
-
-
-
-<h3><a name="ui-CurrentlyDown-NavigatingviatheMastheadMenu"></a>Navigating via the Masthead Menu</h3>
-
-<p>Main screens in Hyperic contain a masthead menu. Users can navigate to the following parts of HQ using this menu:</p>
-<div class='table-wrap'>
-<table class='confluenceTable'><tbody>
-<tr>
-<td class='confluenceTd'> <b>Dashboard</b> </td>
-<td class='confluenceTd'> Displays the <a href="ui-Dashboard.html" title="ui-Dashboard">Dashboard</a>, the starting screen in HQ, which displays information about resource health, recent alerts, recently performed auto-discovery scan, and control actions </td>
-</tr>
-<tr>
-<td class='confluenceTd'> <b>Resources</b> </td>
-<td class='confluenceTd'> Click the menu name to access either <b>Browse</b> (takes users to the <a href="ui-Resources.html" title="ui-Resources">Browse Resources</a> screen, where they can locate and navigate through information about all <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-managedresource">managed resources</a>), <b>Currently Down</b> (takes users to the <a href="ui-CurrentlyDown.html" title="ui-CurrentlyDown">Currently Down</a> screen, where they can look at all managed resources that are unavailable), <b>Nagios Availability</b> (available only when Nagios is installed), or <b>Recently Viewed</b> (provides a drop-down list of <a href="http://support.hyperic.com/confluence/display/EVO/Hyperic+Glossary#HypericGlossary-resource">resources</a> that the user has recently viewed. Selecting one of those resources takes the user to the <a href="ui-Monitor.CurrentHealth.html" title="ui-Monitor.CurrentHealth">Current Health</a> screen for the resource). </td>
-</tr>
-<tr>
-<td class='confluenceTd'> <b>Analyze</b> </td>
-<td class='confluenceTd'> Click the menu name to access <b>Reporting</b> <font color="red">&#42;</font> (presents the <a href="ui-Report.Center.html" title="ui-Report.Center">Reporting</a> screen, from which reports can be generated), <b>Alert Center</b> (presents the <a href="ui-Alert.Center.html" title="ui-Alert.Center">Alert Center</a>, which displays a deployment wide alert summary), or <b>Event Center</b> (presents the <a href="http://support.hyperic.com/confluence/display/DOC/ui-Event.Center" title="ui-Event.Center">Event Center</a>, which displays a deployment-wide event summary). <br class="atl-forced-newline" /> </td>
-</tr>
-<tr>
-<td class='confluenceTd'> <b>Administration</b> </td>
-<td class='confluenceTd'> Takes users (with "Administer Hyperic HQ Server Configuration" permissions) to the <a href="ui-Admin.html" title="ui-Admin">Administration</a> screen, where they can manage the system-wide settings </td>
-</tr>
-<tr>
-<td class='confluenceTd'> <b>Search</b> <br class="atl-forced-newline" /> </td>
-<td class='confluenceTd'> The Search box in the upper right of the Masthead allows you to search for HQ resources of any type and HQ users. <br class="atl-forced-newline" />
-<br class="atl-forced-newline" />
-Search results appear after four characters are entered in the text box. Results will include the first 10 platforms, servers, services, and groups whose name includes the search string. <br class="atl-forced-newline" />  <br class="atl-forced-newline" />
-Double-click a resource in the list to navigate to its Resource page. </td>
-</tr>
-</tbody></table>
-</div>
-
-<p>The masthead also displays the two most recently triggered alerts. Users can click the alert's time to be taken to the <a href="ui-Alert.Detail.html" title="ui-Alert.Detail">alert detail</a>.</p>
-
-
-
-<p><em><a href="#ui-CurrentlyDown-top">back to top</a></em></p>
-
-
-
-<p><br class="atl-forced-newline" /></p>
-
-<table class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><tbody><tr>
-
-<div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>Next Steps</b></div><div class="panelContent">
-<p>View a resource's status on the "<a href="ui-Monitor.CurrentHealth.html" title="ui-Monitor.CurrentHealth">Current Health</a>" screen</p>
-</div></div>
-
-<div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>Related Information</b></div><div class="panelContent">
-<p><a href="http://support.hyperic.com/confluence/display/EVO/Alerts+Overview" title="Alerts Overview">Alerts Overview</a></p>
-</div></div>
-</tr></tbody></table>
-
-
-
-<h5><a name="ui-CurrentlyDown-ReturntotheUserInterfaceReference."></a>Return to the <a href="User Interface Reference.html" title="User Interface Reference">User Interface Reference</a>.</h5>
 
 
 				    					    <br/>
                         <div class="tabletitle">
-                            <a name="attachments">Attachments:</a>
+                            <a name="attachments">
+                                <h2>Attachments:</h2>
+                            </a>
                         </div>
 
                         <div class="greybox" align="left">
@@ -259,10 +112,10 @@ Double-click a resource in the list to navigate to its Resource page. </td>
 	    </table>
 	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
 			<tr>
-				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Oct 28, 2010 15:33</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jan 12, 2012 13:19</font></td>
 		    </tr>
 	    </table>
     </body>
