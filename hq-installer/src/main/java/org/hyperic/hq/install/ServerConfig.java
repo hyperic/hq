@@ -317,7 +317,7 @@ extends BaseConfig {
 			ConfigOptionDisplay largeOption = new ConfigOptionDisplay(ENV_LARGE, ENV_LARGE_DESC);
 			ConfigOptionDisplay[] envs = {smallOption, mediumOption, largeOption};
 
-			if(!installMode.isQuick())
+			if(!installMode.isQuick() && isEEInstall)
 				schema.addOption(new InstallConfigOption("install.profile", Q_PROFILE, smallOption, envs));
 			else
 				schema.addOption(new HiddenConfigOption("install.profile", ENV_SMALL));
