@@ -26,8 +26,6 @@
 
 package org.hyperic.hq.galerts.server.session;
 
-import static org.junit.Assert.assertEquals;
-
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -40,7 +38,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.escalation.server.session.Escalation;
-import org.hyperic.hq.escalation.server.session.EscalationState;
 import org.hyperic.hq.escalation.server.session.EscalationStateDAO;
 import org.hyperic.hq.escalation.shared.EscalationManager;
 import org.hyperic.hq.events.AlertSeverity;
@@ -60,6 +57,7 @@ import org.hyperic.hq.measurement.server.session.MonitorableType;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.test.BaseInfrastructureTest;
+import org.hyperic.hq.util.Reference;
 import org.hyperic.hq.zevents.HeartBeatZevent;
 import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.util.config.ConfigResponse;
@@ -135,9 +133,9 @@ public class GalertManagerTest
         this.testPlatform = createPlatform("agentToken", TEST_PLATFORM_TYPE, "Platform1",
             "Platform1");
 
-        List<Measurement> measurements = measurementManager.createMeasurements(testPlatform
+        List<Measurement> measurements = measurementManager.createOrUpdateMeasurements(testPlatform
             .getEntityId(), new Integer[] { template.getId() },
-            new long[] { COLLECTION_INTERVAL_MILLIS }, new ConfigResponse());
+            new long[] { COLLECTION_INTERVAL_MILLIS }, new ConfigResponse(), new Reference<Boolean>());
         this.measurementId = measurements.get(0).getId();
         flushSession();
     }
