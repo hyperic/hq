@@ -102,8 +102,9 @@ public class EmbeddedActiveMQServerDetector
                             }
                         }
                     } else if (app.getName().endsWith(".war")) {
+                    	JarFile war = null;
                         try {
-                            JarFile war = new JarFile(app);
+                            war = new JarFile(app);
                             Enumeration<JarEntry> files = war.entries();
                             while (files.hasMoreElements()) {
                                 final String fileName = files.nextElement().toString();
@@ -112,9 +113,16 @@ public class EmbeddedActiveMQServerDetector
                                     break;
                                 }
                             }
-                            war.close();
                         } catch (IOException ex) {
                             log.debug("Error: '" + app + "': " + ex.getMessage(), ex);
+                        } finally {
+                        	if (war != null) {
+                        		try {
+									war.close();
+								} catch (IOException e) {
+									log.debug("Unable to close war file: " + e.getMessage(), e);
+								}
+                        	}
                         }
                     }
                 }

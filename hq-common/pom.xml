@@ -64,10 +64,6 @@
 			<version>2.0.4.GA</version>
 		</dependency>
 		<dependency>
-			<groupId>tanukisoft</groupId>
-			<artifactId>wrapper</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 		</dependency>

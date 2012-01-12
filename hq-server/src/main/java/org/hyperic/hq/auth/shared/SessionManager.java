@@ -121,6 +121,10 @@ public class SessionManager {
     	Integer sessionId = _userToSessionId.get(username);
     	if (null != sessionId) {
     		AuthSession session = (AuthSession) _cache.get(sessionId);
+    		if (null == session) {
+    			_userToSessionId.remove(username);
+    			throw new SessionNotFoundException();
+    		}
     		// check expiration...
     		if (session.isExpired()) {
     			invalidate(sessionId);
@@ -187,12 +191,12 @@ public class SessionManager {
     public synchronized void invalidate(int sessionId) {
     	String name = null;	
     	AuthSession sess = (AuthSession)_cache.remove(sessionId);
-    	if (sess != null && sess.getAuthzSubject() != null) 
+    	if (sess != null && sess.getAuthzSubject() != null) {
     		name = sess.getAuthzSubject().getName();
-    	
-    	if (null != name)
+    	}
+    	if (null != name) {
     		_userToSessionId.remove(name);
-    	
+    	}
     	if (_log.isDebugEnabled()) {
     		_log.debug("removed session sessionId=" + sessionId +
     				",user=" + name);

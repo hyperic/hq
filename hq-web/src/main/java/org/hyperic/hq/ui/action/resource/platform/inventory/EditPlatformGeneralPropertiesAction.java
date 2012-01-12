@@ -53,7 +53,7 @@ public class EditPlatformGeneralPropertiesAction
     extends BaseAction {
 
     private final Log log = LogFactory.getLog(EditPlatformGeneralPropertiesAction.class.getName());
-    private AppdefBoss appdefBoss;
+    private final AppdefBoss appdefBoss;
 
     @Autowired
     public EditPlatformGeneralPropertiesAction(AppdefBoss appdefBoss) {
@@ -65,7 +65,8 @@ public class EditPlatformGeneralPropertiesAction
      * Edit the platform with the attributes specified in the given
      * <code>ResourceForm</code>.
      */
-    public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
+    @Override
+	public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                  HttpServletResponse response) throws Exception {
 
         ResourceForm editForm = (ResourceForm) form;
@@ -90,7 +91,8 @@ public class EditPlatformGeneralPropertiesAction
                 RequestUtils.setError(request, "resource.platform.error.PlatformNotFound");
                 return returnFailure(request, mapping, forwardParams);
             }
-
+            platform = (PlatformValue) platform.clone();
+            
             editForm.updateResourceValue(platform);
 
             log.trace("editing general properties of platform [" + platform.getName() + "]" + " with attributes " +

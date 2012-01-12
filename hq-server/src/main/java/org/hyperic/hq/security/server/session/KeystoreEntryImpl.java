@@ -1,5 +1,6 @@
 package org.hyperic.hq.security.server.session;
 
+import java.io.IOException;
 import java.security.cert.Certificate;
 
 import org.hyperic.hibernate.PersistedObject;
@@ -10,10 +11,9 @@ public class KeystoreEntryImpl extends PersistedObject implements KeystoreEntry 
     
     private String alias;
     private String type;
-    private String encodedCertificate;
     private Certificate certificate;
     private Certificate[] certificateChain;
-    private String encodedCertificateChain;
+    private byte[] file ; 
 
     public String getAlias() {
         return alias;
@@ -27,29 +27,31 @@ public class KeystoreEntryImpl extends PersistedObject implements KeystoreEntry 
     public void setType(String type) {
         this.type = type;
     }
-    public Certificate[] getCertificateChain() {
-        return certificateChain;
-    }
-    public Certificate getCertificate() {
-        return certificate;
-    }
-    String getEncodedCertificate() {
-        return encodedCertificate;
-    }
-    void setEncodedCertificate(String encodedCertificate) {
-        this.encodedCertificate = encodedCertificate;
-    }
-    String getEncodedCertificateChain() {
-        return encodedCertificateChain;
-    }
-    void setEncodedCertificateChain(String encodedCertificateChain) {
-        this.encodedCertificateChain = encodedCertificateChain;
-    }
-    void setCertificate(Certificate certificate) {
+    
+    public final Certificate[] getCertificateChain() {
+    	return this.certificateChain ; 
+    }//EOM 
+    
+    public final Certificate getCertificate() {
+    	return this.certificate ; 
+    }//EOM 
+    
+    public void setCertificate(Certificate certificate) throws IOException{
         this.certificate = certificate;
     }
-    void setCertificateChain(Certificate[] chain) {
+    
+    public void setCertificateChain(Certificate[] chain) throws IOException{
         this.certificateChain = chain;
     }
+    
+    
+    public void setFile(final byte[] fileContent) { 
+        this.file = fileContent ; 
+    }//EOM 
+    
+    public byte[] getFile() { 
+        return this.file ; 
+    }//EOM 
+
 
 }

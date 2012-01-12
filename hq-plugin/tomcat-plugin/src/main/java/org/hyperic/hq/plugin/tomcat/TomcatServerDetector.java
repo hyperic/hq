@@ -20,6 +20,7 @@ package org.hyperic.hq.plugin.tomcat;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -85,7 +86,11 @@ public class TomcatServerDetector
                 return null;
             }
         }
-
+        
+        if(!isCorrectVersion(catalinaBase+"/lib/catalina.jar")){
+            return null;
+        }
+        
         ServerResource server = createServerResource(path);
         // Set PTQL query
         ConfigResponse config = new ConfigResponse();
@@ -155,7 +160,7 @@ public class TomcatServerDetector
 
     @Override
     protected boolean isInstallTypeVersion(MxProcess process) {
-        final String[] processArgs = process.getArgs();
+       final String[] processArgs = process.getArgs();
         String catalinaHome = getCatalinaHome(processArgs);
         String catalinaBase = getCatalinaBase(processArgs);
         String bootstrapJar = getBootstrapJar(processArgs);
@@ -164,17 +169,7 @@ public class TomcatServerDetector
         
         if (bootstrapJar != null) {
             // new style using bootstarp.jar meta-inf
-            try {
-                JarFile jarFile = new JarFile(bootstrapJar);
-                log.debug("[isInstallTypeVersion] bootstrapJar='" + jarFile.getName() + "'");
-                Attributes attributes = jarFile.getManifest().getMainAttributes();
-                jarFile.close();
-                String tomcatVersion = attributes.getValue("Specification-Version");
-                log.debug("[isInstallTypeVersion] tomcatVersion='" + tomcatVersion + "' (" + getTypeInfo().getVersion() + ")");
-                correctVersion = tomcatVersion.equals(getTypeInfo().getVersion());
-            } catch (IOException e) {
-                log.debug("Error getting Tomcat version (" + e + ")", e);
-            }
+            correctVersion = isCorrectVersion(bootstrapJar);
         } else {
             // old style
             //check catalina base first - we are using it for the process query, so it must be present
@@ -249,7 +244,7 @@ public class TomcatServerDetector
      */
     public List getServerResources(ConfigResponse platformConfig) throws PluginException {
         List servers = super.getServerResources(platformConfig);
-
+        
         // if we are on windows, take a look at the registry for autodiscovery
         if (isWin32()) {
             Map registryMap = getServerRegistryMap();
@@ -278,6 +273,7 @@ public class TomcatServerDetector
                 }
             }
         }
+        log.debug("[getBootstrapJar] res='"+res+"'");
         return res;
     }
     
@@ -311,5 +307,21 @@ public class TomcatServerDetector
     @Override
     public int getScanOrder() {
        return 0;
+    }
+
+    private boolean isCorrectVersion(String versionJar) {
+        boolean correctVersion = false;
+        try {
+            JarFile jarFile = new JarFile(versionJar);
+            log.debug("[isInstallTypeVersion] versionJar='" + jarFile.getName() + "'");
+            Attributes attributes = jarFile.getManifest().getMainAttributes();
+            jarFile.close();
+            String tomcatVersion = attributes.getValue("Specification-Version");
+            log.debug("[isInstallTypeVersion] tomcatVersion='" + tomcatVersion + "' (" + getTypeInfo().getVersion() + ")");
+            correctVersion = tomcatVersion.equals(getTypeInfo().getVersion());
+        } catch (IOException e) {
+            log.debug("Error getting Tomcat version (" + e + ")", e);
+        }
+        return correctVersion;
     }
 }

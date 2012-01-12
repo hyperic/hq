@@ -44,6 +44,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.sigar.OperatingSystem;
 import org.hyperic.sigar.SigarException;
+import org.hyperic.util.exec.ShutdownType;
 import org.hyperic.util.jdbc.DBUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -59,14 +60,15 @@ import org.springframework.stereotype.Service;
 public class HQServer {
 
     private final Log log = LogFactory.getLog(HQServer.class);
-    private String serverHome;
-    private String engineHome;
-    private ProcessManager processManager;
-    private EmbeddedDatabaseController embeddedDatabaseController;
-    private ServerConfigurator serverConfigurator;
-    private EngineController engineController;
-    private OperatingSystem osInfo;
-    private DataSource dataSource;
+    private final String serverHome;
+    private final String engineHome;
+    private final ProcessManager processManager;
+    private final EmbeddedDatabaseController embeddedDatabaseController;
+    private final ServerConfigurator serverConfigurator;
+    private final EngineController engineController;
+    private final OperatingSystem osInfo;
+    private final DataSource dataSource;
+    
     static final int DB_UPGRADE_PROCESS_TIMEOUT = 60 * 1000;
 
     @Autowired
@@ -86,15 +88,18 @@ public class HQServer {
         this.dataSource = dataSource;
     }
 
-    public void start() {
+    /**
+     * @return {@link System#exit(int)} exit code 
+     */
+    public int start() {
         log.info("Starting HQ server...");
         try {
             if (engineController.isEngineRunning()) {
-                return;
+                return ShutdownType.AbnormalStop.exitCode() ;
             }
         } catch (SigarException e) {
             log.error("Unable to determine if HQ server is already running.  Cause: " + e, e);
-            return;
+            return ShutdownType.AbnormalStop.exitCode() ; 
         }
         try {
             serverConfigurator.configure();
@@ -107,11 +112,11 @@ public class HQServer {
                 if (!embeddedDatabaseController.startBuiltInDB()) {
                     // We couldn't start DB and not already running. Time to
                     // bail.
-                    return;
+                    return ShutdownType.AbnormalStop.exitCode() ;  
                 }
             } catch (Exception e) {
                 log.error("Error starting built-in database: " + e, e);
-                return;
+                return ShutdownType.AbnormalStop.exitCode() ; 
             }
             log.debug("startBuiltinDB completed");
         }
@@ -121,16 +126,16 @@ public class HQServer {
             upgradeDB();
         } catch (Exception e) {
             log.error("Error running database upgrade routine: " + e, e);
-            return;
+            return -1 ;
         }
         
         if (!(verifySchema())) {
             // Schema is not valid. Something went wrong with the DB upgrade.
-            return;
+            return ShutdownType.AbnormalStop.exitCode() ;
         }
         List<String> javaOpts = getJavaOpts();
         log.info("Booting the HQ server...");
-        engineController.start(javaOpts);
+        return engineController.start(javaOpts);
     }
 
     public void stop() {
@@ -163,7 +168,7 @@ public class HQServer {
         }
         return optList;
     }
-
+    
     boolean verifySchema() {
         Statement stmt = null;
         ResultSet rs = null;
@@ -233,21 +238,31 @@ public class HQServer {
     }
 
     public static void main(String[] args) {
-        ClassPathXmlApplicationContext appContext = null;
+    	
+    	int iReturnCode = -1 ; 
+    	
+    	ClassPathXmlApplicationContext appContext = null;
         try {
             appContext = new ClassPathXmlApplicationContext(
                 new String[] { "classpath*:/META-INF/spring/bootstrap-context.xml" });
         } catch (Exception e) {
-            System.err.println("Error initializing bootstrap class: " + e.getMessage());
+            System.err.println("Error initializing bootstrap class: " + e.getMessage());						
             return;
         }
         HQServer server = appContext.getBean(HQServer.class);
         if ("start".equals(args[0])) {
-            server.start();
+        	iReturnCode = server.start();
         } else if ("stop".equals(args[0])) {
             server.stop();
         } else {
             System.err.println("Usage: HQServer {start|stop}");
-        }
+        }			
+        
+        //delegate the shutdown behavior to the ShutdownType strategies.
+        final ShutdownType enumShutdownType = ShutdownType.reverseValueOf(iReturnCode) ;
+        System.out.println("[HQServer.main()]: Shutdown of type '" + enumShutdownType + 
+        																		"' was request") ;
+        enumShutdownType.shutdown() ; 
+        
     }
 }

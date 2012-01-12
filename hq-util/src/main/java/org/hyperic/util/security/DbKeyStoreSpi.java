@@ -47,13 +47,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class DbKeyStoreSpi extends KeyStoreSpi {
-    private Log log = LogFactory.getLog(DbKeyStoreSpi.class);
+    private final Log log = LogFactory.getLog(DbKeyStoreSpi.class);
     public static final String PRIVATE_KEY_ENTRY = "PrivateKeyEntry";
     public static final String TRUSTED_CERT_ENTRY = "trustedCertEntry";
     public static final String SECRET_KEY_ENTRY = "SecretKeyEntry";
     
-    private DbKeystoreManager dbKeystoreManager;
-    private Map<String, Object[]> engineAliases = new HashMap<String, Object[]>();
+    private final DbKeystoreManager dbKeystoreManager;
+    private final Map<String, Object[]> engineAliases = new HashMap<String, Object[]>();
 
     public DbKeyStoreSpi(DbKeystoreManager dbKeystoreManager) {
         this.dbKeystoreManager = dbKeystoreManager;
@@ -154,13 +154,13 @@ public class DbKeyStoreSpi extends KeyStoreSpi {
     @Override
     public void engineStore(OutputStream stream, char[] password)
     throws IOException, NoSuchAlgorithmException, CertificateException {
-        // do nothing
+        throw new UnsupportedOperationException("engineStore() is not supported");
     }
 
     @Override
     public void engineLoad(InputStream stream, char[] password)
     throws IOException, NoSuchAlgorithmException, CertificateException {
-        final Collection<KeystoreEntry> entries = dbKeystoreManager.getKeystore();
+        final Collection<? extends KeystoreEntry> entries = dbKeystoreManager.getKeystore();
         final boolean debug = log.isDebugEnabled();
         for (final KeystoreEntry entry : entries) {
             final String alias = entry.getAlias();

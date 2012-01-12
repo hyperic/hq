@@ -31,6 +31,7 @@ public class KeystoreConfig {
     private String filePassword;
     private boolean hqDefault;
     private String keyCN="";//not required, just for keystore generation
+    private char[] m_arrFilePassword ; 
 
     public KeystoreConfig(){   
     }
@@ -103,6 +104,13 @@ public class KeystoreConfig {
      */
     public void setFilePassword(String filePassword) {
         this.filePassword = filePassword;
-    }
+        if(filePassword != null) { 
+            this.m_arrFilePassword = filePassword.toCharArray() ; 
+        }//EO if password was provided 
+    }//EOM 
+    
+    public final char[] getFilePasswordCharArray() { 
+        return this.m_arrFilePassword ;
+    }//EOM 
     
 }

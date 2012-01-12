@@ -53,8 +53,8 @@ public class VSphereHostCollector extends VSphereCollector {
 
     static final String TYPE = VSphereUtil.HOST_SYSTEM;
 
-    private static final Log _log =
-        LogFactory.getLog(VSphereHostCollector.class.getName());
+    private final Log _log =
+        LogFactory.getLog(this.getClass());
 
     private static final Set<String> VALID_UNITS =
         new HashSet<String>(Arrays.asList(MeasurementConstants.VALID_UNITS));
@@ -223,6 +223,7 @@ public class VSphereHostCollector extends VSphereCollector {
             if (info.getUnitInfo().getLabel().equals("Percent")) {
                 val /= 100;
             }
+            
             String type = info.getStatsType().toString();
             if (type.equals("absolute") ||
                 (type.equals("rate") &&

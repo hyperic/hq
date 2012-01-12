@@ -56,6 +56,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vmware.vim25.AboutInfo;
+import com.vmware.vim25.DatastoreInfo;
 import com.vmware.vim25.GuestInfo;
 import com.vmware.vim25.GuestNicInfo;
 import com.vmware.vim25.HostConfigInfo;
@@ -77,6 +78,7 @@ import com.vmware.vim25.VirtualMachineConfigInfo;
 import com.vmware.vim25.VirtualMachineFileInfo;
 import com.vmware.vim25.VirtualMachinePowerState;
 import com.vmware.vim25.VirtualMachineRuntimeInfo;
+import com.vmware.vim25.mo.Datastore;
 import com.vmware.vim25.mo.HostSystem;
 import com.vmware.vim25.mo.ManagedEntity;
 import com.vmware.vim25.mo.ResourcePool;
@@ -124,6 +126,10 @@ public class VMAndHostVCenterPlatformDetectorTest {
 
     private VirtualMachine vm;
 
+    private Datastore ds;
+    
+    private DatastoreInfo dsInfo;
+
     private ResourcePool resourcePool;
 
     @Before
@@ -142,13 +148,15 @@ public class VMAndHostVCenterPlatformDetectorTest {
         this.dataCenter = EasyMock.createMock(ManagedEntity.class);
         this.dataCenters = EasyMock.createMock(ManagedEntity.class);
         this.vm = EasyMock.createMock(VirtualMachine.class);
+        this.ds = EasyMock.createMock(Datastore.class);
+        this.dsInfo = EasyMock.createMock(DatastoreInfo.class);
         this.resourcePool = EasyMock.createMock(ResourcePool.class);
         this.detector = new VMAndHostVCenterPlatformDetector();
     }
 
     @Test
     public void testDiscoverPlatforms() throws Exception {
-        EasyMock.expect(hqApi.getResourceApi()).andReturn(resourceApi).times(11);
+        EasyMock.expect(hqApi.getResourceApi()).andReturn(resourceApi).times(13);
         ResourcePrototypeResponse protoResponse = new ResourcePrototypeResponse();
         protoResponse.setStatus(ResponseStatus.SUCCESS);
         ResourcePrototype vcType = new ResourcePrototype();
@@ -180,6 +188,22 @@ public class VMAndHostVCenterPlatformDetectorTest {
         createHost();
         createVM();
         
+        ResourcePrototypeResponse vmDsProtoResponse = new ResourcePrototypeResponse();
+        vmDsProtoResponse.setStatus(ResponseStatus.SUCCESS);
+        ResourcePrototype vmDsType = new ResourcePrototype();
+        vmDsType.setName(VMAndHostVCenterPlatformDetector.VM_DS_TYPE);
+        vmDsProtoResponse.setResourcePrototype(vmDsType);
+        EasyMock.expect(resourceApi.getResourcePrototype(VMAndHostVCenterPlatformDetector.VM_DS_TYPE))
+            .andReturn(vmDsProtoResponse).times(1);
+
+        ResourcePrototypeResponse hostDsProtoResponse = new ResourcePrototypeResponse();
+        hostDsProtoResponse.setStatus(ResponseStatus.SUCCESS);
+        ResourcePrototype hostDSType = new ResourcePrototype();
+        hostDSType.setName(VMAndHostVCenterPlatformDetector.HOST_DS_TYPE);
+        hostDsProtoResponse.setResourcePrototype(hostDSType);
+        EasyMock.expect(resourceApi.getResourcePrototype(VMAndHostVCenterPlatformDetector.HOST_DS_TYPE))
+            .andReturn(hostDsProtoResponse).times(1);
+
         ResourcePrototypeResponse vmProtoResponse = new ResourcePrototypeResponse();
         vmProtoResponse.setStatus(ResponseStatus.SUCCESS);
         ResourcePrototype vmType = new ResourcePrototype();
@@ -263,7 +287,7 @@ public class VMAndHostVCenterPlatformDetectorTest {
         return response;
     }
 
-    private void createHost() throws PluginException {
+    private void createHost() throws PluginException, InvalidProperty, RuntimeFault, RemoteException {
         EasyMock.expect(vim.find(VSphereUtil.HOST_SYSTEM)).andReturn(new ManagedEntity[] { host });
         HostRuntimeInfo hostInfo = new HostRuntimeInfo();
         hostInfo.setPowerState(HostSystemPowerState.poweredOn);
@@ -310,6 +334,10 @@ public class VMAndHostVCenterPlatformDetectorTest {
         EasyMock.expect(dataCenter.getParent()).andReturn(dataCenters);
         EasyMock.expect(dataCenters.getName()).andReturn("Datacenters");
         EasyMock.expect(dataCenters.getParent()).andReturn(null);
+        EasyMock.expect(ds.getName()).andReturn("ds1").anyTimes();
+        EasyMock.expect(ds.getInfo()).andReturn(dsInfo).anyTimes();
+        EasyMock.expect(dsInfo.getUrl()).andReturn("ds://vmfs/volumes/4e9c6624-e4950d68-3b10-f4ce46bfd1c3/").anyTimes();
+        EasyMock.expect(host.getDatastores()).andReturn(new Datastore[]{ ds });
     }
 
     private void createVM() throws InvalidProperty, RuntimeFault, RemoteException {
@@ -343,6 +371,7 @@ public class VMAndHostVCenterPlatformDetectorTest {
         EasyMock.expect(vm.getRuntime()).andReturn(runtime);
         EasyMock.expect(vm.getGuest()).andReturn(guestInfo);
         EasyMock.expect(vm.getResourcePool()).andReturn(resourcePool);
+        EasyMock.expect(vm.getDatastores()).andReturn(new Datastore[]{ ds });
     }
 
     private VSphereHostResource getExpectedHost(ResourcePrototype hostPrototype,
@@ -416,11 +445,11 @@ public class VMAndHostVCenterPlatformDetectorTest {
 
     private void replay() {
         EasyMock.replay(hqApi, resourceApi, agentApi, resourceEdgeApi, vim, host, dataCenter,
-            dataCenters, vm, resourcePool);
+            dataCenters, vm, resourcePool, ds, dsInfo);
     }
 
     private void verify() {
         EasyMock.verify(hqApi, resourceApi, agentApi, resourceEdgeApi, vim, host, dataCenter,
-            dataCenters, vm, resourcePool);
+            dataCenters, vm, resourcePool, ds, dsInfo);
     }
 }
