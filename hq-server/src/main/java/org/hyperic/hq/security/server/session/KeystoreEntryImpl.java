@@ -28,11 +28,11 @@ public class KeystoreEntryImpl extends PersistedObject implements KeystoreEntry 
         this.type = type;
     }
     
-    public final Certificate[] getCertificateChain() {
+    public Certificate[] getCertificateChain() {
     	return this.certificateChain ; 
     }//EOM 
     
-    public final Certificate getCertificate() {
+    public Certificate getCertificate() {
     	return this.certificate ; 
     }//EOM 
     
