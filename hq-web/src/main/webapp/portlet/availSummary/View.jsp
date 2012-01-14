@@ -60,7 +60,7 @@
 	hqDojo.ready(function() {
 		requestAvailSummary${portlet.token}();
 	});
-</jau:script>
+</jsu:script>
 
 <div class="effectsPortlet">
 	<tiles:insert definition=".header.tab">
