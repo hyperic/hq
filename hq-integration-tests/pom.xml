@@ -136,7 +136,7 @@
 					</execution>
 				</executions>
 				<configuration>
-					<argLine>-Xmx1024m -XX:MaxPermSize=192m -XX:-UseGCOverheadLimit -agentpath:/work/jprofiler7/bin/linux-x64/libjprofilerti.so=port=8849  </argLine>
+					<argLine>-Xmx1024m -XX:MaxPermSize=192m -XX:-UseGCOverheadLimit </argLine>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -147,7 +147,7 @@
 					<skip>false</skip>
 				</configuration>
 			</plugin>
-		</plugins>
+		</plugins> 
 			<testResources>
     		<testResource>
     			<directory>src/test/resources</directory>
