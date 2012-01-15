@@ -34,7 +34,7 @@
 
 <tiles:importAttribute name="portlet"/>
 
-<jsu:script type="text/javascript">
+<jsu:script>
 	function requestMetricsResponse${portlet.token}() {
         hqDojo.xhrGet({ 
             url: "<html:rewrite page="/dashboard/ViewMetricViewer.do?"/>", 
