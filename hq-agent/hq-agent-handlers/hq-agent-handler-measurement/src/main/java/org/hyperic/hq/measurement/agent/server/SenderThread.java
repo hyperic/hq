@@ -38,6 +38,8 @@ import java.util.LinkedList;
 import java.util.Properties;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.server.AgentStartException;
 import org.hyperic.hq.agent.server.AgentStorageException;
 import org.hyperic.hq.agent.server.AgentStorageProvider;
@@ -47,16 +49,13 @@ import org.hyperic.hq.bizapp.agent.CommandsAPIInfo;
 import org.hyperic.hq.bizapp.client.AgentCallbackClientException;
 import org.hyperic.hq.bizapp.client.MeasurementCallbackClient;
 import org.hyperic.hq.bizapp.client.StorageProviderFetcher;
-import org.hyperic.hq.measurement.server.session.SRN;
 import org.hyperic.hq.measurement.data.DSNList;
 import org.hyperic.hq.measurement.data.MeasurementReport;
 import org.hyperic.hq.measurement.data.MeasurementReportConstructor;
+import org.hyperic.hq.measurement.server.session.SRN;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.encoding.Base64;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Deals with sending measurements back to the server (including 
@@ -178,8 +177,7 @@ public class SenderThread
             }
         }
 
-        this.log.info("Maximum metric batch size set to " + 
-                      this.maxBatchSize);
+        this.log.info("Maximum metric batch size set to " +  this.maxBatchSize);
     }
 
     private MeasurementCallbackClient setupClient()
@@ -409,7 +407,6 @@ public class SenderThread
                               " derivedID=" + rec.derivedID + " value=" + 
                               rec.data.getValue() + " from tQueue -- sending");
             }
-
             constructor.addDataPoint(rec.derivedID, rec.dsnId, rec.data);
         }
 
@@ -441,15 +438,14 @@ public class SenderThread
 
             report = new MeasurementReport();
             if (this.agentToken == null) {
-                this.agentToken =
-                    storage.getValue(CommandsAPIInfo.PROP_AGENT_TOKEN);
+                this.agentToken = storage.getValue(CommandsAPIInfo.PROP_AGENT_TOKEN);
             }
             report.setAgentToken(this.agentToken);
             report.setClientIdList(clientIds);
             report.setSRNList(srnList);
-            batchStart = System.currentTimeMillis();
+            batchStart = now();
             serverTime= this.client.measurementSendReport(report);
-            batchEnd = System.currentTimeMillis();
+            batchEnd = now();
 
             // Compute offset from server (will include network latency)
             this.serverDiff = Math.abs(serverTime - batchEnd);
@@ -501,6 +497,10 @@ public class SenderThread
             }
         }
         return null;
+    }
+
+    private long now() {
+        return System.currentTimeMillis();
     }
 
     /**

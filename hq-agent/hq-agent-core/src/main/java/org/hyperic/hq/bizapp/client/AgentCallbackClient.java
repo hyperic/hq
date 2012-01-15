@@ -34,6 +34,7 @@ import javax.net.ssl.SSLException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentKeystoreConfig;
+import org.hyperic.hq.agent.stats.AgentStatsCollector;
 import org.hyperic.hq.bizapp.agent.ProviderInfo;
 import org.hyperic.hq.bizapp.shared.lather.CommandInfo;
 import org.hyperic.hq.bizapp.shared.lather.SecureAgentLatherValue;
@@ -48,24 +49,25 @@ public abstract class AgentCallbackClient {
     private static final int TIMEOUT_CONN = 30 * 1000;
     private static final int TIMEOUT_DATA = 5 * 60 * 1000;
 
-    private static final Log log = 
-        LogFactory.getLog(AgentCallbackClient.class.getName());
-
+    private static final Log log = LogFactory.getLog(AgentCallbackClient.class);
+    private static final String LATHER_CMD = "LATHER_CMD";
     private ProviderFetcher fetcher;        // Storage of provider info
-    private HashSet         secureCommands; // Secure commands
+    private HashSet<String> secureCommands; // Secure commands
+    private AgentStatsCollector statsCollector = AgentStatsCollector.getInstance();
 
-    public AgentCallbackClient(ProviderFetcher fetcher,
-                               String[] secureCommands) {
-
-        this.fetcher         = fetcher;
+    public AgentCallbackClient(ProviderFetcher fetcher, String[] secureCommands) {
+        this.fetcher = fetcher;
         this.resetProvider();
-
-        this.secureCommands = new HashSet();
+        this.secureCommands = new HashSet<String>();
         for(int i=0; i<secureCommands.length; i++){
             this.secureCommands.add(secureCommands[i]);
         }
-
+        statsCollector.register(LATHER_CMD);
+        for (String cmd : CommandInfo.ALL_COMMANDS) {
+            statsCollector.register(LATHER_CMD + "_" + cmd.toUpperCase());
+        }
     }
+
     public AgentCallbackClient(ProviderFetcher fetcher){
         this(fetcher, CommandInfo.SECURE_COMMANDS);
     }
@@ -110,9 +112,7 @@ public abstract class AgentCallbackClient {
      * @param port Port to use for provider.  If it is -1, the default
      *             port will be used.
      */
-    public static String getDefaultProviderURL(String host, int port,
-                                               boolean secure)
-    {
+    public static String getDefaultProviderURL(String host, int port, boolean secure) {
         String proto;
 
         if(port == -1){
@@ -139,42 +139,37 @@ public abstract class AgentCallbackClient {
         return providerURL.substring(startIndex, endIndex);
     }
 
-    protected LatherValue invokeLatherCall(ProviderInfo provider,
-                                           String methodName,
-                                           LatherValue args)
+    protected LatherValue invokeLatherCall(ProviderInfo provider, String methodName, LatherValue args)
     throws AgentCallbackClientException {
     	return invokeLatherCall(provider, methodName, args, (new AgentKeystoreConfig()).isAcceptUnverifiedCert());
     }
        
-    protected LatherValue invokeLatherCall(ProviderInfo provider,
-                                           String methodName,
-                                           LatherValue args,
-                                           final boolean acceptUnverifiedCertificates)
+    protected LatherValue invokeLatherCall(ProviderInfo provider, String methodName,
+                                           LatherValue args, final boolean acceptUnverifiedCertificates)
     throws AgentCallbackClientException {
         LatherHTTPClient client;
+        final boolean debug = log.isDebugEnabled();
         String addr = provider.getProviderAddress();
-
-        if(this.secureCommands.contains(methodName)){
+        if (this.secureCommands.contains(methodName)) {
             final String agentToken = provider.getAgentToken();
-
             ((SecureAgentLatherValue)args).setAgentToken(agentToken);
         }
-
         try {
         	client = new LatherHTTPClient(addr, TIMEOUT_CONN, TIMEOUT_DATA, acceptUnverifiedCertificates);
-        	
-            return client.invoke(methodName, args);
+            final long start = now();
+            LatherValue rtn = client.invoke(methodName, args);
+            final long duration = now()-start;
+            statsCollector.addStat(duration, LATHER_CMD);
+            statsCollector.addStat(duration, LATHER_CMD + "_" + methodName.toUpperCase());
+            return rtn;
         } catch(SSLException e) {
-        	log.debug(e.getMessage());
-        	
+        	if (debug) log.debug(e,e);
         	throw new AgentCallbackClientException(e);
         } catch(ConnectException exc) {
             // All exceptions are logged as debug.  If the caller wants to
             // log the exception message, it can.
-            final String eMsg = "Unable to contact server @ " + addr + ": " +
-                exc.getMessage();
-        
-            this.log.debug(eMsg);
+            final String eMsg = "Unable to contact server @ " + addr + ": " + exc;
+            if (debug) log.debug(eMsg);
             
             throw new AgentCallbackClientException(eMsg);
         } catch(IOException exc) {
@@ -186,17 +181,17 @@ public abstract class AgentCallbackClient {
                 if (msg.indexOf("Service Unavailable") != -1) {
                     eMsg = "Unable to contact server -- it has no more free connections";
                     
-                    this.log.debug(eMsg);
+                    if (debug) log.debug(eMsg);
                 } else {
                     eMsg = "IO error: " + exc.getMessage();
                     
-                    this.log.debug(eMsg);
+                    if (debug) log.debug(eMsg);
                 }
                 
                 throw new AgentCallbackClientException(eMsg);
             }
             
-            this.log.debug("IO error", exc);
+            if (debug) log.debug("IO error", exc);
             
             throw new AgentCallbackClientException("IO error: " + exc.getMessage());
         } catch(LatherRemoteException exc) {
@@ -204,20 +199,20 @@ public abstract class AgentCallbackClient {
 
             if (exc.getMessage().indexOf("Unauthorized agent denied") != -1) {
                 eMsg = "Unable to invoke '" + methodName + "':  Permission denied";
-                
-                this.log.debug(eMsg);
+                if (debug) log.debug(eMsg);
             } else {
-                eMsg = "Remote error while invoking '" + methodName + ": " + 
-                    exc.getMessage();
-                
-                this.log.debug(eMsg);
+                eMsg = "Remote error while invoking '" + methodName + ": " +  exc;
+                if (debug) log.debug(eMsg);
             } 
 
             throw new AgentCallbackClientException(eMsg, exc);
         } catch(IllegalStateException e) {
-        	log.debug("Could not create the LatherHTTPClient instance", e);
+        	if (debug) log.debug("Could not create the LatherHTTPClient instance", e);
         	
         	throw new AgentCallbackClientException(e);
         }
+    }
+    private long now() {
+        return System.currentTimeMillis();
     }
 }

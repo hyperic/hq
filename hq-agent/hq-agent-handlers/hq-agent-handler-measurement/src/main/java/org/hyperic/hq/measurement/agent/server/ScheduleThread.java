@@ -46,6 +46,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.server.AgentStartException;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorException;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorSimple;
+import org.hyperic.hq.agent.stats.AgentStatsCollector;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.agent.ScheduledMeasurement;
@@ -72,19 +73,16 @@ import org.hyperic.util.schedule.UnscheduledItemException;
  * depositing the results on disk, and sending them to the bizapp.
  */
 
-public class ScheduleThread 
-    extends AgentMonitorSimple
-    implements Runnable 
-{
+public class ScheduleThread  extends AgentMonitorSimple implements Runnable {
+    private static final String SCHEDULE_THREAD_METRICS_COLLECTED_TIME = AgentStatsCollector.SCHEDULE_THREAD_METRICS_COLLECTED_TIME;
+    private static final String SCHEDULE_THREAD_METRIC_TASKS_SUBMITTED = AgentStatsCollector.SCHEDULE_THREAD_METRIC_TASKS_SUBMITTED;
+    private static final String SCHEDULE_THREAD_METRIC_COLLECT_FAILED  = AgentStatsCollector.SCHEDULE_THREAD_METRIC_COLLECT_FAILED;
+
     // Agent properties configuration
-    static final String PROP_POOLSIZE =
-            "scheduleThread.poolsize."; // e.g. scheduleThread.poolsize.system=10
-    static final String PROP_FETCH_LOG_TIMEOUT =
-            "scheduleThread.fetchLogTimeout";
-    static final String PROP_CANCEL_TIMEOUT =
-            "scheduleThread.cancelTimeout";
-    static final String PROP_QUEUE_SIZE =
-            "scheduleThread.queuesize.";
+    static final String PROP_POOLSIZE = "scheduleThread.poolsize."; // e.g. scheduleThread.poolsize.system=10
+    static final String PROP_FETCH_LOG_TIMEOUT = "scheduleThread.fetchLogTimeout";
+    static final String PROP_CANCEL_TIMEOUT = "scheduleThread.cancelTimeout";
+    static final String PROP_QUEUE_SIZE = "scheduleThread.queuesize.";
 
     // How often we check schedules when we think they are empty.
     private static final int POLL_PERIOD = 1000;
@@ -112,12 +110,12 @@ public class ScheduleThread
     // Map of Executors, one per plugin
     private final HashMap<String,ThreadPoolExecutor> executors = new HashMap<String,ThreadPoolExecutor>();
     // Map of asynchronous MetricTasks pending confirmation
-    private final HashMap<Future,MetricTask> metricCollections = new HashMap<Future,MetricTask>();
+    private final HashMap<Future<?>,MetricTask> metricCollections = new HashMap<Future<?>,MetricTask>();
     // The executor confirming metric collections, cancelling tasks that exceed
     // our timeouts.
     private ScheduledExecutorService metricVerificationService;
-    private ScheduledFuture metricVerificationTask;
-    private ScheduledFuture metricLoggingTask;
+    private ScheduledFuture<?> metricVerificationTask;
+    private ScheduledFuture<?> metricLoggingTask;
     
     private MeasurementValueGetter manager;
     private Sender sender;  // Guy handling the results
@@ -130,11 +128,14 @@ public class ScheduleThread
     private long statNumMetricsScheduled = 0;
     private long statMaxFetchTime = Long.MIN_VALUE;
     private long statMinFetchTime = Long.MAX_VALUE;
+    private final AgentStatsCollector statsCollector;
 
-    ScheduleThread(Sender sender, MeasurementValueGetter manager, Properties config)
-        throws AgentStartException
-    {
-        agentConfig = config;
+    ScheduleThread(Sender sender, MeasurementValueGetter manager, Properties config) throws AgentStartException {
+        this.statsCollector = AgentStatsCollector.getInstance();
+        this.statsCollector.register(SCHEDULE_THREAD_METRIC_COLLECT_FAILED);
+        this.statsCollector.register(SCHEDULE_THREAD_METRIC_TASKS_SUBMITTED);
+        this.statsCollector.register(SCHEDULE_THREAD_METRICS_COLLECTED_TIME);
+        this.agentConfig = config;
         this.manager = manager;
         this.sender = sender;
 
@@ -204,12 +205,10 @@ public class ScheduleThread
                 if (isDebugEnabled && metricCollections.size() > 0) {
                     log.debug(metricCollections.size() + " metrics to validate.");
                 }
-                for (Iterator<Future> i = metricCollections.keySet().iterator();
-                     i.hasNext();) {
-                    Future t = i.next();
+                for (Iterator<Future<?>> i = metricCollections.keySet().iterator(); i.hasNext();) {
+                    Future<?> t = i.next();
                     MetricTask mt = metricCollections.get(t);
-                    if (t.isDone())
-                    {
+                    if (t.isDone()) {
                         if (isDebugEnabled) {
                             log.debug("Metric task '" + mt +
                                    "' complete, duration: " +
@@ -487,6 +486,7 @@ public class ScheduleThread
                 if (!category.equals(MeasurementConstants.CAT_AVAILABILITY)) {
                     // Prevent stacktrace bombs if a resource is
                     // down, but don't skip processing availability metrics.
+                    statsCollector.addStat(1, SCHEDULE_THREAD_METRIC_COLLECT_FAILED);
                     statNumMetricsFailed++;
                     return;
                 }
@@ -532,6 +532,7 @@ public class ScheduleThread
 
             // Stats stuff
             Long timeDiff = System.currentTimeMillis() - executeStartTime;
+            statsCollector.addStat(timeDiff, SCHEDULE_THREAD_METRICS_COLLECTED_TIME);
 
             synchronized (statsLock) {
                 statTotFetchTime += timeDiff;
@@ -649,6 +650,7 @@ public class ScheduleThread
             }
 
             MetricTask metricTask = new MetricTask(rs, meas);
+            statsCollector.addStat(1, SCHEDULE_THREAD_METRIC_TASKS_SUBMITTED);
             try {
                 Future<?> task = executor.submit(metricTask);
                 synchronized (metricCollections) {
@@ -718,9 +720,7 @@ public class ScheduleThread
         }
 
         if (schedules != null) {
-            for (Iterator<ResourceSchedule> it = schedules.values().iterator();
-            it.hasNext() && (!shouldDie.get());) {
-
+            for (Iterator<ResourceSchedule> it = schedules.values().iterator(); it.hasNext() && (!shouldDie.get());) {
                 ResourceSchedule rs = it.next();
                 try {
                     long next = collect(rs);

@@ -46,6 +46,7 @@ import org.hyperic.hq.agent.server.AgentServerHandler;
 import org.hyperic.hq.agent.server.AgentStartException;
 import org.hyperic.hq.agent.server.AgentStorageProvider;
 import org.hyperic.hq.agent.server.AgentTransportLifecycle;
+import org.hyperic.hq.agent.server.CollectorThread;
 import org.hyperic.hq.bizapp.agent.CommandsAPIInfo;
 import org.hyperic.hq.bizapp.client.MeasurementCallbackClient;
 import org.hyperic.hq.bizapp.client.StorageProviderFetcher;
@@ -95,6 +96,8 @@ public class MeasurementCommandsServer
     
     private MeasurementCommandsService measurementCommandsService;
 
+    private CollectorThread collectorThread;
+
     public MeasurementCommandsServer(){
         this.verAPI         = new MeasurementCommandsAPI();
         this.scheduleThread = null;
@@ -130,10 +133,12 @@ public class MeasurementCommandsServer
         scheduleThread.setDaemon(true);
         this.trackerThread = new Thread(trackerObject, "TrackerThread");
         this.trackerThread.setDaemon(true);
+        this.collectorThread = CollectorThread.getInstance(pluginManager);
 
         this.senderThread.start();
         this.scheduleThread.start();
         this.trackerThread.start();
+        this.collectorThread.doStart();
     }
 
     public AgentAPIInfo getAPIInfo(){
@@ -360,6 +365,7 @@ public class MeasurementCommandsServer
         logMeasurementSchedule(this.schedStorage);
 
         this.scheduleObject.die();
+        this.collectorThread.doStop();
         this.senderObject.die();
 
         try {
