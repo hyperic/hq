@@ -37,7 +37,7 @@
 	<html:param name="ff" value="{ff}"/> 
 </html:link>
 
-<jsu:script type="text/javascript">
+<jsu:script>
 	function requestAvailSummary${portlet.token}() {
 		hqDojo.xhrGet({
 			url: "<html:rewrite action="/dashboard/ViewAvailSummary" />",
