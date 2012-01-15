@@ -53,7 +53,7 @@ public class AgentStatsCollector extends AbstractStatsCollector {
     
     private static MBeanServer getMBeanServer() {
         final List<MBeanServer> servers = MBeanServerFactory.findMBeanServer(null);
-        return servers.get(0);
+        return (servers.isEmpty()) ? null : servers.get(0);
     }
 
     protected ScheduledFuture<?> scheduleAtFixedRate(Runnable runnable, long millis) {
