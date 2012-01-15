@@ -57,9 +57,9 @@
 		});
 	}
 	
-	hqDojo.ready(function() {
-		requestAvailSummary${portlet.token}();
-	});
+</jsu:script>
+<jsu:script onLoad="true">
+    requestAvailSummary${portlet.token}();
 </jsu:script>
 
 <div class="effectsPortlet">
