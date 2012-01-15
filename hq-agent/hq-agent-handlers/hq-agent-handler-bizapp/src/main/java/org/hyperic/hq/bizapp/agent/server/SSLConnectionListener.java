@@ -32,8 +32,13 @@ import java.io.InterruptedIOException;
 import java.net.InetAddress;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocket;
@@ -219,7 +224,15 @@ class SSLConnectionListener
         while (true) {
             try {
             	listenSock = (SSLServerSocket)sFactory.createServerSocket(port, 50, addr);
-                listenSock.setEnabledCipherSuites(cfg.getEnabledCiphers());
+            	Collection<String> enabledCiphers = new ArrayList<String>(Arrays.asList(cfg.getEnabledCiphers()));
+            	Set<String> supportedCipherSuites = new HashSet<String>(Arrays.asList(sFactory.getSupportedCipherSuites()));
+            	for (final Iterator<String> it=enabledCiphers.iterator(); it.hasNext(); ) {
+            	    final String cipher = it.next();
+            	    if (!supportedCipherSuites.contains(cipher)) {
+            	        it.remove();
+            	    }
+            	}
+                listenSock.setEnabledCipherSuites(enabledCiphers.toArray(new String[0]));
                 listenSock.setSoTimeout(timeout);
                 break;
             } catch(IOException exc){

@@ -23,14 +23,23 @@
  * USA.
  */
 
-package org.hyperic.hq.product;
+package org.hyperic.hq.agent.server;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.Collection;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.stats.AgentStatsCollector;
+import org.hyperic.hq.product.Collector;
+import org.hyperic.hq.product.CollectorExecutor;
+import org.hyperic.hq.product.PluginManager;
 
-class CollectorThread implements Runnable {
+public class CollectorThread implements Runnable {
 
     private static Log log =
         LogFactory.getLog(CollectorThread.class.getName());
@@ -38,22 +47,25 @@ class CollectorThread implements Runnable {
     //interval to check collectors
     private static final int DEFAULT_INTERVAL = 1 * 1000 * 60;
 
+    private static final String COLLECTOR_THREAD_METRIC_COLLECTED_TIME =
+        AgentStatsCollector.COLLECTOR_THREAD_METRIC_COLLECTED_TIME;
+
     private Thread thread = null;
     private static CollectorThread instance = null;
-    private boolean shouldDie = false;
+    private AtomicBoolean shouldDie = new AtomicBoolean(false);
     private long interval = DEFAULT_INTERVAL;
     private Properties props;
+    private AgentStatsCollector statsCollector;
 
-    static synchronized CollectorThread getInstance(PluginManager manager) {
+    public static synchronized CollectorThread getInstance(PluginManager manager) {
         if (instance == null) {
             instance = new CollectorThread();
             instance.props = manager.getProperties();
         }
-
         return instance;
     }
 
-    static synchronized void shutdownInstance() {
+    public static synchronized void shutdownInstance() {
         if (instance != null) {
             instance.doStop();
             instance = null;
@@ -64,6 +76,8 @@ class CollectorThread implements Runnable {
         if (this.thread != null) {
             return;
         }
+        statsCollector = AgentStatsCollector.getInstance();
+        statsCollector.register(COLLECTOR_THREAD_METRIC_COLLECTED_TIME);
 
         String interval = System.getProperty("exec.interval");
         if (interval != null) {
@@ -100,10 +114,15 @@ class CollectorThread implements Runnable {
         log.debug("Created ThreadPoolExecutor: " +
                   "corePoolSize=" + executor.getCorePoolSize() + ", " +
                   "maxPoolSize=" + executor.getMaximumPoolSize());
-
-        while (!shouldDie) {
-            Collector.check(executor);
-
+        while (!shouldDie.get()) {
+            final Collection<Collector> collectorsToExecute = Collector.getCollectorsToExecute();
+            for (final Collector collector : collectorsToExecute) {
+                if (executor.isPoolable() && collector.isPoolable()) {
+                    executor.execute(getProxy(collector));
+                } else {
+                    collector.run();
+                }
+            }
             if (log.isDebugEnabled()) {
                 log.debug("CompletedTaskCount=" + executor.getCompletedTaskCount() + ", " +
                           "ActiveCount=" + executor.getActiveCount() + ", " +
@@ -115,11 +134,33 @@ class CollectorThread implements Runnable {
             } catch (InterruptedException e) {
             }
         }
-
         executor.shutdown();
     }
 
+    /** proxy used to intercept in order to create stats */
+    private Runnable getProxy(Collector collector) {
+        InvocationHandler handler = new InvocationHandler() {
+            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                if (args.length == 0 && method.getName().equals("run")) {
+                    final long start = now();
+                    Object rtn = method.invoke(proxy, args);
+                    final long duration = now() - start;
+                    statsCollector.addStat(duration, COLLECTOR_THREAD_METRIC_COLLECTED_TIME);
+                    return rtn;
+                } else {
+                    return method.invoke(proxy, args);
+                }
+            }
+        };
+        Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class[] {Runnable.class}, handler);
+        return null;
+    }
+
+    private long now() {
+        return System.currentTimeMillis();
+    }
+
     public void die() {
-        this.shouldDie = true;
+        this.shouldDie.set(true);
     }
 }
