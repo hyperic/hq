@@ -46,7 +46,7 @@ ${line.separator}Press enter to continue...
         <property name="setup.upgrade" value="true"/>
       </then>
     </if>
-
+  	
     <absolutePath property="base"
                   path="${install.dir}/.."
                   failOnMissing="true"/>
@@ -629,7 +629,32 @@ ${errMsg}
         <property name="server.product.dir"
               value="${server.installdir}/${server.vname}"/>
    </target>
+	
 
+
+    <target name="update-hq-server-profile" depends="load-basics, check-eula">
+       <fail unless="eula.present" message="Updating scale is only available in the EE version"/>        
+        <condition property="profile.notValid">
+            <and>               
+                <not>
+                     <equals arg1="${install.profile}" arg2="small"/>
+                    </not>
+                <not>
+                     <equals arg1="${install.profile}" arg2="medium"/>
+                    </not>
+                <not>
+                     <equals arg1="${install.profile}" arg2="large"/>
+                    </not>
+            </and>
+        </condition>
+        <fail if="profile.notValid" message="Not a valid profile must be small/medium/large"/>
+        <antcall target="load-properties"/>
+        <updateServerProfile src="${server.product.dir}/conf/hq-profiles.properties"
+                                    dest="${server.product.dir}/conf/hq-server.conf"/>
+         <delete file="${server.product.dir}/conf/hq-profiles.properties"/> 
+         <echo>^^^DEBUG: The server is now updated to "${install.profile}" profile...</echo>
+    </target>
+	
     <target name="install-hq-server-profile">
         <property name="install.profile" value="small"/>
         <echo>^^^DEBUG: Using "${install.profile}" installing profile...</echo>
@@ -641,7 +666,7 @@ ${errMsg}
     <delete file="${server.product.dir}/conf/hq-profiles.properties"/> 
     </target>
 
-
+    
     <target name="load-properties-to-web-xml-file">
          <echo>^^^DETAILED: Loading properties into web.xml</echo>
     	  <loadproperties srcFile="${server.product.dir}/conf/hq-profiles.properties"/>
