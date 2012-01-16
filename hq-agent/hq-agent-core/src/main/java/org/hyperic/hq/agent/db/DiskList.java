@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.util.file;
+package org.hyperic.hq.agent.db;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -35,16 +35,16 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
-import java.util.TreeSet;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.stats.AgentStatsCollector;
 
 /**
  * A DiskList is a representation of a list on disk.  The basic
@@ -93,13 +93,22 @@ public class DiskList {
     private long             maxLength;   // Max file size in bytes
     private Random           rand;         
     private boolean          closed;
+    private static final AgentStatsCollector statsCollector = AgentStatsCollector.getInstance();
+    private static final String DISK_LIST_DISK_ITERATOR_REMOVE_TIME = AgentStatsCollector.DISK_LIST_DISK_ITERATOR_REMOVE_TIME;
+    private static final String DISK_LIST_READ_RECORD_TIME = AgentStatsCollector.DISK_LIST_READ_RECORD_TIME;
+    private static final String DISK_LIST_ADD_TO_LIST_TIME = AgentStatsCollector.DISK_LIST_ADD_TO_LIST_TIME;
+    private static final String DISK_LIST_DELETE_ALL_RECORDS_TIME = AgentStatsCollector.DISK_LIST_DELETE_ALL_RECORDS_TIME;
+    static {
+        statsCollector.register(DISK_LIST_ADD_TO_LIST_TIME);
+        statsCollector.register(DISK_LIST_READ_RECORD_TIME);
+        statsCollector.register(DISK_LIST_DISK_ITERATOR_REMOVE_TIME);
+        statsCollector.register(DISK_LIST_DELETE_ALL_RECORDS_TIME);
+    }
 
     /**
      * Construct a new DiskList
      */
-    public DiskList(File dataFile, int recordSize, long checkSize,
-                    int checkPerc)
-        throws IOException {
+    public DiskList(File dataFile, int recordSize, long checkSize, int checkPerc) throws IOException {
         this(dataFile, recordSize, checkSize, checkPerc, Long.MAX_VALUE);
     }
 
@@ -116,12 +125,8 @@ public class DiskList {
      * @param checkPerc  Maximum percentage of free blocks allowed when
      *                   data file is greater than checkSize.
      */
-    public DiskList(File dataFile, int recordSize, long checkSize,
-                    int checkPerc, long maxLength)
-        throws IOException
-    {
+    public DiskList(File dataFile, int recordSize, long checkSize, int checkPerc, long maxLength) throws IOException {
         File idxFile;
-
         idxFile          = new File(dataFile + ".idx");
         this.fileName    = dataFile.getName();
         this.idxFileName = idxFile.getName();
@@ -130,16 +135,14 @@ public class DiskList {
         this.recordSize  = recordSize;
         this.padBytes    = new byte[Math.max(recordSize, IDX_REC_LEN)];
         this.modNum      = this.rand.nextInt();
-
         this.checkSize   = checkSize;
         this.checkPerc   = checkPerc;
-        this.log.debug("Setting max length for " + this.fileName +
-                       " to " + maxLength + " bytes");
+        if (log.isDebugEnabled()) {
+            log.debug("Setting max length for " + this.fileName + " to " + maxLength + " bytes");
+        }
         this.maxLength   = maxLength;
-
         this.indexFile = new RandomAccessFile(idxFile, "rw");
         this.genFreeList(idxFile);
-
         this.closed    = false;
     }
 
@@ -147,9 +150,7 @@ public class DiskList {
      * Get the precentage of free space available in the datafile rounded
      * to the nearest whole number. (0-100)
      */
-    private long getDataFileFreePercentage()
-        throws IOException
-    {
+    private long getDataFileFreePercentage() throws IOException {
         double dataBytes = (double)this.dataFile.length();
         double freeBytes = (double)(this.freeList.size() * this.recordSize);
 
@@ -166,9 +167,7 @@ public class DiskList {
      * This is a recoverable situation though, since new blocks will be
      * inserted at the beginning of the data file.
      */
-    private void doMaintenence()
-        throws IOException
-    {
+    private void doMaintenence() throws IOException {
         long lastData = this.dataFile.length()/this.recordSize;
         long lastFree = ((Long)this.freeList.last()).longValue();
 
@@ -268,30 +267,21 @@ public class DiskList {
      *
      * @param data Data to add to the end of the list
      */
-    public void addToList(String data)
-        throws IOException
-    {
-        ByteArrayOutputStream bOs;
-        DataOutputStream dOs;
-        byte[] bytes;
-
+    public void addToList(String data) throws IOException {
         if(this.closed){
             throw new IOException("Datafile already closed");
         }
-
-        bOs = new ByteArrayOutputStream(this.recordSize);
-        dOs = new DataOutputStream(bOs);
+        ByteArrayOutputStream bOs = new ByteArrayOutputStream(this.recordSize);
+        DataOutputStream dOs = new DataOutputStream(bOs);
         dOs.writeUTF(data);
-        
         if(bOs.size() > this.recordSize){
             throw new IOException("Data length(" + bOs.size() + ") exceeds " +
-                                  "maximum record length(" + this.recordSize +
-                                  ")");
+                                  "maximum record length(" + this.recordSize + ")");
         }
-
+        final long start = now();
         bOs.write(this.padBytes, 0, this.recordSize - bOs.size());
-        bytes = bOs.toByteArray();
-
+        byte[] bytes = bOs.toByteArray();
+        
         synchronized(this.dataFile){
             Long firstFreeL;
             long firstFree;
@@ -339,6 +329,12 @@ public class DiskList {
                            this.maxLength + " bytes), truncating.");
             deleteAllRecords();
         }
+        long duration = now() - start;
+        statsCollector.addStat(duration, DISK_LIST_ADD_TO_LIST_TIME);
+    }
+
+    private static long now() {
+        return System.currentTimeMillis();
     }
 
     private static class Record {
@@ -357,6 +353,7 @@ public class DiskList {
             throw new IllegalArgumentException("IDX must be positive");
         }
                                                
+        final long start = now();
         synchronized(this.dataFile){
             this.dataFile.seek(recNo * this.recordSize);
             res.data = this.dataFile.readUTF();
@@ -366,6 +363,8 @@ public class DiskList {
             res.prevIdx = this.indexFile.readLong();
             res.nextIdx = this.indexFile.readLong();
         }
+        final long duration = now() - start;
+        statsCollector.addStat(duration, DISK_LIST_READ_RECORD_TIME);
 
         return res;
     }
@@ -373,14 +372,13 @@ public class DiskList {
     /**
      * Delete all the records from storage. 
      */
-    public void deleteAllRecords()
-        throws IOException
-    {
+    public void deleteAllRecords() throws IOException {
         IOException sExc = null;
 
         if(this.closed){
             throw new IOException("Datafile already closed");
         }
+        final long start = now();
 
         synchronized(this.dataFile){
             this.modNum   = this.rand.nextInt();
@@ -410,6 +408,8 @@ public class DiskList {
             }
             this.freeList.clear();
         }
+        final long duration = now() - start;
+        statsCollector.addStat(duration, DISK_LIST_DELETE_ALL_RECORDS_TIME);
         
         if(sExc != null){
             throw sExc;
@@ -572,8 +572,7 @@ public class DiskList {
                     if (log.isDebugEnabled()) {
                         log.debug("IOException while trying to read record number " + this.curIdx, e);
                     }
-                    NoSuchElementException ex = new NoSuchElementException(
-                        "Error getting next element: " + e);
+                    NoSuchElementException ex = new NoSuchElementException("Error getting next element: " + e);
                     ex.initCause(e);
                     throw ex;
                 }
@@ -586,11 +585,11 @@ public class DiskList {
         
         public void remove(){
             if(!this.calledNext){
-                throw new IllegalStateException("remove() called without " +
-                                                "first calling next()");
+                throw new IllegalStateException("remove() called without first calling next()");
             }
 
             this.calledNext = false;
+            final long start = now();
 
             synchronized(this.diskList.dataFile){
                 if(this.diskList.modNum != this.modNum){
@@ -602,14 +601,15 @@ public class DiskList {
                 } catch(IOException exc){
                     log.error("IOException while removing record");
                     if (log.isDebugEnabled()) {
-                        log.debug(exc);
+                        log.debug(exc, exc);
                     }
-                    throw new IllegalStateException("Error removing record: " +
-                                                    exc.getMessage());
+                    throw new IllegalStateException("Error removing record: " + exc, exc);
                 }
 
                 this.modNum = this.diskList.modNum;
             }
+            final long duration = now() - start;
+            statsCollector.addStat(duration, DISK_LIST_DISK_ITERATOR_REMOVE_TIME);
         }
     }
 

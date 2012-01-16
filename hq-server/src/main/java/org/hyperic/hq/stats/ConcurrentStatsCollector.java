@@ -44,7 +44,6 @@ public class ConcurrentStatsCollector extends AbstractStatsCollector {
     						   EVENT_PROCESSING_TIME = "EVENT_PROCESSING_TIME", 
     						   EHCACHE_TOTAL_OBJECTS = "EHCACHE_TOTAL_OBJECTS",
     						   CONCURRENT_STATS_COLLECTOR = "CONCURRENT_STATS_COLLECTOR",
-    						   LATHER_NUMBER_OF_CONNECTIONS = "LATHER_NUMBER_OF_CONNECTIONS",
     						   RUNTIME_PLATFORM_AND_SERVER_MERGER = "RUNTIME_PLATFORM_AND_SERVER_MERGER", 
     						   AVAIL_MANAGER_METRICS_INSERTED = "AVAIL_MANAGER_METRICS_INSERTED",
     						   DATA_MANAGER_INSERT_TIME = "DATA_MANAGER_INSERT_TIME", 
@@ -82,7 +81,8 @@ public class ConcurrentStatsCollector extends AbstractStatsCollector {
                                CMD_CONTROL_SEND_COMMAND_RESULT = "LATHER_" + CommandInfo.CMD_CONTROL_SEND_COMMAND_RESULT.toUpperCase(),
                                CMD_PLUGIN_SEND_REPORT = "LATHER_" + CommandInfo.CMD_PLUGIN_SEND_REPORT.toUpperCase(),
                                CMD_USERISVALID = "LATHER_" + CommandInfo.CMD_USERISVALID.toUpperCase(),
-                               AGENT_PLUGIN_SYNC_RESTARTS = "AGENT_PLUGIN_SYNC_RESTARTS";
+                               AGENT_PLUGIN_SYNC_RESTARTS = "AGENT_PLUGIN_SYNC_RESTARTS",
+                               LATHER_RUN_COMMAND_TIME = "LATHER_RUN_COMMAND_TIME";
     private TaskScheduler taskScheduler;
 
     @Override
