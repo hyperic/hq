@@ -197,6 +197,8 @@ public class AgentConfig {
 
 	private String[] enabledCiphers;        // Enabled ciphers to be used
 
+    private File logdir;
+
 	private AgentConfig(){
         this.proxyIp = AgentConfig.DEFAULT_PROXY_HOST;
         this.proxyPort = AgentConfig.DEFAULT_PROXY_PORT;
@@ -479,7 +481,7 @@ public class AgentConfig {
             appProps.getProperty(PROP_LOGDIR[0],
                                  PROP_LOGDIR[1]);
 
-        dir = new File(logDir);
+        logdir = new File(logDir);
         
         try {
             succeeded = FileUtil.makeDirs(dir, 3);
@@ -488,14 +490,17 @@ public class AgentConfig {
         }
         
         if (!succeeded) {
-            String parent = new File(dir.getAbsolutePath())
-                                    .getParentFile().getAbsolutePath();
+            String parent = new File(logdir.getAbsolutePath()).getParentFile().getAbsolutePath();
             throw new AgentConfigException
                    ("Error creating log directory: " + dir.getAbsolutePath()
                     + "\nMake sure that the " + parent + " directory is "
                     + "owned by user '" + System.getProperty("user.name")
                     + "' and is not a read-only directory.");            
         }
+    }
+    
+    public File getLogDir() {
+        return logdir;
     }
     
     /**

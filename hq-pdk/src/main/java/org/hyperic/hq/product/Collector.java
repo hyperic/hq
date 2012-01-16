@@ -36,12 +36,11 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.util.PluginLoader;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public abstract class Collector implements Runnable {
 
@@ -524,9 +523,6 @@ public abstract class Collector implements Runnable {
             }
 
             container.collectors.put(props, collector);
-
-            //we only have 1 thread, will only actually start once.
-            CollectorThread.getInstance(plugin.getManager()).doStart();
         }
 
         //just added collector to the thread,
@@ -648,35 +644,27 @@ public abstract class Collector implements Runnable {
         return "on " + new Date(time);
     }
 
-    private static void check(CollectorExecutor executor,
-                              PluginContainer container) {
-        boolean isDebug = log.isDebugEnabled();
-        log.debug("Running " + container.name + " collectors");
+    private static Collection<Collector> getCollectorsToExecute(PluginContainer container) {
+        final boolean debug = log.isDebugEnabled();
+        final Collection<Collector> rtn = new ArrayList<Collector>();
+        if (debug) log.debug("Running " + container.name + " collectors");
         List pluginCollectors;
-        
         //copy so we don't block PluginCollector.get()
         synchronized (container.collectors) {
             Collection values = container.collectors.values();
             pluginCollectors = new ArrayList(values.size());
             pluginCollectors.addAll(values);
         }
-
         for (int i=0; i<pluginCollectors.size(); i++) {
             Collector collector = (Collector)pluginCollectors.get(i);
             long interval = collector.getInterval();
             long lastCollection = collector.lastCollection;
-
             if (collector.isRunning) {
-                log.debug(collector + " is running: deferring");
+                if (debug) log.debug(collector + " is running: deferring");
                 continue;
             }
-
-            CollectorResult result =
-                (CollectorResult)container.results.get(collector.props);
-
-            if ((result != null) &&
-                (result.values.size() != 0))
-            {
+            CollectorResult result = (CollectorResult)container.results.get(collector.props);
+            if ((result != null) && (result.values.size() != 0)) {
                 long now = System.currentTimeMillis();
                 boolean shouldSkip = true;
                 if ((interval != -1) && (lastCollection != -1)) {
@@ -684,73 +672,56 @@ public abstract class Collector implements Runnable {
                         //ScheduleThread should be picking this up
                         //within the next minute, so collect now.
                         shouldSkip = false;
-                    }
-                    else if ((now - result.timestamp) >= interval) {
+                    } else if ((now - result.timestamp) >= interval) {
                         //not in sync w/ ScheduleThread
                         shouldSkip = false;
                     }
-                }
-                else {
+                } else {
                     shouldSkip = !result.collected;
                 }
                 String msg = null;
-                if (isDebug) {
+                if (debug) {
                     String itv, coll;
                     if (interval == -1) {
                         itv = "unknown";
-                    }
-                    else {
+                    } else {
                         itv = (interval / MINUTE) + "min";
                     }
                     if (lastCollection == -1) {
                         coll = "n/a";
-                    }
-                    else {
+                    } else {
                         coll = lastRun(now, lastCollection);
                     }
-                    msg =
-                        collector +
+                    msg = collector +
                         " ran " + lastRun(now, result.timestamp) + "," +
-                        " consumed " + coll + ", " +
-                        itv + " itv: ";
+                        " consumed " + coll + ", " + itv + " itv: ";
                 }
                 if (shouldSkip) {
-                    if (isDebug) {
-                        log.debug(msg + "deferring.");
-                    }
+                    if (debug) log.debug(msg + "deferring.");
                     continue;
-                }
-                else {
-                    if (isDebug) {
-                        log.debug(msg + "collecting.");
-                    }
+                } else {
+                    if (debug) log.debug(msg + "collecting.");
                 }
             }
-
-            if (executor.isPoolable() && collector.isPoolable()) {
-                executor.execute(collector);
-            }
-            else {
-                collector.run();
-            }
+            rtn.add(collector);
         }        
+        return rtn;
     }
 
-    static void check(CollectorExecutor executor) {
+    public static Collection<Collector> getCollectorsToExecute() {
+        Collection<Collector> rtn = new ArrayList<Collector>();
         List pluginContainers;
-
         //copy so we don't block PluginCollector.get()
         synchronized (containers) {
             Collection values = containers.values();
             pluginContainers = new ArrayList(values.size());
             pluginContainers.addAll(values);
         }
-
         for (int i=0; i<pluginContainers.size(); i++) {
-            PluginContainer collector =
-                (PluginContainer)pluginContainers.get(i);
-            check(executor, collector);
+            PluginContainer container = (PluginContainer)pluginContainers.get(i);
+            rtn.addAll(getCollectorsToExecute(container));
         }
+        return rtn;
     }
 
     public static void main(String[] args) throws Exception {

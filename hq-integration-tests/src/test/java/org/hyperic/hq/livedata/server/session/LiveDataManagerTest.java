@@ -26,7 +26,7 @@
 
 package org.hyperic.hq.livedata.server.session;
 
-import org.easymock.classextension.EasyMock;
+import org.easymock.EasyMock;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformTypeDAO;
