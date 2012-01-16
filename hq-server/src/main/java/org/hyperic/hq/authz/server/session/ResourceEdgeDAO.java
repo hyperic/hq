@@ -180,18 +180,33 @@ public class ResourceEdgeDAO
             .setInteger("rel_id", rel.getId().intValue()).executeUpdate();
     }
 
+    @SuppressWarnings("unchecked")
+	Collection<ResourceEdge> getParentEdges(Collection<Resource> resources,
+	                                        ResourceRelation relation, int distance) {
+        final String hql = new StringBuilder(64)
+            .append("FROM ResourceEdge re WHERE distance < :dist and relation=:relation ")
+            .append("AND re.from in (:from)")
+            .toString();
+        return getSession()
+            .createQuery(hql)
+            .setParameterList("from", resources)
+            .setParameter("relation", relation)
+            .setParameter("dist", distance)
+            .list();
+    }
+
     // Retrieve the parent of a given resource, if one exists, otherwise return
     // null
     ResourceEdge getParentEdge(Resource resource, ResourceRelation relation) {
-        String hql = "from ResourceEdge re "
-                     + "where re.from=:from and distance=-1 and relation=:relation";
-        Iterator iterator = getSession().createQuery(hql).setParameter("from", resource)
-            .setParameter("relation", relation).iterate();
-
+        String hql = "from ResourceEdge re where re.from=:from and distance=-1 and relation=:relation";
+        Iterator iterator = getSession()
+            .createQuery(hql)
+            .setParameter("from", resource)
+            .setParameter("relation", relation)
+            .iterate();
         if (iterator.hasNext()) {
             return (ResourceEdge) iterator.next();
         }
-
         return null;
     }
 

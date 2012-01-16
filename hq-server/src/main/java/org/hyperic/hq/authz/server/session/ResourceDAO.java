@@ -442,7 +442,25 @@ public class ResourceDAO
         }
         return rtn;
     }
-    
+
+    @SuppressWarnings("unchecked")
+    Collection<Integer> getParentResourceIds(Collection<Resource> resources,
+                                             ResourceRelation relation, int startdistance,
+                                             int maxdistance) {
+        final String hql = new StringBuilder(64)
+            .append("select distinct re.to.id FROM ResourceEdge re ")
+            .append("WHERE re.distance between :start and :end and re.relation=:relation ")
+            .append("AND re.from in (:from)")
+            .toString();
+        return getSession()
+            .createQuery(hql)
+            .setParameterList("from", resources)
+            .setParameter("relation", relation)
+            .setParameter("start", Math.min(startdistance, maxdistance))
+            .setParameter("end", Math.max(startdistance, maxdistance))
+            .list();
+    }
+
     @SuppressWarnings("unchecked")
     Map<String, Long> getResourceCountByProtoTypeName(Collection<MonitorableType> types) {
         if (types == null || types.isEmpty()) {;
