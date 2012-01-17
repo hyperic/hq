@@ -24,7 +24,7 @@
  *
  */
 
-package org.hyperic.util.file;
+package org.hyperic.hq.agent.db;
 
 import java.io.File;
 import java.io.IOException;

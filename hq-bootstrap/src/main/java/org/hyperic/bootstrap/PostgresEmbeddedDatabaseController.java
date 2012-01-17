@@ -50,9 +50,9 @@ public class PostgresEmbeddedDatabaseController implements EmbeddedDatabaseContr
 
     static final long DEFAUT_DB_PORT = 5432;
     static final int DB_PROCESS_TIMEOUT = 60 * 1000;
-    private String serverHome;
-    private ProcessManager processManager;
-    private OperatingSystem osInfo;
+    private final String serverHome;
+    private final ProcessManager processManager;
+    private final OperatingSystem osInfo;
     int dbPortStopCheckTries = 30;
 
     private final Log log = LogFactory.getLog(PostgresEmbeddedDatabaseController.class);
@@ -120,18 +120,12 @@ public class PostgresEmbeddedDatabaseController implements EmbeddedDatabaseContr
             processManager.executeProcess(new String[] { serverHome + "/bin/db-stop.sh" }, serverHome,
                 false, PostgresEmbeddedDatabaseController.DB_PROCESS_TIMEOUT);
         }
-        try {
-            if (!isDBStopped(dbPortStopCheckTries)) {
-                log.error("HQ built-in database failed to stop");
-                log.error("The log file " + serverHome +
-                          "/logs/hqdb.log may contain further details on why it failed to stop");
-                return false;
-            }
-        } catch (Exception e) {
-            log.error("Unable to determine if database was stopped: " + e.getMessage());
-            return false;
-        }
-        log.info("HQ built-in database stopped.");
+    
+        //Guys 12/10/2011 - DB stop operation is fast enough but the port is left opened in a WAIT_FIN2 status 
+        //for another 30-40 secs. As at this stage no further action can be taken, removing the isDBStopped check 
+        //shall speed up the shutdown without removing functionality
+        
+        log.info("Triggered stop script for HQ built in database.");
         return true;
     }
 

@@ -25,8 +25,10 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -37,16 +39,14 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.MeasurementProcessor;
 import org.hyperic.hq.measurement.shared.SRNManager;
 import org.hyperic.hq.zevents.ZeventManager;
-import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -69,8 +69,6 @@ public class SrnManagerImpl implements SRNManager {
     private ScheduleRevNumDAO scheduleRevNumDAO;
     @Autowired
     private MeasurementManager measurementManager;
-    @Autowired
-    private AuthzSubjectManager authzSubjectManager;
     @Autowired
     private ResourceManager resourceManager;
     /** 
@@ -181,19 +179,27 @@ public class SrnManagerImpl implements SRNManager {
         }
     }
 
-    private void setScheduleObjs(Collection<AppdefEntityID> aeids, Set<AppdefEntityID> toReschedule,
+    private void setScheduleObjs(Collection<AppdefEntityID> aeidList, Set<AppdefEntityID> toReschedule,
                                  Set<AppdefEntityID> toUnschedule, boolean overrideRestrictions) {
-        final AuthzSubject subj = authzSubjectManager.getOverlordPojo();
         final long now = now();
-        for (final AppdefEntityID aeid : aeids) {
+        final Collection<AppdefEntityID> aeids = new ArrayList<AppdefEntityID>(aeidList);
+        for (final Iterator<AppdefEntityID> it=aeids.iterator(); it.hasNext(); ) {
+            final AppdefEntityID aeid = it.next();
             final ScheduleRevNum srn = scheduleRevNumDAO.get(new SrnId(aeid));
             // if srn hasn't been created then we should either schedule or unschedule, don't skip
             if (srn != null && !canSchedule(srn, now, overrideRestrictions)) {
+                it.remove();
                 continue;
             }
-            final List<Measurement> meas =
-                measurementManager.findMeasurements(subj, aeid, null, PageControl.PAGE_ALL);
-            if (meas.size() > 0) {
+        }
+        final Map<Integer, List<Measurement>> enabled = measurementManager.findEnabledMeasurements(aeids);
+        for (final AppdefEntityID aeid : aeids) {
+            final Resource resource = resourceManager.findResource(aeid);
+            if (resource == null) {
+                continue;
+            }
+            final List<Measurement> list = enabled.get(resource.getId());
+            if (list != null && !list.isEmpty()) {
                 toReschedule.add(aeid);
             } else {
                 // if size() == 0 then resource was probably deleted

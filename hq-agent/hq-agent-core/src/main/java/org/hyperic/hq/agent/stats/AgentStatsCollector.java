@@ -45,6 +45,10 @@ public class AgentStatsCollector extends AbstractStatsCollector {
     public static final String COLLECTOR_THREAD_METRIC_COLLECTED_TIME = "COLLECTOR_THREAD_METRIC_COLLECTED_TIME";
     public static final String SENDER_THREAD_SEND_NUM_METRICS = "SENDER_THREAD_NUM_SEND_METRICS";
     public static final String SENDER_THREAD_SEND_METRICS_TIME = "SENDER_THREAD_SEND_METRICS_TIME";
+    public static final String DISK_LIST_DISK_ITERATOR_REMOVE_TIME = "DISK_LIST_DISK_ITERATOR_REMOVE_TIME";
+    public static final String DISK_LIST_READ_RECORD_TIME = "DISK_LIST_READ_RECORD_TIME";
+    public static final String DISK_LIST_ADD_TO_LIST_TIME = "DISK_LIST_ADD_TO_LIST_TIME";
+    public static final String DISK_LIST_DELETE_ALL_RECORDS_TIME = "DISK_LIST_DELETE_ALL_RECORDS_TIME";
 
     private AgentStatsCollector() {
         super(getMBeanServer());

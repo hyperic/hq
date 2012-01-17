@@ -41,7 +41,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.hyperic.util.file.DiskList;
+import org.hyperic.hq.agent.db.DiskList;
 import org.hyperic.util.file.FileUtil;
 
 import org.apache.commons.logging.Log;

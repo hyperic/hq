@@ -58,7 +58,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class HQServer {
-
+ 
     private final Log log = LogFactory.getLog(HQServer.class);
     private final String serverHome;
     private final String engineHome;
@@ -114,6 +114,20 @@ public class HQServer {
                     // bail.
                     return ShutdownType.AbnormalStop.exitCode() ;  
                 }
+                
+                //Add a JVM shutdown hook to ensure that the db is always stopped 
+                log.debug("Latching the cleaning process on the JVM's shutdown hook") ; 
+                Runtime.getRuntime().addShutdownHook(new Thread() { 
+                    @Override
+                    public final void run() {
+                        try {
+                            embeddedDatabaseController.stopBuiltInDB();
+                        } catch (Exception e) {
+                            log.error("Error stopping built-in database: " + e, e);
+                            return;
+                        }//EO catch block
+                    }//EOM  
+                }) ;
             } catch (Exception e) {
                 log.error("Error starting built-in database: " + e, e);
                 return ShutdownType.AbnormalStop.exitCode() ; 
@@ -132,7 +146,7 @@ public class HQServer {
         if (!(verifySchema())) {
             // Schema is not valid. Something went wrong with the DB upgrade.
             return ShutdownType.AbnormalStop.exitCode() ;
-        }
+        }                                                                                           
         List<String> javaOpts = getJavaOpts();
         log.info("Booting the HQ server...");
         return engineController.start(javaOpts);
@@ -142,17 +156,9 @@ public class HQServer {
         log.info("Stopping HQ server...");
         try {
             engineController.stop();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.error("Error stopping HQ server: " + e, e);
             return;
-        }
-        if (embeddedDatabaseController.shouldUse()) {
-            try {
-                embeddedDatabaseController.stopBuiltInDB();
-            } catch (Exception e) {
-                log.error("Error stopping built-in database: " + e, e);
-                return;
-            }
         }
         return;
     }
@@ -217,7 +223,7 @@ public class HQServer {
         }
 
         String javaHome = System.getProperty("java.home");
-       
+         
         return processManager.executeProcess(
             new String[] { javaHome + "/bin/java",
                           "-cp",

@@ -71,6 +71,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceEdgeCreateException;
+import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.server.session.AppdefBossImpl;
 import org.hyperic.hq.common.NotFoundException;
@@ -82,7 +83,6 @@ import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplateDAO;
 import org.hyperic.hq.measurement.server.session.MonitorableType;
 import org.hyperic.hq.measurement.server.session.MonitorableTypeDAO;
-import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
@@ -130,6 +130,8 @@ public class ResourceManagerImpl implements ResourceManager {
     private ServiceTypeDAO serviceTypeDAO;
     private MeasurementTemplateDAO measurementTemplateDAO;
     private ResourceRemover resourceRemover;
+    @Autowired
+    private ResourceGroupManager resourceGroupManager;
 
     @Autowired
     public ResourceManagerImpl(ResourceEdgeDAO resourceEdgeDAO, PlatformDAO platformDAO,
@@ -381,6 +383,7 @@ public class ResourceManagerImpl implements ResourceManager {
      */
     @Transactional(readOnly = true)
     public Resource findResource(AppdefEntityID aeid) {
+        Resource rtn = null;
         try {
             final Integer id = aeid.getId();
             switch (aeid.getType()) {
@@ -389,27 +392,39 @@ public class ResourceManagerImpl implements ResourceManager {
                     if (server == null) {
                         return null;
                     }
-                    return server.getResource();
+                    rtn = server.getResource();
+                    break;
                 case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                    return findPlatformById(id).getResource();
+                    rtn = findPlatformById(id).getResource();
+                    break;
                 case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
                     org.hyperic.hq.appdef.server.session.Service service = serviceDAO.get(id);
                     if (service == null) {
                         return null;
                     }
-                    return service.getResource();
+                    rtn = service.getResource();
+                    break;
                 case AppdefEntityConstants.APPDEF_TYPE_GROUP:
                     // XXX not sure about appdef group mapping since 4.0
-                    return resourceDAO.findByInstanceId(aeid.getAuthzTypeId(), id);
+                    rtn = resourceDAO.findByInstanceId(aeid.getAuthzTypeId(), id);
+                    break;
                 case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
                     AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
-                    return findApplicationById(overlord, id).getResource();
+                    rtn = findApplicationById(overlord, id).getResource();
+                    break;
                 default:
-                    return resourceDAO.findByInstanceId(aeid.getAuthzTypeId(), id);
+                    rtn = resourceDAO.findByInstanceId(aeid.getAuthzTypeId(), id);
             }
+            // return real object instead of a proxy
+            return (rtn == null) ? null : getResourceById(rtn.getId());
         } catch (ApplicationNotFoundException e) {
+            log.debug(e,e);
+        } catch (ObjectNotFoundException e) {
+            log.debug(e,e);
         } catch (PermissionException e) {
+            log.debug(e,e);
         } catch (PlatformNotFoundException e) {
+            log.debug(e,e);
         }
         return null;
     }
@@ -598,12 +613,10 @@ public class ResourceManagerImpl implements ResourceManager {
         List<Integer> resIds = pm.findViewableResources(subject, searchFor, pc);
         Pager pager = Pager.getDefaultPager();
         List<Integer> paged = pager.seek(resIds, pc);
-
         PageList<Resource> resources = new PageList<Resource>();
         for (Integer id : paged) {
             resources.add(resourceDAO.findById(id));
         }
-
         resources.setTotalSize(resIds.size());
         return resources;
     }
@@ -840,6 +853,93 @@ public class ResourceManagerImpl implements ResourceManager {
     @Transactional(readOnly = true)
     public Collection<ResourceEdge> findResourceEdgesByName(String name, ResourceRelation relation) {
         return resourceEdgeDAO.findByName(name, relation);
+    }
+
+    @Transactional(readOnly = true)
+    public Collection<Resource> getParentResources(AuthzSubject subj, ResourceGroup group,
+                                                   ResourceRelation relation, int distance,
+                                                   int maxdistance) {
+        final boolean debug = log.isDebugEnabled();
+        final StopWatch watch = new StopWatch();
+        final Resource proto = group.getResourcePrototype();
+        final Collection<ResourceType> types = (proto == null) ?
+            resourceTypeDAO.findAll() : getTypeFromProto(proto.getResourceType());
+
+        if (debug) watch.markTimeBegin("permissionManager.findViewableResources");
+        final Set<Integer> viewable = permissionManager.findViewableResources(subj, types);
+        if (debug) watch.markTimeEnd("permissionManager.findViewableResources");
+
+        if (debug) watch.markTimeBegin("resourceGroupManager.getMembers");
+        final Collection<Resource> resources = resourceGroupManager.getMembers(group);
+        if (debug) watch.markTimeEnd("resourceGroupManager.getMembers");
+
+        if (debug) watch.markTimeBegin("resourceDAO.getParentResourceIds");
+        final Collection<Integer> parentIds =
+            resourceDAO.getParentResourceIds(resources, relation, distance, maxdistance);
+        if (debug) watch.markTimeEnd("resourceDAO.getParentResourceIds");
+
+        final Set<Resource> rtn = new HashSet<Resource>(parentIds.size());
+        if (debug) watch.markTimeBegin("resourceDAO.get");
+        for (final Integer parentId : parentIds) {
+            final Resource parent = resourceDAO.get(parentId);
+            if (parent == null || parent.isInAsyncDeleteState()) {
+                continue;
+            }
+            if (viewable.contains(parent.getId())) {
+                rtn.add(parent);
+            }
+        }
+        if (debug) watch.markTimeEnd("resourceDAO.get");
+
+        if (debug) log.debug(watch);
+        return rtn;
+    }
+
+    private Collection<ResourceType> getTypeFromProto(ResourceType resourceType) {
+        Integer id = resourceType.getId();
+        Collection<ResourceType> rtn = new ArrayList<ResourceType>(3);
+        if (id.equals(AuthzConstants.authzPlatformProto)) {
+            rtn.add(resourceTypeDAO.get(AuthzConstants.authzPlatform));
+            return rtn;
+        } else if (id.equals(AuthzConstants.authzServerProto)) {
+            rtn.add(resourceTypeDAO.get(AuthzConstants.authzPlatform));
+            rtn.add(resourceTypeDAO.get(AuthzConstants.authzServer));
+            return rtn;
+        } else if (id.equals(AuthzConstants.authzServiceProto)) {
+            rtn.add(resourceTypeDAO.get(AuthzConstants.authzPlatform));
+            rtn.add(resourceTypeDAO.get(AuthzConstants.authzServer));
+            rtn.add(resourceTypeDAO.get(AuthzConstants.authzService));
+            return rtn;
+        }
+        return resourceTypeDAO.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public Collection<Resource> getParentResources(AuthzSubject subj, Resource resource,
+                                                   ResourceRelation relation) {
+        if (resource.getResourceType().getId().equals(AuthzConstants.authzGroup)) {
+            final ResourceGroup group =
+                resourceGroupManager.findResourceGroupById(resource.getInstanceId());
+            return getParentResources(subj, group, relation, -1, -1);
+        }
+        final Collection<ResourceEdge> parentEdges =
+            resourceEdgeDAO.getParentEdges(Collections.singletonList(resource), relation, -1);
+        final Set<Resource> rtn = new HashSet<Resource>(parentEdges.size());
+        final Set<Integer> viewable =
+            permissionManager.findViewableResources(subj, resourceTypeDAO.findAll());
+        for (final ResourceEdge edge : parentEdges) {
+            if (edge == null) {
+                continue;
+            }
+            final Resource res = edge.getTo();
+            if (res == null || res.isInAsyncDeleteState()) {
+                continue;
+            }
+            if (viewable.contains(res.getId())) {
+                rtn.add(res);
+            }
+        }
+        return rtn;
     }
 
     @Transactional(readOnly = true)
