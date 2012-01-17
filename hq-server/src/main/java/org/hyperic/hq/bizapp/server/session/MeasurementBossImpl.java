@@ -164,7 +164,6 @@ public class MeasurementBossImpl implements MeasurementBoss {
     private ApplicationManager applicationManager;
     private CritterTranslator critterTranslator;
     private ProblemMetricManager problemMetricManager;
-    private ResourceRelation containmentRelation;
 
     @Autowired
     public MeasurementBossImpl(SessionManager sessionManager, AuthBoss authBoss,
@@ -194,7 +193,6 @@ public class MeasurementBossImpl implements MeasurementBoss {
         this.applicationManager = applicationManager;
         this.critterTranslator = critterTranslator;
         this.problemMetricManager = problemMetricManager;
-        this.containmentRelation = resourceManager.getContainmentRelation();
     }
     
     @Transactional(readOnly = true)
@@ -3639,7 +3637,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
             return Collections.emptyList();
         }
         final Collection<Resource> hosts =
-            resourceManager.getParentResources(subj, resource, containmentRelation);
+            resourceManager.getParentResources(subj, resource, resourceManager.getContainmentRelation());
         return getResourcesCurrentHealth(subj, hosts);
     }
 
