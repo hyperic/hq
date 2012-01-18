@@ -41,6 +41,39 @@
             <option name="jboss7.pass" description="Password" default="guest" type="secret"/>
             <option name="jboss7.host" description="Host Name"/>
         </config>
+        <help>
+            <![CDATA[
+                  <p>
+                    <h2>Configure JBoss 7 Host Controller for Monitoring</h2>
+                        <h3>Config properties</h3>
+                        <ol>
+                            <li><b>addr</b>: Management HTTP IP/HostName (usualy: localhost)</li>
+                            <li><b>port</b>: Management HTTP Listen Port</li>
+                            <li><b>https</b>: Use https/ssl</li>
+                            <li><b>user</b>: Administrator User name</li>
+                            <li><b>pass</b>: Administrator User password</li>
+                            <li><b>host</b>: Host Controller Name</li>
+                        </ol>
+                        <h3>SSL Configuration Requirements (Hyperic 4.6 and later)</h3>
+                        There are new SSL configuration requirements for secure communication between a Hyperic 4.6 agent and a JBoss.
+                        <ul>
+                            <li>If the <b>accept.unverified.certificates</b> property is <b>false</b> (default value) in the <b>agent.properties</b> file, 
+                            the JBoss's unverified SSL certificate needs to be manually imported to a keystore that the Hyperic 4.6 agent can access.
+                            Otherwise, secure communication between the Hyperic 4.6 agent and JBoss will fail.
+                            </li>
+                            <li>If the <b>accept.unverified.certificates</b> property is <b>true</b> in the <b>agent.properties</b> file, the JBoss plugin will automatically
+                            import the unverified SSL certificate of the JBoss to the keystore accessible to the Hyperic 4.6 agent.
+                            <u>This is not recommended</u> because it is less secure and will expose the Hyperic agent to man-in-the-middle attacks.
+                            </li>
+                        </ul> 
+                  </p>
+                  <p>
+                    <h3>Help Docs</h3>
+                    <a href="http://support.hyperic.com/display/DOCS46/JBoss" target="_new">Monitoring and Managing JBoss</a>
+                  </p>
+            ]]>
+        </help>
+
         <filter name="server-connection" value="jboss7.addr=%jboss7.addr%,jboss7.port=%jboss7.port%,jboss7.user=%jboss7.user%,jboss7.pass=%jboss7.pass%,jboss7.https=%jboss7.https%,jboss7.host=%jboss7.host%,jboss7.server=%jboss7.server%"/>
         <property name="template" value="jboss7:${server-connection}:${alias}"/>
         <metric name="Availability" alias="Availability" indicator="true"/>
@@ -72,6 +105,38 @@
             <option name="jboss7.user" description="Username" default="guest"/>
             <option name="jboss7.pass" description="Password" default="guest" type="secret"/>
         </config>
+
+        <help>
+            <![CDATA[
+                  <p>
+                    <h2>Configure JBoss 7 for Monitoring</h2>
+                        <h3>Config properties</h3>
+                        <ol>
+                            <li><b>addr</b>: Management HTTP IP/HostName (usualy: localhost)</li>
+                            <li><b>port</b>: Management HTTP Listen Port</li>
+                            <li><b>https</b>: Use https/ssl</li>
+                            <li><b>user</b>: Administrator User name</li>
+                            <li><b>pass</b>: Administrator User password</li>
+                        </ol>
+                        <h3>SSL Configuration Requirements (Hyperic 4.6 and later)</h3>
+                        There are new SSL configuration requirements for secure communication between a Hyperic 4.6 agent and a JBoss.
+                        <ul>
+                            <li>If the <b>accept.unverified.certificates</b> property is <b>false</b> (default value) in the <b>agent.properties</b> file, 
+                            the JBoss's unverified SSL certificate needs to be manually imported to a keystore that the Hyperic 4.6 agent can access.
+                            Otherwise, secure communication between the Hyperic 4.6 agent and JBoss will fail.
+                            </li>
+                            <li>If the <b>accept.unverified.certificates</b> property is <b>true</b> in the <b>agent.properties</b> file, the JBoss plugin will automatically
+                            import the unverified SSL certificate of the JBoss to the keystore accessible to the Hyperic 4.6 agent.
+                            <u>This is not recommended</u> because it is less secure and will expose the Hyperic agent to man-in-the-middle attacks.
+                            </li>
+                        </ul> 
+                  </p>
+                  <p>
+                    <h3>Help Docs</h3>
+                    <a href="http://support.hyperic.com/display/DOCS46/JBoss" target="_new">Monitoring and Managing JBoss</a>
+                  </p>
+            ]]>
+        </help>
 
         <metric name="Object Pending Finalization" alias="object-pending-finalization-count"/>            
         <metric name="Aborted Transactions" alias="aborted-transactions" collectionType="trendsup"/>
@@ -157,5 +222,38 @@
             <option name="jboss7.host" description="Host Name"/>
             <option name="jboss7.server" description="Server Name"/>
         </config>
+        <help>
+            <![CDATA[
+                  <p>
+                    <h2>Configure JBoss 7 Managed for Monitoring</h2>
+                        <h3>Config properties</h3>
+                        <ol>
+                            <li><b>addr</b>: Management HTTP IP/HostName (usualy: localhost)</li>
+                            <li><b>port</b>: Management HTTP Listen Port</li>
+                            <li><b>https</b>: Use https/ssl</li>
+                            <li><b>user</b>: Administrator User name</li>
+                            <li><b>pass</b>: Administrator User password</li>
+                            <li><b>host</b>: Host Controller Name</li>
+                            <li><b>server</b>: Server Name</li>
+                        </ol>
+                        <h3>SSL Configuration Requirements (Hyperic 4.6 and later)</h3>
+                        There are new SSL configuration requirements for secure communication between a Hyperic 4.6 agent and a JBoss.
+                        <ul>
+                            <li>If the <b>accept.unverified.certificates</b> property is <b>false</b> (default value) in the <b>agent.properties</b> file, 
+                            the JBoss's unverified SSL certificate needs to be manually imported to a keystore that the Hyperic 4.6 agent can access.
+                            Otherwise, secure communication between the Hyperic 4.6 agent and JBoss will fail.
+                            </li>
+                            <li>If the <b>accept.unverified.certificates</b> property is <b>true</b> in the <b>agent.properties</b> file, the JBoss plugin will automatically
+                            import the unverified SSL certificate of the JBoss to the keystore accessible to the Hyperic 4.6 agent.
+                            <u>This is not recommended</u> because it is less secure and will expose the Hyperic agent to man-in-the-middle attacks.
+                            </li>
+                        </ul> 
+                  </p>
+                  <p>
+                    <h3>Help Docs</h3>
+                    <a href="http://support.hyperic.com/display/DOCS46/JBoss" target="_new">Monitoring and Managing JBoss</a>
+                  </p>
+            ]]>
+        </help>
     </server>
 </plugin>
