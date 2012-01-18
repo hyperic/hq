@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
@@ -255,7 +256,7 @@ public class AgentConfig {
         try {
             fin = new FileInputStream(file);
             tmpProps.load(fin);
-            for (Enumeration propKeys = tmpProps.propertyNames(); propKeys.hasMoreElements();) {
+            for (Enumeration<?> propKeys = tmpProps.propertyNames(); propKeys.hasMoreElements();) {
                 String tmpKey = (String)propKeys.nextElement();
                 String tmpValue = tmpProps.getProperty(tmpKey);
                 tmpValue = tmpValue.trim();
@@ -710,6 +711,10 @@ public class AgentConfig {
     public String[] getEnabledCiphers() {
 		return enabledCiphers;
 	}
+    
+    public List<String> getEnabledCipherList() {
+    	return new ArrayList<String>(Arrays.asList(getEnabledCiphers()));
+    }
 
 	public void setEnabledCiphers(String[] enabledCiphers) {
 		this.enabledCiphers = enabledCiphers;
