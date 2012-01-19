@@ -142,7 +142,7 @@ public class MeasurementDAO
     @SuppressWarnings("unchecked")
     public List<Measurement> findByTemplatesForInstance(Integer[] tids, Resource res) {
         if (tids.length == 0) // Nothing to do
-            return new ArrayList(0);
+            return new ArrayList<Measurement>(0);
 
         String sql = "select m from Measurement m " + "join m.template t "
                      + "where t.id in (:tids) and m.resource = :res";
@@ -607,36 +607,38 @@ public class MeasurementDAO
      *         are parents of the resourceId
      */
     @SuppressWarnings("unchecked")
-    List<Object[]> findParentAvailMeasurements(List resourceIds, String resourceRelationType) {
+    List<Object[]> findParentAvailMeasurements(List<Integer> resourceIds, String resourceRelationType) {
         if (resourceIds.isEmpty()) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
-
         // Needs to be ordered by DISTANCE in descending order so that
         // it's immediate parent is the first record
-        final String sql = new StringBuilder().append("select e.from.id, m from Measurement m ")
-            .append("join m.resource.toEdges e ").append("join m.template t ").append(
-                "join e.relation r ").append("where m.resource is not null ").append(
-                "and e.distance < 0 ").append("and r.name = :relationType ").append(
-                "and e.from in (:resourceIds) and ").append(ALIAS_CLAUSE).append(
-                "order by e.from.id, e.distance desc ").toString();
-
+        final String sql = new StringBuilder()
+            .append("select e.from.id, m from Measurement m ")
+            .append("join m.resource.toEdges e ")
+            .append("join m.template t ")
+            .append("join e.relation r ")
+            .append("where m.resource is not null ")
+            .append("and e.distance < 0 ")
+            .append("and r.name = :relationType ")
+            .append("and e.from in (:resourceIds) and ")
+            .append(ALIAS_CLAUSE).append("order by e.from.id, e.distance desc ")
+            .toString();
         // create a new list so that the original list is not modified
         // and sort the resource ids so that the results are more cacheable
-        final List sortedResourceIds = new ArrayList(resourceIds);
+        final List<Integer> sortedResourceIds = new ArrayList<Integer>(resourceIds);
         Collections.sort(sortedResourceIds);
-
-        final List rtn = new ArrayList(sortedResourceIds.size());
+        final List<Object[]> rtn = new ArrayList<Object[]>(sortedResourceIds.size());
         final HQDialect dialect = getHQDialect();
-        final int max = (dialect.getMaxExpressions() <= 0) ? BATCH_SIZE : dialect
-            .getMaxExpressions();
-
+        final int max = (dialect.getMaxExpressions() <= 0) ? BATCH_SIZE : dialect.getMaxExpressions();
         for (int i = 0; i < sortedResourceIds.size(); i += max) {
             final int end = Math.min(i + max, sortedResourceIds.size());
-            final List list = sortedResourceIds.subList(i, end);
-            rtn.addAll(getSession().createQuery(sql).setParameterList("resourceIds", list,
-                new IntegerType()).setParameter("relationType", resourceRelationType).setCacheable(
-                true).setCacheRegion("Measurement.findParentAvailMeasurements").list());
+            final List<Integer> list = sortedResourceIds.subList(i, end);
+            rtn.addAll(getSession().createQuery(sql)
+                                   .setParameterList("resourceIds", list, new IntegerType())
+                                   .setParameter("relationType", resourceRelationType)
+                                   .setCacheable(true).setCacheRegion("Measurement.findParentAvailMeasurements")
+                                   .list());
         }
         return rtn;
     }

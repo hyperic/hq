@@ -280,6 +280,11 @@ function getNewImage (iSrc, iW, iH, iB) {
 
 function goToSelectLocation (e, param, base) {
 	 var sep = base.indexOf('?') >=0 ? '&' : '?';
+	 //if the base url already contains the param, we need to remove it
+	 if (-1 != base.indexOf(param + "=")) {
+		var pattern = "(&" + param + "=[0-9a-zA-Z]*)";
+		base = base.replace(new RegExp(pattern), "");
+	 }
 	 window.location = base + sep + param + "=" + e.options[e.selectedIndex].value;
 }
 

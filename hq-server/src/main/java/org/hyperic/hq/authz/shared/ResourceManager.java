@@ -36,6 +36,7 @@ import org.hyperic.hq.appdef.shared.ResourcesCleanupZevent;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceEdge;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceRelation;
 import org.hyperic.hq.authz.server.session.ResourceSortField;
 import org.hyperic.hq.authz.server.session.ResourceType;
@@ -346,4 +347,20 @@ public interface ResourceManager {
      * @return {@link Map} of {@link String} {@link Plugin}.getName() to a count
      */
     public Map<String, Long> getResourceCountByPlugin(Collection<Plugin> plugins);
+
+    public Collection<Resource> getParentResources(AuthzSubject subj, ResourceGroup group,
+                                                   ResourceRelation relation, int distance,
+                                                   int maxdistance);
+
+    public Collection<Resource> getParentResources(AuthzSubject subj, Resource resource, ResourceRelation relation);
+
+    /**
+     * Finds all descendant resources from the EAM_RESOURCE_EDGE table.  This method will not work with {@link Resource}s
+     * of type {@link ResourceGroup}.
+     * @param proto may be null
+     * @param children if true will fetch all the child resources (distance = 1), if false will fetch all parent
+     * resources (distance = -1)
+     */
+    public Collection<Resource> getDescendantResources(AuthzSubject subj, Collection<Resource> resources,
+                                                       ResourceRelation relation, Resource proto, boolean children);
 }

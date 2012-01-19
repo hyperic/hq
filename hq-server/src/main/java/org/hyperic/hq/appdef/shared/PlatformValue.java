@@ -465,10 +465,8 @@ public class PlatformValue extends AppdefResourceValue
     }
 
     @Override
-	public String toString()
-    {
+	public String toString() {
         StringBuffer str = new StringBuffer("{");
-
         str.append("sortName=" + getSortName() + " commentText="
                 + getCommentText() + " modifiedBy=" + getModifiedBy()
                 + " owner=" + getOwner() + " configResponseId="
@@ -478,7 +476,6 @@ public class PlatformValue extends AppdefResourceValue
                 + " cpuCount=" + getCpuCount() + " id=" + getId() + " mTime="
                 + getMTime() + " cTime=" + getCTime());
         str.append('}');
-
         return(str.toString());
     }
 
@@ -672,38 +669,33 @@ public class PlatformValue extends AppdefResourceValue
         }
     }
 
+    private Integer getIpValuesHash(IpValue[] ips) {
+        int hash = 17;
+        for (IpValue ip : ips) {
+            hash = 37*(ip.hashCode() + hash);
+        }
+        return hash;
+    }
+
     @Override
 	public int hashCode(){
         int result = 17;
         result = 37*result + ((this.sortName != null) ? this.sortName.hashCode() : 0);
-
         result = 37*result + ((this.commentText != null) ? this.commentText.hashCode() : 0);
-
         result = 37*result + ((this.modifiedBy != null) ? this.modifiedBy.hashCode() : 0);
-
         result = 37*result + ((this.owner != null) ? this.owner.hashCode() : 0);
-
         result = 37*result + ((this.configResponseId != null) ? this.configResponseId.hashCode() : 0);
-
         result = 37*result + ((this.certdn != null) ? this.certdn.hashCode() : 0);
-
         result = 37*result + ((this.fqdn != null) ? this.fqdn.hashCode() : 0);
-
         result = 37*result + ((this.name != null) ? this.name.hashCode() : 0);
-
         result = 37*result + ((this.location != null) ? this.location.hashCode() : 0);
-
         result = 37*result + ((this.description != null) ? this.description.hashCode() : 0);
-
         result = 37*result + ((this.cpuCount != null) ? this.cpuCount.hashCode() : 0);
-
         result = 37*result + ((this.id != null) ? this.id.hashCode() : 0);
-
         result = 37*result + ((this.mTime != null) ? this.mTime.hashCode() : 0);
-
         result = 37*result + ((this.cTime != null) ? this.cTime.hashCode() : 0);
-
-        result = 37*result + ((this.getIpValues() != null) ? this.getIpValues().hashCode() : 0);
+        final IpValue[] ips = getIpValues();
+        result = 37*result + ((ips != null) ? this.getIpValuesHash(ips) : 0);
         result = 37*result + ((this.PlatformType != null) ? this.PlatformType.hashCode() : 0);
         result = 37*result + ((this.Agent != null) ? this.Agent.hashCode() : 0);
         return result;

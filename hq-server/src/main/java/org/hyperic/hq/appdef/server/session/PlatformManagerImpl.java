@@ -649,8 +649,17 @@ public class PlatformManagerImpl implements PlatformManager {
 
     /**
      * Get platform light value by id. Does not check permission.
-     * 
-     * 
+     */
+    @Transactional(readOnly = true)
+    public Platform getPlatformById(Integer id) {
+        if (id == null) {
+            return null;
+        }
+        return platformDAO.get(id);
+    }
+
+    /**
+     * Get platform light value by id.
      */
     @Transactional(readOnly = true)
     public Platform getPlatformById(AuthzSubject subject, Integer id)

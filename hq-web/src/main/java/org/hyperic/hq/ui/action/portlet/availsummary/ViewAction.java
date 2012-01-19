@@ -77,10 +77,10 @@ public class ViewAction
     extends BaseAction {
 
     private final Log log = LogFactory.getLog(ViewAction.class.getName());
-    private AuthzBoss authzBoss;
-    private MeasurementBoss measurementBoss;
-    private AppdefBoss appdefBoss;
-    private DashboardManager dashboardManager;
+    private final AuthzBoss authzBoss;
+    private final MeasurementBoss measurementBoss;
+    private final AppdefBoss appdefBoss;
+    private final DashboardManager dashboardManager;
 
     @Autowired
     public ViewAction(AuthzBoss authzBoss, MeasurementBoss measurementBoss, AppdefBoss appdefBoss, DashboardManager dashboardManager) {
@@ -91,6 +91,7 @@ public class ViewAction
         this.dashboardManager = dashboardManager;
     }
 
+    @Override
     public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
                                  HttpServletResponse response) throws Exception {
 
@@ -110,6 +111,13 @@ public class ViewAction
 
         try {
             token = RequestUtils.getStringParameter(request, "token");
+            if (token != null){
+               //token should be alpha-numeric
+               if (!token.matches("^[\\w-]*$")){
+                   log.warn("Token cleared by xss filter: "+token);
+                   token=null;
+               }
+            }
         } catch (ParameterNotFoundException e) {
             token = null;
         }
@@ -117,7 +125,7 @@ public class ViewAction
         String resKey = PropertiesForm.RESOURCES;
         String numKey = PropertiesForm.NUM_TO_SHOW;
         String titleKey = PropertiesForm.TITLE;
-
+        
         if (token != null) {
             resKey += token;
             numKey += token;
@@ -189,7 +197,7 @@ public class ViewAction
                 }
 
                 String name = ent.getType().getName();
-                AvailSummary summary = (AvailSummary) res.get(name);
+                AvailSummary summary = res.get(name);
                 if (summary == null) {
                     summary = new AvailSummary(ent.getType());
                     res.put(name, summary);
@@ -231,14 +239,14 @@ public class ViewAction
 
         if (toRemove.size() > 0) {
             log.debug("Removing " + toRemove.size() + " missing resources.");
-            DashboardUtils.removeResources((String[]) toRemove.toArray(new String[toRemove.size()]), resKey, dashPrefs);
+            DashboardUtils.removeResources(toRemove.toArray(new String[toRemove.size()]), resKey, dashPrefs);
         }
 
         return null;
     }
 
     private class AvailSummary {
-        private AppdefResourceTypeValue _type;
+        private final AppdefResourceTypeValue _type;
         private int _numUp = 0;
         private int _numDown = 0;
 
@@ -323,7 +331,7 @@ public class ViewAction
     // Classes for caching dashboard data
     private class CacheEntry {
         private AppdefResourceTypeValue _type;
-        private Measurement _m;
+        private final Measurement _m;
 
         public CacheEntry(Measurement m) {
             _m = m;

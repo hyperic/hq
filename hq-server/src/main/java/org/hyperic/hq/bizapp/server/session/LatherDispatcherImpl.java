@@ -128,7 +128,7 @@ public class LatherDispatcherImpl implements LatherDispatcher {
 
     private HashSet<String> secureCommands = new HashSet<String>();
 
-    private static final String LATHER_NUMBER_OF_CONNECTIONS = ConcurrentStatsCollector.LATHER_NUMBER_OF_CONNECTIONS;
+    private static final String LATHER_RUN_COMMAND_TIME = ConcurrentStatsCollector.LATHER_RUN_COMMAND_TIME;
 
     private AgentManager agentManager;
     private AuthManager authManager;
@@ -179,7 +179,7 @@ public class LatherDispatcherImpl implements LatherDispatcher {
     
     @PostConstruct
     public void initStatsCollector() {
-    	concurrentStatsCollector.register(LATHER_NUMBER_OF_CONNECTIONS);
+    	concurrentStatsCollector.register(LATHER_RUN_COMMAND_TIME);
         concurrentStatsCollector.register(ConcurrentStatsCollector.CMD_PING);
         concurrentStatsCollector.register(ConcurrentStatsCollector.CMD_USERISVALID);
         concurrentStatsCollector.register(ConcurrentStatsCollector.CMD_MEASUREMENT_SEND_REPORT);
@@ -486,7 +486,7 @@ public class LatherDispatcherImpl implements LatherDispatcher {
             throw new LatherRemoteException("Unable to insert data " + e.getMessage());
         }
 
-        res.setTime(System.currentTimeMillis());
+        res.setTime(now());
         return res;
     }
 
@@ -529,10 +529,8 @@ public class LatherDispatcherImpl implements LatherDispatcher {
      * servicing.
      */
     private MeasurementGetConfigs_result cmdMeasurementGetConfigs(MeasurementGetConfigs_args args)
-        throws LatherRemoteException {
-
+    throws LatherRemoteException {
         ResourceTree tree;
-
         AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
         try {
             tree = agentManager.getEntitiesForAgent(overlord, args.getAgentToken());
@@ -541,17 +539,13 @@ public class LatherDispatcherImpl implements LatherDispatcher {
         } catch (AgentNotFoundException exc) {
             throw new SystemException("Validated an agent which could " + "not be found");
         }
-
         ArrayList<MeasurementConfigEntity> ents = new ArrayList<MeasurementConfigEntity>();
         for (Iterator<PlatformNode> p = tree.getPlatformIterator(); p.hasNext();) {
             PlatformNode pNode = p.next();
             addMeasurementConfig(ents, pNode.getPlatform());
-
             try {
-                AppdefEntityValue aeval =
-                    new AppdefEntityValue(pNode.getPlatform().getEntityId(), overlord);
-                List<AppdefResourceValue> services =
-                    aeval.getAssociatedServices(PageControl.PAGE_ALL);
+                AppdefEntityValue aeval = new AppdefEntityValue(pNode.getPlatform().getEntityId(), overlord);
+                List<AppdefResourceValue> services = aeval.getAssociatedServices(PageControl.PAGE_ALL);
                 for (int i = 0; i < services.size(); i++) {
                     ServiceValue val = (ServiceValue) services.get(i);
 
@@ -711,65 +705,75 @@ public class LatherDispatcherImpl implements LatherDispatcher {
         }
 
         AgentConnection conn = null;
+        long start = 0;
         try {
             conn = agentManager.getAgentConnection(method, ctx.getCallerIP(), agentId);
-            concurrentStatsCollector.addStat(1, LATHER_NUMBER_OF_CONNECTIONS);
-            LatherValue rtn = runCommand(ctx, method, arg);
-            return rtn;
+            start = now();
+            return runCommand(ctx, method, arg);
         } finally {
-            if (conn != null)
+            if (conn != null) {
                 agentManager.disconnectAgent(conn);
+            }
+            long duration = now() - start;
+            concurrentStatsCollector.addStat(duration, LATHER_RUN_COMMAND_TIME);
         }
     }
 
     private LatherValue runCommand(LatherContext ctx, String method, LatherValue arg)
         throws LatherRemoteException {
+        LatherValue rtn = null;
+        long start = now();
         if (method.equals(CommandInfo.CMD_PING)) {
-            concurrentStatsCollector.addStat(1, ConcurrentStatsCollector.CMD_PING);
-            return cmdPing(arg);
+            rtn = cmdPing(arg);
+            concurrentStatsCollector.addStat(now()-start, ConcurrentStatsCollector.CMD_PING);
         } else if (method.equals(CommandInfo.CMD_USERISVALID)) {
-            concurrentStatsCollector.addStat(1, ConcurrentStatsCollector.CMD_USERISVALID);
-            return cmdUserIsValid(ctx, (UserIsValid_args) arg);
+            rtn = cmdUserIsValid(ctx, (UserIsValid_args) arg);
+            concurrentStatsCollector.addStat(now()-start, ConcurrentStatsCollector.CMD_USERISVALID);
         } else if (method.equals(CommandInfo.CMD_MEASUREMENT_SEND_REPORT)) {
-            concurrentStatsCollector.addStat(1, ConcurrentStatsCollector.CMD_MEASUREMENT_SEND_REPORT);
-            return cmdMeasurementSendReport((MeasurementSendReport_args) arg);
+            rtn = cmdMeasurementSendReport((MeasurementSendReport_args) arg);
+            concurrentStatsCollector.addStat(now()-start, ConcurrentStatsCollector.CMD_MEASUREMENT_SEND_REPORT);
         } else if (method.equals(CommandInfo.CMD_MEASUREMENT_GET_CONFIGS)) {
-            concurrentStatsCollector.addStat(1, ConcurrentStatsCollector.CMD_MEASUREMENT_GET_CONFIGS);
-            return cmdMeasurementGetConfigs((MeasurementGetConfigs_args) arg);
+            rtn = cmdMeasurementGetConfigs((MeasurementGetConfigs_args) arg);
+            concurrentStatsCollector.addStat(now()-start, ConcurrentStatsCollector.CMD_MEASUREMENT_GET_CONFIGS);
         } else if (method.equals(CommandInfo.CMD_REGISTER_AGENT)) {
-            concurrentStatsCollector.addStat(1, ConcurrentStatsCollector.CMD_REGISTER_AGENT);
-            return cmdRegisterAgent(ctx, (RegisterAgent_args) arg);
+            rtn = cmdRegisterAgent(ctx, (RegisterAgent_args) arg);
+            concurrentStatsCollector.addStat(now()-start, ConcurrentStatsCollector.CMD_REGISTER_AGENT);
         } else if (method.equals(CommandInfo.CMD_UPDATE_AGENT)) {
-            concurrentStatsCollector.addStat(1, ConcurrentStatsCollector.CMD_UPDATE_AGENT);
-            return cmdUpdateAgent(ctx, (UpdateAgent_args) arg);
+            rtn = cmdUpdateAgent(ctx, (UpdateAgent_args) arg);
+            concurrentStatsCollector.addStat(now()-start, ConcurrentStatsCollector.CMD_UPDATE_AGENT);
         } else if (method.equals(CommandInfo.CMD_AI_SEND_REPORT)) {
-            concurrentStatsCollector.addStat(1, ConcurrentStatsCollector.CMD_AI_SEND_REPORT);
-            return cmdAiSendReport((AiSendReport_args) arg);
+            rtn = cmdAiSendReport((AiSendReport_args) arg);
+            concurrentStatsCollector.addStat(now()-start, ConcurrentStatsCollector.CMD_AI_SEND_REPORT);
         } else if (method.equals(CommandInfo.CMD_AI_SEND_RUNTIME_REPORT)) {
-            concurrentStatsCollector.addStat(1, ConcurrentStatsCollector.CMD_AI_SEND_RUNTIME_REPORT);
-            return cmdAiSendRuntimeReport((AiSendRuntimeReport_args) arg);
+            rtn = cmdAiSendRuntimeReport((AiSendRuntimeReport_args) arg);
+            concurrentStatsCollector.addStat(now()-start, ConcurrentStatsCollector.CMD_AI_SEND_RUNTIME_REPORT);
         } else if (method.equals(CommandInfo.CMD_TRACK_SEND_LOG)) {
-            concurrentStatsCollector.addStat(1, ConcurrentStatsCollector.CMD_TRACK_SEND_LOG);
-            return cmdTrackLogMessage((TrackSend_args) arg);
+            rtn = cmdTrackLogMessage((TrackSend_args) arg);
+            concurrentStatsCollector.addStat(now()-start, ConcurrentStatsCollector.CMD_TRACK_SEND_LOG);
         } else if (method.equals(CommandInfo.CMD_TRACK_SEND_CONFIG_CHANGE)) {
-            concurrentStatsCollector.addStat(1, ConcurrentStatsCollector.CMD_TRACK_SEND_CONFIG_CHANGE);
-            return cmdTrackConfigChange((TrackSend_args) arg);
+            rtn = cmdTrackConfigChange((TrackSend_args) arg);
+            concurrentStatsCollector.addStat(now()-start, ConcurrentStatsCollector.CMD_TRACK_SEND_CONFIG_CHANGE);
         } else if (method.equals(CommandInfo.CMD_CONTROL_GET_PLUGIN_CONFIG)) {
-            concurrentStatsCollector.addStat(1, ConcurrentStatsCollector.CMD_CONTROL_GET_PLUGIN_CONFIG);
-            return cmdControlGetPluginConfig((ControlGetPluginConfig_args) arg);
+            rtn = cmdControlGetPluginConfig((ControlGetPluginConfig_args) arg);
+            concurrentStatsCollector.addStat(now()-start, ConcurrentStatsCollector.CMD_CONTROL_GET_PLUGIN_CONFIG);
         } else if (method.equals(CommandInfo.CMD_CONTROL_SEND_COMMAND_RESULT)) {
-            concurrentStatsCollector.addStat(1, ConcurrentStatsCollector.CMD_CONTROL_SEND_COMMAND_RESULT);
-            return cmdControlSendCommandResult((ControlSendCommandResult_args) arg);
+            rtn = cmdControlSendCommandResult((ControlSendCommandResult_args) arg);
+            concurrentStatsCollector.addStat(now()-start, ConcurrentStatsCollector.CMD_CONTROL_SEND_COMMAND_RESULT);
         } else if (method.equals(CommandInfo.CMD_PLUGIN_SEND_REPORT)) {
-            concurrentStatsCollector.addStat(1, ConcurrentStatsCollector.CMD_PLUGIN_SEND_REPORT);
-            return cmdAgentPluginReport((PluginReport_args) arg);
+            rtn = cmdAgentPluginReport((PluginReport_args) arg);
+            concurrentStatsCollector.addStat(now()-start, ConcurrentStatsCollector.CMD_PLUGIN_SEND_REPORT);
         } else {
             log.warn(ctx.getCallerIP() + " attempted to invoke '" + method +
                      "' which could not be found");
             throw new LatherRemoteException("Unknown method, '" + method + "'");
         }
+        return rtn;
     }
     
+    private long now() {
+        return System.currentTimeMillis();
+    }
+
     private LatherValue cmdAgentPluginReport(PluginReport_args arg) {
         agentManager.updateAgentPluginStatusInBackground(arg);
         return new NullLatherValue();

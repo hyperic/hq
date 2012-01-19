@@ -408,4 +408,6 @@ public interface PlatformManager {
      */
     public Collection<Platform> findAll(AuthzSubject superUser) throws PermissionException;
 
+    public Platform getPlatformById(Integer id);
+
 }
