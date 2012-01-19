@@ -71,7 +71,18 @@ var weekArr = new Array("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", 
 
 var yearArr = new Array();
 for (i=0; i<SEL_NUMYEARS; i++) {
-  yearArr[i] = SEL_STARTYEAR - i;
+  yearArr[i] = SEL_STARTYEAR + i;
+  yearOpt = document.getElementById("startYear"+i);
+  if (yearOpt != null){
+    yearOpt.text=yearArr[i];
+    yearOpt.value=yearArr[i];
+  }
+  
+  yearOpt = document.getElementById("endYear"+i);
+  if (yearOpt != null){
+    yearOpt.text=yearArr[i];
+    yearOpt.value=yearArr[i];
+  }
 }
 /*----------- end DECLARATIONS -----------*/
 
