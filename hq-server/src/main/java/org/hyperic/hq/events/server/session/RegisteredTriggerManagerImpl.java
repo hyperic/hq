@@ -74,23 +74,23 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
     
     private final Log traceLog = LogFactory.getLog(RegisteredTriggerManagerImpl.class.getName() + "Trace");
 
-    private AlertConditionEvaluatorFactory alertConditionEvaluatorFactory;
+    private final AlertConditionEvaluatorFactory alertConditionEvaluatorFactory;
 
     private RegisterableTriggerRepository registeredTriggerRepository;
 
-    private TriggerDAOInterface triggerDAO;
+    private final TriggerDAOInterface triggerDAO;
 
     private ZeventEnqueuer zeventEnqueuer;
 
-    private AlertConditionEvaluatorRepository alertConditionEvaluatorRepository;
+    private final AlertConditionEvaluatorRepository alertConditionEvaluatorRepository;
 
-    private AlertDefinitionDAOInterface alertDefinitionDAO;
+    private final AlertDefinitionDAOInterface alertDefinitionDAO;
     
-    private AlertDAO alertDAO;
+    private final AlertDAO alertDAO;
     
-    private EventLogManager eventLogManager;
+    private final EventLogManager eventLogManager;
     
-    private DBUtil dbUtil;
+    private final DBUtil dbUtil;
 
     @Autowired
     public RegisteredTriggerManagerImpl(AlertConditionEvaluatorFactory alertConditionEvaluatorFactory,
@@ -212,7 +212,7 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
     private void registerTriggers(Integer alertDefId) {
         Collection<RegisteredTrigger> registeredTriggers = getAllTriggersByAlertDefId(alertDefId);
         if (!(registeredTriggers.isEmpty())) {
-            AlertDefinition alertDefinition = getDefinitionFromTrigger((RegisteredTrigger) registeredTriggers.iterator()
+            AlertDefinition alertDefinition = getDefinitionFromTrigger(registeredTriggers.iterator()
                                                                                                              .next());
             if (alertDefinition == null) {
                 log.warn("Unable to find AlertDefinition with id: " + alertDefId + ".  These alerts will not fire.");
@@ -299,7 +299,7 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
             
                 if (def != null) {
                     AlertConditionEvaluator evaluator = 
-                        (AlertConditionEvaluator) alertConditionEvaluatorRepository.getAlertConditionEvaluatorById(def.getId());
+                        alertConditionEvaluatorRepository.getAlertConditionEvaluatorById(def.getId());
                 
                     if (evaluator != null) {
                         registerTrigger(tv.getRegisteredTriggerValue(),
@@ -341,10 +341,16 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
                     if (alertConditionEvaluator instanceof RecoveryConditionEvaluator) {
                         RecoveryConditionEvaluator rce =
                             (RecoveryConditionEvaluator) alertConditionEvaluator;
-                        initialState = (AlertFiredEvent) alertFiredEvents.get(
+                        if (alertFiredEvents == null){
+                            log.warn("Initial state map empty for RecoveryConditionEvaluator of trigger with id "+
+                                    tv.getId() + ". These alerts will not be fired");
+                            continue;
+                        }
+                            
+                        initialState = alertFiredEvents.get(
                             rce.getRecoveringFromAlertDefinitionId());
                     } else {
-                        initialState = (Serializable) alertConditionEvaluatorRepository
+                        initialState = alertConditionEvaluatorRepository
                             .getStateRepository()
                             .getAlertConditionEvaluatorStates()
                             .get(def.getId());
@@ -353,10 +359,10 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
                     alertConditionEvaluator.initialize(initialState);
                     
                     Serializable initialExStrategyState =
-                        (Serializable) alertConditionEvaluatorRepository
-                            .getStateRepository()
-                            .getExecutionStrategyStates()
-                            .get(def.getId());
+                        alertConditionEvaluatorRepository
+                        .getStateRepository()
+                        .getExecutionStrategyStates()
+                        .get(def.getId());
                     
                     alertConditionEvaluator.getExecutionStrategy()
                                            .initialize(initialExStrategyState);
@@ -407,7 +413,12 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
             }
         }
 
-        Map<Integer,AlertFiredEvent> results = eventLogManager.findLastUnfixedAlertFiredEvents();
+        Map<Integer,AlertFiredEvent> results = null;
+        try {
+            results = eventLogManager.findLastUnfixedAlertFiredEvents();
+        } catch (Exception e){
+            log.error(e.getMessage(), e);
+        }
         
         if (debug) {
             watch.markTimeEnd("find");
@@ -536,7 +547,7 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
                 Collection<Integer> triggerIds =  alertDefTriggerMap.get(alertDefId);
                 
                 if (enabled && !triggerIds.isEmpty()) {
-                    Integer triggerId = (Integer) triggerIds.iterator().next();
+                    Integer triggerId = triggerIds.iterator().next();
                     if (registeredTriggerRepository.getTriggerById(triggerId) == null) {
                         zevents.add(new TriggersCreatedZevent(alertDefId));
                         continue;

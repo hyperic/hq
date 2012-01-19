@@ -28,7 +28,9 @@ package org.hyperic.hq.agent.stats;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
@@ -45,10 +47,21 @@ public class AgentStatsCollector extends AbstractStatsCollector {
     public static final String COLLECTOR_THREAD_METRIC_COLLECTED_TIME = "COLLECTOR_THREAD_METRIC_COLLECTED_TIME";
     public static final String SENDER_THREAD_SEND_NUM_METRICS = "SENDER_THREAD_NUM_SEND_METRICS";
     public static final String SENDER_THREAD_SEND_METRICS_TIME = "SENDER_THREAD_SEND_METRICS_TIME";
+    public static final String DISK_LIST_DISK_ITERATOR_REMOVE_TIME = "DISK_LIST_DISK_ITERATOR_REMOVE_TIME";
+    public static final String DISK_LIST_READ_RECORD_TIME = "DISK_LIST_READ_RECORD_TIME";
+    public static final String DISK_LIST_ADD_TO_LIST_TIME = "DISK_LIST_ADD_TO_LIST_TIME";
+    public static final String DISK_LIST_DELETE_ALL_RECORDS_TIME = "DISK_LIST_DELETE_ALL_RECORDS_TIME";
 
     private AgentStatsCollector() {
         super(getMBeanServer());
-        this.executor = new ScheduledThreadPoolExecutor(2);
+        this.executor = new ScheduledThreadPoolExecutor(2, new ThreadFactory() {
+            private final AtomicLong num = new AtomicLong(0);
+            public Thread newThread(Runnable r) {
+                final Thread rtn = new Thread(r, "agentstats-" + num.getAndIncrement());
+                rtn.setDaemon(true);
+                return rtn;
+            }
+        });
     }
     
     private static MBeanServer getMBeanServer() {

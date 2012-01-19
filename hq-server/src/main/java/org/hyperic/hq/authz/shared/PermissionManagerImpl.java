@@ -463,15 +463,23 @@ public class PermissionManagerImpl
         return rtn;
     }
 
-    public Set<Integer> findViewableResources(AuthzSubject subj,
-                                              Collection<ResourceType> resourceTypes) {
+    public Set<Integer> findViewableResources(AuthzSubject subj, Collection<ResourceType> resourceTypes) {
+        return findViewableResources(subj, resourceTypes, new IntegerConverter<Integer>() {
+            public Integer convert(Integer id) {
+                return id;
+            }
+        });
+    }
+
+    public <T> Set<T> findViewableResources(AuthzSubject subj, Collection<ResourceType> resourceTypes,
+                                            IntegerConverter<T> converter) {
         if (resourceTypes.isEmpty()) {
             return Collections.emptySet();
         }
         final ResourceDAO resourceDAO = getResourceDAO();
         final Collection<Resource> resources = (subj.getId().equals(1)) ?
             resourceDAO.findAll() : resourceDAO.findByOwner(subj);
-        final Set<Integer> rtn = new HashSet<Integer>();
+        final Set<T> rtn = new HashSet<T>();
         final Set<Integer> typeIds = new HashSet<Integer>();
         for (final ResourceType type : resourceTypes) {
             typeIds.add(type.getId());
@@ -480,8 +488,13 @@ public class PermissionManagerImpl
             if (r == null || r.isInAsyncDeleteState() || r.isSystem()) {
                 continue;
             }
-            if (typeIds.contains(r.getResourceType().getId())) {
-                rtn.add(r.getId());
+            final Integer id = r.getId();
+            final int typeId = r.getResourceType().getId();
+            if (typeIds.contains(typeId)) {
+                T val = converter.convert(id);
+                if (val != null) {
+                    rtn.add(val);
+                }
             }
         }
         return rtn;

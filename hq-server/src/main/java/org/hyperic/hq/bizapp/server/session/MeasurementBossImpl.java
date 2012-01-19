@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -76,6 +77,8 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.ResourceRelation;
+import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
@@ -2473,14 +2476,12 @@ public class MeasurementBossImpl implements MeasurementBoss {
                                                                       long filters, String keyword,
                                                                       long begin, long end,
                                                                       boolean showNoCollect)
-        throws AppdefCompatException {
+    throws AppdefCompatException {
         // Need to get the templates for this type
-        List<MeasurementTemplate> tmpls = templateManager.findTemplates(resourceType, filters,
-            keyword);
+        List<MeasurementTemplate> tmpls = templateManager.findTemplates(resourceType, filters, keyword);
 
         // Look up the metric summaries of associated servers
-        return getResourceMetrics(subject, resources, tmpls, begin, end, Boolean
-            .valueOf(showNoCollect));
+        return getResourceMetrics(subject, resources, tmpls, begin, end, Boolean.valueOf(showNoCollect));
     }
 
     /**
@@ -2493,22 +2494,17 @@ public class MeasurementBossImpl implements MeasurementBoss {
      *        collected data
      * @return Map where key = category, value = List of summary beans
      */
-    private Map<String, Set<MetricDisplaySummary>> getResourceMetrics(AuthzSubject subject,
-                                                                      List resources, List tmpls,
-                                                                      long begin, long end,
-                                                                      Boolean showNoCollect)
-        throws AppdefCompatException {
+    private Map<String, Set<MetricDisplaySummary>> getResourceMetrics(AuthzSubject subject, List resources, List tmpls,
+                                                                      long begin, long end, Boolean showNoCollect)
+    throws AppdefCompatException {
         List<MeasurementTemplate> templates;
         Integer[] tids;
-
         // Create Map of all resources
         final int size = MeasurementConstants.VALID_CATEGORIES.length;
-        HashMap<String, Set<MetricDisplaySummary>> resmap =
-            new HashMap<String, Set<MetricDisplaySummary>>(size);
-
-        if (tmpls.size() == 0 || resources.size() == 0)
+        HashMap<String, Set<MetricDisplaySummary>> resmap = new HashMap<String, Set<MetricDisplaySummary>>(size);
+        if (tmpls.size() == 0 || resources.size() == 0) {
             return resmap;
-
+        }
         if (tmpls.get(0) instanceof MeasurementTemplate) {
             templates = tmpls;
             tids = new Integer[templates.size()];
@@ -2531,8 +2527,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
         Integer[] eids = new Integer[resources.size()];
         AppdefEntityID[] aeids = new AppdefEntityID[resources.size()];
         Map<String, Integer> totalCounts = new HashMap<String, Integer>();
-        Map<Integer, Collection<AppdefEntityID>> aeidsByType =
-            new HashMap<Integer, Collection<AppdefEntityID>>();
+        Map<Integer, Collection<AppdefEntityID>> aeidsByType = new HashMap<Integer, Collection<AppdefEntityID>>();
         int i=0;
         for (Iterator<Object> it=resources.iterator(); it.hasNext(); i++) {
             // We understand two types
@@ -2868,11 +2863,9 @@ public class MeasurementBossImpl implements MeasurementBoss {
     /**
      * @return a List of ResourceTypeDisplaySummary's
      */
-    private List<ResourceTypeDisplaySummary> getSummarizedResourceCurrentHealth(
-                                                                                AuthzSubject subject,
+    private List<ResourceTypeDisplaySummary> getSummarizedResourceCurrentHealth(AuthzSubject subject,
                                                                                 Collection<AppdefResource> resources)
-        throws SessionTimeoutException, SessionNotFoundException, AppdefEntityNotFoundException,
-        PermissionException {
+    throws SessionTimeoutException, SessionNotFoundException, AppdefEntityNotFoundException, PermissionException {
         List<ResourceTypeDisplaySummary> summaries = new ArrayList<ResourceTypeDisplaySummary>();
 
         // auto-group'd entities are kept track of in here where keys are the
@@ -3075,8 +3068,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
     @Transactional(readOnly = true)
     public List<ResourceTypeDisplaySummary> findSummarizedServerCurrentHealth(int sessionId,
                                                                               AppdefEntityID entId)
-        throws SessionTimeoutException, SessionNotFoundException, AppdefEntityNotFoundException,
-        PermissionException {
+    throws SessionTimeoutException, SessionNotFoundException, AppdefEntityNotFoundException, PermissionException {
         final AuthzSubject subject = sessionManager.getSubject(sessionId);
 
         // Get the associated servers
@@ -3109,11 +3101,9 @@ public class MeasurementBossImpl implements MeasurementBoss {
      * 
      */
     @Transactional(readOnly = true)
-    public List<ResourceTypeDisplaySummary> findSummarizedPlatformServiceCurrentHealth(
-                                                                                       int sessionId,
+    public List<ResourceTypeDisplaySummary> findSummarizedPlatformServiceCurrentHealth(int sessionId,
                                                                                        AppdefEntityID entId)
-        throws SessionTimeoutException, SessionNotFoundException, PermissionException,
-        AppdefEntityNotFoundException {
+    throws SessionTimeoutException, SessionNotFoundException, PermissionException, AppdefEntityNotFoundException {
         final AuthzSubject subject = sessionManager.getSubject(sessionId);
 
         Collection<AppdefResource> services = serviceManager.getPlatformServices(subject, entId
@@ -3125,10 +3115,8 @@ public class MeasurementBossImpl implements MeasurementBoss {
      * 
      */
     @Transactional(readOnly = true)
-    public List<ResourceTypeDisplaySummary> findSummarizedServiceCurrentHealth(int sessionId,
-                                                                               AppdefEntityID entId)
-        throws SessionTimeoutException, SessionNotFoundException, PermissionException,
-        AppdefEntityNotFoundException {
+    public List<ResourceTypeDisplaySummary> findSummarizedServiceCurrentHealth(int sessionId, AppdefEntityID entId)
+    throws SessionTimeoutException, SessionNotFoundException, PermissionException, AppdefEntityNotFoundException {
         final AuthzSubject subject = sessionManager.getSubject(sessionId);
         // Get the associated services
         AppdefEntityValue rv = new AppdefEntityValue(entId, subject);
@@ -3170,18 +3158,15 @@ public class MeasurementBossImpl implements MeasurementBoss {
         // Look up metrics by group first
 
         for (Map.Entry<String, Map<Resource, Measurement>> entry : cats.entrySet()) {
-
-            List<Measurement> metrics = measurementManager.findDesignatedMeasurements(subject,
-                group, (String) entry.getKey());
+            List<Measurement> metrics =
+                measurementManager.findDesignatedMeasurements(subject, group, (String) entry.getKey());
             Map<Resource, Measurement> mmap = new HashMap<Resource, Measurement>(metrics.size());
             // Optimization for the fact that we can have multiple indicator
             // metrics for each category, only keep one
             for (Measurement m : metrics) {
-
                 if (mmap.containsKey(m.getResource())) {
                     continue;
                 }
-
                 mmap.put(m.getResource(), m);
             }
             entry.setValue(mmap);
@@ -3285,13 +3270,14 @@ public class MeasurementBossImpl implements MeasurementBoss {
 
     }
 
-    private void setResourceDisplaySummary(ResourceDisplaySummary rds, AppdefEntityValue resource,
+    private void setResourceDisplaySummary(ResourceDisplaySummary rds, AppdefEntityID aeid,
                                            AppdefResourceValue parentResource)
         throws AppdefEntityNotFoundException, PermissionException {
-        rds.setEntityId(resource.getID());
+        Resource resource = resourceManager.findResource(aeid);
+        rds.setEntityId(aeid);
         rds.setResourceName(resource.getName());
-        rds.setResourceEntityTypeName(resource.getID().getTypeName());
-        rds.setResourceTypeName(resource.getTypeName());
+        rds.setResourceEntityTypeName(aeid.getTypeName());
+        rds.setResourceTypeName(resource.getResourceType().getName());
         if (parentResource == null) {
             rds.setHasParentResource(Boolean.FALSE);
         } else {
@@ -3320,38 +3306,36 @@ public class MeasurementBossImpl implements MeasurementBoss {
     }
 
     private PageList<ResourceDisplaySummary> getResourcesCurrentHealth(AuthzSubject subject,
-                                                                       PageList resources)
+                                                                       Collection<?> resources)
         throws AppdefEntityNotFoundException, PermissionException {
         final boolean debug = log.isDebugEnabled();
-        StopWatch watch = new StopWatch();
-        PageList<ResourceDisplaySummary> summaries = new PageList<ResourceDisplaySummary>();
-        if (debug)
-            watch.markTimeBegin("getAvailMeasurements");
-        final Map<Integer, List<Measurement>> measCache = measurementManager
-            .getAvailMeasurements(resources);
-        if (debug)
-            watch.markTimeEnd("getAvailMeasurements");
-        if (debug)
-            watch.markTimeBegin("getLastAvail");
-        final Map<Integer, MetricValue> availCache = availabilityManager.getLastAvail(resources,
-            measCache);
-        if (debug)
-            watch.markTimeEnd("getLastAvail");
-        for (Iterator it = resources.iterator(); it.hasNext();) {
+        final StopWatch watch = new StopWatch();
+        final Collection<ResourceDisplaySummary> summaries =
+            new TreeSet<ResourceDisplaySummary>(new Comparator<ResourceDisplaySummary>() {
+                public int compare(ResourceDisplaySummary o1, ResourceDisplaySummary o2) {
+                    return o1.getResourceName().compareTo(o2.getResourceName());
+                }
+        });
+        if (debug) watch.markTimeBegin("getAvailMeasurements");
+        final Map<Integer, List<Measurement>> measCache = measurementManager.getAvailMeasurements(resources);
+        if (debug) watch.markTimeEnd("getAvailMeasurements");
+        if (debug) watch.markTimeBegin("getLastAvail");
+        final Map<Integer, MetricValue> availCache = availabilityManager.getLastAvail(resources, measCache);
+        if (debug) watch.markTimeEnd("getLastAvail");
+        for (final Iterator<?> it = resources.iterator(); it.hasNext();) {
             try {
                 Object o = it.next();
-                AppdefEntityValue rv;
                 AppdefEntityID aeid;
                 if (o instanceof AppdefEntityValue) {
-                    rv = (AppdefEntityValue) o;
+                    AppdefEntityValue rv = (AppdefEntityValue) o;
                     aeid = rv.getID();
+                } else if (o instanceof Resource) {
+                    aeid = AppdefUtil.newAppdefEntityId((Resource) o);
                 } else if (o instanceof AppdefEntityID) {
                     aeid = (AppdefEntityID) o;
-                    rv = new AppdefEntityValue(aeid, subject);
                 } else {
                     AppdefResourceValue resource = (AppdefResourceValue) o;
                     aeid = resource.getEntityId();
-                    rv = new AppdefEntityValue(aeid, subject);
                 }
                 ResourceDisplaySummary summary = new ResourceDisplaySummary();
                 // Set the resource
@@ -3359,67 +3343,51 @@ public class MeasurementBossImpl implements MeasurementBoss {
                 HashSet<String> categories = new HashSet<String>(4);
                 switch (aeid.getType()) {
                     case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                        if (debug)
-                            watch.markTimeBegin("getPlatform");
-                        Server server = serverManager.findServerById(rv.getID().getId());
+                        if (debug) watch.markTimeBegin("getPlatform");
+                        Server server = serverManager.findServerById(aeid.getId());
                         parent = server.getPlatform().getAppdefResourceValue();
-                        if (debug)
-                            watch.markTimeEnd("getPlatform");
+                        if (debug) watch.markTimeEnd("getPlatform");
                     case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
                     case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
                         categories.add(MeasurementConstants.CAT_AVAILABILITY);
-                        // XXX scottmf need to review this, perf is bad and
-                        // metric
-                        // is not very useful
-                        // categories.add(MeasurementConstants.CAT_THROUGHPUT);
-                        if (debug)
-                            watch.markTimeBegin("setResourceDisplaySummaryValueForCategory");
-                        setResourceDisplaySummaryValueForCategory(subject, aeid, summary,
-                            categories, measCache, availCache);
-                        if (debug)
-                            watch.markTimeEnd("setResourceDisplaySummaryValueForCategory");
-
+                        // XXX scottmf need to review this, perf is bad and metric
+                        // is not very useful categories.add(MeasurementConstants.CAT_THROUGHPUT);
+                        if (debug) watch.markTimeBegin("setResourceDisplaySummaryValueForCategory");
+                        setResourceDisplaySummaryValueForCategory(subject, aeid, summary, categories, measCache, availCache);
+                        if (debug) watch.markTimeEnd("setResourceDisplaySummaryValueForCategory");
                         summary.setMonitorable(Boolean.TRUE);
                         break;
                     case AppdefEntityConstants.APPDEF_TYPE_GROUP:
                     case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-                        if (debug)
-                            watch.markTimeBegin("Group Type");
+                        if (debug) watch.markTimeBegin("Group Type");
                         summary.setMonitorable(Boolean.TRUE);
                         // Set the availability now
                         double avail = getAvailability(subject, aeid, measCache, availCache);
                         summary.setAvailability(new Double(avail));
                         try {
                             // Get the availability template
-                            MeasurementTemplate tmpl = getAvailabilityMetricTemplate(subject, aeid,
-                                measCache);
+                            MeasurementTemplate tmpl = getAvailabilityMetricTemplate(subject, aeid, measCache);
                             summary.setAvailTempl(tmpl.getId());
                         } catch (MeasurementNotFoundException e) {
                             // No availability metric, don't set it
                         }
-                        if (debug)
-                            watch.markTimeEnd("Group Type");
+                        if (debug) watch.markTimeEnd("Group Type");
                         break;
                     default:
                         throw new InvalidAppdefTypeException(
                             "entity type is not monitorable, id type: " + aeid.getType());
                 }
-                if (debug)
-                    watch.markTimeBegin("setResourceDisplaySummary");
-                setResourceDisplaySummary(summary, rv, parent);
-                if (debug)
-                    watch.markTimeEnd("setResourceDisplaySummary");
+                if (debug) watch.markTimeBegin("setResourceDisplaySummary");
+                setResourceDisplaySummary(summary, aeid, parent);
+                if (debug) watch.markTimeEnd("setResourceDisplaySummary");
                 summaries.add(summary);
             } catch (AppdefEntityNotFoundException e) {
                 log.debug(e.getMessage(), e);
             }
         }
-
-        if (debug)
-            log.debug("getResourcesCurrentHealth: " + watch);
-
-        summaries.setTotalSize(resources.getTotalSize());
-        return summaries;
+        if (debug) log.debug("getResourcesCurrentHealth: " + watch);
+        final PageList<ResourceDisplaySummary> rtn = new PageList<ResourceDisplaySummary>(summaries, resources.size());
+        return rtn;
     }
 
     /**
@@ -3433,9 +3401,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
      * @throws PermissionException
      * @throws AppdefEntityNotFoundException
      */
-    private void setResourceDisplaySummaryValueForCategory(
-                                                           AuthzSubject subject,
-                                                           AppdefEntityID aeid,
+    private void setResourceDisplaySummaryValueForCategory(AuthzSubject subject, AppdefEntityID aeid,
                                                            ResourceDisplaySummary summary,
                                                            Set<String> categories,
                                                            Map<Integer, List<Measurement>> measCache,
@@ -3521,9 +3487,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
      * @throws PermissionException
      * @throws AppdefEntityNotFoundException
      */
-    private void setResourceDisplaySummaryValueForCategories(
-                                                             AuthzSubject subject,
-                                                             Resource res,
+    private void setResourceDisplaySummaryValueForCategories(AuthzSubject subject, Resource res,
                                                              ResourceDisplaySummary summary,
                                                              Map<String, Map<Resource, Measurement>> categories,
                                                              Map<Integer, List<Measurement>> measCache,
@@ -3598,8 +3562,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
      * 
      */
     @Transactional(readOnly = true)
-    public List<ResourceDisplaySummary> findResourcesCurrentHealth(String user,
-                                                                   AppdefEntityID[] entIds)
+    public List<ResourceDisplaySummary> findResourcesCurrentHealth(String user, AppdefEntityID[] entIds)
         throws LoginException, ApplicationException, PermissionException,
         AppdefEntityNotFoundException, SessionNotFoundException, SessionTimeoutException {
         int sessionId = authBoss.getUnauthSessionId(user);
@@ -3616,8 +3579,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
      * 
      */
     @Transactional(readOnly = true)
-    public List<ResourceDisplaySummary> findResourcesCurrentHealth(int sessionId,
-                                                                   AppdefEntityID[] entIds)
+    public List<ResourceDisplaySummary> findResourcesCurrentHealth(int sessionId, AppdefEntityID[] entIds)
         throws AppdefEntityNotFoundException, PermissionException, SessionNotFoundException,
         SessionTimeoutException {
         final AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -3638,48 +3600,16 @@ public class MeasurementBossImpl implements MeasurementBoss {
      * 
      */
     @Transactional(readOnly = true)
-    public List<ResourceDisplaySummary> findHostsCurrentHealth(int sessionId, AppdefEntityID entId,
-                                                               PageControl pc)
-        throws SessionNotFoundException, SessionTimeoutException, PermissionException,
-        AppdefEntityNotFoundException {
-        final AuthzSubject subject = sessionManager.getSubject(sessionId);
-        AppdefEntityValue rv = new AppdefEntityValue(entId, subject);
-        int entType = entId.getType();
-
-        if (entId.isGroup()) {
-            entType = rv.getAppdefResourceType().getAppdefType();
+    public List<ResourceDisplaySummary> findHostsCurrentHealth(int sessionId, AppdefEntityID aeid, PageControl pc)
+    throws SessionNotFoundException, SessionTimeoutException, PermissionException, AppdefEntityNotFoundException {
+        final AuthzSubject subj = sessionManager.getSubject(sessionId);
+        final Resource resource = resourceManager.findResource(aeid);
+        if (resource == null || resource.isInAsyncDeleteState()) {
+            return Collections.emptyList();
         }
-
-        PageList hosts;
-
-        switch (entType) {
-            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                hosts = rv.getAssociatedPlatforms(pc);
-                break;
-            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                hosts = rv.getAssociatedServers(pc);
-
-                // Go through and see if we are looking at virtual servers
-                ArrayList<AppdefEntityID> virtIds = new ArrayList<AppdefEntityID>(hosts.size());
-                for (Iterator<ServerValue> it = hosts.iterator(); it.hasNext();) {
-                    ServerValue sv = it.next();
-                    if (!sv.getServerType().getVirtual()) {
-                        break;
-                    }
-
-                    virtIds.add(sv.getEntityId());
-                }
-
-                if (virtIds.size() > 0) {
-                    hosts = platformManager.getPlatformsByServers(subject, virtIds);
-                }
-                break;
-            default:
-                return new PageList<ResourceDisplaySummary>();
-        }
-
-        // Return a paged list of current health
-        return getResourcesCurrentHealth(subject, hosts);
+        final Collection<Resource> hosts =
+            resourceManager.getParentResources(subj, resource, resourceManager.getContainmentRelation());
+        return getResourcesCurrentHealth(subj, hosts);
     }
 
     /**
@@ -3700,11 +3630,9 @@ public class MeasurementBossImpl implements MeasurementBoss {
      * 
      */
     @Transactional(readOnly = true)
-    public PageList<ResourceDisplaySummary> findPlatformsCurrentHealth(int sessionId,
-                                                                       AppdefEntityID entId,
+    public PageList<ResourceDisplaySummary> findPlatformsCurrentHealth(int sessionId, AppdefEntityID entId,
                                                                        PageControl pc)
-        throws SessionTimeoutException, SessionNotFoundException, AppdefEntityNotFoundException,
-        PermissionException {
+    throws SessionTimeoutException, SessionNotFoundException, AppdefEntityNotFoundException, PermissionException {
         final AuthzSubject subject = sessionManager.getSubject(sessionId);
         AppdefEntityValue rv = new AppdefEntityValue(entId, subject);
         PageList platforms = rv.getAssociatedPlatforms(pc);
@@ -3791,8 +3719,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
             case AppdefEntityConstants.APPDEF_TYPE_GROUP:
                 break;
             default:
-                throw new InvalidAppdefTypeException("entityID is not valid type, id type: " +
-                                                     entId.getType());
+                throw new InvalidAppdefTypeException("entityID is not valid type, id:type=" + entId);
         }
 
         AppdefEntityValue rv = new AppdefEntityValue(entId, subject);
@@ -3801,13 +3728,10 @@ public class MeasurementBossImpl implements MeasurementBoss {
         // Return a paged list of current health
         final StopWatch watch = new StopWatch();
         final boolean debug = log.isDebugEnabled();
-        if (debug)
-            watch.markTimeBegin("getResourcesCurrentHealth");
+        if (debug) watch.markTimeBegin("getResourcesCurrentHealth");
         PageList<ResourceDisplaySummary> rtn = getResourcesCurrentHealth(subject, servers);
-        if (debug)
-            watch.markTimeEnd("getResourcesCurrentHealth");
-        if (debug)
-            log.debug(watch);
+        if (debug) watch.markTimeEnd("getResourcesCurrentHealth");
+        if (debug) log.debug(watch);
         return rtn;
     }
 
@@ -3816,36 +3740,33 @@ public class MeasurementBossImpl implements MeasurementBoss {
      * 
      * For platform's autogroup of servers.
      * 
-     * If the entId is a platform, the deployed servers view shows the current
-     * health of servers.
+     * If the entId is a platform, the deployed servers view shows the current health of servers.
      * 
      * @return a list of ResourceDisplaySummary beans
      * 
      */
     @Transactional(readOnly = true)
-    public List<ResourceDisplaySummary> findAGServersCurrentHealthByType(int sessionId,
-                                                                         AppdefEntityID[] entIds,
+    public List<ResourceDisplaySummary> findAGServersCurrentHealthByType(int sessionId, AppdefEntityID[] entIds,
                                                                          Integer serverTypeId)
-        throws SessionTimeoutException, SessionNotFoundException, InvalidAppdefTypeException,
-        AppdefEntityNotFoundException, PermissionException {
+    throws SessionTimeoutException, SessionNotFoundException, InvalidAppdefTypeException, AppdefEntityNotFoundException,
+           PermissionException {
         final AuthzSubject subject = sessionManager.getSubject(sessionId);
-        PageList servers = new PageList();
-        PageControl pc = PageControl.PAGE_ALL;
-
-        for (int i = 0; i < entIds.length; i++) {
-            AppdefEntityID entId = entIds[i];
-            if (entId.getType() != AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
-                throw new InvalidAppdefTypeException(
-                    "findServersCurrentHealthByType() only allows Platforms, " + "id type: " +
-                        entId.getType());
+        final Collection<AppdefEntityID> aeids = Arrays.asList(entIds);
+        final Collection<Resource> resources = new ArrayList<Resource>(entIds.length);
+        for (final AppdefEntityID aeid : aeids) {
+            if (aeid.getType() != AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
+                throw new InvalidAppdefTypeException("findServersCurrentHealthByType() only allows Platforms, " +
+                                                     "id:type=" + aeid);
             }
-
-            AppdefEntityValue rv = new AppdefEntityValue(entId, subject);
-            servers.addAll(rv.getAssociatedServers(serverTypeId, pc));
+            final Resource resource = resourceManager.findResource(aeid);
+            resources.add(resource);
         }
-
-        // Return a paged list of current health
-        return getResourcesCurrentHealth(subject, servers);
+        final AppdefEntityTypeID appdefType = new AppdefEntityTypeID(AppdefEntityConstants.APPDEF_TYPE_SERVER, serverTypeId);
+        final Resource prototype = resourceManager.findResourcePrototype(appdefType);
+        final ResourceRelation relation = resourceManager.getContainmentRelation();
+        final Collection<Resource> childResources =
+            resourceManager.getDescendantResources(subject, resources, relation, prototype, true);
+        return getResourcesCurrentHealth(subject, childResources);
     }
 
     /**

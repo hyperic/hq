@@ -53,6 +53,7 @@ public class AgentServerDetector
         super();
     }
 
+    @Override
     public ServerSignature getServerSignature(){
         return new ServerSignature(AgentProductPlugin.FULL_SERVER_NAME,
                                    new String[0], new String[0], 
@@ -91,7 +92,7 @@ public class AgentServerDetector
         // Set custom properties
         ConfigResponse cprop = new ConfigResponse();
         cprop.setValue("version", version);
-        cprop.setValue("JavaVersion", System.getProperty("java.vm.version"));
+        cprop.setValue("JavaVersion", System.getProperty("java.version"));
         cprop.setValue("JavaVendor", System.getProperty("java.vm.vendor"));
         cprop.setValue("UserHome", System.getProperty("user.home"));
         cprop.setValue("SigarVersion", Sigar.VERSION_STRING);

@@ -180,18 +180,42 @@ public class ResourceEdgeDAO
             .setInteger("rel_id", rel.getId().intValue()).executeUpdate();
     }
 
+    @SuppressWarnings("unchecked")
+	Collection<ResourceEdge> getDescendantEdgesOfType(Collection<Resource> resources, Resource prototype,
+	                                                  ResourceRelation relation, int distance) {
+        String sign = (distance < 0) ? "<=" : ">=";
+        distance = Math.abs(distance);
+        final StringBuilder hqlbuf = new StringBuilder(64)
+            .append("FROM ResourceEdge re ")
+            .append("WHERE distance ").append(sign).append(" :dist and relation=:relation ")
+            .append("AND re.from in (:from)");
+        if (prototype != null) {
+            hqlbuf.append(" AND re.to.prototype = :type");
+        }
+        final String hql = hqlbuf.toString();
+        final Query query = getSession()
+            .createQuery(hql)
+            .setParameterList("from", resources)
+            .setParameter("relation", relation)
+            .setParameter("dist", distance);
+        if (prototype != null) {
+            query.setParameter("type", prototype);
+        }
+        return query.list();
+    }
+
     // Retrieve the parent of a given resource, if one exists, otherwise return
     // null
     ResourceEdge getParentEdge(Resource resource, ResourceRelation relation) {
-        String hql = "from ResourceEdge re "
-                     + "where re.from=:from and distance=-1 and relation=:relation";
-        Iterator iterator = getSession().createQuery(hql).setParameter("from", resource)
-            .setParameter("relation", relation).iterate();
-
+        String hql = "from ResourceEdge re where re.from=:from and distance=-1 and relation=:relation";
+        Iterator iterator = getSession()
+            .createQuery(hql)
+            .setParameter("from", resource)
+            .setParameter("relation", relation)
+            .iterate();
         if (iterator.hasNext()) {
             return (ResourceEdge) iterator.next();
         }
-
         return null;
     }
 
