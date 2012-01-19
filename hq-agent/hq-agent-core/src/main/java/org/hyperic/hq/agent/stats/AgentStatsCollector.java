@@ -28,7 +28,9 @@ package org.hyperic.hq.agent.stats;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
@@ -52,7 +54,14 @@ public class AgentStatsCollector extends AbstractStatsCollector {
 
     private AgentStatsCollector() {
         super(getMBeanServer());
-        this.executor = new ScheduledThreadPoolExecutor(2);
+        this.executor = new ScheduledThreadPoolExecutor(2, new ThreadFactory() {
+            private final AtomicLong num = new AtomicLong(0);
+            public Thread newThread(Runnable r) {
+                final Thread rtn = new Thread(r, "agentstats-" + num.getAndIncrement());
+                rtn.setDaemon(true);
+                return rtn;
+            }
+        });
     }
     
     private static MBeanServer getMBeanServer() {
