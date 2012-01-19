@@ -842,4 +842,12 @@ public class ApplicationManagerImpl implements ApplicationManager,
         if (app.getOpsContact() != null)
             app.setOpsContact(app.getOpsContact().trim());
     }
+
+    @Transactional(readOnly=true)
+    public Application getApplicationById(Integer id) {
+        if (id == null) {
+            return null;
+        }
+        return applicationDAO.get(id);
+    }
 }

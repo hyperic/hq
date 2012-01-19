@@ -98,4 +98,5 @@ public class ResourceTypeDAO
         return (ResourceType) getSession().createQuery(sql).setString(0, name).setCacheable(true)
             .setCacheRegion("ResourceType.findByName").uniqueResult();
     }
+
 }
