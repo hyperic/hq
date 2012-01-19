@@ -274,11 +274,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
-			<artifactId>jboss7-plugin</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>jetty-plugin</artifactId>
 			<version>${project.version}</version>
 		    <type>zip</type>
