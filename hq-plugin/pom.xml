@@ -38,7 +38,6 @@
 		<module>informix-plugin</module>
 		<module>iplanet-plugin</module>
 		<module>jboss-plugin</module>
-		<module>jboss7-plugin</module>
 		<module>jetty-plugin</module>
 		<module>jmx-plugin</module>
 		<module>jvm-plugin</module>

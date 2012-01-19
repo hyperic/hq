@@ -1678,4 +1678,232 @@
             <plugin type="control" class="JBoss6StateServiceControlPlugin"/>
         </service>
     </server>
+    
+        <server name="JBoss Host Controller" version="7">
+        <plugin type="autoinventory" class="org.hyperic.hq.plugin.jboss7.JBossHostControllerDetector"/>
+        <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
+        <plugin type="collector" class="org.hyperic.hq.plugin.jboss7.JBossHostControllerCollector"/>
+        <config>
+            <option name="jboss7.addr" description="Http Address" default="localhost"/>
+            <option name="jboss7.port" description="Http Port" default="9990"/>
+            <option name="jboss7.https" description="Use SSL" default="false" type="boolean"/>
+            <option name="jboss7.user" description="Username" default="guest"/>
+            <option name="jboss7.pass" description="Password" default="guest" type="secret"/>
+            <option name="jboss7.host" description="Host Name"/>
+        </config>
+        <help>
+            <![CDATA[
+                  <p>
+                    <h2>Configure JBoss 7 Host Controller for Monitoring</h2>
+                        <h3>Config properties</h3>
+                        <ol>
+                            <li><b>addr</b>: Management HTTP IP/HostName (usualy: localhost)</li>
+                            <li><b>port</b>: Management HTTP Listen Port</li>
+                            <li><b>https</b>: Use https/ssl</li>
+                            <li><b>user</b>: Administrator User name</li>
+                            <li><b>pass</b>: Administrator User password</li>
+                            <li><b>host</b>: Host Controller Name</li>
+                        </ol>
+                        <h3>SSL Configuration Requirements (Hyperic 4.6 and later)</h3>
+                        There are new SSL configuration requirements for secure communication between a Hyperic 4.6 agent and a JBoss.
+                        <ul>
+                            <li>If the <b>accept.unverified.certificates</b> property is <b>false</b> (default value) in the <b>agent.properties</b> file, 
+                            the JBoss's unverified SSL certificate needs to be manually imported to a keystore that the Hyperic 4.6 agent can access.
+                            Otherwise, secure communication between the Hyperic 4.6 agent and JBoss will fail.
+                            </li>
+                            <li>If the <b>accept.unverified.certificates</b> property is <b>true</b> in the <b>agent.properties</b> file, the JBoss plugin will automatically
+                            import the unverified SSL certificate of the JBoss to the keystore accessible to the Hyperic 4.6 agent.
+                            <u>This is not recommended</u> because it is less secure and will expose the Hyperic agent to man-in-the-middle attacks.
+                            </li>
+                        </ul> 
+                  </p>
+                  <p>
+                    <h3>Help Docs</h3>
+                    <a href="http://support.hyperic.com/display/DOCS46/JBoss" target="_new">Monitoring and Managing JBoss</a>
+                  </p>
+            ]]>
+        </help>
+
+        <filter name="server-connection" value="jboss7.addr=%jboss7.addr%,jboss7.port=%jboss7.port%,jboss7.user=%jboss7.user%,jboss7.pass=%jboss7.pass%,jboss7.https=%jboss7.https%,jboss7.host=%jboss7.host%,jboss7.server=%jboss7.server%"/>
+        <property name="template" value="jboss7:${server-connection}:${alias}"/>
+        <metric name="Availability" alias="Availability" indicator="true"/>
+        <metric name="thread-count"/>
+        <metric name="peak-thread-count" />
+        <metric name="total-started-thread-count" />
+        <metric name="daemon-thread-count" />
+        <metric name="current-thread-cpu-time" units="ns"/>
+        <metric name="current-thread-user-time" units="ns"/>
+        <metric name="Heap Used %" alias="h.used.p" units="percentage" indicator="true"/>
+        <metric name="Heap Init" alias="h.init" units="B"/>
+        <metric name="Heap used" alias="h.used" units="B"/>
+        <metric name="Heap Commited" alias="h.committed" units="B"/>
+        <metric name="Heap Max" alias="h.max" units="B"/>
+        <metric name="Non-Heap Used %" alias="nh.used.p" units="percentage" indicator="true"/>
+        <metric name="Non-Heap Init" alias="nh.init" units="B"/>
+        <metric name="Non-Heap used" alias="nh.used" units="B"/>
+        <metric name="Non-Heap Commited" alias="nh.committed" units="B"/>
+        <metric name="Non-Heap Max" alias="nh.max" units="B"/>
+    </server>
+        
+    <server name="JBoss" version="7" include="JBoss Host Controller 7">
+        <plugin type="autoinventory" class="org.hyperic.hq.plugin.jboss7.JBossStandaloneDetector"/>
+        <plugin type="collector" class="org.hyperic.hq.plugin.jboss7.JBoss7Collector"/>
+        <config>
+            <option name="jboss7.addr" description="Http Address" default="localhost"/>
+            <option name="jboss7.port" description="Http Port" default="9990"/>
+            <option name="jboss7.https" description="Use SSL" default="false" type="boolean"/>
+            <option name="jboss7.user" description="Username" default="guest"/>
+            <option name="jboss7.pass" description="Password" default="guest" type="secret"/>
+        </config>
+
+        <help>
+            <![CDATA[
+                  <p>
+                    <h2>Configure JBoss 7 for Monitoring</h2>
+                        <h3>Config properties</h3>
+                        <ol>
+                            <li><b>addr</b>: Management HTTP IP/HostName (usualy: localhost)</li>
+                            <li><b>port</b>: Management HTTP Listen Port</li>
+                            <li><b>https</b>: Use https/ssl</li>
+                            <li><b>user</b>: Administrator User name</li>
+                            <li><b>pass</b>: Administrator User password</li>
+                        </ol>
+                        <h3>SSL Configuration Requirements (Hyperic 4.6 and later)</h3>
+                        There are new SSL configuration requirements for secure communication between a Hyperic 4.6 agent and a JBoss.
+                        <ul>
+                            <li>If the <b>accept.unverified.certificates</b> property is <b>false</b> (default value) in the <b>agent.properties</b> file, 
+                            the JBoss's unverified SSL certificate needs to be manually imported to a keystore that the Hyperic 4.6 agent can access.
+                            Otherwise, secure communication between the Hyperic 4.6 agent and JBoss will fail.
+                            </li>
+                            <li>If the <b>accept.unverified.certificates</b> property is <b>true</b> in the <b>agent.properties</b> file, the JBoss plugin will automatically
+                            import the unverified SSL certificate of the JBoss to the keystore accessible to the Hyperic 4.6 agent.
+                            <u>This is not recommended</u> because it is less secure and will expose the Hyperic agent to man-in-the-middle attacks.
+                            </li>
+                        </ul> 
+                  </p>
+                  <p>
+                    <h3>Help Docs</h3>
+                    <a href="http://support.hyperic.com/display/DOCS46/JBoss" target="_new">Monitoring and Managing JBoss</a>
+                  </p>
+            ]]>
+        </help>
+
+        <metric name="Object Pending Finalization" alias="object-pending-finalization-count"/>            
+        <metric name="Aborted Transactions" alias="aborted-transactions" collectionType="trendsup"/>
+        <metric name="Application Transactions Rollbacks" alias="application-rollbacks" collectionType="trendsup"/>
+        <metric name="Committed Transactions" alias="committed-transactions" collectionType="trendsup"/>
+        <metric name="Heuristics Transactions" alias="heuristics" collectionType="trendsup"/>
+        <metric name="Inflight Transactions" alias="inflight-transactions"/>
+        <metric name="Nested Transactions" alias="nested-transactions" collectionType="trendsup"/>
+        <metric name="Resource Transactions Rollbacks" alias="resource-rollbacks" collectionType="trendsup"/>
+        <metric name="Timed-out Transactions" alias="timed-out-transactions" collectionType="trendsup" indicator="true"/>
+        <metric name="Number of Transactions" alias="transactions" collectionType="trendsup" indicator="true"/>
+
+        <service name="Datasource">
+            <plugin type="collector" class="org.hyperic.hq.plugin.jboss7.DataSourceCollector"/>
+            <config>
+                <option name="name" description="DataSource Name"/>
+            </config>
+            <properties>
+                <property name="jndi" description="JNDI Name"/>
+                <property name="driver" description="Driver"/>
+            </properties>
+            <property name="template" value="jboss7:datasource=%name%,${server-connection}:${alias}"/>
+            <metric name="Availability" alias="Availability" indicator="true"/>
+            <metric name="ActiveCount" alias="ActiveCount" indicator="true"/>
+            <metric name="AvailableCount" alias="AvailableCount" indicator="true"/>
+            <metric name="AverageBlockingTime" alias="AverageBlockingTime" units="ms"/>
+            <metric name="AverageCreationTime" alias="AverageCreationTime" units="ms"/>
+            <metric name="CreatedCount" alias="CreatedCount" collectionType="trendsup"/>
+            <metric name="DestroyedCount" alias="DestroyedCount" collectionType="trendsup"/>
+            <metric name="MaxCreationTime" alias="MaxCreationTime" units="ms"/>
+            <metric name="MaxUsedCount" alias="MaxUsedCount" collectionType="trendsup"/>
+            <metric name="MaxWaitCount" alias="MaxWaitCount" collectionType="trendsup"/>
+            <metric name="MaxWaitTime" alias="MaxWaitTime" units="ms" indicator="true"/>
+            <metric name="PreparedStatementCacheAccessCount" alias="PreparedStatementCacheAccessCount" collectionType="trendsup"/>
+            <metric name="PreparedStatementCacheAddCount" alias="PreparedStatementCacheAddCount" collectionType="trendsup"/>
+            <metric name="PreparedStatementCacheCurrentSize" alias="PreparedStatementCacheCurrentSize" collectionType="trendsup"/>
+            <metric name="PreparedStatementCacheDeleteCount" alias="PreparedStatementCacheDeleteCount" collectionType="trendsup"/>
+            <metric name="PreparedStatementCacheHitCount" alias="PreparedStatementCacheHitCount" collectionType="trendsup" indicator="true"/>
+            <metric name="PreparedStatementCacheMissCount" alias="PreparedStatementCacheMissCount" collectionType="trendsup" indicator="true"/>
+            <metric name="TimedOut" alias="TimedOut" collectionType="trendsup"/>
+            <metric name="TotalBlockingTime" alias="TotalBlockingTime" units="ms"/>
+            <metric name="TotalCreationTime" alias="TotalCreationTime" units="ms"/>
+        </service>
+        <service name="Connector">
+            <plugin type="collector" class="org.hyperic.hq.plugin.jboss7.ConnectorCollector"/>
+            <config>
+                <option name="name" description="Connector Name"/>
+            </config>
+            <properties>
+                <property name="protocol" description="protocol"/>
+                <property name="scheme" description="scheme"/>
+            </properties>
+            <property name="template" value="jboss7:connector=%name%,${server-connection}:${alias}"/>
+            <metric name="Availability"  indicator="true"/>
+            <metric name="errorCount" collectionType="trendsup" indicator="true"/>
+            <metric name="requestCount" collectionType="trendsup" indicator="true"/>
+            <metric name="maxTime" units="ms" indicator="true"/>
+            <metric name="bytesSent" collectionType="trendsup"/>
+            <metric name="bytesReceived" collectionType="trendsup"/>
+            <metric name="processingTime" collectionType="trendsup" units="ms"/>
+        </service>
+        <service name="deployment">
+            <plugin type="collector" class="org.hyperic.hq.plugin.jboss7.DeploymentCollector"/>
+            <config>
+                <option name="name" description="Deployment Name"/>
+            </config>
+            <properties>
+                <property name="runtime-name" description="runtime-name"/>
+            </properties>
+            <property name="template" value="jboss7:${server-connection}:%name%.${alias}"/>
+            <metric name="Availability"  indicator="true" />
+        </service>
+    </server>
+    
+    <server name="JBoss Managed" version="7" include="JBoss 7">
+        <plugin type="autoinventory" class="org.hyperic.hq.plugin.jboss7.JBossManagedDetector"/>
+        <config>
+            <option name="jboss7.addr" description="Http Address" default="localhost"/>
+            <option name="jboss7.port" description="Http Port" default="9990"/>
+            <option name="jboss7.https" description="Use SSL" default="false" type="boolean"/>
+            <option name="jboss7.user" description="Username" default="guest"/>
+            <option name="jboss7.pass" description="Password" default="guest" type="secret"/>
+            <option name="jboss7.host" description="Host Name"/>
+            <option name="jboss7.server" description="Server Name"/>
+        </config>
+        <help>
+            <![CDATA[
+                  <p>
+                    <h2>Configure JBoss 7 Managed for Monitoring</h2>
+                        <h3>Config properties</h3>
+                        <ol>
+                            <li><b>addr</b>: Management HTTP IP/HostName (usualy: localhost)</li>
+                            <li><b>port</b>: Management HTTP Listen Port</li>
+                            <li><b>https</b>: Use https/ssl</li>
+                            <li><b>user</b>: Administrator User name</li>
+                            <li><b>pass</b>: Administrator User password</li>
+                            <li><b>host</b>: Host Controller Name</li>
+                            <li><b>server</b>: Server Name</li>
+                        </ol>
+                        <h3>SSL Configuration Requirements (Hyperic 4.6 and later)</h3>
+                        There are new SSL configuration requirements for secure communication between a Hyperic 4.6 agent and a JBoss.
+                        <ul>
+                            <li>If the <b>accept.unverified.certificates</b> property is <b>false</b> (default value) in the <b>agent.properties</b> file, 
+                            the JBoss's unverified SSL certificate needs to be manually imported to a keystore that the Hyperic 4.6 agent can access.
+                            Otherwise, secure communication between the Hyperic 4.6 agent and JBoss will fail.
+                            </li>
+                            <li>If the <b>accept.unverified.certificates</b> property is <b>true</b> in the <b>agent.properties</b> file, the JBoss plugin will automatically
+                            import the unverified SSL certificate of the JBoss to the keystore accessible to the Hyperic 4.6 agent.
+                            <u>This is not recommended</u> because it is less secure and will expose the Hyperic agent to man-in-the-middle attacks.
+                            </li>
+                        </ul> 
+                  </p>
+                  <p>
+                    <h3>Help Docs</h3>
+                    <a href="http://support.hyperic.com/display/DOCS46/JBoss" target="_new">Monitoring and Managing JBoss</a>
+                  </p>
+            ]]>
+        </help>
+    </server>
 </plugin>
