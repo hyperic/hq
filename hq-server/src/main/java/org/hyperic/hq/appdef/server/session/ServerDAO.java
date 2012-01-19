@@ -134,7 +134,7 @@ public class ServerDAO
      * @param serverIds - {@link List} of {@link Integer}
      * @return {@link Collection} of {@link ServerType}
      */
-    Collection<ServerType> getServerTypes(final List serverIds, final boolean asc) {
+    Collection<ServerType> getServerTypes(final List<Integer> serverIds, final boolean asc) {
         final String hql = new StringBuilder().append("SELECT distinct s.serverType").append(
             " FROM Server s").append(" WHERE s.id in (:svrs)").toString();
         final HQDialect dialect = getHQDialect();
@@ -146,7 +146,7 @@ public class ServerDAO
         final Set set = new HashSet();
         for (int i = 0; i < serverIds.size(); i += maxExprs) {
             final int last = Math.min(i + maxExprs, serverIds.size());
-            final List sublist = serverIds.subList(i, last);
+            final List<Integer> sublist = serverIds.subList(i, last);
             final List list = getSession().createQuery(hql).setParameterList("svrs", sublist,
                 new IntegerType()).list();
             // ServerType hashCode is by name

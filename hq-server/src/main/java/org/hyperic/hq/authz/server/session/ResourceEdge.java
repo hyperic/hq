@@ -102,4 +102,11 @@ public class ResourceEdge extends PersistedObject {
                o.getDistance() == getDistance() &&
                o.getRelation().equals(getRelation());
     }
+    
+    public String toString() {
+        return new StringBuilder()
+            .append("{from=").append(_from)
+            .append(", to=").append(_to).append("}")
+            .toString();
+    }
 }

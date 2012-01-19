@@ -948,4 +948,11 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager, Applicati
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }
+
+    public ResourceGroup getGroupById(Integer id) {
+        if (id == null) {
+            return null;
+        }
+        return resourceGroupDAO.get(id);
+    }
 }

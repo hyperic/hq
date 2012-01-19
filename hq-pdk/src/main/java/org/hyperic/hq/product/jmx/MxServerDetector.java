@@ -177,10 +177,6 @@ public class MxServerDetector
     protected boolean configureLocalMxURL(ConfigResponse config, String arg, String query) {
         String mxUrl = null;
         boolean urlSet = false;
-        if ((query == null) || !arg.equals(SUN_JMX_REMOTE)) {
-            // exit, because it must contain the SUN_JMX_REMOTE value to proceed.
-            return false;
-        }
 
         try {
             //verify local url access is supported by this JVM

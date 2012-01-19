@@ -41,6 +41,7 @@ import org.hibernate.criterion.Restrictions;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AgentType;
+import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.hibernate3.HibernateCallback;
@@ -50,6 +51,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class AgentDAO extends HibernateDAO<Agent> {
     private static final Log log = LogFactory.getLog(AgentDAO.class);
+    private static final String OLD_AGENT_CONDITION = "< ( select value from ConfigProperty where key = :serverVersion)";
+    
     @Autowired
     public AgentDAO(SessionFactory f) {
         super(Agent.class, f);
@@ -83,6 +86,7 @@ public class AgentDAO extends HibernateDAO<Agent> {
         return ag;
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public List<Agent> findAll() {
         return getSession().createCriteria(Agent.class).addOrder(Order.asc("address")).addOrder(
@@ -92,7 +96,7 @@ public class AgentDAO extends HibernateDAO<Agent> {
     @SuppressWarnings("unchecked")
     public List<Agent> findByIP(String ip) {
         String hql = "from Agent where address=:address";
-        return (List<Agent>) getSession().createQuery(hql)
+        return getSession().createQuery(hql)
                                          .setString("address", ip)
                                          .setCacheable(true)
                                          .setCacheRegion("Agent.findByIP")
@@ -139,6 +143,28 @@ public class AgentDAO extends HibernateDAO<Agent> {
             sql.append(", ").append(AgentSortField.CTIME.getSortString("a")).append(" DESC");
         }
         final Query q = getSession().createQuery(sql.toString());
-        return (List<Agent>) pInfo.pageResults(q).list();
+        return pInfo.pageResults(q).list();
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Agent> findOldAgents() {
+        String sql = "from Agent where version " + OLD_AGENT_CONDITION;
+        final Query query = getSession().createQuery(sql);
+        query.setParameter("serverVersion", HQConstants.ServerVersion);
+        return query.list();
+    }
+    
+    /**
+     * 
+     * @return number of agents, whose version is older than that of the server
+     */
+    public long getNumOldAgents() {
+        final String sql = "select count(a) from Agent a where version " + OLD_AGENT_CONDITION;        
+        final Query query = getSession().createQuery(sql);
+        query.setParameter("serverVersion", HQConstants.ServerVersion);        
+        return ((Number) query.uniqueResult()).longValue();
+        
+
+        
     }
 }

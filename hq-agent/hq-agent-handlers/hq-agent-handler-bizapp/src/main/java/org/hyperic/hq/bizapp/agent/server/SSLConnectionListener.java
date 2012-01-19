@@ -34,7 +34,6 @@ import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -224,15 +223,7 @@ class SSLConnectionListener
         while (true) {
             try {
             	listenSock = (SSLServerSocket)sFactory.createServerSocket(port, 50, addr);
-            	Collection<String> enabledCiphers = new ArrayList<String>(Arrays.asList(cfg.getEnabledCiphers()));
-            	Set<String> supportedCipherSuites = new HashSet<String>(Arrays.asList(sFactory.getSupportedCipherSuites()));
-            	for (final Iterator<String> it=enabledCiphers.iterator(); it.hasNext(); ) {
-            	    final String cipher = it.next();
-            	    if (!supportedCipherSuites.contains(cipher)) {
-            	        it.remove();
-            	    }
-            	}
-                listenSock.setEnabledCipherSuites(enabledCiphers.toArray(new String[0]));
+            	listenSock.setEnabledCipherSuites(getSupportedAndEnabledCiphers(cfg.getEnabledCipherList(), sFactory));
                 listenSock.setSoTimeout(timeout);
                 break;
             } catch(IOException exc){
@@ -253,6 +244,28 @@ class SSLConnectionListener
                 }
             }
         }
+    }
+    
+    /**
+     * Find the intersection between enabled and supported ciphers.
+     * 
+     * If a cipher is enabled but not supported, log it in the agent's log.
+     * 
+     * @param enabledCiphers
+     * @param sFactory
+     * @return
+     */
+    private String[] getSupportedAndEnabledCiphers(List<String> enabledCiphers, SSLServerSocketFactory sFactory) {
+    	Set<String> supportedCiphers = new HashSet<String>(Arrays.asList(sFactory.getSupportedCipherSuites()));
+    	List<String> unsupportedCiphers = new ArrayList<String>();
+    	for (String cipher : enabledCiphers) {
+    		if (!supportedCiphers.contains(cipher)) {
+    			unsupportedCiphers.add(cipher);
+    			log.warn("Cipher " + cipher + " is not supported, removing from list of negotiable ciphers.");
+    		}
+    	}
+    	enabledCiphers.removeAll(unsupportedCiphers);
+    	return enabledCiphers.toArray(new String[]{});
     }
 
     public void cleanup(){

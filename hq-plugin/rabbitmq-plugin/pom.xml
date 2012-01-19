@@ -25,7 +25,7 @@
             <groupId>org.hyperic.hq.hqapi</groupId>
             <artifactId>hqapi1</artifactId>
             <version>${hqapi.version}</version>
-            <scope>compile</scope>
+         
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>

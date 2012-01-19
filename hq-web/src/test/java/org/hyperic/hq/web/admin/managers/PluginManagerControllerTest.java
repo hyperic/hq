@@ -25,8 +25,11 @@
  */
 package org.hyperic.hq.web.admin.managers;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.text.ParseException;
@@ -38,7 +41,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.easymock.IExpectationSetters;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatus;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatusEnum;
@@ -47,6 +49,8 @@ import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.common.shared.ServerConfigManager;
+import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.product.shared.PluginManager;
 import org.hyperic.hq.product.shared.PluginTypeEnum;
 import org.hyperic.hq.web.BaseControllerTest;
@@ -55,7 +59,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
-import org.hyperic.hq.product.Plugin;
 
 public class PluginManagerControllerTest extends BaseControllerTest {
     private PluginManagerController pluginManagerController;
@@ -64,6 +67,8 @@ public class PluginManagerControllerTest extends BaseControllerTest {
     private ResourceManager mockResourceManager;
     private AppdefBoss mockAppdefBoss;
     private AuthzBoss mockAuthzBoss;
+    private ServerConfigManager mockServerConfigManager;
+    
     private static SimpleDateFormat format;
     private static Date date1 = new Date();
     private static Date date2 = new Date();
@@ -87,8 +92,9 @@ public class PluginManagerControllerTest extends BaseControllerTest {
         mockResourceManager = createMock(ResourceManager.class);
         mockAppdefBoss = getMockAppdefBoss();
         mockAuthzBoss = getMockAuthzBoss();
+        mockServerConfigManager = createMock(ServerConfigManager.class);
         pluginManagerController = new PluginManagerController(mockAppdefBoss, mockAuthzBoss, 
-            mockPluginManager, mockAgentManager,mockResourceManager);
+            mockPluginManager, mockAgentManager,mockResourceManager, mockServerConfigManager);
 
     }
     
@@ -196,7 +202,7 @@ public class PluginManagerControllerTest extends BaseControllerTest {
         assertEquals("plugin-a: allAgentCount should be 101",101,summaries.get(0).get("allAgentCount"));
         assertEquals("plugin-a: successAgentCount should be 100",100,summaries.get(0).get("successAgentCount"));
         assertEquals("plugin-a: errorAgentCount should be 1",1,summaries.get(0).get("errorAgentCount"));
-        assertEquals("plugin-a: inProgress should be false",false,(Boolean)summaries.get(0).get("inProgress"));
+        assertEquals("plugin-a: inProgress should be false",false,summaries.get(0).get("inProgress"));
         assertEquals("plugin-a: updatedDate should be ...", date1.getTime(), format.parse(summaries.get(0).get("updatedDate").toString()).getTime());
         assertEquals("plugin-a: initialDeployDate should be ...",format.format(date2),""+summaries.get(0).get("initialDeployDate"));
         assertEquals("plugin-a: id should be 1",1,summaries.get(0).get("id"));
@@ -210,7 +216,7 @@ public class PluginManagerControllerTest extends BaseControllerTest {
         assertEquals("plugin-c: allAgentCount should be 7",7,summaries.get(1).get("allAgentCount"));
         assertEquals("plugin-c: successAgentCount should be 0",0,summaries.get(1).get("successAgentCount"));
         assertEquals("plugin-c: errorAgentCount should be 3",3,summaries.get(1).get("errorAgentCount"));
-        assertEquals("plugin-c: inProgress should be true",true,(Boolean)summaries.get(1).get("inProgress"));
+        assertEquals("plugin-c: inProgress should be true",true,summaries.get(1).get("inProgress"));
         assertEquals("plugin-c: id should be 3",3,summaries.get(1).get("id"));        
         assertEquals("plugin-c: is not server plugin",false, summaries.get(1).get("isServerPlugin"));
         assertEquals("plugin-c: is custom plugin",true, summaries.get(1).get("isCustomPlugin"));
@@ -220,7 +226,7 @@ public class PluginManagerControllerTest extends BaseControllerTest {
         assertEquals("plugin-b: allAgentCount should be 99",99,summaries.get(2).get("allAgentCount"));
         assertEquals("plugin-b: successAgentCount should be 99",99,summaries.get(2).get("successAgentCount"));
         assertEquals("plugin-b: errorAgentCount should be 0",0,summaries.get(2).get("errorAgentCount"));
-        assertEquals("plugin-b: inProgress should be false",false,(Boolean)summaries.get(2).get("inProgress"));
+        assertEquals("plugin-b: inProgress should be false",false,summaries.get(2).get("inProgress"));
         assertEquals("plugin-b: id should be 2",2,summaries.get(2).get("id"));        
         assertEquals("plugin-b: is not server plugin",false, summaries.get(2).get("isServerPlugin"));
         assertEquals("plugin-b: is not custom plugin",false, summaries.get(2).get("isCustomPlugin"));

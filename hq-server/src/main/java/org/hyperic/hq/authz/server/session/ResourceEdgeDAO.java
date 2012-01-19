@@ -181,18 +181,27 @@ public class ResourceEdgeDAO
     }
 
     @SuppressWarnings("unchecked")
-	Collection<ResourceEdge> getParentEdges(Collection<Resource> resources,
-	                                        ResourceRelation relation, int distance) {
-        final String hql = new StringBuilder(64)
-            .append("FROM ResourceEdge re WHERE distance < :dist and relation=:relation ")
-            .append("AND re.from in (:from)")
-            .toString();
-        return getSession()
+	Collection<ResourceEdge> getDescendantEdgesOfType(Collection<Resource> resources, Resource prototype,
+	                                                  ResourceRelation relation, int distance) {
+        String sign = (distance < 0) ? "<=" : ">=";
+        distance = Math.abs(distance);
+        final StringBuilder hqlbuf = new StringBuilder(64)
+            .append("FROM ResourceEdge re ")
+            .append("WHERE distance ").append(sign).append(" :dist and relation=:relation ")
+            .append("AND re.from in (:from)");
+        if (prototype != null) {
+            hqlbuf.append(" AND re.to.prototype = :type");
+        }
+        final String hql = hqlbuf.toString();
+        final Query query = getSession()
             .createQuery(hql)
             .setParameterList("from", resources)
             .setParameter("relation", relation)
-            .setParameter("dist", distance)
-            .list();
+            .setParameter("dist", distance);
+        if (prototype != null) {
+            query.setParameter("type", prototype);
+        }
+        return query.list();
     }
 
     // Retrieve the parent of a given resource, if one exists, otherwise return

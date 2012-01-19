@@ -67,6 +67,7 @@ import org.hyperic.hq.appdef.shared.ResourceTypeCleanupZevent;
 import org.hyperic.hq.appdef.shared.ResourcesCleanupZevent;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
+import org.hyperic.hq.authz.shared.IntegerConverter;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
@@ -872,6 +873,9 @@ public class ResourceManagerImpl implements ResourceManager {
         if (debug) watch.markTimeBegin("resourceGroupManager.getMembers");
         final Collection<Resource> resources = resourceGroupManager.getMembers(group);
         if (debug) watch.markTimeEnd("resourceGroupManager.getMembers");
+        if (resources.isEmpty()) {
+            return Collections.emptyList();
+        }
 
         if (debug) watch.markTimeBegin("resourceDAO.getParentResourceIds");
         final Collection<Integer> parentIds =
@@ -915,18 +919,12 @@ public class ResourceManagerImpl implements ResourceManager {
     }
 
     @Transactional(readOnly = true)
-    public Collection<Resource> getParentResources(AuthzSubject subj, Resource resource,
-                                                   ResourceRelation relation) {
-        if (resource.getResourceType().getId().equals(AuthzConstants.authzGroup)) {
-            final ResourceGroup group =
-                resourceGroupManager.findResourceGroupById(resource.getInstanceId());
-            return getParentResources(subj, group, relation, -1, -1);
-        }
+    public Collection<Resource> getDescendantResources(AuthzSubject subj, Collection<Resource> resources,
+                                                       ResourceRelation relation, Resource proto, boolean children) {
         final Collection<ResourceEdge> parentEdges =
-            resourceEdgeDAO.getParentEdges(Collections.singletonList(resource), relation, -1);
-        final Set<Resource> rtn = new HashSet<Resource>(parentEdges.size());
-        final Set<Integer> viewable =
-            permissionManager.findViewableResources(subj, resourceTypeDAO.findAll());
+            resourceEdgeDAO.getDescendantEdgesOfType(resources, proto, relation, children ? 1 : -1);
+        final Map<Integer, Resource> rtn = new HashMap<Integer, Resource>(parentEdges.size());
+        final Set<ResourceType> types = new HashSet<ResourceType>();
         for (final ResourceEdge edge : parentEdges) {
             if (edge == null) {
                 continue;
@@ -935,11 +933,23 @@ public class ResourceManagerImpl implements ResourceManager {
             if (res == null || res.isInAsyncDeleteState()) {
                 continue;
             }
-            if (viewable.contains(res.getId())) {
-                rtn.add(res);
-            }
+            types.add(res.getResourceType());
+            rtn.put(res.getId(), res);
         }
-        return rtn;
+        return permissionManager.findViewableResources(subj, types, new IntegerConverter<Resource>() {
+            public Resource convert(Integer id) {
+                return rtn.get(id);
+            }
+        });
+    }
+
+    @Transactional(readOnly = true)
+    public Collection<Resource> getParentResources(AuthzSubject subj, Resource resource, ResourceRelation relation) {
+        if (resource.getResourceType().getId().equals(AuthzConstants.authzGroup)) {
+            final ResourceGroup group = resourceGroupManager.findResourceGroupById(resource.getInstanceId());
+            return getParentResources(subj, group, relation, -1, -1);
+        }
+        return getDescendantResources(subj, Collections.singletonList(resource), relation, null, false);
     }
 
     @Transactional(readOnly = true)
