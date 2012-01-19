@@ -352,6 +352,15 @@ public interface ResourceManager {
                                                    ResourceRelation relation, int distance,
                                                    int maxdistance);
 
-    public Collection<Resource> getParentResources(AuthzSubject subj, Resource resource,
-                                                   ResourceRelation relation);
+    public Collection<Resource> getParentResources(AuthzSubject subj, Resource resource, ResourceRelation relation);
+
+    /**
+     * Finds all descendant resources from the EAM_RESOURCE_EDGE table.  This method will not work with {@link Resource}s
+     * of type {@link ResourceGroup}.
+     * @param proto may be null
+     * @param children if true will fetch all the child resources (distance = 1), if false will fetch all parent
+     * resources (distance = -1)
+     */
+    public Collection<Resource> getDescendantResources(AuthzSubject subj, Collection<Resource> resources,
+                                                       ResourceRelation relation, Resource proto, boolean children);
 }

@@ -358,7 +358,7 @@ public class ServerManagerImpl implements ServerManager {
      * @return List of ServerPK's for which subject has
      *         AuthzConstants.serverOpViewServer
      */
-    protected List<Integer> getViewableServers(AuthzSubject whoami) throws PermissionException, NotFoundException {
+    protected Collection<Integer> getViewableServers(AuthzSubject whoami) throws PermissionException, NotFoundException {
         if (log.isDebugEnabled()) {
             log.debug("Checking viewable servers for subject: " + whoami.getName());
         }
@@ -370,7 +370,7 @@ public class ServerManagerImpl implements ServerManager {
         if (log.isDebugEnabled()) {
             log.debug("There are: " + idList.size() + " viewable servers");
         }
-        return new ArrayList<Integer>(idList);
+        return idList;
     }
 
     /**
@@ -644,8 +644,8 @@ public class ServerManagerImpl implements ServerManager {
     public PageList<ServerTypeValue> getViewableServerTypes(AuthzSubject subject, PageControl pc)
         throws PermissionException, NotFoundException {
         // build the server types from the visible list of servers
-        final List<Integer> authzPks = getViewableServers(subject);
-        final Collection<ServerType> serverTypes = serverDAO.getServerTypes(authzPks, true);
+        final Collection<Integer> authzPks = getViewableServers(subject);
+        final Collection<ServerType> serverTypes = serverDAO.getServerTypes(new ArrayList<Integer>(authzPks), true);
         // valuePager converts local/remote interfaces to value objects
         // as it pages through them.
         return valuePager.seek(serverTypes, pc);
@@ -887,7 +887,7 @@ public class ServerManagerImpl implements ServerManager {
     private Collection<Server> getViewableServers(AuthzSubject subject, PageControl pc) throws PermissionException,
         NotFoundException {
         Collection<Server> servers;
-        List<Integer> authzPks = getViewableServers(subject);
+        Collection<Integer> authzPks = getViewableServers(subject);
         int attr = -1;
         if (pc != null) {
             attr = pc.getSortattribute();
@@ -943,7 +943,7 @@ public class ServerManagerImpl implements ServerManager {
     private Collection<Server> getServersByPlatformImpl(AuthzSubject subject, Integer platId, Integer servTypeId,
                                                         boolean excludeVirtual, PageControl pc)
         throws PermissionException, ServerNotFoundException, PlatformNotFoundException {
-        List<Integer> authzPks;
+        Collection<Integer> authzPks;
         try {
             authzPks = getViewableServers(subject);
         } catch (NotFoundException exc) {
@@ -1078,7 +1078,7 @@ public class ServerManagerImpl implements ServerManager {
 
             Collection<Server> servers = serverDAO.findByType(serverType.getId());
 
-            List<Integer> authzPks = getViewableServers(subject);
+            Collection<Integer> authzPks = getViewableServers(subject);
             for (Iterator<Server> i = servers.iterator(); i.hasNext();) {
                 Integer sPK = i.next().getId();
                 // remove server if its not viewable
@@ -1162,7 +1162,7 @@ public class ServerManagerImpl implements ServerManager {
     private Collection<Server> getServersByApplicationImpl(AuthzSubject subject, Integer appId, Integer servTypeId)
         throws ServerNotFoundException, ApplicationNotFoundException, PermissionException {
 
-        List<Integer> authzPks;
+        Collection<Integer> authzPks;
         Application appLocal;
 
         try {

@@ -338,4 +338,6 @@ public interface ResourceGroupManager
 
     public void removeGroupsCompatibleWith(String name) throws VetoException;
 
+    public ResourceGroup getGroupById(Integer id);
+
 }

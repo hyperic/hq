@@ -841,4 +841,14 @@ public abstract class PermissionManager {
         throw new PermissionException(subject.getName() + " does not have super user priviledge");
     }
 
+    /**
+     * This method is should save some processing since it gives the ability to easily process the resultset
+     * inline to the loop method and has the ability to filter out unwanted resources by returning null from convert()
+     * @param converter converts the returned {@link Set} into any type specified by the converter.  If the call to
+     * convert() returns null, the value will not be returned in the resulting {@link Set}.
+     * @return {@link Set} of objects determined by the generic type of the specified {@link IntegerConverter}
+     */
+    public abstract <T> Set<T> findViewableResources(AuthzSubject subj, Collection<ResourceType> resourceTypes,
+                                                     IntegerConverter<T> converter);
+
 }

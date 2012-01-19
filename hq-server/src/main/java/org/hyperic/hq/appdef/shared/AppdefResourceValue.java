@@ -36,10 +36,11 @@ import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.ApplicationType;
 import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.server.session.ServerType;
-import org.hyperic.hq.appdef.server.session.ServiceManagerImpl;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.context.Bootstrap;
 
 /**
@@ -99,6 +100,9 @@ public abstract class AppdefResourceValue
     public abstract AppdefEntityID getEntityId();
 
     // get a map of resource types and instances
+    /**
+     * @deprecated
+     */
     public static Map<String,Integer> getResourceTypeCountMap(Collection objColl) {
         Map<String, Integer> aMap = new HashMap<String, Integer>();
                 
@@ -123,6 +127,7 @@ public abstract class AppdefResourceValue
      * Get an upcasted reference to our resource type value.
      * @return the "type value" value object upcasted to its
      *         abstract base class for use in agnostic context.
+     * @deprecated
      */
     public AppdefResourceTypeValue getAppdefResourceTypeValue () {
         int entityType = this.getEntityId().getType();
@@ -157,6 +162,7 @@ public abstract class AppdefResourceValue
      * @param platformColl collection of <code>PlatformLightValue</code> objects
      * @return map with key: platformTypeValue, value: a <code>List</code> 
      * of PlatformLightValues matching that type
+     * @deprecated
      */
     public static Map getPlatformTypeCountMap(Collection platformColl) {
         return getResourceTypeCountMap(platformColl);
@@ -167,6 +173,7 @@ public abstract class AppdefResourceValue
      * @param a collection of <code>ServerLightValue</code> objects
      * @return map with key: serverTypeValue, value: a <code>List</code> 
      * of ServerLightValues matching that type
+     * @deprecated
      */
     public static Map<String,Integer> getServerTypeCountMap(Collection<? extends AppdefResourceValue> serverColl) {
         // remove any virtual servers
@@ -188,6 +195,7 @@ public abstract class AppdefResourceValue
      * @param a collection of <code>ServiceLightValue</code> objects
      * @return map with key: serviceTypeValue, value: a <code>List</code> 
      * of ServiceLightValues matching that type
+     * @deprecated
      */
     public static Map<String,Integer> getServiceTypeCountMap(Collection serviceColl) {
         return getResourceTypeCountMap(serviceColl);
@@ -201,7 +209,7 @@ public abstract class AppdefResourceValue
     }
     
     /**
-     * 
+     * @deprecated
      */
     public static AppdefResourceType getAppdefResourceType(AuthzSubject subject, ResourceGroup group) {
         if (group.isMixed())
@@ -210,7 +218,25 @@ public abstract class AppdefResourceValue
         return getResourceTypeById(group.getGroupEntType().intValue(),
                                    group.getGroupEntResType().intValue());
     }
+    
+    public boolean equals(Object rhs) {
+        if (this == rhs) {
+            return true;
+        }
+        if (rhs instanceof AppdefResourceValue) {
+            AppdefEntityID aeid = (AppdefEntityID) rhs;
+            return getEntityId().equals(aeid);
+        }
+        return false;
+    }
+    
+    public int hashCode() {
+        return getEntityId().hashCode();
+    }
 
+    /**
+     * @deprecated
+     */
     public AppdefResourceTypeValue getAppdefResourceTypeValue(AuthzSubject subject, ResourceGroup group) {
         if (group.isMixed()) {
             AppdefResourceTypeValue res = new GroupTypeValue();
@@ -225,6 +251,42 @@ public abstract class AppdefResourceValue
     }
     
     
+    /**
+     * This method is a helper method to bridge the gap btwn Resources and AppdefResourceValue.  AppdefResourceValues
+     * should not be used unless it is for backwards compatibility
+     * @deprecated
+     */
+    public static AppdefResourceValue convertToAppdefResourceValue(Resource resource) {
+        final int type = resource.getResourceType().getId();
+        if (type == AuthzConstants.authzPlatform) {
+            return getPlatformManager().getPlatformById(resource.getInstanceId()).getAppdefResourceValue();
+        } else if (type == AuthzConstants.authzServer) {
+            return getServerManager().getServerById(resource.getInstanceId()).getAppdefResourceValue();
+        } else if (type == AuthzConstants.authzService) {
+            return getServiceManager().getServiceById(resource.getInstanceId()).getAppdefResourceValue();
+        } else if (type == AuthzConstants.authzApplication) {
+            return getApplicationManager().getApplicationById(resource.getInstanceId()).getAppdefResourceValue();
+        } else {
+            throw new IllegalArgumentException("Invalid appdef resource type:" + type);
+        }
+    }
+
+    private static ApplicationManager getApplicationManager() {
+        return Bootstrap.getBean(ApplicationManager.class);
+    }
+
+    private static ServiceManager getServiceManager() {
+        return Bootstrap.getBean(ServiceManager.class);
+    }
+
+    private static ServerManager getServerManager() {
+        return Bootstrap.getBean(ServerManager.class);
+    }
+
+    private static PlatformManager getPlatformManager() {
+        return Bootstrap.getBean(PlatformManager.class);
+    }
+
     private static AppdefResourceType getResourceTypeById(int type, int id) {
         switch (type) {
             case (AppdefEntityConstants.APPDEF_TYPE_PLATFORM):

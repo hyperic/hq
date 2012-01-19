@@ -35,7 +35,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -131,6 +130,7 @@ import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.GroupCreationException;
+import org.hyperic.hq.authz.shared.IntegerConverter;
 import org.hyperic.hq.authz.shared.MixedGroupType;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
@@ -837,51 +837,37 @@ public class AppdefBossImpl implements AppdefBoss {
      */
     @Transactional(readOnly = true)
     @SuppressWarnings("unchecked")
-    public PageList<AppdefResourceValue> findByIds(int sessionId, AppdefEntityID[] entities,
-                                                   PageControl pc) throws PermissionException,
-        SessionTimeoutException, SessionNotFoundException {
-        // get the user
-        AuthzSubject subject = sessionManager.getSubject(sessionId);
-
+    public PageList<AppdefResourceValue> findByIds(int sessionId, AppdefEntityID[] entities, PageControl pc)
+    throws PermissionException, SessionTimeoutException, SessionNotFoundException {
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
+        final Collection<ResourceType> types = new HashSet<ResourceType>();
+        final Map<Integer, Resource> resources = new HashMap<Integer, Resource>(entities.length);
+        for (final AppdefEntityID aeid : entities) {
+            if (aeid == null) {
+                continue;
+            }
+            final Resource res = resourceManager.findResource(aeid);
+            if (res == null || res.isInAsyncDeleteState()) {
+                continue;
+            }
+            resources.put(res.getId(), res);
+            types.add(res.getResourceType());
+        }
+        final Collection<AppdefResourceValue> rtn =
+            permissionManager.findViewableResources(subject, types, new IntegerConverter<AppdefResourceValue>() {
+                public AppdefResourceValue convert(Integer id) {
+                    final Resource r = resources.get(id);
+                    if (null != r) {
+                        return AppdefResourceValue.convertToAppdefResourceValue(r);
+                    }
+                    return null;
+                }
+            });
         if (pc != null) {
-            List<Resource> appdefList = new ArrayList<Resource>();
-            for (int i = 0; i < entities.length; i++) {
-                Resource res = resourceManager.findResource(entities[i]);
-                if (res != null && !res.isInAsyncDeleteState()) {
-                    appdefList.add(res);
-                }
-            }
-            Collections.sort(appdefList);
-            if (pc.getSortorder() == PageControl.SORT_DESC) {
-                Collections.reverse(appdefList);
-            }
-
-            PageList<Resource> pl = Pager.getDefaultPager().seek(appdefList, pc);
-
-            List<AppdefResourceValue> appdefResources = new ArrayList<AppdefResourceValue>();
-            for (Resource res : pl) {
-                try {
-                    appdefResources.add(findById(subject, AppdefUtil.newAppdefEntityId(res)));
-                } catch (AppdefEntityNotFoundException e) {
-                    log.error("Resource not found in Appdef: " + res.getId());
-                }
-            }
-
-            return new PageList<AppdefResourceValue>(appdefResources, pl.getTotalSize());
+        	return Pager.getDefaultPager().seek(rtn, pc);
+        } else {
+            return new PageList<AppdefResourceValue>(rtn, rtn.size());
         }
-
-        List<AppdefResourceValue> appdefList = new ArrayList<AppdefResourceValue>();
-        for (int i = 0; i < entities.length; i++) {
-            try {
-                AppdefResourceValue res = findById(subject, entities[i]);
-                if (res != null) {
-                    appdefList.add(res);
-                }
-            } catch (AppdefEntityNotFoundException e) {
-                log.debug("Entity not found: " + entities[i]);
-            }
-        }
-        return new PageList<AppdefResourceValue>(appdefList, appdefList.size());
     }
 
     /**
