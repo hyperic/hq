@@ -40,6 +40,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatus;
@@ -49,11 +50,13 @@ import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.product.shared.PluginManager;
 import org.hyperic.hq.product.shared.PluginTypeEnum;
 import org.hyperic.hq.web.BaseControllerTest;
+import org.hyperic.util.ConfigPropertyException;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -99,7 +102,7 @@ public class PluginManagerControllerTest extends BaseControllerTest {
     }
     
     @Test
-    public void testMechanismOff(){
+    public void testMechanismOff() throws ConfigPropertyException{
         Model model =new ExtendedModelMap();
         expect(mockPluginManager.getStatusesByAgentId(AgentPluginStatusEnum.SYNC_FAILURE)).andStubReturn(getStatusesByAgentId());
         expect(mockPluginManager.getAllPlugins()).andStubReturn(new ArrayList<Plugin>());
@@ -107,16 +110,24 @@ public class PluginManagerControllerTest extends BaseControllerTest {
         expect(mockPluginManager.isPluginSyncEnabled()).andStubReturn(false);
         expect(mockPluginManager.getCustomPluginDir()).andStubReturn(new File("/root/hq/test"));
         expect(mockAgentManager.getNumAutoUpdatingAgents()).andReturn(Long.parseLong("0"));
+        expect(mockAgentManager.getNumOldAgents()).andStubReturn(Long.parseLong("0"));
 
+        String serverVersion = "4.5.6";
+        Properties serverConfigProps = getPropertiesWithServerVersion(serverVersion);  
+        expect(mockServerConfigManager.getConfig()).andStubReturn(serverConfigProps);
+        
         replay(mockAgentManager);
         replay(mockPluginManager);
+        replay(mockServerConfigManager);
         
         String toPage = pluginManagerController.index(model);
         Map<String,Object> map = model.asMap();
         Map<String, Object> info = (Map<String, Object>)map.get("info");
         
         assertEquals("should be direct to admin/managers/plugin page.", "admin/managers/plugin",toPage);
-        assertEquals("all agent count should be 0",Long.valueOf(0),info.get("allAgentCount"));
+        assertEquals("total agent count should be 0",Long.valueOf(0),info.get("totalAgentCount"));
+        assertEquals("syncable agent count should be 0",Long.valueOf(0),info.get("syncableAgentCount"));
+        assertEquals("server version should be " + serverVersion,serverVersion,info.get("serverVersion"));        
         assertTrue("mechanismOn should be false", !(Boolean)map.get("mechanismOn"));
         assertEquals("instruction should be admin.managers.plugin.mechanism.off",
             "admin.managers.plugin.mechanism.off",
@@ -124,7 +135,7 @@ public class PluginManagerControllerTest extends BaseControllerTest {
     }
     
     @Test
-    public void testMechanismOn(){
+    public void testMechanismOn() throws ConfigPropertyException{
         Model model =new ExtendedModelMap();
         expect(mockPluginManager.getStatusesByAgentId(AgentPluginStatusEnum.SYNC_FAILURE)).andStubReturn(getStatusesByAgentId());
         expect(mockPluginManager.getAllPlugins()).andStubReturn(getAllPlugins());
@@ -132,9 +143,15 @@ public class PluginManagerControllerTest extends BaseControllerTest {
         expect(mockPluginManager.isPluginSyncEnabled()).andStubReturn(true);
         expect(mockPluginManager.getCustomPluginDir()).andStubReturn(new File("/root/hq/test"));
         expect(mockAgentManager.getNumAutoUpdatingAgents()).andStubReturn(Long.parseLong("3"));
+        expect(mockAgentManager.getNumOldAgents()).andStubReturn(Long.parseLong("0"));
+        
+        String serverVersion = "4.5.6";
+        Properties serverConfigProps = getPropertiesWithServerVersion(serverVersion); 
+        expect(mockServerConfigManager.getConfig()).andStubReturn(serverConfigProps);
         
         replay(mockAgentManager);
         replay(mockPluginManager);
+        replay(mockServerConfigManager);
         
         String toPage = pluginManagerController.index(model);
         Map<String,Object> map = model.asMap();
@@ -142,10 +159,18 @@ public class PluginManagerControllerTest extends BaseControllerTest {
         
         assertEquals("should be direct to admin/managers/plugin page.", "admin/managers/plugin",toPage);
         assertTrue("mechanismOn should be true", (Boolean)map.get("mechanismOn"));
-        assertEquals("all agent count should be 3",Long.valueOf(3),info.get("allAgentCount"));
+        assertEquals("total agent count should be 3",Long.valueOf(3),info.get("totalAgentCount"));
+        assertEquals("syncable agent count should be 3",Long.valueOf(3),info.get("syncableAgentCount"));
+        assertEquals("server version should be " + serverVersion,serverVersion,info.get("serverVersion"));
         assertEquals("instruction should be admin.managers.plugin.instructions",
             "admin.managers.plugin.instructions", map.get("instruction"));
         assertEquals("file path should be /root/hq/test","/root/hq/test",""+map.get("customDir"));
+    }
+
+    private Properties getPropertiesWithServerVersion(String serverVersion) {
+        Properties serverConfigProps = new Properties();
+        serverConfigProps.setProperty(HQConstants.ServerVersion,serverVersion);
+        return serverConfigProps;
     }
     
     @Test
@@ -161,29 +186,45 @@ public class PluginManagerControllerTest extends BaseControllerTest {
     }
     
     @Test
-    public void testInfoNull(){
+    public void testInfoNull() throws ConfigPropertyException{
         expect(mockPluginManager.getStatusesByAgentId(AgentPluginStatusEnum.SYNC_FAILURE)).andStubReturn(null);
         expect(mockAgentManager.getNumAutoUpdatingAgents()).andReturn(Long.parseLong("0"));
+        expect(mockAgentManager.getNumOldAgents()).andStubReturn(Long.parseLong("0"));        
+
+        String serverVersion = "4.5.6";
+        Properties serverConfigProps = getPropertiesWithServerVersion(serverVersion); 
+        expect(mockServerConfigManager.getConfig()).andStubReturn(serverConfigProps);  
+        
         replay(mockPluginManager);
         replay(mockAgentManager);
+        replay(mockServerConfigManager);
         
-        Map<String, Object> result = pluginManagerController.getAgentInfo();
+        Map<String, Object> info = pluginManagerController.getAgentInfo();
         
-        assertEquals("agentErrorCount should be 0",0,result.get("agentErrorCount"));
-        assertEquals("allAgentCount should be 0",Long.valueOf("0"),result.get("allAgentCount"));
+        assertEquals("agentErrorCount should be 0",0,info.get("agentErrorCount"));
+        assertEquals("total agent count should be 0",Long.valueOf(0),info.get("totalAgentCount"));
+        assertEquals("syncable agent count should be 0",Long.valueOf(0),info.get("syncableAgentCount"));
     }
     
     @Test
-    public void testInfo(){
+    public void testInfo() throws ConfigPropertyException{
         expect(mockPluginManager.getStatusesByAgentId(AgentPluginStatusEnum.SYNC_FAILURE)).andStubReturn(getStatusesByAgentId());
         expect(mockAgentManager.getNumAutoUpdatingAgents()).andReturn(Long.parseLong("3"));
+        expect(mockAgentManager.getNumOldAgents()).andStubReturn(Long.parseLong("1"));        
+
+        String serverVersion = "4.5.6";
+        Properties serverConfigProps = getPropertiesWithServerVersion(serverVersion); 
+        expect(mockServerConfigManager.getConfig()).andStubReturn(serverConfigProps);  
+        
         replay(mockPluginManager);
         replay(mockAgentManager);
+        replay(mockServerConfigManager);
 
-        Map<String, Object> result = pluginManagerController.getAgentInfo();
+        Map<String, Object> info = pluginManagerController.getAgentInfo();
         
-        assertEquals("allAgentCount should be 3",Long.valueOf("3"),result.get("allAgentCount"));
-        assertEquals("agentErrorCount should be 2",2,result.get("agentErrorCount"));
+        assertEquals("total agent count should be 4",Long.valueOf(4),info.get("totalAgentCount"));
+        assertEquals("syncable agent count should be 3",Long.valueOf(3),info.get("syncableAgentCount"));
+        assertEquals("agentErrorCount should be 2",2,info.get("agentErrorCount"));
     }
     
     @Test
