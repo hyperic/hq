@@ -104,9 +104,6 @@
 <html:form action="/resource/platform/inventory/RemoveServers">
 
 <c:set var="svrAction" value="${selfAction}&accord=2"/>
-<c:if test="${not empty param.fs}">
-  <c:set var="svrAction" value="${svrAction}&fs=${param.fs}"/>
-</c:if>
 <c:if test="${not empty param.ps}">
   <c:set var="svrAction" value="${svrAction}&ps=${param.ps}"/>
 </c:if>
