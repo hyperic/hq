@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.hyperic.hq.plugin</groupId>
 		<artifactId>hq-plugin-parent</artifactId>
-		<version>4.5.3</version>
+		<version>4.5.4.BUILD-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>sqlquery-plugin</artifactId>
