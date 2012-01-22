@@ -125,16 +125,16 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
     // used AtomicBoolean so that a groovy script may disable the mechanism live, no restarts
     private final AtomicBoolean isEnabled = new AtomicBoolean(true);
     
-    private PermissionManager permissionManager;
-    private AgentSynchronizer agentSynchronizer;
-    private AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle;
-    private PluginDAO pluginDAO;
-    private AgentPluginStatusDAO agentPluginStatusDAO;
-    private MonitorableTypeDAO monitorableTypeDAO;
-    private ResourceManager resourceManager;
-    private AuthzSubjectManager authzSubjectManager;
-    private ZeventManager zeventManager;
-    private TransactionRetry transactionRetry;
+    private final PermissionManager permissionManager;
+    private final AgentSynchronizer agentSynchronizer;
+    private final AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle;
+    private final PluginDAO pluginDAO;
+    private final AgentPluginStatusDAO agentPluginStatusDAO;
+    private final MonitorableTypeDAO monitorableTypeDAO;
+    private final ResourceManager resourceManager;
+    private final AuthzSubjectManager authzSubjectManager;
+    private final ZeventManager zeventManager;
+    private final TransactionRetry transactionRetry;
 
     private ApplicationContext ctx;
 
@@ -258,8 +258,8 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
     }
     
     private class PluginRemoveZevent extends Zevent {
-        private AuthzSubject subj;
-        private Collection<String> pluginFileNames;
+        private final AuthzSubject subj;
+        private final Collection<String> pluginFileNames;
         @SuppressWarnings("serial")
         public PluginRemoveZevent(AuthzSubject subj, Collection<String> pluginFileNames) {
             super(new ZeventSourceId() {}, new ZeventPayload() {});
@@ -652,6 +652,7 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         private NoCloseStringReader(String s) {
             super(s);
         }
+        @Override
         public void close() {}
     }
 

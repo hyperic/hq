@@ -44,6 +44,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.lather.PluginReport_args;
 import org.hyperic.util.ConfigPropertyException;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Local interface for AgentManager.
@@ -70,6 +71,12 @@ public interface AgentManager {
      */
     public List<Agent> getAgents();
 
+    /**
+     * Get a list of all agents in the system, whose version is older than server's version
+     */
+    @Transactional(readOnly = true)
+    public List<Agent> getOldAgents();    
+    
     /**
      * Get a count of all the agents in the system
      */
@@ -502,8 +509,12 @@ public interface AgentManager {
     public void syncPluginToAgentsAfterCommit(Collection<String> pluginFileNames);
 
     /**
-     * @return long representing the unique agent_ids in the EAM_AGENT_PLUGIN_STATUS table
+     * @return long representing the number of unique agent_ids in the EAM_AGENT_PLUGIN_STATUS table
      */
     public long getNumAutoUpdatingAgents();
-
+           
+    /**
+     * @return long representing the number of agents whose version is lower than that of the server
+     */
+    public long getNumOldAgents();
 }

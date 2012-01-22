@@ -403,12 +403,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.hq.plugin</groupId>
-			<artifactId>jboss7-plugin</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.hyperic.hq.plugin</groupId>
 			<artifactId>jetty-plugin</artifactId>
 			<version>${project.version}</version>
 			<scope>provided</scope>

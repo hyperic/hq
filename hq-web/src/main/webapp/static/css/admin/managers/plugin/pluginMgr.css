@@ -1,352 +1,430 @@
+.mechanismOff {
+    border-bottom: 1px solid gray;
+}
 
-	.mechanismOff{
-		border-bottom: 1px solid gray;
-	}
+#selectedFileList {
+    border: 1px solid #CCCCCC;
+    height: 100px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    width: 350px;
+    text-align: left;
+}
 
-	#selectedFileList{
-		border: 1px solid #CCCCCC;
-    	height: 100px;
-    	overflow-x: hidden;
-    	overflow-y: auto;
-    	width: 350px;
-    	text-align: left;
-	}
-	.fileToUploadClose{
-		width:10px;
-	}
-	
-	#selectedFileList table{
-		padding: 0px;
-		margin: 0px;
-	}
-        
-	.selectFileBtn{
-		-moz-border-radius: 4px 4px 4px 4px;
-	    background: url("/static/images/button-green-background.jpg") repeat-x scroll center bottom #2DBF3D;
-    	border: 1px solid #84B96D;
-	    color: #FFFFFF;
-	    font-size: 0.9em;
-	    font-weight: bold;
-	    padding: 3px 15px;
-	    width: 90px;
-	    height: 16px;
-	    float:right;
-	}
-	#uploadButtonBar{
-		text-align: right;
-	}
+.fileToUploadClose {
+    width: 10px;
+}
 
-	#pluginManagerPanel {
-		padding: 0.5em 1.5em;
-		width:90%;
-		min-width:400px;
-	}
-	
-	#pluginManagerPanel span a {
-		font-weight: bold;
-		text-decoration: none;
-	}
-	
-	#pluginManagerPanel h1 {
-		color: #444;
-		font-size: 1.5em;
-		font-weight: bold;
-		margin-bottom: 0.5em;
-	}
-	
-	#pluginManagerPanel .actionbar {
-		background: url("/static/images/table_header_large.png") repeat-x 0 0 transparent;
-		overflow: hidden;
-		border: 1px solid gray;
-		border-top: 0;
-	}
-	
-	#pluginManagerPanel .actionbar input[type="button"],
-	#uploadPanel input[type="submit"],
-	#confirmationPanel input[type="button"] {
-		margin-right: 0.5em;
-	}
-	
-	#pluginManagerPanel .actionbar input[type="button"]{
-		margin: 0.25em 1em;
-	}
-	
-	#pluginManagerPanel ul {
-		margin: 0;
-		padding: 0;
-		list-style: none;
-		background-color: #fff;
-		border: 1px solid gray;
-		border-top: 0;
-		border-bottom: 0;
-		overflow-y: scroll;
-		overflow-x: hidden;
-		height: 400px;
-	}
+#selectedFileList table {
+    padding: 0px;
+    margin: 0px;
+}
 
-	#pluginManagerPanel .gridheader {
-		background: url("/static/images/table_header_large.png") repeat-x 0 0 transparent;
-		overflow: hidden;
-		font-weight: bold;
-		font-size: 1.1em;
-		color: #444;
-		border: 1px solid gray;
-		border-bottom: 0;
-		height: 29px;
-	}
-	
-	#pluginManagerPanel .gridheader span.column {
-		padding-top: 0.25em;
-		padding-left: 0.5em;
-		height: 25px;	
-	}
-	
-	#pluginManagerPanel .gridrow {
-		overflow: hidden;
-	}
-	
-	#pluginManagerPanel .gridrow span.column {
-		padding: 0.5em 0;
-		padding-left: 0.5em;
-	}
-	
-	#pluginManagerPanel .gridrow span.first {
-		text-align: center;
-	}
-	
-	#pluginManagerPanel li.even {
-		background-color: #eee;
-	}
-	
-	#uploadPanel {
-		width: 400px;
-		text-align: left;
-	}
+.selectFileBtn {
+    -moz-border-radius: 4px 4px 4px 4px;
+    background: url("/static/images/button-green-background.jpg") repeat-x
+        scroll center bottom #2DBF3D;
+    border: 1px solid #84B96D;
+    color: #FFFFFF;
+    font-size: 0.9em;
+    font-weight: bold;
+    padding: 3px 15px;
+    width: 90px;
+    height: 16px;
+    float: right;
+}
 
-	#errorMsgPanel, #confirmationPanel {
-		width: 400px;
-		text-align: left;
-	}
-	#errorMsgPanel div{
-		text-align: right;
-	}
-		
-	#uploadForm fieldset {
-		border: 0;
-	}
-	
-	#uploadForm div {
-		text-align: right;
-	}
-	
-	#confirmationPanel div {
-		text-align: right;
-	}
-	
-	#validationMessage {
-	    font-weight: bold;
-	}
-	
-	#progressMessage {
-	    font-weight: bold;
-	    margin-right: 1em;
-	}
-	
-	#progressMessage.information {
-	    color: #00bb00;
-	}
-	
-	#validationMessage.error,
-	#progressMessage.error{
-	    color: #bb0000;
-	}
-	#showUploadFormButton {
-		float:right;
-	}	
-	#showRemoveConfirmationButton{
-		float:left;
-	}
-	#pluginList .notFound{
-		color:red;
-	}
-    #pluginList .deleting{
-		color:red;
-	}
-    #pluginCount{
-		color:#777777;
-		font-weight: bold;
-	}
-	.agentStatusProgressSpan,
-	.agentStatusFailSpan,
-	#agentFailure,
-	.helpLink{
-		color: #0066CC;
-		font-weight: bold;
-		height:9px;
-	}
-	.agentStatusProgressSpan,
-	.agentStatusFailSpan,
-	.agentStatusSuccessfulSpan{
-		float:left;height:20px;
-	}
-	
-	.agentStatusProgressSpan:focus,
-	.agentStatusProgressSpan:hover,
-	.agentStatusFailSpan:focus,
-	.agentStatusFailSpan:hover,
-	#agentFailure:focus,
-	#agentFailure:hover,
-	.helpLink:focus,
-	.helpLink:hover{
-		cursor: pointer;
-		color: #0099FF;
-	}
-	.helpLink{
-	    margin-top:0;
-	    margin-right:0;
-	    position:absolute;
-	    top:4px;
-	    right:10px;
-	    float:right;
-	}
-	#agentSummaryPanel{
-		margin-top:0;
-	}
-	.errorAgentTip{
-		overflow:auto;
-	}
-	.errorAgentTitle{
-		font-weight: bold;
-		height:8px;
-	}
-	.topInfo, 
-	#currentTimeInfo, 
-	#agentInfo,
-	#customDirInfo{
-		font-weight: bold;
-		height: 20px;
-		color: #777777;
-	}
-	.closeButton{
-		margin-right:5px;
-		float:right;
-		visibility:hidden;
-	}
-	#showStatusPanelDialog{
-		width: 505px;
-		height: 410px;
-		text-align: left;
-	}
-	
-	#statusButtonBar {
-		text-align: right;
-		vertical-align:bottom;
-	}
-	#agentList{
-		border: solid 1px;
-		border-color: #BBBBBB;
-		height: 290px;
-		overflow: auto;
-		margin: 10px;
-		padding: 0px 30px;
-		width:410px;
-	}
-	
-	.errorAgent{
-		list-style-image: url("/static/images/icon_available_red.gif");
-	}
-	.inProgressAgent{
-		list-style-image: url("/static/images/alert.png");
-	}
-	#searchText{
-		background: url("/static/images/search.png") no-repeat scroll 3px center #FFFFFF;
-		color: #444444;
-		padding: 0.25em 0.25em 0.25em 20px;
-		width:250px;
-	}
-	input[type="text"]{
-		margin:0.5em 0;
-	}
-	.selectInstruction{
-		font-weight:bold;
-		width:290px;
-		float:left;
-	}
-	#selectedFileList{
-		width:400px;
-	}
-	.uploaderInsideNode{
-	}
-	#selectFileBtn{
-		width:60px;
-		float:right;
-	}
-	.fileToUploadClose{
-		background: url("/static/images/dash_movecontent_del-on.gif") no-repeat scroll 5px center #FFFFFF;
-	}
-	#afterSelectFileInstruction{
-		text-align:center;
-		color:#777777;
-	}
-	.mechanismOffInstruction{
-		background:yellow; 
-	}
-	#loadingIcon,
-	#summaryLoadingIcon{
-		width:15px;
-	}
-	.infoIcon{
-		width:12px;
-	}
+#uploadButtonBar {
+    text-align: right;
+}
 
-    #pluginManagerPanel .gridheader, #pluginManagerPanel .gridrow, 
-    	#pluginManagerPanel .actionbar, #pluginManagerPanel ul{
-    	min-width:980px;
-	}
-	.span-small{
-		width:10%;
-	}
-	.span-med{
-		width:15%;
-	}
-	.span-status{
-		min-width: 120px;
-		width:10%;
-	}
-	#selectFileButton{
-		width:60px;
-	}
-	#progressMessage{
-		float:left; 
-		margin:0px 100px; 
-		padding:5px 0px;
-	}
-    #pluginManagerPanel li.grey{
-        background-color:#BBB;
-    }
+#pluginManagerPanel {
+    padding: 0.5em 1.5em;
+    width: 90%;
+    min-width: 400px;
+}
 
-	#agentSummaryPanel{
-		width:400px;
-		
-	}
-	#agentSummaryPanel .cancelLink{
-		float:right;
-	}
-	#agentSummaryList{
-		max-height: 290px;
-		overflow: auto;
-		margin: 10px;
-		padding: 0px 30px;
-		max-width:350px;
-		margin-left:0px;
-	}
-	#deletLoadingIcon{
-	    float:right;
-	}
-	#tableLoadingIcon{
-		width:50px; 
-		height:50px;
-		display:block;
-		margin-left:auto;
-		margin-right:auto;
-	}
+#pluginManagerPanel span a {
+    font-weight: bold;
+    text-decoration: none;
+}
+
+#pluginManagerPanel h1 {
+    color: #444;
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 0.5em;
+}
+
+#pluginManagerPanel .actionbar {
+    background: url("/static/images/table_header_large.png") repeat-x 0 0
+        transparent;
+    overflow: hidden;
+    border: 1px solid gray;
+    border-top: 0;
+}
+
+#pluginManagerPanel .actionbar input[type="button"],#uploadPanel input[type="submit"],#confirmationPanel input[type="button"]
+    {
+    margin-right: 0.5em;
+}
+
+#pluginManagerPanel .actionbar input[type="button"] {
+    margin: 0.25em 1em;
+}
+
+#pluginManagerPanel ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    background-color: #fff;
+    border: 1px solid gray;
+    border-top: 0;
+    border-bottom: 0;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    height: 400px;
+}
+
+#pluginManagerPanel .gridheader {
+    background: url("/static/images/table_header_large.png") repeat-x 0 0
+        transparent;
+    overflow: hidden;
+    font-weight: bold;
+    font-size: 1.1em;
+    color: #444;
+    border: 1px solid gray;
+    border-bottom: 0;
+    height: 29px;
+}
+
+#pluginManagerPanel .gridheader span.column {
+    padding-top: 0.25em;
+    padding-left: 0.5em;
+    height: 25px;
+}
+
+#pluginManagerPanel .gridrow {
+    overflow: hidden;
+}
+
+#pluginManagerPanel .gridrow span.column {
+    padding: 0.5em 0;
+    padding-left: 0.5em;
+}
+
+#pluginManagerPanel .gridrow span.first {
+    text-align: center;
+}
+
+#pluginManagerPanel li.even {
+    background-color: #eee;
+}
+
+#uploadPanel {
+    width: 400px;
+    text-align: left;
+}
+
+#errorMsgPanel,#confirmationPanel {
+    width: 400px;
+    text-align: left;
+}
+
+#errorMsgPanel div {
+    text-align: right;
+}
+
+#uploadForm fieldset {
+    border: 0;
+}
+
+#uploadForm div {
+    text-align: right;
+}
+
+#confirmationPanel div {
+    text-align: right;
+}
+
+#validationMessage {
+    font-weight: bold;
+}
+
+#progressMessage {
+    font-weight: bold;
+    margin-right: 1em;
+}
+
+#progressMessage.information {
+    color: #00bb00;
+}
+
+#validationMessage.error,#progressMessage.error {
+    color: #bb0000;
+}
+
+#showUploadFormButton {
+    float: right;
+}
+
+#showRemoveConfirmationButton {
+    float: left;
+}
+
+#pluginList .notFound {
+    color: red;
+}
+
+#pluginList .deleting {
+    color: red;
+}
+
+#pluginCount {
+    color: #777777;
+    font-weight: bold;
+}
+
+.agentStatusProgressSpan,.agentStatusFailSpan,#agentFailure,#outdatedAgents,.helpLink
+    {
+    color: #0066CC;
+    font-weight: bold;
+    height: 9px;
+}
+
+.agentStatusProgressSpan,.agentStatusFailSpan,.agentStatusSuccessfulSpan
+    {
+    float: left;
+    height: 20px;
+}
+
+.agentStatusProgressSpan:focus,.agentStatusProgressSpan:hover,.agentStatusFailSpan:focus,.agentStatusFailSpan:hover,#agentFailure:focus,#agentFailure:hover,#outdatedAgents:focus,#outdatedAgents:hover,.helpLink:focus,.helpLink:hover
+    {
+    cursor: pointer;
+    color: #0099FF;
+}
+
+.helpLink {
+    margin-top: 0;
+    margin-right: 0;
+    position: absolute;
+    top: 4px;
+    right: 10px;
+    float: right;
+}
+
+#agentSummaryPanel,#oldAgentSummaryPanel {
+    margin-top: 0;
+}
+
+.errorAgentTip {
+    overflow: auto;
+}
+
+.errorAgentTitle {
+    font-weight: bold;
+    height: 8px;
+}
+
+.topInfo,#currentTimeInfo,#agentInfo,#customDirInfo {
+    font-weight: bold;
+    height: 20px;
+    color: #777777;
+}
+
+.closeButton {
+    margin-right: 5px;
+    float: right;
+    visibility: hidden;
+}
+
+#showStatusPanelDialog {
+    width: 505px;
+    height: 410px;
+    text-align: left;
+}
+
+#statusButtonBar {
+    text-align: right;
+    vertical-align: bottom;
+}
+
+#agentList {
+    border: solid 1px;
+    border-color: #BBBBBB;
+    height: 290px;
+    overflow: auto;
+    margin: 10px;
+    padding: 0px 30px;
+    width: 410px;
+}
+
+.errorAgent {
+    list-style-image: url("/static/images/icon_available_red.gif");
+}
+
+.inProgressAgent {
+    list-style-image: url("/static/images/alert.png");
+}
+
+#searchText {
+    background: url("/static/images/search.png") no-repeat scroll 3px center
+        #FFFFFF;
+    color: #444444;
+    padding: 0.25em 0.25em 0.25em 20px;
+    width: 250px;
+}
+
+input[type="text"] {
+    margin: 0.5em 0;
+}
+
+.selectInstruction {
+    font-weight: bold;
+    width: 290px;
+    float: left;
+}
+
+#selectedFileList {
+    width: 400px;
+}
+
+.uploaderInsideNode {
+    
+}
+
+#selectFileBtn {
+    width: 60px;
+    float: right;
+}
+
+.fileToUploadClose {
+    background: url("/static/images/dash_movecontent_del-on.gif") no-repeat
+        scroll 5px center #FFFFFF;
+}
+
+#afterSelectFileInstruction {
+    text-align: center;
+    color: #777777;
+}
+
+.mechanismOffInstruction {
+    background: yellow;
+}
+
+#loadingIcon,#summaryLoadingIcon,#oldAgentSummaryLoadingIcon {
+    width: 15px;
+}
+
+.infoIcon {
+    width: 12px;
+}
+
+#pluginManagerPanel .gridheader,#pluginManagerPanel .gridrow,#pluginManagerPanel .actionbar,#pluginManagerPanel ul
+    {
+    min-width: 980px;
+}
+
+.span-small {
+    width: 10%;
+}
+
+.span-med {
+    width: 15%;
+}
+
+.span-large {
+    width: 60%;
+}
+
+.span-status {
+    min-width: 120px;
+    width: 10%;
+}
+
+#selectFileButton {
+    width: 60px;
+}
+
+#progressMessage {
+    float: left;
+    margin: 0px 100px;
+    padding: 5px 0px;
+}
+
+#pluginManagerPanel li.grey {
+    background-color: #BBB;
+}
+
+#agentSummaryPanel {
+    width: 400px;
+}
+
+#agentSummaryPanel .cancelLink,#oldAgentSummaryPanel .cancelLink {
+    float: right;
+}
+
+#agentSummaryList {
+    max-height: 290px;
+    overflow: auto;
+    margin: 10px;
+    padding: 0px 30px;
+    max-width: 350px;
+    margin-left: 0px;
+}
+
+#deletLoadingIcon {
+    float: right;
+}
+
+#tableLoadingIcon {
+    width: 50px;
+    height: 50px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#oldAgentSummaryPanel {
+    width: 600px;
+}
+
+#oldAgentSummaryPanel ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    background-color: #fff;
+    border: 1px solid gray;
+    border-top: 0;
+    border-bottom: 1px solid gray;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    /* height: 400px;*/
+}
+
+#oldAgentSummaryPanel .gridheader {
+    background: url("/static/images/table_header_large.png") repeat-x 0 0
+        transparent;
+    overflow: hidden;
+    font-weight: bold;
+    color: #444;
+    border: 1px solid gray;
+    border-bottom: 0;
+    text-align: left;
+}
+
+#oldAgentSummaryPanel .gridheader span.column {
+    padding-top: 0.25em;
+    padding-left: 0.5em;
+    height: 25px;
+    text-align: left;
+}
+
+#oldAgentSummaryPanel .gridrow {
+    text-align: left;
+}
+
+#oldAgentSummaryPanel .gridrow span.column {
+    padding: 0.5em 0;
+    padding-left: 0.5em;
+}

@@ -110,22 +110,22 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
 
     private static final String AGENT_BUNDLE_HOME_PROP = "${" + AgentConfig.AGENT_BUNDLE_HOME + "}";
     private static final Log log = LogFactory.getLog(AgentManagerImpl.class);
-    private AgentTypeDAO agentTypeDao;
-    private AgentDAO agentDao;
-    private ServiceDAO serviceDao;
-    private ServerDAO serverDao;
-    private PermissionManager permissionManager;
-    private PlatformDAO platformDao;
-    private ServerConfigManager serverConfigManager;
-    private AgentCommandsClientFactory agentCommandsClientFactory;
+    private final AgentTypeDAO agentTypeDao;
+    private final AgentDAO agentDao;
+    private final ServiceDAO serviceDao;
+    private final ServerDAO serverDao;
+    private final PermissionManager permissionManager;
+    private final PlatformDAO platformDao;
+    private final ServerConfigManager serverConfigManager;
+    private final AgentCommandsClientFactory agentCommandsClientFactory;
     private ApplicationContext applicationContext;
-    private AgentPluginStatusDAO agentPluginStatusDAO;
-    private AgentPluginUpdater agentPluginUpdater;
-    private PluginDAO pluginDAO;
-    private ConcurrentStatsCollector concurrentStatsCollector;
-    private AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle;
-    private PluginManager pluginManager;
-    private TransactionRetry transactionRetry;
+    private final AgentPluginStatusDAO agentPluginStatusDAO;
+    private final AgentPluginUpdater agentPluginUpdater;
+    private final PluginDAO pluginDAO;
+    private final ConcurrentStatsCollector concurrentStatsCollector;
+    private final AgentPluginSyncRestartThrottle agentPluginSyncRestartThrottle;
+    private final PluginManager pluginManager;
+    private final TransactionRetry transactionRetry;
 
     @Autowired
     public AgentManagerImpl(AgentTypeDAO agentTypeDao,
@@ -191,6 +191,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                     }
                 }
             }
+            @Override
             public String toString() {
                 return "Agent Plugin Sync (initiated by agent startup)";
             }
@@ -217,6 +218,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
                     }
                 }
             }
+            @Override
             public String toString() {
                 return "Global Plugin Sync (initiated by plugin deploy)";
             }
@@ -301,6 +303,14 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         return agentDao.findAll();
     }
 
+    /**
+     * Get a list of all agents in the system, whose version is older than server's version
+     */
+    @Transactional(readOnly = true)
+    public List<Agent> getOldAgents() {
+        return agentDao.findOldAgents();
+    } 
+    
     /**
      * Get a count of all the agents in the system
      */
@@ -1304,7 +1314,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
 // XXX needs javadoc!
 // TODO May not want to pass around the lather PluginReport_args object to hide the comm layer from
 // the business logic
-    public Integer updateAgentPluginStatus(PluginReport_args arg) {
+    public Integer updateAgentPluginStatus(PluginReport_args arg)  {
         @SuppressWarnings("unchecked")
         final Map<String, String> stringVals = arg.getStringVals();
         final boolean debug = log.isDebugEnabled();
@@ -1314,7 +1324,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
             final String agentToken = stringVals.get(PluginReport_args.AGENT_TOKEN);
             if (debug) log.debug(stringVals);
             agent = getAgent(agentToken);
-            if (agent == null) {
+                    
+            if ((agent == null) || isAgentOld(agent)) {
                 return null;
             }
             if (canRestartAgent(agent, arg.getStringLists().toString())) {
@@ -1348,6 +1359,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
             agentPluginUpdater.queuePluginTransfer(updateMap, removeMap, canRestartAgent);
         } catch (AgentNotFoundException e) {
             log.error(e,e);
+        } catch (ConfigPropertyException e) {
+            throw new SystemException(e);
         } finally {
             if (agent != null) {
                 agent.setLastPluginInventoryCheckin(System.currentTimeMillis());
@@ -1355,6 +1368,12 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
         }
         // only return agentId if canRestartAgent == true
         return (agent != null && canRestartAgent) ? agent.getId() : null;
+    }
+
+    private boolean isAgentOld(Agent agent) throws ConfigPropertyException {
+        Properties serverConfigProps = serverConfigManager.getConfig();
+        String serverVersion = serverConfigProps.getProperty(HQConstants.ServerVersion);     
+        return agent.getVersion().compareTo(serverVersion) < 0;
     }
 
     private boolean canRestartAgent(Agent agent, String stringLists) {
@@ -1449,8 +1468,8 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
             if (currPlugin == null || currPlugin.isDeleted()) {
                 // the agent has a plugin that is unknown to the server, remove it!
                 setFileNameToRemove(removeMap, agent.getId(), filename);
-            } else if (!md5.equals(currPlugin.getMD5())) {
-                setPluginToUpdate(updateMap, agent.getId(), currPlugin);
+            } else if (!md5.equals(currPlugin.getMD5())) {                  
+                setPluginToUpdate(updateMap, agent.getId(), currPlugin);                
                 if (debug) log.debug("plugin=" + currPlugin.getName() +
                                      " md5 does not match agentId=" + agent.getId() +
                                      ", " + md5 + " != " + currPlugin.getMD5());
@@ -1583,6 +1602,11 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     public long getNumAutoUpdatingAgents() {
         return agentPluginStatusDAO.getNumAutoUpdatingAgents();
     }
+    
+    @Transactional(readOnly=true)
+    public long getNumOldAgents()  {
+        return agentDao.getNumOldAgents();
+    }      
 
     @Transactional(readOnly=false)
     public void syncAllAgentPlugins() {
@@ -1701,7 +1725,7 @@ public class AgentManagerImpl implements AgentManager, ApplicationContextAware {
     // THESE CLASSES ARE USED TO DRIVE THE ZEVENTS FOR THE SERVER -> AGENT PLUGIN SYNC
     // -----------------------------
     private class PluginDeployedZevent extends Zevent {
-        private Collection<String> pluginFileNames;
+        private final Collection<String> pluginFileNames;
         @SuppressWarnings("serial")
         private PluginDeployedZevent(Collection<String> pluginFileNames) {
             super(new ZeventSourceId() {}, new ZeventPayload() {});
