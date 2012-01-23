@@ -720,7 +720,6 @@ ${errMsg}
     <antcall target="install-hq-server-profile"/>
     <property name="tomcat.home"
               value="${server.product.dir}/hq-engine"/>
-  	<antcall target="update-jms-context"/>
     <echo>^^^INFO: Copying binaries and libraries to server installation...</echo>
 
     <!-- We only keep this file around for debugging, in case we need
@@ -836,24 +835,6 @@ ${errMsg}
 
     <antcall target="debug-setup"/>
   </target>
-
-	<target name="update-jms-context">
-		<!--This steps are made as a work around to the following bug - 
-	       	https://issues.apache.org/jira/browse/AMQ-3168.
-	       	When this bug will be fixed this code should be removed and this values (server.jms.usejmx, server.jms.jmxport)
-	       	will be loaded into the jms-context file in run time. Now this values needs to be hard coded into
-	       	the file so changing this values in the hq-server.conf file and restarting the server won't
-	       	have any effect and this is not the right behaviour-->
-		<property name="server.jms.usejmx" value="false"/>
-		<property name="server.jms.jmxport" value="1099"/>	
-		 <unzip src="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/lib/hq-server-${version}.jar"
-		        dest="${server.installdir}/hq-tmp-jar"/>
-	        <jmsContextConfigure jmsContextFile="${server.installdir}/hq-tmp-jar/META-INF/spring/jms-context.xml"
-		            useJmx="${server.jms.usejmx}" jmxPort="${server.jms.jmxport}"/>
-		    <jar update="true" basedir="${server.installdir}/hq-tmp-jar" 
-		        destfile="${server.product.dir}/hq-engine/hq-server/webapps/ROOT/WEB-INF/lib/hq-server-${version}.jar"/>
-		    <delete dir="${server.installdir}/hq-tmp-jar"/>
-	</target>
      
 	<target name="copy-license" unless="setup.upgrade">
         <copy file="${install.dir}/data/license.xml" todir="${conf-dir}"
