@@ -27,12 +27,13 @@
 package org.hyperic.hq.agent.db;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.util.Iterator;
 
 import junit.framework.TestCase;
 
+import org.springframework.test.annotation.DirtiesContext;
+
+@DirtiesContext
 public class DiskListTest extends TestCase
 {
     private static final int RECSIZE  = 1024;
@@ -43,6 +44,7 @@ public class DiskListTest extends TestCase
 
     public DiskListTest() {}
     
+    @Override
     public void setUp() {
     }
         
@@ -565,7 +567,7 @@ public class DiskListTest extends TestCase
     
     private static class IterationRunner extends Thread {
         
-        private Iterator it;
+        private final Iterator it;
         private Exception failure;
 
         IterationRunner(Iterator it) {
@@ -573,6 +575,7 @@ public class DiskListTest extends TestCase
             this.failure = null;
         }
         
+        @Override
         public void run() {
             try {
                 while (it.hasNext()) {

@@ -58,8 +58,8 @@ import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.OperationDAO;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
+import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -71,6 +71,7 @@ import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.context.IntegrationTestContextLoader;
+import org.hyperic.hq.context.IntegrationTestSpringJUnit4ClassRunner;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationManagerImpl;
 import org.hyperic.hq.escalation.server.session.EscalationRuntime;
@@ -97,7 +98,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -105,7 +105,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author trader
  * 
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(IntegrationTestSpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = IntegrationTestContextLoader.class, locations = { "classpath*:META-INF/spring/*-context.xml" })
 @Transactional
 @DirtiesContext
@@ -162,9 +162,9 @@ public class EscalationManagerTest  {
 
 	private AlertDefinition testServiceAlertDef;
 
-	private List<Role> testRoles = new ArrayList<Role>();
+	private final List<Role> testRoles = new ArrayList<Role>();
 
-	private List<AuthzSubject> testUsers = new ArrayList<AuthzSubject>();
+	private final List<AuthzSubject> testUsers = new ArrayList<AuthzSubject>();
 
 	private Platform testPlatform;
 	

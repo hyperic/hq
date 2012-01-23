@@ -25,8 +25,17 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
+import static org.easymock.EasyMock.and;
+import static org.easymock.EasyMock.capture;
+import static org.easymock.EasyMock.createStrictControl;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.EasyMock.isA;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -42,6 +51,7 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.context.IntegrationTestContextLoader;
+import org.hyperic.hq.context.IntegrationTestSpringJUnit4ClassRunner;
 import org.hyperic.hq.db.DatabasePopulator;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.MeasurementProcessor;
@@ -54,13 +64,13 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(IntegrationTestSpringJUnit4ClassRunner.class)
 @Transactional
 @ContextConfiguration(loader    = IntegrationTestContextLoader.class,
                       locations = {"classpath*:META-INF/spring/*-context.xml", "SrnManagerTest-context.xml"})
+@DirtiesContext
 public class SrnManagerTest {
     private static final int PLATFORM_ID = 11060;
     

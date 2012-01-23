@@ -21,6 +21,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.NotFoundException;
 import org.hyperic.hq.context.IntegrationTestContextLoader;
+import org.hyperic.hq.context.IntegrationTestSpringJUnit4ClassRunner;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -30,7 +31,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StopWatch;
 
@@ -42,7 +42,7 @@ import org.springframework.util.StopWatch;
  * 
  */
 @DirtiesContext
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(IntegrationTestSpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "classpath*:META-INF/spring/*-context.xml", loader = IntegrationTestContextLoader.class)
 @Transactional
 public class AIQueueRetrievalTest {

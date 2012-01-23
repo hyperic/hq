@@ -25,6 +25,8 @@
  */
 package org.hyperic.hq.appdef.server.session;
 
+import static org.junit.Assert.assertEquals;
+
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueManager;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -38,15 +40,13 @@ import org.hyperic.util.config.EncodingException;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.DirtiesContext;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Integration test of {@link AIQueueManagerImpl}
  * @author jhickey
  * 
  */
-@DirtiesContext
+
 public class AIQueueManagerTest
     extends BaseInfrastructureTest {
 
