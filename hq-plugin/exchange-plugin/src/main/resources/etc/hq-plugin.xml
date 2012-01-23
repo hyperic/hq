@@ -1186,7 +1186,7 @@
     <plugin type="log_track"
             class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>    
 
-    <property name="VERSION_FILE" value="offfilt.dll"/>
+    <property name="version" value="8.\d*"/>
 
     <properties>
        <property name="version"
@@ -1212,7 +1212,12 @@
     </service>
   </server>
 
+  <server name="Exchange" version="2010" include="Exchange 2007" platforms="Win32">
+    <property name="version" value="14.\d*"/>
+  </server>
+
   <server name="Exchange Transport" version="2007" platforms="Win32">
+    <property name="version" value="8.\d*"/>
 
     <plugin type="measurement"
             class="org.hyperic.hq.product.Win32MeasurementPlugin"/>
@@ -1239,5 +1244,9 @@
       </config>
       <plugin type="measurement"/>
     </service>
+  </server>
+  
+  <server name="Exchange Transport" version="2010" include="Exchange Transport 2007" platforms="Win32">
+    <property name="version" value="14.\d*"/>
   </server>
 </plugin>

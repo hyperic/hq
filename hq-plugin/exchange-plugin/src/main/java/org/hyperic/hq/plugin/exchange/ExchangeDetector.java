@@ -25,17 +25,15 @@
 
 package org.hyperic.hq.plugin.exchange;
 
-import java.io.File;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.product.AutoServerDetector;
-import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.ServerDetector;
-import org.hyperic.hq.product.ServerResource;
-import org.hyperic.hq.product.ServiceResource;
+import org.hyperic.hq.product.*;
 import org.hyperic.sigar.win32.Pdh;
 import org.hyperic.sigar.win32.RegistryKey;
 import org.hyperic.sigar.win32.Service;
@@ -95,10 +93,14 @@ public class ExchangeDetector
         try {
             exch = new Service(EXCHANGE_IS);
             if (exch.getStatus() != Service.SERVICE_RUNNING) {
+                log.debug("[getServerResources] service '" + EXCHANGE_IS
+                        + "' is not RUNNING (status='"+exch.getStatusString()+"')");
                 return null;
             }
             exe = exch.getConfig().getExe().trim();
         } catch (Win32Exception e) {
+            log.debug("[getServerResources] Error getting '" + EXCHANGE_IS
+                    + "' service information " + e, e);
             return null;
         } finally {
             if (exch != null) {
@@ -108,10 +110,20 @@ public class ExchangeDetector
 
         File bin = new File(exe).getParentFile();
         installpath = bin.getParent();
-        if (!isInstallTypeVersion(bin.getPath())) {
-            return null;
+        
+        String expectedVersion = getTypeProperty("version");
+        if (expectedVersion!=null) {
+            if (!checkVersion(bin, expectedVersion)) {
+                log.debug("[getServerResources] exchange on '" + bin
+                        + "' is not a " + getTypeInfo().getName());
+                return null;
+            }
+        } else {
+            if (!isInstallTypeVersion(bin.getPath())) {
+                return null;
+            }
         }
-
+        
         ServerResource server = createServerResource(installpath);
         server.setProductConfig();
         server.setMeasurementConfig();
@@ -130,6 +142,7 @@ public class ExchangeDetector
             } catch (Win32Exception e) {
             }
         } catch (Win32Exception e) {
+            log.debug(e,e);
         } finally {
             if (key != null) {
                 key.close();
@@ -165,8 +178,63 @@ public class ExchangeDetector
                 services.add(createService(WEB_NAME));
             } //else not enabled if no counters
         } catch (Win32Exception e) {
+            log.debug(e,e);
         }
 
         return services;
+    }
+    
+    static boolean checkVersion(File bin, String expectedVersion) {
+        boolean isOK = true;
+        File remoteExchange = new File(bin, "RemoteExchange.ps1");
+        String cmdArgs[] = {"cmd", "/c",
+            "powershell",
+            "-command",
+            "\". '" + remoteExchange.getAbsolutePath() + "' ; Connect-ExchangeServer -auto; get-exchangeserver | format-list ; exit;\""
+        };
+
+        Process cmd;
+        try {
+            log.debug("[checkVersion] cmdArgs=" + Arrays.asList(cmdArgs));
+            cmd = Runtime.getRuntime().exec(cmdArgs);
+            cmd.getOutputStream().close();
+            String resultString = inputStreamAsString(cmd.getInputStream());
+            Pattern regx = Pattern.compile("AdminDisplayVersion[^:]*:.Version.([^\\s]*).");
+            Matcher matcher = regx.matcher(resultString);
+            if (matcher.find()) {
+                Pattern versionRegx = Pattern.compile(expectedVersion);
+                Matcher versrionMatcher = versionRegx.matcher(matcher.group(1));
+                if (!versrionMatcher.find()) {
+                    log.debug("[checkVersion] versrion line=" + matcher.group(0));
+                    log.debug("[checkVersion] versrionString=" + matcher.group(1));
+                    log.debug("[checkVersion] versrionMatcher=" + versrionMatcher);
+                    isOK = false;
+                }
+            } else {
+                log.debug("[checkVersion] command result=" + resultString);
+                log.debug("[checkVersion] matcher=" + matcher);
+                log.debug("[checkVersion] Error getting Exchange version");
+                isOK = false;
+            }
+        } catch (Exception ex) {
+            log.debug("[checkVersion] Error getting Exchange version " + ex, ex);
+            isOK = false;
+        }
+        return isOK;
+    }
+    
+    
+    static String inputStreamAsString(InputStream stream) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(stream));
+        StringBuilder sb = new StringBuilder();
+        try {
+            String line;
+            while ((line = br.readLine()) != null) {
+                sb.append(line).append("\n");
+            }
+        } finally {
+            br.close();
+        }
+        return sb.toString();
     }
 }
