@@ -273,6 +273,14 @@ public class ServerConfigUpgrader
         if (!StringUtils.hasText(serverProps.getProperty("tomcat.minsparethreads"))) {
         	serverProps.setProperty("tomcat.minsparethreads", "50");
         }
+        
+        if (!StringUtils.hasText(serverProps.getProperty("server.jms.usejmx"))) {
+        	serverProps.setProperty("server.jms.usejmx", "false");
+        }
+        
+        if (!StringUtils.hasText(serverProps.getProperty("server.jms.jmxport"))) {
+        	serverProps.setProperty("server.jms.jmxport", "1099");
+        }
     }
 
     private String encryptPassword(String encryptionKey, String clearTextPassword) {
