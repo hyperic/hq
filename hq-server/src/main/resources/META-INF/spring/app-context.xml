@@ -110,8 +110,9 @@
 				p:defaultAutoCommit="false" p:minIdle="${server.database-minpoolsize}"
 				p:maxActive="${server.database-maxpoolsize}" p:maxIdle="${server.database-maxpoolsize}" 
 				p:initialSize="${server.database-minpoolsize}"
-				p:maxWait="${server.database-blockingtimeout}"
+				p:maxWait="${server.database-blockingtimeout}" 
                 p:jdbcInterceptors="ConnectionState;StatementFinalizer"
+                destroy-method="close"
 				p:validationQuery="${server.connection-validation-sql}"
 				p:validationInterval="30000" p:logAbandoned="true" p:testOnBorrow="true" p:defaultTransactionIsolation="2" />
 				
@@ -129,10 +130,12 @@
 		</property>
 	</bean>
 
-	<context:component-scan base-package="org.hyperic,com.hyperic" />
+	<context:component-scan base-package="org.hyperic,com.hyperic"> 
+	   <context:exclude-filter type="regex" expression="org.hyperic.cm.*"/>
+	</context:component-scan>
 
-	<bean id="sessionFactory"
-		class="org.hyperic.hibernate.CacheInitializingLocalSessionFactoryBean">
+	<bean id="sessionFactory"  
+		class="org.hyperic.hibernate.CacheInitializingLocalSessionFactoryBean" destroy-method="destroy">
 		<constructor-arg ref="preloadCaches"/>
 		<property name="dataSource" ref="dataSource" />
 		<property name="mappingLocations" value="classpath:/hibernate/**/*.hbm.xml" />
