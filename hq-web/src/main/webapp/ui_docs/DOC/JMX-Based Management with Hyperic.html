@@ -1,9 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : JMX-Based Management with Hyperic</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : JMX-Based Management with Hyperic</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -14,19 +12,19 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : JMX-Based Management with Hyperic
+                            vFabric Hyperic 4.6.5 : JMX-Based Management with Hyperic
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1307466547146 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1307466547146 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1307466547146 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1325699755018 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699755018 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699755018 li {margin-left: 0px;padding-left: 0px;}
 
-/*]] >*/</style><div class='rbtoc1307466547146'>
+/*]]>*/</style><div class='rbtoc1325699755018'>
 <ul>
     <li><a href='#JMX-BasedManagementwithHyperic-Introduction'>Introduction</a></li>
     <li><a href='#JMX-BasedManagementwithHyperic-JMXResourcesantheHypericInventoryModel'>JMX Resources an the Hyperic Inventory Model</a></li>
@@ -64,20 +62,20 @@ div.rbtoc1307466547146 li {margin-left: 0px;padding-left: 0px;}
 </ul>
 
 
-<p>Hyperic uses the <a href="http://www.jcp.org/en/jsr/detail?id=160">remote API</a> specified by JSR-160 to manage products that support JMX 1.2/JSR-160, including the ones listed above. For JMX-enabled servers that do not support JSR-160, Hyperic uses vendor-specific connectors.  </p>
+<p>Hyperic uses the remote API (<a href="http://www.jcp.org/en/jsr/detail?id=160">http://www.jcp.org/en/jsr/detail?id=160</a>] specified by JSR-160 to manage products that support JMX 1.2/JSR-160, including the ones listed above. For JMX-enabled servers that do not support JSR-160, Hyperic uses vendor-specific connectors.  </p>
 
 <p>Hyperic's JMX support classes enable auto-discovery of MBean servers and MBeans, collection of MBean attributes, and execution of MBean operations. </p>
 
 <p>To enable monitoring, you must configure the target JMX-enabled to accept remote connections. In many cases, the remote connector enabled by default, otherwise, you must configure it for remote access.</p>
 
 <ul>
-	<li><a href="http://java.sun.com/j2se/1.5.0/docs/guide/management/agent.html#remote">J2SE 1.5</a></li>
-	<li><a href="http://mx4j.sourceforge.net/docs/ch03.html">MX4J</a></li>
-	<li><a href="http://activemq.apache.org/jmx.html">ActiveMQ</a></li>
-	<li><a href="http://jonas.objectweb.org/current/doc/doc-en/integrated/howto/JSR160_support.html#JSR160_support">JOnAS</a></li>
-	<li><a href="http://servicemix.apache.org/jmx-console.html">ServiceMix</a></li>
-	<li>Many more...</li>
+	<li>J2SE 1.5 &#8212; <a href="http://download.oracle.com/javase/1.5.0/docs/api/javax/management/remote/package-summary.html">http://download.oracle.com/javase/1.5.0/docs/api/javax/management/remote/package-summary.html</a></li>
+	<li>MX4J &#8212; <a href="http://mx4j.sourceforge.net/docs/ch03.html">http://mx4j.sourceforge.net/docs/ch03.html</a></li>
+	<li>ActiveMQ &#8212; <a href="http://activemq.apache.org/jmx.html">http://activemq.apache.org/jmx.html</a></li>
+	<li>JOnAS &#8212; See <a href="http://jonas.objectweb.org/current/doc/doc-en/integrated/howto/JSR160_support.html#JSR160_support">http://jonas.objectweb.org/current/doc/doc-en/integrated/howto/JSR160_support.html#JSR160_support</a></li>
+	<li>ServiceMix &#8212; See <a href="http://servicemix.apache.org/jmx-console.html">http://servicemix.apache.org/jmx-console.html</a></li>
 </ul>
+
 
 
 <h1><a name="JMX-BasedManagementwithHyperic-JMXResourcesantheHypericInventoryModel"></a>JMX Resources an the Hyperic Inventory Model</h1>
@@ -104,10 +102,10 @@ div.rbtoc1307466547146 li {margin-left: 0px;padding-left: 0px;}
 
 
 <h1><a name="JMX-BasedManagementwithHyperic-IdentifyTargetMBeansandAttributes"></a>Identify Target MBeans and Attributes</h1>
+<p><a name="JMX-BasedManagementwithHyperic-attributes"></a><br/>
+Identify the MBeans you want to manage. The target MBeans will be represented in Hyperic by a services that are children of the server resource that represents the monitored JMX application. </p>
 
-<p>Identify the MBeans you want to manage. The target MBeans will be represented in Hyperic by a services that are children of the server resource that represents the monitored JMX application. </p>
-
-<p>You can use an MBean browser, such as <a href="http://java.sun.com/j2se/1.5.0/docs/guide/management/jconsole.html">JConsole</a> or  <a href="http://mc4j.org/">MC4J</a></p>
+<p>You can use an MBean browser, such as JConsole (<a href="http://download.oracle.com/javase/1.5.0/docs/guide/management/jconsole.html">http://download.oracle.com/javase/1.5.0/docs/guide/management/jconsole.html</a>) or MC4J (<a href="http://sourceforge.net/projects/mc4j/">http://sourceforge.net/projects/mc4j/</a>).</p>
 
 <p>Hyperic JMX support classes also provide a command line tool to dump MBeans in text format:</p>
 
@@ -151,14 +149,14 @@ Name:  Catalina:type=Cache,host=localhost,path=/jsp-examples
 </pre>
 </div></div>
 
-<p>Each of the attribute names given above (for example, modelerType or accessCount) can be used as the metric <tt>alias</tt> in the plugin when <a href="#JMX-BasedManagementwithHyperic-metrics">defining the metrics</a> to be collected.</p>
+<p>Each of the attribute names given above (for example, modelerType or accessCount) can be used as the metric <tt>alias</tt> in the plugin when defining the metrics to be collected.</p>
 
 <h1><a name="JMX-BasedManagementwithHyperic-ConfigurationPropertiesRequiredforJMXMonitoring"></a>Configuration Properties Required for JMX Monitoring</h1>
 
 <p>Hyperic's JMX support classes require the JMX URL and JMX user credentials in order to connect to a remote MBean server. </p>
 
 <ul>
-	<li>jmx.url - The <a href="http://java.sun.com/j2se/1.5.0/docs/api/javax/management/remote/JMXServiceURL.html">JMX Service URL</a></li>
+	<li>jmx.url - The JMX Service URL. For more information, see <a href="http://download.oracle.com/javase/1.5.0/docs/api/javax/management/remote/JMXServiceURL.html">http://download.oracle.com/javase/1.5.0/docs/api/javax/management/remote/JMXServiceURL.html</a></li>
 	<li>jmx.username - Username if authentication is required</li>
 	<li>jmx.password - Password if authentication is required</li>
 </ul>
@@ -419,7 +417,6 @@ return MbeanServer.invoke(name, "reset", new Object[0], new String[0]);</pre>
 		</div>
 </div></div>
 
-<p><em><a href="#JMX-BasedManagementwithHyperic-components"><em>back to list of plugin components</em></a></em></p>
 
 <p><a name="JMX-BasedManagementwithHyperic-custom"></a></p>
 
@@ -502,7 +499,7 @@ return MbeanServer.invoke(name, "reset", new Object[0], new String[0]);</pre>
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:44</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jan 20, 2012 10:08</font></td>
 		    </tr>
 	    </table>
     </body>

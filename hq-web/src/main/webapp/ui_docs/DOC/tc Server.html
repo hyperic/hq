@@ -1,9 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : tc Server</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : tc Server</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -14,21 +12,21 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : tc Server
+                            vFabric Hyperic 4.6.5 : tc Server
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1307466764795 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1307466764795 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1307466764795 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1325699881336 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699881336 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699881336 li {margin-left: 0px;padding-left: 0px;}
 
-/*]] >*/</style><div class='rbtoc1307466764795'>
+/*]]>*/</style><div class='rbtoc1325699881336'>
 <ul>
     <li><a href='#tcServer-ConfigureatcServerInstance'>Configure a tc Server Instance</a></li>
 <ul>
@@ -85,11 +83,11 @@ div.rbtoc1307466764795 li {margin-left: 0px;padding-left: 0px;}
 <h1><a name="tcServer-ConfigureatcServerInstance"></a>Configure a tc Server Instance </h1>
 <p>The features described on this page are available in tc Server and tc Server Standard Edition.</p>
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1311961878117 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1311961878117 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1311961878117 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1325699340505 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699340505 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699340505 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1311961878117'>
+/*]]>*/</style><div class='rbtoc1325699340505'>
 <ul>
     <li><a href='#ui-tcserver.ServerConfiguration-tcRuntimeConfiguration'>tc Runtime Configuration</a></li>
     <li><a href='#ui-tcserver.ServerConfiguration-NavigatingtcRuntimeConfigurationPages'>Navigating tc Runtime Configuration Pages</a></li>
@@ -179,6 +177,7 @@ div.rbtoc1311961878117 li {margin-left: 0px;padding-left: 0px;}
 <p>If you update tc Runtime configuration settings from the HQ user interface, do NOT manually update the tc Runtime configuration files at the same time. HQ clears its local memory and reloads the configuration files upon certain events, not continuously.</p>
 
 <h2><a name="tcServer-UserPermissionsRequiredtoUsethetcRuntimeFeatures"></a>User Permissions Required to Use the tc Runtime Features</h2>
+<p><a name="tcServer-permissions"></a></p>
 
 <p>The HQ super-user can use all the tc Runtime features of the HQ UI.&nbsp; If, however, you log on to the HQ UI as a non-super-user, then that user must have certain permissions to be able to use the tc Runtime features, as described in this section.</p>
 
@@ -242,7 +241,7 @@ div.rbtoc1311961878117 li {margin-left: 0px;padding-left: 0px;}
 <ol>
 	<li><a href="#tcServer-navigating">Navigate to the tc Runtime configuration pages.</a></li>
 	<li>Click the <b>Configuration</b> tab.</li>
-	<li>Click the <b>Server Start</b> link in the list on the left. For information about the fields on this page, see <a href="ui-tcserver.ServerConfigurationRef.html#ui-tcserver.ServerConfigurationRef-configurationstartup">tc Runtime Configuration Reference</a>.</li>
+	<li>Click the <b>Server Start</b> link in the list on the left. For information about the fields on this page, see <a href="ui-tcserver.ServerConfigurationRef.html" title="ui-tcserver.ServerConfigurationRef">ui&#45;tcserver.ServerConfigurationRef</a>.</li>
 	<li>Make your changes.&nbsp;</li>
 	<li>To add your own JVM command line arguments, click the <b>Advanced</b> link at the bottom and enter them in the form the form "-X<em>option</em><em>value</em> or &#45;XX:<em>option</em>=<em>value</em>, separating options with a space.</li>
 	<li>Click <b>Save</b>. The message "Configuration saved successfully" indicates your changes were successfully saved.</li>
@@ -324,12 +323,12 @@ div.rbtoc1311961878117 li {margin-left: 0px;padding-left: 0px;}
 
 <p>You can create two types of JDBC data sources:</p>
 <ul>
-	<li><a href="#tcServer-dbcpdatasource">Database Connection Pool (DBCP) Datasource</a>&#45; The DBCP Datasource is the standard datasource provided by tc Runtime that uses the commons-dbcp package. Although this datasource is adequate for simple applications, it is single-threaded which means that in order to be thread-safe, tc Runtime must lock the entire pool, even during query validation. Thus it is not suitable for highly concurrent environments. Additionally, it can be slow, which in turn can negatively affect the performance of Web applications.</li>
+	<li>Database Connection Pool (DBCP) Datasource &#8212; The DBCP Datasource is the standard datasource provided by tc Runtime that uses the commons-dbcp package. Although this datasource is adequate for simple applications, it is single-threaded which means that in order to be thread-safe, tc Runtime must lock the entire pool, even during query validation. Thus it is not suitable for highly concurrent environments. Additionally, it can be slow, which in turn can negatively affect the performance of Web applications.</li>
 </ul>
 
 
 <ul>
-	<li><a href="#tcServer-tomcatdatasource">Tomcat Datasource</a> &#45; The <b>Tomcat Datasource</b> includes all the functionality of the DBCP datasource, but adds additional features to support highly-concurrent environments and multiple core/cpu systems. The Tomcat datasource typically performs much better than the DBCP datasource. Additional features include:
+	<li>Tomcat Datasource &#8212; The <b>Tomcat Datasource</b> includes all the functionality of the DBCP datasource, but adds additional features to support highly-concurrent environments and multiple core/cpu systems. The Tomcat datasource typically performs much better than the DBCP datasource. Additional features include:
 <br class="atl-forced-newline" />
 	<ul>
 		<li>Dynamic implementation of the interfaces, which means that the datasource supports the java.sql and javax.sql interfaces for your runtime environment (as long as your JDBC driver supports it), even when compiled with a lower version of the JDK.</li>
@@ -364,7 +363,7 @@ div.rbtoc1311961878117 li {margin-left: 0px;padding-left: 0px;}
 	<li>If you want to edit an existing service, such as the default "catalina" service, click its name in the table and then configure, or add, the following components of the service:
 	<ul>
 		<li><a href="#tcServer-connector">Connectors</a></li>
-		<li><a href="#tcServer-engine">Engine</a></li>
+		<li>Engine</li>
 		<li><a href="#tcServer-host">Virtual Host</a></li>
 		<li><a href="#tcServer-logging">Logging System</a></li>
 	</ul>
@@ -377,8 +376,8 @@ div.rbtoc1311961878117 li {margin-left: 0px;padding-left: 0px;}
 <p>For more information about configuring tc Runtime services, see <a href="http://tomcat.apache.org/tomcat-6.0-doc/config/service.html">The Service Component</a>, part of <a href="http://tomcat.apache.org/tomcat-6.0-doc/index.html">Apache Tomcat documentation</a>.</p>
 
 <h2><a name="tcServer-ConfiguringandCreatingConnectors"></a>Configuring and Creating Connectors</h2>
-
-<p>Connectors represent the interface between external clients sending requests to (and receiving responses from) a particular tc Runtime service. A tc Runtime instance can have one or more connectors, one for each supported message protocol. The default connector, configured for each tc Runtime, is the HTTP connector.</p>
+<p><a name="tcServer-connector"></a><br/>
+Connectors represent the interface between external clients sending requests to (and receiving responses from) a particular tc Runtime service. A tc Runtime instance can have one or more connectors, one for each supported message protocol. The default connector, configured for each tc Runtime, is the HTTP connector.</p>
 
 <p>Use this page to configure, or create new, connectors for the current tc Runtime service.</p>
 <ol>
@@ -394,6 +393,7 @@ div.rbtoc1311961878117 li {margin-left: 0px;padding-left: 0px;}
 <p>For additional detailed information about configuring tc Runtime connectors, see <a href="http://tomcat.apache.org/tomcat-6.0-doc/connectors">Connectors How-To</a>, part of the general <a href="http://tomcat.apache.org/tomcat-6.0-doc/index.html">Apache Tomcat documentation</a>.</p>
 
 <h2><a name="tcServer-ConfiguringandCreatingVirtualHosts"></a>Configuring and Creating Virtual Hosts</h2>
+<p><a name="tcServer-host"></a></p>
 
 <p>A tc Runtime host represents a virtual host, which is an association of a network name for a server (such as "www.mycompany.com") with the particular computer which hosts the tc Runtime instance. In order to be effective, this name must be registered in the Domain Name Service (DNS) server that manages your Internet domain.</p>
 
@@ -411,6 +411,7 @@ div.rbtoc1311961878117 li {margin-left: 0px;padding-left: 0px;}
 <p>For more information about configuring tc Runtime hosts, see <a href="http://tomcat.apache.org/tomcat-6.0-doc/config/host.html">The Host Container</a>, part of <a href="http://tomcat.apache.org/tomcat-6.0-doc/index.html">Apache Tomcat documentation</a>.</p>
 
 <h2><a name="tcServer-ConfiguringtcRuntimeLogging"></a>Configuring tc Runtime Logging</h2>
+<p><a name="tcServer-logging"></a></p>
 
 <p>Use this page to configure the logging system for the current engine. Note that you can also configure logging for a host by configuring the specific Host component; see <a href="#tcServer-ConfiguringandCreatingVirtualHosts">Configuring and Creating Virtual Hosts</a>.</p>
 <ol>
@@ -418,7 +419,7 @@ div.rbtoc1311961878117 li {margin-left: 0px;padding-left: 0px;}
 	<li>Click the <b>Services</b> tab.</li>
 	<li>In the <b>Services</b> table, click the name of the service for which you want to configure logging.</li>
 	<li>Click the <b>Logging</b> link in the list on the left.</li>
-	<li>Make your changes in the table. For information about the fields on this page, see <a href="ui-tcserver.ServerServicesRef.html#ui-tcserver.ServerServicesRef-serviceslogging">tc Runtime Services Reference</a>.</li>
+	<li>Make your changes in the table. For information about the fields on this page, see <a href="ui-tcserver.ServerServicesRef.html" title="ui-tcserver.ServerServicesRef">ui&#45;tcserver.ServerServicesRef</a>.</li>
 	<li>Click <b>Save</b>. The message "Configuration saved successfully" indicates your changes were successfully saved.</li>
 </ol>
 
@@ -445,7 +446,7 @@ div.rbtoc1311961878117 li {margin-left: 0px;padding-left: 0px;}
 
 <p>The <b>Application Management</b> page, available when a tc Runtime instance or a group of tc Runtime instances is selected, enables an authorized user to manage applications deployed that server instance or group.</p>
 
-<p>The HQ super-user can use all the tc Runtime Application Management features of the HQ UI.&nbsp; If,  however, you log on to the HQ UI as a non-super-user, then that user  must have certain permissions to be able to use the tc Runtime features.&nbsp; See <a href="http://support.hyperic.com/display/ui-tcserver.ServerConfiguration#ui-tcserver.ServerConfiguration-UserPermissionsRequiredtoUsethetcRuntimeFeatures">User Permissions Required to Use the tc Runtime Features</a> for details.</p>
+<p>The HQ super-user can use all the tc Runtime Application Management features of the HQ UI.&nbsp; If,  however, you log on to the HQ UI as a non-super-user, then that user  must have certain permissions to be able to use the tc Runtime features.&nbsp; See <a href="ui-tcserver.ServerConfiguration.html#ui-tcserver.ServerConfiguration-permissions">User Permissions Required to Use the tc Runtime Features</a> for details.</p>
 <div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>An HQ Group is not a Cluster</b></div><div class="panelContent">
 <p>An HQ <em>group</em> is not equivalent or similar to a tc Runtime cluster.</p>
 <ul>
@@ -652,7 +653,7 @@ With the default setting, "-1", no shutdown port is enabled, so that the only wa
 
 <h3><a name="tcServer-JMXListener"></a>JMX Listener</h3>
 
-<p>The <b>JMX Listener</b> section configures the component of the tc Runtime instance that listens for Java Management Extensions (JMX) connections from management tools, such as the HQ Agent. By default, tc Runtime enables JMX connectivity.</p>
+<p>The <b>JMX Listener</b> section configures the component of the tc Runtime instance that listens for Java Management Extensions (JMX) connections from management tools, such as the Hyperic Agent. By default, tc Runtime enables JMX connectivity.</p>
 <div class='table-wrap'>
 <table class='confluenceTable'><tbody>
 <tr>
@@ -663,7 +664,7 @@ With the default setting, "-1", no shutdown port is enabled, so that the only wa
 <td class='confluenceTd'> Enabled <a name="tcServer-configurationjmxenabled"></a></td>
 <td class='confluenceTd'> Specifies whether the tc Runtime instance's pre-configured JMX listener is enabled. <br class="atl-forced-newline" />
 <br class="atl-forced-newline" />
-<b>Important:</b> The HQ Agent uses JMX to connect to tc Runtime, so if you disable the JMX listener then you will not be able to use configure tc Runtime instances or groups from the HQ user interface, unless you configure JMX for tc Runtime through some other mechanism. </td>
+<b>Important:</b> The Hyperic Agent uses JMX to connect to tc Runtime, so if you disable the JMX listener then you will not be able to use configure tc Runtime instances or groups from the Hyperic user interface, unless you configure JMX for tc Runtime through some other mechanism. </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Port <a name="tcServer-configurationjmxport"></a><br class="atl-forced-newline" /> </td>
@@ -682,11 +683,11 @@ With the default setting, "-1", no shutdown port is enabled, so that the only wa
 <td class='confluenceTd'> Specifies whether tc Runtime authenticates users that connect to the server using the JMX port. <br class="atl-forced-newline" />  <br class="atl-forced-newline" />
 If you enable this field, tc Runtime looks up the user and password in the files specifies by the Access File and Password File fields, respectively; if tc Runtime finds the username and password in the files, then the user is authenticated and allowed JMX access. If you disable this property, <em>all</em> users may access tc Runtime via JMX. <br class="atl-forced-newline" />
 <br class="atl-forced-newline" />
-You configure the JMX user and password in HQ on server instances the <b>Inventory &gt; Configuration Properties</b> page. The default JMX user and password is configured by default when you install tc Server; if, however, you change the name or password of the user in the access and password files, you must also change the configured user/password in the HQ user interface. </td>
+You configure the JMX user and password in Hyperic on server instances the <b>Inventory &gt; Configuration Properties</b> page. The default JMX user and password is configured by default when you install tc Server; if, however, you change the name or password of the user in the access and password files, you must also change the configured user/password in the Hyperic user interface. </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Access File <a name="tcServer-configurationjmxaccessFile"></a><br class="atl-forced-newline" /> </td>
-<td class='confluenceTd'> Specifies the full pathname of the tc Runtime file that contains the list of users allowed to access tc Runtime using JMX. Note that this file is on the computer that hosts the tc Runtime instance, not the computer that hosts the HQ Server. <br class="atl-forced-newline" />
+<td class='confluenceTd'> Specifies the full pathname of the tc Runtime file that contains the list of users allowed to access tc Runtime using JMX. Note that this file is on the computer that hosts the tc Runtime instance, not the computer that hosts the Hyperic Server. <br class="atl-forced-newline" />
 <br class="atl-forced-newline" />
 The access file contains one line per user; each line contains a username and permission level:
 <ul>
@@ -698,7 +699,7 @@ The default name for the access file is <tt>jmxremote.access</tt>; the default l
 </tr>
 <tr>
 <td class='confluenceTd'> Password File <a name="tcServer-configurationjmxpasswordFile"></a><br class="atl-forced-newline" /> </td>
-<td class='confluenceTd'> Specifies the full pathname of the tc Runtime file that contains passwords for the users listed in the Access File. Note that this file is on the computer that hosts the tc Runtime instance, not the computer that hosts the HQ Server. <br class="atl-forced-newline" />
+<td class='confluenceTd'> Specifies the full pathname of the tc Runtime file that contains passwords for the users listed in the Access File. Note that this file is on the computer that hosts the tc Runtime instance, not the computer that hosts the Hyperic Server. <br class="atl-forced-newline" />
 <br class="atl-forced-newline" />
 The password file contains one line for each user listed in the access file; each line contains a username and password. <br class="atl-forced-newline" />
 <br class="atl-forced-newline" />
@@ -708,7 +709,7 @@ The default name for the password file is <tt>jmxremote.password</tt>; the defau
 <td class='confluenceTd'> Use SSL <a name="tcServer-configurationjmxuseSSL"></a></td>
 <td class='confluenceTd'> Specifies whether to use secure sockets layer (SSL) for users' JMX connections to tc Runtime. <br class="atl-forced-newline" />
 <br class="atl-forced-newline" />
-To use SSL, you must first set up a digital certificate on the computer that hosts the tc Runtime instance and then configure the SSL setings on this page. You can use the command-line utility <a href="http://java.sun.com/j2se/1.5.0/docs/tooldocs/solaris/keytool.html">keytool</a> to manage digital certificates. </td>
+To use SSL, you must first set up a digital certificate on the computer that hosts the tc Runtime instance and then configure the SSL setings on this page. You can use the command-line utility keytool (<a href="http://download.oracle.com/javase/1.4.2/docs/tooldocs/solaris/keytool.html">http://download.oracle.com/javase/1.4.2/docs/tooldocs/solaris/keytool.html</a>) to manage digital certificates. </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Client Authentication <br class="atl-forced-newline" /> <a name="tcServer-configurationjmxclientAuth"></a></td>
@@ -718,7 +719,7 @@ If you enable this property, tc Runtime authenticates JMX/SSL clients using cert
 </tr>
 <tr>
 <td class='confluenceTd'> Use JDK Client Factory <a name="tcServer-configurationjmxuseJdkClientFactory"></a></td>
-<td class='confluenceTd'> Specifies whether or not the HQ Agent uses the required client libraries from the JDK. The required libraries are used to pass SSL-specific properties (such as the trust store and password) to the tc Runtime instance. If you disable this property, you must manually set up the HQ Agent's CLASSPATH to find these client libraries. </td>
+<td class='confluenceTd'> Specifies whether or not the Hyperic Agent uses the required client libraries from the JDK. The required libraries are used to pass SSL-specific properties (such as the trust store and password) to the tc Runtime instance. If you disable this property, you must manually set up the Hyperic Agent's CLASSPATH to find these client libraries. </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Cipher Suites <a name="tcServer-configurationjmxcipherSuites"></a></td>
@@ -752,11 +753,11 @@ A <em>keystore</em> is a database of key material. Key material is used for a va
 
 <h2><a name="tcServer-ServerStartConfiguration"></a>Server Start Configuration</h2>
 
-<p><b>NOTE:</b> HQ populates these fields with information contained in the <tt>CATALINA_HOME/bin/setenv.sh</tt> file of the tc Runtime instance you are configuring, specifically argument values defined in the JVM_OPTS environment variable.</p>
+<p><b>NOTE:</b> Hyperic populates these fields with information contained in the <tt>CATALINA_HOME/bin/setenv.sh</tt> file of the tc Runtime instance you are configuring, specifically argument values defined in the JVM_OPTS environment variable.</p>
 
 <p>If for some reason <tt>setenv.sh</tt> does not exist, or does not define JVM_OPTS, the Server Start fields will be blank.</p>
 
-<p>Edits you make to Server Start fields in the HQ user interface are written back to <tt>setenv.sh</tt>.</p>
+<p>Edits you make to Server Start fields in the Hyperic user interface are written back to <tt>setenv.sh</tt>.</p>
 
 <h3><a name="tcServer-General"></a>General</h3>
 
@@ -907,7 +908,7 @@ For example: <br class="atl-forced-newline" />
 <h2><a name="tcServer-ContextContainer"></a>Context Container</h2>
 
 <p><a name="tcServer-configurationcontainer"></a><br/>
-The fields described in the following table configure the context for <em>every</em> Web application deployed to this tc Runtime instance. HQ loads and updates the values from the <tt>CATALINA_BASE/conf/context.xml</tt> file for this tc Runtime instance.</p>
+The fields described in the following table configure the context for <em>every</em> Web application deployed to this tc Runtime instance. Hyperic loads and updates the values from the <tt>CATALINA_BASE/conf/context.xml</tt> file for this tc Runtime instance.</p>
 
 <h3><a name="tcServer-StaticResourceCache"></a>Static Resource Cache</h3>
 
@@ -952,7 +953,7 @@ The fields described in the following table configure the context for <em>every<
 <h2><a name="tcServer-ServerDefaultsJSP"></a>Server Defaults - JSP</h2>
 
 <p><a name="tcServer-configurationdefaultsJsp"></a><br/>
-The fields described in the following table configure JSP-related init params for <em>every</em> Web application deployed to this tc Runtime instance. HQ loads and updates the values from the <tt>CATALINA_BASE/conf/web.xml</tt> file for this tc Runtime instance.</p>
+The fields described in the following table configure JSP-related init params for <em>every</em> Web application deployed to this tc Runtime instance. Hyperic loads and updates the values from the <tt>CATALINA_BASE/conf/web.xml</tt> file for this tc Runtime instance.</p>
 <div class='table-wrap'>
 <table class='confluenceTable'><tbody>
 <tr>
@@ -1055,7 +1056,7 @@ Default value is clsid:8AD9C840-044E-11D1-B3E9-00805F499D93. <br class="atl-forc
 <h2><a name="tcServer-ServerDefaultsStaticContent"></a>Server Defaults - Static Content</h2>
 
 <p><a name="tcServer-configurationdefaultsStatic"></a><br/>
-The fields described in the following table configure static content-related init params for <em>every</em> Web application deployed to this tc Runtime instance. HQ loads and updates the values from the <tt>CATALINA_BASE/conf/web.xml</tt> file for this tc Runtime instance.</p>
+The fields described in the following table configure static content-related init params for <em>every</em> Web application deployed to this tc Runtime instance. Hyperic loads and updates the values from the <tt>CATALINA_BASE/conf/web.xml</tt> file for this tc Runtime instance.</p>
 <div class='table-wrap'>
 <table class='confluenceTable'><tbody>
 <tr>
@@ -1558,6 +1559,7 @@ The files in this directory must be PEM-encoded and are accessed through hash fi
 
 
 <h3><a name="tcServer-ThreadDiagnostics"></a>Thread Diagnostics</h3>
+<p><a name="tcServer-thread"></a></p>
 
 <p>When you deploy and start a Web application on a tc Runtime instance, and then clients begin connecting and using the application, you might find that the clients occasionally run into problems such as slow requests or even failed requests. Although tc Runtime by default logs these errors in the log files, it is often difficult to pinpoint where exactly the error came from and how to go about fixing it. By enabling thread diagnostics, tc Runtime provides additional information to help you troubleshoot the problem.</p>
 
@@ -1584,7 +1586,7 @@ The files in this directory must be PEM-encoded and are accessed through hash fi
 </tr>
 <tr>
 <td class='confluenceTd'> Enable Thread Diagnostics  <a name="tcServer-servicesthreadDiagnosticsenableThreadDiagnostics"></a><br class="atl-forced-newline" /> </td>
-<td class='confluenceTd'> Enables the gathering of thread diagnostic information; see the <a href="#tcServer-threaddiag">thread diagnostics introduction</a> for details about the information that tc Runtime gathers. <br class="atl-forced-newline" />
+<td class='confluenceTd'> Enables the gathering of thread diagnostic information <br class="atl-forced-newline" />
 <br class="atl-forced-newline" />
 To view this information after you have enabled thread diagnostics, go to the <b>Monitor</b> tab of a particular tc Runtime instance, then click on the <b><em>servername</em></b> <b>Thread Diagnostics</b> link in the <b>Resources &gt; Services</b> window on the left. </td>
 </tr>
@@ -4230,7 +4232,7 @@ To view this information after you have enabled thread diagnostics, go to the <b
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:43</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jan 20, 2012 10:07</font></td>
 		    </tr>
 	    </table>
     </body>

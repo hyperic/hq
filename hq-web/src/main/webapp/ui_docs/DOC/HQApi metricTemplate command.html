@@ -1,0 +1,262 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : HQApi metricTemplate command</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 4.6.5 : HQApi metricTemplate command
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325699169639 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699169639 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699169639 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1325699169639'>
+<ul>
+    <li><a href='#HQApimetricTemplatecommand-Functionality'>Functionality</a></li>
+    <li><a href='#HQApimetricTemplatecommand-metricTemplateCommandOptions'>metricTemplate Command Options</a></li>
+<ul>
+    <li><a href='#HQApimetricTemplatecommand-metricTemplatelist'>metricTemplate list</a></li>
+<ul>
+    <li><a href='#HQApimetricTemplatecommand-metricTemplatelistCommandQualifiers'>metricTemplate list Command Qualifiers</a></li>
+    <li><a href='#HQApimetricTemplatecommand-StructureofametricTemplatesResponse'>Structure of a metricTemplatesResponse</a></li>
+    <li><a href='#HQApimetricTemplatecommand-AttributesinaMetricTemplatesResponse'>Attributes in a MetricTemplatesResponse</a></li>
+</ul>
+    <li><a href='#HQApimetricTemplatecommand-metricTemplatesync'>metricTemplate sync</a></li>
+</ul>
+    <li><a href='#HQApimetricTemplatecommand-Examples'>Examples</a></li>
+<ul>
+    <li><a href='#HQApimetricTemplatecommand-metricTemplatelist'>metricTemplate list</a></li>
+    <li><a href='#HQApimetricTemplatecommand-metricTemplatesync'>metricTemplate sync</a></li>
+</ul>
+</ul></div>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Related Topics</b><br />This page provides information for running an HQ API from the command line. Related topics include: 
+<ul>
+	<li><a href="vFabric Hyperic Web Services API.html" title="vFabric Hyperic Web Services API">vFabric Hyperic Web Services API</a> - brief introduction to the API.</li>
+	<li><a href="HQApi Command-Line Tools.html" title="HQApi Command-Line Tools">HQApi Command&#45;Line Tools</a> - how to get started with the command line tools.</li>
+	<li><a href="HQApi Java API.html" title="HQApi Java API">HQApi Java API</a> - about accessing the APIs programmatically.</li>
+</ul>
+</td></tr></table></div> 
+
+
+
+<h1><a name="HQApimetricTemplatecommand-Functionality"></a>Functionality </h1>
+<p>The <b>metricTemplate</b> command has options to output the metric collection configuration for a specified resource type. This is useful for:</p>
+
+<ul>
+	<li>Reviewing the metric collection configuration for a resource type.</li>
+	<li>Updating the metric collection configuration for a resource type.</li>
+</ul>
+
+
+<p>To work with the metric collection configuration for a specific resource, see the <a href="HQApi metric command.html" title="HQApi metric command">HQApi metric command</a>.</p>
+
+<h1><a name="HQApimetricTemplatecommand-metricTemplateCommandOptions"></a>metricTemplate Command Options</h1>
+
+<h2><a name="HQApimetricTemplatecommand-metricTemplatelist"></a>metricTemplate list</h2>
+
+<p>The <b>metricTemplate list</b> returns an MetricTemplatesResponse element that defines all of the metrics that are supported for a specific escalations defined in HQ.</p>
+
+<h3><a name="HQApimetricTemplatecommand-metricTemplatelistCommandQualifiers"></a>metricTemplate list Command Qualifiers</h3>
+
+<p>The --prototype qualifier, which specifies a resource type, is required for the <b>list</b> option. </p>
+
+<h3><a name="HQApimetricTemplatecommand-StructureofametricTemplatesResponse"></a>Structure of a metricTemplatesResponse</h3>
+
+<p>The MetricTemplatesResponse returned by the <b>metricTemplate list</b> has this element structure.</p>
+
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre> 
+MetricTemplatesResponse
+      MetricTemplate
+</pre>
+</div></div>
+
+<p>where there is 1 MetricTemplate element for each metric that can be collected for the resource type.</p>
+
+<h3><a name="HQApimetricTemplatecommand-AttributesinaMetricTemplatesResponse"></a>Attributes in a MetricTemplatesResponse</h3>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'>Element </th>
+<th class='confluenceTh'>Attribute </th>
+<th class='confluenceTh'>Description </th>
+<th class='confluenceTh'>Allowable Values </th>
+</tr>
+<tr>
+<td class='confluenceTd'><tt>MetricTemplate</tt>  </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>defaultInterval </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>category </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>collectionType </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>defaultOn </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>indicator </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>plugin </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>units </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>alias</td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>name </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>id  </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+</tbody></table>
+</div>
+
+
+<h2><a name="HQApimetricTemplatecommand-metricTemplatesync"></a>metricTemplate sync</h2>
+
+<p>The <b>metricTemplate sync</b> option can be used to update the values of the <tt>defaultInterval</tt>, <tt>defaultOn</tt>, and <tt>indicator</tt> attributes. The values of other attributes in the <tt>MetricTemplate</tt> element are not written to HQ.</p>
+
+<h1><a name="HQApimetricTemplatecommand-Examples"></a>Examples</h1>
+
+<h2><a name="HQApimetricTemplatecommand-metricTemplatelist"></a>metricTemplate list</h2>
+
+<p>In this example, the metrics supported for the resource type "CPU" are listed. </p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">$ ./bin/hqapi.sh metricTemplate list --prototype="CPU"
+&lt;MetricTemplatesResponse&gt;
+    &lt;Status&gt;Success&lt;/Status&gt;
+    &lt;MetricTemplate defaultInterval="600000" category="AVAILABILITY" collectionType="0" 
+                    defaultOn="true" indicator="true" plugin="system" units="percentage" 
+                    alias="Availability" name="Availability" id="11014"/&gt;
+    &lt;MetricTemplate defaultInterval="300000" category="UTILIZATION" collectionType="0" 
+                    defaultOn="true" indicator="true" plugin="system" units="percentage" 
+                    alias="CpuIdle" name="Cpu Idle" id="11016"/&gt;
+    &lt;MetricTemplate defaultInterval="600000" category="UTILIZATION" collectionType="2" 
+                    defaultOn="false" indicator="false" plugin="system" units="ms" 
+                    alias="CpuIdleSec" name="Cpu Idle Time" id="11010"/&gt;
+    &lt;MetricTemplate defaultInterval="600000" category="UTILIZATION" collectionType="0" 
+                    defaultOn="false" indicator="false" plugin="system" units="ms" 
+                    alias="CpuIdleSec1m" name="Cpu Idle Time per Minute" id="11018"/&gt;
+    &lt;MetricTemplate defaultInterval="300000" category="UTILIZATION" collectionType="0"
+                    defaultOn="true" indicator="true" plugin="system" units="percentage"
+                    alias="CpuUsage" name="Cpu Usage" id="11015"/&gt;
+    &lt;MetricTemplate defaultInterval="600000" category="UTILIZATION" collectionType="2"
+                    defaultOn="false" indicator="false" plugin="system" units="ms"
+                    alias="CpuWaitSec" name="Cpu Wait Time" id="11013"/&gt;
+    &lt;MetricTemplate defaultInterval="600000" category="UTILIZATION" collectionType="0"
+                    defaultOn="false" indicator="false" plugin="system" units="ms" 
+                    alias="CpuWaitSec1m" name="Cpu Wait Time per Minute" id="11011"/&gt;
+    &lt;MetricTemplate defaultInterval="300000" category="UTILIZATION" collectionType="0" 
+                    defaultOn="true" indicator="true" plugin="system" units="percentage"
+                    alias="CpuSys" name="System Cpu" id="11012"/&gt;
+    &lt;MetricTemplate defaultInterval="600000" category="UTILIZATION" collectionType="2"
+                    defaultOn="false" indicator="false" plugin="system" units="ms" 
+                    alias="CpuSysSec" name="System Cpu Time" id="11021"/&gt;
+    &lt;MetricTemplate defaultInterval="600000" category="UTILIZATION" collectionType="0" 
+                    defaultOn="false" indicator="false" plugin="system" units="ms" 
+                    alias="CpuSysSec1m" name="System Cpu Time per Minute" id="11020"/&gt;
+    &lt;MetricTemplate defaultInterval="300000" category="UTILIZATION" collectionType="0"
+                    defaultOn="true" indicator="true" plugin="system" units="percentage"
+                    alias="CpuUser" name="User Cpu" id="11009"/&gt;
+    &lt;MetricTemplate defaultInterval="600000" category="UTILIZATION" collectionType="2" 
+                    defaultOn="false" indicator="false" plugin="system" units="ms" 
+                    alias="CpuUserSec" name="User Cpu Time" id="11019"/&gt;
+    &lt;MetricTemplate defaultInterval="600000" category="UTILIZATION" collectionType="0" 
+                    defaultOn="false" indicator="false" plugin="system" units="ms" 
+                    alias="CpuUserSec1m" name="User Cpu Time per Minute" id="11017"/&gt;
+&lt;/MetricTemplatesResponse&gt;</pre>
+		</div>
+</div></div>
+
+
+<h2><a name="HQApimetricTemplatecommand-metricTemplatesync"></a>metricTemplate sync</h2>
+
+<p>In this example, the first command writes the <tt>MetricTemplate</tt> for each metric supported for the "CPU" resource type to a file called cpu-metrics.xml. </p>
+
+<p>The second command sends the cpu-metrics.xml to the sync method to update the values of the <tt>defaultInterval</tt>, <tt>defaultOn</tt>, and <tt>indicator</tt> attributes of each metric. </p>
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">$ ./bin/hqapi.sh metricTemplate list --prototype="CPU" &gt; cpu-metrics.xml
+...
+...
+$ cat cpu-metrics.xml | ./bin/hqapi.sh metricTemplate sync
+Successfully synced 13 templates.</pre>
+		</div>
+</div></div>
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jan 20, 2012 10:08</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

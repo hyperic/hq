@@ -1,9 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : Developing an HQU Plugin</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : Developing an HQU Plugin</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -14,19 +12,19 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : Developing an HQU Plugin
+                            vFabric Hyperic 4.6.5 : Developing an HQU Plugin
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1307466534106 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1307466534106 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1307466534106 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1325699463039 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699463039 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699463039 li {margin-left: 0px;padding-left: 0px;}
 
-/*]] >*/</style><div class='rbtoc1307466534106'>
+/*]]>*/</style><div class='rbtoc1325699463039'>
 <ul>
     <li><a href='#DevelopinganHQUPlugin-Step1CreatePluginScaffolding'>Step 1 - Create Plugin Scaffolding</a></li>
 <ul>
@@ -119,11 +117,11 @@ Y: Y</pre>
 </tr>
 <tr>
 <td class='confluenceTd'> <tt>controller</tt></td>
-<td class='confluenceTd'> The name of the controller for which the scaffolding will create a controller file.  The task will create a controller file, whose name is the string "Controller" concatenated with <em>Controller_Name</em>, as in: <em>Controller_Name</em>Controller.groovy.  Supply a value with leading character in upper case.</td>
+<td class='confluenceTd'> The name of the controller for which the scaffolding will create a controller file.  The task will create a controller file, whose name is the string "Controller" concatenated with <em>Controller_Name</em>, as in: <tt>Controller_NameController.groovy</tt>.  Supply a value with leading character in upper case.</td>
 </tr>
 <tr>
 <td class='confluenceTd'> <tt>controllerDir</tt></td>
-<td class='confluenceTd'>The name of the directory that contains views for <em>Controller_Name;</em>  the string you supply will be the name of the directory in which views are created. Supply a lower case string.</td>
+<td class='confluenceTd'>The name of the directory that contains views for <em>Controller_Name</em>;  the string you supply will be the name of the directory in which views are created. Supply a lower case string.</td>
 </tr>
 </tbody></table>
 </div>
@@ -218,18 +216,23 @@ $ mvn clean assembly:directory</pre>
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
 		<pre class="theme: Confluence; brush: java; gutter: false">$ cd hq-uiplugin/_plugin_name_
-$ cp -r target/_plugin_name_-VERSION-server/_plugin_name_/* TOMCAT_HOME/webapps/ROOT/hqu/_plugin_name_</pre>
+$ cp -r target/plugin_name-VERSION-server/plugin_name/* TOMCAT_HOME/webapps/ROOT/hqu/plugin_name</pre>
 		</div>
 </div></div>
 
 <p><b>NOTE: To hot deploy updates to the plugin, remove the plugin folder completely from the hqu folder to undeploy and then paste the updated folder back in to redeploy.</b></p>
 
-<p>To invoke the plugin from a browser:
-<a href="http://localhost:7080/hqu/">http://localhost:7080/hqu/</a><em>plugin_name</em>/<em>Controller_Name</em>/index.hqu </p>
+<p>To invoke the plugin from a browser:</p>
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>http://localhost:7080/hqu/plugin_name/Controller_Name/index.hqu 
+</pre>
+</div></div>
 
-<p>For example, given the values used for <em>plugin_name</em> and <em>Controller_Name</em> in the example task execution above: 
-<a href="http://localhost:7080/hqu/joesalertcenter/Alert/index.hqu">http://localhost:7080/hqu/joesalertcenter/Alert/index.hqu</a> </p>
-
+<p>For example, given the values used for <em>plugin_name</em> and <em>Controller_Name</em> in the example task execution above: </p>
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>http://localhost:7080/hqu/joesalertcenter/Alert/index.hqu 
+</pre>
+</div></div>
 <p>When you invoke the plugin, its default action "index" is executed.</p>
 
 <h1><a name="DevelopinganHQUPlugin-Step4SetLocationPropertiesforaViewPlugin"></a>Step 4 - Set Location Properties for a View Plugin</h1>
@@ -266,7 +269,7 @@ $ cp -r target/_plugin_name_-VERSION-server/_plugin_name_/* TOMCAT_HOME/webapps/
 <tr>
 <td class='confluenceTd'>description</td>
 <td class='confluenceTd'>Brief description of the view displayed as the View title in the Portal.</td>
-<td class='confluenceTd'>'A Groovy HQU-<em>plugin_name</em>'</td>
+<td class='confluenceTd'>'A Groovy HQU-plugin_name'</td>
 </tr>
 <tr>
 <td class='confluenceTd'>attachType</td>
@@ -343,17 +346,17 @@ $ cp -r target/_plugin_name_-VERSION-server/_plugin_name_/* TOMCAT_HOME/webapps/
 
 <h1><a name="DevelopinganHQUPlugin-Step4ProgramthePluginBehavior"></a>Step 4 - Program the Plugin Behavior </h1>
 
-<p>The real work of developing an HQU plugin is defining its behavior, in the plugin controller file.  For controller development topics, see <a href="#DevelopinganHQUPlugin-WritingPluginControllerLogic">Writing Plugin Controller Logic on page </a>.</p>
+<p>The real work of developing an HQU plugin is defining its behavior, in the plugin controller file.  For controller development topics, see <a href="Writing Plugin Controller Logic.html" title="Writing Plugin Controller Logic">Writing Plugin Controller Logic</a>.</p>
 
 <h1><a name="DevelopinganHQUPlugin-Step5LocalizethePlugin"></a>Step 5 - Localize the Plugin </h1>
 
-<p>HQU supports the I18N internationalization model. The scaffolding tool creates a PropertyResourceBundle file for localization strings properties, <em>plugin_name</em><em>i18n.properties in /ui_plugins/</em>plugin/etc._</p>
+<p>HQU supports the I18N internationalization model. The scaffolding tool creates a PropertyResourceBundle file for localization strings properties, <tt>plugin_name_i18n.properties</tt> in <tt>/ui_plugins/{plugin/etc</tt>.</p>
 
 
 <h2><a name="DevelopinganHQUPlugin-ContentsoftheI18nPropertiesasCreated"></a>Contents of  the I18n Properties as Created</h2>
 
 <p>Upon creation <tt>plugin_name_i18n.properties</tt> contains two key-value pairs.<br/>
-plugin_name.description=new plugin  plugin_name<br/>
+plugin_name.description=[new plugin]  plugin_name<br/>
 Congrats=Congratulations
 <br class="atl-forced-newline" />
 The first line defines the link name for plugins attached to the portal, where:</p>
@@ -369,11 +372,15 @@ The second line defines the string to present in Views for the text item whose k
 
 <h2><a name="DevelopinganHQUPlugin-UnderstandingHowPluginViewsObtainLocalizationStrings"></a>Understanding How Plugin Views Obtain Localization Strings </h2>
 
-<p>A special variable in the .gsp rendered for an action allows it to obtain localized resource bundles from  etc/<em>myplugin</em>_i18n.properties. The variable, a lower-case letter 'l', is of the type 'BundleMapFacade' which provides a map-like facade, allowing you to access resource bundle attributes like regular Map entries. For example, in a line from a .gsp, in either of these forms:<br/>
-${l.Congrats} <br/>
-$l['Congrats'] <br/>
-The variable l.Congrats points at etc/<em>myplugin</em>_i18n.properties:Congrats<br/>
-For information about how a plugin controller can obtain localized resource bundles, see <a href="#DevelopinganHQUPlugin-ObtainingLocalizedStrings">Obtaining Localized Strings.</a></p>
+<p>A special variable in the .gsp rendered for an action allows it to obtain localized resource bundles from  <tt>etc/myplugin_i18n.properties</tt>. The variable, a lower-case letter 'l', is of the type 'BundleMapFacade' which provides a map-like facade, allowing you to access resource bundle attributes like regular Map entries. For example, in a line from a <tt>.gsp</tt>, in either of these forms:</p>
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>${l.Congrats} </pre>
+</div></div>
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>$l['Congrats'] </pre>
+</div></div>
+<p>The variable <tt>l.Congrats</tt> points at <tt>etc/myplugin_i18n.properties:Congrats</tt><br/>
+For information about how a plugin controller can obtain localized resource bundles, see <a href="Writing Plugin Controller Logic.html#WritingPluginControllerLogic-LocalizedResourceBundles">Obtaining Localized Strings</a>.</p>
 
 				    
                     			    </td>
@@ -384,7 +391,7 @@ For information about how a plugin controller can obtain localized resource bund
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:44</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jan 20, 2012 10:08</font></td>
 		    </tr>
 	    </table>
     </body>

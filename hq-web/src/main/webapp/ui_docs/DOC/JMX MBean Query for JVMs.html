@@ -1,9 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : JMX MBean Query for JVMs</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : JMX MBean Query for JVMs</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -14,11 +12,11 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : JMX MBean Query for JVMs
+                            vFabric Hyperic 4.6.5 : JMX MBean Query for JVMs
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
@@ -57,12 +55,12 @@
 <p>To access specific MBean attributes and operations, you enter search patterns in the these text boxes in the JMX MBean Query tool page:</p>
 
 <ul>
-	<li>Object Name Pattern - To specify the MBean or Mbeans of interest, enter a&nbsp; valid MBean object name pattern.&nbsp;For information on object name patterns, see <a href="http://java.sun.com/j2ee/1.4/docs/api/javax/management/ObjectName.html">http://java.sun.com/j2ee/1.4/docs/api/javax/management/ObjectName.html</a>.</li>
+	<li>Object Name Pattern - To specify the MBean or Mbeans of interest, enter a&nbsp; valid MBean object name pattern.&nbsp;For information on object name patterns, see <a href="http://download.oracle.com/javaee/1.4/api/javax/management/ObjectName.html">http://download.oracle.com/javaee/1.4/api/javax/management/ObjectName.html</a>.</li>
 </ul>
 
 
 <ul>
-	<li>Attribute Regex Filter - To restrict the attributes returned, enter a valid Java regular expression.&nbsp;For information on Java regex patterns, see <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html</a>.</li>
+	<li>Attribute Regex Filter - To restrict the attributes returned, enter a valid Java regular expression.&nbsp;For information on Java regex patterns, see <a href="http://download.oracle.com/javase/1.4.2/docs/api/java/util/regex/Pattern.html">http://download.oracle.com/javase/1.4.2/docs/api/java/util/regex/Pattern.html</a>.</li>
 </ul>
 
 
@@ -75,7 +73,7 @@
 
 <p>For MBeans whose object name matches the Object Name Pattern, attributes and operations that match your filter criteria will be listed.&nbsp; For example:</p>
 
-<p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 1303x650" href='http://support.hyperic.com/download/attachments/77464629/jmx console.gif'><img src="attachments/thumbnails/77464629/77660942" style="border: 0px solid black"/></a></span></p>
+<p><span class="image-wrap" style=""><a class="confluence-thumbnail-link 1303x650" href='http://support.hyperic.com/download/attachments/79037023/jmx console.gif'><img src="attachments/thumbnails/79037023/79134888" style="border: 0px solid black"/></a></span></p>
 
 <h1><a name="JMXMBeanQueryforJVMs-EnablingAutomaticRefresh"></a>Enabling Automatic Refresh</h1>
 
@@ -124,40 +122,24 @@
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <script type="syntaxhighlighter" class="theme: Confluence; brush: java; gutter: false"><![CDATA[&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 
-
-
 &lt;filters&gt;
 
-
-
   &lt;filter id="JVM Memory MBean"&gt;
-
     &lt;objectName&gt;java.lang:type=Memory&lt;/objectName&gt;
-
     &lt;attributeRegex&gt;.*Usage&lt;/attributeRegex&gt;
-
     &lt;operationRegex&gt;.*&lt;/operationRegex&gt;
-
   &lt;/filter&gt;
-
-
 
   &lt;filter id="JVM Platform MBeans"&gt;
-
     &lt;objectName&gt;java.lang:*&lt;/objectName&gt;
-
     &lt;attributeRegex&gt;.*&lt;/attributeRegex&gt;
-
     &lt;operationRegex&gt;.*&lt;/operationRegex&gt;
-
   &lt;/filter&gt;
-
-
 
 &lt;/filters&gt;]]></script>
 </div></div>
 
-<p><font color=""></font></p>
+
 
 
 				    
@@ -169,7 +151,7 @@
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:44</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jan 20, 2012 10:07</font></td>
 		    </tr>
 	    </table>
     </body>

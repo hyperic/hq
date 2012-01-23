@@ -1,9 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : Report Center</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : Report Center</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -14,11 +12,11 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : Report Center
+                            vFabric Hyperic 4.6.5 : Report Center
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 01, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 12, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
@@ -26,11 +24,11 @@
 <p>This page describes the <b>Report Center</b> page in the VMware vFabric™ Hyperic® user interface.</p>
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1309542767178 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1309542767178 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1309542767178 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1326411398228 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1326411398228 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1326411398228 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1309542767178'>
+/*]]>*/</style><div class='rbtoc1326411398228'>
 <ul>
     <li><a href='#ReportCenter-ReportCenterOverview'>Report Center Overview</a></li>
     <li><a href='#ReportCenter-NavigatetotheReportCenter'>Navigate to the Report Center</a></li>
@@ -63,113 +61,100 @@ div.rbtoc1309542767178 li {margin-left: 0px;padding-left: 0px;}
 <th class='confluenceTh'> What The Report Displays </th>
 <th class='confluenceTh'> Required User Input (Parameters) </th>
 <th class='confluenceTh'> Sample Report </th>
-<th class='confluenceTh'> JRXML Template </th>
 </tr>
 <tr>
 <td class='confluenceTd'> Alert Detail </td>
 <td class='confluenceTd'> Which resources in my environment are firing the most alerts? </td>
-<td class='confluenceTd'> The same as the [Alert Summary Report<a href="#ReportCenter-summary">summary</a>, except, instead of a summary of alerts, every alert is shown. This is useful when analyzing a full alert log. </td>
-<td class='confluenceTd'> Start Date <br class="atl-forced-newline" />
-End Date <br class="atl-forced-newline" />
+<td class='confluenceTd'> The same as the <a href="#ReportCenter-summary">Alert Summary Report\</a>, except, instead of a summary of alerts, every alert is shown. This is useful when analyzing a full alert log. </td>
+<td class='confluenceTd'> Start Date <br class="atl-forced-newline" /> 
+End Date <br class="atl-forced-newline" /> 
 Group </td>
-<td class='confluenceTd'> [] </td>
-<td class='confluenceTd'> []<br class="atl-forced-newline" />  [] </td>
+<td class='confluenceTd'> <a href="attachments/79037938/79135569.png">Alert Detail Report.png</a> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Alert Summary<a name="ReportCenter-summary"></a> </td>
 <td class='confluenceTd'> Which resources in my environment are firing the most alerts? </td>
-<td class='confluenceTd'> A summary of all alerts that were triggered during the user-specified time range. You can restrict the list of alerts by a user-specified group. For each resource, the number of low-, medium-, and high-priority alerts are shown, along with the total number of alerts. </td>
-<td class='confluenceTd'> Start Date <br class="atl-forced-newline" />
-End Date <br class="atl-forced-newline" />
+<td class='confluenceTd'> A summary of all alerts that were triggered during the user-specified time range. You can restrict the list of alerts by a user-specified group. For each resource, the number of low-, medium-, and high&#45;<a href="http://support.hyperic.com/display/465/Hyperic+Glossary#HypericGlossary-priority">priority</a> alerts are shown, along with the total number of alerts. </td>
+<td class='confluenceTd'> Start Date <br class="atl-forced-newline" /> 
+End Date <br class="atl-forced-newline" /> 
 Group </td>
-<td class='confluenceTd'> [] </td>
-<td class='confluenceTd'> [] </td>
+<td class='confluenceTd'> <a href="attachments/79037938/79135565.png">Alert Summary Report.png</a> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Availability Downtime </td>
 <td class='confluenceTd'> How many minutes were resources unavailable over the given time range? </td>
 <td class='confluenceTd'> Availability percentage and minutes of downtime, over a user-specified time range, for resources in a user-specified group. This report cannot be run against the entire environment. </td>
-<td class='confluenceTd'> Start Date <br class="atl-forced-newline" />
-End Date <br class="atl-forced-newline" />
+<td class='confluenceTd'> Start Date <br class="atl-forced-newline" /> 
+End Date <br class="atl-forced-newline" /> 
 Group </td>
-<td class='confluenceTd'> [] </td>
-<td class='confluenceTd'> [] </td>
+<td class='confluenceTd'> <a href="attachments/79037938/79135566.png">Availability Downtime Report.png</a> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Disk Usage </td>
-<td class='confluenceTd'> Which disks are running low on free space? <br class="atl-forced-newline" />
+<td class='confluenceTd'> Which disks are running low on free space? <br class="atl-forced-newline" /> 
 Which disks are filling up the quickest? </td>
 <td class='confluenceTd'> Disks in the environment that are running low on free space, over a user-specified time range. This report can be run against a single group or across the entire environment. </td>
-<td class='confluenceTd'> Start Date <br class="atl-forced-newline" />
-End Date <br class="atl-forced-newline" />
+<td class='confluenceTd'> Start Date <br class="atl-forced-newline" /> 
+End Date <br class="atl-forced-newline" /> 
 Group </td>
-<td class='confluenceTd'> [] </td>
-<td class='confluenceTd'> [] </td>
+<td class='confluenceTd'> <a href="attachments/79037938/79135572.png">Disk Usage Report.png</a> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Inventory </td>
-<td class='confluenceTd'> What resources were created during the given time range? <br class="atl-forced-newline" />
+<td class='confluenceTd'> What resources were created during the given time range? <br class="atl-forced-newline" /> 
 What new services have been discovered? (HQ auto-imports them and so they are not immediately obvious.) </td>
 <td class='confluenceTd'> All resources created in the HQ environment in the user-specified time range, sorted by creation date. This report operates on the entire environment. </td>
-<td class='confluenceTd'> Start Date <br class="atl-forced-newline" />
+<td class='confluenceTd'> Start Date <br class="atl-forced-newline" /> 
 End Date </td>
-<td class='confluenceTd'> [] </td>
-<td class='confluenceTd'> [] </td>
+<td class='confluenceTd'> <a href="attachments/79037938/79135562.png">Inventory Report.png</a> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Event Log Summary </td>
 <td class='confluenceTd'> What's happening on each of my resources? A summary of events across all resources, instead of for a single resource. </td>
-<td class='confluenceTd'> Resources and their logged events, taken from the system's event logs, sorted by the number of events. Learn more about <a href="Set Up Log Tracking for a Resource.html" title="Set Up Log Tracking for a Resource">log tracking</a> in HQ. </td>
-<td class='confluenceTd'> Start Date <br class="atl-forced-newline" />
+<td class='confluenceTd'> Resources and their logged events, taken from the system's event logs, sorted by the number of events. </td>
+<td class='confluenceTd'> Start Date <br class="atl-forced-newline" /> 
 End Date </td>
-<td class='confluenceTd'> [] </td>
-<td class='confluenceTd'> [] </td>
+<td class='confluenceTd'> <a href="attachments/79037938/79135563.png">Event Log Summary.png</a> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> License Count <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> The platforms for which I have HQ licenses. <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> Platform name, type, license count, and date added. <br class="atl-forced-newline" /> </td>
 <td class='confluenceTd'> No user input <br class="atl-forced-newline" /> </td>
-<td class='confluenceTd'> [] </td>
-<td class='confluenceTd'> [] </td>
+<td class='confluenceTd'> <a href="attachments/79037938/79135567.png">License Count.png</a> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Metric Interval </td>
 <td class='confluenceTd'> How many metrics are being collected on my resources, how often, and when? Basically, the report shows the metric load. </td>
 <td class='confluenceTd'> The collection interval and the number of metrics that are being collected for each resource. </td>
 <td class='confluenceTd'> No user input </td>
-<td class='confluenceTd'> [] </td>
-<td class='confluenceTd'> [] </td>
+<td class='confluenceTd'> <a href="attachments/79037938/79135568.png">Metric Interval Report.png</a> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Network Interface </td>
 <td class='confluenceTd'> What kind of traffic are my resources experiencing? </td>
 <td class='confluenceTd'> Bits in/out per second for each resource </td>
-<td class='confluenceTd'> Start Date <br class="atl-forced-newline" />
-End Date <br class="atl-forced-newline" />
+<td class='confluenceTd'> Start Date <br class="atl-forced-newline" /> 
+End Date <br class="atl-forced-newline" /> 
 Group </td>
-<td class='confluenceTd'> [] </td>
-<td class='confluenceTd'> [] </td>
+<td class='confluenceTd'> <a href="attachments/79037938/79135570.png">Network Interface Report.png</a> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Resources Not Collecting Metrics </td>
 <td class='confluenceTd'> Which of my metrics are no longer collecting any metrics, even though they're supposed to be? </td>
 <td class='confluenceTd'> Resources that have stopped publishing metrics, plus the last time a metric was recorded for the resource </td>
 <td class='confluenceTd'> No user input </td>
-<td class='confluenceTd'> [] </td>
-<td class='confluenceTd'> [] </td>
+<td class='confluenceTd'> <a href="attachments/79037938/79135571.png">Resources Not Collecting Metrics.png</a> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Resources Without Metrics </td>
 <td class='confluenceTd'> Which of my resources don't have metric collection enabled? For example, did you discover and import a platform but not configure it to collect metrics? For instance, Oracle needs a password, so when it is discovered and imported, it won't collect metrics if the password isn't provided. </td>
 <td class='confluenceTd'> Resources that don't have metric collection enabled in HQ </td>
 <td class='confluenceTd'> No user input </td>
-<td class='confluenceTd'> [] </td>
-<td class='confluenceTd'> [] </td>
+<td class='confluenceTd'> <a href="attachments/79037938/79135564.png">Resources Without Metrics.png</a> </td>
 </tr>
 </tbody></table>
 </div>
-
 
 <p><tt>&#42;</tt> For reports involving specific resource types (for example, the Disk Usage and Network Usage reports include only "File Server Mount" resources), only compatible groups of that resource type are allowed as an input parameter. For all non-resource-type-specific reports (for example, the Alert and Availability reports), all groups defined in HQ are available for selection.</p>
 
@@ -236,7 +221,7 @@ Group </td>
 </ul>
 
 
-<p><font color=""></font></p>
+
 
 				    					    <br/>
                         <div class="tabletitle">
@@ -247,73 +232,37 @@ Group </td>
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464635/77660434.pdf">License Count.pdf</a> (application/pdf)
+                                <a href="attachments/79037938/79135562.png">Inventory Report.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464635/77660433.jrxml">ResourcesWithoutMetrics.jrxml</a> (application/octet-stream)
+                                <a href="attachments/79037938/79135563.png">Event Log Summary.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464635/77660436.pdf">Resources Not Collecting Metrics.pdf</a> (application/pdf)
+                                <a href="attachments/79037938/79135564.png">Resources Without Metrics.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464635/77660435.jrxml">ResourcesNotCollectingMetrics.jrxml</a> (application/octet-stream)
+                                <a href="attachments/79037938/79135565.png">Alert Summary Report.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464635/77660438.pdf">Metric Interval Report.pdf</a> (application/pdf)
+                                <a href="attachments/79037938/79135566.png">Availability Downtime Report.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464635/77660437.jrxml">AlertDetail.jrxml</a> (application/octet-stream)
+                                <a href="attachments/79037938/79135567.png">License Count.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464635/77660440.pdf">Availability Downtime Report.pdf</a> (application/pdf)
+                                <a href="attachments/79037938/79135568.png">Metric Interval Report.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464635/77660439.jrxml">NetworkInterfaceReport.jrxml</a> (application/octet-stream)
+                                <a href="attachments/79037938/79135569.png">Alert Detail Report.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464635/77660425.jrxml">subreport_AlertDetail.jrxml</a> (application/octet-stream)
+                                <a href="attachments/79037938/79135570.png">Network Interface Report.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464635/77660426.jrxml">DiskUsage.jrxml</a> (application/octet-stream)
+                                <a href="attachments/79037938/79135571.png">Resources Not Collecting Metrics.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464635/77660427.jrxml">NewInventoryReport.jrxml</a> (application/octet-stream)
-                                <br/>
-                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464635/77660428.jrxml">EventLogSummary.jrxml</a> (application/octet-stream)
-                                <br/>
-                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464635/77660429.jrxml">LicenseCount.jrxml</a> (application/octet-stream)
-                                <br/>
-                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464635/77660430.pdf">Inventory Report.pdf</a> (application/pdf)
-                                <br/>
-                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464635/77660431.pdf">Network Interface Report.pdf</a> (application/pdf)
-                                <br/>
-                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464635/77660432.pdf">Alert Summary Report.pdf</a> (application/pdf)
-                                <br/>
-                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464635/77660417.pdf">Disk Usage Report.pdf</a> (application/pdf)
-                                <br/>
-                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464635/77660418.jrxml">AvailabilityDowntime.jrxml</a> (application/octet-stream)
-                                <br/>
-                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464635/77660419.pdf">Resources Without Metrics.pdf</a> (application/pdf)
-                                <br/>
-                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464635/77660420.pdf">Event Log Summary.pdf</a> (application/pdf)
-                                <br/>
-                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464635/77660421.jrxml">AlertSummary.jrxml</a> (application/octet-stream)
-                                <br/>
-                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464635/77660422.jrxml">MetricIntervals.jrxml</a> (application/octet-stream)
-                                <br/>
-                                                            <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464635/77660423.pdf">Alert Detail Report.pdf</a> (application/pdf)
+                                <a href="attachments/79037938/79135572.png">Disk Usage Report.png</a> (image/png)
                                 <br/>
                                                     </div>
 				    
@@ -325,7 +274,7 @@ Group </td>
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:44</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jan 20, 2012 10:07</font></td>
 		    </tr>
 	    </table>
     </body>

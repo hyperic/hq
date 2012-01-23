@@ -1,9 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : ui-tcserver.ServerConfiguration</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : ui-tcserver.ServerConfiguration</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -14,20 +12,20 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : ui-tcserver.ServerConfiguration
+                            vFabric Hyperic 4.6.5 : ui-tcserver.ServerConfiguration
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 29, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p>The features described on this page are available in tc Server and tc Server Standard Edition.</p>
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1311961878117 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1311961878117 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1311961878117 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1325699340505 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699340505 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699340505 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1311961878117'>
+/*]]>*/</style><div class='rbtoc1325699340505'>
 <ul>
     <li><a href='#ui-tcserver.ServerConfiguration-tcRuntimeConfiguration'>tc Runtime Configuration</a></li>
     <li><a href='#ui-tcserver.ServerConfiguration-NavigatingtcRuntimeConfigurationPages'>Navigating tc Runtime Configuration Pages</a></li>
@@ -117,6 +115,7 @@ div.rbtoc1311961878117 li {margin-left: 0px;padding-left: 0px;}
 <p>If you update tc Runtime configuration settings from the HQ user interface, do NOT manually update the tc Runtime configuration files at the same time. HQ clears its local memory and reloads the configuration files upon certain events, not continuously.</p>
 
 <h2><a name="ui-tcserver.ServerConfiguration-UserPermissionsRequiredtoUsethetcRuntimeFeatures"></a>User Permissions Required to Use the tc Runtime Features</h2>
+<p><a name="ui-tcserver.ServerConfiguration-permissions"></a></p>
 
 <p>The HQ super-user can use all the tc Runtime features of the HQ UI.&nbsp; If, however, you log on to the HQ UI as a non-super-user, then that user must have certain permissions to be able to use the tc Runtime features, as described in this section.</p>
 
@@ -180,7 +179,7 @@ div.rbtoc1311961878117 li {margin-left: 0px;padding-left: 0px;}
 <ol>
 	<li><a href="#ui-tcserver.ServerConfiguration-navigating">Navigate to the tc Runtime configuration pages.</a></li>
 	<li>Click the <b>Configuration</b> tab.</li>
-	<li>Click the <b>Server Start</b> link in the list on the left. For information about the fields on this page, see <a href="ui-tcserver.ServerConfigurationRef.html#ui-tcserver.ServerConfigurationRef-configurationstartup">tc Runtime Configuration Reference</a>.</li>
+	<li>Click the <b>Server Start</b> link in the list on the left. For information about the fields on this page, see <a href="ui-tcserver.ServerConfigurationRef.html" title="ui-tcserver.ServerConfigurationRef">ui&#45;tcserver.ServerConfigurationRef</a>.</li>
 	<li>Make your changes.&nbsp;</li>
 	<li>To add your own JVM command line arguments, click the <b>Advanced</b> link at the bottom and enter them in the form the form "-X<em>option</em><em>value</em> or &#45;XX:<em>option</em>=<em>value</em>, separating options with a space.</li>
 	<li>Click <b>Save</b>. The message "Configuration saved successfully" indicates your changes were successfully saved.</li>
@@ -262,12 +261,12 @@ div.rbtoc1311961878117 li {margin-left: 0px;padding-left: 0px;}
 
 <p>You can create two types of JDBC data sources:</p>
 <ul>
-	<li><a href="#ui-tcserver.ServerConfiguration-dbcpdatasource">Database Connection Pool (DBCP) Datasource</a>&#45; The DBCP Datasource is the standard datasource provided by tc Runtime that uses the commons-dbcp package. Although this datasource is adequate for simple applications, it is single-threaded which means that in order to be thread-safe, tc Runtime must lock the entire pool, even during query validation. Thus it is not suitable for highly concurrent environments. Additionally, it can be slow, which in turn can negatively affect the performance of Web applications.</li>
+	<li>Database Connection Pool (DBCP) Datasource &#8212; The DBCP Datasource is the standard datasource provided by tc Runtime that uses the commons-dbcp package. Although this datasource is adequate for simple applications, it is single-threaded which means that in order to be thread-safe, tc Runtime must lock the entire pool, even during query validation. Thus it is not suitable for highly concurrent environments. Additionally, it can be slow, which in turn can negatively affect the performance of Web applications.</li>
 </ul>
 
 
 <ul>
-	<li><a href="#ui-tcserver.ServerConfiguration-tomcatdatasource">Tomcat Datasource</a> &#45; The <b>Tomcat Datasource</b> includes all the functionality of the DBCP datasource, but adds additional features to support highly-concurrent environments and multiple core/cpu systems. The Tomcat datasource typically performs much better than the DBCP datasource. Additional features include:
+	<li>Tomcat Datasource &#8212; The <b>Tomcat Datasource</b> includes all the functionality of the DBCP datasource, but adds additional features to support highly-concurrent environments and multiple core/cpu systems. The Tomcat datasource typically performs much better than the DBCP datasource. Additional features include:
 <br class="atl-forced-newline" />
 	<ul>
 		<li>Dynamic implementation of the interfaces, which means that the datasource supports the java.sql and javax.sql interfaces for your runtime environment (as long as your JDBC driver supports it), even when compiled with a lower version of the JDK.</li>
@@ -302,7 +301,7 @@ div.rbtoc1311961878117 li {margin-left: 0px;padding-left: 0px;}
 	<li>If you want to edit an existing service, such as the default "catalina" service, click its name in the table and then configure, or add, the following components of the service:
 	<ul>
 		<li><a href="#ui-tcserver.ServerConfiguration-connector">Connectors</a></li>
-		<li><a href="#ui-tcserver.ServerConfiguration-engine">Engine</a></li>
+		<li>Engine</li>
 		<li><a href="#ui-tcserver.ServerConfiguration-host">Virtual Host</a></li>
 		<li><a href="#ui-tcserver.ServerConfiguration-logging">Logging System</a></li>
 	</ul>
@@ -315,8 +314,8 @@ div.rbtoc1311961878117 li {margin-left: 0px;padding-left: 0px;}
 <p>For more information about configuring tc Runtime services, see <a href="http://tomcat.apache.org/tomcat-6.0-doc/config/service.html">The Service Component</a>, part of <a href="http://tomcat.apache.org/tomcat-6.0-doc/index.html">Apache Tomcat documentation</a>.</p>
 
 <h2><a name="ui-tcserver.ServerConfiguration-ConfiguringandCreatingConnectors"></a>Configuring and Creating Connectors</h2>
-
-<p>Connectors represent the interface between external clients sending requests to (and receiving responses from) a particular tc Runtime service. A tc Runtime instance can have one or more connectors, one for each supported message protocol. The default connector, configured for each tc Runtime, is the HTTP connector.</p>
+<p><a name="ui-tcserver.ServerConfiguration-connector"></a><br/>
+Connectors represent the interface between external clients sending requests to (and receiving responses from) a particular tc Runtime service. A tc Runtime instance can have one or more connectors, one for each supported message protocol. The default connector, configured for each tc Runtime, is the HTTP connector.</p>
 
 <p>Use this page to configure, or create new, connectors for the current tc Runtime service.</p>
 <ol>
@@ -332,6 +331,7 @@ div.rbtoc1311961878117 li {margin-left: 0px;padding-left: 0px;}
 <p>For additional detailed information about configuring tc Runtime connectors, see <a href="http://tomcat.apache.org/tomcat-6.0-doc/connectors">Connectors How-To</a>, part of the general <a href="http://tomcat.apache.org/tomcat-6.0-doc/index.html">Apache Tomcat documentation</a>.</p>
 
 <h2><a name="ui-tcserver.ServerConfiguration-ConfiguringandCreatingVirtualHosts"></a>Configuring and Creating Virtual Hosts</h2>
+<p><a name="ui-tcserver.ServerConfiguration-host"></a></p>
 
 <p>A tc Runtime host represents a virtual host, which is an association of a network name for a server (such as "www.mycompany.com") with the particular computer which hosts the tc Runtime instance. In order to be effective, this name must be registered in the Domain Name Service (DNS) server that manages your Internet domain.</p>
 
@@ -349,6 +349,7 @@ div.rbtoc1311961878117 li {margin-left: 0px;padding-left: 0px;}
 <p>For more information about configuring tc Runtime hosts, see <a href="http://tomcat.apache.org/tomcat-6.0-doc/config/host.html">The Host Container</a>, part of <a href="http://tomcat.apache.org/tomcat-6.0-doc/index.html">Apache Tomcat documentation</a>.</p>
 
 <h2><a name="ui-tcserver.ServerConfiguration-ConfiguringtcRuntimeLogging"></a>Configuring tc Runtime Logging</h2>
+<p><a name="ui-tcserver.ServerConfiguration-logging"></a></p>
 
 <p>Use this page to configure the logging system for the current engine. Note that you can also configure logging for a host by configuring the specific Host component; see <a href="#ui-tcserver.ServerConfiguration-ConfiguringandCreatingVirtualHosts">Configuring and Creating Virtual Hosts</a>.</p>
 <ol>
@@ -356,7 +357,7 @@ div.rbtoc1311961878117 li {margin-left: 0px;padding-left: 0px;}
 	<li>Click the <b>Services</b> tab.</li>
 	<li>In the <b>Services</b> table, click the name of the service for which you want to configure logging.</li>
 	<li>Click the <b>Logging</b> link in the list on the left.</li>
-	<li>Make your changes in the table. For information about the fields on this page, see <a href="ui-tcserver.ServerServicesRef.html#ui-tcserver.ServerServicesRef-serviceslogging">tc Runtime Services Reference</a>.</li>
+	<li>Make your changes in the table. For information about the fields on this page, see <a href="ui-tcserver.ServerServicesRef.html" title="ui-tcserver.ServerServicesRef">ui&#45;tcserver.ServerServicesRef</a>.</li>
 	<li>Click <b>Save</b>. The message "Configuration saved successfully" indicates your changes were successfully saved.</li>
 </ol>
 
@@ -372,7 +373,7 @@ div.rbtoc1311961878117 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:44</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jan 20, 2012 10:08</font></td>
 		    </tr>
 	    </table>
     </body>

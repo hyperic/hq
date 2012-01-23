@@ -1,9 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : Plugin Deployment and Management</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : Plugin Deployment and Management</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -14,19 +12,19 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : Plugin Deployment and Management
+                            vFabric Hyperic 4.6.5 : Plugin Deployment and Management
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 11, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1310415018426 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1310415018426 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1310415018426 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1325712804323 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325712804323 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325712804323 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1310415018426'>
+/*]]>*/</style><div class='rbtoc1325712804323'>
 <ul>
     <li><a href='#PluginDeploymentandManagement-NewPluginManagementFeaturesinHyperic4.6'>New Plugin Management Features in Hyperic 4.6</a></li>
     <li><a href='#PluginDeploymentandManagement-PluginAdministrationTasks'>Plugin Administration Tasks</a></li>
@@ -48,7 +46,7 @@ div.rbtoc1310415018426 li {margin-left: 0px;padding-left: 0px;}
 <p>Hyperic 4.6 provides new product plugin management and deployment features that ensure all Hyperic Agents reporting to the Hyperic Server run exactly the same product plugins as those deployed to the server. The key features are:</p>
 
 <ul>
-	<li>Plugin management interface &#8212; Hyperic 4.6 provides a user interface for deployment-wide management of  product plugins. You use the <b>Plugin Manager</b> to deploy and manage plugins on the Hyperic Server and all Hyperic Agents that report to the server. For more information, see <a href="#PluginDeploymentandManagement-AboutthePluginManager">About the Plugin Manager</a> below.</li>
+	<li>Plugin management interface &#8212; Hyperic 4.6 provides a user interface for deployment-wide management of  product plugins. You use the <b>Plugin Manager</b> to deploy and manage plugins on the Hyperic Server and all Hyperic Agents that report to the server. For more information, see <a href="#PluginDeploymentandManagement-AboutPluginManager">About Plugin Manager</a> below.</li>
 </ul>
 
 
@@ -138,10 +136,10 @@ div.rbtoc1310415018426 li {margin-left: 0px;padding-left: 0px;}
 
 <p>To detect plugin mismatches caused by inconsistent manual deployment, the Hyperic Server checks for out-of-sync plugins every time it starts up, and every time an agent connects to it upon agent start or restart. (The Hyperic Server does the post-startup checks five minutes after startup, so that any agents that were restarted while the server was down to sync their plugin inventory.)  In the case of a mismatch between server-side and agent-side plugins, the Hyperic Server updates the agent.</p>
 
+<p><a name="PluginDeploymentandManagement-AgentStartupSync"></a></p>
 
 <h2><a name="PluginDeploymentandManagement-AboutPluginSyncatAgentStartup"></a>About Plugin Sync at Agent Startup</h2>
-<p><a name="PluginDeploymentandManagement-AgentStartupSync"></a><br/>
-When an agent starts up and loads the plugins in its plugin directory, it sends a plugin status report to the server, including the MD5 checksum of each plugin it loaded.</p>
+<p>When an agent starts up and loads the plugins in its plugin directory, it sends a plugin status report to the server, including the MD5 checksum of each plugin it loaded.</p>
 
 <p>On receipt of a plugin status report from an agent, the Hyperic Server compares the MD5 checksum of each plugin that the agent loaded with the the MD5 checksum of the corresponding plugin (a plugin with the same name) currently deployed on the server. </p>
 
@@ -155,8 +153,8 @@ When an agent starts up and loads the plugins in its plugin directory, it sends 
 
 <p>After adding or removing agent plugins as necessary, the server restarts the agent.</p>
 
+<p><a name="PluginDeploymentandManagement-ServerStartupSync"></a></p>
 <h2><a name="PluginDeploymentandManagement-AboutPluginSyncatServerStartup"></a>About Plugin Sync at Server Startup</h2>
-<p><a name="PluginDeploymentandManagement-AgentStartupSync"></a></p>
 
 <p>When the Hyperic Server starts up and loads the plugins in its deployment directories, it <br/>
 compares the MD5 checksum of the plugins it loaded with the MD5 checksums in the plugin status report last received from each agent. </p>
@@ -186,7 +184,7 @@ compares the MD5 checksum of the plugins it loaded with the MD5 checksums in the
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:43</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jan 20, 2012 10:07</font></td>
 		    </tr>
 	    </table>
     </body>

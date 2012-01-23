@@ -1,0 +1,174 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : Set Up Agent Interactively</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 4.6.5 : Set Up Agent Interactively
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325710826511 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325710826511 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325710826511 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1325710826511'>
+<ul>
+    <li><a href='#SetUpAgentInteractively-AbouttheAgentConfigurationDialog'>About the Agent Configuration Dialog</a></li>
+    <li><a href='#SetUpAgentInteractively-LaunchtheConfigurationDialog'>Launch the Configuration Dialog</a></li>
+    <li><a href='#SetUpAgentInteractively-AgentConfigurationDialog'>Agent Configuration Dialog</a></li>
+</ul></div>
+
+<blockquote>
+<p><b>About this page...</b></p>
+
+<p>This page has instructions for interactively configuring a newly installed Hyperic Agent to communicate with the Hyperic Server, or reconfiguring the communication behavior of an existing agent.  </p>
+
+<p>Before following the instructions below, see <a href="Hyperic Installation and Startup Process.html" title="Hyperic Installation and Startup Process">Hyperic Installation and Startup Process</a> to see how agent configuration fits into the overall Hyperic implementation process and to understand agent configuration options and requirements. </p>
+
+<p>Depending upon your situation, it may be preferable to configure agent-server communication settings in the agent's <tt>agent.properties</tt> file, rather than interactively:</p>
+
+<ul>
+	<li>Some communication features, such as user-managed SSL keystore location, can <em>only</em> be configured in an agent's properties file. For more information, see the <a href="Hyperic Installation and Startup Process.html#HypericInstallationandStartupProcess-PropFile">Configure Hyperic Agent in properties file</a> step of <a href="Hyperic Installation and Startup Process.html" title="Hyperic Installation and Startup Process">Hyperic Installation and Startup Process</a>.</li>
+	<li>If you have a lot of agents to configure, properties file configuration is faster than interactive configuration, as described in <a href="Install Hyperic Agents in Volume.html" title="Install Hyperic Agents in Volume">Install Hyperic Agents in Volume</a>.</li>
+</ul>
+
+</blockquote>
+
+<h1><a name="SetUpAgentInteractively-AbouttheAgentConfigurationDialog"></a>About the Agent Configuration Dialog</h1>
+
+<p>The agent configuration dialog appears in the shell when you launch a Hyperic Agent that lacks the configuration values that specify the location of the Hyperic Server. The dialog queries for the address and port of the Hyperic server, and other connection-related data. To understand the details of how the agent figures out where to contact the Hyperic Server see <a href="About the Agent Launcher and Agent Startup.html#AbouttheAgentLauncherandAgentStartup-AgentStartup">What Happens When an Agent Starts Up</a> on <a href="About the Agent Launcher and Agent Startup.html" title="About the Agent Launcher and Agent Startup">About the Agent Launcher and Agent Startup</a>.</p>
+
+<p>The agent configuration dialog is presented in these cases:</p>
+<ul>
+	<li>The first time you start an agent (assuming that have not supplied the properties in <tt>agent.profile</tt>).</li>
+	<li>When you start an agent that whose saved server connection data is corrupt or has been removed.</li>
+	<li>When you run the agent launcher with the <tt>setup</tt> option, which causes the agent to prompt for new connection property settings.</li>
+</ul>
+
+
+<p>You can also run the agent launcher with the to re-run the configuration dialog</p>
+
+<h1><a name="SetUpAgentInteractively-LaunchtheConfigurationDialog"></a>Launch the Configuration Dialog</h1>
+<ol>
+	<li>Open a terminal window on the platform where the agent is installed.</li>
+	<li>Navigate to the <tt>AgentHome/bin</tt> directory.</li>
+	<li>Run the agent launcher with the <tt>start</tt> or <tt>setup</tt> option:
+	<ul>
+		<li>On Unix-like platforms:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">sh hq-agent.sh start</pre>
+		</div>
+</div></div></li>
+		<li>On Windows platforms, install the Windows service for the agent, and then start it:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">sh hq-agent.bat install
+sh hq-agent.bat start</pre>
+		</div>
+</div></div></li>
+	</ul>
+	</li>
+	<li>Respond to the prompts described below in <a href="#SetUpAgentInteractively-AgentConfigurationDialog">Agent Configuration Dialog</a>.</li>
+</ol>
+
+
+<h1><a name="SetUpAgentInteractively-AgentConfigurationDialog"></a>Agent Configuration Dialog</h1>
+
+<ol>
+	<li><em>Should Agent communications to HQ be unidirectional [docbox:default=no]</em>
+	<ul>
+		<li>This prompt only appears if you are installing vFabric Hyperic. To understand this option, see <a href="About Agent - Server Communication.html" title="About Agent - Server Communication">About Agent &#45; Server Communication</a>.</li>
+	</ul>
+	</li>
+	<li><em>What is the HQ server IP address</em>
+	<ul>
+		<li>Enter the listen address of your Hyperic Server. The server must be running. If the server is on the same machine as the agent, you can enter localhost.</li>
+		<li>If there is a firewall blocking traffic from the agent to the server, specify the address of the firewall.</li>
+	</ul>
+	</li>
+	<li><em>Should Agent communications to HQ always be secure [docbox:default=yes]</em>.
+	<ul>
+		<li>Accept the default to configure Hyperic to use SSL for agent-to-server communication. (Server-agent communication is <em>always</em> SSL.)</li>
+		<li>SSL configuration is strongly recommended, and <b>required</b> if you configured unidirectional communications in Step 1.</li>
+		<li>To configure Hyperic to use plain HTTP for agent-to-server communication, enter "no".</li>
+	</ul>
+	</li>
+	<li>You are prompted to identify the server port where the Hyperic server listens for agent communication. Depending on whether you selected SSL in the previous step, one of the following prompts appears:
+	<ul>
+		<li><em>What is the secure HQ server port [docbox:default=7443]</em> &#8212; If the Hyperic Server is configured to listen for SSL communications on the default SSL port of 7443, press <b>Return</b>.</li>
+		<li><em>What is the HQ server port [docbox:default=7080]</em> &#8212; If the Hyperic Server is configured to listen on the default port of 7080, press <b>Return</b>. If there is a firewall blocking traffic from the agent to the server, configure it to forward traffic on TCP port 7080 (or 7443) to the host running the Hyperic Server.</li>
+	</ul>
+	</li>
+	<li><em>What is your HQ login [docbox:default=hqadmin]:</em>
+	<ul>
+		<li>By default, the Hyperic Server is initially configured with an administrative account with username <tt>hqadmin</tt>. Unless you have configured a different Hyperic user account for agent-server communications, accept the default.</li>
+	</ul>
+	</li>
+	<li><em>What is your HQ password</em>
+	<ul>
+		<li>Enter the password for the username you supplied at the previous prompt.</li>
+	</ul>
+	</li>
+	<li><em>What IP should HQ use to contact the agent [docbox:default=n.n.n.n]</em>
+	<ul>
+		<li>The prompt will show the first IP address the agent detects on the host.</li>
+		<li>If there is another IP address on the host you prefer to use, enter it.</li>
+		<li>If there is a firewall blocking traffic from the server to the agent, enter the IP address of the firewall, and configure the firewall to forward traffic intended for the Hyperic Agent to the listen address of the agent host.</li>
+	</ul>
+	</li>
+	<li><em>What port should HQ use to contact the agent [docbox:default=2144]</em>
+	<ul>
+		<li>Enter the agent port the Hyperic Server should use when it initiates contact with the agent. Specify the port that the agent binds to at startup, which by default is 2144.</li>
+		<li>If you have previously edited <tt>agent.properties</tt> to explicitly define a different listen port, using the optional <tt>agent.listenPort</tt> property, that is the value you should supply to this prompt.</li>
+		<li>If there is a firewall blocking traffic from the server to the agent, configure the device to forward traffic on TCP port 2144 to the Hyperic Agent.</li>
+	</ul>
+	</li>
+	<li>After you respond to the last prompt the agent initiates a connection to the server and the server verifies that it can communicate with the agent.
+<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>If you have not configured user-managed keystores on the agent and server the agent will issue warning related to the components' self-signed SSL certificates. For more information see the <a href="Hyperic Installation and Startup Process.html" title="#SslWarnings">SSL Warnings</a> note on <a href="Hyperic Installation and Startup Process.html" title="Hyperic Installation and Startup Process">Hyperic Installation and Startup Process</a>.</td></tr></table></div>
+	<ul>
+		<li>Once the agent and server successfully establish communication and complete the registration process, messages similar to the following appear:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">Received temporary auth token from agent
+Registering agent with HQ
+HQ gave us the following agent token
+1215038691323-8570363106994871928-8259195015465958356
+Informing agent of new HQ server
+Validating
+Successfully setup agent</pre>
+		</div>
+</div></div></li>
+	</ul>
+	</li>
+	<li>The Hyperic Agent discovers the platform and supported products running on it. For more information, see the <a href="Hyperic Installation and Startup Process.html#HypericInstallationandStartupProcess-import">Import discovered resources</a> step on <a href="Hyperic Installation and Startup Process.html" title="Hyperic Installation and Startup Process">Hyperic Installation and Startup Process</a>.</li>
+</ol>
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jan 20, 2012 10:07</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>
