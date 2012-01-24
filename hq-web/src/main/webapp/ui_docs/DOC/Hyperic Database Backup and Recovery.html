@@ -1,0 +1,86 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : Hyperic Database Backup and Recovery</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 4.6.5 : Hyperic Database Backup and Recovery
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p>The Hyperic database contains most of the data necessary to recreate your Hyperic Server environment after a failure, or to move the database to a different host. In addition to historical metrics, the database contains configuration settings, such as Hyperic Agent connection information, collection intervals, portlet configurations, groups, roles, and users. Some server configuration data, such as database connection information, the mail server for alerts, and Java arguments used at server startup, is stored in external files.</p>
+
+<p>Like any other database, your Hyperic database should be backed up on a regular basis, so that you can restore the data in the event of a failure that corrupts or destroys the database. It is also good practice to backup the database prior to upgrading Hyperic, your database server, or other software that resides on the server machine.</p>
+
+<p>You should define Hyperic backup procedures and incorporate them into your overall backup processes. Your local requirements and practices will dictate backup frequency, timing, naming conventions, and  retention policies. A daily backup is sufficient for most environments.</p>
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325699601153 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699601153 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699601153 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1325699601153'>
+<ul>
+    <li><a href='#HypericDatabaseBackupandRecovery-BackingupBuiltInPostgreSQLDatabase'>Backing up Built-In PostgreSQL Database</a></li>
+    <li><a href='#HypericDatabaseBackupandRecovery-BackupandRecoveryofMySQLandOracleDatabases'>Backup and Recovery of MySQL and Oracle Databases</a></li>
+    <li><a href='#HypericDatabaseBackupandRecovery-HypericFilestoBackup'>Hyperic Files to Backup</a></li>
+</ul></div>
+
+<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Shut down Hyperic Server if backup makes database unavailable</b><br />If your database backup process makes the Hyperic database unavailable, shut down the Hyperic Server before running the backup.</td></tr></table></div>
+
+<h1><a name="HypericDatabaseBackupandRecovery-BackingupBuiltInPostgreSQLDatabase"></a>Backing up Built-In PostgreSQL Database</h1>
+
+
+<p>If you use Hyperic's built-in PostgreSQL database, back it up with the PostreSQL pg_dump command:</p>
+
+<p><tt>pg_dump hqdb &#124; gzip &gt; hqdb-MM.DD.YY.dump.gz</tt></p>
+
+<p>Copy the dump file to your backup location.</p>
+
+<p>Always use this method to back up the built-in database; do not simply copy the contents of the database's data directory.</p>
+
+<h1><a name="HypericDatabaseBackupandRecovery-BackupandRecoveryofMySQLandOracleDatabases"></a>Backup and Recovery of MySQL and Oracle Databases</h1>
+
+<p>If you use MySQL or Oracle for your Hyperic database, extend your existing database backup and recovery procedures to the Hyperic database. Perform a full database backup on a scheduled basis.</p>
+
+<h1><a name="HypericDatabaseBackupandRecovery-HypericFilestoBackup"></a>Hyperic Files to Backup</h1>
+
+<p>In addition to the Hyperic database, you may want to create a backup of the following directories and files in your server directory:</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">conf/
+bin/hq-server.sh
+hqdb/data/postgresql.conf</pre>
+		</div>
+</div></div>
+<p><br class="atl-forced-newline" />
+You can back up these files while Hyperic Server is running.</p>
+
+<p>The contents of these files are stable. Changes are infrequent once your Hyperic Server is installed at configured. Back them up at that time and after making changes to the sever configuration.</p>
+
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jan 20, 2012 10:07</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

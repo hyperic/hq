@@ -1,9 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : ui-Admin.HQServer</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : ui-Admin.HQServer</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -14,25 +12,25 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : ui-Admin.HQServer
+                            vFabric Hyperic 4.6.5 : ui-Admin.HQServer
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 27, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 
-<p>The <b>HQ Server Settings</b> page allows an HQ user with Super User role to configure a variety of HQ Server behaviors. Most changes take effect upon HQ Server restart.</p>
+<p>The <b>HQ Server Settings</b> page allows a Hyperic user with Super User role to configure a variety of Hyperic Server behaviors. Most changes take effect upon Hyperic Server restart.</p>
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1309216235994 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1309216235994 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1309216235994 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1325699397719 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699397719 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699397719 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1309216235994'>
+/*]]>*/</style><div class='rbtoc1325699397719'>
 <ul>
     <li><a href='#ui-Admin.HQServer-HQEmailConfigurationProperties'>HQ Email Configuration Properties</a></li>
     <li><a href='#ui-Admin.HQServer-HQAnnouncementProperties'>HQ Announcement Properties</a></li>
@@ -58,7 +56,7 @@ div.rbtoc1309216235994 li {margin-left: 0px;padding-left: 0px;}
 
 
 
-<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>HQ Server settings have a fundamental and wide-ranging impact on the functionality and behavior of your HQ deployment. Edit with extreme caution.</td></tr></table></div>
+<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>HQ Server settings have a fundamental and wide-ranging impact on the functionality and behavior of your Hyperic deployment. Edit with extreme caution.</td></tr></table></div>
 
 <h1><a name="ui-Admin.HQServer-HQEmailConfigurationProperties"></a>HQ Email Configuration Properties</h1>
 <p>HQ Server email configuration properties are used to form notifications that HQ &nbsp;sends for a fired alert. &nbsp;</p>
@@ -160,9 +158,9 @@ Base URL forms the prefix of an URL to any HQ appends the remainder of the URL t
 <p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
 
 
-<p>Starting in HQ Enterprise 4.2, you can use notification throttling to limit the number of alert email actions (notifications sent by email for a fired alert) that HQ will issue in a 15 second interval. When the threshold you specify is reached, HQ stops sending email alert notifications and instead sends a summary of alert activity every ten minutes to the recipients you specify.</p>
+<p>In vFabric Hyperic, you can use notification throttling to limit the number of alert email actions (notifications sent by email for a fired alert) that Hyperic will issue in a 15 second interval. When the threshold you specify is reached, Hyperic stops sending email alert notifications and instead sends a summary of alert activity every ten minutes to the recipients you specify.</p>
 
-<p>After startoing to throttle, HQ re-evaluates notification volume for fired alerts every 10 minutes; when it determines that the per interval volume of individual notifications that fired alerts would generate is less than the configured threshold, HQ resumes sending individual notifications.</p>
+<p>After starting to throttle, Hyperic re-evaluates notification volume for fired alerts every 10 minutes; when it determines that the per interval volume of individual notifications that fired alerts would generate is less than the configured threshold, Hyperic resumes sending individual notifications.</p>
 
 <p>To enable notification throttling:</p>
 <ol>
@@ -231,7 +229,7 @@ Base URL forms the prefix of an URL to any HQ appends the remainder of the URL t
 <ol>
 	<li>Click <b>HQ Server Settings</b> on the <b>Administration</b> tab.</li>
 	<li>Scroll down to the "LDAP Configuration Properties* section of the page<br/>
-<span class="image-wrap" style=""><img src="attachments/77464567/77660839.png" width="750px" style="border: 0px solid black"/></span> </li>
+<span class="image-wrap" style=""><img src="attachments/79037064/79134952.png" width="750px" style="border: 0px solid black"/></span> </li>
 	<li>In the enter the properties described below:
 <div class='table-wrap'>
 <table class='confluenceTable'><tbody>
@@ -501,7 +499,7 @@ Base URL forms the prefix of an URL to any HQ appends the remainder of the URL t
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:44</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jan 20, 2012 10:08</font></td>
 		    </tr>
 	    </table>
     </body>

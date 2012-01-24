@@ -1,9 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : ui-Administration.Plugin.Manager</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : ui-Administration.Plugin.Manager</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -14,11 +12,11 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : ui-Administration.Plugin.Manager
+                            vFabric Hyperic 4.6.5 : ui-Administration.Plugin.Manager
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 23, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <ul>
@@ -46,7 +44,7 @@
 	<ul>
 		<li>The <b>Plugin Manager</b> page appears.
 <div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Plugin synchronization must be enabled.</b><br />The <b>Plugin Manager</b> displays a warning if plugin synchronization is currently disabled. To re-enable synchronization set <tt>server.pluginsync.enabled</tt> in <tt>ServerHome/conf/hq-server.conf</tt> file to "true" and restart the server.</td></tr></table></div> 
-<p><span class="image-wrap" style=""><img src="attachments/77463605/77660978.png" width="750px" style="border: 0px solid black"/></span></p></li>
+<p><span class="image-wrap" style=""><img src="attachments/79038211/79135220.png" width="750px" style="border: 0px solid black"/></span></p></li>
 	</ul>
 	</li>
 </ol>
@@ -65,8 +63,8 @@
 <ul>
 	<li><b>Plugin</b> &#8212; The name of the plugin.
 	<ul>
-		<li>If the <span class="image-wrap" style=""><img src="attachments/77463605/77660972.gif" style="border: 0px solid black"/></span> icon is present, the plugin is a system plugin that other plugins depend upon &#8212; you cannot change or remove these plugins.</li>
-		<li>If the <span class="image-wrap" style=""><img src="attachments/77463605/77660970.gif" style="border: 0px solid black"/></span> icon is present, the plugin is a custom plugin.
+		<li>If the <span class="image-wrap" style=""><img src="attachments/79038211/79135227.gif" style="border: 0px solid black"/></span> icon is present, the plugin is a system plugin that other plugins depend upon &#8212; you cannot change or remove these plugins.</li>
+		<li>If the <span class="image-wrap" style=""><img src="attachments/79038211/79135228.gif" style="border: 0px solid black"/></span> icon is present, the plugin is a custom plugin.
 <div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>See a "File Not Found" warning?</b><br />The message "File Not Found" in this column indicates that the plugin file or archive has been manually removed from the Hyperic Server's <tt>hq-plugins</tt> directory. The best practice is to remove plugins using the <b>Plugin Manager</b>, which removes the resources managed by the plugin being removed, as well as the plugin itself. To remove the resources that were defined by the plugin, checkmark the plugin, and click <b>Remove Selected Plugin(s)</b>.</td></tr></table></div></li>
 	</ul>
 	</li>
@@ -76,9 +74,9 @@
 	<li><b>Updated Time</b> &#8212; When the the plugin was most recently redeployed to the Hyperic Server.</li>
 	<li><b>Agent Sync Status</b> &#8212; Summarizes the deployment status of the plugin on 4.6 agents reporting to the server. Deployment status may be:
 	<ul>
-		<li><span class="image-wrap" style=""><img src="attachments/77463605/77660976.gif" style="border: 0px solid black"/></span> &#8212; If this icon is present, the value next to it indicates the number of agents to which the plugin is deployed.</li>
-		<li><span class="image-wrap" style=""><img src="attachments/77463605/77660968.png" style="border: 0px solid black"/></span> &#8212; If this icon is present, the value next to it indicates the number of agents on which deployment has been initiated and is still in progress.</li>
-		<li><span class="image-wrap" style=""><img src="attachments/77463605/77660975.gif" style="border: 0px solid black"/></span> &#8212; if this icon is present, the value next to it indicates the number of agents on which deployment failed.<br/>
+		<li><span class="image-wrap" style=""><img src="attachments/79038211/79135225.gif" style="border: 0px solid black"/></span> &#8212; If this icon is present, the value next to it indicates the number of agents to which the plugin is deployed.</li>
+		<li><span class="image-wrap" style=""><img src="attachments/79038211/79135222.png" style="border: 0px solid black"/></span> &#8212; If this icon is present, the value next to it indicates the number of agents on which deployment has been initiated and is still in progress.</li>
+		<li><span class="image-wrap" style=""><img src="attachments/79038211/79135224.gif" style="border: 0px solid black"/></span> &#8212; if this icon is present, the value next to it indicates the number of agents on which deployment failed.<br/>
 <a name="ui-Administration.Plugin.Manager-StatusHelp"></a></li>
 	</ul>
 	</li>
@@ -89,7 +87,7 @@
 
 <p>If plugin deployment is in progress or failed for one or more agents, the <b>Agent Sync Status</b> is a link &#8212; click it to view the <b>Agent Status</b> page, which lists the agents upon which deployment is in progress or failed, and the status of each.</p>
 
-<p><span class="image-wrap" style=""><img src="attachments/77463605/77660974.png" width="400px" style="border: 0px solid black"/></span></p>
+<p><span class="image-wrap" style=""><img src="attachments/79038211/79135218.png" width="400px" style="border: 0px solid black"/></span></p>
 
 <div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Troubleshoot Failed Plugin Deployment</b><br />If deployment of a plugin to a Hyperic Agent fails, check the Hyperic Server's log file (<tt>ServerHome/logs/server.log</tt>} for this message:
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
@@ -107,7 +105,7 @@
 	<li>Click <b>Add/Update Plugin</b> on the <b>Plugin Manager</b> page.
 	<ul>
 		<li>The <b>Upload</b> page appears.<br/>
-<span class="image-wrap" style=""><img src="attachments/77463605/77660977.png" width="440px" style="border: 0px solid black"/></span> </li>
+<span class="image-wrap" style=""><img src="attachments/79038211/79135223.png" width="440px" style="border: 0px solid black"/></span> </li>
 	</ul>
 	</li>
 	<li>Click <b>Browse</b> to browse the file system for the plugin <tt>.jar</tt> or <tt>.xml</tt> file.
@@ -135,7 +133,7 @@
 	<li>Click <b>Remove Selected Plugin(s)</b>
 	<ul>
 		<li>The <b>Confirm Remove</b> page appears; it lists the number of resources in inventory managed by the plugin. If there are no resources managed by the plugin, no resource count is shown.<br/>
-<span class="image-wrap" style=""><img src="attachments/77463605/77660971.png" width="440px" style="border: 0px solid black"/></span> </li>
+<span class="image-wrap" style=""><img src="attachments/79038211/79135219.png" width="440px" style="border: 0px solid black"/></span> </li>
 	</ul>
 	</li>
 	<li>Click <b>Remove</b> to remove the plugin and all resources managed by the plugin.
@@ -157,28 +155,28 @@
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464574/77660831.png">alert.png</a> (image/png)
+                                <a href="attachments/79037074/79134953.png">InProgress.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464574/77660828.png">PluginManager.png</a> (image/png)
+                                <a href="attachments/79037074/79134954.gif">icon_available_green.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464574/77660829.png">UploadPlugin.png</a> (image/png)
+                                <a href="attachments/79037074/79134955.gif">icon_available_red.gif</a> (image/gif)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464574/77660826.png">ConfirmRemove.png</a> (image/png)
+                                <a href="attachments/79037074/79134956.png">AgentStatus.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464574/77660827.png">AgentStatus.png</a> (image/png)
+                                <a href="attachments/79037074/79134957.png">ConfirmRemove.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464574/77660824.gif">icon_available_red.gif</a> (image/gif)
+                                <a href="attachments/79037074/79134958.png">UploadPlugin.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464574/77660825.gif">icon_available_green.gif</a> (image/gif)
+                                <a href="attachments/79037074/79134959.png">PluginManager.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="attachments/77464574/77660838.png">InProgress.png</a> (image/png)
+                                <a href="attachments/79037074/79134960.png">alert.png</a> (image/png)
                                 <br/>
                                                     </div>
 				    
@@ -190,7 +188,7 @@
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:44</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jan 20, 2012 10:08</font></td>
 		    </tr>
 	    </table>
     </body>

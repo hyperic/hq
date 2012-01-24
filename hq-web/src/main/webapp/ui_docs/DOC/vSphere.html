@@ -1,9 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : vSphere</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : vSphere</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -14,22 +12,22 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : vSphere
+                            vFabric Hyperic 4.6.5 : vSphere
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 27, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
  
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1311786243996 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1311786243996 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1311786243996 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1325699941373 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699941373 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699941373 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1311786243996'>
+/*]]>*/</style><div class='rbtoc1325699941373'>
 <ul>
     <li><a href='#vSphere-vSpherePluginOverview'>vSphere Plugin Overview</a></li>
 <ul>
@@ -51,7 +49,7 @@ div.rbtoc1311786243996 li {margin-left: 0px;padding-left: 0px;}
     <li><a href='#vSphere-ViewaVMwarevSphereHostintheResourceHub'>View a VMware vSphere Host in the Resource Hub</a></li>
     <li><a href='#vSphere-ViewaVMwarevSphereVMintheResourceHub'>View a VMware vSphere VM in the Resource Hub</a></li>
 </ul>
-    <li><a href='#vSphere-vSphereComponentsinHypericEnterprise'>vSphere Components in Hyperic Enterprise</a></li>
+    <li><a href='#vSphere-vSphereComponentsinvFabricHyperic'>vSphere Components in vFabric Hyperic</a></li>
 </ul>
     <li><a href='#vSphere-ConfigurationInstructions'>Configuration Instructions</a></li>
 <ul>
@@ -140,7 +138,7 @@ div.rbtoc1311786243996 li {margin-left: 0px;padding-left: 0px;}
 
 <p>You install a Hyperic Agent on a platform that can access vCenter Server over the network. To minimize the load on the vCenter platform, do not install the agent on the same platform as vCenter.</p>
 
-<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>SSL Requirements for 4.6 Agents</b><br />In Hyperic 4.6, to communicate with the vCenter server over SSL, you must configure a keystore for the agent and manually import the vCenter SSL certificate into the agent keystore.</td></tr></table></div>
+<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>SSL Requirements for 4.6 Agents</b><br />In Hyperic 4.6, to communicate with the vCenter server over SSL, you must configure a keystore for the agent and manually import the vCenter SSL certificate into the agent keystore if the server’s certificate is unverified.</td></tr></table></div>
 
 <p>To discover and manage vSphere Hosts and VMs, the plugin must be able to connect to the vCenter SDK port, so after vCenter is discovered, you must enable the plugin to connect to the SDK port by defining the SDK connection settings on the vCenter server's <b>Configuration Properties</b> page. </p>
 
@@ -188,7 +186,7 @@ div.rbtoc1311786243996 li {margin-left: 0px;padding-left: 0px;}
 			<li>vProcessor Sockets</li>
 			<li>Cores per Socket</li>
 			<li>Data Center<br/>
-<span class="image-wrap" style=""><img src="attachments/77463605/77660701.png" style="border: 0px solid black"/></span> </li>
+<span class="image-wrap" style=""><img src="attachments/79038211/79135262.png" style="border: 0px solid black"/></span> </li>
 		</ul>
 		</li>
 	</ul>
@@ -250,7 +248,7 @@ div.rbtoc1311786243996 li {margin-left: 0px;padding-left: 0px;}
 			<li>Virtual CPUs</li>
 			<li>Tools Version</li>
 			<li>Config File<br/>
-<span class="image-wrap" style=""><img src="attachments/77463605/77660701.png" style="border: 0px solid black"/></span> </li>
+<span class="image-wrap" style=""><img src="attachments/79038211/79135262.png" style="border: 0px solid black"/></span> </li>
 		</ul>
 		</li>
 	</ul>
@@ -270,7 +268,7 @@ div.rbtoc1311786243996 li {margin-left: 0px;padding-left: 0px;}
 
 
 <ul>
-	<li><b>Metric Collection</b> &#45; The <tt>org.hyperic.hq.plugin.vsphere.VSphereVmCollector</tt> class obtains vCenter Performance Counters for each VM with an HQ Agent. See <a href="#vSphere-VMwarevSphereVMMetrics">VMware vSphere VM Metrics</a> for a list of supported metrics.</li>
+	<li><b>Metric Collection</b> &#45; The <tt>org.hyperic.hq.plugin.vsphere.VSphereVmCollector</tt> class obtains vCenter Performance Counters for each VM with a Hyperic Agent. See <a href="#vSphere-VMwarevSphereVMMetrics">VMware vSphere VM Metrics</a> for a list of supported metrics.</li>
 </ul>
 
 
@@ -315,7 +313,7 @@ div.rbtoc1311786243996 li {margin-left: 0px;padding-left: 0px;}
 
 <p>This section introduces the user interface for viewing vSphere resources in Hyperic. In Hyperic Open Source, you use the Resource Hub to view vSphere resources. </p>
 
-<p>Hyperic Enterprise has a separate management view &#8212; the <b>HQ vSphere</b> page &#8212; for monitoring and managing vSphere components. </p>
+<p>vFabric Hyperic has a separate management view &#8212; the <b>HQ vSphere</b> page &#8212; for monitoring and managing vSphere components. </p>
 
 <h2><a name="vSphere-vSphereComponentsintheResourceHub"></a>vSphere Components in the Resource Hub </h2>
 
@@ -324,21 +322,21 @@ div.rbtoc1311786243996 li {margin-left: 0px;padding-left: 0px;}
 <h3><a name="vSphere-ViewaVMwarevCenterInstanceintheResourceHub"></a>View a VMware vCenter Instance in the Resource Hub </h3>
 
 <p>Use <b>Resources &gt; Browse &gt; Servers &gt; Server Type Dropdown &gt; VMware vCenter</b> to navigate to VMware vCenter instance. The <b>Current Health</b> page for the vCenter instance appears. See the thumbnail below for a screenshot. <br/>
-<span class="image-wrap" style=""><img src="attachments/77463605/77660681.png" style="border: 0px solid black"/></span> </p>
+<span class="image-wrap" style=""><img src="attachments/79038211/79135251.png" style="border: 0px solid black"/></span> </p>
 
 <h3><a name="vSphere-ViewaVMwarevSphereHostintheResourceHub"></a>View a VMware vSphere Host in the Resource Hub </h3>
 
 <p>Use <b>Resources &gt; Browse &gt; Platforms &gt; Platform Type Dropdown &gt; vSphere Host</b> to navigate to a vSphere Host. The <b>Current Health</b> page for the host. See the thumbnail below for a screenshot. <br/>
-<span class="image-wrap" style=""><img src="attachments/77463605/77660684.png" style="border: 0px solid black"/></span> </p>
+<span class="image-wrap" style=""><img src="attachments/79038211/79135252.png" style="border: 0px solid black"/></span> </p>
 
 <h3><a name="vSphere-ViewaVMwarevSphereVMintheResourceHub"></a>View a VMware vSphere VM in the Resource Hub </h3>
 
 <p>Use <b>Resources &gt; Browse &gt; Platforms &gt; Platform Type Dropdown &gt; vSphere VM</b> to navigate to a vSphere VM. The <b>Current Health</b> page for the VM. See the thumbnail below for a screenshot. <br/>
-<span class="image-wrap" style=""><img src="attachments/77463605/77660682.png" style="border: 0px solid black"/></span> </p>
+<span class="image-wrap" style=""><img src="attachments/79038211/79135250.png" style="border: 0px solid black"/></span> </p>
 
 <div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>When you browse platforms on the <b>Resources &gt; Browse</b> page, if the filter is set to "All Platform Types", vSphere VMs will <em>not</em> appear in the list of platforms. You must select "vSphere VM" in the platform types filter to display a list of vSphere VMs in the Resource Hub.</td></tr></table></div> 
 
-<h2><a name="vSphere-vSphereComponentsinHypericEnterprise"></a>vSphere Components in Hyperic Enterprise </h2>
+<h2><a name="vSphere-vSphereComponentsinvFabricHyperic"></a>vSphere Components in vFabric Hyperic</h2>
 
 <p>Use <b>Resources &gt; Browse &gt; HQ vSphere</b> to display the <b>HQ vSphere</b> management interface. For more information, see <a href="ui-vSphere.html" title="ui-vSphere">ui-vSphere</a>. </p>
 
@@ -367,7 +365,7 @@ div.rbtoc1311786243996 li {margin-left: 0px;padding-left: 0px;}
 <p>If the <tt>accept.unverified.certificates</tt> property in <tt>agent.properties</tt> is "true", the vSphere plugin will automatically import the VMware vCenter server's unverified SSL certificate to the keystore accessible to the Hyperic 4.6 agent. This is not recommended because it is less secure and expose the Hyperic Agent to man-in-the-middle attacks.</p></td></tr></table></div>
 <h2><a name="vSphere-Step2InstallHypericAgent"></a>Step 2 - Install Hyperic Agent</h2>
 
-<p>Install a Hyperic Agent on the platform from which you will remotely monitor vCenter Server. For instructions, see <a href="Installing an Agent-Only Package.html" title="Installing an Agent-Only Package">Installing an Agent&#45;Only Package</a>. </p>
+<p>Install a Hyperic Agent on the platform from which you will remotely monitor vCenter Server. For instructions, see Installing an Agent&#45;Only Package. </p>
 
 <div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Interactive Agent Configuration is Not Supported</b><br />You must configure the Hyperic Agent in its properties file. <b>Do not start the Hyperic Agent until you have configured its startup setting in its <tt>agent.properties</tt> file, as described in the following section</b>.</td></tr></table></div> 
 
@@ -429,8 +427,13 @@ Perform the configuration steps in this section if your vCenter instance manages
 
 <ol>
 	<li>Navigate to the &nbsp;<b>Configuration Properties</b>&nbsp;page for the VMware vCenter instance.<br/>
-<span class="image-wrap" style=""><img src="attachments/77463605/77660690.png" style="border: 0px solid black"/></span> </li>
-	<li>Enter the vCenter SDK URL, supplying an URL with a fully-qualified domain name or an IP address.</li>
+<span class="image-wrap" style=""><img src="attachments/79038211/79135259.png" style="border: 0px solid black"/></span> </li>
+	<li>Enter the vCenter SDK URL, supplying an URL with a fully-qualified domain name or an IP address.
+<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>vCenter URLs must be unique</b><br />Due to a known problem (<a href="https://jira.hyperic.com/browse/HQ-2418">https://jira.hyperic.com/browse/HQ-2418</a>), each vCenter Server resource managed by Hyperic must be configured with a unique URL. If multiple vCenter Server resources are defined with the same URL, for instance the default 
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>http://localhost/sdk</pre>
+</div></div>
+<p> all discovered Hosts and VMs will appear under one of the vCenter Server instances.</p></td></tr></table></div></li>
 	<li>Enter the username and password for connecting to vCenter.
 <div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Required Privileges</b><br />The vCenter user account that the Hyperic Agent uses to connect to vCenter must have a vCenter role with the following privileges: 
 <ul>
@@ -487,8 +490,8 @@ Perform the configuration steps in this section if your vCenter instance manages
 	<li>Scroll down to the resource type and click <b>Edit Metric Template</b>.
 	<ul>
 		<li>Click the thumbnails below to view the <b>Monitoring Defaults</b> pages for vSphere Hosts and VMs.<br/>
-<span class="image-wrap" style=""><img src="attachments/77463605/77660695.png" style="border: 0px solid black"/></span> <br/>
-<span class="image-wrap" style=""><img src="attachments/77463605/77660696.png" style="border: 0px solid black"/></span> </li>
+<span class="image-wrap" style=""><img src="attachments/79038211/79135256.png" style="border: 0px solid black"/></span> <br/>
+<span class="image-wrap" style=""><img src="attachments/79038211/79135257.png" style="border: 0px solid black"/></span> </li>
 	</ul>
 	</li>
 </ol>
@@ -498,7 +501,7 @@ Perform the configuration steps in this section if your vCenter instance manages
 
 <p>Installing a Hyperic Agent in each VM enables you to manage Hyperic-supported server types running in it.  In vFabric Hyperic, this enables you to correlate the behavior of resources throughout the managed resource hierarchy &#8212; from vCenter to managed servers in the VM. </p>
 
-<p>For installation instructions, see <a href="Installing an Agent-Only Package.html" title="Installing an Agent-Only Package">Installing an Agent&#45;Only Package</a>. </p>
+<p>For installation instructions, see Installing an Agent&#45;Only Package. </p>
 
 <p><b>Note:</b> If you run a Hyperic Agent in a VM, Hyperic creates an operating system type platform type for it in inventory. For instance, if you run and agent in a VM running Linux, Hyperic creates a platform of type "Linux" for the system, in addition to the platform of type "vSphere VM" create for the VM itself. </p>
 
@@ -1180,7 +1183,7 @@ While a VM may&nbsp;have been configured to use 4 GB of RAM, as an example, it m
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:43</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jan 20, 2012 10:07</font></td>
 		    </tr>
 	    </table>
     </body>

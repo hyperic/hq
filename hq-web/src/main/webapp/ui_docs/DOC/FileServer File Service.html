@@ -1,0 +1,190 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : FileServer File Service</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 4.6.5 : FileServer File Service
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+ 
+
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325699982109 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699982109 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699982109 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1325699982109'>
+<ul>
+    <li><a href='#FileServerFileService-FileServerFile'>FileServer File</a></li>
+    <li><a href='#FileServerFileService-CreateFileServerFileServiceinHyperic'>Create FileServer File Service in Hyperic</a></li>
+    <li><a href='#FileServerFileService-FileServerFileServiceConfigurationOptions'>File Server File Service Configuration Options</a></li>
+    <li><a href='#FileServerFileService-FileServerFileServiceMetrics'>FileServer File Service Metrics</a></li>
+    <li><a href='#FileServerFileService-EventTracking'>Event Tracking</a></li>
+</ul></div> 
+
+ 
+
+
+<h1><a name="FileServerFileService-FileServerFile"></a>FileServer File </h1>
+
+<p>In Hyperic, a file in a file system is represented by a platform service of type "FileServer File". Although a Hyperic Agent automatically discovers filesystems on a platform (see <a href="FileServer Mount Service.html" title="FileServer Mount Service">FileServer Mount Service</a>, to monitor a particularly file, you must configure it manually. </p>
+
+
+<h1><a name="FileServerFileService-CreateFileServerFileServiceinHyperic"></a>Create FileServer File Service in Hyperic</h1>
+
+<p>To create a FileServer File service. </p>
+
+<ol>
+	<li>Navigate to the platform where the file exists.</li>
+	<li>Select <b>New Platform Service</b> from the <b>Tools</b> menu.&nbsp;</li>
+	<li>Name the service.</li>
+	<li>Select "FileServer file" from the <b>Service Type</b> pull-down.</li>
+	<li>Click <b>Edit</b> in the "Configuration Properties" section of the new service's <b>Inventory</b> page.</li>
+	<li>On the <b>Configuration Properties</b> page, supply at least the required properties, described in the table below.</li>
+</ol>
+
+
+<h1><a name="FileServerFileService-FileServerFileServiceConfigurationOptions"></a>File Server File Service Configuration Options </h1>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Name </th>
+<th class='confluenceTh'> Description </th>
+<th class='confluenceTh'> Required </th>
+<th class='confluenceTh'> Example </th>
+<th class='confluenceTh'> Notes </th>
+</tr>
+<tr>
+<td class='confluenceTd'> path </td>
+<td class='confluenceTd'> Path to the file </td>
+<td class='confluenceTd'> Yes </td>
+<td class='confluenceTd'> /Users/myfiles </td>
+<td class='confluenceTd'> HQ will check that the path exists </td>
+</tr>
+</tbody></table>
+</div>
+
+
+
+<h1><a name="FileServerFileService-FileServerFileServiceMetrics"></a>FileServer File Service Metrics </h1>
+
+<p>Each instance of a <b>FileServer File</b> service provides the following metrics: </p>
+
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'>Name	</th>
+<th class='confluenceTh'>Alias	</th>
+<th class='confluenceTh'>Units	</th>
+<th class='confluenceTh'>Category	</th>
+<th class='confluenceTh'>Default On	</th>
+<th class='confluenceTh'>Default Interval</th>
+</tr>
+<tr>
+<td class='confluenceTd'>Last Modified Time 	</td>
+<td class='confluenceTd'>LastModified	</td>
+<td class='confluenceTd'>epoch-millis	</td>
+<td class='confluenceTd'>UTILIZATION	</td>
+<td class='confluenceTd'>false	</td>
+<td class='confluenceTd'>30 min</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Last Change Time	</td>
+<td class='confluenceTd'>LastChange	</td>
+<td class='confluenceTd'>epoch-millis	</td>
+<td class='confluenceTd'>UTILIZATION	</td>
+<td class='confluenceTd'>false	</td>
+<td class='confluenceTd'>30 min</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Last Access Time	</td>
+<td class='confluenceTd'>LastAccess	</td>
+<td class='confluenceTd'>epoch-millis	</td>
+<td class='confluenceTd'>UTILIZATION	</td>
+<td class='confluenceTd'>false	</td>
+<td class='confluenceTd'>30 min</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Permissions	</td>
+<td class='confluenceTd'>Permissions	</td>
+<td class='confluenceTd'>none	</td>
+<td class='confluenceTd'>UTILIZATION	</td>
+<td class='confluenceTd'>false	</td>
+<td class='confluenceTd'>30 min</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Owner User Id	</td>
+<td class='confluenceTd'>Uid	</td>
+<td class='confluenceTd'>none	</td>
+<td class='confluenceTd'>UTILIZATION	</td>
+<td class='confluenceTd'>false	</td>
+<td class='confluenceTd'>30 min</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Owner Group Id	</td>
+<td class='confluenceTd'>Gid	</td>
+<td class='confluenceTd'>none	</td>
+<td class='confluenceTd'>UTILIZATION	</td>
+<td class='confluenceTd'>false	</td>
+<td class='confluenceTd'>30 min</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Availability	</td>
+<td class='confluenceTd'>Availability	</td>
+<td class='confluenceTd'>percentage	</td>
+<td class='confluenceTd'>AVAILABILITY	</td>
+<td class='confluenceTd'>true	</td>
+<td class='confluenceTd'>10 min</td>
+</tr>
+<tr>
+<td class='confluenceTd'>Size	</td>
+<td class='confluenceTd'>Suze	</td>
+<td class='confluenceTd'>B	</td>
+<td class='confluenceTd'>UTILIZATION	</td>
+<td class='confluenceTd'>true	</td>
+<td class='confluenceTd'>5 min</td>
+</tr>
+</tbody></table>
+</div>
+
+
+
+<h1><a name="FileServerFileService-EventTracking"></a>Event Tracking </h1>
+
+<p>You can enable log tracking for a FileServer File service. If you do, the agent will log an event for responses that match the criteria you specify. </p>
+
+<p>To enable log tracking, click the <b>Enable Log Tracking</b> box in the <b>Monitoring</b> section of the <b>Configuration Properties</b> page. </p>
+
+<p>For information about Hyperic log tracking functionality and configuration options, and how to view log events, see <a href="Set Up Log Tracking for a Resource.html" title="Set Up Log Tracking for a Resource">Set Up Log Tracking for a Resource</a>.</p>
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jan 20, 2012 10:07</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

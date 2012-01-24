@@ -1,0 +1,103 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : About Agent Configuration</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 4.6.5 : About Agent Configuration
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Nov 11, 2011 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <style type='text/css'>/*<![CDATA[*/
+div.rbtoc1321038332652 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1321038332652 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1321038332652 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1321038332652'>
+<ul>
+    <li><a href='#AboutAgentConfiguration-AgentStartupConfigurationData'>Agent Startup Configuration Data</a></li>
+    <li><a href='#AboutAgentConfiguration-OptionalAgentConfigurationProperties'>Optional Agent Configuration Properties</a></li>
+    <li><a href='#AboutAgentConfiguration-SupportedLocationsfor%7B%7Bagent.properties%7D%7D'>Supported Locations for <tt>agent.properties</tt></a></li>
+    <li><a href='#AboutAgentConfiguration-HowtoChangeAgentSetupConfigurationProperties'>How to Change Agent Setup Configuration Properties</a></li>
+</ul></div> 
+
+<blockquote>
+<p><b>About this page...</b> </p>
+
+<p>This page has information about agent configuration data - how it is initially supplied, where it is saved, and how to change it. </p>
+
+<p>For information about where agent configuration fits into the Hyperic deployment process, see:</p>
+<ul>
+	<li><a href="Hyperic Installation and Startup Process.html#HypericInstallationandStartupProcess-SetupAgent">Step 4 - Set Up the Hyperic Agent</a> on the <a href="Hyperic Installation and Startup Process.html" title="Hyperic Installation and Startup Process">Hyperic Installation and Startup Process</a> page &#8212; for new Hyperic installations</li>
+	<li><a href="Hyperic Upgrade Processes.html" title="Hyperic Upgrade Processes">Hyperic Upgrade Processes</a> &#8212; for upgrade installations</li>
+</ul>
+
+</blockquote>
+<h1><a name="AboutAgentConfiguration-AgentStartupConfigurationData"></a>Agent Startup Configuration Data </h1>
+
+<p>The configuration choices you must supply for the agent to start up specify where and how it communicates with the Hyperic Server, and vice versa. You can supply these setup values either interactively at first startup, or in the agent's <tt>agent.properties</tt> file before first startup. For a list of setup properties and definitions, see <a href="Set Up Agent in Properties File.html#SetUpAgentinPropertiesFile-CommProps">Communication Properties Reference</a> section of the <a href="Set Up Agent in Properties File.html" title="Set Up Agent in Properties File">Set Up Agent in Properties File</a> page. </p>
+
+<p>After the agent and server establish successful communication upon first agent startup:</p>
+
+<ul>
+	<li>The Hyperic Agent saves the server's connection data in <tt>AgentHome/data</tt>. The agent creates the <tt>/data</tt> directory upon first successful startup. On subsequent startups, the agent will look at the connection data stored in its <tt>/data</tt> directory to determine where and how to connect to the Hyperic Server.</li>
+	<li>The Hyperic Server stores the agent's connection data in the Hyperic database.</li>
+</ul>
+
+
+<h1><a name="AboutAgentConfiguration-OptionalAgentConfigurationProperties"></a>Optional Agent Configuration Properties </h1>
+
+<p>As described above in <a href="#AboutAgentConfiguration-AgentStartupConfigurationData">Agent Startup Configuration Data</a>, at first successful startup, the agent saves the server connection data in its <tt>/data</tt> directory, and upon subsequent startups, looks there for the server connection data. If agent finds the server connection data in its <tt>/data</tt> directory, it does not look at <tt>agent.properties</tt> for the connection data.</p>
+
+<p>Other agent properties that configure optional features and behaviors are persisted only in <tt>agent.properties</tt>. For a complete list of agent properties, see docbox:Agent Properties. </p>
+
+<h1><a name="AboutAgentConfiguration-SupportedLocationsfor%7B%7Bagent.properties%7D%7D"></a>Supported Locations for <tt>agent.properties</tt> </h1>
+
+<p><tt>agent.properties</tt> is installed in <tt>AgentHome/conf</tt>. </p>
+
+<p>Note however, that agent first honors an external (from the agent installation) location for the properties file: an <tt>.hq</tt> directory under the home directory of the user under which the agent runs. The agent honors this location for <tt>agent.properties</tt> so that if you upgrade an agent by installing a full agent package (rather than just updating the agent bundle), you will not lose the configuration settings defined in <tt>agent.properties</tt>.</p>
+
+<p>You can also ensure that you do not lose agent configuration settings by backing up <tt>Agent/conf/agent.properties</tt> before installing a full package, and restoring the file after installation. </p>
+
+<p>You can upgrade a 4.x agent by installing an agent bundle only - you can perform this upgrade operation from the Hyperic user interface or using a manual procedure. When you upgrade the agent bundle only, the agent's <tt>/conf</tt> directory is not updated &#8212; this method preserves the <tt>agent.properties</tt> file within the agent installation through the upgrade. </p>
+
+<h1><a name="AboutAgentConfiguration-HowtoChangeAgentSetupConfigurationProperties"></a>How to Change Agent Setup Configuration Properties </h1>
+
+<p>You configure an agent's setup properties either interactively at first startup, or in <tt>agent.properties</tt> prior to first startup The properties that relate to where and how to contact the Hyperic server, are saved in the agent's <tt>/data directory</tt>; those related to how the server can reach the agent are stored in the Hyperic database. </p>
+
+<p>If you need to make changes to those configuration values for an agent at a later time, you can delete the agent's <tt>/data</tt> directory, edit the <tt>agent.setup.*</tt> properties in the <tt>agent.properties</tt> file, and restart the agent. You <em>must</em> use this method if you wish to change the agent's listen port &#8212; you cannot change port settings without restarting the agent. </p>
+
+<p>If you prefer to change the startup configuration (other than agent listen port) without having to restart the agent, run the following command in a command shell, while the agent is running. </p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">AgentHome/hq-agent.sh setup</pre>
+		</div>
+</div></div> 
+<p>This will allow you to interactively supply new values for the setup properties, as described in <a href="Set Up Agent Interactively.html" title="Set Up Agent Interactively">Set Up Agent Interactively</a>. This will this cause all properties in the properties file to be re-read, and take effect. </p>
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jan 20, 2012 10:07</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

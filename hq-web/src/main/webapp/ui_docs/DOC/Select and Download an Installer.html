@@ -1,0 +1,198 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : Select and Download an Installer</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 4.6.5 : Select and Download an Installer
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 03, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325626547667 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325626547667 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325626547667 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1325626547667'>
+<ul>
+    <li><a href='#SelectandDownloadanInstaller-KeyFactsAboutHypericInstallerPackaging'>Key Facts About Hyperic Installer Packaging</a></li>
+    <li><a href='#SelectandDownloadanInstaller-InstallerTypes'>Installer Types</a></li>
+    <li><a href='#SelectandDownloadanInstaller-HypericInstallerFeatures'>Hyperic Installer Features</a></li>
+    <li><a href='#SelectandDownloadanInstaller-WheretoGetHypericInstallationPackages'>Where to Get Hyperic Installation Packages</a></li>
+</ul></div>
+
+<blockquote>
+<p><b>About this page...</b> </p>
+
+<p>This page has instructions for selecting the right Hyperic installation package. After obtaining the appropriate installation package, see: </p>
+
+<ul>
+	<li><a href="Hyperic Installation and Startup Process.html" title="Hyperic Installation and Startup Process">Hyperic Installation and Startup Process</a> &#8212; For instructions on doing a new installation.</li>
+	<li><a href="Hyperic Upgrade Processes.html" title="Hyperic Upgrade Processes">Hyperic Upgrade Processes</a> &#8212; For instructions on doing an upgrade installation.</li>
+</ul>
+</blockquote> 
+
+
+<h1><a name="SelectandDownloadanInstaller-KeyFactsAboutHypericInstallerPackaging"></a>Key Facts About Hyperic Installer Packaging</h1>
+
+<ul>
+	<li>About JRE packaging
+	<ul>
+		<li>Most Hyperic installation packages include a 1.5 JRE for the Hyperic Agent and a 1.6 JRE for the Hyperic Server.</li>
+		<li>Hyperic installers referred to as <em>platform-independent</em> do not include a JRE &#8212; use a platform-independent package if you have a pre-existing JRE on the target platform that you want the server or agent to use. A platform-independent package for Unix-like environments is also appropriate if there is no Hyperic installer for your operating system.</li>
+		<li>The Agent RPM does not include a JRE.</li>
+	</ul>
+	</li>
+</ul>
+
+
+<ul>
+	<li>About Hyperic database options
+	<ul>
+		<li>Platform-independent server packages do not support the option of installing Hyperic Server with a built-in database.</li>
+		<li>The MSI installer automatically installs a built-in PostgreSQL database for Hyperic Server; you cannot install Hyperic Server to use an external database with the MSI installer.</li>
+	</ul>
+	</li>
+</ul>
+
+
+<h1><a name="SelectandDownloadanInstaller-InstallerTypes"></a>Installer Types</h1>
+
+<p>There a several ways you can install Hyperic components:</p>
+
+<ul>
+	<li>Hyperic Installer &#8212; When you are installing the Hyperic Server for a production environment, or want to explicitly configure key behaviors, this is the type of installer to use. The installer is script-based and flexible &#8212; you can do a quick install that sets up defaults for virtually all Hyperic Server configuration options, or run it in "full" mode to respond to the configuration dialog yourself. You can also use this installer to install the Hyperic Agent. To install an agent, the installer simply creates a home directory for the agent, and unpacks the agent archive into it &#8212; you configure agent behavior by editing its properties file prior to first startup, or via an interactive dialog at first startup. Full installer packages are available for both Windows and Unix-like environments, with and without built-in JREs. See rows 1 and 2 in <a href="#SelectandDownloadanInstaller-HypericInstallerFeatures">Hyperic Installer Features</a> below.</li>
+</ul>
+
+
+<ul>
+	<li>Agent Archives &#8212; Agent-only archives are useful when you roll out agents to a large number of platforms with varying operating systems and architectures. Agent archives are available for both Windows and Unix-like environments, with and without built-in JREs. See rows 3 and 4 in <a href="#SelectandDownloadanInstaller-HypericInstallerFeatures">Hyperic Installer Features</a> below.</li>
+</ul>
+
+
+<ul>
+	<li>RHEL RPM &#8212; RPMs are available. Note that the Hyperic RPM is the standard Hyperic installer wrapped in an Expect script. See rows 5 and 6 in <a href="#SelectandDownloadanInstaller-HypericInstallerFeatures">Hyperic Installer Features</a> below.</li>
+</ul>
+
+
+<ul>
+	<li>InstallShield MSI &#8212; The MSI installer for Windows environments is most useful if you are a new evaluator of Hyperic, and prefer a GUI interaction, rather than a command-line dialog. The MSI is not suitable for production environments, as it does not provide the option of installing Hyperic Server to work with an external databaase. The MSI installs a built-in PostgreSQL database, the use of which is unsuitable for production use. See rows 7 in <a href="#SelectandDownloadanInstaller-HypericInstallerFeatures">Hyperic Installer Features</a> below.</li>
+</ul>
+
+
+<h1><a name="SelectandDownloadanInstaller-HypericInstallerFeatures"></a>Hyperic Installer Features</h1>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'>&nbsp;</th>
+<th class='confluenceTh'> Installer Package Type </th>
+<th class='confluenceTh'> Architectures </th>
+</tr>
+<tr>
+<td class='confluenceTd'> 1 </td>
+<td class='confluenceTd'> Hyperic Full Installer (tar) </td>
+<td class='confluenceTd'> Linux (32 bit) <br class="atl-forced-newline" />
+Linux (64 bit) <br class="atl-forced-newline" />
+Solaris Sparc (32 or 64 bit) <br class="atl-forced-newline" />
+Mac OSX (32 or 64 bit) <br class="atl-forced-newline" />
+Platform-independent (32 or 64 bit) <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> 2 </td>
+<td class='confluenceTd'> Hyperic Full Installer (zip) </td>
+<td class='confluenceTd'> Windows (32 bit) <br class="atl-forced-newline" />
+Platform-independent (32 or 64 bit) <br class="atl-forced-newline" />
+<br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> 3 </td>
+<td class='confluenceTd'> Agent archive (tar) </td>
+<td class='confluenceTd'> Linux (32 bit) <br class="atl-forced-newline" />
+Linux (64 bit) <br class="atl-forced-newline" />
+Solaris Sparc (32 or 64 bit) <br class="atl-forced-newline" />
+Mac OSX (32 or 64 bit) <br class="atl-forced-newline" />
+AIX (32 or 64 bit) <br class="atl-forced-newline" />
+HP-UX 11.x (32 or 64 bit) <br class="atl-forced-newline" />
+Platform-independent (32 or 64 bit) <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> 4 </td>
+<td class='confluenceTd'> Agent archive (zip) </td>
+<td class='confluenceTd'> Windows&nbsp;(32 bit) <br class="atl-forced-newline" />
+Platform-independent (32 or 64 bit) <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'> 5 </td>
+<td class='confluenceTd'> Server RPM </td>
+<td class='confluenceTd'> RHEL x86-64 (64 bit) <br class="atl-forced-newline" />
+RHEL i386 (32 bit) <br class="atl-forced-newline" />
+Platform-independent (32 or 64 bit) </td>
+</tr>
+<tr>
+<td class='confluenceTd'> 6 </td>
+<td class='confluenceTd'> Agent RPM </td>
+<td class='confluenceTd'> Platform-independent (32 or 64 bit) </td>
+</tr>
+<tr>
+<td class='confluenceTd'> 7 </td>
+<td class='confluenceTd'> MSI </td>
+<td class='confluenceTd'> Windows (32 bit) </td>
+</tr>
+</tbody></table>
+</div>
+
+
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>No 64-bit Installers for Windows Environments</b><br />Hyperic installers for Windows include 32-bit JREs &#8212; there is no Hyperic package for Windows with a 64-bit JRE. You can a install Hyperic component from the Hyperic 32-bit package for Windows, and configure the component to use a pre-existing 64-bit JRE on the platform. See <a href="Configure JREs for Hyperic Components.html" title="Configure JREs for Hyperic Components">Configure JREs for Hyperic Components</a>.</td></tr></table></div>
+
+<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Known Hyperic Agent Problem on Windows 2008 R2 x64</b><br />A known problem (<a href="https://jira.hyperic.com/browse/HHQ-4640">https://jira.hyperic.com/browse/HHQ-4640</a> with the Hyperic Agent 4.6, installing the agent on Windows 2008 x64 (Microsoft Windows Version 6.1.7600) causes the agent's Java Service Wrapper to crash and issue messages similar to:
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">C:\Program Files (x86)\Hyperic\4.6.0-EE-110\hyperic-hqee-agent-4.6.0.BUILD-SNAPSHOT\bin&gt;hq-agent.bat install
+Out of memory in logging code (PPB1)
+Out of memory in logging code (PPB1)
+Logging mutex wait failed.
+Logging mutex wait failed.
+...</pre>
+		</div>
+</div></div> 
+
+<p>The agent service is successfully installed, despite the errors.</p></td></tr></table></div>
+<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Note for Solaris x86 Environment</b><br />There is <em>no</em> platform-specific Hyperic installer for Solaris x86. Install a no-JRE Hyperic package in Solaris x86 environments and configure the components to use pre-existing JREs in your environment. For more information, see <a href="Configure JREs for Hyperic Components.html" title="Configure JREs for Hyperic Components">Configure JREs for Hyperic Components</a>.</td></tr></table></div>
+
+
+<h1><a name="SelectandDownloadanInstaller-WheretoGetHypericInstallationPackages"></a>Where to Get Hyperic Installation Packages</h1>
+
+<p>vFabric Hyperic and Hyperic HQ installers are available on the VMware download page at <a href="http://downloads.vmware.com/">http://downloads.vmware.com/</a>. Navigate to the page and choose <b>VMware vFabric Hyperic</b>.</p>
+
+<p>vFabric Hyperic RPM packages are available in the VMware RPM repository. For information about installing from the repository, see <a href="http://pubs.vmware.com:8080/vfabric5/topic/com.vmware.vfabric.platform.5.0/vfabric/install-repo-install.html">http://pubs.vmware.com:8080/vfabric5/topic/com.vmware.vfabric.platform.5.0/vfabric/install-repo-install.html</a>.</p>
+
+<p>If you plan a local RPM installation, rather than from the repository, vFabric Hyperic RPMs are available for download at <a href="http://repo.vmware.com/pub/rhel5/vfabric/5/i386">http://repo.vmware.com/pub/rhel5/vfabric/5/i386</a> and <a href="http://repo.vmware.com/pub/rhel5/vfabric/5/x86_64">http://repo.vmware.com/pub/rhel5/vfabric/5/x86_64</a>.</p>
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jan 20, 2012 10:06</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

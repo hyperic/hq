@@ -1,9 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : Metrics and Metric Collection</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : Metrics and Metric Collection</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -14,21 +12,21 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : Metrics and Metric Collection
+                            vFabric Hyperic 4.6.5 : Metrics and Metric Collection
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 01, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p>This page describes how metrics are categorized in VMware vFabric™ Hyperic®, how metric baselines are calculated and used, and default metric collection settings. </p>
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1309540922595 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1309540922595 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1309540922595 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1325700481771 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325700481771 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325700481771 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1309540922595'>
+/*]]>*/</style><div class='rbtoc1325700481771'>
 <ul>
     <li><a href='#MetricsandMetricCollection-MetricCategories'>Metric Categories</a></li>
 <ul>
@@ -47,7 +45,7 @@ div.rbtoc1309540922595 li {margin-left: 0px;padding-left: 0px;}
     <li><a href='#MetricsandMetricCollection-DefaultMetricCollectionSettings'>Default Metric Collection Settings</a></li>
 </ul></div>
 
-<p><font color=""></font></p>
+
 <p><a name="MetricsandMetricCollection-metrics"></a></p>
 
 
@@ -69,13 +67,13 @@ div.rbtoc1309540922595 li {margin-left: 0px;padding-left: 0px;}
 </tr>
 <tr>
 <td class='confluenceTd'> Green </td>
-<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/77463561/77660601.gif" style="border: 0px solid black"/></span> </td>
+<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/79038082/79135188.gif" style="border: 0px solid black"/></span> </td>
 <td class='confluenceTd'>Up </td>
 <td class='confluenceTd'>For an individual resource, indicates that its availability status is "up". <br class="atl-forced-newline" /> <br class="atl-forced-newline" />  For a group, indicates that none of the group members has availability status of  "down".  </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Yellow </td>
-<td class='confluenceTd'><span class="image-wrap" style=""><img src="attachments/77463561/77660604.gif" style="border: 0px solid black"/></span>  </td>
+<td class='confluenceTd'><span class="image-wrap" style=""><img src="attachments/79038082/79135189.gif" style="border: 0px solid black"/></span>  </td>
 <td class='confluenceTd'>Warn </td>
 <td class='confluenceTd'> This state is valid for a group only. It indicates that (1) one or more group members, but not all members, have the availability state of "down", and (2) the remaining members have status "green". </td>
 </tr>
@@ -87,13 +85,13 @@ div.rbtoc1309540922595 li {margin-left: 0px;padding-left: 0px;}
 </tr>
 <tr>
 <td class='confluenceTd'> Red </td>
-<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/77463561/77660603.gif" style="border: 0px solid black"/></span> </td>
+<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/79038082/79135190.gif" style="border: 0px solid black"/></span> </td>
 <td class='confluenceTd'> Down</td>
 <td class='confluenceTd'> For an individual resource, indicates that its availability status is "down".<br class="atl-forced-newline" /> <br class="atl-forced-newline" />   For a group, indicates that all members of the group have either availability status "red" or "unknown".  </td>
 </tr>
 <tr>
 <td class='confluenceTd'> Grey </td>
-<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/77463561/77660602.gif" style="border: 0px solid black"/></span> </td>
+<td class='confluenceTd'> <span class="image-wrap" style=""><img src="attachments/79038082/79135187.gif" style="border: 0px solid black"/></span> </td>
 <td class='confluenceTd'>Unknown </td>
 <td class='confluenceTd'>For an individual resource, indicates that its availability is unknown. <br class="atl-forced-newline" /> <br class="atl-forced-newline" /> For a group, indicates that the availability of at least one of the members is unknown. <br class="atl-forced-newline" /> </td>
 </tr>
@@ -145,7 +143,7 @@ div.rbtoc1309540922595 li {margin-left: 0px;padding-left: 0px;}
 </ul>
 
 
-<p><font color=""></font></p>
+
 <p><a name="MetricsandMetricCollection-baselines"></a></p>
 
 
@@ -187,7 +185,7 @@ div.rbtoc1309540922595 li {margin-left: 0px;padding-left: 0px;}
 </ul>
 
 
-<p><span class="image-wrap" style=""><img src="attachments/77463605/77660406.png" width="700pxpxpxpx" style="border: 0px solid black"/></span></p>
+<p><span class="image-wrap" style=""><img src="attachments/79038211/79135380.png" width="700pxpxpxpx" style="border: 0px solid black"/></span></p>
 
 <h2><a name="MetricsandMetricCollection-HowaBaselineisCalculated"></a>How a Baseline is Calculated</h2>
 
@@ -206,7 +204,7 @@ div.rbtoc1309540922595 li {margin-left: 0px;padding-left: 0px;}
 
 <p>Default metric collection and alert definitions for a resource type can be viewed and edited by an authorized user on the <b>Monitoring Defaults</b> page for a resource type.</p>
 
-<p><font color=""></font></p>
+
 
 				    
                     			    </td>
@@ -217,7 +215,7 @@ div.rbtoc1309540922595 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:43</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jan 20, 2012 10:06</font></td>
 		    </tr>
 	    </table>
     </body>

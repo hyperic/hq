@@ -1,0 +1,746 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : HQApi resource command</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            vFabric Hyperic 4.6.5 : HQApi resource command
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
+
+ 
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1325699150634 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699150634 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699150634 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1325699150634'>
+<ul>
+    <li><a href='#HQApiresourcecommand-Functionality'>Functionality</a></li>
+    <li><a href='#HQApiresourcecommand-resourceCommandOptions'>resource Command Options</a></li>
+<ul>
+    <li><a href='#HQApiresourcecommand-resourcelist'>resource list</a></li>
+<ul>
+    <li><a href='#HQApiresourcecommand-resourcelistCommandQualifiers'>resource list Command Qualifiers</a></li>
+    <li><a href='#HQApiresourcecommand-StructureofaResourcesResponse'>Structure of a ResourcesResponse</a></li>
+    <li><a href='#HQApiresourcecommand-AttributesinanResourcesResponse'>Attributes in an ResourcesResponse</a></li>
+</ul>
+    <li><a href='#HQApiresourcecommand-resourcesync'>resource sync</a></li>
+    <li><a href='#HQApiresourcecommand-resourcedelete'>resource delete</a></li>
+    <li><a href='#HQApiresourcecommand-resourcecreatePlatform'>resource createPlatform</a></li>
+<ul>
+    <li><a href='#HQApiresourcecommand-resourcecreatePlatformCommandQualifiers'>resource createPlatform Command Qualifiers</a></li>
+</ul>
+    <li><a href='#HQApiresourcecommand-resourcecreateServer'>resource createServer</a></li>
+<ul>
+    <li><a href='#HQApiresourcecommand-resourcecreateServerCommandQualifiers'>resource createServer Command Qualifiers</a></li>
+</ul>
+    <li><a href='#HQApiresourcecommand-resourcecreateService'>resource createService</a></li>
+<ul>
+    <li><a href='#HQApiresourcecommand-resourcecreateServiceCommandQualifiers'>resource createService Command Qualifiers</a></li>
+</ul>
+    <li><a href='#HQApiresourcecommand-resourcemove'>resource move</a></li>
+<ul>
+    <li><a href='#HQApiresourcecommand-resourcemoveCommandQualifiers'>resource move Command Qualifiers</a></li>
+</ul>
+</ul>
+    <li><a href='#HQApiresourcecommand-Examples'>Examples</a></li>
+<ul>
+    <li><a href='#HQApiresourcecommand-ListResourcesoftheSameType'>List Resources of the Same Type</a></li>
+    <li><a href='#HQApiresourcecommand-ListResourcesoftheSameTypeVerbosely'>List Resources of the Same Type Verbosely</a></li>
+    <li><a href='#HQApiresourcecommand-WriteResourceDatatoaFile'>Write Resource Data to a File</a></li>
+    <li><a href='#HQApiresourcecommand-UpdateResourceProperties'>Update Resource Properties</a></li>
+    <li><a href='#HQApiresourcecommand-DeleteaResource'>Delete a Resource</a></li>
+    <li><a href='#HQApiresourcecommand-CreateaNewPlatform'>Create a New Platform</a></li>
+    <li><a href='#HQApiresourcecommand-CreateaNewServer'>Create a New Server</a></li>
+    <li><a href='#HQApiresourcecommand-CreateaNewService'>Create a New Service</a></li>
+</ul>
+</ul></div> 
+ 
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Related Topics</b><br />This page provides information for running an HQ API from the command line. Related topics include: 
+<ul>
+	<li><a href="vFabric Hyperic Web Services API.html" title="vFabric Hyperic Web Services API">vFabric Hyperic Web Services API</a> - brief introduction to the API.</li>
+	<li><a href="HQApi Command-Line Tools.html" title="HQApi Command-Line Tools">HQApi Command&#45;Line Tools</a> - how to get started with the command line tools.</li>
+	<li><a href="HQApi Java API.html" title="HQApi Java API">HQApi Java API</a> - about accessing the APIs programmatically.</li>
+</ul>
+</td></tr></table></div>  
+
+ 
+
+<h1><a name="HQApiresourcecommand-Functionality"></a>Functionality </h1>
+
+<p>The <b>resource</b> command can list resource properties, create or update resources, and delete resources. </p>
+
+<h1><a name="HQApiresourcecommand-resourceCommandOptions"></a>resource Command Options </h1>
+
+
+<h2><a name="HQApiresourcecommand-resourcelist"></a>resource list </h2>
+<p><a name="HQApiresourcecommand-list"></a><br/>
+The <b>resource list</b> command returns an <tt>ResourcesResponse</tt> element that specifies inventory and configuration properties for selected resources. </p>
+
+<h3><a name="HQApiresourcecommand-resourcelistCommandQualifiers"></a>resource list Command Qualifiers </h3>
+
+<p>The command qualifiers for <b>resource list</b> limit the resources returned and control how much detail is provided. </p>
+
+<p>Note that you must supply one of: </p>
+<ul>
+	<li><tt>agentId</tt></li>
+	<li><tt>id</tt></li>
+	<li><tt>platform</tt></li>
+	<li><tt>prototype</tt></li>
+</ul>
+
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Qualifier </th>
+<th class='confluenceTh'> Description</th>
+</tr>
+<tr>
+<td class='confluenceTd'> &#45;-aeid </td>
+<td class='confluenceTd'> List the resource with the specified <tt>aeid</tt> (<tt>AppdefEntityID</tt>), which is its <tt>typeID:instanceID</tt> combination. See <a href="#HQApiresourcecommand-AttributesinanResourcesResponse">Attributes in an ResourcesResponse</a> for definitions of <tt>typeID</tt> and <tt>instanceID</tt> and <tt>instanceID</tt>. The <tt>aeid</tt> qualifier is useful if you do not know a resource's resource ID (see <tt>-id</tt> below), but you do know its <tt>aeid</tt>.</td>
+</tr>
+<tr>
+<td class='confluenceTd'> &#45;-agentId </td>
+<td class='confluenceTd'> List the resources managed by the agent with the specified resource ID. This is useful for listing the resources that an agent monitors remotely, such as network services. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> &#45;-children </td>
+<td class='confluenceTd'> Include child resources. Use of this qualifier increases the length of time for <b>resource list</b> to return results. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> &#45;-id </td>
+<td class='confluenceTd'> List the resource with the specified resource ID. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> &#45;-name </td>
+<td class='confluenceTd'> Limit the resources returned to those whose names match the specified regular expression </td>
+</tr>
+<tr>
+<td class='confluenceTd'> &#45;-parentPlatform </td>
+<td class='confluenceTd'> May be used (only in combination with the <tt>-id</tt> qualifer) to list the parent platform of the resource identified by <tt>-id</tt>. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> &#45;-platform </td>
+<td class='confluenceTd'> List resources for the given platform name. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> &#45;-prototype </td>
+<td class='confluenceTd'> Only list resources of the given type. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> &#45;-id </td>
+<td class='confluenceTd'> Only list the resource with the given id. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> &#45;-verbose </td>
+<td class='confluenceTd'> Include resource properties and configuration. Use of this qualifier increases the length of time for <b>resource list</b> to return results. </td>
+</tr>
+</tbody></table>
+</div>
+
+
+<h3><a name="HQApiresourcecommand-StructureofaResourcesResponse"></a>Structure of a ResourcesResponse </h3>
+
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre> 
+ResourcesResponse 
+Resource 
+ResourceConfig 
+ResourceProperty 
+ResourcePrototype 
+Agent 
+Ip 
+ResourceInfo 
+</pre>
+</div></div> 
+<p>where there is: </p>
+
+<ul>
+	<li>1 <tt>Resource</tt> element for each resource returned, which contains:
+	<ul>
+		<li>Optionally, if <tt>--verbose</tt> qualifier is used, a <tt>ResourceConfig</tt> element for each configuration option for a resource.</li>
+		<li>Optionally, if <tt>--verbose</tt> qualifier is used, a <tt>ResourceProperty</tt> element for each configuration option for a resource.</li>
+		<li>1 <tt>ResourcePrototype</tt> element.</li>
+		<li>1 <tt>Agent</tt> element.</li>
+		<li>If a resource is a platform, 1 <tt>Ip</tt> element for each network interface on the platform.</li>
+		<li>1 <tt>ResourceInfo</tt> element.</li>
+	</ul>
+	</li>
+</ul>
+
+
+<h3><a name="HQApiresourcecommand-AttributesinanResourcesResponse"></a>Attributes in an ResourcesResponse </h3>
+
+<p>This table defines the attributes in a <tt>ResourcesResponse</tt>. </p>
+
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Element </th>
+<th class='confluenceTh'> Attribute </th>
+<th class='confluenceTh'> Description </th>
+<th class='confluenceTh'> Values </th>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>resource</tt> </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>id</tt> <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Internal Hyperic ID for the resource. This value is assigned by Hyperic Server when the resource is created. When you create an resource using the API, you do not supply the value of <tt>id</tt>. </td>
+<td class='confluenceTd'> Numeric value, for example, "10002" <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>name</tt> </td>
+<td class='confluenceTd'> Name or the resource. </td>
+<td class='confluenceTd'> "Tech-x-MacBook-Air.local" <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>description</tt> </td>
+<td class='confluenceTd'> Description of the resource. </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>location</tt> </td>
+<td class='confluenceTd'> Location of the resource, if one was defined. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>instanceId</tt> </td>
+<td class='confluenceTd'> Uniquely identifies a resource among resources with the same <tt>TypeId</tt>. Forms a portion of a resource's <tt>AppdefEntityID</tt>), which is <tt>TypeId:instanceID</tt> </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>typeId</tt> </td>
+<td class='confluenceTd'>Identifies the inventory level of the resource. Forms a portion of a resource's <tt>AppdefEntityID</tt>), which is <tt>TypeId:instanceID</tt>. </td>
+<td class='confluenceTd'> "1" &#8212; platform <br class="atl-forced-newline" /> "2" &#8212; server <br class="atl-forced-newline" /> "3" &#8212; service <br class="atl-forced-newline" /> "4" &#8212; application <br class="atl-forced-newline" /> "5" &#8212; group </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>ResourceConfig</tt> </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>key</tt> </td>
+<td class='confluenceTd'> Name of a resource configuration option. </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>value</tt> </td>
+<td class='confluenceTd'> Value of a resource configuration option. </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>ResourceProperty</tt> </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>key</tt> </td>
+<td class='confluenceTd'> Name of a resource property. </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>value</tt> </td>
+<td class='confluenceTd'> Value of a resource property. </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>ResourcePrototype</tt> </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>resourceTypeId</tt> </td>
+<td class='confluenceTd'> Identifies the inventory level of the resource type. </td>
+<td class='confluenceTd'> "1" &#8212; platform <br class="atl-forced-newline" /> "2" &#8212; server <br class="atl-forced-newline" /> "3" &#8212; service <br class="atl-forced-newline" /> "4" &#8212; application <br class="atl-forced-newline" /> "5" &#8212; group </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>id</tt> </td>
+<td class='confluenceTd'> The internal HQ ID for a resource type. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Example value:"10329" <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>instanceId</tt> </td>
+<td class='confluenceTd'>Uniquely identifies a resource type among resources with the same <tt>resourceTypeId</tt>. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Example value:"10329" <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>name</tt> </td>
+<td class='confluenceTd'> The name of the resource type. <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Example values: 
+<ul>
+	<li>"Linux"</li>
+	<li>"Tomcat 6.0 Connector"</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>Agent</tt> </td>
+<td class='confluenceTd'>Present only if the resource is a platform type. </td>
+<td class='confluenceTd'> <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>id</tt> <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'> Internal Hyperic ID for the agent <tt>color:red</tt> that manages the platform.<font color=""></font> </td>
+<td class='confluenceTd'> Numeric value, for example, "10002" <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>address</tt> </td>
+<td class='confluenceTd'> The IP address on the agent that the server uses to contact the agent. </td>
+<td class='confluenceTd'> 172.14.216.1 </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>port</tt> </td>
+<td class='confluenceTd'> The port on the agent's listen address the server uses to contact the agent. </td>
+<td class='confluenceTd'>2144 </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>version</tt> </td>
+<td class='confluenceTd'> Agent version <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>unidirectional</tt> </td>
+<td class='confluenceTd'>Whether or not the agent is configured to use unidirectional communication with the Hyperic Agent. </td>
+<td class='confluenceTd'>"true" or "false" </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>Ip</tt> </td>
+<td class='confluenceTd'>Present only if the resource is a platform type. </td>
+<td class='confluenceTd'> <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>address</tt> </td>
+<td class='confluenceTd'> IP address of a network interface on the platform. </td>
+<td class='confluenceTd'> <br class="atl-forced-newline" /> </td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>mac</tt> </td>
+<td class='confluenceTd'> Mac address of the network interface. </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>netmask</tt> </td>
+<td class='confluenceTd'> Netmask for the network interface. </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt>ResourceInfo</tt> </td>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <br class="atl-forced-newline" /> </td>
+<td class='confluenceTd'>&nbsp;</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>key</tt> </td>
+<td class='confluenceTd'> Name of a resource property. </td>
+<td class='confluenceTd'> For a platform &#8212; "fqdn" <br class="atl-forced-newline" /> For a server or service ---"autoIdentifier" and "installPath"</td>
+</tr>
+<tr>
+<td class='confluenceTd'>&nbsp;</td>
+<td class='confluenceTd'> <tt>value</tt> </td>
+<td class='confluenceTd'> Value of a resource property. </td>
+<td class='confluenceTd'>Tech-x-MacBook-Air.local </td>
+</tr>
+</tbody></table>
+</div>
+
+<h2><a name="HQApiresourcecommand-resourcesync"></a>resource sync </h2>
+<p><a name="HQApiresourcecommand-sync"></a></p>
+
+<p>The <b>resource sync</b> command creates or updates resources in Hyperic inventory from the content of a <tt>ResourcesResponse</tt> object in a file you specify. </p>
+
+<p>You can use the results of a <b>resource list</b> command to create a starting point for your sync file. Use appropriate qualifiers to return the XML elements for resource or resources you want to update or use as a prototype to create new resources.&nbsp; </p>
+
+<p>The <b>resource sync</b> command requires a single <b>&#45;-file</b> qualifier to specify the sync file. </p>
+
+<p>This qualifiers is optional: </p>
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Qualifier </th>
+<th class='confluenceTh'> Description</th>
+</tr>
+<tr>
+<td class='confluenceTd'> &#45;-batchSize </td>
+<td class='confluenceTd'> Sync resources in batches of the size specified. Supply an integer value.</td>
+</tr>
+<tr>
+<td class='confluenceTd'>--file </td>
+<td class='confluenceTd'>Use to specify a file that contains the <tt>ResourcesResponse</tt> with the resource definitions to sync. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> --setConfig </td>
+<td class='confluenceTd'>Set or update the specified <tt>ResourceConfigUse</tt>. Supply a list of key value pairs.</td>
+</tr>
+</tbody></table>
+</div>
+
+<p><b>Note</b>: You cannot change a resource's type. </p>
+
+<h2><a name="HQApiresourcecommand-resourcedelete"></a>resource delete </h2>
+
+<p>The <b>resource delete</b> command requires a single <b>&#45;-id</b> qualifier to specify the internal ID of the resource to delete. You can obtain resource IDs with the <b>resource list</b> command. </p>
+
+<h2><a name="HQApiresourcecommand-resourcecreatePlatform"></a>resource createPlatform </h2>
+
+<p>The <b>createPlatform</b> command is used to create new platforms in Hyperic. </p>
+
+<p>You can also create new resources with the <a href="#HQApiresourcecommand-sync">resource sync</a> command. </p>
+
+<h3><a name="HQApiresourcecommand-resourcecreatePlatformCommandQualifiers"></a>resource createPlatform Command Qualifiers </h3>
+
+<p>The <b>createPlatform</b> command requires the following arguments: </p>
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Qualifier </th>
+<th class='confluenceTh'> Description</th>
+</tr>
+<tr>
+<td class='confluenceTd'> &#45;-prototype </td>
+<td class='confluenceTd'> The platform type to create. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> &#45;-agentId </td>
+<td class='confluenceTd'> The id of the agent that will service the new platform. Agent ids may be retrieved using the agent list command. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> &#45;-fqdn </td>
+<td class='confluenceTd'> The FQDN of the newly created platform. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> &#45;-ip </td>
+<td class='confluenceTd'> The IP address of the newly created platform. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> &#45;-name </td>
+<td class='confluenceTd'> The name of the newly created platform. </td>
+</tr>
+</tbody></table>
+</div>
+
+<p>In addition to the required arguments, you can specify resource inventory and configuration properties on the command line as "extra arguments". Extra arguments are provided after the required arguments, preceded by an empty "--". For each property you want to define, you supply a key=value pair. See the <a href="#HQApiresourcecommand-resourcecreatePlatform">resource createPlatform</a> example. </p>
+
+<p>The properties available for resources vary by resource type. If you do not know the properties supported for a particular resource, you can get them by running a <b>resource list &#45;-prototype=</b><b><em>ResourceType</em></b> <b>&#45;-verbose</b> command for the resource type, as shown below in <a href="#HQApiresourcecommand-ListResourcesoftheSameTypeVerbosely">List Resources of the Same Type Verbosely</a>. </p>
+
+<h2><a name="HQApiresourcecommand-resourcecreateServer"></a>resource createServer </h2>
+
+<p>The <b>createServer</b> command is used to create new servers in Hyperic. </p>
+
+<p>You can also create new resources with the <a href="#HQApiresourcecommand-sync">resource sync</a> command. </p>
+
+<h3><a name="HQApiresourcecommand-resourcecreateServerCommandQualifiers"></a>resource createServer Command Qualifiers </h3>
+
+<p>The <b>createServer</b> command requires the following arguments: </p>
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Qualifier </th>
+<th class='confluenceTh'> Description</th>
+</tr>
+<tr>
+<td class='confluenceTd'> &#45;-prototype </td>
+<td class='confluenceTd'> The server type to create. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> &#45;-resourceId </td>
+<td class='confluenceTd'> The platform Resource id to create this server Resource. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> &#45;-name </td>
+<td class='confluenceTd'> The name of the newly created server. </td>
+</tr>
+</tbody></table>
+</div>
+
+<p>As described in <a href="#HQApiresourcecommand-resourcecreatePlatform">resource createPlatform</a> you can also specify optional resource inventory and configuration properties on the command line as "extra arguments". See the <a href="#HQApiresourcecommand-resourcecreateServer">resource createServer</a> example. </p>
+
+<h2><a name="HQApiresourcecommand-resourcecreateService"></a>resource createService </h2>
+
+<p>The <b>createService</b> command is used to create new service Resources in Hyperic.</p>
+
+<p>You can also create new resources with the <a href="#HQApiresourcecommand-sync">resource sync</a> command. </p>
+
+<h3><a name="HQApiresourcecommand-resourcecreateServiceCommandQualifiers"></a>resource createService Command Qualifiers </h3>
+
+<p>The <b>createService</b> command requires the following arguments: </p>
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Qualifier </th>
+<th class='confluenceTh'> Description</th>
+</tr>
+<tr>
+<td class='confluenceTd'> &#45;-prototype </td>
+<td class='confluenceTd'> The service Resource type to create. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> &#45;-resourceId </td>
+<td class='confluenceTd'> The parent server or platform Resource id. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> &#45;-name </td>
+<td class='confluenceTd'> The name of the service to create </td>
+</tr>
+</tbody></table>
+</div>
+
+<p>As described in <a href="#HQApiresourcecommand-resourcecreatePlatform">resource createPlatform</a> you can also specify optional resource inventory and configuration properties on the command line as "extra arguments". See the <a href="#HQApiresourcecommand-resourcecreateService">resource createService</a> example. </p>
+
+<h2><a name="HQApiresourcecommand-resourcemove"></a>resource move </h2>
+
+<p>The <b>resource move</b> command moves a resource from one platform to another. For instance, if you have an HTTP check configured on one platform and decide you prefer a different Hyperic Agent to perform the check, you can move it to move the check to the target platform, retaining its configuration and history. </p>
+
+<p>You can more a server or a platform service to a platform. </p>
+
+<h3><a name="HQApiresourcecommand-resourcemoveCommandQualifiers"></a>resource move Command Qualifiers </h3>
+
+<p>The <b>resource move</b> command requires the following.&nbsp; </p>
+<div class='table-wrap'>
+<table class='confluenceTable'><tbody>
+<tr>
+<th class='confluenceTh'> Qualifier </th>
+<th class='confluenceTh'> Description</th>
+</tr>
+<tr>
+<td class='confluenceTd'> &#45;-id </td>
+<td class='confluenceTd'> The internal Hyperic ID of a server or platform service to move. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> &#45;-to </td>
+<td class='confluenceTd'> The internal Hyperic ID of the destination platform. </td>
+</tr>
+<tr>
+<td class='confluenceTd'> &#45;-setName </td>
+<td class='confluenceTd'> Optional. Sets the resource name to the name specified. </td>
+</tr>
+</tbody></table>
+</div>
+
+
+<p>Note: You can determine a resource's internal Hyperic ID using the <b>resource list</b> command. </p>
+
+<h1><a name="HQApiresourcecommand-Examples"></a>Examples </h1>
+
+
+<h2><a name="HQApiresourcecommand-ListResourcesoftheSameType"></a>List Resources of the Same Type </h2>
+
+<p>This command returns all resources whose resource type is "macOSX". In this example there is only one instance of that type. Only key properties are returned for each resource returned. </p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">$ sh bin/hqapi.sh resource list --prototype="MacOSX" 
+&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt; 
+&lt;ResourcesResponse&gt; 
+&lt;Status&gt;Success&lt;/Status&gt; 
+&lt;Resource id="10880" name="Marrys-MacBook-Air.local" description="Mac OS X Snow Leopard" location="" instanceId="10001" typeId="1"&gt; 
+&lt;ResourcePrototype resourceTypeId="1" instanceId="10002" id="10002" name="MacOSX"/&gt; 
+&lt;Agent id="10001" address="127.0.0.1" port="2144" version="4.6.0.BUILD-SNAPSHOT" unidirectional="false"/&gt; 
+&lt;Ip address="172.16.0.1" mac="00:50:56:C0:00:01" netmask="255.255.255.0"/&gt; 
+&lt;Ip address="127.0.0.1" mac="00:00:00:00:00:00" netmask="255.0.0.0"/&gt; 
+&lt;Ip address="172.16.216.1" mac="00:50:56:C0:00:08" netmask="255.255.255.0"/&gt; 
+&lt;Ip address="192.168.0.11" mac="10:93:E9:0E:8D:BC" netmask="255.255.255.0"/&gt; 
+&lt;Ip address="192.168.0.5" mac="10:9A:DD:40:C6:27" netmask="255.255.255.0"/&gt; 
+&lt;Ip address="10.16.244.59" mac="00:00:00:00:00:00" netmask="255.255.255.255"/&gt; 
+&lt;Ip address="10.16.245.222" mac="00:00:00:00:00:00" netmask="255.255.255.255"/&gt;
+&lt;ResourceInfo key="fqdn" value="Marie-McGarrys-MacBook-Air.local"/&gt; 
+&lt;/Resource&gt; 
+&lt;/ResourcesResponse&gt;</pre>
+		</div>
+</div></div> 
+
+<h2><a name="HQApiresourcecommand-ListResourcesoftheSameTypeVerbosely"></a>List Resources of the Same Type Verbosely </h2>
+
+<p>This command is the same as the previous example, with the <tt>&#45;-verbose</tt> qualifier. The results include all configuration and inventory properties for a MacOSX platform. </p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">$ sh bin/hqapi.sh resource list --prototype="MacOSX" --verbose 
+&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt; 
+&lt;ResourcesResponse&gt; 
+&lt;Status&gt;Success&lt;/Status&gt; 
+&lt;Resource id="10880" name="Marrys-MacBook-Air.local" description="Mac OS X Snow Leopard" location="" instanceId="10001" typeId="1"&gt; 
+&lt;ResourceConfig key="platform.log_track.enable" value="true"/&gt; 
+&lt;ResourceConfig key="platform.log_track.level" value="Warn"/&gt; 
+&lt;ResourceConfig key="platform.log_track.include" value=""/&gt; 
+&lt;ResourceConfig key="platform.log_track.exclude" value=""/&gt; 
+&lt;ResourceConfig key="platform.log_track.files" value=""/&gt; 
+&lt;ResourceConfig key="platform.config_track.enable" value="true"/&gt; 
+&lt;ResourceConfig key="platform.config_track.files" value=""/&gt; 
+&lt;ResourceProperty key="arch" value="i386"/&gt; 
+&lt;ResourceProperty key="version" value="10.6.7"/&gt; 
+&lt;ResourceProperty key="vendor" value="Apple"/&gt; 
+&lt;ResourceProperty key="vendorVersion" value="10.6"/&gt; 
+&lt;ResourceProperty key="ram" value="2048 MB"/&gt; 
+&lt;ResourceProperty key="cpuSpeed" value="2 @ 1860 MHz (1x2)"/&gt; 
+&lt;ResourceProperty key="ip" value="192.168.0.11"/&gt; 
+&lt;ResourceProperty key="primaryDNS" value="10.16.65.110"/&gt; 
+&lt;ResourceProperty key="secondaryDNS" value="10.16.65.111"/&gt; 
+&lt;ResourceProperty key="defaultGateway" value="192.168.0.1"/&gt; 
+&lt;ResourcePrototype resourceTypeId="1" instanceId="10002" id="10002" name="MacOSX"/&gt; 
+&lt;Agent id="10001" address="127.0.0.1" port="2144" version="4.6.0.BUILD-SNAPSHOT" unidirectional="false"/&gt; 
+&lt;Ip address="172.16.0.1" mac="00:50:56:C0:00:01" netmask="255.255.255.0"/&gt; 
+&lt;Ip address="127.0.0.1" mac="00:00:00:00:00:00" netmask="255.0.0.0"/&gt; 
+&lt;Ip address="172.16.216.1" mac="00:50:56:C0:00:08" netmask="255.255.255.0"/&gt; 
+&lt;Ip address="192.168.0.11" mac="10:93:E9:0E:8D:BC" netmask="255.255.255.0"/&gt; 
+&lt;Ip address="192.168.0.5" mac="10:9A:DD:40:C6:27" netmask="255.255.255.0"/&gt; 
+&lt;Ip address="10.16.244.59" mac="00:00:00:00:00:00" netmask="255.255.255.255"/&gt; 
+&lt;Ip address="10.16.245.222" mac="00:00:00:00:00:00" netmask="255.255.255.255"/&gt;
+&lt;ResourceInfo key="fqdn" value="Marie-McGarrys-MacBook-Air.local"/&gt; 
+&lt;/Resource&gt; 
+&lt;/ResourcesResponse&gt;</pre>
+		</div>
+</div></div> 
+
+<h2><a name="HQApiresourcecommand-WriteResourceDatatoaFile"></a>Write Resource Data to a File </h2>
+
+<p>This command writes key property for all resources of the type "HTTP" to a <br/>
+file called "http-resources.xml". Once the file is created, the property values in it can be edited, and as shown in the following example, you can update Hyperic with the contents of the file. </p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">$ ./bin/hqapi.sh resource list --prototype="HTTP" &gt; http-resources.xml</pre>
+		</div>
+</div></div> 
+
+<h2><a name="HQApiresourcecommand-UpdateResourceProperties"></a>Update Resource Properties </h2>
+
+<p>This command pipes the contents of the "http-resources.xml" file to the <tt>resource sync</tt> command, which updates existing resources in Hyperic with the property values defined in the XML. </p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">$ cat http-resources.xml | ./bin/hqapi.sh resource sync 
+Successfully synced 10 resources.</pre>
+		</div>
+</div></div> 
+
+<h2><a name="HQApiresourcecommand-DeleteaResource"></a>Delete a Resource </h2>
+
+<p>The command below deletes the resource whose internal ID is 10654. </p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">$ ./bin/hqapi.sh resource delete --id=10654 
+Successfully deleted resource id 10654</pre>
+		</div>
+</div></div> 
+
+<h2><a name="HQApiresourcecommand-CreateaNewPlatform"></a>Create a New Platform </h2>
+
+<p>The command below creates a new platform in Hyperic. Note that the command includes: </p>
+<ul>
+	<li>Required qualifiers that supply the platform's resource type, the internal ID of its Hyperic Agent, FQDN, IP address, and name.</li>
+</ul>
+
+
+<ul>
+	<li>Optional qualifiers that follow the empty "--" supply SNMP configuration properties as name=value pairs.</li>
+</ul>
+
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">$ ./bin/hqapi.sh resource createPlatform --prototype="Network Device" --agentId=10001 --fqdn=netdevice.hyperic.com --ip=10.0.0.1 --name="Hyperic Router" -- interface.index=ifDescr snmpIp=10.0.0.1 snmpPort=161 snmpVersion=v2c snmpCommunity=public 
+Successfully created 'Hyperic Router' (id=11518) 
+$</pre>
+		</div>
+</div></div> 
+<p>Additional qualifiers could be used to set additional configuration properties.</p>
+
+<h2><a name="HQApiresourcecommand-CreateaNewServer"></a>Create a New Server </h2>
+
+<p>The command below creates a new server in Hyperic. Note that the command includes: </p>
+<ul>
+	<li>Required qualifiers that supply the servers's resource type, the internal ID for its host platform, name, and name.</li>
+</ul>
+
+
+<ul>
+	<li>Optional qualifiers additional properties as name=value pairs.</li>
+</ul>
+
+
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">$ ./bin/hqapi.sh resource createServer --prototype="Apache httpd" --resourceId=10661 --name="Test Apache" -- hostname=localhost port=80 sotimeout=10 path=/server-status 
+Successfully created 'Test Apache' (id=10976)</pre>
+		</div>
+</div></div> 
+
+<h2><a name="HQApiresourcecommand-CreateaNewService"></a>Create a New Service </h2>
+
+<p>The command below creates a new service in Hyperic. Note that the command includes: </p>
+<ul>
+	<li>Required qualifiers that supply the service's resource type, the internal ID for its host platform or server, name, and name.</li>
+</ul>
+
+
+<ul>
+	<li>Optional qualifiers that follow the empty "--" supply additional properties as name=value pairs.</li>
+</ul>
+
+
+<p>Additional qualifiers could be used to set additional configuration properties.</p>
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">$ ./bin/hqapi.sh resource createService --prototype="HTTP" --resourceId=10661 --name="HTTP check" -- hostname=localhost port=7080 sotimeout=60 path=/ method=HEAD 
+Successfully created 'HTTP check' (id=10978) 
+$</pre>
+		</div>
+</div></div>
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jan 20, 2012 10:08</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

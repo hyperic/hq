@@ -1,9 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : Understanding Metric Templates</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : Understanding Metric Templates</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -14,22 +12,22 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : Understanding Metric Templates
+                            vFabric Hyperic 4.6.5 : Understanding Metric Templates
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jun 07, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1307466581438 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1307466581438 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1307466581438 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1325699829442 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325699829442 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325699829442 li {margin-left: 0px;padding-left: 0px;}
 
-/*]] >*/</style><div class='rbtoc1307466581438'>
+/*]]>*/</style><div class='rbtoc1325699829442'>
 <ul>
     <li><a href='#UnderstandingMetricTemplates-IntroductiontoMetricTemplates'>Introduction to Metric Templates</a></li>
     <li><a href='#UnderstandingMetricTemplates-AnatomyofaMetricTemplate'>Anatomy of a Metric Template</a></li>
@@ -39,7 +37,7 @@ div.rbtoc1307466581438 li {margin-left: 0px;padding-left: 0px;}
     <li><a href='#UnderstandingMetricTemplates-LearnMoreAboutVariablesinPluginDescriptors'>Learn More About Variables in Plugin Descriptors</a></li>
     <li><a href='#UnderstandingMetricTemplates-MetricTemplateRulesforEachCollectionMethod'>Metric Template Rules for Each Collection Method</a></li>
 </ul></div>
-<p><font color=""></font></p>
+
 
 <h1><a name="UnderstandingMetricTemplates-IntroductiontoMetricTemplates"></a>Introduction to Metric Templates</h1>
 
@@ -53,7 +51,7 @@ div.rbtoc1307466581438 li {margin-left: 0px;padding-left: 0px;}
 
 <p>The content of each segment of the metric template depends on how the metric is obtained - from an MBean server, SIGAR, an HQ measurement class, via SNMP, and so on.&nbsp;</p>
 <ul>
-	<li>*<tt>Domain</tt> &#8212; Specifies the management facility that collects the metric. For a JMX metric, <tt>Domain</tt> is a JMX domain. <tt>Domain</tt> may also take values that specify that the metric is collected via SIGAR, SNMP, or the script processing service. For metrics collected by a Java measurement class using a vendor-specific API, <tt>Domain</tt> is not a meaningful segment of a metric template - it has an arbitrary value.</li>
+	<li><tt>Domain</tt> &#8212; Specifies the management facility that collects the metric. For a JMX metric, <tt>Domain</tt> is a JMX domain. <tt>Domain</tt> may also take values that specify that the metric is collected via SIGAR, SNMP, or the script processing service. For metrics collected by a Java measurement class using a vendor-specific API, <tt>Domain</tt> is not a meaningful segment of a metric template - it has an arbitrary value.</li>
 </ul>
 
 
@@ -94,7 +92,7 @@ div.rbtoc1307466581438 li {margin-left: 0px;padding-left: 0px;}
 <tr>
 <td class='confluenceTd'> <tt>Domain</tt> </td>
 <td class='confluenceTd'> postgresql </td>
-<td class='confluenceTd'> Nothing - in HQ database plugins the Domain segment is a dummy string. </td>
+<td class='confluenceTd'> Nothing &#8212; in Hyperic database plugins the Domain segment is a dummy string. </td>
 </tr>
 <tr>
 <td class='confluenceTd'> <tt>Properties</tt> </td>
@@ -109,7 +107,7 @@ div.rbtoc1307466581438 li {margin-left: 0px;padding-left: 0px;}
 <tr>
 <td class='confluenceTd'> <tt>Connection</tt> </td>
 <td class='confluenceTd'> jdbcUrl=jdbc:postgresql://localhost:9432/hqdb,jdbcUser=hqadmin,jdbcPassword=***** </td>
-<td class='confluenceTd'> The database URL and database user credentials the HQ Agent uses to connect to PostgreSQL.</td>
+<td class='confluenceTd'> The database URL and database user credentials the Hyperic Agent uses to connect to PostgreSQL.</td>
 </tr>
 </tbody></table>
 </div>
@@ -120,13 +118,13 @@ div.rbtoc1307466581438 li {margin-left: 0px;padding-left: 0px;}
 
 <p>When you design a plugin, you determine the appropriate collection method for the resource types it manages, the requirements for accessing or connecting to each type, and the measurements you want to collect. In the plugin descriptor you define these resource and measurement attributes using &lt;option&gt;, &lt;property&gt; and &lt;metric&gt; elements. These data items map to fields that a plugin class either needs (the value is set in descriptor or supplied by user) or discovers.</p>
 
-<p>A metric template codifies connection data, resource properties, and metric attributes as a "metric request" that the HQ Agent can fulfill.</p>
+<p>A metric template codifies connection data, resource properties, and metric attributes as a "metric request" that the Hyperic Agent can fulfill.</p>
 
 <h1><a name="UnderstandingMetricTemplates-HowaMetric%27s%7B%7Btemplate%7D%7DAttributeisSpecified"></a>How a Metric's <tt>template</tt> Attribute is Specified</h1>
 
 <p>A &lt;metric&gt; element's <tt>template</tt> attribute specifies the first three segments of a metric template ---<tt>Domain:Properties:Metric</tt>. (The properties for the <tt>Connection</tt> segment are defined in the plugin descriptor, but do not form a portion of the <tt>template</tt> attribute; the <tt>Connection</tt> segment is appended to the <tt>template</tt> attribute when a metric value is requested.)</p>
 
-<p>HQ plugin descriptors typically use variables for resource properties and options in the <tt>template</tt> attribute to make the descriptor easier to write, maintain, and read. Strictly speaking, the <tt>template</tt> attribute, or certainly parts of it, can be defined explicitly, as in this &lt;metric&gt; element for the "Sequential Scans" metric:</p>
+<p>Hyperic plugin descriptors typically use variables for resource properties and options in the <tt>template</tt> attribute to make the descriptor easier to write, maintain, and read. Strictly speaking, the <tt>template</tt> attribute, or certainly parts of it, can be defined explicitly, as in this &lt;metric&gt; element for the "Sequential Scans" metric:</p>
 
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
@@ -149,7 +147,7 @@ collectionType="trendsup"/&gt;</pre>
 		</div>
 </div></div>
 
-<p>The use of variables in HQ plugin descriptors is widespread, and the way they are used tends to vary from plugin to plugin. Peruse a few HQ plugin descriptors, and you will note &lt;metric&gt; elements that do not contain a <tt>template</tt> attribute at all; instead, a local variable named <tt>template</tt> defines the whole <tt>template</tt> attribute in terms of variables that return attributes from resource-specific elements. Instead of defining <tt>template</tt> explicitly in each &lt;metric&gt; element, a variable is defined once, outside and before the &lt;metric&gt; elements for the resource type.</p>
+<p>The use of variables in Hyperic plugin descriptors is widespread, and the way they are used tends to vary from plugin to plugin. Peruse a few Hyperic plugin descriptors, and you will note <tt>&lt;metric&gt;</tt> elements that contain <em>no</em> <tt>template</tt> attribute; instead, a local variable named <tt>template</tt> defines the whole <tt>template</tt> attribute in terms of variables that return attributes from resource-specific elements. Instead of defining <tt>template</tt> explicitly in each &lt;metric&gt; element, a variable is defined once, outside and before the &lt;metric&gt; elements for the resource type.</p>
 
 <p>For example, the <tt>template</tt> variable below defines the <tt>template</tt> attribute for all metrics for all tables. This is similar to the previous definition, but in this case, the <tt>Metric</tt> segment of the <tt>template</tt> attribute for a metric is supplied by the &lt;metric&gt; element's <tt>alias</tt> attribute.</p>
 
@@ -188,13 +186,13 @@ jdbc:postgresql://localhost:9432/hqdb,jdbcUser=hqadmin,jdbcPassword=******</pre>
 <p>Because the the rules for for constructing a metric's <tt>template</tt> attribute vary by collection method, see the instructions and examples for the metric collection method you are using.</p>
 <ul>
 	<li>JMX &#8212; <a href="JMX Metric Templates.html" title="JMX Metric Templates">JMX Metric Templates</a></li>
-	<li>script &#8212; <a href="Script Plugin.html" title="Script Plugin">Script Plugin</a></li>
-	<li>SQL Query &#8212; <a href="SQL Query Plugin.html#SQLQueryPlugin-SqlQueryMetricTemplateSQL">Metric Template Format for SQL Query Plugins</a></li>
+	<li>script &#8212; <a href="Facts About Script Plugins.html" title="Facts About Script Plugins">Facts About Script Plugins</a></li>
+	<li>SQL Query &#8212; <a href="SQL Query Plugin.html#SQLQueryPlugin-SqlQueryMetricTemplate">Metric Template Format for SQL Query Plugins</a></li>
 	<li>SNMP &#8212; <a href="Write an SNMP Plugin.html" title="Write an SNMP Plugin">Write an SNMP Plugin</a></li>
 </ul>
 
 
-<p><font color=""></font></p>
+
 
 				    
                     			    </td>
@@ -205,7 +203,7 @@ jdbc:postgresql://localhost:9432/hqdb,jdbcUser=hqadmin,jdbcPassword=******</pre>
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:44</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jan 20, 2012 10:08</font></td>
 		    </tr>
 	    </table>
     </body>

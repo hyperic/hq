@@ -1,9 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
- <b><a href="vFabric Hyperic 4.6.html" title="vFabric Hyperic 4.6 Documentation Home">vFabric Hyperic 4.6 Documentation Home (Internal)</a> - <a href="https://www.vmware.com/support/pubs/vfabric-hyperic.html">vFabric Hyperic 4.6 Documentation Home (Online)</a> -  <a href="https://www.vmware.com/support/vfabric-hyperic/doc/vfabric-hyperic-rn-4.6.0.html">Hyperic 4.6 Release Notes</a> </b>
-<p>      
-<p>
-        <title>vFabric Hyperic 4.6 : WebLogic Server</title>
+    <head>
+        <title>vFabric Hyperic 4.6.5 : WebLogic Server</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -14,19 +12,19 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            vFabric Hyperic 4.6 : WebLogic Server
+                            vFabric Hyperic 4.6.5 : WebLogic Server
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 27, 2011 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1311786241131 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1311786241131 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1311786241131 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1325700070745 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1325700070745 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1325700070745 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1311786241131'>
+/*]]>*/</style><div class='rbtoc1325700070745'>
 <ul>
     <li><a href='#WebLogicServer-Introduction'>Introduction</a></li>
     <li><a href='#WebLogicServer-ConfigurationOverview'>Configuration Overview</a></li>
@@ -52,22 +50,22 @@ div.rbtoc1311786241131 li {margin-left: 0px;padding-left: 0px;}
 
 <h1><a name="WebLogicServer-Introduction"></a>Introduction </h1>
 
-<p>This document has instructions for configuring the HQ Agent to monitor WebLogic Server (WLS), and information to help you understand and solve problems with the WLS auto-discovery process. </p>
+<p>This document has instructions for configuring the Hyperic Agent to monitor WebLogic Server (WLS), and information to help you understand and solve problems with the WLS auto-discovery process. </p>
 
 <h1><a name="WebLogicServer-ConfigurationOverview"></a>Configuration Overview </h1>
 
-<p>This section is an overview of how you configure HQ to monitor a WebLogic Server domain. See the following section for detailed instructions. </p>
+<p>This section is an overview of how you configure Hyperic to monitor a WebLogic Server domain. See the following section for detailed instructions. </p>
 <ol>
-	<li>The HQ Agent auto-discovers the WLS Administration Server. For this to happen:
+	<li>The Hyperic Agent auto-discovers the WLS Administration Server. For this to happen:
 	<ul>
-		<li>The HQ Agent and the WLS plugin must be installed on Administration Server host. (The WLS plugin is part of the standard agent installation; you do not need to install it separately.)</li>
+		<li>The Hyperic Agent and the WLS plugin must be installed on Administration Server host. (The WLS plugin is part of the standard agent installation; you do not need to install it separately.)</li>
 		<li>For WLS 9.0 and later, the agent must run on a 1.5 JRE.</li>
 		<li>The agent must have correct permissions to access the admin server configuration file.</li>
 		<li>If the admin server requires SSL, the agent must be configured accordingly.</li>
 	</ul>
 	</li>
-	<li>You add the auto-discovered admin server to HQ inventory. In terms of the Hyperic inventory model, the inventory type of the admin server is "server". For information about the inventory model, see <a href="Resources, Resource Types and Inventory Types.html" title="Resources, Resource Types and Inventory Types">Resources, Resource Types and Inventory Types</a></li>
-	<li>In HQ, you edit configuration properties for the newly-added server with the admin server's username and password.</li>
+	<li>You add the auto-discovered admin server to Hyperic inventory. In terms of the Hyperic inventory model, the inventory type of the admin server is "server". For information about the inventory model, see <a href="Resources, Resource Types and Inventory Types.html" title="Resources, Resource Types and Inventory Types">Resources, Resource Types and Inventory Types</a></li>
+	<li>In Hyperic, you edit configuration properties for the newly-added server with the admin server's username and password.</li>
 	<li>The agent determines the Managed Servers in the WLS domain from the domain configuration file and adds them to inventory. In terms of the Hyperic inventory model, the inventory type of the Managed Server is "server".
 	<ul>
 		<li>The agent adds a Managed Server as a child of an existing platform in inventory, which corresponds to the machine that hosts the Managed Server.</li>
@@ -84,7 +82,7 @@ div.rbtoc1311786241131 li {margin-left: 0px;padding-left: 0px;}
 	<li><a href="#WebLogicServer-SpecifyAgentJRE">Specify Agent JRE</a></li>
 	<li><a href="#WebLogicServer-RunAgentwithRequiredPermissions">Run Agent with Required Permissions</a></li>
 	<li><a href="#WebLogicServer-ConfigureWLSLocation">Configure WLS Location</a></li>
-	<li><a href="#WebLogicServer-ConfigureSSLPropertiesifNecessary">Configure SSL Properties if Necessary</a></li>
+	<li><a href="#WebLogicServer-ConfigureSSL">Configure SSL</a></li>
 	<li><a href="#WebLogicServer-RestartAgent">Restart Agent</a></li>
 	<li><a href="#WebLogicServer-VerifyAutoDiscoveryofAdministrationServer">Verify Auto-Discovery of Administration Server</a></li>
 	<li><a href="#WebLogicServer-ConfigureMonitoring">Configure Monitoring</a></li>
@@ -95,7 +93,7 @@ div.rbtoc1311786241131 li {margin-left: 0px;padding-left: 0px;}
 
 <h2><a name="WebLogicServer-SpecifyAgentJRE"></a>Specify Agent JRE </h2>
 
-<p>The HQ Agent must run on a 1.5 JRE to monitor WebLogic Server 9.0 and higher. For earlier versions, a 1.4 JRE is supported. </p>
+<p>The Hyperic Agent must run on a 1.5 JRE to monitor WebLogic Server 9.0 and higher. For earlier versions, a 1.4 JRE is supported. </p>
 
 <p>Hyperic recommends you run the agent using the same JRE as WebLogic Server. </p>
 
@@ -103,26 +101,24 @@ div.rbtoc1311786241131 li {margin-left: 0px;padding-left: 0px;}
 
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre> 
-
 HQ_JAVA_HOME=/usr/local/bea/jdk150_04 
-
 </pre>
 </div></div> 
 
-<p>For HQ Agent v4.x on Windows platforms you must specify HQ_JAVA_HOME as a <b>system</b> variable. For more information, see <a href="Before You Start.html#BeforeYouStart-HQAgentJRE">HQ Agent JRE</a>. </p>
+<p>For Hyperic Agent v4.x on Windows platforms you must specify HQ_JAVA_HOME as a <b>system</b> variable. For more information, see HQ Agent JRE. </p>
 
 <h2><a name="WebLogicServer-RunAgentwithRequiredPermissions"></a>Run Agent with Required Permissions </h2>
 
-<p>In order to discover the WLS Administration Server, the HQ Agent must run under an account with permissions that allow it to obtain the Administration Server's process arguments, and its current working directory. </p>
+<p>In order to discover the WLS Administration Server, the Hyperic Agent must run under an account with permissions that allow it to obtain the Administration Server's process arguments, and its current working directory. </p>
 
-<p>On Unix-based platforms, to ensure that the HQ Agent has the permissions it needs, either: </p>
+<p>On Unix-based platforms, to ensure that the Hyperic Agent has the permissions it needs, either: </p>
 <ul>
-	<li>Run the HQ Agent as the same user id that runs the Administration Server, or</li>
-	<li>Run the HQ agent as root</li>
+	<li>Run the Hyperic Agent as the same user id that runs the Administration Server, or</li>
+	<li>Run the Hyperic agent as root</li>
 </ul>
 
 
-<p>See also: <a href="http://jira.hyperic.com/browse/HHQ-511">HHQ-511</a> </p>
+<p>See also: <a href="http://jira.hyperic.com/browse/HHQ-511">http://jira.hyperic.com/browse/HHQ-511</a> </p>
 
 
 
@@ -131,13 +127,13 @@ HQ_JAVA_HOME=/usr/local/bea/jdk150_04
 
 
 
-<p>After the agent has discovered the Administration Server, it no longer needs the permissions required for process process discovery. (The agent uses JMX to discover the WLS Managed Servers.)&nbsp; After discovery of the admin server, you can update the permissions to the HQ Agent directory. As superuser, run this command in the agent directory: </p>
+<p>After the agent has discovered the Administration Server, it no longer needs the permissions required for process process discovery. (The agent uses JMX to discover the WLS Managed Servers.)&nbsp; After discovery of the admin server, you can update the permissions to the Hyperic Agent directory. As superuser, run this command in the agent directory: </p>
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
 		<pre class="theme: Confluence; brush: java; gutter: false">chown user -R</pre>
 		</div>
 </div></div> 
-<p>where <em>user</em> is the username under which you will henceforth run the agent, for example, <em>hqadmin</em>.. </p>
+<p>where <em>user</em> is the username under which you will henceforth run the agent, for example, <em>hqadmin</em>.</p>
 
 <p><b>Note:&nbsp;</b> If you cannot run the agent as the Administration Server user or as root, follow the directions in <a href="#WebLogicServer-AddAdministrationServerManually">Add Administration Server Manually</a> </p>
 
@@ -147,13 +143,13 @@ HQ_JAVA_HOME=/usr/local/bea/jdk150_04
 
 <h2><a name="WebLogicServer-ConfigureWLSLocation"></a>Configure WLS Location </h2>
 
-<p>To ensure the HQ Agent can find the WebLogic Server installation, define the installation path in agent.properties. For example: </p>
+<p>To ensure the Hyperic Agent can find the WebLogic Server installation, define the installation path in agent.properties. For example: </p>
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
 		<pre class="theme: Confluence; brush: java; gutter: false">weblogic.installpath=/usr/local/bea/weblogic92</pre>
 		</div>
 </div></div> 
-<p><b>Note:</b> if you add the Administration Server to inventory manually, you specify the installation path from HQ user interface, rather than in the properties file. </p>
+<p><b>Note:</b> if you add the Administration Server to inventory manually, you specify the installation path from Hyperic user interface, rather than in the properties file. </p>
 
 <h2><a name="WebLogicServer-ConfigureSSL"></a>Configure SSL </h2>
 
@@ -163,7 +159,7 @@ HQ_JAVA_HOME=/usr/local/bea/jdk150_04
 
 <h3><a name="WebLogicServer-OneWaySSL"></a>One-Way SSL </h3>
 
-<p>In one-way SSL the HQ Agent needs the public key of the Administration Serves's cert in order to trust it and to decrypt/encrypt communications. This public key is stored in the TrustKeyStore. </p>
+<p>In one-way SSL the Hyperic Agent needs the public key of the Administration Serves's cert in order to trust it and to decrypt/encrypt communications. This public key is stored in the TrustKeyStore. </p>
 
 <p>Configure these properties in agent.properties: </p>
 
@@ -222,7 +218,7 @@ HQ_JAVA_HOME=/usr/local/bea/jdk150_04
 
 <h2><a name="WebLogicServer-VerifyAutoDiscoveryofAdministrationServer"></a>Verify Auto-Discovery of Administration Server </h2>
 
-<p>After completing the previous steps, the HQ Agent should auto-discover the Administration Server. The Administration Server must be running for the agent to discover it. </p>
+<p>After completing the previous steps, the Hyperic Agent should auto-discover the Administration Server. The Administration Server must be running for the agent to discover it. </p>
 
 <p>Check the Auto-Discovery portlet in the dashboard to verify that the Administration Server was discovered. The agent scans the platform upon startup, so the Administration Server should appear in the portlet within a few minutes. The name of the server will be: </p>
 
@@ -230,8 +226,8 @@ HQ_JAVA_HOME=/usr/local/bea/jdk150_04
 
 <p>where: </p>
 <ul>
-	<li><em>PlatformIdentifier -</em> is the first, or left-most, label of the FQDN of platform that hosts the admin server. (This&nbsp; comes from the platform FQDN property in HQ.)</li>
-	<li><em>ServerType -</em> is "Weblogic Admin <em>n.n</em>", where <em>n.n</em> is the version of the admin server.&nbsp; (This is the server type property for the admin server in HQ.)</li>
+	<li><em>PlatformIdentifier -</em> is the first, or left-most, label of the FQDN of platform that hosts the admin server. (This&nbsp; comes from the platform FQDN property in Hyperic.)</li>
+	<li><em>ServerType -</em> is "Weblogic Admin <em>n.n</em>", where <em>n.n</em> is the version of the admin server.&nbsp; (This is the server type property for the admin server in Hyperic.)</li>
 	<li><em>DomainName -</em> is the name of the WebLogic Server domain that contains the admin server.</li>
 	<li><em>AdminServerName</em> &#45; is the name configured for the admin server in WebLogic Server.</li>
 </ul>
@@ -248,16 +244,16 @@ HQ_JAVA_HOME=/usr/local/bea/jdk150_04
 
 <h2><a name="WebLogicServer-ConfigureMonitoring"></a>Configure Monitoring </h2>
 
-<p>In this step, you configure the Administration Server in HQ with credentials that allow it to access the domain config.xml, which specifies the Managed Servers in the domain. You can specify monitoring options at this time, or do it later. </p>
+<p>In this step, you configure the Administration Server in Hyperic with credentials that allow it to access the domain config.xml, which specifies the Managed Servers in the domain. You can specify monitoring options at this time, or do it later. </p>
 
 <h3><a name="WebLogicServer-RequiredAdministrationServerConfiguration"></a>Required Administration Server Configuration </h3>
 
 <p>These steps are required to enable discovery of the Managed Servers in the domain. </p>
 <ol>
-	<li>Navigate to the Admin Server in the HQ user interface.
+	<li>Navigate to the Admin Server in the Hyperic user interface.
 	<ol>
 		<li>Choose <b>Browse</b> from the Resources tab and click <b>Servers</b>.&nbsp;</li>
-		<li>To narrow the list of servers displayed, enter WebLogic in the Keyword box and click <span class="image-wrap" style=""><img src="attachments/77463605/77660272.png" height="17" width="17" style="border: 0px solid black"/></span>.</li>
+		<li>To narrow the list of servers displayed, enter WebLogic in the Keyword box and click <span class="image-wrap" style=""><img src="attachments/79038211/79135522.png" height="17" width="17" style="border: 0px solid black"/></span>.</li>
 		<li>Select the admin server from the list to display its Inventory page.</li>
 	</ol>
 	</li>
@@ -283,7 +279,7 @@ HQ_JAVA_HOME=/usr/local/bea/jdk150_04
 		<li>Debug (maps to WLS "Debug")</li>
 	</ul>
 	</li>
-	<li>Log Pattern Match - Enter a substring or regular expression to track only matching messages. See: <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">java.util.regex.Pattern</a>.</li>
+	<li>Log Pattern Match - Enter a substring or regular expression to track only matching messages. See: <a href="http://download.oracle.com/javase/1.4.2/docs/api/java/util/regex/Pattern.html">http://download.oracle.com/javase/1.4.2/docs/api/java/util/regex/Pattern.html</a>.</li>
 	<li>Log Pattern Exclude - Enter a substring or regular expression to exclude matching messages.</li>
 	<li>Log Files - Enter a comma delimited list of log files to track. Relative file specifications are resolved relative to the server's installation path.</li>
 	<li>Enable Config Tracking - Check to enable configuration tracking.</li>
@@ -294,9 +290,9 @@ HQ_JAVA_HOME=/usr/local/bea/jdk150_04
 
 <h2><a name="WebLogicServer-VerifyManagedServerAutoDiscovery"></a>Verify Managed Server Auto-Discovery </h2>
 
-<p>After you complete the steps in <a href="#WebLogicServer-RequiredAdministrationServerConfiguration">Required Administration Server Configuration</a> the Manager Servers currently running in the WLS domain should appear in HQ inventory and metric collection should commence. </p>
+<p>After you complete the steps in <a href="#WebLogicServer-RequiredAdministrationServerConfiguration">Required Administration Server Configuration</a> the Manager Servers currently running in the WLS domain should appear in Hyperic inventory and metric collection should commence. </p>
 
-<p>Check the Recently Added portlet in the Dashboard for the Managed Servers.&nbsp; </p>
+<p>Check the <b>Recently Added</b> portlet in the <b>Dashboard</b> for the Managed Servers.&nbsp; </p>
 
 <p>If the Managed Servers have not been added to inventory, see <a href="#WebLogicServer-SolveManagedServerAutoDiscoveryProblems">Solve Managed Server Auto-Discovery Problems</a>. </p>
 
@@ -307,7 +303,7 @@ HQ_JAVA_HOME=/usr/local/bea/jdk150_04
 <p>To view or modify the default metric collection settings for the WLS servers and their services, access the metric template for your WebLogic Server version: </p>
 <ol>
 	<li>Click <b>Administration</b>&nbsp; in the Masthead,</li>
-	<li>Select the <b>Monitoring Defaults</b> link in the HQ Server Settings section of the Administration page.</li>
+	<li>Select the <b>Monitoring Defaults</b> link in the <b>HQ Server Settings</b> section of the <b>Administration</b> page.</li>
 	<li>On the Monitoring Defaults page, click <b>Edit Metric Template</b> for your WebLogic Server version.</li>
 </ol>
 
@@ -335,40 +331,29 @@ HQ_JAVA_HOME=/usr/local/bea/jdk150_04
 <p>This is an example execution of the WLS plugin's "discover" function, including the results: </p>
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre> 
-
 % java -jar pdk/lib/hq-product.jar \ 
-
 -Dplugins.include=weblogic -Dadmin.username=weblogic -Dadmin.password=weblogic -m discover 
-
 1 servers detected 
 
-
-
 Server: bear Weblogic Admin 9.2 medrec MedRecServer [/usr/local/bea/weblogic92/samples/domains/medrec/servers/MedRecServer] 
-
 AIID...../usr/local/bea/weblogic92/samples/domains/medrec/servers/MedRecServer 
-
 config... 
-
 product..{admin.username=weblogic, server.log_track.files=/usr/local/bea/weblogic92/samples/domains/medrec/servers/MedRecServer/logs/MedRecServer.log, admin.url=t3://bear:7011, domain=medrec, server=MedRecServer, admin.password=weblogic} 
-
 metric...null 
-
 control..{program=/usr/local/bea/weblogic92/samples/domains/medrec/startWebLogic.sh}
-
 </pre>
 </div></div> 
 <p><b>Note:&nbsp;</b> Command usage is documented in <a href="Running and Testing Plugins from Command Line.html" title="Running and Testing Plugins from Command Line">Running and Testing Plugins from Command Line</a>. </p>
 
-<p>The result above shows that a resource of type "server" was auto-discovered. The name of the newly discovered server in HQ is: </p>
+<p>The result above shows that a resource of type "server" was auto-discovered. The name of the newly discovered server in Hyperic is: </p>
 
-<p>bear Weblogic Admin 9.2 medrec MedRecServer </p>
+<p><tt>bear Weblogic Admin 9.2 medrec MedRecServer</tt> </p>
 
-<p>The HQ naming convention for the WLS Administration Server is explained above in <a href="#WebLogicServer-VerifyAutoDiscoveryofAdministrationServer">Verify Auto-Discovery of Administration Server</a>. </p>
+<p>The Hyperic naming convention for the WLS Administration Server is explained above in <a href="#WebLogicServer-VerifyAutoDiscoveryofAdministrationServer">Verify Auto-Discovery of Administration Server</a>. </p>
 
 <h3><a name="WebLogicServer-CheckNetworkAccess"></a>Check Network Access </h3>
 
-<p>Check to see if the location of the HQ Agent with respect to the WLS admin server is causing the problem.&nbsp; In the HQ User Forum thread <a href="http://forums.hyperic.com/jiveforums/thread.jspa?threadID=6366&amp;tstart=0">WebLogic 8.1 Admin Server configuration stalls</a> the user's admin server was on a different subnet than the HQ components. </p>
+<p>Check to see if the location of the Hyperic Agent with respect to the WLS admin server is causing the problem.&nbsp; In the HQ User Forum thread "WebLogic 8.1 Admin Server configuration stalls" at <a href="http://forums.hyperic.com/jiveforums/thread.jspa?threadID=6366&amp;tstart=0">http://forums.hyperic.com/jiveforums/thread.jspa?threadID=6366&amp;tstart=0</a> the user's admin server was on a different subnet than the Hyperic components. </p>
 
 <h3><a name="WebLogicServer-VerifyPermissions"></a>Verify Permissions </h3>
 
@@ -383,53 +368,29 @@ control..{program=/usr/local/bea/weblogic92/samples/domains/medrec/startWebLogic
 <p>In the results below, the value returned for the current working directory (cwd) is "???", indicating that&nbsp; the user running the command lacked permission to obtain that information. </p>
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre> 
-
 % java -jar pdk/lib/sigar.jar pargs State.Name.eq=java,Args.-1.eq=weblogic.Server 
-
 pid=2317 
-
 exe=??? 
-
 cwd=??? 
-
 0=&gt;/usr/local/bea/jrockit90_150_04/bin/java&lt;= 
-
 1=&gt;-jrockit&lt;= 
-
 2=&gt;-Xms256m&lt;= 
-
 3=&gt;-Xmx512m&lt;= 
-
 4=&gt;-Xverify:none&lt;= 
-
 5=&gt;-da&lt;= 
-
 6=&gt;-Dplatform.home=/usr/local/bea/weblogic92&lt;= 
-
 7=&gt;-Dwls.home=/usr/local/bea/weblogic92/server&lt;= 
-
 8=&gt;-Dwli.home=/usr/local/bea/weblogic92/integration&lt;= 
-
 9=&gt;-Dcom.bea.medrec.xml.incoming=incoming&lt;= 
-
 10=&gt;-Dlog4j.configuration=file:/usr/local/bea/weblogic92/samples/domains/medrec/log4jConfig.xml&lt;=
-
 11=&gt;-Dweblogic.management.discover=true&lt;= 
-
 12=&gt;-Dwlw.iterativeDev=&lt;= 
-
 13=&gt;-Dwlw.testConsole=&lt;= 
-
 14=&gt;-Dwlw.logErrorsToConsole=&lt;= 
-
 15=&gt;-Dweblogic.ext.dirs=/usr/local/bea/patch_weblogic920/profiles/default/sysext_manifest_classpath&lt;=
-
 16=&gt;-Dweblogic.Name=MedRecServer&lt;= 
-
 17=&gt;-Djava.security.policy=/usr/local/bea/weblogic92/server/lib/weblogic.policy&lt;= 
-
 18=&gt;weblogic.Server&lt;= 
-
 </pre>
 </div></div> 
 
@@ -438,15 +399,10 @@ cwd=???
 <p>If you run the query as the weblogic user or as root, the Administration Server's current working directory (cwd) is returned: </p>
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre> 
-
 % java -jar pdk/lib/sigar.jar pargs State.Name.eq=java,Args.-1.eq=weblogic.Server 
-
 pid=2317 
-
 exe=/usr/local/bea/jrockit90_150_04/bin/java 
-
 cwd=/usr/local/bea/weblogic92/samples/domains/medrec 
-
 </pre>
 </div></div> 
 
@@ -454,51 +410,39 @@ cwd=/usr/local/bea/weblogic92/samples/domains/medrec
 
 <p>If you are unable to run the agent with sufficient permissions to auto-discover the WLS Administration Server, or you have problems with the auto-discovery process, you can add the admin server to inventory manually. </p>
 
-<p>1.&nbsp; In the HQ user interface, navigate the the platform that hosts the Administration Server. </p>
-
-<p>2.&nbsp; Choose <b>New Server</b> from the <b>Tools</b> menu. </p>
-
-<p>3.&nbsp; On the New Server page, supply the required values. For example, </p>
+<ol>
+	<li>In the Hyperic user interface, navigate the the platform that hosts the Administration Server.</li>
+	<li>Choose <b>New Server</b> from the <b>Tools</b> menu.</li>
+	<li>On the New Server page, supply the required values and click <b>OK</b>. For example,
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <div id="root">
 		<pre class="theme: Confluence; brush: java; gutter: false">Name: [Weblogic Admin 9.2 medrec MedRecServer] 
 Server Type: [Weblogic Admin 9.2] 
 Install Path: [/usr/local/bea/weblogic92/samples/domains/medrec/servers/MedRecServer]</pre>
 		</div>
-</div></div> 
-<p>&nbsp;and click OK. </p>
-
-<p>4.&nbsp; Select the server to display its Inventory page. </p>
-
-<p>5.&nbsp; Choose <b>Configure Server</b> from the <b>Tools</b> menu. </p>
-
-<p>6.&nbsp; In the Configuration Properties page, enter values for the properties in the "Shared" section, using the values that were returned by the <a href="#WebLogicServer-WebLogicConfig">WebLogicConfig</a> command above: 
-<br class="atl-forced-newline" /> 
-<br class="atl-forced-newline" /> </p>
-<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
-<pre> 
-
-admin.url [t3://bear:7011] 
-
+</div></div> </li>
+	<li>Select the server to display its Inventory page.</li>
+	<li>Choose <b>Configure Server</b> from the <b>Tools</b> menu.</li>
+	<li>In the Configuration Properties page, enter values for the properties in the "Shared" section, using the values that were returned by the <a href="#WebLogicServer-WebLogicConfig">WebLogicConfig</a> command above:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">admin.url [t3://bear:7011] 
 admin.username [weblogic] 
-
 admin.password [weblogic] 
-
 server [MedRecServer] 
-
 domain [medrec] 
+jvm.runtime [JVMRuntime] (choose JRockit or JVM (Sun))</pre>
+		</div>
+</div></div> </li>
+	<li>Click OK.</li>
+</ol>
 
-jvm.runtime [JVMRuntime] (choose JRockit or JVM (Sun)) 
-
-</pre>
-</div></div> 
-<p>7.&nbsp; Click OK. </p>
 
 <h2><a name="WebLogicServer-SolveManagedServerAutoDiscoveryProblems"></a>Solve Managed Server Auto-Discovery Problems </h2>
 
 <p>Read this section if your Managed Servers were not discovered after you performed the <a href="#WebLogicServer-RequiredAdministrationServerConfiguration">Required Administration Server Configuration</a>. </p>
 
-<p>To add a WLS Managed Server to inventory, the HQ Agent needs to locate the "platform" in HQ upon which the Managed Server runs. Because a Managed Server is a "server" in the HQ inventory hierarchy, adding it to inventory means making it the child of a platform. The agent determines the address of machine that hosts the Managed Server from config.xml and looks for a platform in inventory whose FQDN matches that address. If there is no platform in inventory with that FQDN, the agent will fail to add the Managed Server to inventory. &nbsp; </p>
+<p>To add a WLS Managed Server to inventory, the Hyperic Agent needs to locate the "platform" in Hyperic upon which the Managed Server runs. Because a Managed Server is a "server" in the Hyperic inventory hierarchy, adding it to inventory means making it the child of a platform. The agent determines the address of machine that hosts the Managed Server from config.xml and looks for a platform in inventory whose FQDN matches that address. If there is no platform in inventory with that FQDN, the agent will fail to add the Managed Server to inventory. &nbsp; </p>
 
 <h3><a name="WebLogicServer-HowthePluginDiscoversManagedServers%26nbsp%3B"></a>How the Plugin Discovers Managed Servers&nbsp; </h3>
 
@@ -506,18 +450,16 @@ jvm.runtime [JVMRuntime] (choose JRockit or JVM (Sun))
 <ul>
 	<li>Connects to the host specified by the Managed Server's ListenAddress property as specified in config.xml.</li>
 	<li>Obtains inventory attributes for the Managed Server.</li>
-	<li>Creates a server in HQ inventory under the platform whose fully qualified domain name (FQDN) matches the Managed Server's ListenAddress.&nbsp;</li>
+	<li>Creates a server in Hyperic inventory under the platform whose fully qualified domain name (FQDN) matches the Managed Server's ListenAddress.&nbsp;</li>
 </ul>
 
 
 <p>If a Managed Server's ListenAddress is specified in config.xml as an IP address, rather than a domain name, the plugin will not find the the platform in inventory. By default the plugin searches for the platform by FQDN only - it doesn't search the IP addresses associated with platforms in inventory. &nbsp;&nbsp; </p>
 
-<p>For example, if a Managed Server whose ListenAddress=10.0.0.102 runs on a platform whose FQDN in HQ is&nbsp; appserver2.hyperic.com, the plugin will not find that platform in inventory, and will will fail to add the Managed Server to inventory. In this event, the plugin will log a message like this to the agent.log file in its /log directory: </p>
+<p>For example, if a Managed Server whose ListenAddress=10.0.0.102 runs on a platform whose FQDN in Hyperic is&nbsp; appserver2.hyperic.com, the plugin will not find that platform in inventory, and will will fail to add the Managed Server to inventory. In this event, the plugin will log a message like this to the agent.log file in its /log directory: </p>
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre> 
-
 [WeblogicRuntimeDiscoverer] Discovered server (Weblogic 9.2 medrec bear) hosted on another platform (fqdn=10.0.0.102) 
-
 </pre>
 </div></div> 
 
@@ -532,77 +474,62 @@ jvm.runtime [JVMRuntime] (choose JRockit or JVM (Sun))
 <p><b>Note:&nbsp;</b> To run this query in your environment, replace "java" with "<em>HQ_JAVA_HOME"</em>/bin/java", where "_HQ_JAVA_HOME"_is the location of the JRE the agent uses - the same JRE as the Administration Server uses, if you followed the recommendation in <a href="#WebLogicServer-SpecifyAgentJRE">Specify Agent JRE</a>. </p>
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre> 
-
 % java -jar pdk/lib/hq-product.jar weblogic WeblogicConfig /usr/local/bea/weblogic92/samples/domains/medrec/config/config.xml 
-
 /usr/local/bea/weblogic92/samples/domains/medrec/config/config.xml... 
-
 9.2 
-
 medrec 
-
 admin=MedRecServer 
-
 -- listing properties -- 
-
 admin.url=t3://bear:7011 
-
 version=9.2 
-
 domain=medrec 
-
 server=MedRecServer 
-
 </pre>
 </div></div> 
 
 <h3><a name="WebLogicServer-ResolveManagedServerIPAddress%2FFQDNMismatch"></a>Resolve Managed Server IP Address/FQDN Mismatch </h3>
 
-<p>If your Managed Server's ListenAddress is specified as an IP addess (rather than a domain name) in config.xml&nbsp; the HQ Agent will fail to add the Managed Server to inventory. There are two ways to solve this problem. </p>
+<p>If your Managed Server's ListenAddress is specified as an IP addess (rather than a domain name) in config.xml&nbsp; the Hyperic Agent will fail to add the Managed Server to inventory. There are two ways to solve this problem. </p>
+
 <ul>
-	<li>Option 1 - Configure the HQ Agent to add all the Managed Servers in the WLS domain to the HQ platform that hosts the HQ Agent, instead of adding each Managed Server to the HQ platforms that actually hosts it.&nbsp; To do this, add this property to agent.properties:</li>
+	<li>Option 1 - Configure the Hyperic Agent to add all the Managed Servers in the WLS domain to the Hyperic platform that hosts the Hyperic Agent, instead of adding each Managed Server to the Hyperic platforms that actually hosts it.&nbsp; To do this, add this property to <tt>agent.properties</tt>:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">weblogic.discover.fqdn=same</pre>
+		</div>
+</div></div> </li>
 </ul>
 
 
-<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
-<pre> 
-
-weblogic.discover.fqdn=same 
-
-</pre>
-</div></div> 
 <ul>
-	<li>Option 2 - For each Managed Server, define the mapping between its ListenAddress as defined in config.xml and its HQ FQDN. This method will allow the plugin to add the Managed Server to the platform in HQ for the machine that actually hosts it. To do this, for each Managed Server in the domain, add a line like this to agent.properties:</li>
-</ul>
-
-
-<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
-<pre> 
-
-weblogic.discover.fqdn.ListenAddress=FQDN.fqdn 
-
-where ListenAddress is the value of that property as defined for the Managed Server in config.xml and FQDN is the 
-
-</pre>
+	<li>Option 2 - For each Managed Server, define the mapping between its ListenAddress as defined in config.xml and its Hyperic FQDN. This method will allow the plugin to add the Managed Server to the platform in Hyperic for the machine that actually hosts it. To do this, for each Managed Server in the domain, add a line like this to agent.properties:
+<div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+<div id="root">
+		<pre class="theme: Confluence; brush: java; gutter: false">weblogic.discover.fqdn.ListenAddress=FQDN.fqdn 
+where ListenAddress is the value of that property as defined for the Managed Server in config.xml and FQDN is the</pre>
+		</div>
 </div></div> 
-<p>&nbsp;&nbsp;&nbsp; where: </p>
-
-<p>&nbsp;&nbsp;&nbsp; <em>ListenAddress</em> is the value of that property as defined for the Managed Server in config.xml, and </p>
-
-<p>&nbsp;&nbsp;&nbsp; FQDN is the platform's fully qualified domain name in HQ.&nbsp; </p>
-
-<p>&nbsp;&nbsp;&nbsp; For example: </p>
+	<ul>
+		<li>where:
+		<ul>
+			<li><em>ListenAddress</em> is the value of that property as defined for the Managed Server in config.xml, and</li>
+			<li>FQDN is the platform's fully qualified domain name in Hyperic.&nbsp;<br/>
+For example: 
 <div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
 <pre> 
-
 weblogic.discover.fqdn.10.0.0.4=appserver2.hyperic.com 
-
 </pre>
 </div></div> 
-<p>Restart the agent after making changes to agent.properties. </p>
+<p>Restart the agent after making changes to agent.properties. </p></li>
+		</ul>
+		</li>
+	</ul>
+	</li>
+</ul>
+
 
 <h1><a name="WebLogicServer-Metrics"></a>Metrics </h1>
-<div class="error"><span class="error">Unable to render {include}</span> Couldn't find a page to include called: Oracle Weblogic Server 4.6</div>
+<ul><li><a href="Weblogic 6.1 Application service.html" title="Weblogic 6.1 Application service">Weblogic 6.1 Application service</a></li><li><a href="Weblogic 6.1 Entity EJB service.html" title="Weblogic 6.1 Entity EJB service">Weblogic 6.1 Entity EJB service</a></li><li><a href="Weblogic 6.1 Execute Queue service.html" title="Weblogic 6.1 Execute Queue service">Weblogic 6.1 Execute Queue service</a></li><li><a href="Weblogic 6.1 JDBC Connection Pool service.html" title="Weblogic 6.1 JDBC Connection Pool service">Weblogic 6.1 JDBC Connection Pool service</a></li><li><a href="Weblogic 6.1 JMS Destination service.html" title="Weblogic 6.1 JMS Destination service">Weblogic 6.1 JMS Destination service</a></li><li><a href="Weblogic 6.1 JMS Server service.html" title="Weblogic 6.1 JMS Server service">Weblogic 6.1 JMS Server service</a></li><li><a href="Weblogic 6.1 JTA Resource service.html" title="Weblogic 6.1 JTA Resource service">Weblogic 6.1 JTA Resource service</a></li><li><a href="Weblogic 6.1 Message Driven EJB service.html" title="Weblogic 6.1 Message Driven EJB service">Weblogic 6.1 Message Driven EJB service</a></li><li><a href="Weblogic 6.1 server.html" title="Weblogic 6.1 server">Weblogic 6.1 server</a></li><li><a href="Weblogic 6.1 Stateful EJB service.html" title="Weblogic 6.1 Stateful EJB service">Weblogic 6.1 Stateful EJB service</a></li><li><a href="Weblogic 6.1 Stateless EJB service.html" title="Weblogic 6.1 Stateless EJB service">Weblogic 6.1 Stateless EJB service</a></li><li><a href="Weblogic 6.1 Webapp service.html" title="Weblogic 6.1 Webapp service">Weblogic 6.1 Webapp service</a></li><li><a href="Weblogic 7.0 Application service.html" title="Weblogic 7.0 Application service">Weblogic 7.0 Application service</a></li><li><a href="Weblogic 7.0 Entity EJB service.html" title="Weblogic 7.0 Entity EJB service">Weblogic 7.0 Entity EJB service</a></li><li><a href="Weblogic 7.0 Execute Queue service.html" title="Weblogic 7.0 Execute Queue service">Weblogic 7.0 Execute Queue service</a></li><li><a href="Weblogic 7.0 JDBC Connection Pool service.html" title="Weblogic 7.0 JDBC Connection Pool service">Weblogic 7.0 JDBC Connection Pool service</a></li><li><a href="Weblogic 7.0 JMS Destination service.html" title="Weblogic 7.0 JMS Destination service">Weblogic 7.0 JMS Destination service</a></li><li><a href="Weblogic 7.0 JMS Server service.html" title="Weblogic 7.0 JMS Server service">Weblogic 7.0 JMS Server service</a></li><li><a href="Weblogic 7.0 JTA Resource service.html" title="Weblogic 7.0 JTA Resource service">Weblogic 7.0 JTA Resource service</a></li><li><a href="Weblogic 7.0 Message Driven EJB service.html" title="Weblogic 7.0 Message Driven EJB service">Weblogic 7.0 Message Driven EJB service</a></li><li><a href="Weblogic 7.0 server.html" title="Weblogic 7.0 server">Weblogic 7.0 server</a></li><li><a href="Weblogic 7.0 Stateful EJB service.html" title="Weblogic 7.0 Stateful EJB service">Weblogic 7.0 Stateful EJB service</a></li><li><a href="Weblogic 7.0 Stateless EJB service.html" title="Weblogic 7.0 Stateless EJB service">Weblogic 7.0 Stateless EJB service</a></li><li><a href="Weblogic 7.0 Webapp service.html" title="Weblogic 7.0 Webapp service">Weblogic 7.0 Webapp service</a></li><li><a href="Weblogic 8.1 Application service.html" title="Weblogic 8.1 Application service">Weblogic 8.1 Application service</a></li><li><a href="Weblogic 8.1 Entity EJB service.html" title="Weblogic 8.1 Entity EJB service">Weblogic 8.1 Entity EJB service</a></li><li><a href="Weblogic 8.1 Execute Queue service.html" title="Weblogic 8.1 Execute Queue service">Weblogic 8.1 Execute Queue service</a></li><li><a href="Weblogic 8.1 JDBC Connection Pool service.html" title="Weblogic 8.1 JDBC Connection Pool service">Weblogic 8.1 JDBC Connection Pool service</a></li><li><a href="Weblogic 8.1 JMS Destination service.html" title="Weblogic 8.1 JMS Destination service">Weblogic 8.1 JMS Destination service</a></li><li><a href="Weblogic 8.1 JMS Server service.html" title="Weblogic 8.1 JMS Server service">Weblogic 8.1 JMS Server service</a></li><li><a href="Weblogic 8.1 JTA Resource service.html" title="Weblogic 8.1 JTA Resource service">Weblogic 8.1 JTA Resource service</a></li><li><a href="Weblogic 8.1 Message Driven EJB service.html" title="Weblogic 8.1 Message Driven EJB service">Weblogic 8.1 Message Driven EJB service</a></li><li><a href="Weblogic 8.1 server.html" title="Weblogic 8.1 server">Weblogic 8.1 server</a></li><li><a href="Weblogic 8.1 Stateful EJB service.html" title="Weblogic 8.1 Stateful EJB service">Weblogic 8.1 Stateful EJB service</a></li><li><a href="Weblogic 8.1 Stateless EJB service.html" title="Weblogic 8.1 Stateless EJB service">Weblogic 8.1 Stateless EJB service</a></li><li><a href="Weblogic 8.1 Webapp service.html" title="Weblogic 8.1 Webapp service">Weblogic 8.1 Webapp service</a></li><li><a href="Weblogic 9.1 Application service.html" title="Weblogic 9.1 Application service">Weblogic 9.1 Application service</a></li><li><a href="Weblogic 9.1 Entity EJB service.html" title="Weblogic 9.1 Entity EJB service">Weblogic 9.1 Entity EJB service</a></li><li><a href="Weblogic 9.1 Execute Queue service.html" title="Weblogic 9.1 Execute Queue service">Weblogic 9.1 Execute Queue service</a></li><li><a href="Weblogic 9.1 JDBC Connection Pool service.html" title="Weblogic 9.1 JDBC Connection Pool service">Weblogic 9.1 JDBC Connection Pool service</a></li><li><a href="Weblogic 9.1 JMS Destination service.html" title="Weblogic 9.1 JMS Destination service">Weblogic 9.1 JMS Destination service</a></li><li><a href="Weblogic 9.1 JMS Server service.html" title="Weblogic 9.1 JMS Server service">Weblogic 9.1 JMS Server service</a></li><li><a href="Weblogic 9.1 JTA Resource service.html" title="Weblogic 9.1 JTA Resource service">Weblogic 9.1 JTA Resource service</a></li><li><a href="Weblogic 9.1 Message Driven EJB service.html" title="Weblogic 9.1 Message Driven EJB service">Weblogic 9.1 Message Driven EJB service</a></li><li><a href="Weblogic 9.1 server.html" title="Weblogic 9.1 server">Weblogic 9.1 server</a></li><li><a href="Weblogic 9.1 Stateful EJB service.html" title="Weblogic 9.1 Stateful EJB service">Weblogic 9.1 Stateful EJB service</a></li><li><a href="Weblogic 9.1 Stateless EJB service.html" title="Weblogic 9.1 Stateless EJB service">Weblogic 9.1 Stateless EJB service</a></li><li><a href="Weblogic 9.1 Webapp service.html" title="Weblogic 9.1 Webapp service">Weblogic 9.1 Webapp service</a></li><li><a href="Weblogic 9.2 Application service.html" title="Weblogic 9.2 Application service">Weblogic 9.2 Application service</a></li><li><a href="Weblogic 9.2 Entity EJB service.html" title="Weblogic 9.2 Entity EJB service">Weblogic 9.2 Entity EJB service</a></li><li><a href="Weblogic 9.2 Execute Queue service.html" title="Weblogic 9.2 Execute Queue service">Weblogic 9.2 Execute Queue service</a></li><li><a href="Weblogic 9.2 JDBC Connection Pool service.html" title="Weblogic 9.2 JDBC Connection Pool service">Weblogic 9.2 JDBC Connection Pool service</a></li><li><a href="Weblogic 9.2 JMS Destination service.html" title="Weblogic 9.2 JMS Destination service">Weblogic 9.2 JMS Destination service</a></li><li><a href="Weblogic 9.2 JMS Server service.html" title="Weblogic 9.2 JMS Server service">Weblogic 9.2 JMS Server service</a></li><li><a href="Weblogic 9.2 JTA Resource service.html" title="Weblogic 9.2 JTA Resource service">Weblogic 9.2 JTA Resource service</a></li><li><a href="Weblogic 9.2 Message Driven EJB service.html" title="Weblogic 9.2 Message Driven EJB service">Weblogic 9.2 Message Driven EJB service</a></li><li><a href="Weblogic 9.2 server.html" title="Weblogic 9.2 server">Weblogic 9.2 server</a></li><li><a href="Weblogic 9.2 Stateful EJB service.html" title="Weblogic 9.2 Stateful EJB service">Weblogic 9.2 Stateful EJB service</a></li><li><a href="Weblogic 9.2 Stateless EJB service.html" title="Weblogic 9.2 Stateless EJB service">Weblogic 9.2 Stateless EJB service</a></li><li><a href="Weblogic 9.2 Webapp service.html" title="Weblogic 9.2 Webapp service">Weblogic 9.2 Webapp service</a></li><li><a href="Weblogic 10.0 Application service.html" title="Weblogic 10.0 Application service">Weblogic 10.0 Application service</a></li><li><a href="Weblogic 10.0 Entity EJB service.html" title="Weblogic 10.0 Entity EJB service">Weblogic 10.0 Entity EJB service</a></li><li><a href="Weblogic 10.0 Execute Queue service.html" title="Weblogic 10.0 Execute Queue service">Weblogic 10.0 Execute Queue service</a></li><li><a href="Weblogic 10.0 JDBC Connection Pool service.html" title="Weblogic 10.0 JDBC Connection Pool service">Weblogic 10.0 JDBC Connection Pool service</a></li><li><a href="Weblogic 10.0 JMS Destination service.html" title="Weblogic 10.0 JMS Destination service">Weblogic 10.0 JMS Destination service</a></li><li><a href="Weblogic 10.0 JMS Server service.html" title="Weblogic 10.0 JMS Server service">Weblogic 10.0 JMS Server service</a></li><li><a href="Weblogic 10.0 JTA Resource service.html" title="Weblogic 10.0 JTA Resource service">Weblogic 10.0 JTA Resource service</a></li><li><a href="Weblogic 10.0 Message Driven EJB service.html" title="Weblogic 10.0 Message Driven EJB service">Weblogic 10.0 Message Driven EJB service</a></li><li><a href="Weblogic 10.0 server.html" title="Weblogic 10.0 server">Weblogic 10.0 server</a></li><li><a href="Weblogic 10.0 Stateful EJB service.html" title="Weblogic 10.0 Stateful EJB service">Weblogic 10.0 Stateful EJB service</a></li><li><a href="Weblogic 10.0 Stateless EJB service.html" title="Weblogic 10.0 Stateless EJB service">Weblogic 10.0 Stateless EJB service</a></li><li><a href="Weblogic 10.0 Webapp service.html" title="Weblogic 10.0 Webapp service">Weblogic 10.0 Webapp service</a></li><li><a href="Weblogic 10.1 Application service.html" title="Weblogic 10.1 Application service">Weblogic 10.1 Application service</a></li><li><a href="Weblogic 10.1 Entity EJB service.html" title="Weblogic 10.1 Entity EJB service">Weblogic 10.1 Entity EJB service</a></li><li><a href="Weblogic 10.1 Execute Queue service.html" title="Weblogic 10.1 Execute Queue service">Weblogic 10.1 Execute Queue service</a></li><li><a href="Weblogic 10.1 JDBC Connection Pool service.html" title="Weblogic 10.1 JDBC Connection Pool service">Weblogic 10.1 JDBC Connection Pool service</a></li><li><a href="Weblogic 10.1 JMS Destination service.html" title="Weblogic 10.1 JMS Destination service">Weblogic 10.1 JMS Destination service</a></li><li><a href="Weblogic 10.1 JMS Server service.html" title="Weblogic 10.1 JMS Server service">Weblogic 10.1 JMS Server service</a></li><li><a href="Weblogic 10.1 JTA Resource service.html" title="Weblogic 10.1 JTA Resource service">Weblogic 10.1 JTA Resource service</a></li><li><a href="Weblogic 10.1 Message Driven EJB service.html" title="Weblogic 10.1 Message Driven EJB service">Weblogic 10.1 Message Driven EJB service</a></li><li><a href="Weblogic 10.1 server.html" title="Weblogic 10.1 server">Weblogic 10.1 server</a></li><li><a href="Weblogic 10.1 Stateful EJB service.html" title="Weblogic 10.1 Stateful EJB service">Weblogic 10.1 Stateful EJB service</a></li><li><a href="Weblogic 10.1 Stateless EJB service.html" title="Weblogic 10.1 Stateless EJB service">Weblogic 10.1 Stateless EJB service</a></li><li><a href="Weblogic 10.1 Webapp service.html" title="Weblogic 10.1 Webapp service">Weblogic 10.1 Webapp service</a></li><li><a href="Weblogic 10.2 Application service.html" title="Weblogic 10.2 Application service">Weblogic 10.2 Application service</a></li><li><a href="Weblogic 10.2 Entity EJB service.html" title="Weblogic 10.2 Entity EJB service">Weblogic 10.2 Entity EJB service</a></li><li><a href="Weblogic 10.2 Execute Queue service.html" title="Weblogic 10.2 Execute Queue service">Weblogic 10.2 Execute Queue service</a></li><li><a href="Weblogic 10.2 JDBC Connection Pool service.html" title="Weblogic 10.2 JDBC Connection Pool service">Weblogic 10.2 JDBC Connection Pool service</a></li><li><a href="Weblogic 10.2 JMS Destination service.html" title="Weblogic 10.2 JMS Destination service">Weblogic 10.2 JMS Destination service</a></li><li><a href="Weblogic 10.2 JMS Server service.html" title="Weblogic 10.2 JMS Server service">Weblogic 10.2 JMS Server service</a></li><li><a href="Weblogic 10.2 JTA Resource service.html" title="Weblogic 10.2 JTA Resource service">Weblogic 10.2 JTA Resource service</a></li><li><a href="Weblogic 10.2 Message Driven EJB service.html" title="Weblogic 10.2 Message Driven EJB service">Weblogic 10.2 Message Driven EJB service</a></li><li><a href="Weblogic 10.2 server.html" title="Weblogic 10.2 server">Weblogic 10.2 server</a></li><li><a href="Weblogic 10.2 Stateful EJB service.html" title="Weblogic 10.2 Stateful EJB service">Weblogic 10.2 Stateful EJB service</a></li><li><a href="Weblogic 10.2 Stateless EJB service.html" title="Weblogic 10.2 Stateless EJB service">Weblogic 10.2 Stateless EJB service</a></li><li><a href="Weblogic 10.2 Webapp service.html" title="Weblogic 10.2 Webapp service">Weblogic 10.2 Webapp service</a></li><li><a href="Weblogic 10.3 Application service.html" title="Weblogic 10.3 Application service">Weblogic 10.3 Application service</a></li><li><a href="Weblogic 10.3 Entity EJB service.html" title="Weblogic 10.3 Entity EJB service">Weblogic 10.3 Entity EJB service</a></li><li><a href="Weblogic 10.3 Execute Queue service.html" title="Weblogic 10.3 Execute Queue service">Weblogic 10.3 Execute Queue service</a></li><li><a href="Weblogic 10.3 JDBC Connection Pool service.html" title="Weblogic 10.3 JDBC Connection Pool service">Weblogic 10.3 JDBC Connection Pool service</a></li><li><a href="Weblogic 10.3 JMS Destination service.html" title="Weblogic 10.3 JMS Destination service">Weblogic 10.3 JMS Destination service</a></li><li><a href="Weblogic 10.3 JMS Server service.html" title="Weblogic 10.3 JMS Server service">Weblogic 10.3 JMS Server service</a></li><li><a href="Weblogic 10.3 JTA Resource service.html" title="Weblogic 10.3 JTA Resource service">Weblogic 10.3 JTA Resource service</a></li><li><a href="Weblogic 10.3 Message Driven EJB service.html" title="Weblogic 10.3 Message Driven EJB service">Weblogic 10.3 Message Driven EJB service</a></li><li><a href="Weblogic 10.3 server.html" title="Weblogic 10.3 server">Weblogic 10.3 server</a></li><li><a href="Weblogic 10.3 Stateful EJB service.html" title="Weblogic 10.3 Stateful EJB service">Weblogic 10.3 Stateful EJB service</a></li><li><a href="Weblogic 10.3 Webapp service.html" title="Weblogic 10.3 Webapp service">Weblogic 10.3 Webapp service</a></li><li><a href="Weblogic Admin 6.1 Application service.html" title="Weblogic Admin 6.1 Application service">Weblogic Admin 6.1 Application service</a></li><li><a href="Weblogic Admin 6.1 Entity EJB service.html" title="Weblogic Admin 6.1 Entity EJB service">Weblogic Admin 6.1 Entity EJB service</a></li><li><a href="Weblogic Admin 6.1 Execute Queue service.html" title="Weblogic Admin 6.1 Execute Queue service">Weblogic Admin 6.1 Execute Queue service</a></li><li><a href="Weblogic Admin 6.1 JDBC Connection Pool service.html" title="Weblogic Admin 6.1 JDBC Connection Pool service">Weblogic Admin 6.1 JDBC Connection Pool service</a></li><li><a href="Weblogic Admin 6.1 JMS Destination service.html" title="Weblogic Admin 6.1 JMS Destination service">Weblogic Admin 6.1 JMS Destination service</a></li><li><a href="Weblogic Admin 6.1 JMS Server service.html" title="Weblogic Admin 6.1 JMS Server service">Weblogic Admin 6.1 JMS Server service</a></li><li><a href="Weblogic Admin 6.1 JTA Resource service.html" title="Weblogic Admin 6.1 JTA Resource service">Weblogic Admin 6.1 JTA Resource service</a></li><li><a href="Weblogic Admin 6.1 Message Driven EJB service.html" title="Weblogic Admin 6.1 Message Driven EJB service">Weblogic Admin 6.1 Message Driven EJB service</a></li><li><a href="Weblogic Admin 6.1 server.html" title="Weblogic Admin 6.1 server">Weblogic Admin 6.1 server</a></li><li><a href="Weblogic Admin 6.1 Stateful EJB service.html" title="Weblogic Admin 6.1 Stateful EJB service">Weblogic Admin 6.1 Stateful EJB service</a></li><li><a href="Weblogic Admin 6.1 Stateless EJB service.html" title="Weblogic Admin 6.1 Stateless EJB service">Weblogic Admin 6.1 Stateless EJB service</a></li><li><a href="Weblogic Admin 6.1 Webapp service.html" title="Weblogic Admin 6.1 Webapp service">Weblogic Admin 6.1 Webapp service</a></li><li><a href="Weblogic Admin 7.0 Application service.html" title="Weblogic Admin 7.0 Application service">Weblogic Admin 7.0 Application service</a></li><li><a href="Weblogic Admin 7.0 Entity EJB service.html" title="Weblogic Admin 7.0 Entity EJB service">Weblogic Admin 7.0 Entity EJB service</a></li><li><a href="Weblogic Admin 7.0 Execute Queue service.html" title="Weblogic Admin 7.0 Execute Queue service">Weblogic Admin 7.0 Execute Queue service</a></li><li><a href="Weblogic Admin 7.0 JDBC Connection Pool service.html" title="Weblogic Admin 7.0 JDBC Connection Pool service">Weblogic Admin 7.0 JDBC Connection Pool service</a></li><li><a href="Weblogic Admin 7.0 JMS Destination service.html" title="Weblogic Admin 7.0 JMS Destination service">Weblogic Admin 7.0 JMS Destination service</a></li><li><a href="Weblogic Admin 7.0 JMS Server service.html" title="Weblogic Admin 7.0 JMS Server service">Weblogic Admin 7.0 JMS Server service</a></li><li><a href="Weblogic Admin 7.0 JTA Resource service.html" title="Weblogic Admin 7.0 JTA Resource service">Weblogic Admin 7.0 JTA Resource service</a></li><li><a href="Weblogic Admin 7.0 Message Driven EJB service.html" title="Weblogic Admin 7.0 Message Driven EJB service">Weblogic Admin 7.0 Message Driven EJB service</a></li><li><a href="Weblogic Admin 7.0 server.html" title="Weblogic Admin 7.0 server">Weblogic Admin 7.0 server</a></li><li><a href="Weblogic Admin 7.0 Stateful EJB service.html" title="Weblogic Admin 7.0 Stateful EJB service">Weblogic Admin 7.0 Stateful EJB service</a></li><li><a href="Weblogic Admin 7.0 Stateless EJB service.html" title="Weblogic Admin 7.0 Stateless EJB service">Weblogic Admin 7.0 Stateless EJB service</a></li><li><a href="Weblogic Admin 7.0 Webapp service.html" title="Weblogic Admin 7.0 Webapp service">Weblogic Admin 7.0 Webapp service</a></li><li><a href="Weblogic Admin 8.1 Application service.html" title="Weblogic Admin 8.1 Application service">Weblogic Admin 8.1 Application service</a></li><li><a href="Weblogic Admin 8.1 Entity EJB service.html" title="Weblogic Admin 8.1 Entity EJB service">Weblogic Admin 8.1 Entity EJB service</a></li><li><a href="Weblogic Admin 8.1 Execute Queue service.html" title="Weblogic Admin 8.1 Execute Queue service">Weblogic Admin 8.1 Execute Queue service</a></li><li><a href="Weblogic Admin 8.1 JDBC Connection Pool service.html" title="Weblogic Admin 8.1 JDBC Connection Pool service">Weblogic Admin 8.1 JDBC Connection Pool service</a></li><li><a href="Weblogic Admin 8.1 JMS Destination service.html" title="Weblogic Admin 8.1 JMS Destination service">Weblogic Admin 8.1 JMS Destination service</a></li><li><a href="Weblogic Admin 8.1 JMS Server service.html" title="Weblogic Admin 8.1 JMS Server service">Weblogic Admin 8.1 JMS Server service</a></li><li><a href="Weblogic Admin 8.1 JTA Resource service.html" title="Weblogic Admin 8.1 JTA Resource service">Weblogic Admin 8.1 JTA Resource service</a></li><li><a href="Weblogic Admin 8.1 Message Driven EJB service.html" title="Weblogic Admin 8.1 Message Driven EJB service">Weblogic Admin 8.1 Message Driven EJB service</a></li><li><a href="Weblogic Admin 8.1 server.html" title="Weblogic Admin 8.1 server">Weblogic Admin 8.1 server</a></li><li><a href="Weblogic Admin 8.1 Stateful EJB service.html" title="Weblogic Admin 8.1 Stateful EJB service">Weblogic Admin 8.1 Stateful EJB service</a></li><li><a href="Weblogic Admin 8.1 Stateless EJB service.html" title="Weblogic Admin 8.1 Stateless EJB service">Weblogic Admin 8.1 Stateless EJB service</a></li><li><a href="Weblogic Admin 8.1 Webapp service.html" title="Weblogic Admin 8.1 Webapp service">Weblogic Admin 8.1 Webapp service</a></li><li><a href="Weblogic Admin 9.1 Application service.html" title="Weblogic Admin 9.1 Application service">Weblogic Admin 9.1 Application service</a></li><li><a href="Weblogic Admin 9.1 Entity EJB service.html" title="Weblogic Admin 9.1 Entity EJB service">Weblogic Admin 9.1 Entity EJB service</a></li><li><a href="Weblogic Admin 9.1 Execute Queue service.html" title="Weblogic Admin 9.1 Execute Queue service">Weblogic Admin 9.1 Execute Queue service</a></li><li><a href="Weblogic Admin 9.1 JDBC Connection Pool service.html" title="Weblogic Admin 9.1 JDBC Connection Pool service">Weblogic Admin 9.1 JDBC Connection Pool service</a></li><li><a href="Weblogic Admin 9.1 JMS Destination service.html" title="Weblogic Admin 9.1 JMS Destination service">Weblogic Admin 9.1 JMS Destination service</a></li><li><a href="Weblogic Admin 9.1 JMS Server service.html" title="Weblogic Admin 9.1 JMS Server service">Weblogic Admin 9.1 JMS Server service</a></li><li><a href="Weblogic Admin 9.1 JTA Resource service.html" title="Weblogic Admin 9.1 JTA Resource service">Weblogic Admin 9.1 JTA Resource service</a></li><li><a href="Weblogic Admin 9.1 Message Driven EJB service.html" title="Weblogic Admin 9.1 Message Driven EJB service">Weblogic Admin 9.1 Message Driven EJB service</a></li><li><a href="Weblogic Admin 9.1 server.html" title="Weblogic Admin 9.1 server">Weblogic Admin 9.1 server</a></li><li><a href="Weblogic Admin 9.1 Stateful EJB service.html" title="Weblogic Admin 9.1 Stateful EJB service">Weblogic Admin 9.1 Stateful EJB service</a></li><li><a href="Weblogic Admin 9.1 Stateless EJB service.html" title="Weblogic Admin 9.1 Stateless EJB service">Weblogic Admin 9.1 Stateless EJB service</a></li><li><a href="Weblogic Admin 9.1 Webapp service.html" title="Weblogic Admin 9.1 Webapp service">Weblogic Admin 9.1 Webapp service</a></li><li><a href="Weblogic Admin 9.2 Application service.html" title="Weblogic Admin 9.2 Application service">Weblogic Admin 9.2 Application service</a></li><li><a href="Weblogic Admin 9.2 Entity EJB service.html" title="Weblogic Admin 9.2 Entity EJB service">Weblogic Admin 9.2 Entity EJB service</a></li><li><a href="Weblogic Admin 9.2 Execute Queue service.html" title="Weblogic Admin 9.2 Execute Queue service">Weblogic Admin 9.2 Execute Queue service</a></li><li><a href="Weblogic Admin 9.2 JDBC Connection Pool service.html" title="Weblogic Admin 9.2 JDBC Connection Pool service">Weblogic Admin 9.2 JDBC Connection Pool service</a></li><li><a href="Weblogic Admin 9.2 JMS Destination service.html" title="Weblogic Admin 9.2 JMS Destination service">Weblogic Admin 9.2 JMS Destination service</a></li><li><a href="Weblogic Admin 9.2 JMS Server service.html" title="Weblogic Admin 9.2 JMS Server service">Weblogic Admin 9.2 JMS Server service</a></li><li><a href="Weblogic Admin 9.2 JTA Resource service.html" title="Weblogic Admin 9.2 JTA Resource service">Weblogic Admin 9.2 JTA Resource service</a></li><li><a href="Weblogic Admin 9.2 Message Driven EJB service.html" title="Weblogic Admin 9.2 Message Driven EJB service">Weblogic Admin 9.2 Message Driven EJB service</a></li><li><a href="Weblogic Admin 9.2 server.html" title="Weblogic Admin 9.2 server">Weblogic Admin 9.2 server</a></li><li><a href="Weblogic Admin 9.2 Stateful EJB service.html" title="Weblogic Admin 9.2 Stateful EJB service">Weblogic Admin 9.2 Stateful EJB service</a></li><li><a href="Weblogic Admin 9.2 Stateless EJB service.html" title="Weblogic Admin 9.2 Stateless EJB service">Weblogic Admin 9.2 Stateless EJB service</a></li><li><a href="Weblogic Admin 9.2 Webapp service.html" title="Weblogic Admin 9.2 Webapp service">Weblogic Admin 9.2 Webapp service</a></li><li><a href="Weblogic Admin 10.0 Application service.html" title="Weblogic Admin 10.0 Application service">Weblogic Admin 10.0 Application service</a></li><li><a href="Weblogic Admin 10.0 Entity EJB service.html" title="Weblogic Admin 10.0 Entity EJB service">Weblogic Admin 10.0 Entity EJB service</a></li><li><a href="Weblogic Admin 10.0 Execute Queue service.html" title="Weblogic Admin 10.0 Execute Queue service">Weblogic Admin 10.0 Execute Queue service</a></li><li><a href="Weblogic Admin 10.0 JDBC Connection Pool service.html" title="Weblogic Admin 10.0 JDBC Connection Pool service">Weblogic Admin 10.0 JDBC Connection Pool service</a></li><li><a href="Weblogic Admin 10.0 JMS Destination service.html" title="Weblogic Admin 10.0 JMS Destination service">Weblogic Admin 10.0 JMS Destination service</a></li><li><a href="Weblogic Admin 10.0 JMS Server service.html" title="Weblogic Admin 10.0 JMS Server service">Weblogic Admin 10.0 JMS Server service</a></li><li><a href="Weblogic Admin 10.0 JTA Resource service.html" title="Weblogic Admin 10.0 JTA Resource service">Weblogic Admin 10.0 JTA Resource service</a></li><li><a href="Weblogic Admin 10.0 Message Driven EJB service.html" title="Weblogic Admin 10.0 Message Driven EJB service">Weblogic Admin 10.0 Message Driven EJB service</a></li><li><a href="Weblogic Admin 10.0 server.html" title="Weblogic Admin 10.0 server">Weblogic Admin 10.0 server</a></li><li><a href="Weblogic Admin 10.0 Stateful EJB service.html" title="Weblogic Admin 10.0 Stateful EJB service">Weblogic Admin 10.0 Stateful EJB service</a></li><li><a href="Weblogic Admin 10.0 Stateless EJB service.html" title="Weblogic Admin 10.0 Stateless EJB service">Weblogic Admin 10.0 Stateless EJB service</a></li><li><a href="Weblogic Admin 10.0 Webapp service.html" title="Weblogic Admin 10.0 Webapp service">Weblogic Admin 10.0 Webapp service</a></li><li><a href="Weblogic Admin 10.1 Application service.html" title="Weblogic Admin 10.1 Application service">Weblogic Admin 10.1 Application service</a></li><li><a href="Weblogic Admin 10.1 Entity EJB service.html" title="Weblogic Admin 10.1 Entity EJB service">Weblogic Admin 10.1 Entity EJB service</a></li><li><a href="Weblogic Admin 10.1 Execute Queue service.html" title="Weblogic Admin 10.1 Execute Queue service">Weblogic Admin 10.1 Execute Queue service</a></li><li><a href="Weblogic Admin 10.1 JDBC Connection Pool service.html" title="Weblogic Admin 10.1 JDBC Connection Pool service">Weblogic Admin 10.1 JDBC Connection Pool service</a></li><li><a href="Weblogic Admin 10.1 JMS Destination service.html" title="Weblogic Admin 10.1 JMS Destination service">Weblogic Admin 10.1 JMS Destination service</a></li><li><a href="Weblogic Admin 10.1 JMS Server service.html" title="Weblogic Admin 10.1 JMS Server service">Weblogic Admin 10.1 JMS Server service</a></li><li><a href="Weblogic Admin 10.1 JTA Resource service.html" title="Weblogic Admin 10.1 JTA Resource service">Weblogic Admin 10.1 JTA Resource service</a></li><li><a href="Weblogic Admin 10.1 Message Driven EJB service.html" title="Weblogic Admin 10.1 Message Driven EJB service">Weblogic Admin 10.1 Message Driven EJB service</a></li><li><a href="Weblogic Admin 10.1 server.html" title="Weblogic Admin 10.1 server">Weblogic Admin 10.1 server</a></li><li><a href="Weblogic Admin 10.1 Stateful EJB service.html" title="Weblogic Admin 10.1 Stateful EJB service">Weblogic Admin 10.1 Stateful EJB service</a></li><li><a href="Weblogic Admin 10.1 Stateless EJB service.html" title="Weblogic Admin 10.1 Stateless EJB service">Weblogic Admin 10.1 Stateless EJB service</a></li><li><a href="Weblogic Admin 10.1 Webapp service.html" title="Weblogic Admin 10.1 Webapp service">Weblogic Admin 10.1 Webapp service</a></li><li><a href="Weblogic Admin 10.2 Application service.html" title="Weblogic Admin 10.2 Application service">Weblogic Admin 10.2 Application service</a></li><li><a href="Weblogic Admin 10.2 Entity EJB service.html" title="Weblogic Admin 10.2 Entity EJB service">Weblogic Admin 10.2 Entity EJB service</a></li><li><a href="Weblogic Admin 10.2 Execute Queue service.html" title="Weblogic Admin 10.2 Execute Queue service">Weblogic Admin 10.2 Execute Queue service</a></li><li><a href="Weblogic Admin 10.2 JDBC Connection Pool service.html" title="Weblogic Admin 10.2 JDBC Connection Pool service">Weblogic Admin 10.2 JDBC Connection Pool service</a></li><li><a href="Weblogic Admin 10.2 JMS Destination service.html" title="Weblogic Admin 10.2 JMS Destination service">Weblogic Admin 10.2 JMS Destination service</a></li><li><a href="Weblogic Admin 10.2 JMS Server service.html" title="Weblogic Admin 10.2 JMS Server service">Weblogic Admin 10.2 JMS Server service</a></li><li><a href="Weblogic Admin 10.2 JTA Resource service.html" title="Weblogic Admin 10.2 JTA Resource service">Weblogic Admin 10.2 JTA Resource service</a></li><li><a href="Weblogic Admin 10.2 Message Driven EJB service.html" title="Weblogic Admin 10.2 Message Driven EJB service">Weblogic Admin 10.2 Message Driven EJB service</a></li><li><a href="Weblogic Admin 10.2 server.html" title="Weblogic Admin 10.2 server">Weblogic Admin 10.2 server</a></li><li><a href="Weblogic Admin 10.2 Stateful EJB service.html" title="Weblogic Admin 10.2 Stateful EJB service">Weblogic Admin 10.2 Stateful EJB service</a></li><li><a href="Weblogic Admin 10.2 Stateless EJB service.html" title="Weblogic Admin 10.2 Stateless EJB service">Weblogic Admin 10.2 Stateless EJB service</a></li><li><a href="Weblogic Admin 10.2 Webapp service.html" title="Weblogic Admin 10.2 Webapp service">Weblogic Admin 10.2 Webapp service</a></li><li><a href="Weblogic Admin 10.3 Application service.html" title="Weblogic Admin 10.3 Application service">Weblogic Admin 10.3 Application service</a></li><li><a href="Weblogic Admin 10.3 Entity EJB service.html" title="Weblogic Admin 10.3 Entity EJB service">Weblogic Admin 10.3 Entity EJB service</a></li><li><a href="Weblogic Admin 10.3 Execute Queue service.html" title="Weblogic Admin 10.3 Execute Queue service">Weblogic Admin 10.3 Execute Queue service</a></li><li><a href="Weblogic Admin 10.3 JDBC Connection Pool service.html" title="Weblogic Admin 10.3 JDBC Connection Pool service">Weblogic Admin 10.3 JDBC Connection Pool service</a></li><li><a href="Weblogic Admin 10.3 JMS Destination service.html" title="Weblogic Admin 10.3 JMS Destination service">Weblogic Admin 10.3 JMS Destination service</a></li><li><a href="Weblogic Admin 10.3 JMS Server service.html" title="Weblogic Admin 10.3 JMS Server service">Weblogic Admin 10.3 JMS Server service</a></li><li><a href="Weblogic Admin 10.3 JTA Resource service.html" title="Weblogic Admin 10.3 JTA Resource service">Weblogic Admin 10.3 JTA Resource service</a></li><li><a href="Weblogic Admin 10.3 Message Driven EJB service.html" title="Weblogic Admin 10.3 Message Driven EJB service">Weblogic Admin 10.3 Message Driven EJB service</a></li><li><a href="Weblogic Admin 10.3 server.html" title="Weblogic Admin 10.3 server">Weblogic Admin 10.3 server</a></li><li><a href="Weblogic Admin 10.3 Stateful EJB service.html" title="Weblogic Admin 10.3 Stateful EJB service">Weblogic Admin 10.3 Stateful EJB service</a></li><li><a href="Weblogic Admin 10.3 Stateless EJB service.html" title="Weblogic Admin 10.3 Stateless EJB service">Weblogic Admin 10.3 Stateless EJB service</a></li><li><a href="Weblogic Admin 10.3 Webapp service.html" title="Weblogic Admin 10.3 Webapp service">Weblogic Admin 10.3 Webapp service</a></li><li><a href="Weblogic NodeManager 6.1 server.html" title="Weblogic NodeManager 6.1 server">Weblogic NodeManager 6.1 server</a></li><li><a href="Weblogic NodeManager 7.0 server.html" title="Weblogic NodeManager 7.0 server">Weblogic NodeManager 7.0 server</a></li><li><a href="Weblogic NodeManager 8.1 server.html" title="Weblogic NodeManager 8.1 server">Weblogic NodeManager 8.1 server</a></li><li><a href="Weblogic NodeManager 9.1 server.html" title="Weblogic NodeManager 9.1 server">Weblogic NodeManager 9.1 server</a></li><li><a href="Weblogic NodeManager 9.2 server.html" title="Weblogic NodeManager 9.2 server">Weblogic NodeManager 9.2 server</a></li><li><a href="Weblogic NodeManager 10.0 server.html" title="Weblogic NodeManager 10.0 server">Weblogic NodeManager 10.0 server</a></li><li><a href="Weblogic NodeManager 10.1 server.html" title="Weblogic NodeManager 10.1 server">Weblogic NodeManager 10.1 server</a></li><li><a href="Weblogic NodeManager 10.2 server.html" title="Weblogic NodeManager 10.2 server">Weblogic NodeManager 10.2 server</a></li><li><a href="Weblogic NodeManager 10.3 server.html" title="Weblogic NodeManager 10.3 server">Weblogic NodeManager 10.3 server</a></li></ul>
 
 				    
                     			    </td>
@@ -613,7 +540,7 @@ weblogic.discover.fqdn.10.0.0.4=appserver2.hyperic.com
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 29, 2011 14:43</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jan 20, 2012 10:07</font></td>
 		    </tr>
 	    </table>
     </body>
