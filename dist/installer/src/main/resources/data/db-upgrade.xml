@@ -11745,6 +11745,20 @@ has already been defined.
  <schemaSpec version="3.209">
     <schema-addColumn table="EAM_SRN" column="LAST_SCHEDULE_TIME" columnType="LONG" nullable="NOT NULL" default="0"/>
  </schemaSpec>
+	
+ <schemaSpec version="3.210">
+    <schema-directSQL>
+        <statement targetDB="mysql">
+        	ALTER TABLE EAM_KEYSTORE CHANGE COLUMN FILE CERT_FILE BLOB
+        </statement>
+        <statement targetDB="postgresql">
+        	ALTER TABLE EAM_KEYSTORE RENAME COLUMN FILE TO CERT_FILE
+        </statement>
+        <statement targetDB="oracle">
+        	ALTER TABLE EAM_KEYSTORE RENAME COLUMN FILE TO CERT_FILE
+        </statement>
+    </schema-directSQL>
+ </schemaSpec>
 
 </dbupgrade>
 </target>
