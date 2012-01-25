@@ -16,7 +16,7 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jan 18, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 24, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
@@ -24,16 +24,16 @@
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1326910276098 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1326910276098 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1326910276098 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1327439172295 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1327439172295 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1327439172295 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1326910276098'>
+/*]]>*/</style><div class='rbtoc1327439172295'>
 <ul>
     <li><a href='#UpgradeHypericServer-WhatHappensDuringServerUpgrade'>What Happens During Server Upgrade</a></li>
     <li><a href='#UpgradeHypericServer-UpgradeHypericServeronUnixBasedPlatforms'>Upgrade Hyperic Server on Unix-Based Platforms</a></li>
     <li><a href='#UpgradeHypericServer-UpgradeHypericServeronWindowsPlatforms'>Upgrade Hyperic Server on Windows Platforms</a></li>
-    <li><a href='#UpgradeHypericServer-SetInstallationProfileforvFabricHyperic'>Set Installation Profile for vFabric Hyperic</a></li>
+    <li><a href='#UpgradeHypericServer-ScalingHypericServerinvFabricHyperic4.6.5'>Scaling Hyperic Server in vFabric Hyperic 4.6.5</a></li>
     <li><a href='#UpgradeHypericServer-SolvingProblemswithUpgradedServerswithanOracleDatabase'>Solving Problems with Upgraded Servers with an Oracle Database</a></li>
 </ul></div>
 
@@ -49,7 +49,9 @@ div.rbtoc1326910276098 li {margin-left: 0px;padding-left: 0px;}
 
 <p>You upgrade the Hyperic Server using the Hyperic installer, using the upgrade option. (The installer does not upgrade the Hyperic Agent.)</p>
 
-<p>The installer installs a new version of Hyperic Server; it obtains the configuration information from your previous server installation and configures the new server instance accordingly.</p>
+<p>The installer installs a new version of Hyperic Server; it obtains the configuration information from your previous server installation configuration files and configures the new server instance accordingly.</p>
+
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>New Properties in vFabric Hyperic 4.6.5</b><br />In Hyperic 4.6.5, there are two new properties in <tt>server.conf</tt> &#8212; <tt><a href="tomcat.maxthreads.html" title="tomcat.maxthreads">tomcat.maxthreads</a></tt> and <tt><a href="tomcat.minsparethreads.html" title="tomcat.minsparethreads">tomcat.minsparethreads</a></tt>.</td></tr></table></div>
 
 <p>If you use Hyperic's internal database, the installer creates a new database instance that contains the data from the existing instance. The new instance has an updated schema, but the PostgreSQL server itself in not upgraded to a new version.</p>
 
@@ -100,6 +102,7 @@ div.rbtoc1326910276098 li {margin-left: 0px;padding-left: 0px;}
 		<pre class="theme: Confluence; brush: java; gutter: false">/opt/hyperic/server-4.6.0/bin/hq-server.sh start</pre>
 		</div>
 </div></div></li>
+	<li>In vFabric Hyperic, you can set a variety of sizing properties by running the installer with the <tt>-updateScale</tt> option. For more information, see <a href="#UpgradeHypericServer-ScalingHypericServerinvFabricHyperic4.6.5">Scaling Hyperic Server in vFabric Hyperic 4.6.5</a>.</li>
 </ol>
 
 
@@ -144,13 +147,16 @@ div.rbtoc1326910276098 li {margin-left: 0px;padding-left: 0px;}
 		</div>
 </div></div></li>
 	<li>Start the upgraded Hyperic Server using the Windows Services Control Panel.</li>
+	<li>In vFabric Hyperic, you can set a variety of sizing properties by running the installer with the <tt>-updateScale</tt> option. For more information, see <a href="#UpgradeHypericServer-ScalingHypericServerinvFabricHyperic4.6.5">Scaling Hyperic Server in vFabric Hyperic 4.6.5</a>.</li>
 </ol>
 
 
-<h1><a name="UpgradeHypericServer-SetInstallationProfileforvFabricHyperic"></a>Set Installation Profile for vFabric Hyperic</h1>
+<h1><a name="UpgradeHypericServer-ScalingHypericServerinvFabricHyperic4.6.5"></a>Scaling Hyperic Server in vFabric Hyperic 4.6.5</h1>
 <p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
 
-<p>Starting in vFabric 4.6.5, you can set an installation profile that sets the values of key server properties to tune the Hyperic Server based on the size of your environment. For information about the effect of setting an installation profile, see <a href="About Installation Profiles in vFabric Hyperic.html" title="About Installation Profiles in vFabric Hyperic">About Installation Profiles in vFabric Hyperic</a>. For instructions on how to set the installation profile for Hyperic Server after installation or upgrade, see Set Installation Profile after Server Installation.</p>
+<p>Starting in vFabric 4.6.5, you can set an installation profile that sets the values of key server properties to tune the Hyperic Server based on the size of your environment. For information about the effect of setting an installation profile, see <a href="About Sizing Profiles in vFabric Hyperic.html" title="About Sizing Profiles in vFabric Hyperic">About Sizing Profiles in vFabric Hyperic</a>. For instructions on how to set the installation profile for Hyperic Server after installation or upgrade, see <a href="Change vFabric Hyperic Server Sizing Profile.html" title="Change vFabric Hyperic Server Sizing Profile">Change vFabric Hyperic Server Sizing Profile</a>. </p>
+
+<p>If you manage more than 50 platforms, and have previously tuned the server properties whose values are set by changing the sizing profile, rather than update the server's sizing profile, you may wish to manually change the values of the server properties that are new in Hyperic 4.6.5 &#8212; in an upgrade installation <tt><a href="tomcat.maxthreads.html" title="tomcat.maxthreads">tomcat.maxthreads</a></tt> and <tt><a href="tomcat.minsparethreads.html" title="tomcat.minsparethreads">tomcat.minsparethreads</a></tt> are added to <tt>server.conf</tt> with values appropriate for managing less than fifty platforms.</p>
 
 <h1><a name="UpgradeHypericServer-SolvingProblemswithUpgradedServerswithanOracleDatabase"></a>Solving Problems with Upgraded Servers with an Oracle Database</h1>
 
@@ -186,7 +192,7 @@ div.rbtoc1326910276098 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jan 20, 2012 10:07</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jan 24, 2012 14:50</font></td>
 		    </tr>
 	    </table>
     </body>

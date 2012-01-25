@@ -16,27 +16,26 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jan 23, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1325706018544 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1325706018544 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1325706018544 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1327363339927 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1327363339927 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1327363339927 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1325706018544'>
+/*]]>*/</style><div class='rbtoc1327363339927'>
 <ul>
     <li><a href='#RunHypericInstaller-ObtainHypericInstaller'>Obtain Hyperic Installer</a></li>
     <li><a href='#RunHypericInstaller-AbouttheSetupScript'>About the Setup Script</a></li>
     <li><a href='#RunHypericInstaller-RuntheSetupScript'>Run the Setup Script</a></li>
 </ul></div>
 
-<blockquote>
-<p><b>About this page...</b> </p>
+<blockquote><p><b>About this page...</b></p>
 
-<p>This page has instructions for performing a <b>new</b> installation of Hyperic components using the Hyperic installer. Before running the installer, see <a href="Hyperic Installation and Startup Process.html" title="Hyperic Installation and Startup Process">Hyperic Installation and Startup Process</a> for information about where installation fits in the implementation process. For production environments, there are several steps to perform before installing the Hyperic Server and Hyperic Agent, including database setup and SSL configuration. </p>
+<p>This page has instructions for performing a <b>new</b> installation of Hyperic components using the Hyperic installer. Before running the installer, see <a href="Hyperic Installation and Startup Process.html" title="Hyperic Installation and Startup Process">Hyperic Installation and Startup Process</a> for information about where installation fits in the implementation process. For production environments, there are several steps to perform before installing the Hyperic Server and Hyperic Agent, including database setup and SSL configuration.</p>
 
-<p>If you wish to upgrade an existing Hyperic deployment, please see <a href="Hyperic Upgrade Processes.html" title="Hyperic Upgrade Processes">Hyperic Upgrade Processes</a>.</p></blockquote> 
+<p>If you wish to upgrade an existing Hyperic deployment, please see <a href="Hyperic Upgrade Processes.html" title="Hyperic Upgrade Processes">Hyperic Upgrade Processes</a>.</p></blockquote>
 
 <h1><a name="RunHypericInstaller-ObtainHypericInstaller"></a>Obtain Hyperic Installer</h1>
 
@@ -78,14 +77,18 @@ div.rbtoc1325706018544 li {margin-left: 0px;padding-left: 0px;}
 </ul>
 
 
+<ul>
+	<li><tt>&#45;updateScale</tt> &#8212; In vFabric Hyperic 4.6.5 and later, run the installer with this option to change the sizing profile for the Hyperic Server. For more information aboutsizing profiles, see <a href="About Sizing Profiles in vFabric Hyperic.html" title="About Sizing Profiles in vFabric Hyperic">About Sizing Profiles in vFabric Hyperic</a>.</li>
+</ul>
+
+
 <div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Configuration Options for Database-Specific Quick Installs</b><br />When you do a database-specific quick install (<tt>&#45;postgresql</tt>, <tt>&#45;oracle</tt>, or <tt>&#45;mysql</tt>) the installer <b>does not</b>:
 <ul>
 	<li>Prompt for the ports on which the Hyperic Server listens for agent and user interface requests &#8212; the default ports are automatically configured.</li>
 	<li>Allow you to specify the location and password for a user-managed server keystore &#8212; instead, the Hyperic Server will use a Hyperic-managed keystore.</li>
 	<li>Allow you to select a different database type.</li>
 </ul>
-</td></tr></table></div> 
-
+</td></tr></table></div>
 
 <h1><a name="RunHypericInstaller-RuntheSetupScript"></a>Run the Setup Script</h1>
 
@@ -130,7 +133,7 @@ div.rbtoc1325706018544 li {margin-left: 0px;padding-left: 0px;}
 		<li>Accept the license agreement to proceed.</li>
 	</ul>
 	</li>
-	<li><b><em>Choose which software to install</em></b><b><em>1: Hyperic HQ Server</em></b><b><em>2: Hyperic HQ Agent</em></b>
+	<li><b><em>Choose which software to install</em></b><b>{</b><b><em>} 1: Hyperic HQ Server</em></b><b><em>2: Hyperic HQ Agent</em></b>
 	<ul>
 		<li>To install both the server and the agent, enter:
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
@@ -155,10 +158,10 @@ div.rbtoc1325706018544 li {margin-left: 0px;padding-left: 0px;}
 		<li>Accept the default, or enter a different (unused) port.</li>
 	</ul>
 	</li>
-	<li><b><em>Would you like us to use a user-managed java keystore? [default '2']</em></b><b><em>1: Yes</em></b><b>{</b><b><em>} 2: No</em></b>
+	<li><b><em>Would you like us to use your own java keystore? [default '2']</em></b><b><em>1: Yes</em></b><b>{</b><b><em>} 2: No</em></b>
 	<ul>
 		<li>Enter "1" if you wish to configure the Hyperic Server to use a certificate you manage, rather than generate its own, and proceed to the next step.</li>
-		<li>If you accept the default "2", a default keystore will be generated at <tt>ServerHome/conf/hyperic.keystore</tt> with the password <tt>hyperic</tt>.</li>
+		<li>If you accept the default "2", a default keystore will be generated at: <tt>ServerHome/conf/hyperic.keystore</tt> with the password <tt>hyperic</tt>, and the next three prompts will not appear.</li>
 	</ul>
 	</li>
 	<li><b><em>What is the file path to your java keystore?</em></b>
@@ -187,6 +190,14 @@ div.rbtoc1325706018544 li {margin-left: 0px;padding-left: 0px;}
 	<li><b><em>Enter the email address that HQ will use as the sender for email messages [default...]</em></b>
 	<ul>
 		<li>The email address of the Hyperic Administrator. Note that most mail servers will not deliver mail without a valid domain name in the From field.</li>
+	</ul>
+	</li>
+	<li><b><em>What is the installation profile?</em></b> <b><em>default '1'</em></b><b><em>:]</em></b><br/>
+<b><em>1: small (less than 50 platforms)</em></b><br/>
+<b><em>2: medium (50-250 platforms)</em></b><br/>
+<b><em>3: large (larger than 250 platforms)</em></b>
+	<ul>
+		<li>Select the profile that fits your deployment. For more information, see <a href="About Sizing Profiles in vFabric Hyperic.html" title="About Sizing Profiles in vFabric Hyperic">About Sizing Profiles in vFabric Hyperic</a>.</li>
 	</ul>
 	</li>
 	<li><b><em>What backend database should the HQ server use? [default '1']:</em></b><b><em>Choices:</em></b><br/>
@@ -224,9 +235,9 @@ div.rbtoc1325706018544 li {margin-left: 0px;padding-left: 0px;}
 		</li>
 	</ol>
 	</li>
-	<li><b><em>Enter an encryption key to use to encrypt the database password:</em></b>
+	<li><b><em>Would you like to use an auto generated encryption key to encrypt the database password? [default '1']</em></b>
 	<ul>
-		<li>Enter a string of at least 8 characters.</li>
+		<li>If you accept the default, the installer will generate a key for encrypting the database password. Enter 2 if you prefer to supply the string yourself, and when prompted, enter a string of at least 8 characters.</li>
 	</ul>
 	</li>
 	<li><b><em>What should the username be for the initial admin user? [default 'hqadmin']:</em></b>
@@ -271,7 +282,7 @@ div.rbtoc1325706018544 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jan 20, 2012 10:06</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jan 24, 2012 14:50</font></td>
 		    </tr>
 	    </table>
     </body>
