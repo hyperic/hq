@@ -1186,6 +1186,7 @@
     <plugin type="log_track"
             class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>    
 
+    <property name="regKey" value="\SOFTWARE\Microsoft\Exchange\Setup"/>
     <property name="version" value="8.\d*"/>
 
     <properties>
@@ -1213,10 +1214,12 @@
   </server>
 
   <server name="Exchange" version="2010" include="Exchange 2007" platforms="Win32">
+    <property name="regKey" value="\SOFTWARE\Microsoft\ExchangeServer\v14\Setup"/>
     <property name="version" value="14.\d*"/>
   </server>
 
   <server name="Exchange Transport" version="2007" platforms="Win32">
+    <property name="regKey" value="\SOFTWARE\Microsoft\Exchange\Setup"/>
     <property name="version" value="8.\d*"/>
 
     <plugin type="measurement"
@@ -1247,6 +1250,7 @@
   </server>
   
   <server name="Exchange Transport" version="2010" include="Exchange Transport 2007" platforms="Win32">
+    <property name="regKey" value="\SOFTWARE\Microsoft\ExchangeServer\v14\Setup"/>
     <property name="version" value="14.\d*"/>
   </server>
 </plugin>

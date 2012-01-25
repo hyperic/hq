@@ -27,6 +27,7 @@ package org.hyperic.hq.plugin.exchange;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.*;
@@ -84,7 +85,9 @@ public class ExchangeTransportDetector
         
         File bin = new File(exe).getParentFile();
         String expectedVersion = getTypeProperty("version");
-        if (!ExchangeDetector.checkVersion(bin, expectedVersion)) {
+        String regKey = getTypeProperty("regKey");
+        Map<String, String> info = ExchangeDetector.getExchangeVersionInfo(regKey);
+        if (!ExchangeDetector.checkVersion(info.get("version"), expectedVersion)) {
             log.debug("[getServerResources] 'Exchange Transport' on '" + bin
                     + "' is not a " + getTypeInfo().getName());
             return null;

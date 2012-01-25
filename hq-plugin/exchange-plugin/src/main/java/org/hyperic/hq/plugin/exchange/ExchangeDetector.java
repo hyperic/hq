@@ -26,16 +26,13 @@
 package org.hyperic.hq.plugin.exchange;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.*;
 import org.hyperic.sigar.win32.Pdh;
-import org.hyperic.sigar.win32.RegistryKey;
 import org.hyperic.sigar.win32.Service;
 import org.hyperic.sigar.win32.Win32Exception;
 import org.hyperic.util.config.ConfigResponse;
@@ -54,9 +51,6 @@ public class ExchangeDetector
         POP3_NAME,
         MTA_NAME,
     };
-
-    private static final String EXCHANGE_KEY =
-        "SOFTWARE\\Microsoft\\Exchange\\Setup";
 
     static final String EX = "MSExchange";
     private static final String WEBMAIL = EX + " Web Mail";
@@ -110,49 +104,32 @@ public class ExchangeDetector
 
         File bin = new File(exe).getParentFile();
         installpath = bin.getParent();
-        
+
+        ServerResource server = createServerResource(installpath);
+
         String expectedVersion = getTypeProperty("version");
+        String regKey = getTypeProperty("regKey");
         if (expectedVersion!=null) {
-            if (!checkVersion(bin, expectedVersion)) {
+            Map<String, String> info = getExchangeVersionInfo(regKey);
+            if (!checkVersion(info.get("version"), expectedVersion)) {
                 log.debug("[getServerResources] exchange on '" + bin
                         + "' is not a " + getTypeInfo().getName());
                 return null;
             }
+            server.setCustomProperties(new ConfigResponse(info));
         } else {
             if (!isInstallTypeVersion(bin.getPath())) {
                 return null;
             }
         }
         
-        ServerResource server = createServerResource(installpath);
         server.setProductConfig();
         server.setMeasurementConfig();
-
-        RegistryKey key = null;
-        try {
-            //XXX does not work for 64-bit exchange running 32-bit agent
-            key = RegistryKey.LocalMachine.openSubKey(EXCHANGE_KEY);
-            ConfigResponse cprops = new ConfigResponse();
-            try {
-                cprops.setValue("version",
-                                key.getStringValue("Services Version"));
-                cprops.setValue("build",
-                                key.getStringValue("NewestBuild"));
-                server.setCustomProperties(cprops);
-            } catch (Win32Exception e) {
-            }
-        } catch (Win32Exception e) {
-            log.debug(e,e);
-        } finally {
-            if (key != null) {
-                key.close();
-            }
-        }
-
         servers.add(server);
         return servers;
     }
 
+    @Override
     protected List discoverServices(ConfigResponse config)
         throws PluginException {
 
@@ -184,57 +161,87 @@ public class ExchangeDetector
         return services;
     }
     
-    static boolean checkVersion(File bin, String expectedVersion) {
-        boolean isOK = true;
-        File remoteExchange = new File(bin, "RemoteExchange.ps1");
-        String cmdArgs[] = {"cmd", "/c",
-            "powershell",
-            "-command",
-            "\". '" + remoteExchange.getAbsolutePath() + "' ; Connect-ExchangeServer -auto; get-exchangeserver | format-list ; exit;\""
-        };
-
-        Process cmd;
-        try {
-            log.debug("[checkVersion] cmdArgs=" + Arrays.asList(cmdArgs));
-            cmd = Runtime.getRuntime().exec(cmdArgs);
-            cmd.getOutputStream().close();
-            String resultString = inputStreamAsString(cmd.getInputStream());
-            Pattern regx = Pattern.compile("AdminDisplayVersion[^:]*:.Version.([^\\s]*).");
-            Matcher matcher = regx.matcher(resultString);
-            if (matcher.find()) {
-                Pattern versionRegx = Pattern.compile(expectedVersion);
-                Matcher versrionMatcher = versionRegx.matcher(matcher.group(1));
-                if (!versrionMatcher.find()) {
-                    log.debug("[checkVersion] versrion line=" + matcher.group(0));
-                    log.debug("[checkVersion] versrionString=" + matcher.group(1));
-                    log.debug("[checkVersion] versrionMatcher=" + versrionMatcher);
-                    isOK = false;
-                }
-            } else {
-                log.debug("[checkVersion] command result=" + resultString);
-                log.debug("[checkVersion] matcher=" + matcher);
-                log.debug("[checkVersion] Error getting Exchange version");
-                isOK = false;
-            }
-        } catch (Exception ex) {
-            log.debug("[checkVersion] Error getting Exchange version " + ex, ex);
-            isOK = false;
+    static boolean checkVersion(String version, String expectedVersion) {
+        boolean isOK = false;
+        if (version != null) {
+            Pattern versionRegx = Pattern.compile(expectedVersion);
+            Matcher versrionMatcher = versionRegx.matcher(version);
+            isOK = versrionMatcher.find();
         }
+        log.debug("[checkVersion] versrionString=" + version
+                + " expectedVersion=" + expectedVersion
+                + " isOK=" + isOK);
         return isOK;
     }
     
-    
-    static String inputStreamAsString(InputStream stream) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(stream));
-        StringBuilder sb = new StringBuilder();
+    static Map<String,String> getExchangeVersionInfo(String key){
+        Map<String,String> info=new HashMap<String,String>();
+            
+        String cmdArgs[] = {"cmd", "/c",
+            "powershell",
+            "-command",
+            "\"& { Get-ItemProperty HKLM:"+key+" }\""
+        };
+        
+        Process cmd;
         try {
-            String line;
-            while ((line = br.readLine()) != null) {
-                sb.append(line).append("\n");
+            log.debug("[getExchangeVersionInfo] cmdArgs=" + Arrays.asList(cmdArgs));
+            cmd = Runtime.getRuntime().exec(cmdArgs);
+            cmd.getOutputStream().close();
+            StreamGobbler outputGobbler = new StreamGobbler(cmd.getInputStream());
+            StreamGobbler errorGobbler = new StreamGobbler(cmd.getErrorStream());
+            outputGobbler.start();
+            errorGobbler.start();
+            cmd.waitFor();
+            String resultString = outputGobbler.getString()+errorGobbler.getString();
+            Matcher msiBuildMajor = Pattern.compile("MsiBuildMajor[^:]*:[^\\d]*(\\d*)").matcher(resultString);
+            Matcher msiBuildMinor = Pattern.compile("MsiBuildMinor[^:]*:[^\\d]*(\\d*)").matcher(resultString);
+            if (msiBuildMajor.find() && msiBuildMinor.find()) {
+                String build = msiBuildMajor.group(1)+"."+msiBuildMinor.group(1);
+                info.put("build", build);
+            } else {
+                log.debug("[getExchangeVersionInfo] command result=" + resultString);
+                log.debug("[getExchangeVersionInfo] Error getting Exchange build");
             }
-        } finally {
-            br.close();
+            Matcher msiProductMajor = Pattern.compile("MsiProductMajor[^:]*:[^\\d]*(\\d*)").matcher(resultString);
+            Matcher msiProductMinor = Pattern.compile("MsiProductMinor[^:]*:[^\\d]*(\\d*)").matcher(resultString);
+            if (msiProductMajor.find() && msiProductMinor.find()) {
+                String versrion = msiProductMajor.group(1)+"."+msiProductMinor.group(1);
+                info.put("version", versrion);
+            } else {
+                log.debug("[getExchangeVersionInfo] command result=" + resultString);
+                log.debug("[getExchangeVersionInfo] Error getting Exchange version");
+            }
+        } catch (Exception ex) {
+            log.debug("[getExchangeVersionInfo] Error getting Exchange version " + ex, ex);
         }
-        return sb.toString();
+        return info;
+    }
+
+    static class StreamGobbler extends Thread {
+        InputStream is;
+        StringBuilder sb = new StringBuilder();
+
+        StreamGobbler(InputStream is) {
+            this.is = is;
+        }
+
+        public String getString(){
+            return sb.toString();
+        }
+        
+        @Override
+        public void run() {
+            try {
+                InputStreamReader isr = new InputStreamReader(is);
+                BufferedReader br = new BufferedReader(isr);
+                String line;
+                while ((line = br.readLine()) != null) {
+                    sb.append(line).append("\n");
+                }
+            } catch (IOException e) {
+                log.debug(e,e);
+            }
+        }
     }
 }
