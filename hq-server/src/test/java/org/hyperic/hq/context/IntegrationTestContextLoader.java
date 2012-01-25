@@ -51,9 +51,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
@@ -141,6 +139,23 @@ public class IntegrationTestContextLoader extends AbstractContextLoader {
         }
     }//EOC ExternalizingGenericXmlContextLoader
     
+    private static final class DisposableApplicationContext extends GenericApplicationContext { 
+        @Override
+        public final void close() {
+            if(!this.isActive()) { 
+             // Destroy all cached singletons in the context's BeanFactory.
+                this.destroyBeans();
+
+                // Close the state of this context itself.
+                this.closeBeanFactory();
+            }//EO if not active 
+            else { 
+                super.close();
+            }//EO else normal close 
+        }//EOM 
+        
+    }//EOC ExternalizingGenericApplicationContext
+    
     /**
      * Wrapper around an {@link GenericApplicationContext} instance used to control its references.<br>
      * the {@link ProxyingGenericApplicationContext#close()} shall clear context resources and ensure that the<br>
@@ -151,11 +166,11 @@ public class IntegrationTestContextLoader extends AbstractContextLoader {
      */
     private static final class ProxyingGenericApplicationContext extends GenericApplicationContext { 
        
-        private GenericApplicationContext delegate ; 
+        private DisposableApplicationContext delegate ; 
         
         public ProxyingGenericApplicationContext() {
             super() ; 
-            this.delegate = new GenericApplicationContext() ; 
+            this.delegate = new DisposableApplicationContext() ; 
         }//EOM
 
         @Override
@@ -163,13 +178,6 @@ public class IntegrationTestContextLoader extends AbstractContextLoader {
             this.delegate.setParent(parent);
         }//EOM 
         
-        public final void setDelegateContext(final GenericApplicationContext delegateContext) { 
-            if(this.delegate != null) { 
-                this.close() ; 
-            }//EO if there was an existing delegate 
-            this.delegate = delegateContext ; 
-        }//EOM 
-
         @Override
         public void setId(String id) {
             this.delegate.setId(id);
@@ -335,15 +343,7 @@ public class IntegrationTestContextLoader extends AbstractContextLoader {
             //Clear the JMX resources 
             this.resetJMXResources() ; 
                         
-            if(this.isActive()){ 
-                this.delegate.close() ; 
-            }else{  
-                final ConfigurableListableBeanFactory beansFactory = this.getBeanFactory() ;  
-                beansFactory.destroySingletons() ; 
-                if(beansFactory instanceof DefaultListableBeanFactory) { 
-                    ((DefaultListableBeanFactory)beansFactory).setSerializationId(null) ; 
-                }//EO catch block 
-            }//EO else if not active  
+            this.delegate.close() ;
             
             this.delegate = null ;
             
@@ -353,6 +353,8 @@ public class IntegrationTestContextLoader extends AbstractContextLoader {
                 System.gc() ;   
             }//EO while there are more tests 
         }//EOM 
+        
+        
         
         /*
          * Clears the ManagementFactory's platformBeanServerField member as well as the reference in 
