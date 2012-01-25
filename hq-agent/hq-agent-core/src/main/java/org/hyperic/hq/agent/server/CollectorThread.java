@@ -52,7 +52,7 @@ public class CollectorThread implements Runnable {
 
     private Thread thread = null;
     private static CollectorThread instance = null;
-    private AtomicBoolean shouldDie = new AtomicBoolean(false);
+    private final AtomicBoolean shouldDie = new AtomicBoolean(false);
     private long interval = DEFAULT_INTERVAL;
     private Properties props;
     private AgentStatsCollector statsCollector;
@@ -138,22 +138,21 @@ public class CollectorThread implements Runnable {
     }
 
     /** proxy used to intercept in order to create stats */
-    private Runnable getProxy(Collector collector) {
+    private Runnable getProxy(final Collector collector) {
         InvocationHandler handler = new InvocationHandler() {
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                if (args.length == 0 && method.getName().equals("run")) {
+                if ((null == args || args.length == 0) && method.getName().equals("run")) {
                     final long start = now();
-                    Object rtn = method.invoke(proxy, args);
+                    Object rtn = method.invoke(collector, args);
                     final long duration = now() - start;
                     statsCollector.addStat(duration, COLLECTOR_THREAD_METRIC_COLLECTED_TIME);
                     return rtn;
                 } else {
-                    return method.invoke(proxy, args);
+                    return method.invoke(collector, args);
                 }
             }
         };
-        Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class[] {Runnable.class}, handler);
-        return null;
+        return (Runnable) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class[] {Runnable.class}, handler);
     }
 
     private long now() {
