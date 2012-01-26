@@ -21,16 +21,17 @@
 			<version>${project.version}</version>
 			<type>tar.gz</type>
 		</dependency>
-		<dependency>
+		<!--  <dependency>
 			<groupId>org.hyperic.hq.dist</groupId>
 			<artifactId>support</artifactId>
 			<version>${project.version}</version>
 			<type>tar.gz</type>
 		</dependency>	
+		-->
 	</dependencies>
 
 
-	<build>
+	<!--  <build>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -52,7 +53,7 @@
 				</executions>
 			</plugin>	
 		</plugins>
-	</build>
+	</build> -->
 	
 	<profiles>
 		<profile>

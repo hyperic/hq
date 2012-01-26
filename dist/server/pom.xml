@@ -48,7 +48,7 @@
 							<excludeTransitive>true</excludeTransitive>
 						</configuration>
 					</execution>
-					<execution>
+					<!-- <execution>
 						<id>unpack-support</id>
 						<goals>
 							<goal>unpack-dependencies</goal>
@@ -61,6 +61,7 @@
 							<excludeTransitive>true</excludeTransitive>
 						</configuration>
 					</execution>
+					-->
 					<execution>
 						<id>unpack-tomcat</id>
 						<goals>
@@ -80,12 +81,12 @@
 	</build>
 
 	<dependencies>
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.hyperic.hq.dist</groupId>
 			<artifactId>support</artifactId>
 			<version>${project.version}</version>
 			<type>tar.gz</type>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>org.hyperic.hq.dist</groupId>
 			<artifactId>bootstrap</artifactId>
