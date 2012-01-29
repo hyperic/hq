@@ -148,7 +148,7 @@
                    type="org.hyperic.hq.ui.action.resource.platform.PlatformForm"/>
         <form-bean name="NewPlatformForm"
                    type="org.hyperic.hq.ui.action.resource.platform.PlatformForm"/>
-        <form-bean name="EditPlatformGeneralPropertiesForm"
+        <form-bean name="EditPlatformGeneralPropertiesForm" 
                    type="org.hyperic.hq.ui.action.resource.platform.PlatformForm"/>
         <form-bean name="EditPlatformTypeNetworkPropertiesForm"
                    type="org.hyperic.hq.ui.action.resource.platform.PlatformForm"/>
@@ -697,6 +697,7 @@
               type="org.springframework.web.struts.DelegatingActionProxy"
               name="ResourceForm"
               scope="request"
+              validate="true"
               input="/resource/platform/Inventory.do?mode=edit">
         <set-property property="workflow" value="resource/GeneralProperties"/>
         <forward name="cancel" path="/resource/platform/Inventory.do?mode=view"
