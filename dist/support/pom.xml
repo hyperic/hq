@@ -3,17 +3,24 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
+  <!--  Severed parent relations so as to exclude from builds -->
+  <!--   <parent>
         <groupId>org.hyperic.hq</groupId>
         <artifactId>hq-parent</artifactId>
         <version>4.6.5.BUILD-SNAPSHOT</version>
     </parent>
-
+  --> 
+    
     <groupId>org.hyperic.hq.dist</groupId>
     <artifactId>support</artifactId>
+    <version>4.6.5.BUILD-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Hyperic HQ Distribution - Hyperic HQ Server Support Bundle</name>
-
+    
+    <!--  Explicitly defined here due to the removal of the parent relations -->
+    <properties>
+        <sigar.version>1.6.4</sigar.version>
+    </properties>
 
     <build>
         <plugins>

@@ -16,7 +16,7 @@
 
 
 	<modules>
-		<module>support</module>
+		<!-- <module>support</module> --> 
 		<module>agent</module>
 		<module>hyperic-hq-agent</module>
 		<module>bootstrap</module>

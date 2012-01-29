@@ -152,7 +152,7 @@
     </form>
     
     <form name="ResourceForm">
-      <field property="name" depends="required,maxlength">
+      <field property="name" depends="required,maxlength,mask">
         <msg name="required"
              key="resource.common.inventory.error.ResourceNameIsRequired"/>
         <var>
@@ -160,6 +160,11 @@
          <var-value>100</var-value>
         </var>
         <msg name="maxlength" key="resource.common.inventory.error.NameMaxLength"/>
+        <var>
+          <var-name>mask</var-name>
+          <var-value>${resourceName}</var-value>
+        </var>
+        <msg name="mask" key="resource.common.inventory.error.illegalResourceName" />
       </field>
       <field property="description" depends="maxlength">
         <arg0 key="common.header.Description"/>
