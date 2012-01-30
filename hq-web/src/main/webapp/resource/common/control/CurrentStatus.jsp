@@ -7,6 +7,7 @@
 <%@ taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
+<%@ taglib tagdir="/WEB-INF/tags/jsUtils" prefix="jsu" %>
 
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
@@ -81,7 +82,7 @@
    <c:set var="statusMsg"><c:out value="${statusMsg}"/>&nbsp;<html:link href="${detailsLink}"><fmt:message key="resource.group.ControlStatus.Link.Details"/></html:link></c:set>
   </c:if>
 
-<script>
+<jsu:script>
     setInterval(function (){
       <c:url var="updateUrl" value="/resource/common/control/UpdateStatus.do">
         <c:param name="eid" value="${Resource.entityId}"/>
@@ -118,7 +119,11 @@
           timeout: 2000
       });
     },5000);
-</script>
+</jsu:script>
+
+<jsu:script onLoad="true">
+        hyperic.updateControlStatus();
+</jsu:script>
     
  </c:when>
  <c:when test="${controlStatus eq 'Failed'}">
