@@ -190,9 +190,7 @@ public class JBossServerControlPlugin extends ServerControlPlugin {
         ConfigSchema schema = super.getConfigSchema(info, config);
         ConfigOption opt = schema.getOption(PROP_PROGRAM);
         opt.setDescription("Server start program");
-        List options = schema.getOptions();
-        options.remove(opt);
-        options.add(0, opt);
+        schema.addOptionAsFirst(opt);
         return schema;
     }
 
