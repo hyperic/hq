@@ -26,6 +26,7 @@
 package org.hyperic.hq.plugin.exchange;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -177,21 +178,23 @@ public class ExchangeDetector
     static Map<String,String> getExchangeVersionInfo(String key){
         Map<String,String> info=new HashMap<String,String>();
             
-        String cmdArgs[] = {"cmd", "/c",
-            "powershell",
-            "-command",
-            "\"& { Get-ItemProperty HKLM:"+key+" }\""
-        };
         
         Process cmd;
         try {
+            String cmdArgs[] = {"cmd", "/C",
+                "powershell",
+                "-command",
+                "Get-ItemProperty",
+                "HKLM:\\SOFTWARE\\Microsoft\\Exchange\\v8.0\\Setup"
+            };
+
             log.debug("[getExchangeVersionInfo] cmdArgs=" + Arrays.asList(cmdArgs));
             cmd = Runtime.getRuntime().exec(cmdArgs);
-            cmd.getOutputStream().close();
             StreamGobbler outputGobbler = new StreamGobbler(cmd.getInputStream());
             StreamGobbler errorGobbler = new StreamGobbler(cmd.getErrorStream());
             outputGobbler.start();
             errorGobbler.start();
+            cmd.getOutputStream().close();
             cmd.waitFor();
             String resultString = outputGobbler.getString()+errorGobbler.getString();
             Matcher msiBuildMajor = Pattern.compile("MsiBuildMajor[^:]*:[^\\d]*(\\d*)").matcher(resultString);

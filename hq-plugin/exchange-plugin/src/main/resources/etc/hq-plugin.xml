@@ -562,14 +562,6 @@
 
   <filter name="template" value="${mbox}:${name}"/>
   <metrics name="exchange-mbox">
-    <metric name="Send Queue Size"/> <!-- gone in 2007? -->
-
-    <metric name="Receive Queue Size"
-            indicator="true"/>
-
-    <metric name="Categorization Count"
-            collectionType="trendsup"/>
-
     <metric name="Messages Delivered"
             category="THROUGHPUT"
             collectionType="trendsup"/>
@@ -582,8 +574,6 @@
 
     <metric name="Messages Submitted"
             collectionType="trendsup"/>
-
-    <metric name="Single Instance Ratio"/>
 
     <metric name="Average Delivery Time"/>
 
@@ -599,6 +589,32 @@
     <metric name="Local deliveries"/>
   </metrics>
 
+    <metrics name="MBOX_V5">
+          <metric name="Send Queue Size"/>
+
+    <metric name="Receive Queue Size"
+            indicator="true"/>
+
+    <metric name="Categorization Count"
+            collectionType="trendsup"/>
+
+    <metric name="Single Instance Ratio"/>
+
+    </metrics>
+    
+  <metrics name="MBOX_V8">
+    <metric name="Messages Queued For Submission"/>
+
+    <metric name="Receive Queue Size"
+            indicator="true"/>
+
+    <metric name="Categorization Count"
+            collectionType="trendsup"/>
+
+      <metric name="Single Instance Ratio"/>
+
+  </metrics>
+    
   <filter name="template" value="${imap4}:${name}"/>
   <metrics name="IMAP4">
     <metric name="APPEND Total"
@@ -704,18 +720,6 @@
     <metric name="RENAME Failures"
             collectionType="trendsup"/>
 
-    <metric name="RLIST Total"
-            collectionType="trendsup"/>
-
-    <metric name="RLIST Failures"
-            collectionType="trendsup"/>
-
-    <metric name="RLSUB Total"
-            collectionType="trendsup"/>
-
-    <metric name="RLSUB Failures"
-            collectionType="trendsup"/>
-
     <metric name="SEARCH Total"
             collectionType="trendsup"/>
 
@@ -745,12 +749,6 @@
             collectionType="trendsup"/>
 
     <metric name="SUBSCRIBE Failures"
-            collectionType="trendsup"/>
-
-    <metric name="UID Total"
-            collectionType="trendsup"/>
-
-    <metric name="UID Failures"
             collectionType="trendsup"/>
 
     <metric name="UNSUBSCRIBE Total"
@@ -793,6 +791,25 @@
 
     <metric name="Connections Current"
             indicator="true"/>
+
+    <metric name="RLIST Total"
+            collectionType="trendsup"/>
+
+    <metric name="RLIST Failures"
+            collectionType="trendsup"/>
+
+    <metric name="RLSUB Total"
+            collectionType="trendsup"/>
+
+    <metric name="RLSUB Failures"
+            collectionType="trendsup"/>
+
+    <metric name="UID Total"
+            collectionType="trendsup"/>
+
+    <metric name="UID Failures"
+            collectionType="trendsup"/>
+
   </metrics>
 
   <metrics name="IMAP4_V8" include="IMAP4">
@@ -807,6 +824,19 @@
             template="${imap4}:Total Connections"
             collectionType="trendsup"/>
 
+    <metric name="Connections Current"
+            template="${imap4}:Current Connections"
+            indicator="true"/>
+  </metrics>
+
+  <metrics name="IMAP4_V14" include="IMAP4">
+    <metric name="Availability"
+            template="win32:Service=MSExchangeImap4:${alias}"
+            category="AVAILABILITY"
+            indicator="true"/>
+    <metric name="Connections Total"
+            template="${imap4}:Connections Total"
+            collectionType="trendsup"/>
     <metric name="Connections Current"
             template="${imap4}:Current Connections"
             indicator="true"/>
@@ -1073,10 +1103,11 @@
     <metric name="Tarpitting Delays Anonymous"/>
   </metrics>
 
-  <metrics name="Exchange 5.5" include="exchange-is,exchange-mbox"/>
-  <metrics name="Exchange 2000" include="exchange-is,exchange-mbox"/>
-  <metrics name="Exchange 2003" include="exchange-is,exchange-mbox"/>
-  <metrics name="Exchange 2007" include="exchange-is,exchange-mbox"/>
+  <metrics name="Exchange 5.5" include="exchange-is,exchange-mbox,MBOX_V5"/>
+  <metrics name="Exchange 2000" include="exchange-is,exchange-mbox,MBOX_V5"/>
+  <metrics name="Exchange 2003" include="exchange-is,exchange-mbox,MBOX_V5"/>
+  <metrics name="Exchange 2007" include="exchange-is,exchange-mbox,MBOX_V8"/>
+  <metrics name="Exchange 2010" include="exchange-is,exchange-mbox"/>
   <metrics name="Exchange Transport 2007" include="exchange-transport"/>
 
   <metrics name="Exchange 5.5 POP3" include="POP3_V5"/>
@@ -1088,6 +1119,7 @@
   <metrics name="Exchange 2000 IMAP4" include="IMAP4_V5"/>
   <metrics name="Exchange 2003 IMAP4" include="IMAP4_V5"/>
   <metrics name="Exchange 2007 IMAP4" include="IMAP4_V8"/>
+  <metrics name="Exchange 2010 IMAP4" include="IMAP4_V14"/>
 
   <metrics name="Exchange 5.5 MTA" include="MTA"/>
   <metrics name="Exchange 2000 MTA" include="MTA"/>
@@ -1186,7 +1218,7 @@
     <plugin type="log_track"
             class="org.hyperic.hq.product.Win32EventLogTrackPlugin"/>    
 
-    <property name="regKey" value="\SOFTWARE\Microsoft\Exchange\Setup"/>
+    <property name="regKey" value="\SOFTWARE\Microsoft\Exchange\v8.0\Setup"/>
     <property name="version" value="8.\d*"/>
 
     <properties>
