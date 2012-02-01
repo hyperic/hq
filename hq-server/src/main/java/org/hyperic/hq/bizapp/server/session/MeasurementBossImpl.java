@@ -66,7 +66,6 @@ import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.ServerManager;
-import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceClusterValue;
 import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.appdef.shared.VirtualManager;
@@ -78,8 +77,6 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceRelation;
-import org.hyperic.hq.authz.server.session.ResourceType;
-import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
@@ -148,22 +145,22 @@ public class MeasurementBossImpl implements MeasurementBoss {
     private static final double AVAIL_UP = MeasurementConstants.AVAIL_UP;
     protected final Log log = LogFactory.getLog(MeasurementBossImpl.class);
 
-    private SessionManager sessionManager;
-    private AuthBoss authBoss;
-    private MeasurementManager measurementManager;
-    private TemplateManager templateManager;
-    private AvailabilityManager availabilityManager;
-    private DataManager dataManager;
-    private ConfigManager configManager;
-    private PlatformManager platformManager;
-    private ResourceManager resourceManager;
-    private ResourceGroupManager resourceGroupManager;
-    private ServerManager serverManager;
-    private ServiceManager serviceManager;
-    private VirtualManager virtualManager;
-    private ApplicationManager applicationManager;
-    private CritterTranslator critterTranslator;
-    private ProblemMetricManager problemMetricManager;
+    private final SessionManager sessionManager;
+    private final AuthBoss authBoss;
+    private final MeasurementManager measurementManager;
+    private final TemplateManager templateManager;
+    private final AvailabilityManager availabilityManager;
+    private final DataManager dataManager;
+    private final ConfigManager configManager;
+    private final PlatformManager platformManager;
+    private final ResourceManager resourceManager;
+    private final ResourceGroupManager resourceGroupManager;
+    private final ServerManager serverManager;
+    private final ServiceManager serviceManager;
+    private final VirtualManager virtualManager;
+    private final ApplicationManager applicationManager;
+    private final CritterTranslator critterTranslator;
+    private final ProblemMetricManager problemMetricManager;
 
     @Autowired
     public MeasurementBossImpl(SessionManager sessionManager, AuthBoss authBoss,
@@ -247,7 +244,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
         final List<Measurement> metrics;
 
         if (cats.size() == 1) {
-            String cat = (String) cats.iterator().next();
+            String cat = cats.iterator().next();
             metrics = measurementManager.findDesignatedMeasurements(subject, id, cat);
         } else {
             metrics = measurementManager.findDesignatedMeasurements(id);
@@ -453,7 +450,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
             // Go through the group members and return the first measurement
             // that we find
             for (Iterator<AppdefEntityID> it = grpMembers.iterator(); it.hasNext();) {
-                aeid = (AppdefEntityID) it.next();
+                aeid = it.next();
                 dm = findAvailabilityMetric(subj, aeid, measCache);
                 if (dm != null) {
                     break;
@@ -627,7 +624,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
         List<AppdefEntityID> kids = getAGMemberIds(subject, parentid, ctype);
         for (int i = 0; i < kids.size(); i++) {
             // Do create, because we want to create or update
-            AppdefEntityID kid = (AppdefEntityID) kids.get(i);
+            AppdefEntityID kid = kids.get(i);
             createMeasurements(sessionId, kid, tids, interval);
         }
     }
@@ -832,7 +829,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
         int i=0;
         for (final Measurement m : measurements) {
             if (m != null && data.containsKey(m.getId())) {
-                ret[i++] = (MetricValue) data.get(m.getId());
+                ret[i++] = data.get(m.getId());
             }
         }
 
@@ -981,7 +978,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
         throws SessionNotFoundException, SessionTimeoutException, PermissionException,
         MeasurementNotFoundException, AppdefEntityNotFoundException {
         if (id.isGroup())
-            return (Measurement) findMeasurements(sessionId, tid, new AppdefEntityID[] { id }).get(
+            return findMeasurements(sessionId, tid, new AppdefEntityID[] { id }).get(
                 0);
 
         final AuthzSubject subject = sessionManager.getSubject(sessionId);
@@ -1798,7 +1795,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
                 rv = new AppdefEntityValue(entIds[i], subject);
 
                 if (seen.containsKey(entIds[i])) {
-                    v = (Resource) seen.get(entIds[i]);
+                    v = seen.get(entIds[i]);
                 } else {
                     v = resourceManager.findResource(entIds[i]);
                     seen.put(entIds[i], v); // keep track of what we've seen
@@ -1816,7 +1813,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
         // MeasurementTemplate's and merge them into the result
         HashMap<MeasurementTemplate, List<MetricDisplaySummary>> result = new HashMap<MeasurementTemplate, List<MetricDisplaySummary>>();
         for (Iterator<Integer> iter = uniqueTemplates.keySet().iterator(); iter.hasNext();) {
-            Integer mtid = (Integer) iter.next();
+            Integer mtid = iter.next();
             result.put(uniqueTemplates.get(mtid), (List<MetricDisplaySummary>) templateMetrics
                 .get(mtid.intValue()));
         }
@@ -2146,13 +2143,13 @@ public class MeasurementBossImpl implements MeasurementBoss {
     private final Map<Integer, Measurement> getMidMap(Collection<Resource> resources) {
         final List<AppdefEntityID> aeids = new ArrayList<AppdefEntityID>();
         for (final Iterator<Resource> it = resources.iterator(); it.hasNext();) {
-            final Resource r = (Resource) it.next();
+            final Resource r = it.next();
             if (r == null || r.isInAsyncDeleteState()) {
                 continue;
             }
             aeids.add(AppdefUtil.newAppdefEntityId(r));
         }
-        final AppdefEntityID[] ids = (AppdefEntityID[]) aeids.toArray(new AppdefEntityID[0]);
+        final AppdefEntityID[] ids = aeids.toArray(new AppdefEntityID[0]);
         return getMidMap(ids, null);
     }
 
@@ -2267,7 +2264,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
                     continue;
                 }
                 if (availCache != null) {
-                    MetricValue mv = (MetricValue) availCache.get(meas.getId());
+                    MetricValue mv = availCache.get(meas.getId());
                     if (mv != null) {
                         data.put(meas.getId(), mv);
                     } else {
@@ -2279,7 +2276,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
             }
             if (debug)
                 watch.markTimeBegin("getLastAvail");
-            data.putAll(availabilityManager.getLastAvail((Integer[]) mids.toArray(new Integer[0])));
+            data.putAll(availabilityManager.getLastAvail(mids.toArray(new Integer[0])));
             if (debug)
                 watch.markTimeEnd("getLastAvail");
         }
@@ -2293,9 +2290,9 @@ public class MeasurementBossImpl implements MeasurementBoss {
                 continue;
             }
             if (midMap.containsKey(r.getId())) {
-                Integer mid = ((Measurement) midMap.get(r.getId())).getId();
+                Integer mid = midMap.get(r.getId()).getId();
                 MetricValue mval = null;
-                if (null != (mval = (MetricValue) data.get(mid))) {
+                if (null != (mval = data.get(mid))) {
                     result[i] = mval.getValue();
                 }
             } else {
@@ -2509,7 +2506,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
             templates = tmpls;
             tids = new Integer[templates.size()];
             for (int i = 0; i < templates.size(); i++) {
-                MeasurementTemplate t = (MeasurementTemplate) templates.get(i);
+                MeasurementTemplate t = templates.get(i);
                 tids[i] = t.getId();
             }
         } else {
@@ -2541,7 +2538,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
                 String type = resVal.getAppdefResourceTypeValue().getName();
                 int count = 0;
                 if (totalCounts.containsKey(type)) {
-                    count = ((Integer) totalCounts.get(type)).intValue();
+                    count = totalCounts.get(type).intValue();
                 }
                 totalCounts.put(type, new Integer(++count));
             } else if (resource instanceof AppdefEntityID) {
@@ -2586,10 +2583,10 @@ public class MeasurementBossImpl implements MeasurementBoss {
             int total = eids.length;
             String type = tmpl.getMonitorableType().getName();
             if (totalCounts.containsKey(type)) {
-                total = ((Integer) totalCounts.get(type)).intValue();
+                total = totalCounts.get(type).intValue();
             }
 
-            double[] data = (double[]) datamap.get(tmpl.getId());
+            double[] data = datamap.get(tmpl.getId());
 
             if (data == null && (showNoCollect == null || showNoCollect.equals(Boolean.FALSE))) {
                 continue;
@@ -2602,7 +2599,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
                 resmap.put(category, summaries);
             }
 
-            Long interval = (Long) intervals.get(tmpl.getId());
+            Long interval = intervals.get(tmpl.getId());
 
             // Now create a MetricDisplaySummary and add it to the list
             MetricDisplaySummary summary =
@@ -2611,7 +2608,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
             if (data != null) {
                 // See if there are problems, too
                 if (probmap.containsKey(tmpl.getId())) {
-                    ProblemMetricInfo pmi = (ProblemMetricInfo) probmap.get(tmpl.getId());
+                    ProblemMetricInfo pmi = probmap.get(tmpl.getId());
                     summary.setAlertCount(pmi.getAlertCount());
                     summary.setOobCount(pmi.getOobCount());
                 }
@@ -2773,6 +2770,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
      * @return a List of ResourceTypeDisplaySummary's
      * @deprecated use POJO API instead
      */
+    @Deprecated
     private List<ResourceTypeDisplaySummary> getSummarizedResourceCurrentHealth(
                                                                                 AuthzSubject subject,
                                                                                 AppdefResourceValue[] resources)
@@ -2809,7 +2807,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
                 cds.setNumResources(new Integer(size));
                 // Replace the IDs with all of the members
                 List<AppdefEntityID> memberIds = getResourceIds(subject, aid, null);
-                AppdefEntityID[] ids = (AppdefEntityID[]) memberIds.toArray(new AppdefEntityID[0]);
+                AppdefEntityID[] ids = memberIds.toArray(new AppdefEntityID[0]);
                 setResourceTypeDisplaySummary(subject, cds, agval.getAppdefResourceTypeValue(),
                     ids, midMap);
                 summaries.add(cds);
@@ -2840,7 +2838,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
 
             ResourceTypeDisplaySummary summary;
 
-            AppdefEntityID[] ids = (AppdefEntityID[]) siblings.toArray(new AppdefEntityID[0]);
+            AppdefEntityID[] ids = siblings.toArray(new AppdefEntityID[0]);
             AppdefEntityID aid = ids[0];
             AppdefResourceValue resource = resourcemap.get(aid);
             // autogroup
@@ -2895,7 +2893,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
         // its own type is... silly)
         for (Map.Entry<Integer, List<AppdefResource>> entry : resTypeMap.entrySet()) {
 
-            final Collection<AppdefResource> siblings = (Collection<AppdefResource>) entry
+            final Collection<AppdefResource> siblings = entry
                 .getValue();
             // Make sure we have valid IDs
             if (siblings == null || siblings.size() == 0) {
@@ -3159,7 +3157,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
 
         for (Map.Entry<String, Map<Resource, Measurement>> entry : cats.entrySet()) {
             List<Measurement> metrics =
-                measurementManager.findDesignatedMeasurements(subject, group, (String) entry.getKey());
+                measurementManager.findDesignatedMeasurements(subject, group, entry.getKey());
             Map<Resource, Measurement> mmap = new HashMap<Resource, Measurement>(metrics.size());
             // Optimization for the fact that we can have multiple indicator
             // metrics for each category, only keep one
@@ -3275,11 +3273,11 @@ public class MeasurementBossImpl implements MeasurementBoss {
         throws AppdefEntityNotFoundException, PermissionException {
         Resource resource = resourceManager.findResource(aeid);
         rds.setEntityId(aeid);
-        rds.setResourceName(resource.getName());
+        rds.setResourceName(resource.getName()); 
         rds.setResourceEntityTypeName(aeid.getTypeName());
-        rds.setResourceTypeName(resource.getResourceType().getName());
+        rds.setResourceTypeName(resource.getPrototype().getName());
         if (parentResource == null) {
-            rds.setHasParentResource(Boolean.FALSE);
+            rds.setHasParentResource(Boolean.FALSE); 
         } else {
             rds.setParentResourceId(parentResource.getId());
             rds.setParentResourceName(parentResource.getName());
@@ -3421,8 +3419,8 @@ public class MeasurementBossImpl implements MeasurementBoss {
                 if (list == null) {
                     // nothing to do
                 } else if (list.size() == 1) {
-                    dm = (Measurement) list.get(0);
-                    mv = (MetricValue) availCache.get(dm.getId());
+                    dm = list.get(0);
+                    mv = availCache.get(dm.getId());
                     if (mv != null) {
                         summary.setAvailability(mv.getObjectValue());
                         summary.setAvailTempl(dm.getTemplate().getId());
@@ -3516,7 +3514,7 @@ public class MeasurementBossImpl implements MeasurementBoss {
                 ;
                 if (availCache != null) {
                     Integer mid = m.getId();
-                    mv = (MetricValue) availCache.get(mid);
+                    mv = availCache.get(mid);
                 }
                 Double val = (mv == null) ? new Double(getAvailability(subject, id, measCache,
                     availCache)) : mv.getObjectValue();
