@@ -281,6 +281,13 @@ public class ProductPluginDeployer implements Comparator<String>, ApplicationCon
             };
             transactionRetry.runTransaction(runner, 3, 1000);
         } catch (Exception e) {
+            // HHQ-5390
+            final Runnable runner = new Runnable() {
+                public void run() {
+                    pluginManager.markPluginDisabledByName(pluginName);
+                }
+            };
+            transactionRetry.runTransaction(runner, 3, 1000);
             log.error("Unable to deploy plugin '" + pluginName + "'", e);
         }
     }
