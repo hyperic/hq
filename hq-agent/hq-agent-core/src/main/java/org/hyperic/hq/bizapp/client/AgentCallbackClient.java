@@ -53,7 +53,13 @@ public abstract class AgentCallbackClient {
     private static final String LATHER_CMD = "LATHER_CMD";
     private ProviderFetcher fetcher;        // Storage of provider info
     private HashSet<String> secureCommands; // Secure commands
-    private AgentStatsCollector statsCollector = AgentStatsCollector.getInstance();
+    private static AgentStatsCollector statsCollector = AgentStatsCollector.getInstance();
+    static {
+        statsCollector.register(LATHER_CMD);
+        for (String cmd : CommandInfo.ALL_COMMANDS) {
+            statsCollector.register(LATHER_CMD + "_" + cmd.toUpperCase());
+        }
+    }
 
     public AgentCallbackClient(ProviderFetcher fetcher, String[] secureCommands) {
         this.fetcher = fetcher;
@@ -61,10 +67,6 @@ public abstract class AgentCallbackClient {
         this.secureCommands = new HashSet<String>();
         for(int i=0; i<secureCommands.length; i++){
             this.secureCommands.add(secureCommands[i]);
-        }
-        statsCollector.register(LATHER_CMD);
-        for (String cmd : CommandInfo.ALL_COMMANDS) {
-            statsCollector.register(LATHER_CMD + "_" + cmd.toUpperCase());
         }
     }
 
