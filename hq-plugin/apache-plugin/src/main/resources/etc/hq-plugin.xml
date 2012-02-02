@@ -701,8 +701,6 @@
   <server name="Apache httpd"
           platforms="Unix,Win32">
 
-    <property name="DEFAULT_CONF_FILE"
-              value="conf/httpd.conf"/>
 
     <property name="DEFAULT_LOG_FILE"
               value="logs/error_log"/>
@@ -737,11 +735,11 @@
     		platform="Unix"
     		class="org.hyperic.hq.product.FileChangeTrackPlugin">
       <monitored>
-        <folder path="httpd/conf" recursive="false" filter=".*\.conf"/>
-        <folder path="httpd/conf.d" recursive="false" filter=".*\.conf"/>
+        <folder path="" recursive="true" filter=".*\.conf"/>
+        <folder path="httpd/conf.d" recursive="false" filter=".*"/>
       </monitored>
     </plugin>
-    <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="true" />
+    <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="false" />
  
     <plugin type="control"
             class="ApacheControlPlugin"/>
@@ -867,8 +865,8 @@ ExtendedStatus On
     		platform="Unix"
     		class="org.hyperic.hq.product.FileChangeTrackPlugin">
       <monitored>
-        <folder path="httpd/conf" recursive="false" filter=".*.conf"/>
-        <folder path="httpd/conf.d" recursive="false" filter=".*.conf"/>
+        <folder path="" recursive="true" filter=".*\.conf"/>
+        <folder path="httpd/conf.d" recursive="false" filter=".*"/>
       </monitored>
     </plugin>
     <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="true" />
