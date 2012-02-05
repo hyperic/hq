@@ -140,7 +140,7 @@ public class HQServer {
             upgradeDB();
         } catch (Exception e) {
             log.error("Error running database upgrade routine: " + e, e);
-            return -1 ;
+            return ShutdownType.AbnormalStop.exitCode() ;
         }
         
         if (!(verifySchema())) {
@@ -176,6 +176,14 @@ public class HQServer {
     }
     
     boolean verifySchema() {
+        final String sInconsistentStateErrorMsgTemplate = "HQ DB schema is in a bad state: '%s'." + 
+                " This is most likely due to a failed upgrade.  " +
+                "Please either restore from backups and start your " +
+                "previous version of HQ or contact HQ support.  " +
+                "HQ cannot start while the current DB Schema version " +
+                "is in this state" ; 
+        
+        boolean isSuccessful = false ;   
         Statement stmt = null;
         ResultSet rs = null;
         Connection conn = null;
@@ -189,15 +197,14 @@ public class HQServer {
                 final String currSchema = rs.getString("propvalue");
                 log.info("HQ DB schema: " + currSchema);
                 if (currSchema.contains(HQConstants.SCHEMA_MOD_IN_PROGRESS)) {
-                    log.fatal("HQ DB schema is in a bad state: '" + currSchema +
-                              "'.  This is most likely due to a failed upgrade.  " +
-                              "Please either restore from backups and start your " +
-                              "previous version of HQ or contact HQ support.  " +
-                              "HQ cannot start while the current DB Schema version " +
-                              "is in this state");
-                    return false;
-                }
-            }
+                    log.fatal(String.format(sInconsistentStateErrorMsgTemplate, currSchema));
+                }else { 
+                    isSuccessful = true ; 
+                }//EO else if DB version is in a consistent state 
+            }else { 
+                log.fatal(String.format(sInconsistentStateErrorMsgTemplate, "No CAM_SCHEMA_VERSION property found"));
+            }//EO else if there was no CAM_SCHEMA_VERSION proprety 
+            
         } catch (SQLException e) {
             try {
                 DatabaseMetaData metaData = (conn == null) ? null : conn.getMetaData();
@@ -209,7 +216,7 @@ public class HQServer {
         } finally {
             DBUtil.closeJDBCObjects(HQServer.class.getName(), conn, stmt, rs);
         }
-        return true;
+        return isSuccessful ; 
     }
 
     int upgradeDB() {
@@ -260,13 +267,15 @@ public class HQServer {
         	iReturnCode = server.start();
         } else if ("stop".equals(args[0])) {
             server.stop();
+            iReturnCode = ShutdownType.NormalStop.exitCode() ; 
+            //return ;  
         } else {
             System.err.println("Usage: HQServer {start|stop}");
         }			
         
         //delegate the shutdown behavior to the ShutdownType strategies.
         final ShutdownType enumShutdownType = ShutdownType.reverseValueOf(iReturnCode) ;
-        System.out.println("[HQServer.main()]: Shutdown of type '" + enumShutdownType + 
+        System.out.println("[HQServer.main("+args[0]+")]: Shutdown of type '" + enumShutdownType + 
         																		"' was request") ;
         enumShutdownType.shutdown() ; 
         
