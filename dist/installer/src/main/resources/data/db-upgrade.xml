@@ -11731,7 +11731,7 @@ has already been defined.
                 TYPE varchar2(32 char) not null,
                 CERT varchar2(4000 char) not null,
                 CERT_CHAIN varchar2(4000 char),
-                FILE BLOB,  
+                "FILE" BLOB,  
                 primary key (ID),
                 unique (ALIAS_NAME)
             )
@@ -11755,7 +11755,7 @@ has already been defined.
         	ALTER TABLE EAM_KEYSTORE RENAME COLUMN FILE TO CERT_FILE
         </statement>
         <statement targetDB="oracle">
-        	ALTER TABLE EAM_KEYSTORE RENAME COLUMN FILE TO CERT_FILE
+        	ALTER TABLE EAM_KEYSTORE RENAME COLUMN "FILE" TO CERT_FILE
         </statement>
     </schema-directSQL>
  </schemaSpec>

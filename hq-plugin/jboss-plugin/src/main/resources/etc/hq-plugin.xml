@@ -1683,10 +1683,10 @@
         <plugin type="autoinventory" class="org.hyperic.hq.plugin.jboss7.JBossHostControllerDetector"/>
         <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
         <plugin type="collector" class="org.hyperic.hq.plugin.jboss7.JBossHostControllerCollector"/>
-        <filter name="conf" value=".*\.xml|.*\.properties"/>
+        <filter name="conf7" value=".*\.xml|.*\.properties"/>
         <plugin type="config_track" class="org.hyperic.hq.product.FileChangeTrackPlugin">
             <monitored>
-                <folder path="configuration/" recursive="false" filter="${conf}"/>
+                <folder path="configuration/" recursive="false" filter="${conf7}"/>
             </monitored>
         </plugin>
         <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="true" />

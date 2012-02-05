@@ -25,19 +25,15 @@
 
 package org.hyperic.hq.plugin.exchange;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
+import java.io.*;
+import java.nio.charset.Charset;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.product.AutoServerDetector;
-import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.ServerDetector;
-import org.hyperic.hq.product.ServerResource;
-import org.hyperic.hq.product.ServiceResource;
+import org.hyperic.hq.product.*;
 import org.hyperic.sigar.win32.Pdh;
-import org.hyperic.sigar.win32.RegistryKey;
 import org.hyperic.sigar.win32.Service;
 import org.hyperic.sigar.win32.Win32Exception;
 import org.hyperic.util.config.ConfigResponse;
@@ -56,9 +52,6 @@ public class ExchangeDetector
         POP3_NAME,
         MTA_NAME,
     };
-
-    private static final String EXCHANGE_KEY =
-        "SOFTWARE\\Microsoft\\Exchange\\Setup";
 
     static final String EX = "MSExchange";
     private static final String WEBMAIL = EX + " Web Mail";
@@ -95,10 +88,14 @@ public class ExchangeDetector
         try {
             exch = new Service(EXCHANGE_IS);
             if (exch.getStatus() != Service.SERVICE_RUNNING) {
+                log.debug("[getServerResources] service '" + EXCHANGE_IS
+                        + "' is not RUNNING (status='"+exch.getStatusString()+"')");
                 return null;
             }
             exe = exch.getConfig().getExe().trim();
         } catch (Win32Exception e) {
+            log.debug("[getServerResources] Error getting '" + EXCHANGE_IS
+                    + "' service information " + e, e);
             return null;
         } finally {
             if (exch != null) {
@@ -108,38 +105,32 @@ public class ExchangeDetector
 
         File bin = new File(exe).getParentFile();
         installpath = bin.getParent();
-        if (!isInstallTypeVersion(bin.getPath())) {
-            return null;
-        }
 
         ServerResource server = createServerResource(installpath);
-        server.setProductConfig();
-        server.setMeasurementConfig();
 
-        RegistryKey key = null;
-        try {
-            //XXX does not work for 64-bit exchange running 32-bit agent
-            key = RegistryKey.LocalMachine.openSubKey(EXCHANGE_KEY);
-            ConfigResponse cprops = new ConfigResponse();
-            try {
-                cprops.setValue("version",
-                                key.getStringValue("Services Version"));
-                cprops.setValue("build",
-                                key.getStringValue("NewestBuild"));
-                server.setCustomProperties(cprops);
-            } catch (Win32Exception e) {
+        String expectedVersion = getTypeProperty("version");
+        String regKey = getTypeProperty("regKey");
+        if (expectedVersion!=null) {
+            Map<String, String> info = getExchangeVersionInfo(regKey);
+            if (!checkVersion(info.get("version"), expectedVersion)) {
+                log.debug("[getServerResources] exchange on '" + bin
+                        + "' is not a " + getTypeInfo().getName());
+                return null;
             }
-        } catch (Win32Exception e) {
-        } finally {
-            if (key != null) {
-                key.close();
+            server.setCustomProperties(new ConfigResponse(info));
+        } else {
+            if (!isInstallTypeVersion(bin.getPath())) {
+                return null;
             }
         }
-
+        
+        server.setProductConfig();
+        server.setMeasurementConfig();
         servers.add(server);
         return servers;
     }
 
+    @Override
     protected List discoverServices(ConfigResponse config)
         throws PluginException {
 
@@ -165,8 +156,95 @@ public class ExchangeDetector
                 services.add(createService(WEB_NAME));
             } //else not enabled if no counters
         } catch (Win32Exception e) {
+            log.debug(e,e);
         }
 
         return services;
+    }
+    
+    static boolean checkVersion(String version, String expectedVersion) {
+        boolean isOK = false;
+        if (version != null) {
+            Pattern versionRegx = Pattern.compile(expectedVersion);
+            Matcher versrionMatcher = versionRegx.matcher(version);
+            isOK = versrionMatcher.find();
+        }
+        log.debug("[checkVersion] versrionString=" + version
+                + " expectedVersion=" + expectedVersion
+                + " isOK=" + isOK);
+        return isOK;
+    }
+    
+    static Map<String,String> getExchangeVersionInfo(String key){
+        Map<String,String> info=new HashMap<String,String>();
+            
+        
+        Process cmd;
+        try {
+            String cmdArgs[] = {"cmd", "/C",
+                "powershell",
+                "-command",
+                "Get-ItemProperty",
+                "HKLM:\\SOFTWARE\\Microsoft\\Exchange\\v8.0\\Setup"
+            };
+
+            log.debug("[getExchangeVersionInfo] cmdArgs=" + Arrays.asList(cmdArgs));
+            cmd = Runtime.getRuntime().exec(cmdArgs);
+            StreamGobbler outputGobbler = new StreamGobbler(cmd.getInputStream());
+            StreamGobbler errorGobbler = new StreamGobbler(cmd.getErrorStream());
+            outputGobbler.start();
+            errorGobbler.start();
+            cmd.getOutputStream().close();
+            cmd.waitFor();
+            String resultString = outputGobbler.getString()+errorGobbler.getString();
+            Matcher msiBuildMajor = Pattern.compile("MsiBuildMajor[^:]*:[^\\d]*(\\d*)").matcher(resultString);
+            Matcher msiBuildMinor = Pattern.compile("MsiBuildMinor[^:]*:[^\\d]*(\\d*)").matcher(resultString);
+            if (msiBuildMajor.find() && msiBuildMinor.find()) {
+                String build = msiBuildMajor.group(1)+"."+msiBuildMinor.group(1);
+                info.put("build", build);
+            } else {
+                log.debug("[getExchangeVersionInfo] command result=" + resultString);
+                log.debug("[getExchangeVersionInfo] Error getting Exchange build");
+            }
+            Matcher msiProductMajor = Pattern.compile("MsiProductMajor[^:]*:[^\\d]*(\\d*)").matcher(resultString);
+            Matcher msiProductMinor = Pattern.compile("MsiProductMinor[^:]*:[^\\d]*(\\d*)").matcher(resultString);
+            if (msiProductMajor.find() && msiProductMinor.find()) {
+                String versrion = msiProductMajor.group(1)+"."+msiProductMinor.group(1);
+                info.put("version", versrion);
+            } else {
+                log.debug("[getExchangeVersionInfo] command result=" + resultString);
+                log.debug("[getExchangeVersionInfo] Error getting Exchange version");
+            }
+        } catch (Exception ex) {
+            log.debug("[getExchangeVersionInfo] Error getting Exchange version " + ex, ex);
+        }
+        return info;
+    }
+
+    static class StreamGobbler extends Thread {
+        InputStream is;
+        StringBuilder sb = new StringBuilder();
+
+        StreamGobbler(InputStream is) {
+            this.is = is;
+        }
+
+        public String getString(){
+            return sb.toString();
+        }
+        
+        @Override
+        public void run() {
+            try {
+                InputStreamReader isr = new InputStreamReader(is);
+                BufferedReader br = new BufferedReader(isr);
+                String line;
+                while ((line = br.readLine()) != null) {
+                    sb.append(line).append("\n");
+                }
+            } catch (IOException e) {
+                log.debug(e,e);
+            }
+        }
     }
 }

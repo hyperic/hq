@@ -317,8 +317,12 @@ public class TomcatServerDetector
             Attributes attributes = jarFile.getManifest().getMainAttributes();
             jarFile.close();
             String tomcatVersion = attributes.getValue("Specification-Version");
-            log.debug("[isInstallTypeVersion] tomcatVersion='" + tomcatVersion + "' (" + getTypeInfo().getVersion() + ")");
-            correctVersion = tomcatVersion.equals(getTypeInfo().getVersion());
+            String expectedVersion = getTypeProperty("tomcatVersion");
+            if(expectedVersion==null){
+                expectedVersion=getTypeInfo().getVersion();
+            }
+            log.debug("[isInstallTypeVersion] tomcatVersion='" + tomcatVersion + "' (" + expectedVersion + ")");
+            correctVersion = tomcatVersion.equals(expectedVersion);
         } catch (IOException e) {
             log.debug("Error getting Tomcat version (" + e + ")", e);
         }

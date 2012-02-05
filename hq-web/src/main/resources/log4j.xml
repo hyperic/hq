@@ -40,7 +40,7 @@
 		<param name="Target" value="System.out" />
 
 		<layout class="org.apache.log4j.PatternLayout">
-			<param name="ConversionPattern" value="%d %-5p [%t] [%c@%L] %m%n" />
+			<param name="ConversionPattern" value="%d{dd-MM-yyyy HH:mm:ss,SSS z} %-5p [%t] [%c@%L] %m%n" />
 		</layout>
 	</appender>
 

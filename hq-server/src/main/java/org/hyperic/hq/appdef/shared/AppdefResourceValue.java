@@ -103,6 +103,7 @@ public abstract class AppdefResourceValue
     /**
      * @deprecated
      */
+    @Deprecated
     public static Map<String,Integer> getResourceTypeCountMap(Collection objColl) {
         Map<String, Integer> aMap = new HashMap<String, Integer>();
                 
@@ -116,7 +117,7 @@ public abstract class AppdefResourceValue
             } else {
                 // increment the count
                 int count =
-                    ((Integer) aMap.get(rType.getName())).intValue();
+                    aMap.get(rType.getName()).intValue();
                 aMap.put(rType.getName(), new Integer(++count));
             }
         }
@@ -129,6 +130,7 @@ public abstract class AppdefResourceValue
      *         abstract base class for use in agnostic context.
      * @deprecated
      */
+    @Deprecated
     public AppdefResourceTypeValue getAppdefResourceTypeValue () {
         int entityType = this.getEntityId().getType();
         switch(entityType) {
@@ -164,6 +166,7 @@ public abstract class AppdefResourceValue
      * of PlatformLightValues matching that type
      * @deprecated
      */
+    @Deprecated
     public static Map getPlatformTypeCountMap(Collection platformColl) {
         return getResourceTypeCountMap(platformColl);
     }
@@ -175,6 +178,7 @@ public abstract class AppdefResourceValue
      * of ServerLightValues matching that type
      * @deprecated
      */
+    @Deprecated
     public static Map<String,Integer> getServerTypeCountMap(Collection<? extends AppdefResourceValue> serverColl) {
         // remove any virtual servers
         Collection<AppdefResourceValue> nonVirtual = new ArrayList<AppdefResourceValue>(serverColl.size());
@@ -197,6 +201,7 @@ public abstract class AppdefResourceValue
      * of ServiceLightValues matching that type
      * @deprecated
      */
+    @Deprecated
     public static Map<String,Integer> getServiceTypeCountMap(Collection serviceColl) {
         return getResourceTypeCountMap(serviceColl);
     }
@@ -211,6 +216,7 @@ public abstract class AppdefResourceValue
     /**
      * @deprecated
      */
+    @Deprecated
     public static AppdefResourceType getAppdefResourceType(AuthzSubject subject, ResourceGroup group) {
         if (group.isMixed())
             throw new IllegalArgumentException("Group " + group.getId() +
@@ -219,6 +225,7 @@ public abstract class AppdefResourceValue
                                    group.getGroupEntResType().intValue());
     }
     
+    @Override
     public boolean equals(Object rhs) {
         if (this == rhs) {
             return true;
@@ -230,6 +237,7 @@ public abstract class AppdefResourceValue
         return false;
     }
     
+    @Override
     public int hashCode() {
         return getEntityId().hashCode();
     }
@@ -237,6 +245,7 @@ public abstract class AppdefResourceValue
     /**
      * @deprecated
      */
+    @Deprecated
     public AppdefResourceTypeValue getAppdefResourceTypeValue(AuthzSubject subject, ResourceGroup group) {
         if (group.isMixed()) {
             AppdefResourceTypeValue res = new GroupTypeValue();
@@ -256,6 +265,7 @@ public abstract class AppdefResourceValue
      * should not be used unless it is for backwards compatibility
      * @deprecated
      */
+    @Deprecated
     public static AppdefResourceValue convertToAppdefResourceValue(Resource resource) {
         final int type = resource.getResourceType().getId();
         if (type == AuthzConstants.authzPlatform) {
@@ -267,7 +277,9 @@ public abstract class AppdefResourceValue
         } else if (type == AuthzConstants.authzApplication) {
             return getApplicationManager().getApplicationById(resource.getInstanceId()).getAppdefResourceValue();
         } else {
-            throw new IllegalArgumentException("Invalid appdef resource type:" + type);
+          //HHQ- Guys return null so that appdef types unsupported by the authorization mechanizm would be 
+          //filters by the permissionManagear. 
+          return null ;
         }
     }
 

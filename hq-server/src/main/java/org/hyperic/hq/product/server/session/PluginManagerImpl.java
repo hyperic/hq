@@ -939,6 +939,18 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
     }
 
     @Transactional(readOnly=false)
+    public void markPluginDisabledByName(String pluginName) {
+        final Plugin plugin = pluginDAO.findByName(pluginName);
+        if (plugin == null || plugin.isDeleted()) {
+            return;
+        }
+        if (!plugin.isDisabled()) {
+            plugin.setDisabled(true);
+            plugin.setModifiedTime(System.currentTimeMillis());
+        }
+    }
+
+    @Transactional(readOnly=false)
     public void markEnabled(String pluginName) {
         final Plugin plugin = pluginDAO.findByName(pluginName);
         if (plugin == null || plugin.isDeleted()) {
