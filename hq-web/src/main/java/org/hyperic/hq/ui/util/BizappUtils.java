@@ -457,7 +457,7 @@ public class BizappUtils {
         List<AppdefResourceTypeValue> serverTypes = new ArrayList<AppdefResourceTypeValue>();
         synchronized(serverTypes) {
             while (sigIterator.hasNext()) {
-                ServerSignature st = (ServerSignature)sigIterator.next();
+                ServerSignature st = sigIterator.next();
 
                 AppdefResourceTypeValue stype = 
                         BizappUtils.findResourceTypeValue(sTypes, st.getServerTypeName());
@@ -1041,23 +1041,13 @@ public class BizappUtils {
         String[] values;
         for ( int i=0; i<numKeys; i++ ) {
             opt = (ConfigOption) keys.get(i);
-            optName = opt.getName();
-            values = request.getParameterValues(prefix + optName);
-            if ( values == null  ) {
-                continue;
-            }
-            if ( values.length > 1 ) {
-                value="";
-                for(int regExps=0;regExps<values.length;regExps++) {
-                    value += values[regExps] + " ";
-                }
-            } else {
-                value = values[0];
-            }
+            optName = opt.getName(); 
+            //extract the request parameter corresponding to the config option.
+            value = ActionUtils.getRequestConfigOption(opt, prefix, request) ; 
+            
             if ( value != null ) {
                 config.setValue(optName, value);
-                if ( wereChanges == Boolean.FALSE 
-                     && !value.equals(oldConfig.getValue(optName)) ) {
+                if ( wereChanges == Boolean.FALSE && !value.equals(oldConfig.getValue(optName)) ) {
                     wereChanges = Boolean.TRUE;
                 }
             }

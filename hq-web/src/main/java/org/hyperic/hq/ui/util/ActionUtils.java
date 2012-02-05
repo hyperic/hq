@@ -34,7 +34,11 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.apache.struts.util.LabelValueBean;
 import org.hyperic.hq.ui.beans.ConfigValues;
 import org.hyperic.util.HypericEnum;
 import org.hyperic.util.config.BooleanConfigOption;
@@ -42,10 +46,6 @@ import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.StringConfigOption;
-
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.util.LabelValueBean;
 
 /**
  * Utilities class that provides general convenience methods.
@@ -221,4 +221,46 @@ public class ActionUtils {
         }
         return res;
     }
+    
+    /**
+     * Extracts request parameters corresponding to the {@link ConfigOption} formal argument.
+     * <p> 
+     * <b>Note:</b> Multiple values corresponding to a single parameter would be concatenated to a 
+     * whitespace delimited string.<br/>
+     * <b>Note:</b> Boolean request parameters missing from the request would be considered as provided with a 
+     * <code>false</code> value.
+     * </p>  
+     * 
+     * @param configOption Request parameter metadata. 
+     * @param prefix Request parameter name prefix. 
+     * @param request {@link HttpServletRequest} instance.  
+     * @return
+     */
+    public static final String getRequestConfigOption(final ConfigOption configOption, final String prefix, 
+                                                                            final HttpServletRequest request) {  
+        String value = null ;
+        
+        final String reqParamName = prefix + configOption.getName() ; 
+        String[] arrRequestParams = request.getParameterValues(reqParamName) ; 
+        if(arrRequestParams == null){ 
+            //if the 
+            if(configOption instanceof BooleanConfigOption) {
+                value = Boolean.FALSE.toString() ; 
+            }else {
+                return null ; 
+            }//EO else if the configuration was not of a boolean nature.  
+            
+        }else if(arrRequestParams.length > 1) { 
+            value="";
+            for(int regExps=0; regExps < arrRequestParams.length; regExps++) {
+                value += arrRequestParams[regExps] + " ";
+            }//EO while there are more values 
+        }//EO else if option had more than one value 
+        else { 
+            value = arrRequestParams[0] ; 
+        }//EO else if there was a single value 
+        
+        return value ; 
+    }//EOM 
+    
 }
