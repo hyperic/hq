@@ -43,24 +43,18 @@ import org.tanukisoftware.wrapper.WrapperManager;
 public enum ShutdownType {
 
     Restart(12) {
-        /**
-         * Attempts to detect the a Tanukisoft {@link WrapperManager} and
-         * request a gracefull<br>
-         * restart. If presence was not detected will resort to shutdown.
-         */
+        
         @Override
-        public final void shutdown() {
-            // attempt to detect a wrapper presence and if found, request a
-            // restart, else
-            // invoke the normal system.exit
-            if (WrapperManager.isControlledByNativeWrapper())
-                WrapperManager.restartAndReturn();
-            else {
-                m_logger.error("Restart was requested but Wrapper watchdog was not detected - "
-                        + "please restart manually!!");
-                super.shutdown();
-            }// EO if wrapper was not detected.
-        }// EOM
+        protected final void executeNormalShutdown() {
+            m_logger.error("Restart was requested but Wrapper watchdog was not detected - "
+                    + "please restart manually!!");
+            super.executeNormalShutdown();
+        }//EOM 
+
+        @Override
+        protected final void executeWrapperManagedShutdown() {
+            WrapperManager.restartAndReturn();
+        }//EOM 
     }, // EO Restart enum
     NormalStop(0) {
 
@@ -96,8 +90,7 @@ public enum ShutdownType {
      *         the null object.
      */
     public static final ShutdownType reverseValueOf(final int iExitCode) {
-        final ShutdownType enumShutdownType = m_mapReverseMapping
-                .get(iExitCode);
+        final ShutdownType enumShutdownType = m_mapReverseMapping.get(iExitCode);
         return (enumShutdownType == null ? NormalStop : enumShutdownType);
     }// EOC
 
@@ -105,8 +98,22 @@ public enum ShutdownType {
      * Default implementation invoking the {@link System#exit(int)}.
      */
     public void shutdown() {
-        System.exit(this.m_iExitCode);
+        //Attempt to detect a wrapper presence and if found, delegate, 
+        // else invoke the normal system.exit
+        if (WrapperManager.isControlledByNativeWrapper())
+            this.executeWrapperManagedShutdown() ; 
+        else {
+            this.executeNormalShutdown() ; 
+        }//EO else if no wrapper presence was detected 
     }// EOM
+    
+    protected void executeNormalShutdown() { 
+        System.exit(this.m_iExitCode);
+    }//EOM 
+    
+    protected void executeWrapperManagedShutdown() { 
+        WrapperManager.stopAndReturn(this.m_iExitCode) ;  
+    }//EOM 
 
     /**
      * @return {@link System#exit(int)} exit code
