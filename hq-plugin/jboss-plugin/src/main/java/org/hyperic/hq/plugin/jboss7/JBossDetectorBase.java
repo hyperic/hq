@@ -79,12 +79,16 @@ public abstract class JBossDetectorBase extends DaemonDetector implements AutoSe
             if (version.startsWith(getTypeInfo().getVersion())) {
                 File cfgFile = getConfigFile(args);
                 String installPath;
+                String AIID;
                 try { // cosmetic
-                    installPath = cfgFile.getCanonicalPath();
+                    installPath = cfgFile.getParentFile().getParentFile().getCanonicalPath();
+                    AIID = cfgFile.getCanonicalPath();
                 } catch (IOException ex) {
-                    installPath = cfgFile.getAbsolutePath();
+                    installPath = cfgFile.getParentFile().getParentFile().getAbsolutePath();
+                    AIID = cfgFile.getAbsolutePath();
                 }
                 ServerResource server = createServerResource(installPath);
+                server.setIdentifier(AIID);
                 setProductConfig(server, getServerProductConfig(args));
                 server.setName(prepareServerName(server.getProductConfig()));
                 servers.add(server);

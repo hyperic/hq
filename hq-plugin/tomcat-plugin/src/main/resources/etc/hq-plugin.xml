@@ -173,8 +173,10 @@
     <property name="VERSION_FILE"
               value="server/lib/catalina-storeconfig.jar"/>
 
+    <property name="tomcatVersion" value="1.0"/>
+
     <plugin type="autoinventory"
-            class="org.hyperic.hq.product.jmx.MxServerDetector"/>
+            class="org.hyperic.hq.plugin.tomcat.TomcatServerDetector"/>
 
     <property name="domain"
               value="Catalina"/>
@@ -585,8 +587,7 @@
     <!-- derive installpath from -Dcatalina.base=... -->
     <property name="PROC_HOME_PROPERTY"
               value="catalina.base"/>
-    <plugin type="autoinventory"
-            class="org.hyperic.hq.plugin.tomcat.TomcatServerDetector"/>
+    <property name="tomcatVersion" value="6.0"/>
 
 
      &internal-services;
@@ -602,6 +603,7 @@
               value="lib/tomcat-api.jar"/>
     <property name="PROC_HOME_PROPERTY"
               value="catalina.base"/>
+    <property name="tomcatVersion" value="7.0"/>
      &internal-services;
      &hibernate-services;
   </server>
