@@ -22,17 +22,15 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
 package org.hyperic.hq.plugin.exchange;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.hyperic.hq.product.AutoServerDetector;
-import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.ServerDetector;
-import org.hyperic.hq.product.ServerResource;
-import org.hyperic.hq.product.ServiceResource;
+import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.product.*;
 import org.hyperic.sigar.win32.Pdh;
 import org.hyperic.sigar.win32.Service;
 import org.hyperic.sigar.win32.Win32Exception;
@@ -41,24 +39,27 @@ import org.hyperic.util.config.ConfigResponse;
 //2007 - Edge role does not have MSExchangeIS or most of the other services
 //both Edge and Hub have MSExchangeTransport
 public class ExchangeTransportDetector
-    extends ServerDetector
-    implements AutoServerDetector {
+        extends ServerDetector
+        implements AutoServerDetector {
+
+    private static final Log log =
+            LogFactory.getLog(ExchangeTransportDetector.class.getName());
 
     private static final String TRANSPORT =
-        ExchangeDetector.EX + "Transport";
+            ExchangeDetector.EX + "Transport";
 
     private static final String SMTP_SEND =
-        "SmtpSend";
+            "SmtpSend";
 
     private static final String SMTP_RECEIVE =
-        "SmtpReceive";
+            "SmtpReceive";
 
     private static final String[] SERVICES = {
         SMTP_SEND, SMTP_RECEIVE
     };
 
     public List getServerResources(ConfigResponse platformConfig)
-        throws PluginException {
+            throws PluginException {
 
         List servers = new ArrayList();
 
@@ -67,16 +68,31 @@ public class ExchangeTransportDetector
         try {
             exch = new Service(TRANSPORT);
             if (exch.getStatus() != Service.SERVICE_RUNNING) {
+                log.debug("[getServerResources] service '" + TRANSPORT
+                        + "' is not RUNNING (status='" + exch.getStatusString() + "')");
                 return null;
             }
             exe = exch.getConfig().getExe().trim();
         } catch (Win32Exception e) {
+            log.debug("[getServerResources] Error getting '" + TRANSPORT
+                    + "' service information " + e, e);
             return null;
         } finally {
             if (exch != null) {
                 exch.close();
             }
         }
+        
+        File bin = new File(exe).getParentFile();
+        String expectedVersion = getTypeProperty("version");
+        String regKey = getTypeProperty("regKey");
+        Map<String, String> info = ExchangeDetector.getExchangeVersionInfo(regKey);
+        if (!ExchangeDetector.checkVersion(info.get("version"), expectedVersion)) {
+            log.debug("[getServerResources] 'Exchange Transport' on '" + bin
+                    + "' is not a " + getTypeInfo().getName());
+            return null;
+        }
+
 
         ServerResource server = createServerResource(exe);
         server.setIdentifier(TRANSPORT);
@@ -91,14 +107,14 @@ public class ExchangeTransportDetector
 
         try {
             String[] instances =
-                Pdh.getInstances(TRANSPORT + " " + type);
+                    Pdh.getInstances(TRANSPORT + " " + type);
 
             for (int i=0; i<instances.length; i++) {
                 String name = instances[i];
                 if (name.equalsIgnoreCase("_Total")) {
                     continue;
                 }
-                
+
                 ServiceResource service = new ServiceResource();
                 service.setType(this, type);
                 service.setName(type + " " + name);
@@ -111,12 +127,14 @@ public class ExchangeTransportDetector
                 services.add(service);
             }
         } catch (Win32Exception e) {
+            log.debug(e, e);
         }
 
         return services;
-        
+
     }
 
+    @Override
     protected List discoverServices(ConfigResponse config)
             throws PluginException {
 

@@ -56,6 +56,8 @@ import org.junit.Test;
  * 
  */
 public class HQServerTest {
+    
+    private static final String EXPECTED_EXCEPTION_MSG = "***EXPECTED***" ;  
 
     private HQServer server;
     private ServerConfigurator serverConfigurator;
@@ -194,7 +196,7 @@ public class HQServerTest {
 
     @Test
     public void testStartServerUnableToTellIfRunning() throws SigarException {
-        EasyMock.expect(engineController.isEngineRunning()).andThrow(new SigarException());
+        EasyMock.expect(engineController.isEngineRunning()).andThrow(new SigarException(EXPECTED_EXCEPTION_MSG));
         replay();
         server.start();
         verify();
@@ -204,7 +206,7 @@ public class HQServerTest {
     public void testStartErrorConfiguring() throws Exception {
         EasyMock.expect(engineController.isEngineRunning()).andReturn(false);
         serverConfigurator.configure();
-        EasyMock.expectLastCall().andThrow(new NullPointerException());
+        EasyMock.expectLastCall().andThrow(new NullPointerException(EXPECTED_EXCEPTION_MSG));
         EasyMock.expect(embeddedDatabaseController.shouldUse()).andReturn(false);
         EasyMock.expect(
                 processManager.executeProcess(
@@ -269,8 +271,8 @@ public class HQServerTest {
                                 "org.apache.tools.ant.listener.Log4jListener", "-buildfile",
                                 serverHome + "/data/db-upgrade.xml", "upgrade" }), EasyMock.eq(serverHome),
                         EasyMock.eq(true), EasyMock.eq(HQServer.DB_UPGRADE_PROCESS_TIMEOUT))).andReturn(0);
-        EasyMock.expect(dataSource.getConnection()).andThrow(new SQLException());
-        Properties testProps = new Properties();
+        EasyMock.expect(dataSource.getConnection()).andThrow(new SQLException(EXPECTED_EXCEPTION_MSG));
+        /*Properties testProps = new Properties();
         testProps.put("server.java.opts", "-XX:MaxPermSize=192m -Xmx512m -Xms512m -XX:+HeapDumpOnOutOfMemoryError");
         testProps.put("server.webapp.port", "7080");
         final List<String> expectedOpts = new ArrayList<String>();
@@ -281,7 +283,7 @@ public class HQServerTest {
         expectedOpts.add("-Dserver.home=" + serverHome);
         EasyMock.expect(serverConfigurator.getServerProps()).andReturn(testProps);
         org.easymock.classextension.EasyMock.expect(osInfo.getName()).andReturn("Mac OS X");
-        EasyMock.expect(engineController.start(expectedOpts)).andReturn(0);
+        EasyMock.expect(engineController.start(expectedOpts)).andReturn(0);*/ 
         replay();
         server.start();
         verify();
@@ -359,7 +361,8 @@ public class HQServerTest {
         connection.close();
         resultSet.close();
         statement.close();
-        Properties testProps = new Properties();
+      
+        /*Properties testProps = new Properties();
         testProps.put("server.java.opts", "-XX:MaxPermSize=192m -Xmx512m -Xms512m -XX:+HeapDumpOnOutOfMemoryError");
         testProps.put("server.webapp.port", "7080");
         final List<String> expectedOpts = new ArrayList<String>();
@@ -370,7 +373,7 @@ public class HQServerTest {
         expectedOpts.add("-Dserver.home=" + serverHome);
         EasyMock.expect(serverConfigurator.getServerProps()).andReturn(testProps);
         org.easymock.classextension.EasyMock.expect(osInfo.getName()).andReturn("Mac OS X");
-        EasyMock.expect(engineController.start(expectedOpts)).andReturn(0);
+        EasyMock.expect(engineController.start(expectedOpts)).andReturn(0);*/
         replay();
         server.start();
         verify();
@@ -384,7 +387,8 @@ public class HQServerTest {
         EasyMock.expect(engineController.isEngineRunning()).andReturn(false);
         serverConfigurator.configure();
         EasyMock.expect(embeddedDatabaseController.shouldUse()).andReturn(true);
-        EasyMock.expect(embeddedDatabaseController.startBuiltInDB()).andThrow(new NullPointerException());
+        EasyMock.expect(embeddedDatabaseController.startBuiltInDB()).andThrow(
+                                            new NullPointerException(EXPECTED_EXCEPTION_MSG));
         replay();
         server.start();
         verify();
@@ -413,7 +417,7 @@ public class HQServerTest {
 
     @Test
     public void testStopErrorStoppingEngine() throws Exception {
-        EasyMock.expect(engineController.stop()).andThrow(new SigarException());
+        EasyMock.expect(engineController.stop()).andThrow(new SigarException(EXPECTED_EXCEPTION_MSG));
         replay();
         server.stop();
         verify();

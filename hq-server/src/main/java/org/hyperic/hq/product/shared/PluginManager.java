@@ -169,7 +169,7 @@ public interface PluginManager {
 
     /**
      * Sets the disabled flag to false of the {@link Plugin} object represented by pluginName
-     * @param pluginFileName - pluginNames associated with a {@link Plugin}
+     * @param pluginName - pluginName associated with a {@link Plugin}
      */
     void markEnabled(String pluginName);
 
@@ -186,8 +186,7 @@ public interface PluginManager {
     /**
      * updates {@link AgentPluginStatus} objs with the lastSyncStatus of "from" to "to"
      */
-    void updateAgentPluginSyncStatus(Integer agentId, AgentPluginStatusEnum from,
-                                     AgentPluginStatusEnum to);
+    void updateAgentPluginSyncStatus(Integer agentId, AgentPluginStatusEnum from, AgentPluginStatusEnum to);
 
     /**
      * Updates all the {@link AgentPluginStatus} objects associated with the agentId to the
@@ -207,5 +206,11 @@ public interface PluginManager {
     Map<Integer, AgentPluginStatus> getStatusesByAgentId(AgentPluginStatusEnum ... keys);
 
     Collection<PluginTypeEnum> getPluginType(Plugin plugin);
+
+    /**
+     * Sets the disabled flag to true of the {@link Plugin} object represented by pluginName
+     * @param pluginName - pluginName associated with a {@link Plugin}
+     */
+    void markPluginDisabledByName(String pluginName);
 
 }

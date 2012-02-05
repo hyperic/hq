@@ -397,9 +397,8 @@ input[type="text"] {
     border: 1px solid gray;
     border-top: 0;
     border-bottom: 1px solid gray;
-    overflow-y: scroll;
-    overflow-x: hidden;
-    /* height: 400px;*/
+    max-height: 400px;
+    overflow: auto;
 }
 
 #oldAgentSummaryPanel .gridheader {

@@ -48,10 +48,10 @@ public class JBossManagedDetector extends JBossHostControllerDetector {
         List<ServerResource> servers = new ArrayList<ServerResource>();
         List<ServerResource> controllers = super.getServerResources(platformConfig);
         for (ServerResource controller : controllers) {
-            List<String> serversNames = getServersNames(controller.getInstallPath());
+            List<String> serversNames = getServersNames(controller.getIdentifier());
             for (String serverName : serversNames) {
                 ServerResource server = createServerResource(controller.getInstallPath());
-                server.setIdentifier(serverName + "-" + controller.getInstallPath());
+                server.setIdentifier(serverName + "-" + controller.getIdentifier());
                 ConfigResponse pc = controller.getProductConfig();
                 pc.setValue(SERVER, serverName);
                 setProductConfig(server, pc);
