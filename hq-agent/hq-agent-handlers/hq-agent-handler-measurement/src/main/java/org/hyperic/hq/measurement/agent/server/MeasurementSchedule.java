@@ -31,6 +31,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Properties;
@@ -55,9 +56,9 @@ class MeasurementSchedule {
     private static final String PROP_MSCHED = "measurement_schedule";
     private static final String PROP_MSRNS =  "measurement_srn";
     
-    private AgentStorageProvider store;      
-    private ArrayList            srnList;
-    private Log                  log;
+    private final AgentStorageProvider store;      
+    private final ArrayList            srnList;
+    private final Log                  log;
 
     MeasurementSchedule(AgentStorageProvider store, Properties bootProps) {
         String info = bootProps.getProperty(PROP_MSCHED);
@@ -146,28 +147,68 @@ class MeasurementSchedule {
         }
     }
 
+   
     /**
-     * Get a list of all the measurements within the storage.
+     * Converts all the records (Strings) from the collection into ScheduledMeasurement objects
+     * and returns an Iterator to a collection containing this metrics
      */
-    Iterator getMeasurementList(){
-        ArrayList r = new ArrayList();
-        Iterator i;
-
-        i = this.store.getListIterator(MeasurementSchedule.PROP_MSCHED);
-        
-        for(; i != null && i.hasNext(); ){
-            String value = (String)i.next();
-            ScheduledMeasurement metric;
-
+    private Iterator<ScheduledMeasurement> createMeasurementList(Collection<String> records){
+        ArrayList<ScheduledMeasurement> metrics = new ArrayList<ScheduledMeasurement>();
+        long i = -1;
+        for (String value : records) {
+            i++;
+        	ScheduledMeasurement metric;
             if((metric = ScheduledMeasurement.decode(value)) == null){
                 this.log.error("Unable to decode metric from storage, deleting.");
-                i.remove();
+                try {
+					this.store.removeFromList(MeasurementSchedule.PROP_MSCHED, i);
+				} catch (AgentStorageException e) {
+					log.debug(e,e);
+				}
                 continue;
             }
-
-            r.add(metric);
+            metrics.add(metric);
         }
-        return r.iterator();
+        log.info("Number of metrics decoded from the storage - " + metrics.size());
+        return metrics.iterator();
+    }
+
+    /**
+     * Get a list of all the measurements within the storage.
+     * @throws IOException 
+     */
+    public Iterator<ScheduledMeasurement> getMeasurementList() throws IOException {
+    	Collection<String> records = new ArrayList<String>();
+    	try {
+    		readRecordsFromStorage(records);
+    	}
+    	catch (Exception e) {
+    		//For version 4.6.5 the default record size for Disk list was changed from 1024 to 4000
+    		//If we get an exception here this is probably because this is the first startup after an
+    		//upgrade from a pre 4.6.5 version and we need to try to fix the list 
+    		log.warn("Error reading measurement list from storage = '" + e.getMessage() + "' ," +
+    				" trying to convert the list records size");
+    		this.store.convertListToCurrentRecordSize(MeasurementSchedule.PROP_MSCHED);
+    		//If this time readRecordsFromStorage() we don't want to catch the exception,
+    		//the AgentDeamon will catch this exception and fail the agent startup
+    		readRecordsFromStorage(records);
+    	}
+    	return createMeasurementList(records);
+    }
+
+    /**
+     * Reads all the records from the measurement_schedule storage list and writes
+     * them into the collection
+     * @param records - adds all the records from the storage to this collection
+     */
+    private void readRecordsFromStorage(Collection<String> records) {
+    	Iterator<String> i;
+    	records.clear();
+    	i = this.store.getListIterator(MeasurementSchedule.PROP_MSCHED);
+    	for(; i != null && i.hasNext(); ){
+    		String value = i.next();
+    		records.add(value);
+    	}
     }
 
     void storeMeasurement(ScheduledMeasurement newMeas)
@@ -265,7 +306,7 @@ class MeasurementSchedule {
         }
         final Iterator<String> i = store.getListIterator(MeasurementSchedule.PROP_MSCHED);
         while (i != null && i.hasNext()){
-            final String value = (String) i.next();
+            final String value = i.next();
             final ScheduledMeasurement meas = ScheduledMeasurement.decode(value);
             if (null == meas) {
                 log.error("Unable to decode metric from storage, removing metric for entity");
@@ -282,7 +323,7 @@ class MeasurementSchedule {
         // Clear out the SRN 
         synchronized(this.srnList){
             while (it.hasNext()) {
-                final SRN srn = (SRN) it.next();
+                final SRN srn = it.next();
                 final AppdefEntityID entity = srn.getEntity();
                 if (aeids.contains(entity)) {
                     it.remove();

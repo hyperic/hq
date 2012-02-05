@@ -35,6 +35,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -73,25 +75,25 @@ public class DiskList {
     private static final int IDX_REC_LEN = 1 + 8 + 8;
     private static final Log log = LogFactory.getLog(DiskList.class.getName());
 
-    private String           fileName;
-    private String           idxFileName;
-    private RandomAccessFile indexFile;
+    private final String           fileName;
+    private final String           idxFileName;
+    private final RandomAccessFile indexFile;
     protected RandomAccessFile dataFile;
     private int              recordSize;  // Size of each record
     private long             firstRec;    // IDX of first record
     private long             lastRec;     // IDX of last record
-    private byte[]           padBytes;    // Utility array for padding
+    private final byte[]           padBytes;    // Utility array for padding
     protected SortedSet      freeList;    // Set(Long) of free rec idxs
     private int              modNum;      // Modification random number
-    private long             checkSize;   // Start to check for unused blocks
+    private final long             checkSize;   // Start to check for unused blocks
                                           // when the datafile reaches this 
                                           // size in bytes
-    private int              checkPerc;   // Max percent (0-100) of free space
+    private final int              checkPerc;   // Max percent (0-100) of free space
                                           // allowed in the data file.  Only
                                           // significant when datafile size is
                                           // greated than checkSize
-    private long             maxLength;   // Max file size in bytes
-    private Random           rand;         
+    private final long             maxLength;   // Max file size in bytes
+    private final Random           rand;         
     private boolean          closed;
     private static final AgentStatsCollector statsCollector = AgentStatsCollector.getInstance();
     private static final String DISK_LIST_DISK_ITERATOR_REMOVE_TIME = AgentStatsCollector.DISK_LIST_DISK_ITERATOR_REMOVE_TIME;
@@ -151,8 +153,8 @@ public class DiskList {
      * to the nearest whole number. (0-100)
      */
     private long getDataFileFreePercentage() throws IOException {
-        double dataBytes = (double)this.dataFile.length();
-        double freeBytes = (double)(this.freeList.size() * this.recordSize);
+        double dataBytes = this.dataFile.length();
+        double freeBytes = (this.freeList.size() * this.recordSize);
 
         return Math.round(freeBytes*100/dataBytes);
     }
@@ -416,7 +418,7 @@ public class DiskList {
         }
     }
 
-    private void removeRecord(long recNo)
+    public void removeRecord(long recNo)
         throws IOException
     {
         if(recNo < 0){
@@ -528,11 +530,41 @@ public class DiskList {
             throw sExc;
         }
     }
+    
+    /**
+	 * This method converts lists from the old record size to the current one -
+	 * it reads all the records from the list using the old size, deletes the list
+	 * and than saves all the records using the current record size. 
+	 * should be used when starting the first time after an upgrade. In version
+	 * 4.6.5 the default record size was changed from 1024 to 4000 and when we
+	 * will try to read the records with size 4000 we will get an exception because the
+	 * records size is 1024. This is a fix for Jira bug [HHQ-5387].
+	 * @param oldSize - the old size of the record
+	 * @throws IOException 
+	 */
+    public void convertListToCurrentRecordSize(int oldSize) throws IOException {
+    	log.info("Converting list on file '" + this.fileName + "' from size " + oldSize + " to size " + this.recordSize);
+    	int realRecSize = this.recordSize;
+    	this.recordSize = oldSize;
+    	Collection<String> records = new ArrayList<String>();
+    	Iterator<String> iter = getListIterator();
+    	for(; iter != null && iter.hasNext(); ){
+    		String data = iter.next();
+    		records.add(data);
+    	}
+    	log.info("Read " + records.size() + " records from file '" + this.fileName + "'");    	
+    	deleteAllRecords();
+
+    	this.recordSize = realRecSize;
+    	for (String rec : records) {
+    		addToList(rec);
+    	}
+    }
 
     public static class DiskListIterator 
-        implements Iterator
+        implements Iterator<String>
     {
-        private DiskList diskList;  // Pointer back to the creating DiskList
+        private final DiskList diskList;  // Pointer back to the creating DiskList
         private long     nextIdx;   // Next index to read (or -1)
         private long     curIdx;
         private boolean  calledNext;
@@ -552,7 +584,7 @@ public class DiskList {
             return this.nextIdx != -1;
         }
 
-        public Object next() throws NoSuchElementException {
+        public String next() throws NoSuchElementException {
             Record rec;
 
             if(this.nextIdx == -1){
@@ -613,13 +645,16 @@ public class DiskList {
         }
     }
 
-    public Iterator getListIterator(){
+    public Iterator<String> getListIterator(){
         synchronized(this.dataFile){
             // XXX -- This is broken, and is used to satisfy a lame 
             // requirement I made on the AgentStorageProvider interface.. :-(
-            if(this.firstRec == -1){
-                return null;
-            }
+        	if(this.firstRec == -1){
+        		if (log.isDebugEnabled()) {
+        			log.debug("getListIterator() - list '" + this.fileName + "' has no elements");
+        		}
+        		return null;
+        	}
 
             return new DiskListIterator(this, this.firstRec, this.modNum);
         }
