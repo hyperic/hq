@@ -44,7 +44,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.type.IntegerType;
 import org.hibernate.type.StringType;
 import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.product.server.session.PluginDAO;
@@ -57,17 +57,19 @@ import org.springframework.stereotype.Repository;
 public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
 
     private static final Object LIMIT_S_TO_CURRENT_AGENTS = "join EAM_AGENT agent on s.agent_id = agent.id " +         
-            "where agent.version >= (" +
-            "select propvalue from EAM_CONFIG_PROPS where propkey = :serverVersion) ";
+            "where agent.version >= :serverVersion ";
     
     private final AgentDAO agentDAO;
     private final PluginDAO pluginDAO;
+    private final ServerConfigManager serverConfigManager;
 
     @Autowired
-    public AgentPluginStatusDAO(SessionFactory factory, AgentDAO agentDAO, PluginDAO pluginDAO) {
+    public AgentPluginStatusDAO(SessionFactory factory, AgentDAO agentDAO, PluginDAO pluginDAO,
+            ServerConfigManager serverConfigManager) {
         super(AgentPluginStatus.class, factory);
         this.agentDAO = agentDAO;
         this.pluginDAO = pluginDAO;
+        this.serverConfigManager = serverConfigManager;
     }
     
     @PostConstruct
@@ -156,6 +158,7 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
      */
     @SuppressWarnings("unchecked")
     private List<Integer> getOutOfSyncPlugins(Integer agentId) {
+        String serverMajorVersion = serverConfigManager.getServerMajorVersion();
         final String agentSql = agentId == null ? "" : " s.agent_id = :agentId AND ";
         final String sql = new StringBuilder(256)            
             .append("select distinct s.id ")
@@ -176,7 +179,7 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
         if (agentId != null) {
             query.setParameter("agentId", agentId);
         }
-        query.setParameter("serverVersion", HQConstants.ServerVersion);
+        query.setParameter("serverVersion", serverMajorVersion);
         return query.addScalar("id", Hibernate.INTEGER)
                     .setParameter("syncSuccess", AgentPluginStatusEnum.SYNC_SUCCESS.toString())
                     .list();
@@ -275,25 +278,27 @@ public class AgentPluginStatusDAO extends HibernateDAO<AgentPluginStatus> {
     }
 
     Long getNumAutoUpdatingAgents() {
+        String serverMajorVersion = serverConfigManager.getServerMajorVersion();
         final String sql = new StringBuilder(150)
             .append("select count(distinct agent_id) from EAM_AGENT_PLUGIN_STATUS s ")
             .append(LIMIT_S_TO_CURRENT_AGENTS)
             .append("and exists (select 1 from EAM_PLATFORM p where p.agent_id = s.agent_id)")
             .toString();
         final SQLQuery query = getSession().createSQLQuery(sql);
-        query.setParameter("serverVersion", HQConstants.ServerVersion);
+        query.setParameter("serverVersion", serverMajorVersion);
         return ((Number) query.uniqueResult()).longValue();
     }
 
     @SuppressWarnings("unchecked")
     public Collection<Agent> getAutoUpdatingAgents() {
+        String serverMajorVersion = serverConfigManager.getServerMajorVersion();
         final String hql = new StringBuilder(150)
             .append("select distinct agent_id from EAM_AGENT_PLUGIN_STATUS s ")
             .append(LIMIT_S_TO_CURRENT_AGENTS)
             .append("and exists (select 1 from EAM_PLATFORM p where p.agent_id = s.agent_id)")
             .toString();
         final SQLQuery query = getSession().createSQLQuery(hql);
-        query.setParameter("serverVersion", HQConstants.ServerVersion);
+        query.setParameter("serverVersion", serverMajorVersion);
         final List<Integer> ids = query.addScalar("agent_id", Hibernate.INTEGER).list();
         final List<Agent> rtn = new ArrayList<Agent>(ids.size());
         for (final Integer agentId : ids) {

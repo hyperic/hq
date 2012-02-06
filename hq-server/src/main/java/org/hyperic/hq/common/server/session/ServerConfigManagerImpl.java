@@ -33,6 +33,8 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -68,9 +70,9 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
 
     private static final int DEFAULT_COST = 15;
 
-    private DBUtil dbUtil;
+    private final DBUtil dbUtil;
 
-    private AuthzSubjectManager authzSubjectManager;
+    private final AuthzSubjectManager authzSubjectManager;
 
     private static final String[] APPDEF_TABLES = { "EAM_PLATFORM",
                                                    "EAM_SERVER",
@@ -103,9 +105,9 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
 
     public static final String LOG_CTX = "org.hyperic.hq.common.server.session.ServerConfigManagerImpl";
     protected final Log log = LogFactory.getLog(LOG_CTX);
-    private ConfigPropertyDAO configPropertyDAO;
-    private ServerConfigAuditFactory serverConfigAuditFactory;
-    private ServerConfigCache serverConfigCache;
+    private final ConfigPropertyDAO configPropertyDAO;
+    private final ServerConfigAuditFactory serverConfigAuditFactory;
+    private final ServerConfigCache serverConfigCache;
 
     @Autowired
     public ServerConfigManagerImpl(DBUtil dbUtil, AuthzSubjectManager authzSubjectManager,
@@ -498,6 +500,32 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
     @Transactional(readOnly = true)
     public Properties getConfig(String prefix) throws ConfigPropertyException {
         return serverConfigCache.getConfig(prefix);
+    }
+    
+    @Transactional(readOnly = true)
+    public String getPropertyValue(String name) {
+        return serverConfigCache.getProperty(name);
+    }        
+
+    /**
+     * 
+     * @return major part of the server version - x.x or x.x.x. 
+     * If pattern fails to match - returns the full server version.
+     */
+    @Transactional(readOnly = true)
+    public String getServerMajorVersion() {
+        String serverVersion = serverConfigCache.getProperty(HQConstants.ServerVersion);
+        return extractMajorVersion(serverVersion);
+    }    
+
+    private String extractMajorVersion(String version) {
+        String majorVersion = version;
+        Pattern regex = Pattern.compile("^\\d+.\\d+(\\.\\d+)?");
+        Matcher regexMatcher = regex.matcher(version);
+        if (regexMatcher.find()) {
+            majorVersion = regexMatcher.group();
+        }
+        return majorVersion;
     }
 
 }

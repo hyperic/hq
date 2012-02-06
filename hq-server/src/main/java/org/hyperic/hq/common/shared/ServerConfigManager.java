@@ -42,21 +42,21 @@ public interface ServerConfigManager {
      * NULL prefix.
      * @return Properties
      */
-    public Properties getConfig() throws ConfigPropertyException;
+    Properties getConfig() throws ConfigPropertyException;
 
     /**
      * Get the server configuration
      * @param prefix The prefix of the configuration to retrieve.
      * @return Properties
      */
-    public Properties getConfig(String prefix) throws ConfigPropertyException;
+    Properties getConfig(String prefix) throws ConfigPropertyException;
 
     /**
      * Set the server configuration
      * @throws ConfigPropertyException - if the props object is missing a key
      *         that's currently in the database
      */
-    public void setConfig(AuthzSubject subject, Properties newProps) throws ApplicationException,
+    void setConfig(AuthzSubject subject, Properties newProps) throws ApplicationException,
         ConfigPropertyException;
 
     /**
@@ -67,16 +67,24 @@ public interface ServerConfigManager {
      * @throws ConfigPropertyException - if the props object is missing a key
      *         that's currently in the database
      */
-    public void setConfig(AuthzSubject subject, String prefix, Properties newProps) throws ApplicationException,
+    void setConfig(AuthzSubject subject, String prefix, Properties newProps) throws ApplicationException,
         ConfigPropertyException;
 
+    
+    /**
+     * Get a specific server configuration property
+     * @param name The name of the configuration property to retrieve.
+     * @return Property value
+     */    
+    String getPropertyValue(String name);    
+    
     /**
      * Run an analyze command on all non metric tables. The metric tables are
      * handled seperately using analyzeHqMetricTables() so that only the tables
      * that have been modified are analyzed.
      * @return The time taken in milliseconds to run the command.
      */
-    public long analyzeNonMetricTables();
+    long analyzeNonMetricTables();
 
     /**
      * Run an analyze command on both the current measurement data slice and the
@@ -85,7 +93,7 @@ public interface ServerConfigManager {
      *        data table as well as the current.
      * @return The time taken in milliseconds to run the command.
      */
-    public long analyzeHqMetricTables(boolean analyzePrevMetricDataTable);
+    long analyzeHqMetricTables(boolean analyzePrevMetricDataTable);
 
     /**
      * Run database-specific cleanup routines -- on PostgreSQL we do a VACUUM
@@ -95,12 +103,12 @@ public interface ServerConfigManager {
      * @return The time it took to vaccum, in milliseconds, or -1 if the
      *         database is not PostgreSQL.
      */
-    public long vacuum();
+    long vacuum();
 
     /**
      * Get all the {@link ConfigProperty}s
      */
-    public Collection<ConfigProperty> getConfigProperties();
+    Collection<ConfigProperty> getConfigProperties();
 
     /**
      * Gets the GUID for this HQ server instance. The GUID is persistent for the
@@ -108,6 +116,12 @@ public interface ServerConfigManager {
      * method. If for some reason it can't be determined, 'unknown' will be
      * returned.
      */
-    public String getGUID();
+    String getGUID();
 
+    /**
+     * 
+     * @return major part of the server version - x.x or x.x.x. If pattern 
+     * fails to match - returns the full server version.
+     */
+    String getServerMajorVersion();
 }

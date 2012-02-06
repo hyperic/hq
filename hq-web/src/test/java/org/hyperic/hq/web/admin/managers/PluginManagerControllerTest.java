@@ -40,7 +40,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AgentPluginStatus;
@@ -112,9 +111,8 @@ public class PluginManagerControllerTest extends BaseControllerTest {
         expect(mockAgentManager.getNumAutoUpdatingAgents()).andReturn(Long.parseLong("0"));
         expect(mockAgentManager.getNumOldAgents()).andStubReturn(Long.parseLong("0"));
 
-        String serverVersion = "4.5.6";
-        Properties serverConfigProps = getPropertiesWithServerVersion(serverVersion);  
-        expect(mockServerConfigManager.getConfig()).andStubReturn(serverConfigProps);
+        String serverVersion = "4.5.6.BUILD-SNAPSHOT"; 
+        expect(mockServerConfigManager.getPropertyValue(HQConstants.ServerVersion)).andStubReturn(serverVersion);
         
         replay(mockAgentManager);
         replay(mockPluginManager);
@@ -145,9 +143,8 @@ public class PluginManagerControllerTest extends BaseControllerTest {
         expect(mockAgentManager.getNumAutoUpdatingAgents()).andStubReturn(Long.parseLong("3"));
         expect(mockAgentManager.getNumOldAgents()).andStubReturn(Long.parseLong("0"));
         
-        String serverVersion = "4.5.6";
-        Properties serverConfigProps = getPropertiesWithServerVersion(serverVersion); 
-        expect(mockServerConfigManager.getConfig()).andStubReturn(serverConfigProps);
+        String serverVersion = "4.5.6.BUILD-SNAPSHOT"; 
+        expect(mockServerConfigManager.getPropertyValue(HQConstants.ServerVersion)).andStubReturn(serverVersion);
         
         replay(mockAgentManager);
         replay(mockPluginManager);
@@ -165,13 +162,7 @@ public class PluginManagerControllerTest extends BaseControllerTest {
         assertEquals("instruction should be admin.managers.plugin.instructions",
             "admin.managers.plugin.instructions", map.get("instruction"));
         assertEquals("file path should be /root/hq/test","/root/hq/test",""+map.get("customDir"));
-    }
-
-    private Properties getPropertiesWithServerVersion(String serverVersion) {
-        Properties serverConfigProps = new Properties();
-        serverConfigProps.setProperty(HQConstants.ServerVersion,serverVersion);
-        return serverConfigProps;
-    }
+    }         
     
     @Test
     public void testAgentSummary(){
@@ -191,9 +182,8 @@ public class PluginManagerControllerTest extends BaseControllerTest {
         expect(mockAgentManager.getNumAutoUpdatingAgents()).andReturn(Long.parseLong("0"));
         expect(mockAgentManager.getNumOldAgents()).andStubReturn(Long.parseLong("0"));        
 
-        String serverVersion = "4.5.6";
-        Properties serverConfigProps = getPropertiesWithServerVersion(serverVersion); 
-        expect(mockServerConfigManager.getConfig()).andStubReturn(serverConfigProps);  
+        String serverVersion = "4.5.6.BUILD-SNAPSHOT"; 
+        expect(mockServerConfigManager.getPropertyValue(HQConstants.ServerVersion)).andStubReturn(serverVersion);
         
         replay(mockPluginManager);
         replay(mockAgentManager);
@@ -212,9 +202,8 @@ public class PluginManagerControllerTest extends BaseControllerTest {
         expect(mockAgentManager.getNumAutoUpdatingAgents()).andReturn(Long.parseLong("3"));
         expect(mockAgentManager.getNumOldAgents()).andStubReturn(Long.parseLong("1"));        
 
-        String serverVersion = "4.5.6";
-        Properties serverConfigProps = getPropertiesWithServerVersion(serverVersion); 
-        expect(mockServerConfigManager.getConfig()).andStubReturn(serverConfigProps);  
+        String serverVersion = "4.5.6.BUILD-SNAPSHOT"; 
+        expect(mockServerConfigManager.getPropertyValue(HQConstants.ServerVersion)).andStubReturn(serverVersion);
         
         replay(mockPluginManager);
         replay(mockAgentManager);

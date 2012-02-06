@@ -11704,7 +11704,7 @@ has already been defined.
                 TYPE varchar(32) not null,
                 CERT varchar(4000) not null,
                 CERT_CHAIN varchar(4000),
-        	    FILE BLOB,
+                CERT_FILE BLOB,
                 primary key (ID),
                 unique (ALIAS_NAME)
             )
@@ -11716,7 +11716,7 @@ has already been defined.
                 TYPE varchar(32) not null,
                 CERT varchar(4000) not null,
                 CERT_CHAIN varchar(4000),
-               	FILE bytea, 
+                CERT_FILE bytea, 
                 primary key (ID),
                 unique (ALIAS_NAME)
             )
@@ -11731,7 +11731,7 @@ has already been defined.
                 TYPE varchar2(32 char) not null,
                 CERT varchar2(4000 char) not null,
                 CERT_CHAIN varchar2(4000 char),
-                "FILE" BLOB,  
+        	    CERT_FILE BLOB,  
                 primary key (ID),
                 unique (ALIAS_NAME)
             )
@@ -11744,20 +11744,6 @@ has already been defined.
 
  <schemaSpec version="3.209">
     <schema-addColumn table="EAM_SRN" column="LAST_SCHEDULE_TIME" columnType="LONG" nullable="NOT NULL" default="0"/>
- </schemaSpec>
-	
- <schemaSpec version="3.210">
-    <schema-directSQL>
-        <statement targetDB="mysql">
-        	ALTER TABLE EAM_KEYSTORE CHANGE COLUMN FILE CERT_FILE BLOB
-        </statement>
-        <statement targetDB="postgresql">
-        	ALTER TABLE EAM_KEYSTORE RENAME COLUMN FILE TO CERT_FILE
-        </statement>
-        <statement targetDB="oracle">
-        	ALTER TABLE EAM_KEYSTORE RENAME COLUMN "FILE" TO CERT_FILE
-        </statement>
-    </schema-directSQL>
  </schemaSpec>
 
 </dbupgrade>

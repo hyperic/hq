@@ -324,6 +324,7 @@ extends BaseConfig {
 			break;
 
 		case 6:
+			boolean usingSmallEnv = previous.getValue("install.profile").contentEquals(ENV_SMALL);
 			if (installMode.isOracle()) {
 				schema.addOption(new HiddenConfigOption("server.database.choice", DBC_ORA10));
 			} else if (installMode.isPostgres()) {
@@ -337,6 +338,10 @@ extends BaseConfig {
 				// databases
 				// we support...
 				ConfigOptionDisplay builtInOption = new ConfigOptionDisplay(DBC_BUILTIN);
+				if (!usingSmallEnv) {
+					builtInOption = new ConfigOptionDisplay(DBC_BUILTIN + "(not recommended since you have selected " + previous.getValue("install.profile") +
+							" installation profile and the build in DB should be used only with small profiles)");
+				}
 				ConfigOptionDisplay oracleOption = new ConfigOptionDisplay(DBC_ORA10);
 				ConfigOptionDisplay postgresOption = new ConfigOptionDisplay(DBC_PGSQL);
 				// ...check for the install type (.org or EE) and show the
@@ -365,26 +370,26 @@ extends BaseConfig {
 				dbChoice = DB_PGSQL;
 			else if (dbChoiceStr.startsWith(DBC_MYSQL))
 				dbChoice = DB_MYSQL;
-			else if (dbChoiceStr.equals(DBC_BUILTIN)) {
+			else if (dbChoiceStr.startsWith(DBC_BUILTIN)) {
 				dbChoice = DB_PGSQL;
 				schema.addOption(new HiddenConfigOption("using.builtin.db", "true"));
 			} else
 				throw new IllegalStateException("Invalid database: " + dbChoiceStr);
 
 			schema.addOption(new HiddenConfigOption("server.database", dbChoice));
-			if(!dbChoiceStr.equalsIgnoreCase(DBC_BUILTIN)) {
+			if(!dbChoiceStr.startsWith(DBC_BUILTIN)) {
 				schema.addOption(new StringConfigOption("server.database.host", Q_DB_HOSTNAME, "localhost"));
 			}
 			if (dbChoice.equals(DB_ORA9)) {
 				schema.addOption(new PortConfigOption("server.database.port", Q_DB_PORT, 1521));
 			} 
-			else if (dbChoiceStr.startsWith(DBC_PGSQL) && !dbChoiceStr.equalsIgnoreCase(DBC_BUILTIN)) {
+			else if (dbChoiceStr.startsWith(DBC_PGSQL) && !dbChoiceStr.startsWith(DBC_BUILTIN)) {
 				schema.addOption(new PortConfigOption("server.database.port", Q_DB_PORT, 5432));
 			} 
 			else if (dbChoice.equals(DB_MYSQL)) {
 				schema.addOption(new PortConfigOption("server.database.port", Q_DB_PORT, 3306));
 			}
-			if(!dbChoiceStr.equalsIgnoreCase(DBC_BUILTIN)) {
+			if(!dbChoiceStr.startsWith(DBC_BUILTIN)) {
 				schema.addOption(new StringConfigOption("server.database.name", Q_DB_NAME, PRODUCT));
 			}
 			break;
@@ -452,7 +457,7 @@ extends BaseConfig {
 						"select 1"));
 			}
 
-			if (dbChoiceStr.equals(DBC_BUILTIN)) {
+			if (dbChoiceStr.startsWith(DBC_BUILTIN)) {
 				schema.addOption(new HiddenConfigOption("server.database-user", "hqadmin"));
 				schema.addOption(new HiddenConfigOption("server.database-password", "hqadmin"));
 			} else {
@@ -468,7 +473,7 @@ extends BaseConfig {
 
 		case 9:
 			dbChoiceStr = previous.getValue("server.database.choice");
-			if(!dbChoiceStr.equalsIgnoreCase(DBC_BUILTIN)) {
+			if(!dbChoiceStr.startsWith(DBC_BUILTIN)) {
 				boolean exists = InstallDBUtil.checkConnectionExists(previous.getValue("server.database-url"), previous.getValue("server.database-user"),
 						previous.getValue("server.database-password"));
 				if (!exists) {
@@ -529,7 +534,7 @@ extends BaseConfig {
 			// at
 			// this point. Now we setup the url based on the port selection
 			dbChoiceStr = previous.getValue("server.database.choice");
-			if (dbChoiceStr.equals(DBC_BUILTIN)) {
+			if (dbChoiceStr.startsWith(DBC_BUILTIN)) {
 				String pgport = previous.getValue("server.postgresql.port");
 				schema.addOption(new HiddenConfigOption("server.database-url",
 						"jdbc:postgresql://127.0.0.1:" + pgport + "/hqdb" + PGSQL_PROTOCOL));
@@ -542,7 +547,7 @@ extends BaseConfig {
 			// If we are in "quick" mode and the database already exists,
 			// then STOP ask the user what to do.
 			dbChoiceStr = previous.getValue("server.database.choice");
-			if (!dbChoiceStr.equals(DBC_BUILTIN)) {
+			if (!dbChoiceStr.startsWith(DBC_BUILTIN)) {
 				if (databaseExists(previous)) {
 					// Bug 9722 only check for db upgrade if this isnt an HA
 					// node

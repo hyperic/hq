@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.servlet.http.HttpSession;
 
@@ -37,7 +36,6 @@ import org.hyperic.hq.product.shared.PluginManager;
 import org.hyperic.hq.product.shared.PluginTypeEnum;
 import org.hyperic.hq.ui.KeyConstants;
 import org.hyperic.hq.web.BaseController;
-import org.hyperic.util.ConfigPropertyException;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -407,14 +405,7 @@ public class PluginManagerController extends BaseController implements Applicati
     }
     
     private String getServerVersion() {
-        String serverVersion;        
-        try {
-            Properties serverConfigProps = serverConfigManager.getConfig();
-            serverVersion = serverConfigProps.getProperty(HQConstants.ServerVersion); 
-        } catch (ConfigPropertyException e) {
-            serverVersion = "error"; // TODO Maya what to return in case of error? 
-            log.error(e,e);
-        }                  
+        String serverVersion = serverConfigManager.getPropertyValue(HQConstants.ServerVersion);               
         return serverVersion;
     }       
 }
