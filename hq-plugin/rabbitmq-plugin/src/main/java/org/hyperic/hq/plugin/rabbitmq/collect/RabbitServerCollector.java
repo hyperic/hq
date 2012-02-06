@@ -64,7 +64,7 @@ public class RabbitServerCollector extends RabbitStatsCollector {
             setValue("fd_percentage", (double) n.getFdUsed() / (double) n.getFdTotal());
             setValue("connectionCount", rabbitAdmin.getConnections().size());
             setValue("channelCount", rabbitAdmin.getChannels().size());
-            getResult().addValues(o.getQueueTotals());
+            getResult().addValues(o.getQueueTotals().asMap());
             res = o;
 
         } catch (PluginException ex) {

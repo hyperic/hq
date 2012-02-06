@@ -13,20 +13,20 @@ import java.util.Map;
  */
 public class RabbitOverview implements RabbitStatsObject{
 
-    private Map<String, Integer> queueTotals=new HashMap<String, Integer>();
+    private QueueTotals queueTotals;
     private MessageStats messageStats;
 
     /**
      * @return the queueTotals
      */
-    public Map<String, Integer> getQueueTotals() {
+    public QueueTotals getQueueTotals() {
         return queueTotals;
     }
 
     /**
      * @param queueTotals the queueTotals to set
      */
-    public void setQueueTotals(Map<String, Integer> queueTotals) {
+    public void setQueueTotals(QueueTotals queueTotals) {
         this.queueTotals = queueTotals;
     }
 
