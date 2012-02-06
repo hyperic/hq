@@ -485,6 +485,8 @@ fi
                  description="Oracle Version"/>
     </properties>
 
+    <plugin type="config_track" class="org.hyperic.hq.product.FileChangeTrackPlugin" />
+
    <plugin type="config_track" platform="unix"
             class="org.hyperic.hq.product.FileChangeTrackPlugin">
             <monitored>
@@ -501,7 +503,7 @@ fi
             	<folder path="network/admin" recursive="false" filter=".*\.ora"/>
             </monitored>
     </plugin>
-    <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="true" />
+    <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="false" />
     
 
     <service name="User Instance">
