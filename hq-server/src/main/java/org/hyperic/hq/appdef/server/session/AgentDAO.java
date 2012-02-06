@@ -41,7 +41,7 @@ import org.hibernate.criterion.Restrictions;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AgentType;
-import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.hibernate3.HibernateCallback;
@@ -51,11 +51,13 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class AgentDAO extends HibernateDAO<Agent> {
     private static final Log log = LogFactory.getLog(AgentDAO.class);
-    private static final String OLD_AGENT_CONDITION = "< ( select value from ConfigProperty where key = :serverVersion)";
+    
+    private final ServerConfigManager serverConfigManager;
     
     @Autowired
-    public AgentDAO(SessionFactory f) {
+    public AgentDAO(SessionFactory f, ServerConfigManager serverConfigManager) {
         super(Agent.class, f);
+        this.serverConfigManager = serverConfigManager;
     }
 
     @SuppressWarnings("unchecked")
@@ -148,9 +150,9 @@ public class AgentDAO extends HibernateDAO<Agent> {
 
     @SuppressWarnings("unchecked")
     public List<Agent> findOldAgents() {
-        String sql = "from Agent where version " + OLD_AGENT_CONDITION;
+        String sql = "from Agent where version < :serverVersion";
         final Query query = getSession().createQuery(sql);
-        query.setParameter("serverVersion", HQConstants.ServerVersion);
+        query.setParameter("serverVersion", serverConfigManager.getServerMajorVersion());
         return query.list();
     }
     
@@ -159,12 +161,11 @@ public class AgentDAO extends HibernateDAO<Agent> {
      * @return number of agents, whose version is older than that of the server
      */
     public long getNumOldAgents() {
-        final String sql = "select count(a) from Agent a where version " + OLD_AGENT_CONDITION;        
+        final String sql = "select count(a) from Agent a where version < :serverVersion";        
         final Query query = getSession().createQuery(sql);
-        query.setParameter("serverVersion", HQConstants.ServerVersion);        
+        query.setParameter("serverVersion", serverConfigManager.getServerMajorVersion());        
         return ((Number) query.uniqueResult()).longValue();
-        
-
-        
     }
+
+
 }
