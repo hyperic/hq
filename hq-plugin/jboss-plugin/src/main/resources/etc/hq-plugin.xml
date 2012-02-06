@@ -714,12 +714,6 @@
         <plugin type="log_track"
             class="org.hyperic.hq.product.Log4JLogTrackPlugin"/>
 
-        <property name="DEFAULT_CONFIG_FILE"
-              value="conf/jboss-service.xml,conf/server.policy"/>
-
-        <plugin type="config_track"
-            class="org.hyperic.hq.product.ConfigFileTrackPlugin"/>
-
         <actions include="stop,start,restart,runGarbageCollector"/>
 
         <scan>
@@ -893,8 +887,8 @@
             <actions include="stop,start,restart,flush"/>
         </service>
         
-	<filter name="conf" value=".*\.xml|.*\.cfg|.*\.properties|.*\.ini|.*\.conf|.*\.config"/>
-    <filter name="code" value=".*\.jar|.*\.dll|.*\.class|.*\.jsp|.*\.asp|.*\.aspx|.*\.php|.*\.pl|.*\.vb|.*\.vbs|.*\.js|.*\.py|.*\.pyc|.*\.cgi"/>    
+	<filter name="conf" value=".*\.xml|.*\.cfg|.*\.properties|.*\.ini|.*\.conf|.*\.config|.*\.policy"/>
+    <filter name="code" value=".*\.jar|.*\.dll|.*\.class|.*\.asp|.*\.aspx|.*\.php|.*\.pl|.*\.py|.*\.pyc|.*\.cgi"/>    
     <plugin type="config_track"
     		class="org.hyperic.hq.product.FileChangeTrackPlugin">
       <monitored>
@@ -907,7 +901,7 @@
         <folder path="" recursive="false" filter="jar-versions.xml"/>
       </monitored>
     </plugin>
-    <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="true" />
+    <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="false" />
         
     </server>
 
@@ -1173,13 +1167,21 @@
         <plugin type="log_track"
             class="org.hyperic.hq.product.Log4JLogTrackPlugin"/>
 
-        <property name="DEFAULT_CONFIG_FILE"
-              value="conf/jboss-service.xml,conf/server.policy"/>
-
-        <plugin type="config_track"
-            class="org.hyperic.hq.product.ConfigFileTrackPlugin"/>
-
-        <actions include="stop,start,restart,runGarbageCollector"/>
+	     <plugin type="config_track"
+	            class="org.hyperic.hq.product.FileChangeTrackPlugin">
+	      <monitored>
+	        <folder path="server/all/conf" recursive="true" filter="${conf}"/>
+	        <folder path="server/default/conf" recursive="true" filter="${conf}"/>
+	        <folder path="server/default/deploy" recursive="true" filter="${code}|${conf}"/>
+	        <folder path="server/minimal/conf" recursive="true" filter="${conf}"/>
+	        <folder path="server/standard/conf" recursive="true" filter="${conf}"/>
+	        <folder path="server/web/conf" recursive="true" filter="${conf}"/>
+	        <folder path="" recursive="false" filter="jar-versions.xml"/>
+	      </monitored>
+	    </plugin>
+	    <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="false" />
+	    
+	    <actions include="stop,start,restart,runGarbageCollector"/>
 
         <scan>
             <include name="/**/server/*/conf/jboss-service.xml"/>
@@ -1683,13 +1685,14 @@
         <plugin type="autoinventory" class="org.hyperic.hq.plugin.jboss7.JBossHostControllerDetector"/>
         <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
         <plugin type="collector" class="org.hyperic.hq.plugin.jboss7.JBossHostControllerCollector"/>
-        <filter name="conf7" value=".*\.xml|.*\.properties"/>
+
         <plugin type="config_track" class="org.hyperic.hq.product.FileChangeTrackPlugin">
             <monitored>
-                <folder path="configuration/" recursive="false" filter="${conf7}"/>
+                <folder path="configuration" recursive="false" filter=".*\.xml|.*\.properties"/>
             </monitored>
         </plugin>
-        <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="true" />
+        <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="false" />
+
         <config>
             <option name="jboss7.addr" description="Http Address" default="localhost"/>
             <option name="jboss7.port" description="Http Port" default="9990"/>
@@ -1762,6 +1765,11 @@
             <option name="jboss7.user" description="Username" default="guest"/>
             <option name="jboss7.pass" description="Password" default="guest" type="secret"/>
         </config>
+        <plugin type="config_track" class="org.hyperic.hq.product.FileChangeTrackPlugin">
+            <monitored>
+                <folder path="configuration" recursive="false" filter=".*\.xml|.*\.properties"/>
+            </monitored>
+        </plugin>
 
         <help>
             <![CDATA[
