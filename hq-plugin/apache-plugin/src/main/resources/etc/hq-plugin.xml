@@ -998,9 +998,6 @@ ExtendedStatus On
     <property name="DEFAULT_PIDFILE"
               value="logs/httpsd.pid"/>
 
-    <property name="DEFAULT_CONF_FILE"
-              value="conf/httpsd.conf"/>
-
     <property name="DEFAULT_LOG_FILE"
               value="logs/error.log"/>
 

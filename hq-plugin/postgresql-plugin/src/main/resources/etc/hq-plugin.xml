@@ -307,7 +307,7 @@
             	<folder path="data" recursive="false" filter=".*\.conf"/>
             </monitored>
     </plugin>
-     <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="true" />
+     <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="false" />
 
 
     <actions include="Analyze,ResetStatistics,Vacuum,VacuumAnalyze"/>
