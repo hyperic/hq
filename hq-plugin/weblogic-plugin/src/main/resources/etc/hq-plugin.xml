@@ -1188,7 +1188,7 @@
         <folder path="" recursive="true" filter="${code}|${conf}"/>
       </monitored>
     </plugin>
-    <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="true" />
+    <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="false" />
 
   </server>
 
@@ -1221,7 +1221,7 @@
         <folder path="" recursive="true" filter="${code}|${conf}"/>
       </monitored>
     </plugin>
-    <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="true" />
+    <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="false" />
     
    
 
