@@ -450,7 +450,13 @@ public class ReportProcessorImpl implements ReportProcessor {
                     continue;
                 }
                 final Resource r = resourceManager.getResourceById(rid);
+                if (r == null || r.isInAsyncDeleteState()) {
+                    continue;
+                }
                 final Measurement m = measurementManager.getAvailabilityMeasurement(r);
+                if (m == null) {
+                    continue;
+                }
                 final long now = TimingVoodoo.roundDownTime(now(), m.getInterval());
                 final DataPoint avail =
                     new DataPoint(m.getId(), MeasurementConstants.AVAIL_UP, now);

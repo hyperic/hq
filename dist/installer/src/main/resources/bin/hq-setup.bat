@@ -65,8 +65,25 @@ call "%ANT_HOME%\bin\ant" -Dinstall.dir="%INSTALL_DIR%" -Dinstall.mode="%INSTALL
 goto setupDone
 
 :startUpdateScale 
+
+echo Please Enter the server profile:
+echo 1: small (less than 50 platforms)
+echo 2: medium (50-250 platforms)
+echo 3: large (larger than 250 platforms)
 @ECHO OFF
-SET /P profile=Please Enter the server profile (small, medium, large):
+SET /P profile=
+GOTO CASE_%profile%
+:CASE_1
+    SET profile=small
+    GOTO END_SWITCH
+:CASE_2
+    SET profile=medium
+    GOTO END_SWITCH
+:CASE_3
+    SET profile=large
+    GOTO END_SWITCH
+:END_SWITCH
+
 SET /P dir=Please Enter the server directory:
 call "%ANT_HOME%\bin\ant"  -Dinstall.profile=%profile% -Dserver.product.dir=%dir% -Dinstall.dir="%INSTALL_DIR%" -Dinstall.nowrap=false -Dinstall.mode="%INSTALL_MODE%" -logger org.hyperic.tools.ant.installer.InstallerLogger -f "%INSTALL_DIR%\data\setup.xml"  update-hq-server-profile
 goto setupDone
