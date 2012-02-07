@@ -157,14 +157,14 @@ class MeasurementSchedule {
         long i = -1;
         for (String value : records) {
             i++;
-        	ScheduledMeasurement metric;
+            ScheduledMeasurement metric;
             if((metric = ScheduledMeasurement.decode(value)) == null){
                 this.log.error("Unable to decode metric from storage, deleting.");
                 try {
-					this.store.removeFromList(MeasurementSchedule.PROP_MSCHED, i);
-				} catch (AgentStorageException e) {
-					log.debug(e,e);
-				}
+                    this.store.removeFromList(MeasurementSchedule.PROP_MSCHED, i);
+                } catch (AgentStorageException e) {
+                    log.debug(e,e);
+                }
                 continue;
             }
             metrics.add(metric);
@@ -178,22 +178,22 @@ class MeasurementSchedule {
      * @throws IOException 
      */
     public Iterator<ScheduledMeasurement> getMeasurementList() throws IOException {
-    	Collection<String> records = new ArrayList<String>();
-    	try {
-    		readRecordsFromStorage(records);
-    	}
-    	catch (Exception e) {
-    		//For version 4.6.5 the default record size for Disk list was changed from 1024 to 4000
-    		//If we get an exception here this is probably because this is the first startup after an
-    		//upgrade from a pre 4.6.5 version and we need to try to fix the list 
-    		log.warn("Error reading measurement list from storage = '" + e.getMessage() + "' ," +
-    				" trying to convert the list records size");
-    		this.store.convertListToCurrentRecordSize(MeasurementSchedule.PROP_MSCHED);
-    		//If this time readRecordsFromStorage() we don't want to catch the exception,
-    		//the AgentDeamon will catch this exception and fail the agent startup
-    		readRecordsFromStorage(records);
-    	}
-    	return createMeasurementList(records);
+        Collection<String> records = new ArrayList<String>();
+        try {
+            readRecordsFromStorage(records);
+        }
+        catch (Exception e) {
+            //For version 4.6.5 the default record size for Disk list was changed from 1024 to 4000
+            //If we get an exception here this is probably because this is the first startup after an
+            //upgrade from a pre 4.6.5 version and we need to try to fix the list 
+            log.warn("Error reading measurement list from storage = '" + e.getMessage() + "' ," +
+                    " trying to convert the list records size");
+            this.store.convertListToCurrentRecordSize(MeasurementSchedule.PROP_MSCHED);
+            //If this time readRecordsFromStorage() we don't want to catch the exception,
+            //the AgentDeamon will catch this exception and fail the agent startup
+            readRecordsFromStorage(records);
+        }
+        return createMeasurementList(records);
     }
 
     /**
@@ -202,13 +202,13 @@ class MeasurementSchedule {
      * @param records - adds all the records from the storage to this collection
      */
     private void readRecordsFromStorage(Collection<String> records) {
-    	Iterator<String> i;
-    	records.clear();
-    	i = this.store.getListIterator(MeasurementSchedule.PROP_MSCHED);
-    	for(; i != null && i.hasNext(); ){
-    		String value = i.next();
-    		records.add(value);
-    	}
+        Iterator<String> i;
+        records.clear();
+        i = this.store.getListIterator(MeasurementSchedule.PROP_MSCHED);
+        for(; i != null && i.hasNext(); ){
+            String value = i.next();
+            records.add(value);
+        }
     }
 
     void storeMeasurement(ScheduledMeasurement newMeas)
