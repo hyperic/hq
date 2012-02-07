@@ -1181,14 +1181,14 @@
     </service>
 
 	<filter name="conf" value=".*\.xml|.*\.cfg|.*\.properties|.*\.ini|.*\.conf|.*\.config|.*\.ldift|.*\.sql|.*\.ddl|.*\.sh"/>
-    <filter name="code" value=".*\.jar|.*\.dll|.*\.class|.*\.jsp|.*\.php|.*\.pl|.*\.js|.*\.py|.*\.pyc|.*\.cgi|.*\.so"/>
+    <filter name="code" value=".*\.jar|.*\.dll|.*\.class|.*\.pl|.*\.py|.*\.pyc|.*\.cgi|.*\.so"/>
     <plugin type="config_track"
     		class="org.hyperic.hq.product.FileChangeTrackPlugin">
       <monitored>
-        <folder path="" recursive="true" filter="${code}${conf}"/>
+        <folder path="" recursive="true" filter="${code}|${conf}"/>
       </monitored>
     </plugin>
-    <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="true" />
+    <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="false" />
 
   </server>
 
@@ -1218,9 +1218,11 @@
     <plugin type="config_track"
     		class="org.hyperic.hq.product.FileChangeTrackPlugin">
       <monitored>
-        <folder path="" recursive="true" filter="${code}${conf}"/>
+        <folder path="" recursive="true" filter="${code}|${conf}"/>
       </monitored>
     </plugin>
+    <property name="DEFAULT_CONFIG_TRACK_ENABLE" value="false" />
+    
    
 
   </server>

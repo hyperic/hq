@@ -2077,7 +2077,7 @@
 				<folder path="" recursive="false" filter="my\.ini|my\.cnf"/>
 			</monitored>
 		</plugin>
-		<property name="DEFAULT_CONFIG_TRACK_ENABLE" value="true" />
+		<property name="DEFAULT_CONFIG_TRACK_ENABLE" value="false" />
 		
         <plugin type="log_track"
                 class="MySqlStatsLogTrackPlugin"/>

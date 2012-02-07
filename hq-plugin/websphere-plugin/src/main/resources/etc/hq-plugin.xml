@@ -720,17 +720,17 @@ ${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.se
             </properties>
         </service>
 		
-		<filter name="conf" value=".*\.xml|.*\.cfg|.*\.properties|.*\.ini|.*\.conf|.*\.config"/>
-    	<filter name="code" value=".*\.jar|.*\.dll|.*\.class|.*\.jsp|.*\.php|.*\.pl|.*\.vb|.*\.vbs|.*\.js|.*\.py|.*\.pyc|.*\.cgi"/>
+		<filter name="conf" value=".*\.xml|.*\.cfg|.*\.properties|.*\.ini|.*\.conf|.*\.config|.*\.props|.*\.policy"/>
+    	<filter name="code" value=".*\.jar|.*\.dll|.*\.class|.*\.pl|.*\.py|.*\.pyc|.*\.cgi|.*\.properties|"/>
 		
 		<plugin type="config_track" class="org.hyperic.hq.product.FileChangeTrackPlugin">
 			<monitored>
-				<folder path="installedApps" recursive="true" filter="${code}"/>
+				<folder path="installedApps" recursive="true" filter="${code}|${conf}"/>
 				<folder path="config" recursive="true" filter="${conf}"/>
-				<folder path="properties" recursive="true" filter="${conf}|.*\.policy|.*\.props|.*\.key"/>
+				<folder path="properties" recursive="true" filter="${conf}|.*\.key"/>
 			</monitored>
 		</plugin>
-		<property name="DEFAULT_CONFIG_TRACK_ENABLE" value="true" />
+		<property name="DEFAULT_CONFIG_TRACK_ENABLE" value="false" />
 		
     </server>
 

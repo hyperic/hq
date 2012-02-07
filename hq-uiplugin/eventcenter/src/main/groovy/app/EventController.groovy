@@ -70,7 +70,7 @@ class EventController
              label:{StringEscapeUtils.escapeHtml(it.eventLog.subject)}],
             [field:EventLogSortField.DETAIL, width:'29%',
              label:{
-            	StringEscapeUtils.escapeHtml(getSexyDetail(it.eventLog))
+            	StringEscapeUtils.escapeHtml(getSexyDetail(it.eventLog)).replaceAll("\n","<br>");            	
              }],
         ],
     ]   

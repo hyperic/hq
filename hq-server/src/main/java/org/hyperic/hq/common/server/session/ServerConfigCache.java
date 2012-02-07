@@ -44,6 +44,8 @@ public interface ServerConfigCache {
     
     void remove(String key);
     
+    String getProperty(String key);
+    
     Boolean getBooleanProperty(String key);
 
 }
