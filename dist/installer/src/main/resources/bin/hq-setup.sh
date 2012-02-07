@@ -92,8 +92,22 @@ while [ ! "x${1}" = "x" ] ; do
     INSTALL_MODE=upgrade
   elif [ "x${1}" = "x-updateScale" ] ; then
     INSTALL_MODE=updateScale
-    echo "Please enter the installation profile (small, medium, large)"
+    echo "Please enter the installation profile:
+           1: small (less than 50 platforms)
+           2: medium (50-250 platforms)
+           3: large (larger than 250 platforms)"
     read PROFILE
+    case $PROFILE in
+	1)
+   		PROFILE="small"
+   		;;
+	2)
+   		PROFILE="medium"
+   		;;
+	3)	
+		PROFILE="large"
+   		;;
+     esac
     echo "Please enter the current server installation directory"
     read SERVER_DIR
   elif [ "x${1}" = "x-oracle" ] ; then
