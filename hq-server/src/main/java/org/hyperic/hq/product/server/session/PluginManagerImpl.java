@@ -641,7 +641,7 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
                     file = new File(getServerPluginDir(), filename);
                 }
                 return (file.exists()) ?
-                    new InputSource("file://" + file.getAbsolutePath()) :
+                    new InputSource(file.toURI().toString()) :
                     new InputSource(xmlReaders.get(filename));
             }
         });
