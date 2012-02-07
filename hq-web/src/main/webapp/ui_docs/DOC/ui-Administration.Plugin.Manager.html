@@ -21,12 +21,13 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jan 04, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Feb 03, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <ul>
 	<li><a href="#ui-Administration.Plugin.Manager-ViewthePluginManagerPage">View the Plugin Manager Page</a></li>
 	<li><a href="#ui-Administration.Plugin.Manager-ContentsofthePluginManagerPage">Contents of the Plugin Manager Page</a></li>
+	<li><a href="#ui-Administration.Plugin.Manager-DetermineWhyanAgentisnotSynchronizing">Determine Why an Agent is not Synchronizing</a></li>
 	<li><a href="#ui-Administration.Plugin.Manager-StatusHelp">View Agent Sync Detail for a Plugin</a></li>
 	<li><a href="#ui-Administration.Plugin.Manager-UploadaPlugin">Upload a Plugin</a></li>
 	<li><a href="#ui-Administration.Plugin.Manager-RemovePlugins">Remove Plugins</a></li>
@@ -35,9 +36,9 @@
 
 <h1><a name="ui-Administration.Plugin.Manager-AboutPluginManager"></a>About Plugin Manager</h1>
 
-<p><b>Plugin Manager</b> is a user interface for deployment-wide management of product plugins; it displays all plugins deployed to the Hyperic Server, and a summary of agent deployment status for the plugin.  You can use <b>Plugin Manager</b> to deploy new or updated plugins and to remove plugins. </p>
+<p><b>Plugin Manager</b> is a user interface for deployment-wide management of product plugins; it displays all plugins deployed to the Hyperic Server, and a summary of agent deployment status for the plugin. You can use <b>Plugin Manager</b> to deploy new or updated plugins and to remove plugins from Hyperic Agents.</p>
 
-<p><b>Plugin Manager</b> can only administer plugins on version 4.6 and later agents. </p>
+<p><b>Plugin Manager</b> can only administer plugins on version 4.6 and later agents.</p>
 
 <div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Want to look under the hood?</b><br />For information about plugin deployment; what happens when you add, update, or remove a plugin; and how Hyperic keeps plugins on the server and on agents in sync, see <a href="Plugin Deployment and Management.html" title="Plugin Deployment and Management">Plugin Deployment and Management</a>.</td></tr></table></div>
 
@@ -57,12 +58,11 @@
 
 <h1><a name="ui-Administration.Plugin.Manager-ContentsofthePluginManagerPage"></a>Contents of the Plugin Manager Page</h1>
 
-<p>The <b>Plugin Manager</b> page lists all of the resource plugins deployed to the Hyperic Server and their deployment status on 4.6 agents reporting to the Hyperic Server.  </p>
+<p>The <b>Plugin Manager</b> page lists all of the resource plugins deployed to the server and their deployment status on all 4.x Hyperic Agents reporting to the Hyperic Server. You can use the <b>Plugin Manager</b> to add and remove plugins from v4.x Hyperic Agents. </p>
 
-<p>The <b>Plugin Manager</b> was introduced in Hyperic 4.6, and it relies upon the plugin synchronization features built into both the server and agent. The number of 4.6 or later agents reporting to the server is shown as the "Manageable Agents" in the the upper right of the page.</p>
+<p>In the upper right corner of the <b>Plugin Manager</b> page, a message indicates how many of the agents reporting to the server support <em>Server Agent Plugin Synchronization (SAPS)</em> feature, and the total number of agents reporting to the server. For information about SAPS, see <a href="Plugin Deployment and Management.html" title="Plugin Deployment and Management">Plugin Deployment and Management</a>.</p>
 
-<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>What if the number of "manageable agents" is incorrect?</b><br />If you downgrade a Hyperic 4.6 agent to use a pre-4.6 bundle, the number of manageable agents shown on the <b>Plugin Manager</b> page will not be decremented to reflect the new number of manageable agents. This issue is described in <a href="https://jira.hyperic.com/browse/HHQ-4840">https://jira.hyperic.com/browse/HHQ-4840</a>. To correct the problem, delete the pre-4.6 agent resource from Hyperic inventory. When the pre-4.6 agent is re-discovered, it will no longer be included in the "manageable agents" count.</td></tr></table></div>
-
+<p>If there are agents that do not support SAPS, the message is a link. For example, the screenshot below indicates one agents reports to the server, and that plugins on the agent are not being synchronized with the server.  For more information see <a href="#ui-Administration.Plugin.Manager-DetermineWhyanAgentisnotSynchronizing">Determine Why an Agent is not Synchronizing</a>. </p>
 
 <p>The following information is listed for each plugin:</p>
 <ul>
@@ -81,24 +81,34 @@
 	<ul>
 		<li><span class="image-wrap" style=""><img src="attachments/79038211/79135225.gif" style="border: 0px solid black"/></span> &#8212; If this icon is present, the value next to it indicates the number of agents to which the plugin is deployed.</li>
 		<li><span class="image-wrap" style=""><img src="attachments/79038211/79135222.png" style="border: 0px solid black"/></span> &#8212; If this icon is present, the value next to it indicates the number of agents on which deployment has been initiated and is still in progress.</li>
-		<li><span class="image-wrap" style=""><img src="attachments/79038211/79135224.gif" style="border: 0px solid black"/></span> &#8212; if this icon is present, the value next to it indicates the number of agents on which deployment failed.<br/>
-<a name="ui-Administration.Plugin.Manager-StatusHelp"></a></li>
+		<li><span class="image-wrap" style=""><img src="attachments/79038211/79135224.gif" style="border: 0px solid black"/></span> &#8212; if this icon is present, the value next to it indicates the number of agents on which deployment failed.</li>
 	</ul>
 	</li>
 </ul>
 
 
+
+<h1><a name="ui-Administration.Plugin.Manager-DetermineWhyanAgentisnotSynchronizing"></a>Determine Why an Agent is not Synchronizing</h1>
+
+<p>If one or more agents reporting to the Hyperic Server are not synchronizing plugs with the server, click the link in the upper right of the <b>Plugin Manager</b> page that says how many agents are synchronizing. A popup indicates why the agent or agents are not synchronizing. For example, the following popup indicates the agent is older than the agent. SAPS is not supported for agents of a prior version than the 4.6.5 Hyperic Server.</p>
+
+<p><span class="image-wrap" style=""><img src="attachments/79038211/79135610.png" width="550px" style="border: 0px solid black"/></span></p>
+
+<p><a name="ui-Administration.Plugin.Manager-StatusHelp"></a></p>
+
 <h1><a name="ui-Administration.Plugin.Manager-ViewAgentSyncDetailforaPlugin"></a>View Agent Sync Detail for a Plugin</h1>
 
 <p>If plugin deployment is in progress or failed for one or more agents, the <b>Agent Sync Status</b> is a link &#8212; click it to view the <b>Agent Status</b> page, which lists the agents upon which deployment is in progress or failed, and the status of each.</p>
 
-<p><span class="image-wrap" style=""><img src="attachments/79038211/79135218.png" width="400px" style="border: 0px solid black"/></span></p>
+<p><span class="image-wrap" style=""><img src="attachments/79038211/79135611.png" width="400px" style="border: 0px solid black"/></span></p>
 
 <div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Troubleshoot Failed Plugin Deployment</b><br />If deployment of a plugin to a Hyperic Agent fails, check the Hyperic Server's log file (<tt>ServerHome/logs/server.log</tt>} for this message:
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <script type="syntaxhighlighter" class="theme: Confluence; brush: java; gutter: false"><![CDATA[agent=id=&lt;id&gt;, address=&lt;addr&gt;, port=&lt;port&gt; has checked in the exact same plugin set twice in a row. To avoid any potential issues on the agent which may cause it to continuously restart the Server will sync the agent's plugin repository but will not restart it. Depending on the state of the agent it may take up to two successful agent restarts in order for the agent's plugin to be successfully sync'd with the Server"]]></script>
 </div></div>
 <p>If this message appears in <tt>ServerHome/logs/server.log</tt>, restart the Hyperic Agent twice. Upon the second restart, plugin deployment should succeed.</p></td></tr></table></div>
+
+
 <h1><a name="ui-Administration.Plugin.Manager-UploadaPlugin"></a>Upload a Plugin</h1>
 
 <p>When you upload a plugin with the <b>Plugin Manager</b>, the plugin is deployed to custom plugin directory on the Hyperic Server and on  each 4.6 or later agent reporting to the server. Each agent to which the plugin is deployed is automatically restarted.</p>
@@ -110,7 +120,7 @@
 	<li>Click <b>Add/Update Plugin</b> on the <b>Plugin Manager</b> page.
 	<ul>
 		<li>The <b>Upload</b> page appears.<br/>
-<span class="image-wrap" style=""><img src="attachments/79038211/79135223.png" width="440px" style="border: 0px solid black"/></span> </li>
+<span class="image-wrap" style=""><img src="attachments/79038211/79135223.png" width="440pxpxpxpx" style="border: 0px solid black"/></span></li>
 	</ul>
 	</li>
 	<li>Click <b>Browse</b> to browse the file system for the plugin <tt>.jar</tt> or <tt>.xml</tt> file.
@@ -129,7 +139,7 @@
 
 <h1><a name="ui-Administration.Plugin.Manager-RemovePlugins"></a>Remove Plugins</h1>
 
-<p>When you remove a plugin with the <b>Plugin Manager</b>, the plugin is removed from its plugin directory on the Hyperic Server, and all resources that were defined and managed by the plugin are removed from inventory. The plugin is removed from the plugin directory of each 4.6 or later agent reporting to the server. Each agent from which the plugin was removed is automatically restarted.  </p>
+<p>When you remove a plugin with the <b>Plugin Manager</b>, the plugin is removed from its plugin directory on the Hyperic Server, and all resources that were defined and managed by the plugin are removed from inventory. The plugin is removed from the plugin directory of each 4.6 or later agent reporting to the server. Each agent from which the plugin was removed is automatically restarted.</p>
 
 <p>To remove a one or more plugins:</p>
 
@@ -138,7 +148,7 @@
 	<li>Click <b>Remove Selected Plugin(s)</b>
 	<ul>
 		<li>The <b>Confirm Remove</b> page appears; it lists the number of resources in inventory managed by the plugin. If there are no resources managed by the plugin, no resource count is shown.<br/>
-<span class="image-wrap" style=""><img src="attachments/79038211/79135219.png" width="440px" style="border: 0px solid black"/></span> </li>
+<span class="image-wrap" style=""><img src="attachments/79038211/79135219.png" width="440pxpxpxpx" style="border: 0px solid black"/></span></li>
 	</ul>
 	</li>
 	<li>Click <b>Remove</b> to remove the plugin and all resources managed by the plugin.
@@ -148,7 +158,6 @@
 	</ul>
 	</li>
 </ol>
-
 
 
 				    					    <br/>
@@ -193,7 +202,7 @@
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jan 24, 2012 14:52</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 06, 2012 14:54</font></td>
 		    </tr>
 	    </table>
     </body>

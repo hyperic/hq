@@ -21,116 +21,95 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jan 23, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Feb 03, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><b>Available only in <font color="red">vFabric Hyperic</font></b></p>
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1327361465747 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1327361465747 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1327361465747 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1328307357763 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1328307357763 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1328307357763 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1327361465747'>
+/*]]>*/</style><div class='rbtoc1328307357763'>
 <ul>
     <li><a href='#AboutSizingProfilesinvFabricHyperic-DeploymentSizeandInstallationSizingProfiles'>Deployment Size and Installation Sizing Profiles</a></li>
-    <li><a href='#AboutSizingProfilesinvFabricHyperic-ServerPropertyValuesforeachInstallationSizingProfile'>Server Property Values for each Installation Sizing Profile</a></li>
+    <li><a href='#AboutSizingProfilesinvFabricHyperic-ServerPropertyValuesforSizingProfile'>Server Property Values for Sizing Profile</a></li>
     <li><a href='#AboutSizingProfilesinvFabricHyperic-HowtoSelectanInstallationSizingProfile'>How to Select an Installation Sizing Profile</a></li>
-</ul></div> 
+</ul></div>
+<blockquote><p><b>About this page...</b></p>
 
-<blockquote>
-<p><b>About this page...</b> </p>
+<p>This page describes how the Hyperic installer in vFabric Hyperic 4.6.5 and later sets the values of key server properties that affect the system resources allocated to server processing. </p></blockquote>
 
-<p>This page describes how the Hyperic installer in vFabric Hyperic 4.6.5 and later sets the values of key server properties that affect the system resources allocated to server processing. For information about: </p>
-<ul>
-	<li>blah &#8212; See xref</li>
-	<li>blah &#8212; See xref</li>
-</ul>
-
-</blockquote> 
-
+<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Tuning Hyperic HQ</b><br />Sizing profiles are a vFabric Hyperic feature. The Hyperic HQ installer does not prompt for a sizing profile, and sets related server properties to the values shown in the the "Small (less than 50 platforms)" column of the table in <a href="#AboutSizingProfilesinvFabricHyperic-ServerPropertyValuesforSizingProfile">Server Property Values for Sizing Profile</a>. To tune the Hyperic HQ server, manually edit the properties values.  For more information, see  <a href="Scaling and Tuning Hyperic Performance.html" title="Scaling and Tuning Hyperic Performance">Scaling and Tuning Hyperic Performance</a>.</td></tr></table></div>
 <h1><a name="AboutSizingProfilesinvFabricHyperic-DeploymentSizeandInstallationSizingProfiles"></a>Deployment Size and Installation Sizing Profiles</h1>
 
-<p>Starting in vFabric 4.6.5, the Hyperic installer prompts you to select a sizing profile based on the size of your Hyperic deployment.  Depending on the volume of platforms you will manage, you choose a "small" (less than 50 platforms), "medium" (50-250 platforms), or "large" (more than 250 platforms) sizing profile.</p>
+<p>Starting in vFabric 4.6.5, the Hyperic installer prompts you to select a sizing profile based on the size of your Hyperic deployment.  Depending on the volume of platforms you will manage, you choose a "small", "medium", or "large"  sizing profile.</p>
 
-<p>Based on the profile you select, the installer sets the values of a variety of Hyperic Server sizing properties in <tt>ServerHome\server.conf</tt> and <tt>ServerHome\hq-engine\hq-server\webapps\ROOT\WEB-INF\web.xml</tt>. The choice you make &#8212; "small", "medium", or "large" &#8212; determines the values of server properties that specify the Java options used to start the Hyperic Server, the server's JMS memory limits, the Hyperic database connection pool size, and the number of threads available to the Hyperic Server's internal application server. </p>
+<p>Based on the profile you select, the installer sets the values of a variety of Hyperic Server sizing properties in <tt>ServerHome\server.conf</tt> and <tt>ServerHome\hq-engine\hq-server\webapps\ROOT\WEB-INF\web.xml</tt>. The choice you make &#8212; "small", "medium", or "large" &#8212; determines the values of server properties that specify the Java options used to start the Hyperic Server, the server's JMS memory limits, the Hyperic database connection pool size, and the number of threads available to the Hyperic Server's internal application server.</p>
 
-<h1><a name="AboutSizingProfilesinvFabricHyperic-ServerPropertyValuesforeachInstallationSizingProfile"></a>Server Property Values for each Installation Sizing Profile</h1>
+<h1><a name="AboutSizingProfilesinvFabricHyperic-ServerPropertyValuesforSizingProfile"></a>Server Property Values for Sizing Profile</h1>
+<p>The table below lists the Hyperic Server properties whose values are set based by the vFabric Hyperic installer, upon the selected sizing profile, and the values associated with "small", "medium", and "large" profiles.</p>
 
-<p>The table below lists the Hyperic Server properties whose values are set based upon the selected sizing profile, and the values associated with "small", "medium", and "large" profiles: </p>
+<div class='panelMacro'><table class='infoMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/information.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>Only the "small" sizing profile is supported if you use the embedded PostgreSQL in vFabric Hyperic.</td></tr></table></div>
 
 <div class='table-wrap'>
 <table class='confluenceTable'><tbody>
 <tr>
 <th class='confluenceTh'> Property </th>
-<th class='confluenceTh'> Small </th>
-<th class='confluenceTh'> Medium </th>
-<th class='confluenceTh'> Large </th>
+<th class='confluenceTh'> Small <br class="atl-forced-newline" /> (less than 50 platforms)</th>
+<th class='confluenceTh'> Medium <br class="atl-forced-newline" /> (50-250 platforms)</th>
+<th class='confluenceTh'> Large <br class="atl-forced-newline" /> (more than 250 platforms)</th>
 </tr>
 <tr>
-<td class='confluenceTd'> <tt>server.jms.highmemory</tt> </td>
+<td class='confluenceTd'> <tt><a href="server.jms.highmemory.html" title="server.jms.highmemory">server.jms.highmemory</a></tt> </td>
 <td class='confluenceTd'> 350 </td>
-<td class='confluenceTd'> 1600 </td>
-<td class='confluenceTd'> 3600 </td>
-</tr>
-<tr>
-<td class='confluenceTd'> <tt>server.jms.maxmemory</tt> </td>
-<td class='confluenceTd'> 400 </td>
 <td class='confluenceTd'> 1400 </td>
 <td class='confluenceTd'> 2400 </td>
 </tr>
 <tr>
-<td class='confluenceTd'> <tt>server.database-minpoolsize</tt> </td>
+<td class='confluenceTd'> <tt><a href="server.jms.maxmemory.html" title="server.jms.maxmemory">server.jms.maxmemory</a></tt> </td>
+<td class='confluenceTd'> 400 </td>
+<td class='confluenceTd'> 1600 </td>
+<td class='confluenceTd'> 3600 </td>
+</tr>
+<tr>
+<td class='confluenceTd'> <tt><a href="server.database-minpoolsize.html" title="server.database-minpoolsize">server.database&#45;minpoolsize</a></tt> </td>
 <td class='confluenceTd'> 5 </td>
 <td class='confluenceTd'> 20 </td>
 <td class='confluenceTd'> 50 </td>
 </tr>
 <tr>
-<td class='confluenceTd'> <tt>server.database-maxpoolsize</tt> </td>
+<td class='confluenceTd'> <tt><a href="server.database-maxpoolsize.html" title="server.database-maxpoolsize">server.database&#45;maxpoolsize</a></tt> </td>
 <td class='confluenceTd'> 100 </td>
 <td class='confluenceTd'> 200 </td>
 <td class='confluenceTd'> 400 </td>
 </tr>
 <tr>
-<td class='confluenceTd'> <tt>server.java.opts</tt> </td>
-<td class='confluenceTd'> <tt>&#45;Djava.awt.headless=true</tt> <br class="atl-forced-newline" /> 
-<tt>&#45;XX:MaxPermSize=192m</tt> <br class="atl-forced-newline" /> 
-<tt>&#45;Xmx1g</tt> <br class="atl-forced-newline" /> 
-<tt>&#45;Xms1g</tt> <br class="atl-forced-newline" /> 
-<tt>&#45;XX:+HeapDumpOnOutOfMemory</tt> <br class="atl-forced-newline" /> 
-<tt>Error</tt> </td>
-<td class='confluenceTd'> <tt>&#45;Djava.awt.headless=true</tt> <br class="atl-forced-newline" /> 
-<tt>&#45;XX:MaxPermSize=192m</tt> <br class="atl-forced-newline" /> 
-<tt>&#45;Xmx4g</tt> <br class="atl-forced-newline" /> 
-<tt>&#45;Xms4g</tt> <br class="atl-forced-newline" /> 
-<tt>&#45;XX:+HeapDumpOnOutOfMemory</tt> <br class="atl-forced-newline" /> 
-<tt>Error</tt> </td>
-<td class='confluenceTd'> <tt>&#45;Djava.awt.headless=true</tt> <br class="atl-forced-newline" /> 
-<tt>&#45;XX:MaxPermSize=192m</tt> <br class="atl-forced-newline" /> 
-<tt>&#45;Xmn4g</tt> <br class="atl-forced-newline" /> 
-<tt>&#45;Xmx8g</tt> <br class="atl-forced-newline" /> 
-<tt>&#45;Xms8g</tt> <br class="atl-forced-newline" /> 
-<tt>&#45;XX:+HeapDumpOnOutOfMemory</tt> <br class="atl-forced-newline" /> 
-<tt>Error</tt> </td>
+<td class='confluenceTd'> <tt><a href="server.java.opts.html" title="server.java.opts">server.java.opts</a></tt> </td>
+<td class='confluenceTd'> <tt>&#45;Djava.awt.headless=true</tt> <br class="atl-forced-newline" />  <tt>&#45;XX:MaxPermSize=192m</tt> <br class="atl-forced-newline" />  <tt>&#45;Xmx1g</tt> <br class="atl-forced-newline" />  <tt>&#45;Xms1g</tt> <br class="atl-forced-newline" />  <tt>&#45;XX:+HeapDumpOnOutOfMemory</tt> <br class="atl-forced-newline" />  <tt>Error</tt> </td>
+<td class='confluenceTd'> <tt>&#45;Djava.awt.headless=true</tt> <br class="atl-forced-newline" />  <tt>&#45;XX:MaxPermSize=192m</tt> <br class="atl-forced-newline" />  <tt>&#45;Xmx4g</tt> <br class="atl-forced-newline" />  <tt>&#45;Xms4g</tt> <br class="atl-forced-newline" />  <tt>&#45;XX:+HeapDumpOnOutOfMemory</tt> <br class="atl-forced-newline" />  <tt>Error</tt> </td>
+<td class='confluenceTd'> <tt>&#45;Djava.awt.headless=true</tt> <br class="atl-forced-newline" />  <tt>&#45;XX:MaxPermSize=192m</tt> <br class="atl-forced-newline" />  <tt>&#45;Xmn4g</tt> <br class="atl-forced-newline" />  <tt>&#45;Xmx8g</tt> <br class="atl-forced-newline" />  <tt>&#45;Xms8g</tt> <br class="atl-forced-newline" />  <tt>&#45;XX:+HeapDumpOnOutOfMemory</tt> <br class="atl-forced-newline" />  <tt>Error</tt> <br class="atl-forced-newline" /> <tt>-XX:+UseConcMarkSweepGC</tt> <br class="atl-forced-newline" />  <tt>-XX:SurvivorRatio=12</tt> <br class="atl-forced-newline" />  <tt>-XX:+UseCompressedOops</tt></td>
 </tr>
 <tr>
-<td class='confluenceTd'> <tt>tomcat.maxthreads</tt> <br class="atl-forced-newline" /> 
+</tr>
+<tr>
+<td class='confluenceTd'> <tt><a href="tomcat.maxthreads.html" title="tomcat.maxthreads">tomcat.maxthreads</a></tt> <br class="atl-forced-newline" />
 (new in vFabric Hyperic 4.6.5) </td>
 <td class='confluenceTd'> 500 </td>
 <td class='confluenceTd'> 2000 </td>
 <td class='confluenceTd'> 4000 </td>
 </tr>
 <tr>
-<td class='confluenceTd'> <tt>tomcat.minsparethreads</tt> <br class="atl-forced-newline" /> 
-(new in vFabric Hyperic 4.6.5)  </td>
+<td class='confluenceTd'> <tt><a href="tomcat.minsparethreads.html" title="tomcat.minsparethreads">tomcat.minsparethreads</a></tt> <br class="atl-forced-newline" />
+(new in vFabric Hyperic 4.6.5) </td>
 <td class='confluenceTd'> 50 </td>
 <td class='confluenceTd'> 100 </td>
 <td class='confluenceTd'> 200 </td>
 </tr>
 <tr>
-<td class='confluenceTd'> <tt>org.hyperic.lather.maxConns</tt> <br class="atl-forced-newline" /> 
-(in <tt>ServerHome\hq-engine\hq-server</tt><br class="atl-forced-newline" /> 
-<tt>webapps\ROOT\WEB-INF\web.xml</tt> </td>
+<td class='confluenceTd'> <tt>org.hyperic.lather.maxConns</tt> <br class="atl-forced-newline" />
+(in <tt>ServerHome\hq-engine\hq-server</tt> <br class="atl-forced-newline" />  <tt>webapps\ROOT\WEB-INF\web.xml</tt> </td>
 <td class='confluenceTd'> 475 </td>
 <td class='confluenceTd'> 1900 </td>
 <td class='confluenceTd'> 3800 </td>
@@ -138,15 +117,12 @@ div.rbtoc1327361465747 li {margin-left: 0px;padding-left: 0px;}
 </tbody></table>
 </div>
 
-
 <h1><a name="AboutSizingProfilesinvFabricHyperic-HowtoSelectanInstallationSizingProfile"></a>How to Select an Installation Sizing Profile</h1>
 
-<p>The Hyperic installer you to select an sizing profile size when you run it with the <tt>-full</tt> qualifier. If you run the Hyperic with no qualifier, or a qualifier other than <tt>-full</tt>, default property values are set in accordance with the "small" profile. </p>
-
-<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Sizing Profiles and Upgrade Installations</b><br />When you run the Hyperic installer with the <tt>-upgrade</tt> qualifier, the new Hyperic Server properties {<tt>tomcat.maxthreads</tt>) and (<tt>tomcat.minsparethreads</tt>) are added to <tt>server.conf</tt>, with values corresponding to the "small" sizing profile. You can apply a different sizing profile after installation, as described in Change vFabric Hyperic Server Installation Profile.</td></tr></table></div>
+<p>The Hyperic installer you to select an sizing profile size when you run it with the <tt>&#45;full</tt> qualifier. If you run the Hyperic with no qualifier, or a qualifier other than <tt>&#45;full</tt>, default property values are set in accordance with the "small" profile.</p>
 
 
-
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Sizing Profiles and Upgrade Installations</b><br />When you run the Hyperic installer with the <tt>&#45;upgrade</tt> qualifier, the new Hyperic Server properties {<tt>tomcat.maxthreads</tt>) and (<tt>tomcat.minsparethreads</tt>) are added to <tt>server.conf</tt>, with values corresponding to the "small" sizing profile. You can apply a different sizing profile after installation, as described in <a href="Change vFabric Hyperic Server Sizing Profile.html" title="Change vFabric Hyperic Server Sizing Profile">Change vFabric Hyperic Server Sizing Profile</a>.</td></tr></table></div>
 
 				    
                     			    </td>
@@ -157,7 +133,7 @@ div.rbtoc1327361465747 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jan 24, 2012 14:50</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 06, 2012 14:52</font></td>
 		    </tr>
 	    </table>
     </body>
