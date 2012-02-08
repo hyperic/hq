@@ -30,25 +30,25 @@
 		<dependency>
 			<groupId>org.hyperic.jre</groupId>
 			<artifactId>amd64-linux</artifactId>
-			<version>1.6_29</version>
+			<version>1.6_30</version>
 			<type>tar.gz</type>
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.jre</groupId>
 			<artifactId>x86-linux</artifactId>
-			<version>1.6_29</version>
+			<version>1.6_30</version>
 			<type>tar.gz</type>
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.jre</groupId>
 			<artifactId>sparc-sun-solaris</artifactId>
-			<version>1.6_29</version>
+			<version>1.6_30</version>
 			<type>tar.gz</type>
 		</dependency>
 		<dependency>
 			<groupId>org.hyperic.jre</groupId>
 			<artifactId>x86-win32</artifactId>
-			<version>1.6_29</version>
+			<version>1.6_30</version>
 			<type>exe</type>
 		</dependency>
 		<dependency>
