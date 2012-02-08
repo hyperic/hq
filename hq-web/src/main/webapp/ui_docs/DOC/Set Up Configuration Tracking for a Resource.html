@@ -21,23 +21,21 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Feb 06, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Feb 07, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><font color="gray"><em>Topics marked with</em></font> <font color="red">*</font> <font color="gray"><em>relate to features available only in vFabric Hyperic.</em></font></p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1328554695568 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1328554695568 ul {list-style: disc;margin-left: 0px;padding-left: 20x;}
-div.rbtoc1328554695568 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1328654543457 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1328654543457 ul {list-style: disc;margin-left: 0px;padding-left: 20x;}
+div.rbtoc1328654543457 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1328554695568'>
+/*]]>*/</style><div class='rbtoc1328654543457'>
 <ul>
     <li><a href='#SetUpConfigurationTrackingforaResource-HypericConfigurationTrackingFunctionality'>Hyperic Configuration Tracking Functionality</a></li>
-    <li><a href='#SetUpConfigurationTrackingforaResource-RequirementsforConfigurationTracking'>Requirements for Configuration Tracking</a></li>
-    <li><a href='#SetUpConfigurationTrackingforaResource-SetUpConfigurationTrackingforaPlatformorService'>Set Up Configuration Tracking for a Platform or Service</a></li>
-    <li><a href='#SetUpConfigurationTrackingforaResource-SetUpConfigurationTrackingforaServer'>Set Up Configuration Tracking for a Server</a></li>
+    <li><a href='#SetUpConfigurationTrackingforaResource-SetUp4.6.5ConfigurationTrackingforaServer'>Set Up 4.6.5 Configuration Tracking for a Server</a></li>
 <ul>
     <li><a href='#SetUpConfigurationTrackingforaResource-TomcatConfigurationTracking'>Tomcat Configuration Tracking</a></li>
     <li><a href='#SetUpConfigurationTrackingforaResource-ApacheConfigurationTracking'>Apache Configuration Tracking</a></li>
@@ -48,6 +46,7 @@ div.rbtoc1328554695568 li {margin-left: 0px;padding-left: 0px;}
     <li><a href='#SetUpConfigurationTrackingforaResource-PostgreSQLConfigurationTracking'>PostgreSQL Configuration Tracking</a></li>
     <li><a href='#SetUpConfigurationTrackingforaResource-mySQLConfigurationTracking'>mySQL Configuration Tracking</a></li>
 </ul>
+    <li><a href='#SetUpConfigurationTrackingforaResource-SetUpPollingBasedConfigurationTracking'>Set Up Polling-Based Configuration Tracking</a></li>
     <li><a href='#SetUpConfigurationTrackingforaResource-ViewConfigurationEventsforaResource'>View Configuration Events for a Resource</a></li>
     <li><a href='#SetUpConfigurationTrackingforaResource-ConfigureAlertsBasedonConfigurationEvents'>Configure Alerts Based on Configuration Events</a></li>
 </ul></div>
@@ -55,49 +54,33 @@ div.rbtoc1328554695568 li {margin-left: 0px;padding-left: 0px;}
 
 
 
-
 <h1><a name="SetUpConfigurationTrackingforaResource-HypericConfigurationTrackingFunctionality"></a>Hyperic Configuration Tracking Functionality</h1>
 
-<p>You can configure Hyperic to track changes made to configuration files (or other local files of interest) and log events for the associated resource. Configuration tracking functionality varies by resource type.</p>
+<p>For supported resource types, you can configure Hyperic to track changes made to configuration files (or other local files of interest) and log events for the associated resource. For a full description of configuration tracking functionality, see <a href="Log and Configuration Event Tracking.html" title="Log and Configuration Event Tracking">Log and Configuration Event Tracking</a>.</p>
 
-<p>You can view configuration event data on the <b>Monitor</b> page for a resource or the <b>Event Center</b>. You can base alert conditions on configuration events.</p>
-
-<p>For a full description of configuration tracking functionality, see <a href="Log and Configuration Event Tracking.html" title="Log and Configuration Event Tracking">Log and Configuration Event Tracking</a>.</p>
-
-<h1><a name="SetUpConfigurationTrackingforaResource-RequirementsforConfigurationTracking"></a>Requirements for Configuration Tracking</h1>
-
+<p>Note that:</p>
 <ul>
 	<li>The Hyperic Agent must be able to read a file to track it &#8212; ensure that file permissions are such that the Hyperic Agent can read files you wish to track.</li>
-	<li>Configuration tracking is supported for most platform and server types; typically not for services. Hyperic's configuration tracking functionality for services is the same as for platforms.  For more information, see <a href="#SetUpConfigurationTrackingforaResource-SetUpConfigurationTrackingforaPlatform">Set Up Configuration Tracking for a Platform</a>,</li>
+	<li>Configuration tracking is supported for most platform and server types; typically not for services.</li>
+	<li>Configuration tracking functionality for server types varies by resource type, plugins that have been updated to use the <tt>org.hyperic.hq.product.FileChangeTrackPlugin</tt> added in Hyperic 4.6.5 provide more detailed tracking than those that still use <tt>org.hyperic.hq.product.ConfigFileTrackPlugin</tt>.</li>
 </ul>
 
 
-<h1><a name="SetUpConfigurationTrackingforaResource-SetUpConfigurationTrackingforaPlatformorService"></a>Set Up Configuration Tracking for a Platform or Service</h1>
 
-<p>For platforms and services that support configuration tracking, the agent uses a cryptographic hash function to continuously compare a original version of the file with the current version to see if it has changed.</p>
-
-<p>To enable and configure configuration tracking for a platform or service:</p>
-<ol>
-	<li>Navigate to the resource instance.</li>
-	<li>Select <b>Configure ...</b> from the <b>Tools</b> menu.
-	<ul>
-		<li>The <b>Configuration Properties</b> page appears.</li>
-	</ul>
-	</li>
-	<li>On the <b>Edit Configuration Properties</b> page:
-	<ol>
-		<li>Click the <b>Enable Config Tracking</b> box to turn configuration tracking on and off for the resource.</li>
-		<li>Enter the path, relative to the resource's installation directory, to each file you wish to track. Separate files with a comma.</li>
-		<li>Click <b>OK</b>.</li>
-	</ol>
-	</li>
-</ol>
-
-
-<h1><a name="SetUpConfigurationTrackingforaResource-SetUpConfigurationTrackingforaServer"></a>Set Up Configuration Tracking for a Server</h1>
-
-<p>As of Hyperic 4.6.5. configuration tracking for servers is enhanced &#8212; you can monitor multiple files in multiple directories, recursively  if desired. The Hyperic 4.6.5 agent also tracks more information about a file change then in for other resource types &#8212; the agent detects the nature of the file change (whether it was an file add, delete, modify, or rename), and retains the "diff" data for the change.</p>
-
+<p><a name="SetUpConfigurationTrackingforaResource-config"></a></p>
+<h1><a name="SetUpConfigurationTrackingforaResource-SetUp4.6.5ConfigurationTrackingforaServer"></a>Set Up 4.6.5 Configuration Tracking for a Server</h1>
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>Hyperic 4.6.5 has a new configuration tracking support class that enables enhanced configuration tracking for servers. The new class &#8212; <tt>FileChangeTrackPlugin</tt> ---- supports detailed change tracking of files in multiple directories (or directory trees).  The plugin tracks the nature of a change (whether it was an file add, delete, modify, or rename), and retains the "diff" data for the change. In Hyperic 4.6.5, a number of plugins have been updated to use <tt>FileChangeTrackPlugin</tt> &#8212; follow the instructions in this section to set up configuration tracking for servers of these types. 
+<ul>
+	<li>Tomcat</li>
+	<li>Apache</li>
+	<li>WebSphere</li>
+	<li>WebLogic Server</li>
+	<li>JBoss</li>
+	<li>IIS</li>
+	<li>PostgreSQL</li>
+	<li>mySQL</li>
+</ul>
+</td></tr></table></div>
 <p>To enable and configure configuration tracking for a server:</p>
 
 <ol>
@@ -122,7 +105,8 @@ div.rbtoc1328554695568 li {margin-left: 0px;padding-left: 0px;}
 			<ul>
 				<li><tt>path</tt> &#8212; An absolute path, or a path relative to the managed resource's discovered install directory.</li>
 				<li><tt>recurse</tt> &#8212; Indicates, with a value of "true" or "false", whether or not track the files inside directories below the target directory specified by <tt>path</tt>.</li>
-				<li><tt>regex</tt> &#8212; A regular expression for filtering the directories or files to track for changes, in the directory (or directory tree for recursive tracking) specified by <tt>path</tt>.</li>
+				<li><tt>regex</tt> &#8212; A regular expression for filtering the directories or files to track for changes, in the directory (or directory tree for recursive tracking) specified by <tt>path</tt>.
+<div class='panelMacro'><table class='tipMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/check.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>You do not need to configure the files to track, if you are satisfied by the default filter definitions, which are described below.</td></tr></table></div></li>
 			</ul>
 			</li>
 		</ul>
@@ -133,7 +117,7 @@ div.rbtoc1328554695568 li {margin-left: 0px;padding-left: 0px;}
 </ol>
 
 
-<p>Hyperic provides default configuration tracking settings for a number of server types, which appear in the  in the <b>Configuration Files</b> field in the "Monitoring" section of a resource's <b>Configuration Properties</b> page. The sections below describe these out-of-the-box filter definitions.</p>
+
 
 <h2><a name="SetUpConfigurationTrackingforaResource-TomcatConfigurationTracking"></a>Tomcat Configuration Tracking</h2>
 
@@ -331,6 +315,28 @@ configuration/;false;.*\.xml|.*\.properties</pre>
 
 
 
+<h1><a name="SetUpConfigurationTrackingforaResource-SetUpPollingBasedConfigurationTracking"></a>Set Up Polling-Based Configuration Tracking </h1>
+
+<p>For platforms and services that support configuration tracking, and server types that have the agent uses a cryptographic hash function to continuously compare a original version of the file with the current version to see if it has changed.</p>
+
+<p>To enable and configure configuration tracking for a platform or service:</p>
+<ol>
+	<li>Navigate to the resource instance.</li>
+	<li>Select <b>Configure ...</b> from the <b>Tools</b> menu.
+	<ul>
+		<li>The <b>Configuration Properties</b> page appears.</li>
+	</ul>
+	</li>
+	<li>On the <b>Edit Configuration Properties</b> page:
+	<ol>
+		<li>Click the <b>Enable Config Tracking</b> box to turn configuration tracking on and off for the resource.</li>
+		<li>Enter the path, relative to the resource's installation directory, to each file you wish to track. Separate files with a comma.</li>
+		<li>Click <b>OK</b>.</li>
+	</ol>
+	</li>
+</ol>
+
+
 <h1><a name="SetUpConfigurationTrackingforaResource-ViewConfigurationEventsforaResource"></a>View Configuration Events for a Resource</h1>
 
 <p>You can view configuration event data on:</p>
@@ -398,7 +404,7 @@ configuration/;false;.*\.xml|.*\.properties</pre>
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Feb 06, 2012 14:53</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:56</font></td>
 		    </tr>
 	    </table>
     </body>
