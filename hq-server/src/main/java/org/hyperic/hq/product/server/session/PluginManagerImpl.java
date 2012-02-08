@@ -28,6 +28,7 @@ package org.hyperic.hq.product.server.session;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -87,6 +88,7 @@ import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.hq.zevents.ZeventPayload;
 import org.hyperic.hq.zevents.ZeventSourceId;
+import org.hyperic.util.file.FileUtil;
 import org.hyperic.util.timer.StopWatch;
 import org.jdom.Document;
 import org.jdom.JDOMException;
@@ -499,15 +501,26 @@ public class PluginManagerImpl implements PluginManager, ApplicationContextAware
         }
     }
 
-    private void deployPlugins(Collection<File> files) {
+    private void deployPlugins(Collection<File> files) throws PluginDeployException {
         final File pluginDir = getCustomPluginDir();
         if (!pluginDir.exists() && !pluginDir.isDirectory() && !pluginDir.mkdir()) {
             throw new SystemException(pluginDir.getAbsolutePath() +
                 " does not exist or is not a directory");
         }
         for (final File file : files) {
-            final File dest = new File(pluginDir.getAbsolutePath() + "/" + file.getName());
-            file.renameTo(dest);
+            final File dest = new File(pluginDir.getAbsolutePath() + File.separator + file.getName());
+            if (!file.renameTo(dest) ) {
+                // Rename sometimes fails on Windows for no apparent reason
+                try {
+                    FileUtil.copyFile(file, dest);
+                } catch (FileNotFoundException e) {
+                    throw new PluginDeployException("plugin.manager.file.notfound.exception", e);
+                } catch (IOException e) {
+                    throw new PluginDeployException("plugin.manager.file.ioexception", e, file.getName());
+                } finally {
+                    file.delete();
+                }
+            }
         }
     }
 
