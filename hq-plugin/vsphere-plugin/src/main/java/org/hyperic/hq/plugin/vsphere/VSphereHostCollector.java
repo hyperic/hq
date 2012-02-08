@@ -237,4 +237,19 @@ public class VSphereHostCollector extends VSphereCollector {
             }
         }
     }
+
+    @Override
+    protected void setValue(String key, double val) {
+        if (_log.isDebugEnabled()) {
+            _log.debug("key='" + key + "' val='" + val + "'");
+        }
+        if (key.startsWith("mem.swap") && key.endsWith("Rate.average")) {
+            String newKey = key.replace("Rate.", ".");
+            if (_log.isDebugEnabled()) {
+                _log.debug("newKey='" + newKey + "' val='" + val + "'");
+            }
+            super.setValue(newKey, val);
+        }
+        super.setValue(key, val);
+    }
 }
