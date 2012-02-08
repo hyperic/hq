@@ -21,18 +21,18 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Feb 06, 2012 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Feb 07, 2012 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p>This page is an overview of the event tracking capabilities in VMware vFabric™ Hyperic®.</p>
 
 
 <style type='text/css'>/*<![CDATA[*/
-div.rbtoc1328554755854 {margin-left: 1.5em;padding: 0px;}
-div.rbtoc1328554755854 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
-div.rbtoc1328554755854 li {margin-left: 0px;padding-left: 0px;}
+div.rbtoc1328653372452 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1328653372452 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1328653372452 li {margin-left: 0px;padding-left: 0px;}
 
-/*]]>*/</style><div class='rbtoc1328554755854'>
+/*]]>*/</style><div class='rbtoc1328653372452'>
 <ul>
     <li><a href='#LogandConfigurationEventTracking-HypericLogTrackingOverview'>Hyperic Log Tracking Overview</a></li>
     <li><a href='#LogandConfigurationEventTracking-HypericConfigurationTrackingOverview'>Hyperic Configuration Tracking Overview</a></li>
@@ -72,54 +72,42 @@ div.rbtoc1328554755854 li {margin-left: 0px;padding-left: 0px;}
 
 <h1><a name="LogandConfigurationEventTracking-HypericConfigurationTrackingOverview"></a>Hyperic Configuration Tracking Overview</h1>
 
-<p>You can configure Hyperic to log an event when specified files &#8212; usually configuration artifacts &#8212; associated with a managed resource are modified. The key facts about configuration tracking in Hyperic are:</p>
+<p>You can configure Hyperic to log an event when specified files &#8212; usually configuration artifacts &#8212; associated with a managed resource are modified.</p>
 
+<p>Configuration tracking is supported for most platform and server types; typically not for services.</p>
+
+<p>The Hyperic Agent must be able to read a file to track it &#8212; ensure that file permissions are such that the Hyperic Agent can read files you wish to track.</p>
+
+<p>You can base an alert definition for a resource or resource type on a configuration tracking event. For more information see <a href="Define an Alert for a Resource.html" title="Define an Alert for a Resource">Define an Alert for a Resource</a> and <a href="Define an Alert for a Resource Group.html" title="Define an Alert for a Resource Group">Define an Alert for a Resource Group</a> in <em>vFabric Hyperic Administration</em>.</p>
+
+<p>Hyperic 4.6.5 provides two different configuration tracking mechanisms, described in the sections below:</p>
+
+<h2><a name="LogandConfigurationEventTracking-EventBasedConfigurationTracking"></a>Event-Based Configuration Tracking</h2>
+
+<p>In Hyperic 4.6.5, an new support class &#8212; <tt>org.hyperic.hq.product.FileChangeTrackPlugin</tt> &#8212; enables more detailed change tracking than available in previous versions of Hyperic. This plugin tracks the change type ("add", "delete", "modify", or "rename") and the raw difference data for a change. In Hyperic 4.6.5 the following plugins have been updated to use <tt>FileChangeTrackPlugin</tt>:</p>
 <ul>
-	<li>Hyperic can track multiple files per resource.</li>
+	<li>Tomcat</li>
+	<li>Apache</li>
+	<li>WebSphere</li>
+	<li>WebLogic Server</li>
+	<li>JBoss</li>
+	<li>IIS</li>
+	<li>PostgreSQL</li>
+	<li>mySQL</li>
 </ul>
 
 
-<ul>
-	<li>The Hyperic Agent must be able to read a file to track it &#8212; ensure that file permissions are such that the Hyperic Agent can read files you wish to track.</li>
-</ul>
+<p>These plugins provide default <b>Configuration File</b> filters. Note that configuration tracking for these types is disabled by default. You can enable configuration tracking on the <b>Configuration Properties</b> page for a resource.</p>
 
 
-<ul>
-	<li>Configuration tracking is supported for most platform and server types; typically not for services.
-	<ul>
-		<li>For server types, starting in Hyperic 4.6.5, the agent uses an event-driven mechanism to track the change type ("add", "delete", "modify", or "rename") and the raw difference data for a change.</li>
-		<li>For platform types (and supported service types), the agent uses a polling function to continuously compare a original version of the file with the current version to see if it has changed. (The type of change and the difference data is not available for platform and service types in this version of Hyperic.)</li>
-	</ul>
-	</li>
-</ul>
+<h2><a name="LogandConfigurationEventTracking-PollingBasedConfigurationTracking"></a>Polling-Based Configuration Tracking</h2>
 
-
-<ul>
-	<li>You can base an alert definition for a resource or resource type on a configuration tracking event. For more information see <a href="Define an Alert for a Resource.html" title="Define an Alert for a Resource">Define an Alert for a Resource</a> and <a href="Define an Alert for a Resource Group.html" title="Define an Alert for a Resource Group">Define an Alert for a Resource Group</a> in <em>vFabric Hyperic Administration</em>.</li>
-</ul>
-
-
-
-<ul>
-	<li>Starting in Hyperic 4.6.5, a number server types have pre-configured configuration tracking filters. Note that configuration tracking for these types is disabled by default. You can enable configuration tracking on the <b>Configuration Properties</b> page for a resource.
-	<ul>
-		<li>Tomcat</li>
-		<li>Apache</li>
-		<li>WebSphere</li>
-		<li>WebLogic Server</li>
-		<li>JBoss</li>
-		<li>IIS</li>
-		<li>PostgreSQL</li>
-		<li>mySQL</li>
-	</ul>
-	</li>
-</ul>
-
-
+<p>Plugins that have not been updated to use <tt>FileChangeTrackPlugin</tt> use the still-supported <tt>org.hyperic.hq.product.ConfigFileTrackPlugin</tt> class, which is polling-based, and tracks the fact that a file has changed, but not the change type or diff data.</p>
 
 <p>For information about configuring configuration tracking see <a href="Set Up Configuration Tracking for a Resource.html" title="Set Up Configuration Tracking for a Resource">Set Up Configuration Tracking for a Resource</a> in <em>vFabric Hyperic Administration</em>.</p>
 
 <h1><a name="LogandConfigurationEventTracking-ViewingEventData"></a>Viewing Event Data</h1>
+
 <ul>
 	<li>You can view configuration event data on:
 	<ul>
@@ -139,7 +127,7 @@ div.rbtoc1328554755854 li {margin-left: 0px;padding-left: 0px;}
 				<td height="12" background="http://support.hyperic.com/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Feb 06, 2012 14:52</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Feb 07, 2012 15:56</font></td>
 		    </tr>
 	    </table>
     </body>
