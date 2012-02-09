@@ -34,8 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class ConfigResponseDAO
-    extends HibernateDAO {
+public class ConfigResponseDAO extends HibernateDAO<ConfigResponseDB> {
 
     @Autowired
     public ConfigResponseDAO(SessionFactory f) {
@@ -44,14 +43,14 @@ public class ConfigResponseDAO
     }
 
     public ConfigResponseDB findById(Integer id) {
-        return (ConfigResponseDB) super.findById(id);
+        return super.findById(id);
     }
 
     public ConfigResponseDB get(Integer id) {
-        return (ConfigResponseDB) super.get(id);
+        return super.get(id);
     }
 
-    void save(ConfigResponseDB entity) {
+    public void save(ConfigResponseDB entity) {
         super.save(entity);
     }
 

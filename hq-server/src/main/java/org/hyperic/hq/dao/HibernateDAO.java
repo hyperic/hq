@@ -29,8 +29,11 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
 import org.hibernate.LockMode;
+import org.hibernate.ObjectNotFoundException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -46,6 +49,7 @@ import org.hyperic.util.pager.PageList;
 public abstract class HibernateDAO<T> {
     private Class<T> _persistentClass;
     protected static final int BATCH_SIZE = 1000;
+    private static final Log log = LogFactory.getLog(HibernateDAO.class);
 
     protected SessionFactory sessionFactory;
 
@@ -81,7 +85,12 @@ public abstract class HibernateDAO<T> {
 
     @SuppressWarnings("unchecked")
     public T get(Serializable id) {
-        return (T) getSession().get(getPersistentClass(), id);
+        try {
+            return (T) getSession().get(getPersistentClass(), id);
+        } catch (ObjectNotFoundException e) {
+            log.debug(e,e);
+            return null;
+        }
     }
 
     @SuppressWarnings("unchecked")

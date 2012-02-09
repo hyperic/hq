@@ -46,14 +46,17 @@ import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
+import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.common.shared.TransactionRetry;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.hq.util.Reference;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -68,11 +71,14 @@ public class RemoveResourceAction
 
     private AppdefBoss appdefBoss;
 
+    private TransactionRetry transactionRetry;
+
     @Autowired
-    public RemoveResourceAction(EventsBoss eventsBoss, AppdefBoss appdefBoss) {
+    public RemoveResourceAction(EventsBoss eventsBoss, AppdefBoss appdefBoss, TransactionRetry transactionRetry) {
         super();
         this.eventsBoss = eventsBoss;
         this.appdefBoss = appdefBoss;
+        this.transactionRetry = transactionRetry;
     }
 
     public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request,
@@ -113,14 +119,17 @@ public class RemoveResourceAction
     private void removeResources(HttpServletRequest request, String[] resourceItems) throws SessionNotFoundException,
         ApplicationException, VetoException, RemoteException, ServletException {
 
-        Integer sessionId = RequestUtils.getSessionId(request);
+        final Integer sessionId = RequestUtils.getSessionId(request);
 
         List<String> resourceList = new ArrayList<String>();
         CollectionUtils.addAll(resourceList, resourceItems);
         List<AppdefEntityID> entities = BizappUtils.buildAppdefEntityIds(resourceList);
+        final Reference<SessionNotFoundException> snfeToThrow = new Reference<SessionNotFoundException>();
+        final Reference<ApplicationException> aeToThrow = new Reference<ApplicationException>();
+        final Reference<SessionTimeoutException> stoeToThrow = new Reference<SessionTimeoutException>();
         if (resourceItems != null && resourceItems.length > 0) {
-            Set<AppdefEntityID> deleted = new HashSet<AppdefEntityID>();
-            String vetoMessage = null;
+            final Reference<Integer> numDeleted = new Reference<Integer>();
+            final Reference<String> vetoMessage = new Reference<String>();
             // about the exception handling:
             // if someone either deleted the entity out from under our user
             // or the user hit the back button, a derivative of
@@ -129,21 +138,41 @@ public class RemoveResourceAction
             // (which is why the whole shebang isn't in one big
             // try / catch) but we only confirm that something was deleted
             // if something actually, um, was
-            for (AppdefEntityID resourceId : entities) {
-                try {
-                    deleted.addAll(Arrays.asList(appdefBoss.removeAppdefEntity(sessionId.intValue(), resourceId, false)));
-                } catch (AppdefEntityNotFoundException e) {
-                    log.error("Removing resource " + resourceId + "failed.");
-                } catch (VetoException v) {
-                    vetoMessage = v.getMessage();
-                    log.info(vetoMessage);
+            for (final AppdefEntityID resourceId : entities) {
+                final Runnable runner = new Runnable() {
+                    public void run() {
+                        try {
+                            List<AppdefEntityID> list =
+                                Arrays.asList(appdefBoss.removeAppdefEntity(sessionId.intValue(), resourceId, false));
+                            Integer num = numDeleted.get();
+                            numDeleted.set(num + list.size());
+                        } catch (AppdefEntityNotFoundException e) {
+                            log.error("Removing resource " + resourceId + "failed.", e);
+                        } catch (VetoException v) {
+                            vetoMessage.set(v.getMessage());
+                            log.info(vetoMessage);
+                        } catch (SessionNotFoundException e) {
+                            snfeToThrow.set(e);
+                        } catch (SessionTimeoutException e) {
+                            stoeToThrow.set(e);
+                        } catch (ApplicationException e) {
+                            aeToThrow.set(e);
+                        }
+                    }
+                };
+                transactionRetry.runTransaction(runner, 3, 1000);
+                // this is ugly, may need to rethink the TransactionRetry api to avoid this type of code
+                if (snfeToThrow.get() != null) {
+                    throw snfeToThrow.get();
+                } else if (stoeToThrow.get() != null) {
+                    throw stoeToThrow.get();
+                } else if (aeToThrow.get() != null) {
+                    throw aeToThrow.get();
                 }
             }
-
-            if (vetoMessage != null) {
-                RequestUtils.setErrorObject(request,"resource.common.inventory.groups.error.RemoveVetoed",
-                    vetoMessage);
-            } else if (deleted.size() > 0) {
+            if (vetoMessage.get() != null) {
+                RequestUtils.setErrorObject(request,"resource.common.inventory.groups.error.RemoveVetoed", vetoMessage.get());
+            } else if (numDeleted.get() > 0) {
                 RequestUtils.setConfirmation(request, "resource.common.confirm.ResourcesRemoved");
             }
         }
