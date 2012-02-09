@@ -276,9 +276,13 @@ public class XmlParser {
                 doc = builder.build(is);
             }
         } catch(JDOMException exc){
-            throw new XmlParseException(exc.getMessage());
+            XmlParseException toThrow = new XmlParseException(exc.getMessage());
+            toThrow.initCause(exc);
+            throw toThrow;
         } catch (IOException exc) {
-            throw new XmlParseException(exc.getMessage());
+            XmlParseException toThrow = new XmlParseException(exc.getMessage());
+            toThrow.initCause(exc);
+            throw toThrow;
         }
 
         generalParse(tag, doc);

@@ -961,7 +961,7 @@
 
   <!-- DbKeystore cache -->
   <cache name="org.hyperic.hq.security.server.session.KeystoreEntryImpl"
-         maxElementsInMemory="1000"
+         maxElementsInMemory="10000"
          eternal="true"
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
