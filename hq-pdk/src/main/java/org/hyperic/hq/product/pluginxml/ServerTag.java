@@ -281,8 +281,8 @@ class ServerTag
 
         if (types == null) {
             throw new XmlAttrException("server include='"
-                                            + include + "'" +
-                                            "not found");
+                                            + include + "', name="
+                                            + name + " not found");
         }
         
         this.isIncluded = true;
