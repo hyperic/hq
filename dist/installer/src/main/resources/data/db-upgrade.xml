@@ -11746,6 +11746,15 @@ has already been defined.
     <schema-addColumn table="EAM_SRN" column="LAST_SCHEDULE_TIME" columnType="LONG" nullable="NOT NULL" default="0"/>
  </schemaSpec>
 
+    <schemaSpec version="3.210">
+        <!-- Delete all agent plugin sync status information. Data will be refreshed on startup -->
+       <schema-directSQL>
+         <statement desc="delete all agent plugin sync status">
+           DELETE FROM EAM_AGENT_PLUGIN_STATUS
+         </statement>
+       </schema-directSQL>  
+    </schemaSpec>	
+	
 </dbupgrade>
 </target>
 </project>
